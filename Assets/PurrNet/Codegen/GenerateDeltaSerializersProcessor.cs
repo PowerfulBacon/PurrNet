@@ -205,6 +205,9 @@ namespace PurrNet.Codegen
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldarg_1);
                 il.Emit(OpCodes.Call, genericIsNull);
+                
+                // if null return
+                il.Emit(OpCodes.Brfalse, endOfFunction);
             }
 
             if (type.IsEnum)
