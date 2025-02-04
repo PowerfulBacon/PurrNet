@@ -624,8 +624,8 @@ namespace PurrNet
                 parent.OnChildDespawned(this);
             
             // reset all values
-            TriggerDespawnEvent(true);
             TriggerDespawnEvent(false);
+            TriggerDespawnEvent(true);
             networkManager = null;
             sceneId = default;
             _localPlayer = null;
@@ -870,6 +870,8 @@ namespace PurrNet
             --_spawnedCount;
             _wasEarlySpawned = false;
 
+            OnDespawned(asServer);
+
             if (_spawnedCount == 0)
             {
                 OnDespawned();
@@ -877,9 +879,6 @@ namespace PurrNet
                 for (int i = 0; i < _externalModulesView.Count; i++)
                     _externalModulesView[i].OnDespawned();
             }
-
-            OnDespawned(asServer);
-            
 
             for (int i = 0; i < _externalModulesView.Count; i++)
                 _externalModulesView[i].OnDespawned(asServer);
@@ -944,6 +943,13 @@ namespace PurrNet
         {
             _idServer = networkID;
             _idClient = networkID;
+        }
+
+        public void SetIsSpawned(bool isSpawned, bool asServer)
+        {
+            if (asServer)
+                 _isSpawnedServer = isSpawned;
+            else _isSpawnedClient = isSpawned;
         }
     }
 }

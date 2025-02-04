@@ -1,4 +1,5 @@
 using PurrNet;
+using PurrNet.Logging;
 using UnityEngine;
 
 public class MoveCube : NetworkBehaviour
@@ -17,6 +18,16 @@ public class MoveCube : NetworkBehaviour
     protected override void OnSpawned()
     {
         this.enabled = isController;
+    }
+
+    protected override void OnDespawned()
+    {
+        PurrLogger.Log("Despawned");
+    }
+
+    protected override void OnDespawned(bool asServer)
+    {
+        PurrLogger.Log("Despawned as " + (asServer ? "server" : "client"));
     }
 
     void Update()
