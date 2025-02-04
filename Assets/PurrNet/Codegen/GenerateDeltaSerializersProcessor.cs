@@ -261,13 +261,15 @@ namespace PurrNet.Codegen
                     continue;
                 }
                 
+                var fieldRef = new FieldReference(field.Name, field.FieldType, typeRef).Import(module);
+                
                 il.Emit(OpCodes.Ldarg_0);
                 
                 il.Emit(OpCodes.Ldarg_1);
-                il.Emit(OpCodes.Ldfld, field);
+                il.Emit(OpCodes.Ldfld, fieldRef);
 
                 il.Emit(OpCodes.Ldarg_2);
-                il.Emit(OpCodes.Ldfld, field);
+                il.Emit(OpCodes.Ldfld, fieldRef);
 
                 il.Emit(OpCodes.Call, packer);
             }
