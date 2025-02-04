@@ -886,6 +886,7 @@ namespace PurrNet.Modules
                 if (_toSpawnNextFrame.Contains(identity))
                     continue;
                 
+                identity.SetIsSpawned(true, false);
                 identity.TriggerSpawnEvent(false);
                 onIdentityAdded?.Invoke(identity);
             }
@@ -1005,10 +1006,10 @@ namespace PurrNet.Modules
             {
                 _spawnedIdentities.Remove(identity);
                 _spawnedIdentitiesMap.Remove(identity.id.Value);
-                
-                identity.TriggerDespawnEvent(_asServer);
-                if (_asServer && _manager.isClient)
+
+                if (_asServer && IsServerHost())
                     identity.TriggerDespawnEvent(false);
+                identity.TriggerDespawnEvent(_asServer);
                 
                 onIdentityRemoved?.Invoke(identity);
             }
