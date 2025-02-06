@@ -76,5 +76,18 @@ namespace PurrNet.Packing
         {
             value = new TimeSpan((long)packer.ReadBits(64));
         }
+        
+        [UsedByIL]
+        public static void Write(this BitPacker packer, DateTime value)
+        {
+            packer.WriteBits((ulong)value.Ticks, 64);
+        }
+
+        [UsedByIL]
+        public static void Read(this BitPacker packer, ref DateTime value)
+        {
+            value = new DateTime((long)packer.ReadBits(64));
+        }
+
     }
 }
