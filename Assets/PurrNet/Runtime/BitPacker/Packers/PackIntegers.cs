@@ -1,4 +1,5 @@
-﻿using PurrNet.Modules;
+﻿using System;
+using PurrNet.Modules;
 
 namespace PurrNet.Packing
 {
@@ -62,6 +63,18 @@ namespace PurrNet.Packing
         public static void Read(this BitPacker packer, ref bool value)
         {
             value = packer.ReadBits(1) == 1;
+        }
+        
+        [UsedByIL]
+        public static void Write(this BitPacker packer, TimeSpan value)
+        {
+            packer.WriteBits((ulong)value.Ticks, 64);
+        }
+        
+        [UsedByIL]
+        public static void Read(this BitPacker packer, ref TimeSpan value)
+        {
+            value = new TimeSpan((long)packer.ReadBits(64));
         }
     }
 }
