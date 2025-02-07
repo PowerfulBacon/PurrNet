@@ -1239,10 +1239,43 @@ namespace PurrNet.Codegen
             code.Append(Instruction.Create(OpCodes.Call, freeStreamMethod));
             
             var endOfRunLocallyCheck = Instruction.Create(OpCodes.Nop);
-            
+            var executeRunLocally = Instruction.Create(OpCodes.Nop);
+
             code.Append(Instruction.Create(OpCodes.Ldloc, rpcSignature));
             code.Append(Instruction.Create(OpCodes.Ldfld, module.GetTypeDefinition<RPCSignature>().GetField("runLocally").Import(module)));
-            code.Append(Instruction.Create(OpCodes.Brfalse, endOfRunLocallyCheck));
+            code.Append(Instruction.Create(OpCodes.Brtrue, executeRunLocally));
+
+            if (methodRpc.Signature.type == RPCType.ServerRPC)
+            {
+                if (methodRpc.Signature.isStatic)
+                {
+                    // NetworkManager.main.isServerOnly
+                    var managerType = module.GetTypeDefinition<NetworkManager>();
+                    var mainManagerProp = managerType.GetProperty("main");
+                    var mainManagerGetter = mainManagerProp.GetMethod.Import(module);
+                    var getIsServerOnly = module.GetTypeDefinition<NetworkManager>().GetProperty("isServerOnly").GetMethod.Import(module);
+                    
+                    code.Append(Instruction.Create(OpCodes.Call, mainManagerGetter));
+                    code.Append(Instruction.Create(OpCodes.Call, getIsServerOnly));
+                }
+                else if (isNetworkClass)
+                {
+                    var getIsServerOnly = moduleType.GetProperty("isServerOnly");
+                    code.Append(Instruction.Create(OpCodes.Ldarg_0));
+                    code.Append(Instruction.Create(OpCodes.Call, getIsServerOnly.GetMethod.Import(module)));
+                }
+                else
+                {
+                    var getIsServerOnly = identityType.GetProperty("isServerOnly");
+                    code.Append(Instruction.Create(OpCodes.Ldarg_0));
+                    code.Append(Instruction.Create(OpCodes.Call, getIsServerOnly.GetMethod.Import(module)));
+                }
+
+                code.Append(Instruction.Create(OpCodes.Brtrue, executeRunLocally));
+            }
+            
+            code.Append(Instruction.Create(OpCodes.Br, endOfRunLocallyCheck));
+            code.Append(executeRunLocally);
             
             var callMethod = GetOriginalMethod(method);
             

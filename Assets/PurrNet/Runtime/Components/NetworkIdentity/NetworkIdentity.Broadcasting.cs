@@ -252,7 +252,14 @@ namespace PurrNet
 
             switch (signature.type)
             {
-                case RPCType.ServerRPC: SendToServer(packet, signature.channel); break;
+                case RPCType.ServerRPC:
+                    if (networkManager.isServerOnly)
+                        break;
+                    
+                    if (signature.runLocally && isServer)
+                        break;
+                    
+                    SendToServer(packet, signature.channel); break;
                 case RPCType.ObserversRPC:
                 {
                     if (isServer)

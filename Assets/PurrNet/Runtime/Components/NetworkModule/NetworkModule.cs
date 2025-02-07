@@ -34,6 +34,9 @@ namespace PurrNet
         public bool isServer => parent && parent.isServer;
         
         [UsedImplicitly]
+        public bool isServerOnly => parent && parent.isServerOnly;
+        
+        [UsedImplicitly]
         public bool isHost => parent && parent.isHost;
 
         [UsedImplicitly]

@@ -196,6 +196,9 @@ namespace PurrNet
 
         public bool isServer => isSpawned && networkManager.isServer;
         
+        [UsedByIL]
+        public bool isServerOnly => isSpawned && networkManager.isServerOnly;
+        
         public bool isClient => isSpawned && networkManager.isClient;
         
         public bool isHost => isSpawned && networkManager.isHost;

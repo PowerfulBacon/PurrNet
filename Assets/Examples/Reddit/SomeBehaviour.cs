@@ -1,11 +1,11 @@
 using PurrNet;
-using PurrNet.Modules;
-using PurrNet.Packing;
+using UnityEngine;
 
 public class SomeBehaviour : NetworkBehaviour
 {
-    public static void ReadDelta(BitPacker stream, ChangeParentPacket oldValue, ref ChangeParentPacket value)
+    [ContextMenu("Send RPC and shit"), ServerRpc]
+    void TestRPC()
     {
-        Packer.AreEqual(oldValue, value);
+        Debug.Log("Received TestRPC!");
     }
 }
