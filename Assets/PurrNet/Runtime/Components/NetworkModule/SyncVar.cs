@@ -76,6 +76,15 @@ namespace PurrNet
             SendLatestState(player, _id, _value);
         }
 
+        public override void OnDespawned()
+        {
+            if (isControllingSyncVar)
+            {
+                _id += 1;
+                FlushImmediately();
+            }
+        }
+
         private float _lastSendTime;
 
         private void ForceSendUnreliable()
@@ -183,7 +192,7 @@ namespace PurrNet
             SendToOthers(packetId, newValue);
         }
         
-        [ServerRpc(Channel.ReliableUnordered, requireOwnership: true)]
+        [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
         private void SendToServerReliably(ushort packetId, T newValue)
         {
             if (!_ownerAuth) return;
@@ -198,7 +207,7 @@ namespace PurrNet
             if (!isServer) OnReceivedValue(packetId, newValue);
         }
         
-        [ObserversRpc(Channel.ReliableUnordered, excludeOwner: true)]
+        [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true)]
         private void SendToOthersReliably(ushort packetId, T newValue)
         {
             if (!isHost) OnReceivedValue(packetId, newValue);
@@ -210,7 +219,7 @@ namespace PurrNet
             if (!isHost) OnReceivedValue(packetId, newValue);
         }
         
-        [ObserversRpc(Channel.ReliableUnordered)]
+        [ObserversRpc(Channel.ReliableOrdered)]
         private void SendToAllReliably(ushort packetId, T newValue)
         {
             if (!isHost) OnReceivedValue(packetId, newValue);

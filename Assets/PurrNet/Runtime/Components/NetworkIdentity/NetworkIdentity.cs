@@ -871,6 +871,9 @@ namespace PurrNet
             _wasEarlySpawned = false;
 
             OnDespawned(asServer);
+            
+            for (int i = 0; i < _externalModulesView.Count; i++)
+                _externalModulesView[i].OnDespawned(asServer);
 
             if (_spawnedCount == 0)
             {
@@ -879,9 +882,6 @@ namespace PurrNet
                 for (int i = 0; i < _externalModulesView.Count; i++)
                     _externalModulesView[i].OnDespawned();
             }
-
-            for (int i = 0; i < _externalModulesView.Count; i++)
-                _externalModulesView[i].OnDespawned(asServer);
 
             if (asServer)
                  _isSpawnedServer = false;

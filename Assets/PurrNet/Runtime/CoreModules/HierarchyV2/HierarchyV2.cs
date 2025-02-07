@@ -583,7 +583,7 @@ namespace PurrNet.Modules
 
         private void SendDespawnPacket(PlayerID player, NetworkIdentity identity)
         {
-            if (!identity.id.HasValue || !identity.IsSpawned(_asServer))
+            if (!identity.id.HasValue)
                 return;
             
             var packet = new DespawnPacket
@@ -765,6 +765,9 @@ namespace PurrNet.Modules
                 ListPool<NetworkIdentity>.Destroy(children);
                 return;
             }
+            
+            for (var i = 0; i < children.Count; i++)
+                TriggerDespawnEvent(children[i]);
 
             if (_asServer)
                 _visibility.ClearVisibilityForGameObject(gameObject.transform);
@@ -1000,6 +1003,13 @@ namespace PurrNet.Modules
             }
         }
         
+        private void TriggerDespawnEvent(NetworkIdentity identity)
+        {
+            if (_asServer && IsServerHost())
+                identity.TriggerDespawnEvent(false);
+            identity.TriggerDespawnEvent(_asServer);
+        }
+        
         private void UnregisterIdentity(NetworkIdentity identity)
         {
             if (identity.id.HasValue)
@@ -1007,10 +1017,6 @@ namespace PurrNet.Modules
                 _spawnedIdentities.Remove(identity);
                 _spawnedIdentitiesMap.Remove(identity.id.Value);
 
-                if (_asServer && IsServerHost())
-                    identity.TriggerDespawnEvent(false);
-                identity.TriggerDespawnEvent(_asServer);
-                
                 onIdentityRemoved?.Invoke(identity);
             }
         }

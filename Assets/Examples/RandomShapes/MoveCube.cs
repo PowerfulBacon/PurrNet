@@ -8,6 +8,8 @@ public class MoveCube : NetworkBehaviour
     [SerializeField] private float _xRange = 5f;
     [SerializeField] private float _yRange = 5f;
     
+    [SerializeField] SyncVar<bool> _isAlive = new SyncVar<bool>();
+    
     float _noiseOffset;
 
     private void Awake()
@@ -18,11 +20,24 @@ public class MoveCube : NetworkBehaviour
     protected override void OnSpawned()
     {
         this.enabled = isController;
+        
+        if (_isAlive.isControllingSyncVar)
+            _isAlive.value = true;
+    }
+    
+    [ObserversRpc]
+    private void SayGoodbye()
+    {
+        PurrLogger.Log("Goodbye!");
     }
 
     protected override void OnDespawned()
     {
-        PurrLogger.Log("Despawned");
+        if (_isAlive.isControllingSyncVar)
+            _isAlive.value = false;
+        
+        SayGoodbye();
+        PurrLogger.Log("Despawned, _isAlive.value = " + _isAlive.value);
     }
 
     protected override void OnDespawned(bool asServer)

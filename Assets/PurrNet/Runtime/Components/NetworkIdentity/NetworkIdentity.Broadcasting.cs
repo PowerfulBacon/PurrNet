@@ -256,7 +256,7 @@ namespace PurrNet
                 case RPCType.ObserversRPC:
                 {
                     if (isServer)
-                         SendToObservers(packet, ShouldSend, signature.channel);
+                        SendToObservers(packet, ShouldSend, signature.channel);
                     else SendToServer(packet, signature.channel);
                     break;
                 }

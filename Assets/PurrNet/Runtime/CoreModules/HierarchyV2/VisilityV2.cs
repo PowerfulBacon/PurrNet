@@ -49,7 +49,7 @@ namespace PurrNet.Modules
             
             var affectedPlayers = HashSetPool<PlayerID>.Instantiate();
             
-            RefreshVisibilityForGameObject(transform, affectedPlayers);
+            ClearVisibilityForGameObject(transform, affectedPlayers);
 
             foreach (var player in affectedPlayers)
                 visibilityChanged?.Invoke(player, transform, false);
@@ -92,7 +92,7 @@ namespace PurrNet.Modules
             return removed;
         }
 
-        private static void RefreshVisibilityForGameObject(Transform transform, HashSet<PlayerID> players)
+        private static void ClearVisibilityForGameObject(Transform transform, HashSet<PlayerID> players)
         {
             using var identities = new DisposableList<NetworkIdentity>(16);
             transform.GetComponents(identities.list);
@@ -110,7 +110,7 @@ namespace PurrNet.Modules
             var dcount = directChildren.Count;
             
             for (var i = 0; i < dcount; i++)
-                RefreshVisibilityForGameObject(directChildren[i].transform, players);
+                ClearVisibilityForGameObject(directChildren[i].transform, players);
         }
         
         private void RefreshVisibilityForGameObject(PlayerID player, Transform transform,
