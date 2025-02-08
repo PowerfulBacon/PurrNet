@@ -262,14 +262,13 @@ namespace PurrNet
                 return obj;
             }
             
-            return OnPreInstantiate(prefabData, new InstantiateData<T>(original, position, rotation));
+            return OnPreInstantiate(prefabData, new InstantiateData<T>(original, position, rotation, scene));
         }
         
         public static T InstantiateDirectly<T>(T original, Vector3 position, Quaternion rotation, Scene scene) where T : Object
         {
             var obj = Object.Instantiate(original, position, rotation);
             var go = GetGameObject(obj);
-                
             if (go)
                 SceneManager.MoveGameObjectToScene(go, scene);
             return obj;

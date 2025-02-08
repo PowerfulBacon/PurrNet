@@ -15,7 +15,8 @@ namespace PurrNet
         Scene,
         SceneParent,
         Parameters,
-        ParametersWithPosRot
+        ParametersWithPosRot,
+        PositionRotationScene
     }
     
     internal readonly struct InstantiateData<T> where T : Object
@@ -65,6 +66,15 @@ namespace PurrNet
             instantiateInWorldSpace = false;
         }
         
+        public InstantiateData(T original, Vector3 position, Quaternion rotation, Scene scene) : this()
+        {
+            type = InstantiateType.PositionRotationScene;
+            this.original = original;
+            this.position = position;
+            this.rotation = rotation;
+            this.scene = scene;
+        }
+        
         public InstantiateData(T original, Vector3 position, Quaternion rotation, Transform parent) : this()
         {
             type = InstantiateType.PositionRotationParent;
@@ -72,8 +82,6 @@ namespace PurrNet
             this.position = position;
             this.rotation = rotation;
             this.parent = parent;
-            scene = default;
-            instantiateInWorldSpace = false;
         }
         
         public InstantiateData(T original, Scene scene) : this()
@@ -170,11 +178,16 @@ namespace PurrNet
                 InstantiateType.Parent => UnityProxy.InstantiateDirectly(original, parent, instantiateInWorldSpace),
                 InstantiateType.PositionRotation => UnityProxy.InstantiateDirectly(original, position, rotation),
                 InstantiateType.PositionRotationParent => UnityProxy.InstantiateDirectly(original, position, rotation, parent),
+                InstantiateType.PositionRotationScene => UnityProxy.InstantiateDirectly(original, position, rotation, scene),
+                InstantiateType.SceneParent => UnityProxy.InstantiateDirectly(original, parent),
 #if UNITY_2023_1_OR_NEWER
                 InstantiateType.Scene => UnityProxy.InstantiateDirectly(original, scene),
 #endif
-                InstantiateType.SceneParent => UnityProxy.InstantiateDirectly(original, parent),
-                _ => default
+#if UNITY_6000_0_35
+                InstantiateType.Parameters => UnityProxy.InstantiateDirectly(original, parameters),
+                InstantiateType.ParametersWithPosRot => UnityProxy.InstantiateDirectly(original, position, rotation, parameters),
+#endif
+                _ => throw new ArgumentOutOfRangeException()
             };
         }
 
