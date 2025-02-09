@@ -1,7 +1,8 @@
 using System;
 using JetBrains.Annotations;
+using PurrNet.Logging;
 using PurrNet.Modules;
-using PurrNet.Transports;
+using PurrNet.Packing;
 using PurrNet.Utils;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -25,17 +26,6 @@ namespace PurrNet
         [UsedImplicitly] Local
     }
 
-    [Serializable]
-    public struct Tolerances
-    {
-        [Tooltip("How far the position can be from the target position before it is considered out of sync.")]
-        [Min(0)] public float positionTolerance;
-        [Tooltip("How far the rotation angle can be from the target rotation angle before it is considered out of sync.")]
-        [Min(0)] public float rotationAngleTolerance;
-        [Tooltip("How far the scale can be from the target scale before it is considered out of sync.")]
-        [Min(0)] public float scaleTolerance;
-    }
-    
     public sealed class NetworkTransform : NetworkIdentity, ITick
     {
         [Header("What to Sync")]
@@ -64,21 +54,7 @@ namespace PurrNet
         [Tooltip("Will enforce the character controller getting enabled and disabled when attempting to sync the transform - CAUTION - Physics events can/will be called multiple times")] 
         [SerializeField] private bool _characterControllerPatch;
 
-        [SerializeField] private Tolerances _tolerances = new Tolerances()
-        {
-            rotationAngleTolerance = 1,
-            positionTolerance = 0.1f,
-            scaleTolerance = 0.05f
-        };
-
-        /// <summary>
-        /// How far the position can be from the target position before it is considered out of sync and sent over the network.
-        /// </summary>
-        public Tolerances tolerances
-        {
-            get => _tolerances;
-            set => _tolerances = value;
-        }
+        public bool isControlling => IsController(_ownerAuth);
 
         /// <summary>
         /// Whether to sync the parent of the transform. Only works if the parent is a NetworkIdentiy.
@@ -130,7 +106,6 @@ namespace PurrNet
         }
         
         private bool _isResettingParent;
-        private bool _isFirstTransform = true;
 
         Interpolated<Vector3> _position;
         Interpolated<Quaternion> _rotation;
@@ -145,12 +120,42 @@ namespace PurrNet
         static Vector3 NoInterpolation(Vector3 a, Vector3 b, float t) => b;
         
         static Quaternion NoInterpolation(Quaternion a, Quaternion b, float t) => b;
-
+        
+        public event Action onIsControllingChanged;
+        
         private void Awake()
         {
             _trs = transform;
             _rb = GetComponent<Rigidbody>();
             _controller = GetComponent<CharacterController>();
+        }
+
+        protected override void OnSpawned(bool asServer)
+        {
+            if (!networkManager.TryGetModule<NetworkTransformFactory>(asServer, out var factory))
+            {
+                PurrLogger.LogError("NetworkTransformFactory not found");
+                return;
+            }
+            
+            if (!factory.TryGetModule(sceneId, out var ntModule))
+            {
+                PurrLogger.LogError("NetworkTransformModule not found");
+                return;
+            }
+            
+            ntModule.Register(this);
+        }
+
+        protected override void OnDespawned(bool asServer)
+        {
+            if (!networkManager.TryGetModule<NetworkTransformFactory>(asServer, out var factory))
+                return;
+            
+            if (!factory.TryGetModule(sceneId, out var ntModule))
+                return;
+            
+            ntModule.Unregister(this);
         }
 
         protected override void OnEarlySpawn()
@@ -175,7 +180,6 @@ namespace PurrNet
 
         protected override void OnSpawned()
         {
-            _isFirstTransform = true;
             int ticksPerSec = networkManager.tickModule.tickRate;
             int ticksPerBuffer = Mathf.CeilToInt(ticksPerSec * 0.15f) * 2;
             
@@ -183,117 +187,25 @@ namespace PurrNet
             if (syncRotation) _rotation.maxBufferSize = ticksPerBuffer;
             if (syncScale) _scale.maxBufferSize = ticksPerBuffer;
         }
-        protected override void OnObserverAdded(PlayerID player)
-        {
-            SendLatestTransform(player, GetCurrentTransformData());
-        }
 
         protected override void OnOwnerReconnected(PlayerID ownerId)
         {
-            ReconcileTickId(ownerId, _id);
+            if (isServer && _ownerAuth)
+                onIsControllingChanged?.Invoke();
         }
 
         protected override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
         {
-            if (IsController(_ownerAuth))
-                ReconcileTickIdToOthers();
-            
-            if (!_trs)
-                _trs = transform;
-            
-            _position?.Teleport(_syncPosition == SyncMode.World ? _trs.position : _trs.localPosition);
-            _rotation?.Teleport(_syncRotation == SyncMode.World ? _trs.rotation : _trs.localRotation);
-            _scale?.Teleport(_trs.localScale);
-            
-            ApplyLerpedPosition();
+            if (_ownerAuth)
+                onIsControllingChanged?.Invoke();
         }
-
-        private int _ticksSinceLastSend;
-        private bool _wasLastDirty;
-        private NetworkTransformData _lastSentData;
-
-        private void ReconcileTickIdToOthers()
-        {
-            if (!IsController(_ownerAuth))
-                return;
-            
-            if (isServer)
-                 ReconcileTickId(_id);
-            else ReconcileTickId_Server(_id);
-        }
-        
-        [ServerRpc]
-        private void ReconcileTickId_Server(ushort id)
-        {
-            _id = id;
-            
-            ReconcileTickId(id);
-        }
-        
-        [ObserversRpc]
-        private void ReconcileTickId(ushort id)
-        {
-            _id = id;
-        }
-        
-        [TargetRpc]
-        private void ReconcileTickId([UsedImplicitly] PlayerID player, ushort id)
-        {
-            _id = id;
-        }
-        
-        private bool _forceNextReliable;
         
         public void OnTick(float delta)
         {
             if (_parentChanged)
             {
                 OnTransformParentChangedDelayed();
-                _id++;
                 _parentChanged = false;
-            }
-            
-            if (IsController(_ownerAuth))
-            {
-                if (_ticksSinceLastSend >= _sendIntervalInTicks)
-                {
-                    _ticksSinceLastSend = 0;
-
-                    var data = GetCurrentTransformData();
-                    
-                    if (_wasLastDirty ? !data.Equals(_lastSentData) : !data.Equals(_lastSentData, _tolerances))
-                    {
-                        if (_forceNextReliable)
-                        {
-                            if (isServer)
-                                 SendToAllReliable(data, true);
-                            else SendTransformToServerReliably(data, true);
-                            
-                            _forceNextReliable = false;
-                        }
-                        else
-                        {
-                            if (isServer)
-                                 SendToAll(data, false);
-                            else SendTransformToServer(data, false);
-                        }
-
-                        _wasLastDirty = true;
-                        _lastSentData = data;
-                    }
-                    else if (_wasLastDirty)
-                    {
-                        if (isServer)
-                             SendToAllReliable(data, false);
-                        else SendTransformToServerReliably(data, false);
-                        
-                        _wasLastDirty = false;
-                    }
-                }
-                else
-                {
-                    _ticksSinceLastSend++;
-                }
             }
         }
 
@@ -351,138 +263,11 @@ namespace PurrNet
                 _controller.enabled = true;
         }
 
-        private ushort _id;
-        
         private NetworkTransformData GetCurrentTransformData()
         {
             var pos = _syncPosition == SyncMode.World ? _trs.position : _trs.localPosition;
             var rot = _syncRotation == SyncMode.World ? _trs.rotation : _trs.localRotation;
-            return new NetworkTransformData(_id++, pos, rot, _trs.localScale);
-        }
-        
-        [ServerRpc(Channel.Unreliable, requireOwnership: true)]
-        private void SendTransformToServer(NetworkTransformData data, bool resetInterpolation)
-        {
-            // If clientAuth is disabled, the client can't send transform data to the server
-            if (!_ownerAuth) return;
-            
-            // Apply the transform data to the server
-            ReceiveTransform_Internal(data, resetInterpolation);
-            
-            // Send the transform data to others expect the owner
-            SendToOthers(data, resetInterpolation);
-        }
-        
-        [ServerRpc(Channel.ReliableUnordered, requireOwnership: true)]
-        private void SendTransformToServerReliably(NetworkTransformData data, bool resetInterpolation)
-        {
-            // If clientAuth is disabled, the client can't send transform data to the server
-            if (!_ownerAuth) return;
-            
-            // Apply the transform data to the server
-            ReceiveTransform_Internal(data, resetInterpolation);
-            
-            // Send the transform data to others expect the owner
-            SendToOthersReliably(data, resetInterpolation);
-        }
-        
-        [ObserversRpc(Channel.ReliableUnordered, excludeOwner: true)]
-        private void SendToOthersReliably(NetworkTransformData data, bool resetInterpolation)
-        {
-            if (isHost) return;
-            
-            ReceiveTransform_Internal(data, resetInterpolation);
-        }
-        
-        [ObserversRpc(Channel.Unreliable, excludeOwner: true)]
-        private void SendToOthers(NetworkTransformData data, bool resetInterpolation)
-        {
-            if (isHost) return;
-            
-            ReceiveTransform_Internal(data, resetInterpolation);
-        }
-        
-        [ObserversRpc(Channel.ReliableUnordered)]
-        private void SendToAllReliable(NetworkTransformData data, bool resetInterpolation)
-        {
-            if (isHost) return;
-
-            ReceiveTransform_Internal(data, resetInterpolation);
-        }
-
-        [ObserversRpc(Channel.Unreliable)]
-        private void SendToAll(NetworkTransformData data, bool resetInterpolation)
-        {
-            if (isHost) return;
-
-            ReceiveTransform_Internal(data, resetInterpolation);
-        }
-        
-        private void ReceiveTransform_Internal(NetworkTransformData data, bool resetInterpolation)
-        {
-            if (IsController(_ownerAuth))
-                return;
-
-            // if we receive an old transform, ignore it
-            if (data.id <= _id)
-            {
-                return;
-            }
-
-            if (resetInterpolation)
-            {
-                _position?.Teleport(data.position);
-                _rotation?.Teleport(data.rotation);
-                _scale?.Teleport(data.scale);
-            }
-            
-            // update the last received id in case we switch to a new owner
-            // that way the new owner will send the latest transform
-            _id = data.id;
-            
-            if (_isFirstTransform)
-            {
-                _isFirstTransform = false;
-                ApplyTransformData(data, true);
-                ApplyLerpedPosition();
-            }
-            else
-            {
-                ApplyTransformData(data, false);
-            }
-        }
-
-        private void ApplyTransformData(NetworkTransformData data, bool teleport)
-        {
-            if (syncPosition)
-            {
-                if (teleport) _position.Teleport(data.position);
-                else _position.Add(data.position);
-            }
-
-            if (syncRotation)
-            {
-                if (teleport) _rotation.Teleport(data.rotation);
-                else _rotation.Add(data.rotation);
-            }
-
-            if (syncScale)
-            {
-                if (teleport) _scale.Teleport(data.scale);
-                else _scale.Add(data.scale);
-            }
-        }
-
-        [TargetRpc]
-        private void SendLatestTransform([UsedImplicitly] PlayerID player, NetworkTransformData data)
-        {
-            if (isServer)
-                return;
-            
-            _id = data.id;
-            
-            ApplyTransformData(data, true);
-            ApplyLerpedPosition();
+            return new NetworkTransformData(pos, new HalfQuaternion(rot), _trs.localScale);
         }
         
         private bool _parentChanged;
@@ -513,10 +298,7 @@ namespace PurrNet
                 return;
 
             if (!_isResettingParent && _syncParent)
-            {
-                _forceNextReliable = true;
                 HandleParentChanged(_trs.parent);
-            }
         }
 
         private void HandleParentChanged(Transform parent)
@@ -538,6 +320,26 @@ namespace PurrNet
         public void StopIgnoringParentChanges()
         {
             _isIgnoringParentChanges = false;
+        }
+
+        private NetworkTransformData _lastData;
+        
+        public void FullWrite(BitPacker packer)
+        {
+            var data = GetCurrentTransformData();
+            
+            Packer<Vector3>.Write(packer, data.position);
+            Packer<HalfQuaternion>.Write(packer, data.rotation);
+            Packer<HalfVector3>.Write(packer, data.scale);
+        }
+
+        public void DeltaWrite(BitPacker packer)
+        {
+            var data = GetCurrentTransformData();
+            
+            DeltaPacker<Vector3>.Write(packer, _lastData.position, data.position);
+            DeltaPacker<HalfQuaternion>.Write(packer, _lastData.rotation, data.rotation);
+            DeltaPacker<HalfVector3>.Write(packer, _lastData.scale, data.scale);
         }
     }
 }
