@@ -105,7 +105,7 @@ namespace PurrNet.Packing
                 DeltaPacker<float>.Write(packer, oldvalue.x, newvalue.x);
                 DeltaPacker<float>.Write(packer, oldvalue.y, newvalue.y);
                 DeltaPacker<float>.Write(packer, oldvalue.z, newvalue.z);
-                DeltaPacker<float>.Write(packer, oldvalue.w, newvalue.w);
+                DeltaPacker<bool>.Write(packer, oldvalue.w < 0, newvalue.w < 0);
             }
         }
         
@@ -120,7 +120,15 @@ namespace PurrNet.Packing
                 DeltaPacker<float>.Read(packer, oldvalue.x, ref value.x);
                 DeltaPacker<float>.Read(packer, oldvalue.y, ref value.y);
                 DeltaPacker<float>.Read(packer, oldvalue.z, ref value.z);
-                DeltaPacker<float>.Read(packer, oldvalue.w, ref value.w);
+                
+                bool oldW = oldvalue.w < 0;
+                DeltaPacker<bool>.Read(packer, oldW, ref oldW);
+                
+                var w = (Half)Mathf.Sqrt(Mathf.Max(0, 1 - value.x * value.x - value.y * value.y - value.z * value.z));
+            
+                if (oldW)
+                     value.w = -w;
+                else value.w = w;
             }
             else value = oldvalue;
         }
