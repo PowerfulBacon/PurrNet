@@ -37,6 +37,10 @@ namespace PurrNet
         [SerializeField, HideInInspector] 
         private List<NetworkIdentity> _directChildren;
         
+        public event Action<PlayerID> onObserverAdded;
+        
+        public event Action<PlayerID> onObserverRemoved;
+        
         internal Transform defaultParent { get; private set; }
         
         public int[] invertedPathToNearestParent
@@ -228,7 +232,18 @@ namespace PurrNet
         [UsedImplicitly]
         public bool IsController(bool ownerHasAuthority) => ownerHasAuthority ? isController : isServer;
         
-        public bool IsController(bool asServer, bool ownerHasAuthority) => ownerHasAuthority ? isController : asServer;
+        public bool IsController(bool ownerHasAuthority, bool asServer) => ownerHasAuthority ? isController : asServer;
+
+        public bool IsController(PlayerID player, bool ownerHasAuthority, bool asServer)
+        {
+            if (!hasConnectedOwner)
+                return asServer;
+            
+            if (player == owner)
+                return ownerHasAuthority;
+            
+            return asServer;
+        }
         
         public bool hasConnectedOwner => networkManager && owner.HasValue && networkManager.TryGetModule<PlayersManager>(isServer, out var module) && module.IsPlayerConnected(owner.Value);
 
@@ -657,7 +672,7 @@ namespace PurrNet
             _directChildren.Remove(networkIdentity);
         }
 
-        internal void SetIdentity(NetworkManager manager, HierarchyV2 hierarchy, SceneID scene, bool asServer)
+        internal void SetIdentity(NetworkManager manager, HierarchyV2 hierarchy, SceneID scene, bool asServer, bool asHost)
         {
             isInPool = false;
             layer = gameObject.layer;
@@ -669,6 +684,9 @@ namespace PurrNet
             if (asServer)
             {
                 _isSpawnedServer = true;
+                if (asHost)
+                    _isSpawnedClient = true;
+
                 _serverHierarchy = hierarchy;
                 internalOwnerServer = null;
             }
@@ -924,17 +942,17 @@ namespace PurrNet
         public void TriggerOnObserverAdded(PlayerID target)
         {
             OnObserverAdded(target);
-            
             for (int i = 0; i < _externalModulesView.Count; i++)
                 _externalModulesView[i].OnObserverAdded(target);
+            onObserverAdded?.Invoke(target);
         }
 
         public void TriggerOnObserverRemoved(PlayerID target)
         {
             OnObserverRemoved(target);
-            
             for (int i = 0; i < _externalModulesView.Count; i++)
                 _externalModulesView[i].OnObserverRemoved(target);
+            onObserverRemoved?.Invoke(target);
         }
 
         internal void ClearObservers()

@@ -45,5 +45,15 @@ namespace PurrNet
             z /= magnitude;
             w /= magnitude;
         }
+        
+        public static implicit operator Quaternion(HalfQuaternion value)
+        {
+            return value.ToQuaternion();
+        }
+        
+        public static implicit operator HalfQuaternion(Quaternion value)
+        {
+            return new HalfQuaternion(value);
+        }
     }
 }

@@ -1,15 +1,13 @@
 using System;
-using System.Collections.Generic;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using PurrNet.Packing;
-using Unity.CompilationPipeline.Common.Diagnostics;
 
 namespace PurrNet.Codegen
 {
     public static class GenerateDeltaSerializersProcessor
     {
-        public static void HandleType(AssemblyDefinition assembly, TypeReference type, TypeDefinition generatedClass, List<DiagnosticMessage> messages)
+        public static void HandleType(AssemblyDefinition assembly, TypeReference type, TypeDefinition generatedClass)
         {
             var bitStreamType = assembly.MainModule.GetTypeDefinition(typeof(BitPacker)).Import(assembly.MainModule);
             var packerType = assembly.MainModule.GetTypeDefinition(typeof(Packer)).Import(assembly.MainModule);
@@ -53,6 +51,7 @@ namespace PurrNet.Codegen
             
             var il = method.Body.GetILProcessor();
             var endOfFunction = il.Create(OpCodes.Ret);
+            var elseBlock = il.Create(OpCodes.Ldarg_2);
 
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldloca_S, isEqualVar);
@@ -60,7 +59,7 @@ namespace PurrNet.Codegen
             il.Emit(OpCodes.Ldloc_0);
 
             // if true, return
-            il.Emit(OpCodes.Brtrue, endOfFunction);
+            il.Emit(OpCodes.Brtrue, elseBlock);
             
             if (isClass)
             {
@@ -136,8 +135,6 @@ namespace PurrNet.Codegen
                 }
                 
                 var fieldRef = new FieldReference(field.Name, field.FieldType, typeRef).Import(module);
-
-                
                 il.Emit(OpCodes.Ldarg_0);
                 
                 il.Emit(OpCodes.Ldarg_1);
@@ -149,6 +146,14 @@ namespace PurrNet.Codegen
                 il.Emit(OpCodes.Call, packer);
             }
             
+            il.Emit(OpCodes.Br, endOfFunction);
+            il.Append(elseBlock);
+            
+            // value = oldValue
+            
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Stobj, typeRef);
+
             il.Append(endOfFunction);
         }
 
@@ -280,7 +285,7 @@ namespace PurrNet.Codegen
             il.Append(endOfFunction);
         }
 
-        public static void HandleGenericType(AssemblyDefinition assembly, TypeReference type, HandledGenericTypes genericT, List<DiagnosticMessage> messages)
+        public static void HandleGenericType(AssemblyDefinition assembly, TypeReference type, HandledGenericTypes genericT)
         {
             // TODO: Implement
         }

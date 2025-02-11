@@ -29,6 +29,7 @@ namespace PurrNet.Packing
                 DeltaPacker<float>.Read(packer, oldvalue.x, ref value.x);
                 DeltaPacker<float>.Read(packer, oldvalue.y, ref value.y);
             }
+            else value = oldvalue;
         }
         
         [UsedByIL]
@@ -57,6 +58,7 @@ namespace PurrNet.Packing
                 DeltaPacker<float>.Read(packer, oldvalue.y, ref value.y);
                 DeltaPacker<float>.Read(packer, oldvalue.z, ref value.z);
             }
+            else value = oldvalue;
         }
         
         [UsedByIL]
@@ -87,11 +89,14 @@ namespace PurrNet.Packing
                 DeltaPacker<float>.Read(packer, oldvalue.z, ref value.z);
                 DeltaPacker<float>.Read(packer, oldvalue.w, ref value.w);
             }
+            else value = oldvalue;
         }
         
         [UsedByIL]
         private static void WriteQuaternion(BitPacker packer, Quaternion oldvalue, Quaternion newvalue)
         {
+            newvalue.Normalize();
+            
             bool hasChanged = oldvalue != newvalue;
             Packer<bool>.Write(packer, hasChanged);
 
@@ -117,6 +122,38 @@ namespace PurrNet.Packing
                 DeltaPacker<float>.Read(packer, oldvalue.z, ref value.z);
                 DeltaPacker<float>.Read(packer, oldvalue.w, ref value.w);
             }
+            else value = oldvalue;
+        }
+        
+        [UsedByIL]
+        private static void WriteQuaternion(BitPacker packer, HalfQuaternion oldvalue, HalfQuaternion newvalue)
+        {
+            bool hasChanged = !oldvalue.Equals(newvalue);
+            Packer<bool>.Write(packer, hasChanged);
+
+            if (hasChanged)
+            {
+                DeltaPacker<Half>.Write(packer, oldvalue.x, newvalue.x);
+                DeltaPacker<Half>.Write(packer, oldvalue.y, newvalue.y);
+                DeltaPacker<Half>.Write(packer, oldvalue.z, newvalue.z);
+                DeltaPacker<Half>.Write(packer, oldvalue.w, newvalue.w);
+            }
+        }
+        
+        [UsedByIL]
+        private static void ReadQuaternion(BitPacker packer, HalfQuaternion oldvalue, ref HalfQuaternion value)
+        {
+            bool hasChanged = default;
+            Packer<bool>.Read(packer, ref hasChanged);
+
+            if (hasChanged)
+            {
+                DeltaPacker<Half>.Read(packer, oldvalue.x, ref value.x);
+                DeltaPacker<Half>.Read(packer, oldvalue.y, ref value.y);
+                DeltaPacker<Half>.Read(packer, oldvalue.z, ref value.z);
+                DeltaPacker<Half>.Read(packer, oldvalue.w, ref value.w);
+            }
+            else value = oldvalue;
         }
     }
 }

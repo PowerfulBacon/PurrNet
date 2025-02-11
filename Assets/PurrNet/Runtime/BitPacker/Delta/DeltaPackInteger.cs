@@ -43,6 +43,7 @@ namespace PurrNet.Packing
                 Packer<PackedShort>.Read(packer, ref packed);
                 value = (sbyte)(oldvalue + packed.value);
             }
+            else value = oldvalue;
         }
         
         [UsedByIL]
@@ -70,6 +71,7 @@ namespace PurrNet.Packing
                 Packer<PackedShort>.Read(packer, ref packed);
                 value = (byte)(oldvalue + packed.value);
             }
+            else value = oldvalue;
         }
         
         [UsedByIL]
@@ -97,6 +99,7 @@ namespace PurrNet.Packing
                 Packer<PackedInt>.Read(packer, ref packed);
                 value = (short)(oldvalue + packed.value);
             }
+            else value = oldvalue;
         }
         
         [UsedByIL]
@@ -124,6 +127,7 @@ namespace PurrNet.Packing
                 Packer<PackedInt>.Read(packer, ref packed);
                 value = (ushort)(oldvalue + packed.value);
             }
+            else value = oldvalue;
         }
         
         [UsedByIL]
@@ -151,6 +155,7 @@ namespace PurrNet.Packing
                 Packer<PackedLong>.Read(packer, ref packed);
                 value = (uint)(oldvalue + packed.value);
             }
+            else value = oldvalue;
         }
         
         [UsedByIL]
@@ -178,6 +183,7 @@ namespace PurrNet.Packing
                 Packer<PackedLong>.Read(packer, ref packed);
                 value = (uint)(oldvalue + packed.value);
             }
+            else value = oldvalue;
         }
 
         [UsedByIL]
@@ -205,6 +211,7 @@ namespace PurrNet.Packing
                 Packer<PackedLong>.Read(packer, ref packed);
                 value = (int)(oldvalue + packed.value);
             }
+            else value = oldvalue;
         }
     }
 }

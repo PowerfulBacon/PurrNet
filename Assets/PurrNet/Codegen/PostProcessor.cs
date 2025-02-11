@@ -1556,7 +1556,9 @@ namespace PurrNet.Codegen
                 var visitedTypes = new HashSet<string>();
                 var typesToGenerateSerializer = new HashSet<TypeReference>();
                 var typesToPrepareHasher = new HashSet<TypeReference>();
-                
+                var typesToIgnoreForDelta = new HashSet<TypeReference>();
+                var typesToIgnoreForSerialization = new HashSet<TypeReference>();
+
                 var messages = new List<DiagnosticMessage>();
 
                 using var peStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PeData);
@@ -1613,7 +1615,7 @@ namespace PurrNet.Codegen
                         }
                         
                         UnityProxyProcessor.Process(types[t], messages);
-                        RegisterSerializersProcessor.HandleType(module, types[t], isEditor, messages);
+                        RegisterSerializersProcessor.HandleType(module, types[t], isEditor, typesToIgnoreForDelta, typesToIgnoreForSerialization);
 
                         var type = types[t];
                         
@@ -1780,10 +1782,10 @@ namespace PurrNet.Codegen
                 typesToPrepareHasher.ExceptWith(typesToGenerateSerializer);
 
                 foreach (var typeRef in typesToGenerateSerializer)
-                    GenerateSerializersProcessor.HandleType(false, assemblyDefinition, typeRef, visitedTypes, isEditor, messages);
+                    GenerateSerializersProcessor.HandleType(false, assemblyDefinition, typeRef, visitedTypes, isEditor, typesToIgnoreForSerialization, typesToIgnoreForDelta);
                 
                 foreach (var typeRef in typesToPrepareHasher)
-                    GenerateSerializersProcessor.HandleType(true, assemblyDefinition, typeRef, visitedTypes, isEditor, messages);
+                    GenerateSerializersProcessor.HandleType(true, assemblyDefinition, typeRef, visitedTypes, isEditor, typesToIgnoreForSerialization, typesToIgnoreForDelta);
                 
                 var pe = new MemoryStream();
                 var pdb = new MemoryStream();

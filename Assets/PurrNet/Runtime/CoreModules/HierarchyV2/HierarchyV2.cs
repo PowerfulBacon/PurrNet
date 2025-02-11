@@ -442,19 +442,17 @@ namespace PurrNet.Modules
             
             var createdNids = new DisposableList<NetworkIdentity>(16);
             CreatePrototype(data.prototype, createdNids.list);
+            
 
             if (_asServer)
             {
+                bool isHost = IsServerHost();
+
                 foreach (var nid in createdNids)
                 {
-                    nid.SetIdentity(_manager, this, _sceneId, _asServer);
+                    nid.SetIdentity(_manager, this, _sceneId, _asServer, isHost);
                     RegisterIdentity(nid, false);
                     nid.TryAddObserver(player);
-                    
-                    // I think it makes more sense to not trigger this event here
-                    // as it makes sense to assume they were already observers before the spawn
-                    /*nid.TriggerOnObserverAdded(player);
-                    onEarlyObserverAdded?.Invoke(player, nid);*/
                 }
 
                 if (createdNids.Count > 0)
@@ -468,7 +466,7 @@ namespace PurrNet.Modules
             {
                 foreach (var nid in createdNids)
                 {
-                    nid.SetIdentity(_manager, this, _sceneId, _asServer);
+                    nid.SetIdentity(_manager, this, _sceneId, _asServer, false);
                     RegisterIdentity(nid, false);
                 }
             }
@@ -792,6 +790,8 @@ namespace PurrNet.Modules
 
         private void SetupIdsLocally(NetworkIdentity root, ref NetworkID baseNid)
         {
+            bool isHost = IsServerHost();
+
             using var siblings = new DisposableList<NetworkIdentity>(16);
             root.GetComponents(siblings.list);
             
@@ -800,7 +800,7 @@ namespace PurrNet.Modules
             {
                 var sibling = siblings[i];
                 sibling.SetID(new NetworkID(baseNid, (uint)i));
-                sibling.SetIdentity(_manager, this, _sceneId, _asServer);
+                sibling.SetIdentity(_manager, this, _sceneId, _asServer, isHost);
                 RegisterIdentity(sibling, true);
             }
 
@@ -820,6 +820,8 @@ namespace PurrNet.Modules
         
         private void SpawnSceneObject(List<NetworkIdentity> children)
         {
+            bool isHost = IsServerHost();
+
             for (int i = 0; i < children.Count; i++)
             {
                 var child = children[i];
@@ -829,7 +831,7 @@ namespace PurrNet.Modules
                     child.SetID(id);
                     if (_asServer)
                     {
-                        child.SetIdentity(_manager, this, _sceneId, _asServer);
+                        child.SetIdentity(_manager, this, _sceneId, _asServer, isHost);
                         RegisterIdentity(child, true);
                     }
                 }
@@ -1016,7 +1018,6 @@ namespace PurrNet.Modules
             {
                 _spawnedIdentities.Remove(identity);
                 _spawnedIdentitiesMap.Remove(identity.id.Value);
-
                 onIdentityRemoved?.Invoke(identity);
             }
         }

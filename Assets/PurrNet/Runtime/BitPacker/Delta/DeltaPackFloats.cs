@@ -1,9 +1,25 @@
+using PurrNet.Logging;
 using PurrNet.Modules;
+using UnityEngine;
 
 namespace PurrNet.Packing
 {
     public static class DeltaPackFloats
     {
+        [UsedByIL]
+        private static void WriteHalf(BitPacker packer, Half value)
+        {
+            Packer<ushort>.Write(packer, value.rawValue);
+        }
+
+        [UsedByIL]
+        private static void ReadHalf(BitPacker packer, ref Half value)
+        {
+            ushort rawValue = default;
+            Packer<ushort>.Read(packer, ref rawValue);
+            value = Half.FromRawValue(rawValue);
+        }
+        
         [UsedByIL]
         private static void WriteHalf(BitPacker packer, Half oldvalue, Half newvalue)
         {
@@ -27,10 +43,10 @@ namespace PurrNet.Packing
             {
                 PackedInt packed = default;
                 Packer<PackedInt>.Read(packer, ref packed);
-                value = new Half(oldvalue.Value + packed.value);
+                value = Half.FromRawValue((ushort)(oldvalue.Value + packed.value));
             }
         }
-
+        
         [UsedByIL]
         private static unsafe void WriteDouble(BitPacker packer, double oldvalue, double newvalue)
         {
@@ -62,6 +78,7 @@ namespace PurrNet.Packing
                 ulong newBits = (ulong)((long)oldBits + packed.value);
                 value = *(double*)&newBits;
             }
+            else value = oldvalue;
         }
 
         [UsedByIL]
@@ -75,7 +92,7 @@ namespace PurrNet.Packing
             {
                 uint oldBits = *(uint*)&oldvalue;
                 uint newBits = *(uint*)&newvalue;
-                long diff = (long)newBits - oldBits;
+                long diff = checked((long)newBits - oldBits);
                 Packer<PackedLong>.Write(packer, diff);
             }
         }
@@ -94,6 +111,7 @@ namespace PurrNet.Packing
                 uint newBits = (uint)(oldBits + packed.value);
                 value = *(float*)&newBits;
             }
+            else value = oldvalue;
         }
     }
 }

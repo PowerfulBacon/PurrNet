@@ -115,54 +115,6 @@ namespace PurrNet.Packing
         }
         
         [UsedByIL]
-        public static void Write(this BitPacker packer, HalfVector2 value)
-        {
-            packer.Write(value.x);
-            packer.Write(value.y);
-        }
-        
-        [UsedByIL]
-        public static void Read(this BitPacker packer, ref HalfVector2 value)
-        {
-            packer.Read(ref value.x);
-            packer.Read(ref value.y);
-        }
-        
-        [UsedByIL]
-        public static void Write(this BitPacker packer, HalfVector3 value)
-        {
-            packer.Write(value.x);
-            packer.Write(value.y);
-            packer.Write(value.z);
-        }
-        
-        [UsedByIL]
-        public static void Read(this BitPacker packer, ref HalfVector3 value)
-        {
-            packer.Read(ref value.x);
-            packer.Read(ref value.y);
-            packer.Read(ref value.z);
-        }
-        
-        [UsedByIL]
-        public static void Write(this BitPacker packer, HalfVector4 value)
-        {
-            packer.Write(value.x);
-            packer.Write(value.y);
-            packer.Write(value.z);
-            packer.Write(value.w);
-        }
-        
-        [UsedByIL]
-        public static void Read(this BitPacker packer, ref HalfVector4 value)
-        {
-            packer.Read(ref value.x);
-            packer.Read(ref value.y);
-            packer.Read(ref value.z);
-            packer.Read(ref value.w);
-        }
-   
-        [UsedByIL]
         public static void Write(this BitPacker packer, Quaternion value)
         {
             value.Normalize();
@@ -193,9 +145,9 @@ namespace PurrNet.Packing
             Half y = default;
             Half z = default;
             
-            packer.Read(ref x);
-            packer.Read(ref y);
-            packer.Read(ref z);
+            Packer<Half>.Read(packer, ref x);
+            Packer<Half>.Read(packer, ref y);
+            Packer<Half>.Read(packer, ref z);
             
             bool wSign = false;
             packer.Read(ref wSign);

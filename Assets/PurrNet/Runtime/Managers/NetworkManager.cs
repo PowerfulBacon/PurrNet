@@ -826,7 +826,8 @@ namespace PurrNet
             modules.AddModule(new RpcRequestResponseModule(playersManager));
             modules.AddModule(hierarchyV2);
 
-            var networkTransform = new NetworkTransformFactory(scenesModule, scenePlayers, playersBroadcast);
+            var networkTransform =
+                new NetworkTransformFactory(scenesModule, scenePlayers, playersBroadcast, this);
             
             modules.AddModule(networkTransform);
             

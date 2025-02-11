@@ -30,11 +30,11 @@ namespace PurrNet
     {
         [Header("What to Sync")]
         [Tooltip("Whether to sync the position of the transform. And if so, in what space.")]
-        [SerializeField] private SyncMode _syncPosition = SyncMode.World;
+        [SerializeField, PurrLock] private SyncMode _syncPosition = SyncMode.World;
         [Tooltip("Whether to sync the rotation of the transform. And if so, in what space.")]
-        [SerializeField] private SyncMode _syncRotation = SyncMode.World;
+        [SerializeField, PurrLock] private SyncMode _syncRotation = SyncMode.World;
         [Tooltip("Whether to sync the scale of the transform.")]
-        [SerializeField] private bool _syncScale = true;
+        [SerializeField, PurrLock] private bool _syncScale = true;
         [Tooltip("Whether to sync the parent of the transform. Only works if the parent is a NetworkIdentiy.")]
         [SerializeField, PurrLock] private bool _syncParent = true;
         
@@ -53,8 +53,6 @@ namespace PurrNet
 
         [Tooltip("Will enforce the character controller getting enabled and disabled when attempting to sync the transform - CAUTION - Physics events can/will be called multiple times")] 
         [SerializeField] private bool _characterControllerPatch;
-
-        public bool isControlling => IsController(_ownerAuth);
 
         /// <summary>
         /// Whether to sync the parent of the transform. Only works if the parent is a NetworkIdentiy.
@@ -121,13 +119,45 @@ namespace PurrNet
         
         static Quaternion NoInterpolation(Quaternion a, Quaternion b, float t) => b;
         
-        public event Action onIsControllingChanged;
-        
         private void Awake()
         {
             _trs = transform;
             _rb = GetComponent<Rigidbody>();
             _controller = GetComponent<CharacterController>();
+        }
+
+        protected override void OnEarlySpawn(bool asServer)
+        {
+            _currentData = GetCurrentTransformData();
+            _lastSentDelta = _currentData;
+        }
+        
+        protected override void OnOwnerReconnected(PlayerID ownerId)
+        {
+            OnOwnerChanged(ownerId, ownerId, isServer);
+        }
+
+        protected override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
+        {
+            if (!_ownerAuth)
+                return;
+            
+            if (asServer)
+            {
+                if (newOwner.HasValue && newOwner != localPlayer)
+                    SendLatestState(newOwner.Value, _currentData);
+
+                if (oldOwner.HasValue && newOwner != oldOwner && oldOwner != localPlayer)
+                    SendLatestState(oldOwner.Value, _currentData);
+            }
+            else
+            {
+                _currentData = GetCurrentTransformData();
+                _lastSentDelta = _currentData;
+                
+                if (newOwner == localPlayer && !isServer)
+                    SendLatestStateToServer(_currentData);
+            }
         }
 
         protected override void OnSpawned(bool asServer)
@@ -139,14 +169,14 @@ namespace PurrNet
             }
             
             if (!factory.TryGetModule(sceneId, out var ntModule))
-            {
-                PurrLogger.LogError("NetworkTransformModule not found");
                 return;
-            }
+
+            if (!asServer && !isServer && IsController(localPlayerForced, _ownerAuth, false))
+                SendLatestStateToServer(_currentData);
             
             ntModule.Register(this);
         }
-
+        
         protected override void OnDespawned(bool asServer)
         {
             if (!networkManager.TryGetModule<NetworkTransformFactory>(asServer, out var factory))
@@ -188,16 +218,28 @@ namespace PurrNet
             if (syncScale) _scale.maxBufferSize = ticksPerBuffer;
         }
 
-        protected override void OnOwnerReconnected(PlayerID ownerId)
+        protected override void OnObserverAdded(PlayerID player)
         {
-            if (isServer && _ownerAuth)
-                onIsControllingChanged?.Invoke();
+            if (player != owner && player != localPlayer)
+                SendLatestState(player, _currentData);
         }
 
-        protected override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
+        [ServerRpc]
+        private void SendLatestStateToServer(NetworkTransformData data)
         {
-            if (_ownerAuth)
-                onIsControllingChanged?.Invoke();
+            _lastReadData = data;
+            _currentData = data;
+            TeleportToData(data);
+            ApplyLerpedPosition();
+        }
+        
+        [TargetRpc]
+        private void SendLatestState(PlayerID player, NetworkTransformData data)
+        {
+            _lastReadData = data;
+            _currentData = data;
+            TeleportToData(data);
+            ApplyLerpedPosition();
         }
         
         public void OnTick(float delta)
@@ -321,25 +363,88 @@ namespace PurrNet
         {
             _isIgnoringParentChanges = false;
         }
-
-        private NetworkTransformData _lastData;
         
-        public void FullWrite(BitPacker packer)
+        private void TeleportToData(NetworkTransformData data)
         {
-            var data = GetCurrentTransformData();
+            if (syncPosition)
+                _position.Teleport(data.position);
             
-            Packer<Vector3>.Write(packer, data.position);
-            Packer<HalfQuaternion>.Write(packer, data.rotation);
-            Packer<HalfVector3>.Write(packer, data.scale);
+            if (syncRotation)
+                _rotation.Teleport(data.rotation);
+            
+            if (syncScale)
+                _scale.Teleport(data.scale);
         }
+
+        private void ApplyData(NetworkTransformData data)
+        {
+            if (syncPosition)
+                _position.Add(data.position);
+            
+            if (syncRotation)
+                _rotation.Add(data.rotation);
+            
+            if (syncScale)
+                _scale.Add(data.scale);
+        }
+
+        private NetworkTransformData _currentData;
+        
+        private NetworkTransformData _lastReadData;
+        private NetworkTransformData _lastSentDelta;
 
         public void DeltaWrite(BitPacker packer)
         {
-            var data = GetCurrentTransformData();
+            if (syncPosition)
+                DeltaPacker<Vector3>.Write(packer, _lastSentDelta.position, _currentData.position);
+
+            if (syncRotation)
+                DeltaPacker<Quaternion>.Write(packer, _lastSentDelta.rotation, _currentData.rotation);
+
+            if (syncScale)
+                DeltaPacker<Vector3>.Write(packer, _lastSentDelta.scale, _currentData.scale);
+        }
+        
+        public void DeltaRead(BitPacker packet)
+        {
+            _lastReadData = DeltaRead(packet, _lastReadData);
+            ApplyData(_lastReadData);
+        }
+        
+        NetworkTransformData DeltaRead(BitPacker packet, NetworkTransformData oldValue)
+        {
+            if (syncPosition)
+                DeltaPacker<Vector3>.Read(packet, oldValue.position, ref oldValue.position);
             
-            DeltaPacker<Vector3>.Write(packer, _lastData.position, data.position);
-            DeltaPacker<HalfQuaternion>.Write(packer, _lastData.rotation, data.rotation);
-            DeltaPacker<HalfVector3>.Write(packer, _lastData.scale, data.scale);
+            if (syncRotation)
+                DeltaPacker<Quaternion>.Read(packet, oldValue.rotation, ref oldValue.rotation);
+            
+            if (syncScale)
+                DeltaPacker<Vector3>.Read(packet, oldValue.scale, ref oldValue.scale);
+            
+            return oldValue;
+        }
+
+        public void GatherState()
+        {
+            _currentData = GetCurrentTransformData();
+            
+            if (IsController(_ownerAuth))
+                TeleportToData(_currentData);
+        }
+        
+        public void DeltaSave()
+        {
+            var packer = BitPackerPool.Get(false);
+            DeltaWrite(packer);
+            packer.ResetPositionAndMode(true);
+            
+            _lastSentDelta = DeltaRead(packer, _lastSentDelta);
+        }
+
+        public bool IsControlling(PlayerID player, bool asServer)
+        {
+            return IsController(player, _ownerAuth, asServer);
         }
     }
 }

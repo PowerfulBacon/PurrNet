@@ -7,10 +7,10 @@ namespace PurrNet
     public struct NetworkTransformData : IEquatable<NetworkTransformData>
     {
         public Vector3 position;
-        public HalfQuaternion rotation;
-        public HalfVector3 scale;
+        public Quaternion rotation;
+        public Vector3 scale;
         
-        public NetworkTransformData(Vector3 position, HalfQuaternion rotation, Vector3 scale)
+        public NetworkTransformData(Vector3 position, Quaternion rotation, Vector3 scale)
         {
             this.position = position;
             this.rotation = rotation;
@@ -30,6 +30,11 @@ namespace PurrNet
         public bool Equals(NetworkTransformData other)
         {
             return position.Equals(other.position) && rotation.Equals(other.rotation) && scale.Equals(other.scale);
+        }
+
+        public override string ToString()
+        {
+            return $"Position: {position}, Rotation: {rotation}, Scale: {scale}";
         }
     }
 }

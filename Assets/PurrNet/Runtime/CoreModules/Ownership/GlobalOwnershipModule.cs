@@ -184,10 +184,7 @@ namespace PurrNet.Modules
                 return;
             
             if (_sceneOwnerships.TryGetValue(identity.sceneId, out var module))
-            {
-                if (module.TryGetOwner(identity, out var oldOwner) && module.RemoveOwnership(identity))
-                    identity.TriggerOnOwnerChanged(oldOwner, null, _asServer);
-            }
+                module.RemoveOwnership(identity);
         }
 
         struct PlayerSceneID : IEquatable<PlayerSceneID>
