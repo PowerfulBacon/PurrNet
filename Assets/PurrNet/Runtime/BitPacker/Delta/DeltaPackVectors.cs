@@ -6,16 +6,20 @@ namespace PurrNet.Packing
     public static class DeltaPackVectors
     {
         [UsedByIL]
-        private static void WriteVector2(BitPacker packer, Vector2 oldvalue, Vector2 newvalue)
+        private static bool WriteVector2(BitPacker packer, Vector2 oldvalue, Vector2 newvalue)
         {
-            bool hasChanged = oldvalue != newvalue;
-            Packer<bool>.Write(packer, hasChanged);
-
-            if (hasChanged)
-            {
-                DeltaPacker<float>.Write(packer, oldvalue.x, newvalue.x);
-                DeltaPacker<float>.Write(packer, oldvalue.y, newvalue.y);
-            }
+            int flagPos = packer.AdvanceBits(1);
+            bool wasChanged;
+            
+            wasChanged = DeltaPacker<float>.Write(packer, oldvalue.x, newvalue.x);
+            wasChanged = DeltaPacker<float>.Write(packer, oldvalue.y, newvalue.y) || wasChanged;
+            
+            packer.WriteAt(flagPos, wasChanged);
+            
+            if (!wasChanged)
+                packer.SetBitPosition(flagPos + 1);
+            
+            return wasChanged;
         }
         
         [UsedByIL]
@@ -33,17 +37,20 @@ namespace PurrNet.Packing
         }
         
         [UsedByIL]
-        private static void WriteVector3(BitPacker packer, Vector3 oldvalue, Vector3 newvalue)
+        private static bool WriteVector3(BitPacker packer, Vector3 oldvalue, Vector3 newvalue)
         {
-            bool hasChanged = Vector3.SqrMagnitude(oldvalue - newvalue) > 0.00001f;
-            Packer<bool>.Write(packer, hasChanged);
-
-            if (hasChanged)
-            {
-                DeltaPacker<float>.Write(packer, oldvalue.x, newvalue.x);
-                DeltaPacker<float>.Write(packer, oldvalue.y, newvalue.y);
-                DeltaPacker<float>.Write(packer, oldvalue.z, newvalue.z);
-            }
+            int flagPos = packer.AdvanceBits(1);
+            bool hasChanged;
+            
+            hasChanged = DeltaPacker<float>.Write(packer, oldvalue.x, newvalue.x);
+            hasChanged = DeltaPacker<float>.Write(packer, oldvalue.y, newvalue.y) || hasChanged;
+            hasChanged = DeltaPacker<float>.Write(packer, oldvalue.z, newvalue.z) || hasChanged;
+            
+            packer.WriteAt(flagPos, hasChanged);
+            
+            if (!hasChanged)
+                packer.SetBitPosition(flagPos + 1);
+            return hasChanged;
         }
         
         [UsedByIL]
@@ -62,18 +69,20 @@ namespace PurrNet.Packing
         }
         
         [UsedByIL]
-        private static void WriteVector4(BitPacker packer, Vector4 oldvalue, Vector4 newvalue)
+        private static bool WriteVector4(BitPacker packer, Vector4 oldvalue, Vector4 newvalue)
         {
-            bool hasChanged = oldvalue != newvalue;
-            Packer<bool>.Write(packer, hasChanged);
-
-            if (hasChanged)
-            {
-                DeltaPacker<float>.Write(packer, oldvalue.x, newvalue.x);
-                DeltaPacker<float>.Write(packer, oldvalue.y, newvalue.y);
-                DeltaPacker<float>.Write(packer, oldvalue.z, newvalue.z);
-                DeltaPacker<float>.Write(packer, oldvalue.w, newvalue.w);
-            }
+            int flagPos = packer.AdvanceBits(1);
+            bool isEqual;
+            
+            isEqual = DeltaPacker<float>.Write(packer, oldvalue.x, newvalue.x);
+            isEqual = DeltaPacker<float>.Write(packer, oldvalue.y, newvalue.y) || isEqual;
+            isEqual = DeltaPacker<float>.Write(packer, oldvalue.z, newvalue.z) || isEqual;
+            isEqual = DeltaPacker<float>.Write(packer, oldvalue.w, newvalue.w) || isEqual;
+            
+            packer.WriteAt(flagPos, isEqual);
+            if (!isEqual)
+                packer.SetBitPosition(flagPos + 1);
+            return isEqual;
         }
         
         [UsedByIL]
@@ -93,20 +102,22 @@ namespace PurrNet.Packing
         }
         
         [UsedByIL]
-        private static void WriteQuaternion(BitPacker packer, Quaternion oldvalue, Quaternion newvalue)
+        private static bool WriteQuaternion(BitPacker packer, Quaternion oldvalue, Quaternion newvalue)
         {
             newvalue.Normalize();
             
-            bool hasChanged = oldvalue != newvalue;
-            Packer<bool>.Write(packer, hasChanged);
+            int flagPos = packer.AdvanceBits(1);
+            bool isEqual;
 
-            if (hasChanged)
-            {
-                DeltaPacker<float>.Write(packer, oldvalue.x, newvalue.x);
-                DeltaPacker<float>.Write(packer, oldvalue.y, newvalue.y);
-                DeltaPacker<float>.Write(packer, oldvalue.z, newvalue.z);
-                DeltaPacker<bool>.Write(packer, oldvalue.w < 0, newvalue.w < 0);
-            }
+            isEqual = DeltaPacker<float>.Write(packer, oldvalue.x, newvalue.x);
+            isEqual = DeltaPacker<float>.Write(packer, oldvalue.y, newvalue.y) || isEqual;
+            isEqual = DeltaPacker<float>.Write(packer, oldvalue.z, newvalue.z) || isEqual;
+            isEqual = DeltaPacker<bool>.Write(packer, oldvalue.w < 0, newvalue.w < 0) || isEqual;
+
+            packer.WriteAt(flagPos, isEqual);
+            if (!isEqual)
+                packer.SetBitPosition(flagPos + 1);
+            return isEqual;
         }
         
         [UsedByIL]
@@ -166,20 +177,22 @@ namespace PurrNet.Packing
             
             value = new HalfQuaternion(x, y, z, w);
         }
-        
-        [UsedByIL]
-        private static void WriteQuaternion(BitPacker packer, HalfQuaternion oldvalue, HalfQuaternion newvalue)
-        {
-            bool hasChanged = Quaternion.Dot(oldvalue, newvalue) < 0.9999f;
-            Packer<bool>.Write(packer, hasChanged);
 
-            if (hasChanged)
-            {
-                DeltaPacker<Half>.Write(packer, oldvalue.x, newvalue.x);
-                DeltaPacker<Half>.Write(packer, oldvalue.y, newvalue.y);
-                DeltaPacker<Half>.Write(packer, oldvalue.z, newvalue.z);
-                DeltaPacker<Half>.Write(packer, oldvalue.w, newvalue.w);
-            }
+        [UsedByIL]
+        private static bool WriteQuaternion(BitPacker packer, HalfQuaternion oldvalue, HalfQuaternion newvalue)
+        {
+            var flagPos = packer.AdvanceBits(1);
+            bool hasChanged;
+            
+            hasChanged = DeltaPacker<Half>.Write(packer, oldvalue.x, newvalue.x);
+            hasChanged = DeltaPacker<Half>.Write(packer, oldvalue.y, newvalue.y) || hasChanged;
+            hasChanged = DeltaPacker<Half>.Write(packer, oldvalue.z, newvalue.z) || hasChanged;
+            hasChanged = DeltaPacker<Half>.Write(packer, oldvalue.w, newvalue.w) || hasChanged;
+            
+            packer.WriteAt(flagPos, hasChanged);
+            if (!hasChanged)
+                packer.SetBitPosition(flagPos + 1);
+            return hasChanged;
         }
         
         [UsedByIL]

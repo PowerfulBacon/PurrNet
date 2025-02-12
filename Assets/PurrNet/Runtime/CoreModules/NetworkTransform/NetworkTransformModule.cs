@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using PurrNet.Logging;
 using PurrNet.Packing;
 using PurrNet.Transports;
 
@@ -146,7 +147,10 @@ namespace PurrNet.Modules
                     PrepareDeltaState(packer, player);
 
                     if (packer.positionInBits != 0)
+                    {
+                        // PurrLogger.Log($"Wrote {packer.positionInBits} bits for player {player}");
                         _broadcaster.Send(player, new NetworkTransformDelta(packer));
+                    }
                 }
             }
             

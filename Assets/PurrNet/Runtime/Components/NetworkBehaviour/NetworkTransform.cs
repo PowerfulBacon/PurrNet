@@ -408,20 +408,22 @@ namespace PurrNet
 
         public void DeltaWrite(BitPacker packer)
         {
-            bool hasChanged = _lastSentDelta.IsDifferent(_currentData);
-            Packer<bool>.Write(packer, hasChanged);
-            
-            if (!hasChanged)
-                return;
+            int flagPos = packer.AdvanceBits(1);
+            bool hasChanged = false;
             
             if (syncPosition)
-                DeltaPacker<Vector3>.Write(packer, _lastSentDelta.position, _currentData.position);
+                hasChanged = DeltaPacker<Vector3>.Write(packer, _lastSentDelta.position, _currentData.position);
             
             if (syncRotation)
-                DeltaPacker<HalfQuaternion>.Write(packer,_lastSentDelta.rotation, _currentData.rotation);
+                hasChanged = DeltaPacker<Quaternion>.Write(packer,_lastSentDelta.rotation, _currentData.rotation) || hasChanged;
             
             if (syncScale)
-                DeltaPacker<HalfVector3>.Write(packer,_lastSentDelta.scale, _currentData.scale);
+                hasChanged = DeltaPacker<Vector3>.Write(packer,_lastSentDelta.scale, _currentData.scale) || hasChanged;
+            
+            packer.WriteAt(flagPos, hasChanged);
+            
+            if (!hasChanged)
+                packer.SetBitPosition(flagPos + 1);
         }
         
         public void DeltaRead(BitPacker packet)
@@ -446,10 +448,10 @@ namespace PurrNet
                     DeltaPacker<Vector3>.Read(packet, pos, ref oldValue.position);
                 
                 if (syncRotation)
-                    DeltaPacker<HalfQuaternion>.Read(packet, rot, ref oldValue.rotation);
+                    DeltaPacker<Quaternion>.Read(packet, rot, ref oldValue.rotation);
                 
                 if (syncScale)
-                    DeltaPacker<HalfVector3>.Read(packet, scale, ref oldValue.scale);
+                    DeltaPacker<Vector3>.Read(packet, scale, ref oldValue.scale);
             }
             
             return oldValue;
