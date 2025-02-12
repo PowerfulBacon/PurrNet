@@ -307,9 +307,23 @@ namespace PurrNet
 
         private NetworkTransformData GetCurrentTransformData()
         {
-            var pos = _syncPosition == SyncMode.World ? _trs.position : _trs.localPosition;
-            var rot = _syncRotation == SyncMode.World ? _trs.rotation : _trs.localRotation;
-            return new NetworkTransformData(pos, rot, _trs.localScale);
+            var pos = _syncPosition switch
+            {
+                SyncMode.World => _trs.position,
+                SyncMode.Local => _trs.localPosition,
+                _ => Vector3.zero
+            };
+            
+            var rot = _syncRotation switch
+            {
+                SyncMode.World => _trs.rotation,
+                SyncMode.Local => _trs.localRotation,
+                _ => Quaternion.identity
+            };
+            
+            var scale = _syncScale ? _trs.localScale : default;
+            
+            return new NetworkTransformData(pos, rot, scale);
         }
         
         private bool _parentChanged;
@@ -389,30 +403,25 @@ namespace PurrNet
         }
 
         private NetworkTransformData _currentData;
-        
         private NetworkTransformData _lastReadData;
         private NetworkTransformData _lastSentDelta;
 
         public void DeltaWrite(BitPacker packer)
         {
-            bool isSimilar = _lastSentDelta.IsSimilar(_currentData);
+            bool hasChanged = _lastSentDelta.IsDifferent(_currentData);
+            Packer<bool>.Write(packer, hasChanged);
             
-            if (isSimilar)
-            {
-                Packer<bool>.Write(packer, false);
+            if (!hasChanged)
                 return;
-            }
-            
-            Packer<bool>.Write(packer, true);
             
             if (syncPosition)
                 DeltaPacker<Vector3>.Write(packer, _lastSentDelta.position, _currentData.position);
-
+            
             if (syncRotation)
-                DeltaPacker<HalfQuaternion>.Write(packer, _lastSentDelta.rotation, _currentData.rotation);
-
+                DeltaPacker<HalfQuaternion>.Write(packer,_lastSentDelta.rotation, _currentData.rotation);
+            
             if (syncScale)
-                DeltaPacker<HalfVector3>.Write(packer, _lastSentDelta.scale, _currentData.scale);
+                DeltaPacker<HalfVector3>.Write(packer,_lastSentDelta.scale, _currentData.scale);
         }
         
         public void DeltaRead(BitPacker packet)
@@ -420,24 +429,28 @@ namespace PurrNet
             _lastReadData = DeltaRead(packet, _lastReadData);
             ApplyData(_lastReadData);
         }
-        
+
         NetworkTransformData DeltaRead(BitPacker packet, NetworkTransformData oldValue)
         {
             bool hasChanged = default;
             
             Packer<bool>.Read(packet, ref hasChanged);
 
-            if (!hasChanged)
-                return oldValue;
-            
-            if (syncPosition)
-                DeltaPacker<Vector3>.Read(packet, oldValue.position, ref oldValue.position);
-            
-            if (syncRotation)
-                DeltaPacker<HalfQuaternion>.Read(packet, oldValue.rotation, ref oldValue.rotation);
-            
-            if (syncScale)
-                DeltaPacker<HalfVector3>.Read(packet, oldValue.scale, ref oldValue.scale);
+            if (hasChanged)
+            {
+                var pos = oldValue.position;
+                var rot = oldValue.rotation;
+                var scale = oldValue.scale;
+
+                if (syncPosition)
+                    DeltaPacker<Vector3>.Read(packet, pos, ref oldValue.position);
+                
+                if (syncRotation)
+                    DeltaPacker<HalfQuaternion>.Read(packet, rot, ref oldValue.rotation);
+                
+                if (syncScale)
+                    DeltaPacker<HalfVector3>.Read(packet, scale, ref oldValue.scale);
+            }
             
             return oldValue;
         }
@@ -449,13 +462,12 @@ namespace PurrNet
             if (IsController(_ownerAuth))
                 TeleportToData(_currentData);
         }
-        
+
         public void DeltaSave()
         {
-            var packer = BitPackerPool.Get(false);
+            using var packer = BitPackerPool.Get(false);
             DeltaWrite(packer);
             packer.ResetPositionAndMode(true);
-            
             _lastSentDelta = DeltaRead(packer, _lastSentDelta);
         }
 

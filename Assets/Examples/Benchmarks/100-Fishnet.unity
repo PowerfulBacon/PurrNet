@@ -294,7 +294,7 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   _fishPrefab: {fileID: 5999752480146570505, guid: ce611468ecbf48540a5a5c8dc5bc09f0, type: 3}
-  _fishCount: 100
+  _fishCount: 400
 --- !u!1 &926210937
 GameObject:
   m_ObjectHideFlags: 0
@@ -466,7 +466,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: baacc2bfe126d544691d4f39fa3785f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stopPlayingOnDisconnect: 0
+  _stopPlayingOnDisconnect: 1
   _startServerFlags: 1
   _startClientFlags: 7
   _cookieScope: 1

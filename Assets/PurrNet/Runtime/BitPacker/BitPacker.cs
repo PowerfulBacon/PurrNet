@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Text;
 using JetBrains.Annotations;
@@ -8,7 +9,7 @@ using PurrNet.Transports;
 namespace PurrNet.Packing
 {
     [UsedImplicitly]
-    public partial class BitPacker : IDisposable
+    public partial class BitPacker : IDisposable, IBufferWriter<byte>
     {
         private byte[] _buffer;
         private bool _isReading;
@@ -40,6 +41,24 @@ namespace PurrNet.Packing
         public bool isReading => _isReading;
         
         public bool isWriting => !_isReading;
+        
+        public void Advance(int count)
+        {
+            EnsureBitsExist(count * 8);
+            positionInBits += count * 8;
+        }
+
+        public Memory<byte> GetMemory(int sizeHint = 0)
+        {
+            EnsureBitsExist(sizeHint * 8);
+            return new Memory<byte>(_buffer, positionInBytes, sizeHint);
+        }
+
+        public Span<byte> GetSpan(int sizeHint = 0)
+        {
+            EnsureBitsExist(sizeHint * 8);
+            return new Span<byte>(_buffer, positionInBytes, sizeHint);
+        }
         
         public BitPacker(int initialSize = 1024)
         {

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using PurrNet.Logging;
 using PurrNet.Packing;
 using PurrNet.Transports;
 
@@ -46,6 +45,9 @@ namespace PurrNet.Modules
         private void OnNetworkTransformDelta(PlayerID player, NetworkTransformDelta data, bool asServer)
         {
             using var packet = BitPackerPool.Get(data.packet);
+            
+            packet.ResetPositionAndMode(true);
+            
             int ntCount = _networkTransforms.Count;
 
             if (asServer)
@@ -126,8 +128,9 @@ namespace PurrNet.Modules
             if (!_asServer)
             {
                 using var packer = BitPackerPool.Get();
-                PrepareDeltaState(packer, PlayerID.Server);
 
+                PrepareDeltaState(packer, PlayerID.Server);
+                
                 if (packer.positionInBits != 0)
                     _broadcaster.SendToServer(new NetworkTransformDelta(packer));
             }
@@ -139,6 +142,7 @@ namespace PurrNet.Modules
                         continue;
                     
                     using var packer = BitPackerPool.Get();
+                    
                     PrepareDeltaState(packer, player);
 
                     if (packer.positionInBits != 0)

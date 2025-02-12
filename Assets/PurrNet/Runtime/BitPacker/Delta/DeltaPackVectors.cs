@@ -35,7 +35,7 @@ namespace PurrNet.Packing
         [UsedByIL]
         private static void WriteVector3(BitPacker packer, Vector3 oldvalue, Vector3 newvalue)
         {
-            bool hasChanged = oldvalue != newvalue;
+            bool hasChanged = Vector3.SqrMagnitude(oldvalue - newvalue) > 0.00001f;
             Packer<bool>.Write(packer, hasChanged);
 
             if (hasChanged)
@@ -170,7 +170,7 @@ namespace PurrNet.Packing
         [UsedByIL]
         private static void WriteQuaternion(BitPacker packer, HalfQuaternion oldvalue, HalfQuaternion newvalue)
         {
-            bool hasChanged = Quaternion.Dot(oldvalue, newvalue) < 0.999f;
+            bool hasChanged = Quaternion.Dot(oldvalue, newvalue) < 0.9999f;
             Packer<bool>.Write(packer, hasChanged);
 
             if (hasChanged)
