@@ -631,7 +631,18 @@ namespace PurrNet.Modules
             Spawn(obj);
         }
 
-        public void Spawn(GameObject gameObject)
+        public void Spawn(GameObject gameObject, GameObject prefab)
+        {
+            if (!_manager.TryGetPrefabData(prefab, out var data, out var idx))
+            {
+                PurrLogger.LogError($"Failed to spawn object '{gameObject.name}'. No prefab data found.", gameObject);
+                return;
+            }
+            
+            NetworkManager.SetupPrefabInfo(gameObject, idx, data.pooled);
+        }
+
+        internal void Spawn(GameObject gameObject)
         {
             if (!gameObject)
                 return;

@@ -23,28 +23,15 @@ namespace PurrNet.Packing
         [UsedByIL]
         private static void WriteHalf(BitPacker packer, Half oldvalue, Half newvalue)
         {
-            bool hasChanged = oldvalue != newvalue;
-            Packer<bool>.Write(packer, hasChanged);
-            
-            if (hasChanged)
-            {
-                var diff = newvalue.Value - oldvalue.Value;
-                Packer<PackedInt>.Write(packer, diff);
-            }
+            DeltaPacker<ushort>.Write(packer, oldvalue.rawValue, newvalue.rawValue);
         }
 
         [UsedByIL]
         private static void ReadHalf(BitPacker packer, Half oldvalue, ref Half value)
         {
-            bool hasChanged = default;
-            Packer<bool>.Read(packer, ref hasChanged);
-
-            if (hasChanged)
-            {
-                PackedInt packed = default;
-                Packer<PackedInt>.Read(packer, ref packed);
-                value = Half.FromRawValue((ushort)(oldvalue.Value + packed.value));
-            }
+            ushort newValue = default;
+            DeltaPacker<ushort>.Read(packer, oldvalue.rawValue, ref newValue);
+            value = Half.FromRawValue(newValue);
         }
         
         [UsedByIL]
@@ -84,8 +71,7 @@ namespace PurrNet.Packing
         [UsedByIL]
         private static unsafe void WriteSingle(BitPacker packer, float oldvalue, float newvalue)
         {
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
-            bool hasChanged = oldvalue != newvalue;
+            bool hasChanged = !Mathf.Approximately(oldvalue, newvalue);
             Packer<bool>.Write(packer, hasChanged);
 
             if (hasChanged)

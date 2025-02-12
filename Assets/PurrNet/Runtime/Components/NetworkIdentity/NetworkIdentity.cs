@@ -349,12 +349,6 @@ namespace PurrNet
         {
             Duplicate();
         }
-        
-        [ContextMenu("PurrNet/Spawn")]
-        private void SpawnMenu()
-        {
-            Spawn();
-        }
 
         /// <summary>
         /// Duplicates the object.
@@ -733,13 +727,37 @@ namespace PurrNet
                 return;
             GiveOwnershipInternal(player, silent);
         }
-
+        
         /// <summary>
         /// Spawns the object over the network.
         /// The gameobject must contain a PrefabLink component in order to spawn.
         /// Errors will be logged if something goes wrong.
         /// </summary>
+        /// <param name="prefab">Prefab used to spawn the object</param>
         /// <param name="manager">Optional NetworkManager to use, will use NetworkManager.main if not provided</param>
+        public void Spawn(GameObject prefab, NetworkManager manager = null)
+        {
+            if (isSpawned)
+                return;
+
+            if (!manager)
+            {
+                manager = NetworkManager.main;
+                
+                if (!manager)
+                {
+                    PurrLogger.LogError("Failed to spawn object. No NetworkManager found.", this);
+                    return;
+                }
+            }
+            
+            if (manager.TryGetModule(manager.isServer, out HierarchyFactory module) && 
+                module.TryGetHierarchy(gameObject.scene, out var hierarchy))
+            {
+                hierarchy.Spawn(gameObject, prefab);
+            }
+        }
+
         public void Spawn(NetworkManager manager = null)
         {
             if (isSpawned)
@@ -763,12 +781,35 @@ namespace PurrNet
             }
         }
 
+        
         /// <summary>
         /// Spawn any child objects of this object.
         /// </summary>
+        /// <param name="prefab">Prefab used to spawn the object</param>
         /// <param name="go">GameObject to spawn</param>
         /// <param name="manager">Optional NetworkManager to use, will use NetworkManager.main if not provided</param>
-        public static void Spawn(GameObject go, NetworkManager manager = null)
+        public static void Spawn(GameObject prefab, GameObject go, NetworkManager manager = null)
+        {
+            if (!go)
+                return;
+
+            if (go.TryGetComponent(out NetworkIdentity identity))
+            {
+                identity.Spawn(prefab, manager);
+                return;
+            }
+            
+            using var identities = new DisposableList<TransformIdentityPair>(16);
+            HierarchyPool.GetDirectChildren(go.transform, identities);
+            
+            for (var i = 0; i < identities.Count; i++)
+            {
+                var pair = identities[i];
+                pair.identity.Spawn(prefab, manager);
+            }
+        }
+        
+        public static void SpawnInternal(GameObject go, NetworkManager manager = null)
         {
             if (!go)
                 return;

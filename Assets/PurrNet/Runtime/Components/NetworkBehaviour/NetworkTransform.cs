@@ -309,7 +309,7 @@ namespace PurrNet
         {
             var pos = _syncPosition == SyncMode.World ? _trs.position : _trs.localPosition;
             var rot = _syncRotation == SyncMode.World ? _trs.rotation : _trs.localRotation;
-            return new NetworkTransformData(pos, new HalfQuaternion(rot), _trs.localScale);
+            return new NetworkTransformData(pos, rot, _trs.localScale);
         }
         
         private bool _parentChanged;
@@ -395,14 +395,24 @@ namespace PurrNet
 
         public void DeltaWrite(BitPacker packer)
         {
+            bool isSimilar = _lastSentDelta.IsSimilar(_currentData);
+            
+            if (isSimilar)
+            {
+                Packer<bool>.Write(packer, false);
+                return;
+            }
+            
+            Packer<bool>.Write(packer, true);
+            
             if (syncPosition)
                 DeltaPacker<Vector3>.Write(packer, _lastSentDelta.position, _currentData.position);
 
             if (syncRotation)
-                DeltaPacker<Quaternion>.Write(packer, _lastSentDelta.rotation, _currentData.rotation);
+                DeltaPacker<HalfQuaternion>.Write(packer, _lastSentDelta.rotation, _currentData.rotation);
 
             if (syncScale)
-                DeltaPacker<Vector3>.Write(packer, _lastSentDelta.scale, _currentData.scale);
+                DeltaPacker<HalfVector3>.Write(packer, _lastSentDelta.scale, _currentData.scale);
         }
         
         public void DeltaRead(BitPacker packet)
@@ -413,14 +423,21 @@ namespace PurrNet
         
         NetworkTransformData DeltaRead(BitPacker packet, NetworkTransformData oldValue)
         {
+            bool hasChanged = default;
+            
+            Packer<bool>.Read(packet, ref hasChanged);
+
+            if (!hasChanged)
+                return oldValue;
+            
             if (syncPosition)
                 DeltaPacker<Vector3>.Read(packet, oldValue.position, ref oldValue.position);
             
             if (syncRotation)
-                DeltaPacker<Quaternion>.Read(packet, oldValue.rotation, ref oldValue.rotation);
+                DeltaPacker<HalfQuaternion>.Read(packet, oldValue.rotation, ref oldValue.rotation);
             
             if (syncScale)
-                DeltaPacker<Vector3>.Read(packet, oldValue.scale, ref oldValue.scale);
+                DeltaPacker<HalfVector3>.Read(packet, oldValue.scale, ref oldValue.scale);
             
             return oldValue;
         }

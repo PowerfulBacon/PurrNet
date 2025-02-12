@@ -134,9 +134,43 @@ namespace PurrNet.Packing
         }
         
         [UsedByIL]
+        public static void Write(this BitPacker packer, HalfQuaternion value)
+        {
+            value.Normalize();
+            
+            Packer<Half>.Write(packer, value.x);
+            Packer<Half>.Write(packer, value.y);
+            Packer<Half>.Write(packer, value.z);
+            
+            packer.Write(value.w < 0);
+        }
+        
+        [UsedByIL]
+        public static void Read(this BitPacker packer, ref HalfQuaternion value)
+        {
+            Half x = default;
+            Half y = default;
+            Half z = default;
+            
+            Packer<Half>.Read(packer, ref x);
+            Packer<Half>.Read(packer, ref y);
+            Packer<Half>.Read(packer, ref z);
+            
+            bool wSign = false;
+            packer.Read(ref wSign);
+            
+            var w = (Half)Mathf.Sqrt(Mathf.Max(0, 1 - x * x - y * y - z * z));
+            
+            if (wSign)
+                w = -w;
+            
+            value = new HalfQuaternion(x, y, z, w);
+        }
+        
+        [UsedByIL]
         private static void WriteQuaternion(BitPacker packer, HalfQuaternion oldvalue, HalfQuaternion newvalue)
         {
-            bool hasChanged = !oldvalue.Equals(newvalue);
+            bool hasChanged = Quaternion.Dot(oldvalue, newvalue) < 0.999f;
             Packer<bool>.Write(packer, hasChanged);
 
             if (hasChanged)
