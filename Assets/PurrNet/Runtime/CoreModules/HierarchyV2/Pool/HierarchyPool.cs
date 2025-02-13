@@ -512,7 +512,7 @@ namespace PurrNet.Modules
 
             if (parent)
             {
-                WalkThePath(parent, trs, current.inversedRelativePath);
+                WalkThePath(parent, trs, current.inversedRelativePath, true);
                 instance.SetActive(shouldBeActive);
                 
                 var p = parent.TryGetComponent(out NetworkIdentity parentId) ? parentId : null;
@@ -562,11 +562,11 @@ namespace PurrNet.Modules
             return true;
         }
 
-        public static void WalkThePath(Transform parent, Transform instance, int[] inversedPath)
+        public static void WalkThePath(Transform parent, Transform instance, int[] inversedPath, bool worldPositionStays)
         {
             if (inversedPath == null || inversedPath.Length == 0)
             {
-                instance.SetParent(parent, false);
+                instance.SetParent(parent, worldPositionStays);
                 return;
             }
 
@@ -585,7 +585,7 @@ namespace PurrNet.Modules
                 parent = sibling;
             }
 
-            instance.SetParent(parent, false);
+            instance.SetParent(parent, worldPositionStays);
             
             var targetSiblingIndex = inversedPath[0];
             

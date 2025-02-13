@@ -19,6 +19,11 @@ namespace PurrNet.Transports
         [Tooltip("The path to add to the address.\nEx: '/game' results in ws://localhost:5001/game")]
         [SerializeField] private string _path = "";
         
+        // TODO: Implement timeout
+        /*[Header("Shared Settings")]
+        [Tooltip("The amount of time in seconds before socket is disconnected due to no data being received.")]
+        [SerializeField] private float _timeoutInSeconds = 5f;*/
+        
         [Header("SSL Settings")]
         [SerializeField] private bool _enableSSL;
         [SerializeField] private string _certPath;

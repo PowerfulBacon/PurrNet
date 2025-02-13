@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Text;
 using JetBrains.Annotations;
@@ -8,7 +9,7 @@ using PurrNet.Transports;
 namespace PurrNet.Packing
 {
     [UsedImplicitly]
-    public partial class BitPacker : IDisposable
+    public partial class BitPacker : IDisposable, IBufferWriter<byte>
     {
         private byte[] _buffer;
         private bool _isReading;
@@ -40,6 +41,32 @@ namespace PurrNet.Packing
         public bool isReading => _isReading;
         
         public bool isWriting => !_isReading;
+        
+        public void Advance(int count)
+        {
+            EnsureBitsExist(count * 8);
+            positionInBits += count * 8;
+        }
+        
+        public int AdvanceBits(int bitCount)
+        {
+            EnsureBitsExist(bitCount);
+            var old = positionInBits;
+            positionInBits += bitCount;
+            return old;
+        }
+
+        public Memory<byte> GetMemory(int sizeHint = 0)
+        {
+            EnsureBitsExist(sizeHint * 8);
+            return new Memory<byte>(_buffer, positionInBytes, sizeHint);
+        }
+
+        public Span<byte> GetSpan(int sizeHint = 0)
+        {
+            EnsureBitsExist(sizeHint * 8);
+            return new Span<byte>(_buffer, positionInBytes, sizeHint);
+        }
         
         public BitPacker(int initialSize = 1024)
         {
@@ -105,6 +132,45 @@ namespace PurrNet.Packing
                     throw new IndexOutOfRangeException("Not enough bits in the buffer. | " + targetPos + " > " + bufferBitSize);
                 Array.Resize(ref _buffer, _buffer.Length * 2);
             }
+        }
+        
+        private void EnsureBitsExist(int positionInBits, int bits)
+        {
+            int targetPos = positionInBits + bits;
+            var bufferBitSize = _buffer.Length * 8;
+            
+            if (targetPos > bufferBitSize)
+            {
+                if (_isReading)
+                    throw new IndexOutOfRangeException("Not enough bits in the buffer. | " + targetPos + " > " + bufferBitSize);
+                Array.Resize(ref _buffer, _buffer.Length * 2);
+            }
+        }
+        
+        [UsedByIL]
+        public bool HandleNullScenarios<T>(T oldValue, T newValue, ref bool areEqual) where T : class
+        {
+            if (oldValue == null)
+            {
+                if (newValue == null)
+                {
+                    areEqual = true;
+                    return false;
+                }
+
+                areEqual = false;
+                Packer<T>.Write(this, newValue);
+                return false;
+            }
+
+            if (newValue == null)
+            {
+                areEqual = false;
+                Packer<T>.Write(this, null);
+                return false;
+            }
+
+            return true;
         }
 
         [UsedByIL]
@@ -321,6 +387,37 @@ namespace PurrNet.Packing
         public char ReadChar()
         {
             return (char)ReadBits(8);
+        }
+        
+        public void WriteAt(int positionInBits, bool data)
+        {
+            WriteBitsAt(positionInBits, data ? 1UL : 0UL, 1);
+        }
+
+        public void WriteBitsAt(int positionInBits, ulong data, byte bits)
+        {
+            EnsureBitsExist(positionInBits, bits);
+            
+            if (bits > 64)
+                throw new ArgumentOutOfRangeException(nameof(bits), "Cannot write more than 64 bits at a time.");
+            
+            int bitsLeft = bits;
+
+            while (bitsLeft > 0)
+            {
+                int bytePos = positionInBits / 8;
+                int bitOffset = positionInBits % 8;
+                int bitsToWrite = Math.Min(bitsLeft, 8 - bitOffset);
+
+                byte mask = (byte)((1 << bitsToWrite) - 1);
+                byte value = (byte)((data >> (bits - bitsLeft)) & mask);
+
+                _buffer[bytePos] &= (byte)~(mask << bitOffset); // Clear the bits to be written
+                _buffer[bytePos] |= (byte)(value << bitOffset); // Set the bits
+
+                bitsLeft -= bitsToWrite;
+                positionInBits += bitsToWrite;
+            }
         }
     }
 }
