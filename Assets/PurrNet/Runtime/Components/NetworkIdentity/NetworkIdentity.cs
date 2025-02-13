@@ -758,7 +758,7 @@ namespace PurrNet
             }
         }
 
-        public void Spawn(NetworkManager manager = null)
+        internal void Spawn(NetworkManager manager = null)
         {
             if (isSpawned)
                 return;
@@ -785,10 +785,10 @@ namespace PurrNet
         /// <summary>
         /// Spawn any child objects of this object.
         /// </summary>
-        /// <param name="prefab">Prefab used to spawn the object</param>
         /// <param name="go">GameObject to spawn</param>
+        /// <param name="prefab">Prefab used to spawn the object</param>
         /// <param name="manager">Optional NetworkManager to use, will use NetworkManager.main if not provided</param>
-        public static void Spawn(GameObject prefab, GameObject go, NetworkManager manager = null)
+        public static void Spawn(GameObject go, GameObject prefab, NetworkManager manager = null)
         {
             if (!go)
                 return;
