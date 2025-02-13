@@ -846,7 +846,8 @@ namespace PurrNet
         {
             if (!networkManager)
             {
-                PurrLogger.LogError("Trying to give ownership to " + player + " but identity isn't spawned.", this);
+                if (!silent)
+                    PurrLogger.LogError("Trying to give ownership to " + player + " but identity isn't spawned.", this);
                 return;
             }
             
@@ -854,7 +855,7 @@ namespace PurrNet
             {
                 module.GiveOwnership(this, player, silent: silent);
             }
-            else PurrLogger.LogError("Failed to get ownership module.", this);
+            else if (!silent) PurrLogger.LogError("Failed to get ownership module.", this);
         }
         
         public void RemoveOwnership()
