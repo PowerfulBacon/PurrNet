@@ -291,10 +291,16 @@ namespace PurrNet.Modules
             {
                 var nt = identity.GetComponent<NetworkTransform>();
                 if (nt) nt.StartIgnoringParentChanges();
-                HierarchyPool.WalkThePath(parent.transform, idTrs, path);
+                HierarchyPool.WalkThePath(parent.transform, idTrs, path, true);
                 if (nt) nt.StopIgnoringParentChanges();
             }
-            else idTrs.SetParent(null, true);
+            else
+            {
+                var nt = identity.GetComponent<NetworkTransform>();
+                if (nt) nt.StartIgnoringParentChanges();
+                idTrs.SetParent(null, true);
+                if (nt) nt.StopIgnoringParentChanges();
+            }
             
             if (parent)
                 parent.AddDirectChild(first);
@@ -311,6 +317,17 @@ namespace PurrNet.Modules
         
         internal void OnParentChanged(NetworkIdentity identity, Transform parent)
         {
+            if (!_asServer)
+            {
+                if (!_playersManager.localPlayerId.HasValue)
+                    return;
+                
+                bool hasAuthority = identity.HasChangeParentAuthority(_playersManager.localPlayerId.Value, _asServer);
+                
+                if (!hasAuthority)
+                    return;
+            }
+
             var closestNid = ClosestParent(parent);
             var oldParent = identity.parent;
             

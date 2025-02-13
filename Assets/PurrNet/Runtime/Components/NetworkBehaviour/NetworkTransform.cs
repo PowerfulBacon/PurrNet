@@ -333,6 +333,9 @@ namespace PurrNet
             if (!isSpawned)
                 return;
             
+            var data = GetCurrentTransformData();
+            TeleportLocalToData(data);
+            
             if (_isIgnoringParentChanges)
                 return;
             
@@ -376,6 +379,18 @@ namespace PurrNet
         public void StopIgnoringParentChanges()
         {
             _isIgnoringParentChanges = false;
+        }
+        
+        private void TeleportLocalToData(NetworkTransformData data)
+        {
+            if (_syncPosition == SyncMode.Local)
+                _position.Teleport(data.position);
+            
+            if (_syncRotation == SyncMode.Local)
+                _rotation.Teleport(data.rotation);
+            
+            if (syncScale)
+                _scale.Teleport(data.scale);
         }
         
         private void TeleportToData(NetworkTransformData data)

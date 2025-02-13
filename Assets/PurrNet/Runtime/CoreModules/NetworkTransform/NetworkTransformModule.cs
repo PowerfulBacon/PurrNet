@@ -131,7 +131,7 @@ namespace PurrNet.Modules
                 using var packer = BitPackerPool.Get();
 
                 PrepareDeltaState(packer, PlayerID.Server);
-                
+
                 if (packer.positionInBits != 0)
                     _broadcaster.SendToServer(new NetworkTransformDelta(packer));
             }
