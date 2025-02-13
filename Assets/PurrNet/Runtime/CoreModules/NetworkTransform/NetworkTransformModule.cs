@@ -53,20 +53,34 @@ namespace PurrNet.Modules
 
             if (asServer)
             {
-                for (var i = 0; i < ntCount; i++)
+                try
                 {
-                    var nt = _networkTransforms[i];
-                    if (nt.IsControlling(player, false))
-                        nt.DeltaRead(packet);
+                    for (var i = 0; i < ntCount; i++)
+                    {
+                        var nt = _networkTransforms[i];
+                        if (nt.IsControlling(player, false))
+                            nt.DeltaRead(packet);
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    PurrLogger.LogError($"Error while reading delta for player {player}: {e}");
                 }
             }
             else
             {
-                for (var i = 0; i < ntCount; i++)
+                try
                 {
-                    var nt = _networkTransforms[i];
-                    if (!nt.IsControlling(nt.localPlayerForced, false))
-                        nt.DeltaRead(packet);
+                    for (var i = 0; i < ntCount; i++)
+                    {
+                        var nt = _networkTransforms[i];
+                        if (!nt.IsControlling(nt.localPlayerForced, false))
+                            nt.DeltaRead(packet);
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    PurrLogger.LogError($"Error while reading delta from server: {e}");
                 }
             }
         }
