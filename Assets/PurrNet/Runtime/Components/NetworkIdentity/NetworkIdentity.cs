@@ -754,7 +754,7 @@ namespace PurrNet
             if (manager.TryGetModule(manager.isServer, out HierarchyFactory module) && 
                 module.TryGetHierarchy(gameObject.scene, out var hierarchy))
             {
-                hierarchy.Spawn(gameObject, prefab);
+                hierarchy.OnGameObjectCreated(gameObject, prefab);
             }
         }
 

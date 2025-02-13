@@ -629,7 +629,7 @@ namespace PurrNet.Modules
             _toCompleteNextFrame.Add(spawnId);
         }
 
-        private void OnGameObjectCreated(GameObject obj, GameObject prefab)
+        public void OnGameObjectCreated(GameObject obj, GameObject prefab)
         {
             if (!obj)
                 return;
