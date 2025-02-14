@@ -319,6 +319,27 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &605310879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 605310872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 546481f824f234a47ac513237f837962, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
 --- !u!1 &782978302
 GameObject:
   m_ObjectHideFlags: 0
@@ -791,6 +812,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6085727582062549369, guid: 8d26ea03532006d4db7d29387027d65b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 605310877}
+    - targetCorrespondingSourceObject: {fileID: 6085727582062549369, guid: 8d26ea03532006d4db7d29387027d65b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 605310879}
   m_SourcePrefab: {fileID: 100100000, guid: 8d26ea03532006d4db7d29387027d65b, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
@@ -801,6 +825,6 @@ SceneRoots:
   - {fileID: 782978306}
   - {fileID: 1797705544}
   - {fileID: 270223116}
-  - {fileID: 7682409515188264248}
   - {fileID: 509994469}
   - {fileID: 2096693447}
+  - {fileID: 7682409515188264248}
