@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using PurrNet.Logging;
 using PurrNet.Modules;

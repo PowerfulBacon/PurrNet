@@ -48,9 +48,6 @@ namespace PurrNet
         [Tooltip("If true, the client can send transform data to the server. If false, the client can't send transform data to the server.")]
         [SerializeField, PurrLock] private bool _ownerAuth = true;
         
-        [Tooltip("The interval in ticks to send the transform data. 0 means send every tick.")]
-        [SerializeField, Min(0)] private int _sendIntervalInTicks;
-
         [Tooltip("Will enforce the character controller getting enabled and disabled when attempting to sync the transform - CAUTION - Physics events can/will be called multiple times")] 
         [SerializeField] private bool _characterControllerPatch;
 
@@ -94,15 +91,6 @@ namespace PurrNet
         /// </summary>
         public bool ownerAuth => _ownerAuth;
 
-        /// <summary>
-        /// The interval in ticks to send the transform data. 0 means send every tick, 1 means send every other tick, etc.
-        /// </summary>
-        public int sendIntervalInTicks
-        {
-            get => _sendIntervalInTicks;
-            set => _sendIntervalInTicks = value;
-        }
-        
         private bool _isResettingParent;
 
         Interpolated<Vector3> _position;
@@ -192,7 +180,7 @@ namespace PurrNet
         {
             _trs = transform;
             
-            float sendDelta = (_sendIntervalInTicks + 1) * networkManager.tickModule.tickDelta;
+            float sendDelta = networkManager.tickModule.tickDelta;
 
             if (syncPosition)
             {

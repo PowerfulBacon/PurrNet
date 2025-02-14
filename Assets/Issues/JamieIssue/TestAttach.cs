@@ -1,10 +1,8 @@
 using PurrNet;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
 public class TestAttach : NetworkBehaviour
 {
-    [SerializeField] private Transform _targetParent = null;
     private Rigidbody _rb = null;
 
     private void Awake()
@@ -33,7 +31,10 @@ public class TestAttach : NetworkBehaviour
 
             if (isController)
             {
-                transform.SetParent(_targetParent);
+                PlayerController player = PlayerController.Get(newOwner.Value);
+                Transform rHand = player.transform.Find("AttachPoint");
+
+                transform.SetParent(rHand);
                 transform.localPosition = Vector3.zero;
                 transform.localRotation = Quaternion.identity;
                 transform.localScale = Vector3.one;
