@@ -193,8 +193,8 @@ namespace PurrNet.Transports
         
         public void UnityUpdate(float delta)
         {
-            if (_server.IsRunning) _server.PollEvents();
-            if (_client.IsRunning) _client.PollEvents();
+            /*if (_server.IsRunning) _server.PollEvents();
+            if (_client.IsRunning) _client.PollEvents();*/
         }
 
         public void Connect(string ip, ushort port)

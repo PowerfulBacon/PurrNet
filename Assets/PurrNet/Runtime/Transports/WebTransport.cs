@@ -153,13 +153,14 @@ namespace PurrNet.Transports
         
         public void TickUpdate(float delta)
         {
-            
+            _server.ProcessMessageQueue();
+            _client.ProcessMessageQueue();
         }
 
         public void UnityUpdate(float delta)
         {
-            _server.ProcessMessageQueue();
-            _client.ProcessMessageQueue();
+            /*_server.ProcessMessageQueue();
+            _client.ProcessMessageQueue();*/
         }
 
         public void Listen(ushort port)
