@@ -512,7 +512,7 @@ namespace PurrNet.Modules
 
             if (parent)
             {
-                WalkThePath(parent, trs, current.inversedRelativePath, true);
+                WalkThePath(parent, trs, current.inversedRelativePath, false);
                 instance.SetActive(shouldBeActive);
                 
                 var p = parent.TryGetComponent(out NetworkIdentity parentId) ? parentId : null;
