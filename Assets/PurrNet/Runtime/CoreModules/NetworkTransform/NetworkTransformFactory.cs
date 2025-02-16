@@ -3,7 +3,7 @@ using PurrNet.Logging;
 
 namespace PurrNet.Modules
 {
-    public class NetworkTransformFactory : INetworkModule, IFixedUpdate
+    public class NetworkTransformFactory : INetworkModule, IPostFixedUpdate
     {
         readonly ScenesModule _scenes;
         readonly ScenePlayersModule _scenePlayers;
@@ -74,7 +74,7 @@ namespace PurrNet.Modules
             _modules.Remove(scene);
         }
 
-        public void FixedUpdate()
+        public void PostFixedUpdate()
         {
             for (var i = 0; i < _rawModules.Count; i++)
                 _rawModules[i].FixedUpdate();

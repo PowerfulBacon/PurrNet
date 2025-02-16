@@ -140,11 +140,12 @@ namespace PurrNet
             }
             else
             {
-                _currentData = GetCurrentTransformData();
-                _lastSentDelta = _currentData;
-                
                 if (newOwner == localPlayer && !isServer)
+                {
+                    _currentData = GetCurrentTransformData();
                     SendLatestStateToServer(_currentData);
+                    _lastSentDelta = _currentData;
+                }
             }
         }
 
@@ -409,7 +410,7 @@ namespace PurrNet
         private NetworkTransformData _lastReadData;
         private NetworkTransformData _lastSentDelta;
 
-        public void DeltaWrite(BitPacker packer)
+        public bool DeltaWrite(BitPacker packer)
         {
             int flagPos = packer.AdvanceBits(1);
             bool hasChanged = false;
@@ -427,6 +428,8 @@ namespace PurrNet
             
             if (!hasChanged)
                 packer.SetBitPosition(flagPos + 1);
+            
+            return hasChanged;
         }
         
         public void DeltaRead(BitPacker packet)

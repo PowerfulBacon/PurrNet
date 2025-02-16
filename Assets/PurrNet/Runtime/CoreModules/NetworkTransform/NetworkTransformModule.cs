@@ -92,10 +92,11 @@ namespace PurrNet.Modules
             return PlayerID.Server;
         }
 
-        private void PrepareDeltaState(BitPacker packer, PlayerID player)
+        private bool PrepareDeltaState(BitPacker packer, PlayerID player)
         {
             var localPlayer = GetLocalPlayer();
             int ntCount = _networkTransforms.Count;
+            bool anyWritten = false;
 
             if (player == PlayerID.Server)
             {
@@ -103,7 +104,7 @@ namespace PurrNet.Modules
                 {
                     var nt = _networkTransforms[i];
                     if (nt.IsControlling(localPlayer, false))
-                        nt.DeltaWrite(packer);
+                        anyWritten = nt.DeltaWrite(packer) || anyWritten;
                 }
             }
             else
@@ -112,9 +113,11 @@ namespace PurrNet.Modules
                 {
                     var nt = _networkTransforms[i];
                     if (!nt.IsControlling(player, false) && nt.observers.Contains(player))
-                        nt.DeltaWrite(packer);
+                        anyWritten = nt.DeltaWrite(packer) || anyWritten;
                 }
             }
+            
+            return anyWritten;
         }
         
         public void Register(NetworkTransform networkTransform)
@@ -144,9 +147,7 @@ namespace PurrNet.Modules
             {
                 using var packer = BitPackerPool.Get();
 
-                PrepareDeltaState(packer, PlayerID.Server);
-
-                if (packer.positionInBits != 0)
+                if (PrepareDeltaState(packer, PlayerID.Server))
                     _broadcaster.SendToServer(new NetworkTransformDelta(packer));
             }
             else if (_scenePlayers.TryGetPlayersInScene(_scene, out var players))
@@ -158,13 +159,8 @@ namespace PurrNet.Modules
                     
                     using var packer = BitPackerPool.Get();
                     
-                    PrepareDeltaState(packer, player);
-
-                    if (packer.positionInBits != 0)
-                    {
-                        // PurrLogger.Log($"Wrote {packer.positionInBits} bits for player {player}");
+                    if (PrepareDeltaState(packer, player))
                         _broadcaster.Send(player, new NetworkTransformDelta(packer));
-                    }
                 }
             }
             
