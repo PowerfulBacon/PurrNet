@@ -469,7 +469,11 @@ namespace PurrNet.Modules
                 {
                     nid.SetIdentity(_manager, this, _sceneId, _asServer, isHost);
                     RegisterIdentity(nid, false);
-                    nid.TryAddObserver(player);
+                    if (nid.TryAddObserver(player))
+                    {
+                        onObserverAdded?.Invoke(player, nid);
+                        _triggerLateObserverAdded.Add(new PlayerNid { player = player, nid = nid });
+                    }
                 }
 
                 if (createdNids.Count > 0)
