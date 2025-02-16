@@ -236,11 +236,14 @@ namespace PurrNet
 
         public bool IsController(PlayerID player, bool ownerHasAuthority, bool asServer)
         {
+            if (!ownerHasAuthority)
+                return asServer;
+            
             if (!hasConnectedOwner)
                 return asServer;
             
             if (player == owner)
-                return ownerHasAuthority;
+                return true;
             
             return asServer;
         }
