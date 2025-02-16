@@ -122,8 +122,21 @@ namespace PurrNet.Modules
         
         public void Register(NetworkTransform networkTransform)
         {
-            // TODO: Make sure this order is always the same for all clients
-            _networkTransforms.Add(networkTransform);
+            if (!networkTransform.id.HasValue)
+                return;
+            
+            int insertPos = 0;
+            
+            for (var i = 0; i < _networkTransforms.Count; i++)
+            {
+                if (!_networkTransforms[i].id.HasValue)
+                    break;
+                
+                if (_networkTransforms[i].id.Value.id < networkTransform.id.Value.id)
+                    insertPos = i + 1;
+            }
+            
+            _networkTransforms.Insert(insertPos, networkTransform);
         }
         
         public void Unregister(NetworkTransform networkTransform)
