@@ -206,7 +206,10 @@ namespace PurrNet
 
         protected override void OnObserverAdded(PlayerID player)
         {
-            if (player != owner && player != localPlayer)
+            if (player == localPlayer)
+                return;
+
+            if (!_ownerAuth || player != owner)
                 SendLatestState(player, _currentData);
         }
 
