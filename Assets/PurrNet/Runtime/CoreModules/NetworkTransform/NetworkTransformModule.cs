@@ -147,7 +147,7 @@ namespace PurrNet.Modules
             {
                 using var packer = BitPackerPool.Get();
 
-                if (PrepareDeltaState(packer, PlayerID.Server))
+                if (PrepareDeltaState(packer, PlayerID.Server) && packer.positionInBits > 0)
                     _broadcaster.SendToServer(new NetworkTransformDelta(packer));
             }
             else if (_scenePlayers.TryGetPlayersInScene(_scene, out var players))
@@ -159,7 +159,7 @@ namespace PurrNet.Modules
                     
                     using var packer = BitPackerPool.Get();
                     
-                    if (PrepareDeltaState(packer, player))
+                    if (PrepareDeltaState(packer, player) && packer.positionInBits > 0)
                         _broadcaster.Send(player, new NetworkTransformDelta(packer));
                 }
             }
