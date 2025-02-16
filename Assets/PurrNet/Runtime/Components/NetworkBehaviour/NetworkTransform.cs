@@ -138,14 +138,11 @@ namespace PurrNet
                 if (oldOwner.HasValue && newOwner != oldOwner && oldOwner != localPlayer)
                     SendLatestState(oldOwner.Value, _currentData);
             }
-            else
+            else if (newOwner == localPlayer && !isServer)
             {
-                if (newOwner == localPlayer && !isServer)
-                {
-                    _currentData = GetCurrentTransformData();
-                    SendLatestStateToServer(_currentData);
-                    _lastSentDelta = _currentData;
-                }
+                _currentData = GetCurrentTransformData();
+                SendLatestStateToServer(_currentData);
+                _lastSentDelta = _currentData;
             }
         }
 
