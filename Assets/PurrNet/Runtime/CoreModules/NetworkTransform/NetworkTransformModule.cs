@@ -126,14 +126,18 @@ namespace PurrNet.Modules
                 return;
             
             int insertPos = 0;
-            
+            var b = networkTransform.id.Value;
+
             for (var i = 0; i < _networkTransforms.Count; i++)
             {
                 if (!_networkTransforms[i].id.HasValue)
                     break;
-                
-                if (_networkTransforms[i].id.Value.id < networkTransform.id.Value.id)
+
+                var a = _networkTransforms[i].id.Value;
+                if (a.scope.id < b.scope.id && a.id < b.id)
+                {
                     insertPos = i + 1;
+                }
             }
             
             _networkTransforms.Insert(insertPos, networkTransform);
