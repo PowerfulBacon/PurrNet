@@ -43,6 +43,12 @@ namespace PurrNet
         {
             foreach (var param in _dontSyncParameters)
                 _sontSyncHashes.Add(Animator.StringToHash(param));
+
+            foreach (var parameter in _animator.parameters)
+            {
+                if (_animator.IsParameterControlledByCurve(parameter.nameHash))
+                    _sontSyncHashes.Add(parameter.nameHash);
+            }
         }
 
         void OnEnable()
