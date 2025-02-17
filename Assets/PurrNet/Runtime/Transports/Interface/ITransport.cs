@@ -22,8 +22,8 @@ namespace PurrNet.Transports
     public readonly struct ByteData
     {
         public readonly byte[] data;
-        public readonly PackedInt length;
-        public readonly PackedInt offset;
+        public readonly int length;
+        public readonly int offset;
         
         public ReadOnlySpan<byte> span => new (data, offset, length);
         

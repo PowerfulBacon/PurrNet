@@ -22,7 +22,7 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    public static PlayerController? Get(PlayerID playerID)
+    public static PlayerController Get(PlayerID playerID)
     {
         return Players.GetValueOrDefault(playerID);
     }
