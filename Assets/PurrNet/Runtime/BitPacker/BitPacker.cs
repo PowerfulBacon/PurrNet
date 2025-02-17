@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Text;
 using JetBrains.Annotations;
+using K4os.Compression.LZ4;
 using PurrNet.Modules;
 using PurrNet.Transports;
 
@@ -41,6 +42,22 @@ namespace PurrNet.Packing
         public bool isReading => _isReading;
         
         public bool isWriting => !_isReading;
+
+        /// <summary>
+        /// Pickles the current buffer into the provided BitPacker.
+        /// </summary>
+        public void PickleInto(BitPacker packer, LZ4Level level = LZ4Level.L00_FAST)
+        {
+            LZ4Pickler.Pickle(ToByteData().span, packer, level);
+        }
+        
+        /// <summary>
+        /// Unpickles the provided ByteData into the current BitPacker.
+        /// </summary>
+        public void UnpickleFrom(ByteData data)
+        {
+            LZ4Pickler.Unpickle(data.span, this);
+        }
         
         public void Advance(int count)
         {
