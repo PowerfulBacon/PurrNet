@@ -59,6 +59,25 @@ namespace PurrNet.Packing
             LZ4Pickler.Unpickle(data.span, this);
         }
         
+        /// <summary>
+        /// Unpickles the provided BitPacker into the current BitPacker.
+        /// </summary>
+        public void UnpickleFrom(BitPacker data)
+        {
+            LZ4Pickler.Unpickle(data.ToByteData().span, this);
+        }
+
+        /// <summary>
+        /// Pickles the current buffer into a new BitPacker.
+        /// Don't forget to dispose of the returned BitPacker.
+        /// </summary>
+        public BitPacker Pickle()
+        {
+            var packer = BitPackerPool.Get();
+            PickleInto(packer);
+            return packer;
+        }
+        
         public void Advance(int count)
         {
             EnsureBitsExist(count * 8);
