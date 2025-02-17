@@ -407,6 +407,7 @@ GameObject:
   - component: {fileID: 1262418541}
   - component: {fileID: 1262418543}
   - component: {fileID: 1262418542}
+  - component: {fileID: 1262418544}
   m_Layer: 0
   m_Name: PurrNet
   m_TagString: Untagged
@@ -462,12 +463,28 @@ MonoBehaviour:
   _startClientFlags: 7
   _cookieScope: 1
   _dontDestroyOnLoad: 1
-  _transport: {fileID: 1262418542}
+  _transport: {fileID: 1262418544}
   _networkPrefabs: {fileID: 11400000, guid: d0a8e60d7299d9c47ae4b485ec246587, type: 2}
   _networkRules: {fileID: 11400000, guid: aae356ddbdae8424dace44abaa360dea, type: 2}
   _visibilityRules: {fileID: 11400000, guid: 8f014a5bd8dc68646a2a3c0b18c5bbd8, type: 2}
   _authenticator: {fileID: 0}
   _tickRate: 20
+--- !u!114 &1262418544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1262418540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 332e746c3c3253246aacad4d5559f1fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _masterServer: https://purrbalancer.riten.dev:8080/
+  _roomName: f07658d204874564b384ddf138d7fd7f
+  _region: brazil
+  _host: br.purrlay.riten.dev
 --- !u!1 &1583301168
 GameObject:
   m_ObjectHideFlags: 0

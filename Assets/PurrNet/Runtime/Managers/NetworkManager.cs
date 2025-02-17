@@ -3,6 +3,7 @@ using UnityEditor;
 #endif
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using PurrNet.Authentication;
@@ -1069,6 +1070,8 @@ namespace PurrNet
             _isSubscribedClient = false;
             TriggerUnsubscribeEvents(false);
         }
+
+        private Coroutine _clientCoroutine;
         
         /// <summary>
         /// Starts the client.
@@ -1079,6 +1082,21 @@ namespace PurrNet
             localClientConnection = null;
             if (!_transport)
                 PurrLogger.Throw<InvalidOperationException>("Transport is not set (null).");
+
+            if (_clientCoroutine != null)
+            {
+                StopCoroutine(_clientCoroutine);
+                _clientCoroutine = null;
+            }
+            
+            _clientCoroutine = StartCoroutine(StartClientCoroutine());
+        }
+
+        IEnumerator StartClientCoroutine()
+        {
+            while (serverState is ConnectionState.Connecting)
+                yield return null;
+            
             _transport.StartClient(this);
         }
 
@@ -1164,6 +1182,12 @@ namespace PurrNet
         /// </summary>
         public void StopClient()
         {
+            if (_clientCoroutine != null)
+            {
+                StopCoroutine(_clientCoroutine);
+                _clientCoroutine = null;
+            }
+            
             _transport.StopClient(this);
         }
 

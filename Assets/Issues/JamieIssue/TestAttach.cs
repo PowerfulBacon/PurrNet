@@ -54,6 +54,12 @@ public class TestAttach : NetworkBehaviour
     {
         ServerSetPlayerIDAsOwner(null);
     }
+    
+    [ServerRpc(requireOwnership: false, compressionLevel: CompressionLevel.Best)]
+    private void SendSomeBigChunkOfData(PlayerID? playerID)
+    {
+        Debug.Log("Sent some big chunk of data");
+    }
 
     [ServerRpc(requireOwnership: false)]
     private void ServerSetPlayerIDAsOwner(PlayerID? playerID)
@@ -66,6 +72,5 @@ public class TestAttach : NetworkBehaviour
         {
             GiveOwnership(playerID);
         }
-
     }
 }
