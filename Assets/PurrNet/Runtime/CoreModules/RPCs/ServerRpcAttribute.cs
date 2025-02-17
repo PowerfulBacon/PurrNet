@@ -8,6 +8,7 @@ namespace PurrNet
     {
         None,
         Fast,
+        Balanced,
         Best
     }
     

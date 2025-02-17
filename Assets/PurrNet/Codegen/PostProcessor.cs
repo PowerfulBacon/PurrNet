@@ -305,6 +305,18 @@ namespace PurrNet.Codegen
                 var end = Instruction.Create(OpCodes.Ret);
                 
                 ValidateReceivingRPC(module, isNetworkClass, originalRpcs[i], code, info, packet, asServer, end);
+                
+                // call RPCModule.PostProcessRPC(RPCSignature signature, ref BitPacker packer)
+                var rpcModule = module.GetTypeDefinition<RPCModule>();
+                var postProcessRPC = rpcModule.GetMethod("PostProcessRpc").Import(module);
+                
+                // get packet.data field
+                var dataField = packetType.GetField("data").Import(module);
+                code.Append(Instruction.Create(OpCodes.Ldarga, packet));
+                code.Append(Instruction.Create(OpCodes.Ldfld, dataField));
+                code.Append(Instruction.Create(OpCodes.Ldarg, info));
+                code.Append(Instruction.Create(OpCodes.Ldarga, stream));
+                code.Append(Instruction.Create(OpCodes.Call, postProcessRPC));
 
                 try
                 {
@@ -1218,6 +1230,17 @@ namespace PurrNet.Codegen
             }
 
             code.Append(Instruction.Create(OpCodes.Stloc, rpcDataVariable)); // rpcPacket
+            
+            // Call RPCModule.PreProcessRpc(RPCPacket packet, RPCSignature signature, ref BitPacker packer)
+            var preProcessRpc = rpcType.GetMethod("PreProcessRpc").Import(module);
+            
+            // get rpcDataVariable.data field
+            code.Append(Instruction.Create(OpCodes.Ldloca, rpcDataVariable));
+            code.Append(Instruction.Create(OpCodes.Ldflda, packetType.GetField("data").Import(module)));
+            
+            code.Append(Instruction.Create(OpCodes.Ldloc, rpcSignature)); // stream
+            code.Append(Instruction.Create(OpCodes.Ldloca, streamVariable));
+            code.Append(Instruction.Create(OpCodes.Call, preProcessRpc));
 
             if (!methodRpc.Signature.isStatic)
                 code.Append(Instruction.Create(OpCodes.Ldarg_0)); // this

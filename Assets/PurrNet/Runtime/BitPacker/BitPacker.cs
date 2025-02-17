@@ -71,10 +71,10 @@ namespace PurrNet.Packing
         /// Pickles the current buffer into a new BitPacker.
         /// Don't forget to dispose of the returned BitPacker.
         /// </summary>
-        public BitPacker Pickle()
+        public BitPacker Pickle(LZ4Level level = LZ4Level.L00_FAST)
         {
             var packer = BitPackerPool.Get();
-            PickleInto(packer);
+            PickleInto(packer, level);
             return packer;
         }
         

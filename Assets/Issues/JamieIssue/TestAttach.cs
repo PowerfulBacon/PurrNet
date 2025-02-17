@@ -1,5 +1,6 @@
 using PurrNet;
 using UnityEngine;
+using CompressionLevel = PurrNet.CompressionLevel;
 
 public class TestAttach : NetworkBehaviour
 {
