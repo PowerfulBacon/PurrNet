@@ -483,8 +483,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _masterServer: https://purrbalancer.riten.dev:8080/
   _roomName: f07658d204874564b384ddf138d7fd7f
-  _region: brazil
-  _host: br.purrlay.riten.dev
+  _region: eu-france
+  _host: fr.purrlay.riten.dev
 --- !u!1 &1583301168
 GameObject:
   m_ObjectHideFlags: 0

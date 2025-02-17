@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using PurrNet.Packing;
 
 namespace PurrNet.Transports
 {
@@ -21,8 +22,8 @@ namespace PurrNet.Transports
     public readonly struct ByteData
     {
         public readonly byte[] data;
-        public readonly int length;
-        public readonly int offset;
+        public readonly PackedInt length;
+        public readonly PackedInt offset;
         
         public ReadOnlySpan<byte> span => new (data, offset, length);
         
