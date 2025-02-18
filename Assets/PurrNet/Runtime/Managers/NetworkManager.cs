@@ -829,8 +829,10 @@ namespace PurrNet
 
             var networkTransform =
                 new NetworkTransformFactory(scenesModule, scenePlayers, playersBroadcast, this);
-            
+            var colliderRollback = new ColliderRollbackFactory(tickManager, scenesModule);
+
             modules.AddModule(networkTransform);
+            modules.AddModule(colliderRollback);
             
             RenewSubscriptions(asServer);
         }
@@ -883,6 +885,18 @@ namespace PurrNet
             
             if (_transport) 
                 _transport.transport.UnityUpdate(Time.deltaTime);
+        }
+
+        private void OnDrawGizmos()
+        {
+            bool serverConnected = serverState == ConnectionState.Connected;
+            bool clientConnected = clientState == ConnectionState.Connected;
+
+            if (serverConnected)
+                _serverModules.TriggerOnDrawGizmos();
+            
+            if (clientConnected)
+                _clientModules.TriggerOnDrawGizmos();
         }
 
         private void OnTick()

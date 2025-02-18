@@ -42,6 +42,21 @@ namespace PurrNet
         public event Action<PlayerID> onObserverRemoved;
         
         internal Transform defaultParent { get; private set; }
+
+        public RollbackModule rollbackModule
+        {
+            get
+            {
+                if (!networkManager)
+                    return null;
+                
+                if (networkManager.TryGetModule<ColliderRollbackFactory>(isServer, out var factory) &&
+                    factory.TryGetModule(sceneId, out var module))
+                    return module;
+                
+                return null;
+            }
+        }
         
         public int[] invertedPathToNearestParent
         {
