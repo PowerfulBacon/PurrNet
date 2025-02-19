@@ -131,7 +131,7 @@ namespace PurrNet.Modules
                    !filter.IsFilteringLayerMask(col.gameObject);
         }
 
-        private bool RayIntersectsBounds2D(Ray2D ray, Bounds bounds)
+        private static bool RayIntersectsBounds2D(Ray2D ray, Bounds bounds)
         {
             Vector2 min = bounds.min;
             Vector2 max = bounds.max;
