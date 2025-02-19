@@ -234,7 +234,7 @@ namespace PurrNet
 
         private void HandlePingCheck()
         {
-            if (_lastPingSendTick + _tickManager.TimeToTick(checkInterval) > _tickManager.tick)
+            if (_lastPingSendTick + _tickManager.TimeToTick(checkInterval) > _tickManager.localTick)
                 return;
             
             _pingHistory.Enqueue(Time.time);
@@ -244,7 +244,7 @@ namespace PurrNet
         private void SendPingCheck()
         {
             _playersClientBroadcaster.SendToServer(new PingMessage(), Channel.ReliableUnordered);
-            _lastPingSendTick = _tickManager.tick;
+            _lastPingSendTick = _tickManager.localTick;
         }
 
         private void ReceivePing(PlayerID sender, PingMessage msg, bool asServer)
@@ -269,10 +269,10 @@ namespace PurrNet
             if (_receivedPacketTimes.Count > 0 && _receivedPacketTimes[0] < Time.time - 1)
                 _receivedPacketTimes.RemoveAt(0);
 
-            if (_lastPacketSendTick + _tickManager.TimeToTick(1f / _packetsToSendPerSec) > _tickManager.tick)
+            if (_lastPacketSendTick + _tickManager.TimeToTick(1f / _packetsToSendPerSec) > _tickManager.localTick)
                 return;
             
-            _lastPacketSendTick = _tickManager.tick;
+            _lastPacketSendTick = _tickManager.localTick;
             _playersClientBroadcaster.SendToServer(new PacketMessage(), Channel.Unreliable);
         }
 
@@ -285,7 +285,7 @@ namespace PurrNet
             }
             
             packetLoss = 100 - Mathf.FloorToInt((_receivedPacketTimes.Count / (float)_packetsToSendPerSec) * 100);
-            if (_tickManager.tick < 10 * _tickManager.tickRate || packetLoss < 0)
+            if (_tickManager.localTick < 10 * _tickManager.tickRate || packetLoss < 0)
                 packetLoss = 0;
             
             _receivedPacketTimes.Add(Time.time);

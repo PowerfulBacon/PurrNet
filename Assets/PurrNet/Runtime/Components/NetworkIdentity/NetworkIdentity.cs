@@ -58,6 +58,8 @@ namespace PurrNet
             }
         }
         
+        public double rollbackTick => networkManager ? networkManager.tickModule.rollbackTick : 0;
+        
         public int[] invertedPathToNearestParent
         {
             get => _invertedPathToNearestParent;

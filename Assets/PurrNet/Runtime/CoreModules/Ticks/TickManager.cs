@@ -9,7 +9,7 @@ namespace PurrNet.Modules
         /// <summary>
         /// Tracks local ticks starting from client connection to the server for synchronization.
         /// </summary>
-        public uint tick { get; private set; }
+        public uint localTick { get; private set; }
         
         /// <summary>
         /// Tracks the ticks aligned with the servers ticks for synchronization.
@@ -19,7 +19,7 @@ namespace PurrNet.Modules
             get
             {
                 if(_networkManager.isServer)
-                    return tick;
+                    return localTick;
                 return _syncedTick;
             }
             private set => _syncedTick = value;
@@ -34,17 +34,28 @@ namespace PurrNet.Modules
         /// Uses floating point values for ticks to allow fractional updates, allowing to get precise tick timing within update
         /// </summary>
         public double floatingPoint { get; private set; }
+        
+        public double syncedPreciseTick => syncedTick + floatingPoint;
+
+        public double rollbackTick
+        {
+            get
+            {
+                var halfRttInTicks = TimeToPreciseTick(rtt) / 2;
+                return syncedPreciseTick - halfRttInTicks;
+            }
+        }
 
         /// <summary>
         /// Gives the exact step of the tick, including the floating point.
         /// </summary>
-        public double preciseTick
+        public double localPreciseTick
         {
-            get => tick + floatingPoint;
+            get => localTick + floatingPoint;
             private set
             {
                 if (value <= 0) throw new ArgumentOutOfRangeException(nameof(value));
-                preciseTick = value;
+                localPreciseTick = value;
             }
         }
         
@@ -106,7 +117,7 @@ namespace PurrNet.Modules
             while (_lastTickTime + tickDelta <= Time.unscaledTime && ticksHandled < MaxTickPerFrame)
             {
                 _lastTickTime += tickDelta;
-                tick++;
+                localTick++;
                 syncedTick++;
                 floatingPoint = 0;
                 
@@ -155,6 +166,15 @@ namespace PurrNet.Modules
         {
             return time * tickRate;
         }
+        
+        /// <summary>
+        /// Converts the input float time to precise ticks (double)
+        /// </summary>
+        /// <param name="time">And amount of time to convert</param>
+        public double TimeToPreciseTick(double time)
+        {
+            return time * tickRate;
+        }
 
         private async void HandleTickSync()
         {
@@ -177,7 +197,7 @@ namespace PurrNet.Modules
             [ServerRpc(requireOwnership: false)]
             public static Task<uint> RequestServerTick(RPCInfo info = default)
             {
-                return Task.FromResult(info.manager.tickModule.tick);
+                return Task.FromResult(info.manager.tickModule.localTick);
             }
         }
     }

@@ -61,6 +61,42 @@ namespace PurrNet.Modules
             
             return hitCount;
         }
+        
+        public bool TryGetColliderState(double preciseTick, Collider collider, out Collider3DState state)
+        {
+            if (_collider3DStates.TryGetValue(collider, out var history))
+            {
+                uint tick = (uint)preciseTick;
+                uint tickNext = tick + 1;
+                float tickFraction = (float)(preciseTick - tick);
+
+                bool hasStateA = history.TryGet(tick, out var stateA);
+                bool hasStateB = history.TryGet(tickNext, out var stateB);
+                
+                switch (hasStateA)
+                {
+                    case true when hasStateB:
+                        stateA = stateA.Interpolate(stateB, tickFraction);
+                        break;
+                    case false when hasStateB:
+                        stateA = stateB;
+                        break;
+                    case false:
+                    {
+                        state = default;
+                        return false;
+                    }
+                    case true:
+                        break;
+                }
+                
+                state = stateA;
+                return true;
+            }
+            
+            state = default;
+            return false;
+        }
 
         /// <summary>
         /// Casts a ray, from point origin, in direction direction, of length maxDistance, against all colliders in the scene.
@@ -204,7 +240,7 @@ namespace PurrNet.Modules
                     continue;
                 }
                 
-                history.Write(_tickManager.tick, new Collider3DState(col));
+                history.Write(_tickManager.localTick, new Collider3DState(col));
             }
             
             for (var i = 0; i < _colliders2D.Count; i++)
@@ -220,7 +256,7 @@ namespace PurrNet.Modules
                     continue;
                 }
                 
-                history.Write(_tickManager.tick, new Collider2DState(col));
+                history.Write(_tickManager.localTick, new Collider2DState(col));
             }
         }
 

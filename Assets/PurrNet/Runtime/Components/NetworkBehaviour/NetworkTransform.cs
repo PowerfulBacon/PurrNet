@@ -55,7 +55,21 @@ namespace PurrNet
         /// Whether to sync the parent of the transform. Only works if the parent is a NetworkIdentiy.
         /// </summary>
         public bool syncParent => _syncParent;
-        
+
+        public int ticksBehind
+        {
+            get
+            {
+                if (syncPosition)
+                    return _position.bufferSize;
+                if (syncRotation)
+                    return _rotation.bufferSize;
+                if (syncScale)
+                    return _scale.bufferSize;
+                return 0;
+            }
+        }
+
         /// <summary>
         /// Whether to sync the position of the transform.
         /// </summary>
