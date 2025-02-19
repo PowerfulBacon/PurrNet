@@ -16,10 +16,7 @@ namespace PurrNet.Modules
         private readonly List<Collider2D> _colliders2D = new ();
         
         readonly Dictionary<Collider, SimpleHistory<Collider3DState>> _collider3DStates = new ();
-        readonly Dictionary<Collider, NetworkTransform> _collider3DParent = new ();
-        
         readonly Dictionary<Collider2D, SimpleHistory<Collider2DState>> _collider2DStates = new ();
-        readonly Dictionary<Collider2D, NetworkTransform> _collider2DParent = new ();
 
         public RollbackModule(TickManager tick, Scene scene)
         {
@@ -158,17 +155,9 @@ namespace PurrNet.Modules
                 
                 if (!_collider3DStates.TryGetValue(col, out var history))
                     continue;
-                
-                uint colTick = tick;
-                
-                if (_collider3DParent.TryGetValue(col, out var parent) && parent)
-                {
-                    if (colTick >= parent.ticksBehind)
-                        colTick = (uint)(colTick - parent.ticksBehind);
-                }
 
-                bool hasStateA = history.TryGet(colTick, out var stateA);
-                bool hasStateB = history.TryGet(colTick + 1, out var stateB);
+                bool hasStateA = history.TryGet(tick, out var stateA);
+                bool hasStateB = history.TryGet(tick + 1, out var stateB);
 
                 switch (hasStateA)
                 {
@@ -287,18 +276,6 @@ namespace PurrNet.Modules
                     
                     _trackedColliders.Add(collider);
                     _collider3DStates.Add(collider, new SimpleHistory<Collider3DState>(maxEntries));
-
-                    if (component.TryGetComponent<NetworkTransform>(out var sameLevel))
-                    {
-                        _collider3DParent.Add(collider, sameLevel);
-                    }
-                    else
-                    {
-                        var parent = component.GetComponentInParent<NetworkTransform>(true);
-                        if (parent)
-                            _collider3DParent.Add(collider, parent);
-                    }
-
                     _colliders3D.Add(collider);
                 }
             }
@@ -313,18 +290,6 @@ namespace PurrNet.Modules
                     
                     _trackedColliders.Add(collider);
                     _collider2DStates.Add(collider, new SimpleHistory<Collider2DState>(maxEntries));
-                    
-                    if (component.TryGetComponent<NetworkTransform>(out var sameLevel))
-                    {
-                        _collider2DParent.Add(collider, sameLevel);
-                    }
-                    else
-                    {
-                        var parent = component.GetComponentInParent<NetworkTransform>(true);
-                        if (parent)
-                            _collider2DParent.Add(collider, parent);
-                    }
-
                     _colliders2D.Add(collider);
                 }
             }
@@ -345,7 +310,6 @@ namespace PurrNet.Modules
                     
                     _trackedColliders.Remove(collider);
                     _collider3DStates.Remove(collider);
-                    _collider3DParent.Remove(collider);
                     _colliders3D.Remove(collider);
                 }
             }
@@ -360,7 +324,6 @@ namespace PurrNet.Modules
                     
                     _trackedColliders.Remove(collider);
                     _collider2DStates.Remove(collider);
-                    _collider2DParent.Remove(collider);
                     _colliders2D.Remove(collider);
                 }
             }
