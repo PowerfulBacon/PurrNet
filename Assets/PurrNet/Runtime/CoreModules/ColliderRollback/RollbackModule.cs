@@ -57,7 +57,7 @@ namespace PurrNet.Modules
             hitCount = FilterColliders(hitCount, raycastHits);
             
             // handle raycast hits manually
-            hitCount = DoManualRaycasts(ray, raycastHits, maxDistance, layerMask, colliderCount, hitCount, tick, tickNext, tickFraction);
+            hitCount = DoManualRaycasts(ray, raycastHits, maxDistance, layerMask, colliderCount, hitCount, tick, tickNext, tickFraction, queryTriggers);
             
             return hitCount;
         }
@@ -95,15 +95,22 @@ namespace PurrNet.Modules
         }
 
         private int DoManualRaycasts(Ray ray, RaycastHit[] hits, float maxDistance, int layerMask, int colliderCount,
-            int hitCount, uint tick, uint tickNext, float tickFraction)
+            int hitCount, uint tick, uint tickNext, float tickFraction, QueryTriggerInteraction queryTriggers)
         {
+            if (queryTriggers == QueryTriggerInteraction.UseGlobal)
+                queryTriggers = Physics.queriesHitTriggers ? QueryTriggerInteraction.Collide : QueryTriggerInteraction.Ignore;
+            
             for (var i = 0; i < colliderCount; i++)
             {
                 if (hitCount >= hits.Length)
                     break;
                 
                 var col = _colliders3D[i];
+                
                 if (!col)
+                    continue;
+                
+                if (col.isTrigger && queryTriggers == QueryTriggerInteraction.Ignore)
                     continue;
                 
                 bool isPartOfLayerMask = ((1 << col.gameObject.layer) & layerMask) != 0;
@@ -129,6 +136,9 @@ namespace PurrNet.Modules
                     case true:
                         break;
                 }
+                
+                if (!stateA.enabled)
+                    continue;
                 
                 var trs = col.transform;
 
