@@ -8,7 +8,7 @@ namespace PurrNet
     {
         [Tooltip("How long to store the collider state for rollback in seconds.\n" +
                  "This should be long enough to account for ping and jitter.")]
-        [SerializeField, PurrLock] float _storeHistoryInSeconds = 2f;
+        [SerializeField, PurrLock] float _storeHistoryInSeconds = 5f;
         [SerializeField, PurrLock] Collider[] _colliders3D;
         [SerializeField, PurrLock] Collider2D[] _colliders2D;
 
