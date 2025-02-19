@@ -170,7 +170,7 @@ namespace PurrNet.Modules
             return tmax >= tmin && tmax >= 0;
         }
 
-        private Bounds TransformBounds(Bounds bounds, Matrix4x4 matrix)
+        private static Bounds TransformBounds(Bounds bounds, Matrix4x4 matrix)
         {
             var center = matrix.MultiplyPoint3x4(bounds.center);
             var extents = bounds.extents;
