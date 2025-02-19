@@ -60,8 +60,7 @@ namespace PurrNet.Modules
             hit = default;
             return false;
         }
-        
-                
+
         private int DoManualRaycasts(Ray ray, RaycastHit[] hits, float maxDistance, int layerMask, int colliderCount,
             int hitCount, double preciseTick, QueryTriggerInteraction queryTriggers)
         {

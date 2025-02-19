@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using PurrNet.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -8,6 +9,7 @@ namespace PurrNet.Modules
     public partial class RollbackModule : INetworkModule
     {
         PhysicsScene _physicsScene;
+        PhysicsScene2D _physicsScene2D;
 
         readonly TickManager _tickManager;
         readonly HashSet<Component> _trackedColliders = new ();
@@ -22,12 +24,17 @@ namespace PurrNet.Modules
         {
             _tickManager = tick;
             _physicsScene = scene.GetPhysicsScene();
+            _physicsScene2D = scene.GetPhysicsScene2D();
         }
         
         public void Enable(bool asServer) { }
 
         public void Disable(bool asServer) { }
-        
+
+        /// <summary>
+        /// Tries to get the state of a collider at a precise tick in the past.
+        /// </summary>
+        [UsedImplicitly]
         public bool TryGetColliderState(double preciseTick, Collider2D collider, out Collider2DState state)
         {
             if (_collider2DStates.TryGetValue(collider, out var history))
@@ -64,6 +71,10 @@ namespace PurrNet.Modules
             return false;
         }
         
+        /// <summary>
+        /// Tries to get the state of a collider at a precise tick in the past.
+        /// </summary>
+        [UsedImplicitly]
         public bool TryGetColliderState(double preciseTick, Collider collider, out Collider3DState state)
         {
             if (_collider3DStates.TryGetValue(collider, out var history))
