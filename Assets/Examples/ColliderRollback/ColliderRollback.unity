@@ -271,6 +271,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _storeHistoryInSeconds: 5
+  _autoAddAllChildren: 1
   _colliders3D:
   - {fileID: 515781172}
   _colliders2D: []
@@ -577,8 +578,6 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   _camera: {fileID: 1595659340}
-  _target: {fileID: 515781172}
-  _targetTransform: {fileID: 515781176}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

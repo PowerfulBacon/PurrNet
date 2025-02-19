@@ -4,7 +4,6 @@ using UnityEngine;
 public class ShootTargetTests : NetworkBehaviour
 {
     [SerializeField] private Camera _camera;
-    [SerializeField] private NetworkTransform _targetTransform;
     
     private void Update()
     {
@@ -15,7 +14,7 @@ public class ShootTargetTests : NetworkBehaviour
             if (Physics.Raycast(ray, out var hit))
                 Debug.DrawLine(hit.point, hit.point + hit.normal, Color.red, 5f);
             
-            Shoot(rollbackTick - _targetTransform.ticksBehind, ray);
+            Shoot(rollbackTick, ray);
         }
     }
 
