@@ -44,6 +44,25 @@ namespace PurrNet.Packing
         }
         
         [UsedByIL]
+        public static void Write(this BitPacker packer, Ray value)
+        {
+            Packer<Vector3>.Write(packer, value.origin);
+            Packer<Vector3>.Write(packer, value.direction);
+        }
+        
+        [UsedByIL]
+        public static void Read(this BitPacker packer, ref Ray value)
+        {
+            Vector3 origin = default;
+            Vector3 direction = default;
+            
+            Packer<Vector3>.Read(packer, ref origin);
+            Packer<Vector3>.Read(packer, ref direction);
+            
+            value = new Ray(origin, direction);
+        }
+        
+        [UsedByIL]
         public static void Write(this BitPacker packer, Vector3 value)
         {
             packer.Write(value.x);

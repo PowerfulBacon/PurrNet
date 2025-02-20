@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using PurrNet.Logging;
 using PurrNet.Packing;
 using PurrNet.Transports;
 
@@ -7,10 +6,12 @@ namespace PurrNet.Modules
 {
     public struct NetworkTransformDelta : IPackedAuto
     {
+        public SceneID scene;
         public readonly ByteData packet;
         
-        public NetworkTransformDelta(BitPacker packer)
+        public NetworkTransformDelta(SceneID context, BitPacker packer)
         {
+            scene = context;
             packet = packer.ToByteData();
         }
     }
@@ -45,6 +46,9 @@ namespace PurrNet.Modules
 
         private void OnNetworkTransformDelta(PlayerID player, NetworkTransformDelta data, bool asServer)
         {
+            if (data.scene != _scene)
+                return;
+            
             using var packet = BitPackerPool.Get(data.packet);
             
             packet.ResetPositionAndMode(true);
@@ -53,34 +57,20 @@ namespace PurrNet.Modules
 
             if (asServer)
             {
-                try
+                for (var i = 0; i < ntCount; i++)
                 {
-                    for (var i = 0; i < ntCount; i++)
-                    {
-                        var nt = _networkTransforms[i];
-                        if (nt.IsControlling(player, false))
-                            nt.DeltaRead(packet);
-                    }
-                }
-                catch (System.Exception e)
-                {
-                    PurrLogger.LogError($"Error while reading delta for player {player}: {e}");
+                    var nt = _networkTransforms[i];
+                    if (nt.IsControlling(player, false))
+                        nt.DeltaRead(packet);
                 }
             }
             else
             {
-                try
+                for (var i = 0; i < ntCount; i++)
                 {
-                    for (var i = 0; i < ntCount; i++)
-                    {
-                        var nt = _networkTransforms[i];
-                        if (!nt.IsControlling(nt.localPlayerForced, false))
-                            nt.DeltaRead(packet);
-                    }
-                }
-                catch (System.Exception e)
-                {
-                    PurrLogger.LogError($"Error while reading delta from server: {e}");
+                    var nt = _networkTransforms[i];
+                    if (!nt.IsControlling(nt.localPlayerForced, false))
+                        nt.DeltaRead(packet);
                 }
             }
         }
@@ -165,7 +155,7 @@ namespace PurrNet.Modules
                 using var packer = BitPackerPool.Get();
 
                 if (PrepareDeltaState(packer, PlayerID.Server) && packer.positionInBits > 0)
-                    _broadcaster.SendToServer(new NetworkTransformDelta(packer));
+                    _broadcaster.SendToServer(new NetworkTransformDelta(_scene, packer));
             }
             else if (_scenePlayers.TryGetPlayersInScene(_scene, out var players))
             {
@@ -177,7 +167,7 @@ namespace PurrNet.Modules
                     using var packer = BitPackerPool.Get();
                     
                     if (PrepareDeltaState(packer, player) && packer.positionInBits > 0)
-                        _broadcaster.Send(player, new NetworkTransformDelta(packer));
+                        _broadcaster.Send(player, new NetworkTransformDelta(_scene, packer));
                 }
             }
             

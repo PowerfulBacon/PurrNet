@@ -1781,6 +1781,7 @@ MonoBehaviour:
   _serverPort: 5001
   _maxConnections: 100
   _address: 127.0.0.1
+  _timeoutInSeconds: 5
 --- !u!114 &1216416903
 MonoBehaviour:
   m_ObjectHideFlags: 0

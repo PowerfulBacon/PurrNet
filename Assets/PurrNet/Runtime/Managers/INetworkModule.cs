@@ -40,6 +40,11 @@ namespace PurrNet.Modules
         void PostFixedUpdate();
     }
     
+    internal interface IDrawGizmos
+    {
+        void DrawGizmos();
+    }
+    
     internal interface IFixedUpdate
     {
         void FixedUpdate();

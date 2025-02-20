@@ -13,6 +13,8 @@ namespace PurrNet
         private float _timer;
         private float _tickDelta;
         
+        public int bufferSize => _buffer.Count;
+        
         public float tickDelta
         {
             get => _tickDelta;
