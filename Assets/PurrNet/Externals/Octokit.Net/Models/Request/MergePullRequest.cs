@@ -38,7 +38,9 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Title: '{0}'  Message: '{1}', Sha: '{2}' , MergeMethod: '{3}'", CommitTitle, CommitMessage, Sha, MergeMethod.HasValue ? MergeMethod.Value.ToString() : "null");
+                return string.Format(CultureInfo.InvariantCulture,
+                    "Title: '{0}'  Message: '{1}', Sha: '{2}' , MergeMethod: '{3}'", CommitTitle, CommitMessage, Sha,
+                    MergeMethod.HasValue ? MergeMethod.Value.ToString() : "null");
             }
         }
     }
@@ -51,19 +53,16 @@ namespace Octokit
         /// <summary>
         /// Create a merge commit
         /// </summary>
-        [Parameter(Value = "merge")]
-        Merge,
+        [Parameter(Value = "merge")] Merge,
 
         /// <summary>
         /// Squash and merge
         /// </summary>
-        [Parameter(Value = "squash")]
-        Squash,
+        [Parameter(Value = "squash")] Squash,
 
         /// <summary>
         /// Rebase and merge
         /// </summary>
-        [Parameter(Value = "rebase")]
-        Rebase
+        [Parameter(Value = "rebase")] Rebase
     }
 }

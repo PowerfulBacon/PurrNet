@@ -64,7 +64,8 @@ namespace Octokit
         /// <param name="name">The name of the repository.</param>
         /// <param name="runId">The Id of the workflow run.</param>
         /// <param name="workflowRunJobsRequest">Details to filter the request, such as by when completed.</param>
-        Task<WorkflowJobsResponse> List(string owner, string name, long runId, WorkflowRunJobsRequest workflowRunJobsRequest);
+        Task<WorkflowJobsResponse> List(string owner, string name, long runId,
+            WorkflowRunJobsRequest workflowRunJobsRequest);
 
         /// <summary>
         /// Lists jobs for a specific workflow run.
@@ -77,7 +78,8 @@ namespace Octokit
         /// <param name="runId">The Id of the workflow run.</param>
         /// <param name="workflowRunJobsRequest">Details to filter the request, such as by when completed.</param>
         /// <param name="options">Options to change the API response.</param>
-        Task<WorkflowJobsResponse> List(string owner, string name, long runId, WorkflowRunJobsRequest workflowRunJobsRequest, ApiOptions options);
+        Task<WorkflowJobsResponse> List(string owner, string name, long runId,
+            WorkflowRunJobsRequest workflowRunJobsRequest, ApiOptions options);
 
         /// <summary>
         /// Lists jobs for a specific workflow run attempt.

@@ -8,7 +8,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class PunchCardPoint
     {
-        public PunchCardPoint() { }
+        public PunchCardPoint()
+        {
+        }
 
         public PunchCardPoint(IList<int> punchPoint)
         {
@@ -17,6 +19,7 @@ namespace Octokit
             {
                 throw new ArgumentException("Daily punch card must only contain three data points.");
             }
+
             DayOfWeek = (DayOfWeek)punchPoint[0];
             HourOfTheDay = punchPoint[1];
             CommitCount = punchPoint[2];

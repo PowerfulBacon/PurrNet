@@ -11,7 +11,8 @@ namespace Octokit
         {
         }
 
-        public Artifact(long id, string nodeId, string name, int sizeInBytes, string url, string archiveDownloadUrl, bool expired, DateTime createdAt, DateTime expiresAt, DateTime updatedAt, ArtifactWorkflowRun workflowRun)
+        public Artifact(long id, string nodeId, string name, int sizeInBytes, string url, string archiveDownloadUrl,
+            bool expired, DateTime createdAt, DateTime expiresAt, DateTime updatedAt, ArtifactWorkflowRun workflowRun)
         {
             Id = id;
             NodeId = nodeId;

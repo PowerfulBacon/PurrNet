@@ -90,7 +90,8 @@ namespace LiteNetLib
         /// <param name="remoteEndPoint">From address (IP and Port)</param>
         /// <param name="reader">Message data</param>
         /// <param name="messageType">Message type (simple, discovery request or response)</param>
-        void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType);
+        void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader,
+            UnconnectedMessageType messageType);
 
         /// <summary>
         /// Latency information updated
@@ -135,17 +136,29 @@ namespace LiteNetLib
         void OnPeerAddressChanged(NetPeer peer, IPEndPoint previousAddress);
     }
 
-    public class EventBasedNetListener : INetEventListener, IDeliveryEventListener, INtpEventListener, IPeerAddressChangedListener
+    public class EventBasedNetListener : INetEventListener, IDeliveryEventListener, INtpEventListener,
+        IPeerAddressChangedListener
     {
         public delegate void OnPeerConnected(NetPeer peer);
+
         public delegate void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo);
+
         public delegate void OnNetworkError(IPEndPoint endPoint, SocketError socketError);
-        public delegate void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod deliveryMethod);
-        public delegate void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType);
+
+        public delegate void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channel,
+            DeliveryMethod deliveryMethod);
+
+        public delegate void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader,
+            UnconnectedMessageType messageType);
+
         public delegate void OnNetworkLatencyUpdate(NetPeer peer, int latency);
+
         public delegate void OnConnectionRequest(ConnectionRequest request);
+
         public delegate void OnDeliveryEvent(NetPeer peer, object userData);
+
         public delegate void OnNtpResponseEvent(NtpPacket packet);
+
         public delegate void OnPeerAddressChangedEvent(NetPeer peer, IPEndPoint previousAddress);
 
         public event OnPeerConnected PeerConnectedEvent;
@@ -227,13 +240,15 @@ namespace LiteNetLib
                 NetworkErrorEvent(endPoint, socketErrorCode);
         }
 
-        void INetEventListener.OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
+        void INetEventListener.OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber,
+            DeliveryMethod deliveryMethod)
         {
             if (NetworkReceiveEvent != null)
                 NetworkReceiveEvent(peer, reader, channelNumber, deliveryMethod);
         }
 
-        void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
+        void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader,
+            UnconnectedMessageType messageType)
         {
             if (NetworkReceiveUnconnectedEvent != null)
                 NetworkReceiveUnconnectedEvent(remoteEndPoint, reader, messageType);

@@ -9,7 +9,8 @@ namespace Octokit
     public class RepositoryOidcSubjectClaim
     {
         public RepositoryOidcSubjectClaim()
-        { }
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryOidcSubjectClaim"/> class
@@ -39,7 +40,8 @@ namespace Octokit
             get
             {
                 return string.Format(CultureInfo.InvariantCulture,
-                    "RepositoryOidcSubjectClaim: UseDefault: {0} IncludeClaimKeys {1}", this.UseDefault, this.IncludeClaimKeys);
+                    "RepositoryOidcSubjectClaim: UseDefault: {0} IncludeClaimKeys {1}", this.UseDefault,
+                    this.IncludeClaimKeys);
             }
         }
     }

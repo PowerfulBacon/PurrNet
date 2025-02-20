@@ -3,7 +3,6 @@ using System.Globalization;
 
 namespace Octokit
 {
-    
     /// <summary>
     /// Holds information about an API response after adding or removing seats for a Copilot-enabled organization.
     /// </summary>
@@ -19,22 +18,23 @@ namespace Octokit
             SeatsCancelled = seatsCancelled;
             SeatsCreated = seatsCreated;
         }
-        
+
         /// <summary>
         /// The total number of seat assignments removed.
         /// </summary>
-        public long SeatsCancelled { get; private set;  }
+        public long SeatsCancelled { get; private set; }
 
         /// <summary>
         /// The total number of seat assignments created.
         /// </summary>
-        public long SeatsCreated { get; private set;  }
-        
+        public long SeatsCreated { get; private set; }
+
         internal string DebuggerDisplay
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "SeatsCancelled: {0}, SeatsCreated: {1}", SeatsCancelled, SeatsCreated);
+                return string.Format(CultureInfo.InvariantCulture, "SeatsCancelled: {0}, SeatsCreated: {1}",
+                    SeatsCancelled, SeatsCreated);
             }
         }
     }

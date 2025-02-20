@@ -16,7 +16,7 @@ namespace PurrNet.Modules
         readonly int m_maxCount;
 
         readonly int m_limitToCut;
-        
+
         /// <summary>
         /// Access values directly by index
         /// </summary>
@@ -27,8 +27,10 @@ namespace PurrNet.Modules
             {
                 if (index < 0 || index >= m_data.Count)
                 {
-                    throw new System.IndexOutOfRangeException($"Index {index} is out of range. Only from 0 to {m_data.Count - 1} is valid.");
+                    throw new System.IndexOutOfRangeException(
+                        $"Index {index} is out of range. Only from 0 to {m_data.Count - 1} is valid.");
                 }
+
                 return m_data[index].Data;
             }
             set
@@ -96,7 +98,8 @@ namespace PurrNet.Modules
         /// <param name="data">What is the state/data of the tick.</param>
         public void Write(ulong tick, T data)
         {
-            var entry = new Entry {
+            var entry = new Entry
+            {
                 Tick = tick,
                 Data = data
             };
@@ -139,7 +142,7 @@ namespace PurrNet.Modules
             {
                 index += 1;
             }
-            
+
             m_data.RemoveRange(0, index);
         }
 
@@ -154,7 +157,7 @@ namespace PurrNet.Modules
             {
                 index += 1;
             }
-            
+
             m_data.RemoveRange(index, m_data.Count - index);
         }
 
@@ -177,7 +180,7 @@ namespace PurrNet.Modules
 
             return found;
         }
-        
+
         public T ReadOrDefault(ulong tick)
         {
             T result = default;
@@ -189,12 +192,12 @@ namespace PurrNet.Modules
 
             return result;
         }
-        
+
         public bool TryGet(ulong tick, out T result)
         {
             return Read(tick, out result);
         }
-        
+
         public bool TryGetClosest(ulong tick, out T result)
         {
             result = default;
@@ -232,7 +235,7 @@ namespace PurrNet.Modules
             result = this[index];
             return true;
         }
-        
+
         public bool TryGetClosest(ulong tick, out T result, out ulong tickDifference)
         {
             result = default;
@@ -255,7 +258,7 @@ namespace PurrNet.Modules
                 result = this[index];
                 var resultTick = m_data[index].Tick;
                 if (resultTick > tick)
-                     tickDifference = resultTick - tick;
+                    tickDifference = resultTick - tick;
                 else tickDifference = tick - resultTick;
                 return true;
             }
@@ -265,7 +268,7 @@ namespace PurrNet.Modules
                 result = this[index - 1];
                 var resultTick = m_data[index - 1].Tick;
                 if (resultTick > tick)
-                     tickDifference = resultTick - tick;
+                    tickDifference = resultTick - tick;
                 else tickDifference = tick - resultTick;
                 return true;
             }
@@ -278,7 +281,7 @@ namespace PurrNet.Modules
                 result = this[index - 1];
                 var resultTick = m_data[index - 1].Tick;
                 if (resultTick > tick)
-                     tickDifference = resultTick - tick;
+                    tickDifference = resultTick - tick;
                 else tickDifference = tick - resultTick;
                 return true;
             }
@@ -286,7 +289,7 @@ namespace PurrNet.Modules
             result = this[index];
             var resultTick2 = m_data[index].Tick;
             if (resultTick2 > tick)
-                 tickDifference = resultTick2 - tick;
+                tickDifference = resultTick2 - tick;
             else tickDifference = tick - resultTick2;
             return true;
         }
@@ -297,7 +300,7 @@ namespace PurrNet.Modules
         /// <param name="tick">The tick you are looking for.</param>
         /// <param name="result">The index that is either your result or the closest index, this can change when Writing new data.</param>
         /// <returns>Returns if a match was found or not.</returns>
-        public bool Find(ulong tick, out int result)  
+        public bool Find(ulong tick, out int result)
         {
             int min = 0;
             int max = m_data.Count - 1;
@@ -316,7 +319,7 @@ namespace PurrNet.Modules
                 {
                     max = mid - 1;
                 }
-                else  
+                else
                 {
                     min = mid + 1;
                 }
@@ -324,8 +327,8 @@ namespace PurrNet.Modules
 
             result = min;
             return false;
-        }  
-    
+        }
+
         /// <summary>
         /// Throw any cached data at the garbage collector
         /// </summary>

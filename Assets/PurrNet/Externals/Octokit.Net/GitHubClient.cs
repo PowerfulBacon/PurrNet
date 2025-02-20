@@ -13,6 +13,7 @@ namespace Octokit
         /// The base address for the GitHub API
         /// </summary>
         public static readonly Uri GitHubApiUrl = new Uri("https://api.github.com/");
+
         internal static readonly Uri GitHubDotComUrl = new Uri("https://github.com/");
 
         /// <summary>

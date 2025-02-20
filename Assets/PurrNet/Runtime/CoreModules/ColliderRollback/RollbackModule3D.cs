@@ -9,31 +9,33 @@ namespace PurrNet.Modules
         /// <summary>
         /// Casts a ray, from point origin, in direction direction, of length maxDistance, against all colliders in the scene.
         /// </summary>
-        public int Raycast(double preciseTick, Ray ray, RaycastHit[] raycastHits, 
-            float maxDistance = float.PositiveInfinity, 
+        public int Raycast(double preciseTick, Ray ray, RaycastHit[] raycastHits,
+            float maxDistance = float.PositiveInfinity,
             int layerMask = Physics.AllLayers,
             QueryTriggerInteraction queryTriggers = QueryTriggerInteraction.UseGlobal)
         {
             if (!_physicsScene.IsValid())
                 return 0;
-            
-            int hitCount = _physicsScene.Raycast(ray.origin, ray.direction, raycastHits, maxDistance, layerMask, queryTriggers);
+
+            int hitCount = _physicsScene.Raycast(ray.origin, ray.direction, raycastHits, maxDistance, layerMask,
+                queryTriggers);
             int colliderCount = _colliders3D.Count;
-            
+
             // remove any colliders that we are handling manually
             hitCount = FilterColliders(hitCount, raycastHits);
-            
+
             // handle raycast hits manually
-            hitCount = DoManualRaycasts(ray, raycastHits, maxDistance, layerMask, colliderCount, hitCount, preciseTick, queryTriggers);
-            
+            hitCount = DoManualRaycasts(ray, raycastHits, maxDistance, layerMask, colliderCount, hitCount, preciseTick,
+                queryTriggers);
+
             return hitCount;
         }
 
         /// <summary>
         /// Casts a ray, from point origin, in direction direction, of length maxDistance, against all colliders in the scene.
         /// </summary>
-        public bool Raycast(double preciseTick, Ray ray, out RaycastHit hit, 
-            float maxDistance = float.PositiveInfinity, 
+        public bool Raycast(double preciseTick, Ray ray, out RaycastHit hit,
+            float maxDistance = float.PositiveInfinity,
             int layerMask = Physics.AllLayers,
             QueryTriggerInteraction queryTriggers = QueryTriggerInteraction.UseGlobal)
         {
@@ -42,9 +44,9 @@ namespace PurrNet.Modules
                 hit = default;
                 return false;
             }
-            
+
             int hitCount = Raycast(preciseTick, ray, _raycastHits, maxDistance, layerMask, queryTriggers);
-            
+
             // return the closest hit
             if (hitCount > 0)
             {
@@ -54,9 +56,10 @@ namespace PurrNet.Modules
                     if (_raycastHits[i].distance < hit.distance)
                         hit = _raycastHits[i];
                 }
+
                 return true;
             }
-            
+
             hit = default;
             return false;
         }
@@ -65,29 +68,31 @@ namespace PurrNet.Modules
             int hitCount, double preciseTick, QueryTriggerInteraction queryTriggers)
         {
             if (queryTriggers == QueryTriggerInteraction.UseGlobal)
-                queryTriggers = Physics.queriesHitTriggers ? QueryTriggerInteraction.Collide : QueryTriggerInteraction.Ignore;
-            
+                queryTriggers = Physics.queriesHitTriggers
+                    ? QueryTriggerInteraction.Collide
+                    : QueryTriggerInteraction.Ignore;
+
             for (var i = 0; i < colliderCount; i++)
             {
                 if (hitCount >= hits.Length)
                     break;
-                
+
                 var col = _colliders3D[i];
-                
+
                 if (!col)
                     continue;
-                
+
                 if (col.isTrigger && queryTriggers == QueryTriggerInteraction.Ignore)
                     continue;
-                
+
                 bool isPartOfLayerMask = ((1 << col.gameObject.layer) & layerMask) != 0;
-                
+
                 if (!isPartOfLayerMask)
                     continue;
-                
+
                 if (!TryGetColliderState(preciseTick, col, out var state))
                     continue;
-                
+
                 var trs = col.transform;
 
                 // Get the transform matrix for the historical position
@@ -96,7 +101,7 @@ namespace PurrNet.Modules
 
                 // Transform world ray to historical local space
                 var rayHistoricalLocal = new Ray(
-                    worldToHistorical.MultiplyPoint3x4(ray.origin), 
+                    worldToHistorical.MultiplyPoint3x4(ray.origin),
                     worldToHistorical.MultiplyVector(ray.direction)
                 );
 
@@ -113,11 +118,11 @@ namespace PurrNet.Modules
                     var currentToLocal = trs.worldToLocalMatrix;
                     hit.point = currentToLocal.MultiplyPoint3x4(hit.point);
                     hit.normal = currentToLocal.MultiplyVector(hit.normal);
-    
+
                     // Transform hit from current local space to historical world space
                     hit.point = historicalWorldMatrix.MultiplyPoint3x4(hit.point);
                     hit.normal = historicalWorldMatrix.MultiplyVector(hit.normal);
-    
+
                     hits[hitCount++] = hit;
                 }
             }

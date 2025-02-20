@@ -9,17 +9,21 @@ namespace PurrNet.Transports
     {
         [Header("Server Settings")]
         [Tooltip("The port which the server will start on, and clients connect.")]
-        [SerializeField] private ushort _serverPort = 5000;
-        [Tooltip("The max amount of client connections allowed.")]
-        [SerializeField] private int _maxConnections = 100;
+        [SerializeField]
+        private ushort _serverPort = 5000;
+
+        [Tooltip("The max amount of client connections allowed.")] [SerializeField]
+        private int _maxConnections = 100;
 
         [Header("Client Settings")]
         [Tooltip("This is the IP the client will use to connect to the server.")]
-        [SerializeField] private string _address = "127.0.0.1";
+        [SerializeField]
+        private string _address = "127.0.0.1";
 
         [Header("Shared Settings")]
         [Tooltip("The amount of time in seconds before socket is disconnected due to no data being received.")]
-        [SerializeField] private float _timeoutInSeconds = 5f;
+        [SerializeField]
+        private float _timeoutInSeconds = 5f;
 
         public event OnConnected onConnected;
         public event OnDisconnected onDisconnected;
@@ -27,28 +31,40 @@ namespace PurrNet.Transports
         public event OnDataSent onDataSent;
         public event OnConnectionState onConnectionState;
 
-        public string address { get => _address; set => _address = value; }
-        
-        public ushort serverPort { get => _serverPort; set => _serverPort = value; }
-        
-        public int maxConnections { get => _maxConnections; set => _maxConnections = value; }
-        
+        public string address
+        {
+            get => _address;
+            set => _address = value;
+        }
+
+        public ushort serverPort
+        {
+            get => _serverPort;
+            set => _serverPort = value;
+        }
+
+        public int maxConnections
+        {
+            get => _maxConnections;
+            set => _maxConnections = value;
+        }
+
         public IReadOnlyList<Connection> connections => _connections;
 
         private EventBasedNetListener _clientListener;
         private EventBasedNetListener _serverListener;
-        
+
         private NetManager _client;
         private NetManager _server;
 
         public ConnectionState clientState { get; private set; } = ConnectionState.Disconnected;
-        
+
         public ConnectionState listenerState { get; private set; } = ConnectionState.Disconnected;
 
         readonly List<Connection> _connections = new List<Connection>();
 
         public override bool isSupported => Application.platform != RuntimePlatform.WebGLPlayer;
-        
+
         public override ITransport transport => this;
 
         private void Awake()
@@ -60,7 +76,7 @@ namespace PurrNet.Transports
         {
             _clientListener = new EventBasedNetListener();
             _serverListener = new EventBasedNetListener();
-            
+
             _client = new NetManager(_clientListener)
             {
                 UnconnectedMessagesEnabled = true,
@@ -69,7 +85,7 @@ namespace PurrNet.Transports
                 EnableStatistics = false,
                 DisconnectTimeout = Mathf.RoundToInt(_timeoutInSeconds * 1000)
             };
-            
+
             _server = new NetManager(_serverListener)
             {
                 UnconnectedMessagesEnabled = true,
@@ -82,7 +98,7 @@ namespace PurrNet.Transports
             _clientListener.PeerConnectedEvent += OnClientConnected;
             _clientListener.PeerDisconnectedEvent += OnClientDisconnected;
             _clientListener.NetworkReceiveEvent += OnClientData;
-            
+
             _serverListener.ConnectionRequestEvent += OnServerConnectionRequest;
             _serverListener.PeerConnectedEvent += OnServerConnected;
             _serverListener.PeerDisconnectedEvent += OnServerDisconnected;
@@ -116,7 +132,7 @@ namespace PurrNet.Transports
         private void OnServerConnectionRequest(ConnectionRequest request)
         {
             if (_server.ConnectedPeersCount < _maxConnections)
-                 request.AcceptIfKey("PurrNet");
+                request.AcceptIfKey("PurrNet");
             else request.Reject();
         }
 
@@ -134,7 +150,7 @@ namespace PurrNet.Transports
         {
             clientState = ConnectionState.Disconnected;
             TriggerConnectionStateEvent(false);
-            onDisconnected?.Invoke(new Connection(peer.Id),DisconnectReason.Timeout, false);
+            onDisconnected?.Invoke(new Connection(peer.Id), DisconnectReason.Timeout, false);
         }
 
         private Connection? _clientToServerConn;
@@ -147,11 +163,11 @@ namespace PurrNet.Transports
             TriggerConnectionStateEvent(false);
             onConnected?.Invoke(conn, false);
         }
-        
+
         private void OnServerDisconnected(NetPeer peer, DisconnectInfo disconnectinfo)
         {
             var conn = new Connection(peer.Id);
-            
+
             for (int i = 0; i < _connections.Count; i++)
             {
                 if (_connections[i] == conn)
@@ -160,7 +176,7 @@ namespace PurrNet.Transports
                     break;
                 }
             }
-            
+
             onDisconnected?.Invoke(conn, DisconnectReason.Timeout, true);
             _clientToServerConn = null;
         }
@@ -177,7 +193,7 @@ namespace PurrNet.Transports
         public void TickUpdate(float delta)
         {
             var dInMs = Mathf.FloorToInt(delta * 1000);
-            
+
             if (_server.IsRunning)
             {
                 _server.ManualUpdate(dInMs);
@@ -190,7 +206,7 @@ namespace PurrNet.Transports
                 _client.PollEvents();
             }
         }
-        
+
         public void UnityUpdate(float delta)
         {
             /*if (_server.IsRunning) _server.PollEvents();
@@ -201,9 +217,9 @@ namespace PurrNet.Transports
         {
             if (clientState == ConnectionState.Connected)
                 return;
-            
+
             clientState = ConnectionState.Connecting;
-            
+
             TriggerConnectionStateEvent(false);
 
             _client.StartInManualMode(0);
@@ -215,7 +231,7 @@ namespace PurrNet.Transports
         {
             if (clientState is not (ConnectionState.Connected or ConnectionState.Connecting))
                 return;
-            
+
             clientState = ConnectionState.Disconnecting;
             TriggerConnectionStateEvent(false);
 
@@ -227,7 +243,7 @@ namespace PurrNet.Transports
 
             _client.DisconnectAll();
             _client.Stop();
-            
+
             clientState = ConnectionState.Disconnected;
             TriggerConnectionStateEvent(false);
         }
@@ -242,7 +258,7 @@ namespace PurrNet.Transports
                 TriggerConnectionStateEvent(true);
 
                 _server.StartInManualMode(port);
-                
+
                 listenerState = ConnectionState.Connected;
                 TriggerConnectionStateEvent(true);
             }
@@ -254,12 +270,12 @@ namespace PurrNet.Transports
             {
                 listenerState = ConnectionState.Disconnecting;
                 TriggerConnectionStateEvent(true);
-                
+
                 _server.Stop();
-                
+
                 listenerState = ConnectionState.Disconnected;
                 TriggerConnectionStateEvent(true);
-                
+
                 _connections.Clear();
             }
         }
@@ -282,21 +298,21 @@ namespace PurrNet.Transports
         {
             if (listenerState is not ConnectionState.Connected)
                 return;
-            
+
             if (!target.isValid)
                 return;
-            
+
             var deliveryMethod = ToDeliveryMethod(method);
             var peer = _server.GetPeerById(target.connectionId);
             peer?.Send(data.data, data.offset, data.length, deliveryMethod);
             RaiseDataSent(target, data, true);
         }
-        
+
         public void SendToServer(ByteData data, Channel method = Channel.Unreliable)
         {
             if (clientState != ConnectionState.Connected)
                 return;
-            
+
             var deliveryMethod = ToDeliveryMethod(method);
             _client.SendToAll(data.data, data.offset, data.length, deliveryMethod);
             RaiseDataSent(default, data, false);
@@ -312,7 +328,7 @@ namespace PurrNet.Transports
         {
             _client.Stop();
             _server.Stop();
-            
+
             listenerState = ConnectionState.Disconnected;
             clientState = ConnectionState.Disconnected;
 
@@ -340,10 +356,10 @@ namespace PurrNet.Transports
                     break;
             }
         }
-        
+
         ConnectionState _prevClientState = ConnectionState.Disconnected;
         ConnectionState _prevServerState = ConnectionState.Disconnected;
-        
+
         private void TriggerConnectionStateEvent(bool asServer)
         {
             if (asServer)

@@ -9,7 +9,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class CommitActivity
     {
-        public CommitActivity() { }
+        public CommitActivity()
+        {
+        }
 
         public CommitActivity(IEnumerable<WeeklyCommitActivity> activity)
         {

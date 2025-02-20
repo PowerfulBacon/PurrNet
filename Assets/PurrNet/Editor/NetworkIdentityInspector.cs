@@ -14,7 +14,7 @@ namespace PurrNet.Editor
     {
         private SerializedProperty _networkRules;
         private SerializedProperty _visitiblityRules;
-        
+
 #if TRI_INSPECTOR_PACKAGE
         protected override void OnEnable()
 #else
@@ -46,12 +46,13 @@ namespace PurrNet.Editor
             bool hasNetworkManagerAsChild = identity && identity.GetComponentInChildren<NetworkManager>();
 
             if (hasNetworkManagerAsChild)
-                EditorGUILayout.HelpBox("NetworkIdentity is a child of a NetworkManager. This is not supported.", MessageType.Error);
-            
+                EditorGUILayout.HelpBox("NetworkIdentity is a child of a NetworkManager. This is not supported.",
+                    MessageType.Error);
+
             base.OnInspectorGUI();
-            
+
             DrawIdentityInspector();
-            
+
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -61,25 +62,25 @@ namespace PurrNet.Editor
 
             var identities = targets.Length;
             var identity = (NetworkIdentity)target;
-            
+
             if (!identity)
             {
                 EditorGUILayout.LabelField("Invalid identity");
                 return;
             }
 
-            
+
             HandleOverrides(identity, identities > 1);
             HandleStatus(identity, identities > 1);
         }
-        
+
         private bool _foldoutVisible;
 
         private void HandleOverrides(NetworkIdentity identity, bool multi)
         {
             if (multi || identity.isSpawned)
                 GUI.enabled = false;
-            
+
             string label = "Override Defaults";
 
             if (!multi)
@@ -120,10 +121,10 @@ namespace PurrNet.Editor
                 EditorGUILayout.PropertyField(_visitiblityRules, new GUIContent("Visibility Override"));
                 EditorGUI.indentLevel--;
             }
-            
+
             EditorGUILayout.EndFoldoutHeaderGroup();
         }
-        
+
         private bool _debuggingVisible;
         private bool _observersVisible;
 
@@ -148,9 +149,12 @@ namespace PurrNet.Editor
                 EditorGUILayout.BeginHorizontal("box", GUILayout.ExpandWidth(false));
                 GUILayout.Label($"ID: {identity.id}", GUILayout.ExpandWidth(false));
                 GUILayout.FlexibleSpace();
-                GUILayout.Label($"Owner ID: {(identity.owner.HasValue ? identity.owner.Value.ToString() : "None")}", GUILayout.ExpandWidth(false));
+                GUILayout.Label($"Owner ID: {(identity.owner.HasValue ? identity.owner.Value.ToString() : "None")}",
+                    GUILayout.ExpandWidth(false));
                 GUILayout.FlexibleSpace();
-                GUILayout.Label($"Local Player: {(identity.localPlayer.HasValue ? identity.localPlayer.Value.ToString() : "None")}", GUILayout.ExpandWidth(false));
+                GUILayout.Label(
+                    $"Local Player: {(identity.localPlayer.HasValue ? identity.localPlayer.Value.ToString() : "None")}",
+                    GUILayout.ExpandWidth(false));
                 EditorGUILayout.EndHorizontal();
             }
             else if (Application.isPlaying)
@@ -159,7 +163,7 @@ namespace PurrNet.Editor
                 EditorGUILayout.LabelField("Not Spawned");
                 EditorGUILayout.EndHorizontal();
             }
-            
+
 #if PURRNET_DEBUG_NETWORK_IDENTITY
             var old2 = GUI.enabled;
             GUI.enabled = false;
@@ -203,7 +207,8 @@ namespace PurrNet.Editor
 
         private void PrintObserversDropdown(NetworkIdentity identity)
         {
-            _observersVisible = EditorGUILayout.BeginFoldoutHeaderGroup(_observersVisible, $"Observers ({identity.observers.Count})");
+            _observersVisible =
+                EditorGUILayout.BeginFoldoutHeaderGroup(_observersVisible, $"Observers ({identity.observers.Count})");
 
             if (_observersVisible)
             {
@@ -214,9 +219,10 @@ namespace PurrNet.Editor
                     EditorGUILayout.LabelField(observer.ToString());
                     EditorGUILayout.EndHorizontal();
                 }
+
                 EditorGUI.indentLevel--;
             }
-            
+
             EditorGUILayout.EndFoldoutHeaderGroup();
         }
     }

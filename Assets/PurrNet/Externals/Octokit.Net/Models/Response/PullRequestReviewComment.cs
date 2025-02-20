@@ -8,14 +8,20 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class PullRequestReviewComment
     {
-        public PullRequestReviewComment() { }
+        public PullRequestReviewComment()
+        {
+        }
 
         public PullRequestReviewComment(long id)
         {
             Id = id;
         }
 
-        public PullRequestReviewComment(string url, long id, string nodeId, string diffHunk, string path, int? position, int? originalPosition, string commitId, string originalCommitId, User user, string body, DateTimeOffset createdAt, DateTimeOffset updatedAt, string htmlUrl, string pullRequestUrl, ReactionSummary reactions, long? inReplyToId, long? pullRequestReviewId, AuthorAssociation authorAssociation)
+        public PullRequestReviewComment(string url, long id, string nodeId, string diffHunk, string path, int? position,
+            int? originalPosition, string commitId, string originalCommitId, User user, string body,
+            DateTimeOffset createdAt, DateTimeOffset updatedAt, string htmlUrl, string pullRequestUrl,
+            ReactionSummary reactions, long? inReplyToId, long? pullRequestReviewId,
+            AuthorAssociation authorAssociation)
         {
             PullRequestReviewId = pullRequestReviewId;
             Url = url;
@@ -135,7 +141,11 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Id: {0}, Path: {1}, User: {2}, Url: {3}", Id, Path, User.DebuggerDisplay, Url); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Id: {0}, Path: {1}, User: {2}, Url: {3}", Id, Path,
+                    User.DebuggerDisplay, Url);
+            }
         }
     }
 
@@ -144,13 +154,11 @@ namespace Octokit
         /// <summary>
         /// Sort by create date (default)
         /// </summary>
-        [Parameter(Value = "created")]
-        Created,
+        [Parameter(Value = "created")] Created,
 
         /// <summary>
         /// Sort by the date of the last update
         /// </summary>
-        [Parameter(Value = "updated")]
-        Updated
+        [Parameter(Value = "updated")] Updated
     }
 }

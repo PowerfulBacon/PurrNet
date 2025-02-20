@@ -35,7 +35,9 @@ namespace Octokit.Internal
         class GitHubSerializerStrategy : PocoJsonSerializerStrategy
         {
             readonly List<string> _membersWhichShouldPublishNull = new List<string>();
-            readonly ConcurrentDictionary<Type, ConcurrentDictionary<object, object>> _cachedEnums = new ConcurrentDictionary<Type, ConcurrentDictionary<object, object>>();
+
+            readonly ConcurrentDictionary<Type, ConcurrentDictionary<object, object>> _cachedEnums =
+                new ConcurrentDictionary<Type, ConcurrentDictionary<object, object>>();
 
             protected override string MapClrMemberToJsonFieldName(MemberInfo member)
             {
@@ -60,7 +62,8 @@ namespace Octokit.Internal
             }
 
             // This is overridden so that null values are omitted from serialized objects.
-            [SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate", Justification = "Need to support .NET 2")]
+            [SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate",
+                Justification = "Need to support .NET 2")]
             protected override bool TrySerializeUnknownTypes(object input, out object output)
             {
                 Ensure.ArgumentNotNull(input, nameof(input));
@@ -92,9 +95,11 @@ namespace Octokit.Internal
                             if (!_membersWhichShouldPublishNull.Contains(key))
                                 continue;
                         }
+
                         jsonObject.Add(getter.Key, value);
                     }
                 }
+
                 output = jsonObject;
                 return true;
             }
@@ -205,7 +210,8 @@ namespace Octokit.Internal
                 return base.DeserializeObject(value, type);
             }
 
-            internal override IDictionary<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>> SetterValueFactory(Type type)
+            internal override IDictionary<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>> SetterValueFactory(
+                Type type)
             {
                 return type.GetPropertiesAndFields()
                     .Where(p => p.CanDeserialize)
@@ -249,6 +255,7 @@ namespace Octokit.Internal
                     case "WatchEvent":
                         return typeof(StarredEventPayload);
                 }
+
                 return typeof(ActivityPayload);
             }
         }

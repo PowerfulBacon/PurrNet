@@ -60,7 +60,8 @@ namespace Octokit
         /// <param name="org">The name of the organization</param>
         /// <param name="properties">The custom properties to create or update</param>
         [ManualRoute("PATCH", "orgs/{org}/properties/schema")]
-        public Task<IReadOnlyList<OrganizationCustomProperty>> CreateOrUpdate(string org, UpsertOrganizationCustomProperties properties)
+        public Task<IReadOnlyList<OrganizationCustomProperty>> CreateOrUpdate(string org,
+            UpsertOrganizationCustomProperties properties)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNull(properties, nameof(properties));
@@ -81,7 +82,8 @@ namespace Octokit
         /// <param name="propertyName">The name of the custom property</param>
         /// <param name="property">The custom property to create or update</param>
         [ManualRoute("PUT", "orgs/{org}/properties/schema/{propertyName}")]
-        public Task<OrganizationCustomProperty> CreateOrUpdate(string org, string propertyName, UpsertOrganizationCustomProperty property)
+        public Task<OrganizationCustomProperty> CreateOrUpdate(string org, string propertyName,
+            UpsertOrganizationCustomProperty property)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNullOrEmptyString(propertyName, nameof(propertyName));

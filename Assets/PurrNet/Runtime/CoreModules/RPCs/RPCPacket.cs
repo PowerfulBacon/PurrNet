@@ -9,7 +9,7 @@ namespace PurrNet
         public ByteData rpcData { get; set; }
         PlayerID senderPlayerId { get; }
     }
-    
+
     public struct RPCPacket : IPackedAuto, IRpc
     {
         public NetworkID networkId;
@@ -17,7 +17,7 @@ namespace PurrNet
         public PlayerID senderId;
         public byte rpcId;
         public ByteData data;
-        
+
         public ByteData rpcData
         {
             get { return data; }
@@ -26,7 +26,7 @@ namespace PurrNet
 
         public PlayerID senderPlayerId => senderId;
     }
-    
+
     public struct ChildRPCPacket : IPackedAuto, IRpc
     {
         public NetworkID networkId;
@@ -35,7 +35,7 @@ namespace PurrNet
         public byte rpcId;
         public byte childId;
         public ByteData data;
-        
+
         public ByteData rpcData
         {
             get { return data; }
@@ -44,14 +44,14 @@ namespace PurrNet
 
         public PlayerID senderPlayerId => senderId;
     }
-    
+
     public struct StaticRPCPacket : IPackedAuto, IRpc
     {
         public uint typeHash;
         public byte rpcId;
         public PlayerID senderId;
         public ByteData data;
-        
+
         public ByteData rpcData
         {
             get { return data; }
@@ -60,7 +60,7 @@ namespace PurrNet
 
         public PlayerID senderPlayerId => senderId;
     }
-    
+
     internal readonly struct RPC_ID : IEquatable<RPC_ID>
     {
         public readonly uint typeHash;
@@ -102,20 +102,20 @@ namespace PurrNet
 
         public override int GetHashCode()
         {
-            return sceneId.GetHashCode() ^ 
-                   networkId.GetHashCode() ^ 
-                   rpcId.GetHashCode() ^ 
-                   typeHash.GetHashCode() ^ 
+            return sceneId.GetHashCode() ^
+                   networkId.GetHashCode() ^
+                   rpcId.GetHashCode() ^
+                   typeHash.GetHashCode() ^
                    childId.GetHashCode();
         }
 
         public bool Equals(RPC_ID other)
         {
-            return typeHash == other.typeHash && 
-                   sceneId.Equals(other.sceneId) && 
-                   networkId.Equals(other.networkId) && 
-                   senderId.Equals(other.senderId) && 
-                   rpcId == other.rpcId && 
+            return typeHash == other.typeHash &&
+                   sceneId.Equals(other.sceneId) &&
+                   networkId.Equals(other.networkId) &&
+                   senderId.Equals(other.senderId) &&
+                   rpcId == other.rpcId &&
                    childId == other.childId;
         }
 

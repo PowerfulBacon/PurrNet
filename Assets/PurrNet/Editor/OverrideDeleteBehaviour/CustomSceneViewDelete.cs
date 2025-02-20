@@ -10,16 +10,16 @@ namespace PurrNet.Editor
         {
             SceneView.duringSceneGui += OnSceneGUI;
         }
-        
+
         private static void OnSceneGUI(SceneView sceneView)
         {
             bool isPlaying = Application.isPlaying;
-            
+
             if (!isPlaying)
                 return;
-            
+
             var currentEvent = Event.current;
-            
+
             switch (currentEvent.type)
             {
                 case EventType.ExecuteCommand when currentEvent.commandName == "Paste":

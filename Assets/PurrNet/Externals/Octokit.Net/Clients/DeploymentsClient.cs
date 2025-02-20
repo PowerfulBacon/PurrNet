@@ -126,7 +126,7 @@ namespace Octokit
             Ensure.ArgumentNotNull(newDeployment, nameof(newDeployment));
 
             return ApiConnection.Post<Deployment>(ApiUrls.Deployments(repositoryId),
-                                                     newDeployment);
+                newDeployment);
         }
 
         /// <summary>

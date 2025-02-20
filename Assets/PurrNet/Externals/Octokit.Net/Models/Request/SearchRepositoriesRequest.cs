@@ -22,6 +22,7 @@ namespace Octokit
         {
             Order = SortDirection.Descending;
         }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SearchRepositoriesRequest"/> class.
         /// </summary>
@@ -52,10 +53,7 @@ namespace Octokit
         /// </summary>
         public IEnumerable<InQualifier> In
         {
-            get
-            {
-                return _inQualifier;
-            }
+            get { return _inQualifier; }
             set
             {
                 if (value != null && value.Any())
@@ -193,7 +191,8 @@ namespace Octokit
 
             if (Archived != null)
             {
-                parameters.Add(string.Format(CultureInfo.InvariantCulture, "archived:{0}", Archived.ToString().ToLower()));
+                parameters.Add(string.Format(CultureInfo.InvariantCulture, "archived:{0}",
+                    Archived.ToString().ToLower()));
             }
 
             if (Topic != null)
@@ -205,15 +204,18 @@ namespace Octokit
             {
                 parameters.Add(string.Format(CultureInfo.InvariantCulture, "topics:{0}", Topics.ToString().ToLower()));
             }
+
             if (License != null)
             {
                 parameters.Add(string.Format(CultureInfo.InvariantCulture, "license:{0}", License.ToParameter()));
             }
+
             if (CustomProperties != null)
             {
                 foreach (var customProperty in CustomProperties)
                 {
-                    parameters.Add(string.Format(CultureInfo.InvariantCulture, "props.{0}:{1}", customProperty.Key, customProperty.Value));
+                    parameters.Add(string.Format(CultureInfo.InvariantCulture, "props.{0}:{1}", customProperty.Key,
+                        customProperty.Value));
                 }
             }
 
@@ -222,10 +224,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Term: {0} Sort: {1}", Term, Sort);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Term: {0} Sort: {1}", Term, Sort); }
         }
     }
 
@@ -236,17 +235,13 @@ namespace Octokit
     /// </summary>
     public enum InQualifier
     {
-        [Parameter(Value = "name")]
-        Name,
+        [Parameter(Value = "name")] Name,
 
-        [Parameter(Value = "description")]
-        Description,
+        [Parameter(Value = "description")] Description,
 
-        [Parameter(Value = "topics")]
-        Topics,
+        [Parameter(Value = "topics")] Topics,
 
-        [Parameter(Value = "readme")]
-        Readme
+        [Parameter(Value = "readme")] Readme
     }
 
     /// <summary>
@@ -260,7 +255,8 @@ namespace Octokit
         /// <summary>
         /// Matches repositories that are <param name="size">size</param> MB exactly
         /// </summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.Int32.ToString")]
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider",
+            MessageId = "System.Int32.ToString")]
         public Range(int size)
         {
             query = size.ToString(CultureInfo.InvariantCulture);
@@ -356,7 +352,8 @@ namespace Octokit
         /// Matches repositories with regards to the <param name="date"/>.
         /// We will use the <param name="op"/> to see what operator will be applied to the date qualifier
         /// </summary>
-        [Obsolete("This ctor does not support the time component or timezone and will be removed in a future release. Please use the DateTimeOffset overload instead")]
+        [Obsolete(
+            "This ctor does not support the time component or timezone and will be removed in a future release. Please use the DateTimeOffset overload instead")]
         public DateRange(DateTime date, SearchQualifierOperator op)
         {
             switch (op)
@@ -379,10 +376,12 @@ namespace Octokit
         /// <summary>
         /// Matches repositories with regards to both the <param name="from"/> and <param name="to"/> dates.
         /// </summary>
-        [Obsolete("This ctor does not support the time component or timezone and will be removed in a future release. Please use the DateTimeOffset overload instead")]
+        [Obsolete(
+            "This ctor does not support the time component or timezone and will be removed in a future release. Please use the DateTimeOffset overload instead")]
         public DateRange(DateTime from, DateTime to)
         {
-            query = $"{from.ToString(DatePattern, CultureInfo.InvariantCulture)}..{to.ToString(DatePattern, CultureInfo.InvariantCulture)}";
+            query =
+                $"{from.ToString(DatePattern, CultureInfo.InvariantCulture)}..{to.ToString(DatePattern, CultureInfo.InvariantCulture)}";
         }
 
         /// <summary>
@@ -390,7 +389,8 @@ namespace Octokit
         /// </summary>
         public DateRange(DateTimeOffset from, DateTimeOffset to)
         {
-            query = EncodeOffset($"{from.ToString(DateTimePattern, CultureInfo.InvariantCulture)}..{to.ToString(DateTimePattern, CultureInfo.InvariantCulture)}");
+            query = EncodeOffset(
+                $"{from.ToString(DateTimePattern, CultureInfo.InvariantCulture)}..{to.ToString(DateTimePattern, CultureInfo.InvariantCulture)}");
         }
 
         /// <summary>
@@ -432,7 +432,8 @@ namespace Octokit
         /// </summary>
         /// <param name="date">date to be used for comparison (times are ignored)</param>
         /// <returns><see cref="DateRange"/></returns>
-        [Obsolete("This method does not support the time component or timezone and will be removed in a future release. Please use the DateTimeOffset overload instead")]
+        [Obsolete(
+            "This method does not support the time component or timezone and will be removed in a future release. Please use the DateTimeOffset overload instead")]
         public static DateRange LessThan(DateTime date)
         {
             return new DateRange(date, SearchQualifierOperator.LessThan);
@@ -444,7 +445,8 @@ namespace Octokit
         /// </summary>
         /// <param name="date">date to be used for comparison (times are ignored)</param>
         /// <returns><see cref="DateRange"/></returns>
-        [Obsolete("This method does not support the time component or timezone and will be removed in a future release. Please use the DateTimeOffset overload instead")]
+        [Obsolete(
+            "This method does not support the time component or timezone and will be removed in a future release. Please use the DateTimeOffset overload instead")]
         public static DateRange LessThanOrEquals(DateTime date)
         {
             return new DateRange(date, SearchQualifierOperator.LessThanOrEqualTo);
@@ -456,7 +458,8 @@ namespace Octokit
         /// </summary>
         /// <param name="date">date to be used for comparison (times are ignored)</param>
         /// <returns><see cref="DateRange"/></returns>
-        [Obsolete("This method does not support the time component or timezone and will be removed in a future release. Please use the DateTimeOffset overload instead")]
+        [Obsolete(
+            "This method does not support the time component or timezone and will be removed in a future release. Please use the DateTimeOffset overload instead")]
         public static DateRange GreaterThan(DateTime date)
         {
             return new DateRange(date, SearchQualifierOperator.GreaterThan);
@@ -468,7 +471,8 @@ namespace Octokit
         /// </summary>
         /// <param name="date">date to be used for comparison (times are ignored)</param>
         /// <returns><see cref="DateRange"/></returns>
-        [Obsolete("This method does not support the time component or timezone and will be removed in a future release. Please use the DateTimeOffset overload instead")]
+        [Obsolete(
+            "This method does not support the time component or timezone and will be removed in a future release. Please use the DateTimeOffset overload instead")]
         public static DateRange GreaterThanOrEquals(DateTime date)
         {
             return new DateRange(date, SearchQualifierOperator.GreaterThanOrEqualTo);
@@ -481,7 +485,8 @@ namespace Octokit
         /// <param name="from">earlier date of the two</param>
         /// <param name="to">latter date of the two</param>
         /// <returns><see cref="DateRange"/></returns>
-        [Obsolete("This method does not support the time component or timezone and will be removed in a future release. Please use the DateTimeOffset overload instead")]
+        [Obsolete(
+            "This method does not support the time component or timezone and will be removed in a future release. Please use the DateTimeOffset overload instead")]
         public static DateRange Between(DateTime from, DateTime to)
         {
             return new DateRange(from, to);
@@ -558,38 +563,44 @@ namespace Octokit
 #pragma warning disable 1591
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Abap")]
         Abap,
-        [Parameter(Value = "ActionScript")]
-        ActionScript,
+        [Parameter(Value = "ActionScript")] ActionScript,
         Ada,
         Apex,
-        [Parameter(Value = "AppleScript")]
-        AppleScript,
+        [Parameter(Value = "AppleScript")] AppleScript,
         Arc,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Arduino")]
         Arduino,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Conf")]
         [Parameter(Value = "ApacheConf")]
         ApacheConf,
         Asp,
         Assembly,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Augeas")]
         Augeas,
+
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "HotKey")]
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "HotKey")]
         [Parameter(Value = "AutoHotkey")]
         AutoHotKey,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Awk")]
         Awk,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Batchfile")]
         Batchfile,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Befunge")]
         Befunge,
-        [Parameter(Value = "BlitzMax")]
-        BlitzMax,
+        [Parameter(Value = "BlitzMax")] BlitzMax,
         Boo,
         Bro,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "C")]
         C,
+
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hs")]
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hs")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "hs")]
@@ -598,68 +609,76 @@ namespace Octokit
         Ceylon,
         Chuck,
         Clips,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Clojure")]
         Clojure,
         Cobol,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Cmake")]
         Cmake,
-        [Parameter(Value = "C-ObjDump")]
-        CObjDump,
-        [Parameter(Value = "CoffeeScript")]
-        CoffeeScript,
-        [Parameter(Value = "ColdFusion")]
-        ColdFusion,
+        [Parameter(Value = "C-ObjDump")] CObjDump,
+        [Parameter(Value = "CoffeeScript")] CoffeeScript,
+        [Parameter(Value = "ColdFusion")] ColdFusion,
         CommonLisp,
         Coq,
-        [Parameter(Value = "cpp")]
-        CPlusPlus,
-        [Parameter(Value = "CSharp")]
-        CSharp,
+        [Parameter(Value = "cpp")] CPlusPlus,
+        [Parameter(Value = "CSharp")] CSharp,
         Css,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Cpp")]
         [Parameter(Value = "Cpp-ObjDump")]
         CppObjDump,
         Cucumber,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Cython")]
         Cython,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "D")]
         D,
-        [Parameter(Value = "D-ObjDump")]
-        DObjDump,
+        [Parameter(Value = "D-ObjDump")] DObjDump,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Darcs")]
         [Parameter(Value = "DarcsPatch")]
         DarcsPatch,
         Dart,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Dcpu")]
         [Parameter(Value = "DCPU-16 ASM")]
         Dcpu16Asm,
         Dot,
         Dylan,
+
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ec")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Ec")]
         Ec,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Ecere")]
         [Parameter(Value = "Ecere Projects")]
         EcereProjects,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Ecl")]
         Ecl,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Edn")]
         Edn,
         Eiffel,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Elixir")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Elixir")]
         Elixir,
         Elm,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Emacs")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Emacs")]
         EmacsLisp,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Erlang")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Erlang")]
         Erlang,
-        [Parameter(Value = "F#")]
-        FSharp,
+        [Parameter(Value = "F#")] FSharp,
         Factor,
         Fancy,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Fantom")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Fantom")]
         Fantom,
@@ -667,185 +686,228 @@ namespace Octokit
         Forth,
         Fortran,
         Gas,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Genshi")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Genshi")]
         Genshi,
-        [Parameter(Value = "Gentoo Build")]
-        GentooBuild,
+        [Parameter(Value = "Gentoo Build")] GentooBuild,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Eclass")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Eclass")]
         [Parameter(Value = "Gentoo Eclass")]
         GentooEclass,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Gettext")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Gettext")]
         [Parameter(Value = "Gettext Catalog")]
         GettextCatalog,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Glsl")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Glsl")]
         Glsl,
         Go,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Gosu")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Gosu")]
         Gosu,
         Groff,
         Groovy,
+
         [Parameter(Value = "Groovy Server Pages")]
         GroovyServerPages,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Haml")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Haml")]
         Haml,
+
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "HandleBars")]
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "HandleBars")]
         [Parameter(Value = "HandleBars")]
         HandleBars,
         Haskell,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Haxe")]
         Haxe,
         Http,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Ini")]
         Ini,
+
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Io")]
         Io,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Ioke")]
         Ioke,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Irc")]
         [Parameter(Value = "IRC log")]
         IrcLog,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "J")]
         J,
         Java,
+
         [Parameter(Value = "Java Server Pages")]
         JavaServerPages,
         JavaScript,
         Json,
         Julia,
+
         [Parameter(Value = "Jupyter Notebook")]
         JupyterNotebook,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Kotlin")]
         Kotlin,
         Lasso,
         Less,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Lfe")]
         Lfe,
-        [Parameter(Value = "LillyPond")]
-        LillyPond,
+        [Parameter(Value = "LillyPond")] LillyPond,
+
         [Parameter(Value = "Literate CoffeeScript")]
         LiterateCoffeeScript,
+
         [Parameter(Value = "Literate Haskell")]
         LiterateHaskell,
-        [Parameter(Value = "LiveScript")]
-        LiveScript,
+        [Parameter(Value = "LiveScript")] LiveScript,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Llvm")]
         Llvm,
         Logos,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Logtalk")]
         Logtalk,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Lua")]
         Lua,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "M")]
         M,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Makefile")]
         Makefile,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Mako")]
         Mako,
         Markdown,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Matlab")]
         Matlab,
         Max,
-        [Parameter(Value = "MiniD")]
-        MiniD,
+        [Parameter(Value = "MiniD")] MiniD,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Mirah")]
         Mirah,
         Monkey,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Moocode")]
         Moocode,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Moonscript")]
         Moonscript,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Mupad")]
         Mupad,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Myghty")]
         Myghty,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Nemerle")]
         Nemerle,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Nginx")]
         Nginx,
         Nimrod,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Nsis")]
         Nsis,
+
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Nu")]
         Nu,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Num")]
         [Parameter(Value = "NumPY")]
         NumPY,
-        [Parameter(Value = "ObjDump")]
-        ObjDump,
+        [Parameter(Value = "ObjDump")] ObjDump,
         ObjectiveC,
         ObjectiveJ,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Caml")]
         [Parameter(Value = "OCaml")]
         OCaml,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Omgrofl")]
         Omgrofl,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Ooc")]
         Ooc,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Opa")]
         Opa,
-        [Parameter(Value = "OpenCL")]
-        OpenCL,
+        [Parameter(Value = "OpenCL")] OpenCL,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Abl")]
         [Parameter(Value = "OpenEdge ABL")]
         OpenEdgeAbl,
         Parrot,
-        [Parameter(Value = "Parrot Assembly")]
-        ParrotAssembly,
+        [Parameter(Value = "Parrot Assembly")] ParrotAssembly,
+
         [Parameter(Value = "Parrot Internal Representation")]
         ParrotInternalRepresentation,
         Pascal,
         Perl,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Php")]
         Php,
         Pike,
-        [Parameter(Value = "PogoScript")]
-        PogoScript,
-        [Parameter(Value = "PowerShell")]
-        PowerShell,
+        [Parameter(Value = "PogoScript")] PogoScript,
+        [Parameter(Value = "PowerShell")] PowerShell,
         Processing,
         Prolog,
         Puppet,
-        [Parameter(Value = "Pure Data")]
-        PureData,
+        [Parameter(Value = "Pure Data")] PureData,
         Python,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Traceback")]
         [Parameter(Value = "Python traceback")]
         PythonTraceback,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "R")]
         R,
         Racket,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Ragel")]
         [Parameter(Value = "Ragel in Ruby Host")]
         RagelInRubyHost,
-        [Parameter(Value = "Raw token data")]
-        RawTokenData,
+        [Parameter(Value = "Raw token data")] RawTokenData,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Rebol")]
         Rebol,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Redcode")]
         Redcode,
+
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "ReStructured")]
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Re")]
         [Parameter(Value = "reStructuredText")]
         ReStructuredText,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Rhtml")]
         Rhtml,
         Rouge,
         Ruby,
         Rust,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Scala")]
         Scala,
         Scheme,
         Sage,
         Sass,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Scilab")]
         Scilab,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Scss")]
         Scss,
         Self,
@@ -854,59 +916,69 @@ namespace Octokit
         Smalltalk,
         Smarty,
         Squirrel,
-        [Parameter(Value = "Standard ML")]
-        StandardML,
+        [Parameter(Value = "Standard ML")] StandardML,
+
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "SuperCollider")]
         [Parameter(Value = "SuperCollider")]
         SuperCollider,
-        [Parameter(Value = "Swift")]
-        Swift,
+        [Parameter(Value = "Swift")] Swift,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Tcl")]
         Tcl,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Tcsh")]
         Tcsh,
         Tea,
+
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Te")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Te")]
         [Parameter(Value = "TeX")]
         TeX,
         Textile,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Toml")]
         Toml,
         Turing,
         Twig,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Txl")]
         Txl,
+
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TypeScript")]
         [Parameter(Value = "TypeScript")]
         TypeScript,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Parallel")]
         [Parameter(Value = "Unified Parallel C")]
         UnifiedParallelC,
         Unknown,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Vala")]
         Vala,
         Verilog,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Vhdl")]
         Vhdl,
-        [Parameter(Value = "VimL")]
-        VimL,
+        [Parameter(Value = "VimL")] VimL,
         VisualBasic,
         Volt,
         Wisp,
+
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Xc")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Xc")]
         Xc,
         Xml,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Proc")]
         [Parameter(Value = "XProc")]
         XProc,
-        [Parameter(Value = "XQuery")]
-        XQuery,
+        [Parameter(Value = "XQuery")] XQuery,
+
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Xs")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Xs")]
         Xs,
         Xslt,
+
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Xtend")]
         Xtend,
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Yaml")]
@@ -920,90 +992,50 @@ namespace Octokit
     /// </summary>
     public enum RepoSearchLicense
     {
-        [Parameter(Value = "afl-3.0")]
-        AcademicFree_3_0,
-        [Parameter(Value = "apache-2.0")]
-        Apache_2_0,
-        [Parameter(Value = "artistic-2.0")]
-        Artistic_2_0,
-        [Parameter(Value = "bsl-1.0")]
-        BoostSoftware_1_0,
-        [Parameter(Value = "0bsd")]
-        BSD0Clause,
-        [Parameter(Value = "bsd-2-clause")]
-        BSD2Clause,
-        [Parameter(Value = "bsd-3-clause")]
-        BSD3Clause,
+        [Parameter(Value = "afl-3.0")] AcademicFree_3_0,
+        [Parameter(Value = "apache-2.0")] Apache_2_0,
+        [Parameter(Value = "artistic-2.0")] Artistic_2_0,
+        [Parameter(Value = "bsl-1.0")] BoostSoftware_1_0,
+        [Parameter(Value = "0bsd")] BSD0Clause,
+        [Parameter(Value = "bsd-2-clause")] BSD2Clause,
+        [Parameter(Value = "bsd-3-clause")] BSD3Clause,
+
         [Parameter(Value = "bsd-3-clause-clear")]
         BSD3ClauseClear,
-        [Parameter(Value = "bsd-4-clause")]
-        BSD4Clause,
-        [Parameter(Value = "cc")]
-        CreativeCommons,
-        [Parameter(Value = "cc0-1.0")]
-        CreativeCommonsZero_1_0,
-        [Parameter(Value = "cc-by-4.0")]
-        CreativeCommonsAtrribution_4_0,
-        [Parameter(Value = "cc-by-sa-4.0")]
-        CreativeCommonsAttributionShareAlike_4_0,
-        [Parameter(Value = "cecill-2.1")]
-        CeCILL_2_1,
-        [Parameter(Value = "wtfpl")]
-        DoWhatTheFYouWant,
-        [Parameter(Value = "ecl-2.0")]
-        EducationalCommunity_2_0,
-        [Parameter(Value = "epl-1.0")]
-        EclipsePublic_1_0,
-        [Parameter(Value = "epl-2.0")]
-        EclipsePublic_2_0,
-        [Parameter(Value = "eupl-1.1")]
-        EuropeanUnionPublic_1_1,
-        [Parameter(Value = "eupl-1.2")]
-        EuropeanUnionPublic_1_2,
-        [Parameter(Value = "agpl-3.0")]
-        GNUAfferoGeneralPublic_3_0,
-        [Parameter(Value = "gpl")]
-        GNUGeneralPublic,
-        [Parameter(Value = "gpl-2.0")]
-        GNUGeneralPublic_2_0,
-        [Parameter(Value = "gpl-3.0")]
-        GNUGeneralPublic_3_0,
-        [Parameter(Value = "lgpl")]
-        GNULesserGeneralPublic,
-        [Parameter(Value = "lgpl-2.1")]
-        GNULesserGeneralPublic_2_1,
-        [Parameter(Value = "lgpl-3.0")]
-        GNULesserGeneralPublic_3_0,
-        [Parameter(Value = "isc")]
-        ISC,
-        [Parameter(Value = "lppl-1.3c")]
-        LatexProjectPublic,
-        [Parameter(Value = "ms-pl")]
-        MicrosoftPublic,
-        [Parameter(Value = "ms-rl")]
-        MicrosoftReciprocal,
-        [Parameter(Value = "mit")]
-        MIT,
-        [Parameter(Value = "mpl-2.0")]
-        MozillaPublic_2_0,
-        [Parameter(Value = "odbl-1.0")]
-        ODCOpenDatabase,
-        [Parameter(Value = "osl-3.0")]
-        OpenSoftware_3_0,
-        [Parameter(Value = "postgresql")]
-        PostgreseSQL,
-        [Parameter(Value = "ofl-1.1")]
-        SILOpenFont,
-        [Parameter(Value = "upl-1.0")]
-        UniversalPermissive,
-        [Parameter(Value = "ncsa")]
-        NSCAOpenSource,
-        [Parameter(Value = "unlicense")]
-        TheUnlicense,
-        [Parameter(Value = "vim")]
-        Vim,
-        [Parameter(Value = "zlib")]
-        ZLib
+        [Parameter(Value = "bsd-4-clause")] BSD4Clause,
+        [Parameter(Value = "cc")] CreativeCommons,
+        [Parameter(Value = "cc0-1.0")] CreativeCommonsZero_1_0,
+        [Parameter(Value = "cc-by-4.0")] CreativeCommonsAtrribution_4_0,
+        [Parameter(Value = "cc-by-sa-4.0")] CreativeCommonsAttributionShareAlike_4_0,
+        [Parameter(Value = "cecill-2.1")] CeCILL_2_1,
+        [Parameter(Value = "wtfpl")] DoWhatTheFYouWant,
+        [Parameter(Value = "ecl-2.0")] EducationalCommunity_2_0,
+        [Parameter(Value = "epl-1.0")] EclipsePublic_1_0,
+        [Parameter(Value = "epl-2.0")] EclipsePublic_2_0,
+        [Parameter(Value = "eupl-1.1")] EuropeanUnionPublic_1_1,
+        [Parameter(Value = "eupl-1.2")] EuropeanUnionPublic_1_2,
+        [Parameter(Value = "agpl-3.0")] GNUAfferoGeneralPublic_3_0,
+        [Parameter(Value = "gpl")] GNUGeneralPublic,
+        [Parameter(Value = "gpl-2.0")] GNUGeneralPublic_2_0,
+        [Parameter(Value = "gpl-3.0")] GNUGeneralPublic_3_0,
+        [Parameter(Value = "lgpl")] GNULesserGeneralPublic,
+        [Parameter(Value = "lgpl-2.1")] GNULesserGeneralPublic_2_1,
+        [Parameter(Value = "lgpl-3.0")] GNULesserGeneralPublic_3_0,
+        [Parameter(Value = "isc")] ISC,
+        [Parameter(Value = "lppl-1.3c")] LatexProjectPublic,
+        [Parameter(Value = "ms-pl")] MicrosoftPublic,
+        [Parameter(Value = "ms-rl")] MicrosoftReciprocal,
+        [Parameter(Value = "mit")] MIT,
+        [Parameter(Value = "mpl-2.0")] MozillaPublic_2_0,
+        [Parameter(Value = "odbl-1.0")] ODCOpenDatabase,
+        [Parameter(Value = "osl-3.0")] OpenSoftware_3_0,
+        [Parameter(Value = "postgresql")] PostgreseSQL,
+        [Parameter(Value = "ofl-1.1")] SILOpenFont,
+        [Parameter(Value = "upl-1.0")] UniversalPermissive,
+        [Parameter(Value = "ncsa")] NSCAOpenSource,
+        [Parameter(Value = "unlicense")] TheUnlicense,
+        [Parameter(Value = "vim")] Vim,
+        [Parameter(Value = "zlib")] ZLib
     }
 
     /// <summary>
@@ -1016,23 +1048,23 @@ namespace Octokit
         /// <summary>
         /// search by number of stars
         /// </summary>
-        [Parameter(Value = "stars")]
-        Stars,
+        [Parameter(Value = "stars")] Stars,
+
         /// <summary>
         /// search by number of forks
         /// </summary>
-        [Parameter(Value = "forks")]
-        Forks,
+        [Parameter(Value = "forks")] Forks,
+
         /// <summary>
         /// search by number of help-wanted-issues
         /// </summary>
         [Parameter(Value = "help-wanted-issues")]
         HelpWantedIssues,
+
         /// <summary>
         /// search by last updated
         /// </summary>
-        [Parameter(Value = "updated")]
-        Updated
+        [Parameter(Value = "updated")] Updated
     }
 
     /// <summary>
@@ -1044,12 +1076,11 @@ namespace Octokit
         /// <summary>
         /// only search for forked repos
         /// </summary>
-        [Parameter(Value = "only")]
-        OnlyForks,
+        [Parameter(Value = "only")] OnlyForks,
+
         /// <summary>
         /// include forked repos into the search
         /// </summary>
-        [Parameter(Value = "true")]
-        IncludeForks
+        [Parameter(Value = "true")] IncludeForks
     }
 }

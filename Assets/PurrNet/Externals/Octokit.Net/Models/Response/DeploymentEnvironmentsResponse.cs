@@ -12,7 +12,9 @@ namespace Octokit.Models.Response
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class DeploymentEnvironmentsResponse
     {
-        public DeploymentEnvironmentsResponse() { }
+        public DeploymentEnvironmentsResponse()
+        {
+        }
 
 
         public DeploymentEnvironmentsResponse(int totalCount, IReadOnlyList<DeploymentEnvironment> environments)
@@ -33,10 +35,7 @@ namespace Octokit.Models.Response
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Count: {0}", TotalCount);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Count: {0}", TotalCount); }
         }
     }
 }

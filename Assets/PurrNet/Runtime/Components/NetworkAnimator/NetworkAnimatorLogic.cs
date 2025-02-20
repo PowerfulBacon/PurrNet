@@ -7,7 +7,7 @@ namespace PurrNet
     {
         readonly List<NetAnimatorRPC> _dirty = new List<NetAnimatorRPC>();
         readonly List<NetAnimatorRPC> _ikActions = new List<NetAnimatorRPC>();
-        
+
         readonly List<PlayerID> _reconcilePlayers = new List<PlayerID>();
 
         protected override void OnObserverAdded(PlayerID player)
@@ -24,12 +24,12 @@ namespace PurrNet
                     _dirty.Clear();
                 return;
             }
-            
+
             if (_autoSyncParameters)
                 CheckForParameterChanges();
             SendDirtyActions();
         }
-        
+
         /// <summary>
         /// Sends the current state of the animator to the observers.
         /// This is useful when you need to ensure that the observers are in sync with the controller.
@@ -38,9 +38,9 @@ namespace PurrNet
         {
             if (!IsController(_ownerAuth))
                 return;
-            
+
             var data = NetAnimatorActionBatch.CreateReconcile(_dontSyncHashes, _animator, isIk);
-            
+
             if (isServer)
             {
                 ApplyActionsOnObservers(data);
@@ -50,7 +50,7 @@ namespace PurrNet
                 ForwardThroughServer(data);
             }
         }
-        
+
         /// <summary>
         /// Sends the current state of the animator to the target player.
         /// This is useful when a new player joins the scene.
@@ -62,9 +62,9 @@ namespace PurrNet
         {
             if (!IsController(_ownerAuth))
                 return;
-            
+
             var data = NetAnimatorActionBatch.CreateReconcile(_dontSyncHashes, _animator, isIk);
-            
+
             if (isServer)
             {
                 ReconcileState(target, data);
@@ -74,17 +74,17 @@ namespace PurrNet
                 ForwardThroughServerToTarget(target, data);
             }
         }
-        
+
         private void SendDirtyActions()
         {
             if (_dirty.Count <= 0)
                 return;
-            
+
             var batch = new NetAnimatorActionBatch
             {
                 actions = _dirty
             };
-            
+
             if (isServer)
             {
                 ApplyActionsOnObservers(batch);
@@ -93,7 +93,7 @@ namespace PurrNet
             {
                 ForwardThroughServer(batch);
             }
-            
+
             _dirty.Clear();
         }
 
@@ -102,7 +102,7 @@ namespace PurrNet
             if (IsController(_ownerAuth))
             {
                 _ikActions.Clear();
-                
+
                 for (var i = 0; i < _reconcilePlayers.Count; i++)
                     Reconcile(_reconcilePlayers[i], true);
                 _reconcilePlayers.Clear();
@@ -120,17 +120,17 @@ namespace PurrNet
         {
             if (IsController(_ownerAuth))
                 return;
-            
+
             ExecuteBatch(actions);
         }
-        
+
         [ServerRpc]
         private void ForwardThroughServerToTarget(PlayerID target, NetAnimatorActionBatch actions)
         {
             if (_ownerAuth)
                 ReconcileState(target, actions);
         }
-        
+
         [ServerRpc]
         private void ForwardThroughServer(NetAnimatorActionBatch actions)
         {
@@ -141,13 +141,13 @@ namespace PurrNet
                 ApplyActionsOnObservers(actions);
             }
         }
-        
+
         [ObserversRpc]
         private void ApplyActionsOnObservers(NetAnimatorActionBatch actions)
         {
             if (IsController(_ownerAuth))
                 return;
-            
+
             ExecuteBatch(actions);
         }
 
@@ -155,7 +155,7 @@ namespace PurrNet
         {
             if (!_animator)
                 return;
-            
+
             if (actions.actions == null)
                 return;
 
@@ -167,7 +167,7 @@ namespace PurrNet
                     NetAnimatorAction.SetBoneLocalRotation;
 
                 if (!isIk)
-                     actions.actions[i].Apply(_animator);
+                    actions.actions[i].Apply(_animator);
                 else _ikActions.Add(actions.actions[i]);
             }
         }

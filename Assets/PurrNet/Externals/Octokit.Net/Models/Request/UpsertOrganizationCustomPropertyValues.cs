@@ -11,9 +11,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class UpsertOrganizationCustomPropertyValues
     {
-        public UpsertOrganizationCustomPropertyValues() { }
+        public UpsertOrganizationCustomPropertyValues()
+        {
+        }
 
-        public UpsertOrganizationCustomPropertyValues(List<string> repositoryNames, List<CustomPropertyValueUpdate> properties)
+        public UpsertOrganizationCustomPropertyValues(List<string> repositoryNames,
+            List<CustomPropertyValueUpdate> properties)
         {
             RepositoryNames = repositoryNames;
             Properties = properties;
@@ -39,10 +42,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Count: {0}", Properties?.Count);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Count: {0}", Properties?.Count); }
         }
     }
 }

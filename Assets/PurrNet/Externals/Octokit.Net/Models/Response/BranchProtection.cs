@@ -12,19 +12,21 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class BranchProtectionSettings
     {
-        public BranchProtectionSettings() { }
+        public BranchProtectionSettings()
+        {
+        }
 
         public BranchProtectionSettings(BranchProtectionRequiredStatusChecks requiredStatusChecks,
-                                        BranchProtectionRequiredReviews requiredPullRequestReviews,
-                                        BranchProtectionPushRestrictions restrictions,
-                                        EnforceAdmins enforceAdmins,
-                                        BranchProtectionEnabledCommon requiredLinearHistory,
-                                        BranchProtectionEnabledCommon allowForcePushes,
-                                        BranchProtectionEnabledCommon allowDeletions,
-                                        BranchProtectionEnabledCommon blockCreations,
-                                        BranchProtectionEnabledCommon requiredConversationResolution,
-                                        BranchProtectionEnabledCommon requiredSignatures,
-                                        EnforceLock lockBranch = null)
+            BranchProtectionRequiredReviews requiredPullRequestReviews,
+            BranchProtectionPushRestrictions restrictions,
+            EnforceAdmins enforceAdmins,
+            BranchProtectionEnabledCommon requiredLinearHistory,
+            BranchProtectionEnabledCommon allowForcePushes,
+            BranchProtectionEnabledCommon allowDeletions,
+            BranchProtectionEnabledCommon blockCreations,
+            BranchProtectionEnabledCommon requiredConversationResolution,
+            BranchProtectionEnabledCommon requiredSignatures,
+            EnforceLock lockBranch = null)
         {
             RequiredStatusChecks = requiredStatusChecks;
             RequiredPullRequestReviews = requiredPullRequestReviews;
@@ -114,7 +116,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class EnforceAdmins
     {
-        public EnforceAdmins() { }
+        public EnforceAdmins()
+        {
+        }
 
         public EnforceAdmins(bool enabled)
         {
@@ -125,10 +129,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Enabled: {0}", Enabled);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Enabled: {0}", Enabled); }
         }
     }
 
@@ -138,7 +139,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class EnforceLock
     {
-        public EnforceLock() { }
+        public EnforceLock()
+        {
+        }
 
         public EnforceLock(bool enabled)
         {
@@ -149,10 +152,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Enabled: {0}", Enabled);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Enabled: {0}", Enabled); }
         }
     }
 
@@ -162,7 +162,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class BranchProtectionRequiredStatusChecks
     {
-        public BranchProtectionRequiredStatusChecks() { }
+        public BranchProtectionRequiredStatusChecks()
+        {
+        }
 
         public BranchProtectionRequiredStatusChecks(bool strict, IReadOnlyList<string> contexts)
         {
@@ -198,7 +200,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class BranchProtectionPushRestrictions
     {
-        public BranchProtectionPushRestrictions() { }
+        public BranchProtectionPushRestrictions()
+        {
+        }
 
         public BranchProtectionPushRestrictions(IReadOnlyList<Team> teams, IReadOnlyList<User> users)
         {
@@ -234,9 +238,13 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class BranchProtectionRequiredReviews
     {
-        public BranchProtectionRequiredReviews() { }
+        public BranchProtectionRequiredReviews()
+        {
+        }
 
-        public BranchProtectionRequiredReviews(BranchProtectionRequiredReviewsDismissalRestrictions dismissalRestrictions, bool dismissStaleReviews, bool requireCodeOwnerReviews, int requiredApprovingReviewCount, bool requireLastPushApproval)
+        public BranchProtectionRequiredReviews(
+            BranchProtectionRequiredReviewsDismissalRestrictions dismissalRestrictions, bool dismissStaleReviews,
+            bool requireCodeOwnerReviews, int requiredApprovingReviewCount, bool requireLastPushApproval)
         {
             DismissalRestrictions = dismissalRestrictions;
             DismissStaleReviews = dismissStaleReviews;
@@ -264,7 +272,7 @@ namespace Octokit
         /// Specify the number of reviewers required to approve pull requests. Use a number between 1 and 6.
         /// </summary>
         public int RequiredApprovingReviewCount { get; private set; }
-        
+
         /// <summary>
         /// Whether the most recent push must be approved by someone other than the person who pushed it. Default: false
         /// </summary>
@@ -274,7 +282,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "DismissalRestrictions: {0} DismissStaleReviews: {1} RequireCodeOwnerReviews: {2} RequiredApprovingReviewCount: {3} RequireLastPushApproval: {4}",
+                return string.Format(CultureInfo.InvariantCulture,
+                    "DismissalRestrictions: {0} DismissStaleReviews: {1} RequireCodeOwnerReviews: {2} RequiredApprovingReviewCount: {3} RequireLastPushApproval: {4}",
                     DismissalRestrictions?.DebuggerDisplay ?? "disabled",
                     DismissStaleReviews,
                     RequireCodeOwnerReviews,
@@ -290,9 +299,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class BranchProtectionRequiredReviewsDismissalRestrictions
     {
-        public BranchProtectionRequiredReviewsDismissalRestrictions() { }
+        public BranchProtectionRequiredReviewsDismissalRestrictions()
+        {
+        }
 
-        public BranchProtectionRequiredReviewsDismissalRestrictions(IReadOnlyList<Team> teams, IReadOnlyList<User> users)
+        public BranchProtectionRequiredReviewsDismissalRestrictions(IReadOnlyList<Team> teams,
+            IReadOnlyList<User> users)
         {
             Teams = teams;
             Users = users;
@@ -323,7 +335,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class BranchProtectionEnabledCommon
     {
-        public BranchProtectionEnabledCommon() { }
+        public BranchProtectionEnabledCommon()
+        {
+        }
 
         public BranchProtectionEnabledCommon(bool enabled)
         {
@@ -334,10 +348,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Enabled: {0}", Enabled);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Enabled: {0}", Enabled); }
         }
     }
 }

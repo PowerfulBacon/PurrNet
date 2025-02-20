@@ -13,8 +13,8 @@ namespace Octokit
         /// <param name="apiConnection">An API connection</param>
         public LockUnlockClient(IApiConnection apiConnection) : base(apiConnection)
         {
-
         }
+
         /// <summary>
         /// Locks an issue for the specified repository. Issue owners and users with push access can lock an issue or pull request's conversation.
         /// </summary>
@@ -29,7 +29,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
 
-            return ApiConnection.Put<Issue>(ApiUrls.IssueLock(owner, name, issueNumber), lockReason.HasValue ? new { LockReason = lockReason } : new object());
+            return ApiConnection.Put<Issue>(ApiUrls.IssueLock(owner, name, issueNumber),
+                lockReason.HasValue ? new { LockReason = lockReason } : new object());
         }
 
         /// <summary>
@@ -42,7 +43,8 @@ namespace Octokit
         [ManualRoute("PUT", "/repositories/{id}/issues/{number}/lock")]
         public Task Lock(long repositoryId, int issueNumber, LockReason? lockReason = null)
         {
-            return ApiConnection.Put<Issue>(ApiUrls.IssueLock(repositoryId, issueNumber), lockReason.HasValue ? new { LockReaons = lockReason } : new object());
+            return ApiConnection.Put<Issue>(ApiUrls.IssueLock(repositoryId, issueNumber),
+                lockReason.HasValue ? new { LockReaons = lockReason } : new object());
         }
 
         /// <summary>

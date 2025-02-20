@@ -101,7 +101,8 @@ namespace Octokit
         /// <param name="request">Specifies the parameters to filter notifications by</param>
         /// <param name="options">Options for changing the API response</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
-        Task<IReadOnlyList<Notification>> GetAllForRepository(string owner, string name, NotificationsRequest request, ApiOptions options);
+        Task<IReadOnlyList<Notification>> GetAllForRepository(string owner, string name, NotificationsRequest request,
+            ApiOptions options);
 
         /// <summary>
         /// Retrieves all of the <see cref="Notification"/>s for the current user specific to the specified repository.
@@ -110,7 +111,8 @@ namespace Octokit
         /// <param name="request">Specifies the parameters to filter notifications by</param>
         /// <param name="options">Options for changing the API response</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
-        Task<IReadOnlyList<Notification>> GetAllForRepository(long repositoryId, NotificationsRequest request, ApiOptions options);
+        Task<IReadOnlyList<Notification>> GetAllForRepository(long repositoryId, NotificationsRequest request,
+            ApiOptions options);
 
         /// <summary>
         /// Marks all notifications as read.

@@ -13,7 +13,8 @@ namespace Octokit
     {
         public EnterpriseLdapClient(IApiConnection apiConnection)
             : base(apiConnection)
-        { }
+        {
+        }
 
         /// <summary>
         /// Update the LDAP mapping for a user on a GitHub Enterprise appliance (must be Site Admin user).
@@ -53,7 +54,8 @@ namespace Octokit
             var response = await Connection.Post<LdapSyncResponse>(endpoint).ConfigureAwait(false);
             if (response.HttpResponse.StatusCode != HttpStatusCode.Created)
             {
-                throw new ApiException("Invalid Status Code returned. Expected a 201", response.HttpResponse.StatusCode);
+                throw new ApiException("Invalid Status Code returned. Expected a 201",
+                    response.HttpResponse.StatusCode);
             }
 
             return response.Body;
@@ -97,7 +99,8 @@ namespace Octokit
             var response = await Connection.Post<LdapSyncResponse>(endpoint).ConfigureAwait(false);
             if (response.HttpResponse.StatusCode != HttpStatusCode.Created)
             {
-                throw new ApiException("Invalid Status Code returned. Expected a 201", response.HttpResponse.StatusCode);
+                throw new ApiException("Invalid Status Code returned. Expected a 201",
+                    response.HttpResponse.StatusCode);
             }
 
             return response.Body;

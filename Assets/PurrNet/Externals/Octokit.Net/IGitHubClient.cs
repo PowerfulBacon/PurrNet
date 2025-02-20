@@ -215,6 +215,7 @@ namespace Octokit
         /// Refer to the API documentation for more information: https://docs.github.com/rest/licenses
         /// </remarks>
         ILicensesClient Licenses { get; }
+
         IEmojisClient Emojis { get; }
 
         ICodespacesClient Codespaces { get; }

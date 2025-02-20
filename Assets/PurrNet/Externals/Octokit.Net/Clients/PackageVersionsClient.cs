@@ -10,6 +10,7 @@ namespace Octokit
         }
 
         #region Organization
+
         /// <summary>
         /// List all versions of a package.
         /// </summary>
@@ -22,7 +23,8 @@ namespace Octokit
         /// <param name="state">Optional: Return packages with a state. Defaults to Active</param>
         /// <param name="options">Optional: Paging options</param>
         [ManualRoute("GET", "/orgs/{org}/packages/{package_type}/{package_name}/versions")]
-        public Task<IReadOnlyList<PackageVersion>> GetAllForOrg(string org, PackageType packageType, string packageName, PackageVersionState state = PackageVersionState.Active, ApiOptions options = null)
+        public Task<IReadOnlyList<PackageVersion>> GetAllForOrg(string org, PackageType packageType, string packageName,
+            PackageVersionState state = PackageVersionState.Active, ApiOptions options = null)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNullOrEmptyString(packageName, nameof(packageName));
@@ -45,7 +47,8 @@ namespace Octokit
         /// <param name="packageName">Required: The name of the package</param>
         /// <param name="packageVersionId">Required: The id of the package version</param>
         [ManualRoute("GET", "/orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}")]
-        public Task<PackageVersion> GetForOrg(string org, PackageType packageType, string packageName, int packageVersionId)
+        public Task<PackageVersion> GetForOrg(string org, PackageType packageType, string packageName,
+            int packageVersionId)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNull(packageType, nameof(packageType));
@@ -89,7 +92,8 @@ namespace Octokit
         /// <param name="packageType">Required: The type of package</param>
         /// <param name="packageName">Required: The name of the package</param>
         /// <param name="packageVersionId">Required: The id of the package version</param>
-        [ManualRoute("POST", "/orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}/restore")]
+        [ManualRoute("POST",
+            "/orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}/restore")]
         public Task RestoreForOrg(string org, PackageType packageType, string packageName, int packageVersionId)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
@@ -97,12 +101,14 @@ namespace Octokit
             Ensure.GreaterThanZero(packageVersionId, nameof(packageVersionId));
 
             var route = ApiUrls.PackageVersionRestoreOrg(org, packageType, packageName, packageVersionId);
-            
+
             return ApiConnection.Post(route);
         }
+
         #endregion
 
         #region Active User
+
         /// <summary>
         /// Returns all package versions for a package owned by the authenticated user.
         /// </summary>
@@ -114,7 +120,8 @@ namespace Octokit
         /// <param name="state">Optional: Return packages with a state. Defaults to Active</param>
         /// <param name="options">Optional: Paging options</param>
         [ManualRoute("GET", "/user/packages/{package_type}/{package_name}/versions")]
-        public Task<IReadOnlyList<PackageVersion>> GetAllForActiveUser(PackageType packageType, string packageName, PackageVersionState state = PackageVersionState.Active, ApiOptions options = null)
+        public Task<IReadOnlyList<PackageVersion>> GetAllForActiveUser(PackageType packageType, string packageName,
+            PackageVersionState state = PackageVersionState.Active, ApiOptions options = null)
         {
             Ensure.ArgumentNotNullOrEmptyString(packageName, nameof(packageName));
             Ensure.ApiOptionsNotNull(ref options);
@@ -141,7 +148,7 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(packageName, nameof(packageName));
             Ensure.GreaterThanZero(packageVersionId, nameof(packageVersionId));
 
-            var route = ApiUrls.PackageVersionActiveUser( packageType, packageName, packageVersionId);
+            var route = ApiUrls.PackageVersionActiveUser(packageType, packageName, packageVersionId);
 
             return ApiConnection.Get<PackageVersion>(route);
         }
@@ -185,9 +192,11 @@ namespace Octokit
 
             return ApiConnection.Post(route);
         }
+
         #endregion
 
         #region Specific User
+
         /// <summary>
         /// Returns all package versions for a public package owned by a specified user.
         /// </summary>
@@ -200,7 +209,8 @@ namespace Octokit
         /// <param name="state">Optional: Return packages with a state. Defaults to Active</param>
         /// <param name="options">Optional: Paging options</param>
         [ManualRoute("GET", "/users/{username}/packages/{package_type}/{package_name}/versions")]
-        public Task<IReadOnlyList<PackageVersion>> GetAllForUser(string username, PackageType packageType, string packageName, PackageVersionState state = PackageVersionState.Active, ApiOptions options = null)
+        public Task<IReadOnlyList<PackageVersion>> GetAllForUser(string username, PackageType packageType,
+            string packageName, PackageVersionState state = PackageVersionState.Active, ApiOptions options = null)
         {
             Ensure.ArgumentNotNullOrEmptyString(username, nameof(username));
             Ensure.ArgumentNotNullOrEmptyString(packageName, nameof(packageName));
@@ -223,7 +233,8 @@ namespace Octokit
         /// <param name="packageName">Required: The name of the package</param>
         /// <param name="packageVersionId">Required: The id of the package version</param>
         [ManualRoute("GET", "/users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}")]
-        public Task<PackageVersion> GetForUser(string username, PackageType packageType, string packageName, int packageVersionId)
+        public Task<PackageVersion> GetForUser(string username, PackageType packageType, string packageName,
+            int packageVersionId)
         {
             Ensure.ArgumentNotNullOrEmptyString(username, nameof(username));
             Ensure.ArgumentNotNull(packageType, nameof(packageType));
@@ -245,7 +256,8 @@ namespace Octokit
         /// <param name="packageType">Required: The type of package</param>
         /// <param name="packageName">Required: The name of the package</param>
         /// <param name="packageVersionId">Required: The id of the package version</param>
-        [ManualRoute("DELETE", "/users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}")]
+        [ManualRoute("DELETE",
+            "/users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}")]
         public Task DeleteForUser(string username, PackageType packageType, string packageName, int packageVersionId)
         {
             Ensure.ArgumentNotNullOrEmptyString(username, nameof(username));
@@ -267,7 +279,8 @@ namespace Octokit
         /// <param name="packageType">Required: The type of package</param>
         /// <param name="packageName">Required: The name of the package</param>
         /// <param name="packageVersionId">Required: The id of the package version</param>
-        [ManualRoute("POST", "/users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}/restore")]
+        [ManualRoute("POST",
+            "/users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}/restore")]
         public Task RestoreForUser(string username, PackageType packageType, string packageName, int packageVersionId)
         {
             Ensure.ArgumentNotNullOrEmptyString(username, nameof(username));
@@ -278,6 +291,7 @@ namespace Octokit
 
             return ApiConnection.Post(route);
         }
+
         #endregion
     }
 }

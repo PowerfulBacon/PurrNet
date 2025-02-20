@@ -36,7 +36,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<PullRequestReview>> GetAll(string owner, string name, int pullRequestNumber, ApiOptions options);
+        Task<IReadOnlyList<PullRequestReview>> GetAll(string owner, string name, int pullRequestNumber,
+            ApiOptions options);
 
         /// <summary>
         /// Gets reviews for a specified pull request.
@@ -74,7 +75,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="review">The review</param>
-        Task<PullRequestReview> Create(string owner, string name, int pullRequestNumber, PullRequestReviewCreate review);
+        Task<PullRequestReview> Create(string owner, string name, int pullRequestNumber,
+            PullRequestReviewCreate review);
 
         /// <summary>
         /// Creates a pull request review.
@@ -113,7 +115,8 @@ namespace Octokit
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="reviewId">The pull request review number</param>
         /// <param name="submitMessage">The message and event being submitted for the review</param>
-        Task<PullRequestReview> Submit(string owner, string name, int pullRequestNumber, long reviewId, PullRequestReviewSubmit submitMessage);
+        Task<PullRequestReview> Submit(string owner, string name, int pullRequestNumber, long reviewId,
+            PullRequestReviewSubmit submitMessage);
 
         /// <summary>
         /// Submits a pull request review.
@@ -123,7 +126,8 @@ namespace Octokit
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="reviewId">The pull request review number</param>
         /// <param name="submitMessage">The message and event being submitted for the review</param>
-        Task<PullRequestReview> Submit(long repositoryId, int pullRequestNumber, long reviewId, PullRequestReviewSubmit submitMessage);
+        Task<PullRequestReview> Submit(long repositoryId, int pullRequestNumber, long reviewId,
+            PullRequestReviewSubmit submitMessage);
 
         /// <summary>
         /// Dismisses a pull request review.
@@ -134,7 +138,8 @@ namespace Octokit
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="reviewId">The pull request review number</param>
         /// <param name="dismissMessage">The message indicating why the review was dismissed</param>
-        Task<PullRequestReview> Dismiss(string owner, string name, int pullRequestNumber, long reviewId, PullRequestReviewDismiss dismissMessage);
+        Task<PullRequestReview> Dismiss(string owner, string name, int pullRequestNumber, long reviewId,
+            PullRequestReviewDismiss dismissMessage);
 
         /// <summary>
         /// Dismisses a pull request review.
@@ -144,7 +149,8 @@ namespace Octokit
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="reviewId">The pull request review number</param>
         /// <param name="dismissMessage">The message indicating why the review was dismissed</param>
-        Task<PullRequestReview> Dismiss(long repositoryId, int pullRequestNumber, long reviewId, PullRequestReviewDismiss dismissMessage);
+        Task<PullRequestReview> Dismiss(long repositoryId, int pullRequestNumber, long reviewId,
+            PullRequestReviewDismiss dismissMessage);
 
         /// <summary>
         /// Lists comments for a single review
@@ -154,7 +160,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="reviewId">The pull request review number</param>
-        Task<IReadOnlyList<PullRequestReviewComment>> GetAllComments(string owner, string name, int pullRequestNumber, long reviewId);
+        Task<IReadOnlyList<PullRequestReviewComment>> GetAllComments(string owner, string name, int pullRequestNumber,
+            long reviewId);
 
         /// <summary>
         /// Lists comments for a single review
@@ -163,7 +170,8 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="reviewId">The pull request review number</param>
-        Task<IReadOnlyList<PullRequestReviewComment>> GetAllComments(long repositoryId, int pullRequestNumber, long reviewId);
+        Task<IReadOnlyList<PullRequestReviewComment>> GetAllComments(long repositoryId, int pullRequestNumber,
+            long reviewId);
 
         /// <summary>
         /// Lists comments for a single review
@@ -174,7 +182,8 @@ namespace Octokit
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="reviewId">The pull request review number</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<PullRequestReviewComment>> GetAllComments(string owner, string name, int pullRequestNumber, long reviewId, ApiOptions options);
+        Task<IReadOnlyList<PullRequestReviewComment>> GetAllComments(string owner, string name, int pullRequestNumber,
+            long reviewId, ApiOptions options);
 
         /// <summary>
         /// Lists comments for a single review
@@ -184,6 +193,7 @@ namespace Octokit
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="reviewId">The pull request review number</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<PullRequestReviewComment>> GetAllComments(long repositoryId, int pullRequestNumber, long reviewId, ApiOptions options);
+        Task<IReadOnlyList<PullRequestReviewComment>> GetAllComments(long repositoryId, int pullRequestNumber,
+            long reviewId, ApiOptions options);
     }
 }

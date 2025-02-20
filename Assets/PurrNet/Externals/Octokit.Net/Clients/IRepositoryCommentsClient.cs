@@ -20,7 +20,7 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="commentId">The comment id</param>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
-             Justification = "Method makes a network request")]
+            Justification = "Method makes a network request")]
         Task<CommitComment> Get(string owner, string name, long commentId);
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="commentId">The comment id</param>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
-             Justification = "Method makes a network request")]
+            Justification = "Method makes a network request")]
         Task<CommitComment> Get(long repositoryId, long commentId);
 
         /// <summary>

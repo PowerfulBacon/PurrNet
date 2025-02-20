@@ -7,7 +7,6 @@ namespace PurrNet.Utils
 {
     public class PurrLockAttribute : PropertyAttribute
     {
-        
     }
 
 #if UNITY_EDITOR
@@ -16,7 +15,8 @@ namespace PurrNet.Utils
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            bool shouldLock = Application.isPlaying && !PrefabUtility.IsPartOfPrefabAsset(property.serializedObject.targetObject);
+            bool shouldLock = Application.isPlaying &&
+                              !PrefabUtility.IsPartOfPrefabAsset(property.serializedObject.targetObject);
 
             if (shouldLock)
             {

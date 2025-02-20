@@ -52,10 +52,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Sha: {0} Force: {1}", Sha, Force);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Sha: {0} Force: {1}", Sha, Force); }
         }
     }
 }

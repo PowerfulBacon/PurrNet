@@ -12,8 +12,10 @@ namespace PurrNet.Pooling
 
         static void Reset(Queue<T> list) => list.Clear();
 
-        public QueuePool() : base(Factory, Reset) { }
-        
+        public QueuePool() : base(Factory, Reset)
+        {
+        }
+
         public static int GetCount() => _instance.count;
 
         public static Queue<T> Instantiate() => _instance.Allocate();

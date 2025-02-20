@@ -58,7 +58,8 @@ namespace Octokit
         /// <param name="issueNumber">The issue number</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/issues/{issue_number}/events")]
-        public Task<IReadOnlyList<IssueEvent>> GetAllForIssue(string owner, string name, int issueNumber, ApiOptions options)
+        public Task<IReadOnlyList<IssueEvent>> GetAllForIssue(string owner, string name, int issueNumber,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));

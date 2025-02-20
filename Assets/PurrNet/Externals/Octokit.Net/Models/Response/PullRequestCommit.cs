@@ -9,9 +9,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class PullRequestCommit
     {
-        public PullRequestCommit() { }
+        public PullRequestCommit()
+        {
+        }
 
-        public PullRequestCommit(string nodeId, User author, string commentsUrl, Commit commit, User committer, string htmlUrl, IEnumerable<GitReference> parents, string sha, string url)
+        public PullRequestCommit(string nodeId, User author, string commentsUrl, Commit commit, User committer,
+            string htmlUrl, IEnumerable<GitReference> parents, string sha, string url)
         {
             Ensure.ArgumentNotNull(parents, nameof(parents));
 

@@ -60,7 +60,8 @@ namespace Octokit
         /// <param name="repositoryQuery">Finds repositories in the organization with a query containing one or more search keywords and qualifiers.</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         [ManualRoute("GET", "orgs/{org}/properties/values")]
-        public Task<IReadOnlyList<OrganizationCustomPropertyValues>> GetAll(string org, OrganizationCustomPropertyValuesRequest repositoryQuery)
+        public Task<IReadOnlyList<OrganizationCustomPropertyValues>> GetAll(string org,
+            OrganizationCustomPropertyValuesRequest repositoryQuery)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNull(repositoryQuery, nameof(repositoryQuery));

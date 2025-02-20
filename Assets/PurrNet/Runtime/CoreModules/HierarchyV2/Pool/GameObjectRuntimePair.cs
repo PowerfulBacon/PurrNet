@@ -9,8 +9,9 @@ namespace PurrNet.Modules
         public readonly Transform parent;
         public readonly NetworkIdentity identity;
         public DisposableList<TransformIdentityPair> children;
-        
-        public GameObjectRuntimePair(Transform parent, NetworkIdentity identity, DisposableList<TransformIdentityPair> children)
+
+        public GameObjectRuntimePair(Transform parent, NetworkIdentity identity,
+            DisposableList<TransformIdentityPair> children)
         {
             this.parent = parent;
             this.identity = identity;

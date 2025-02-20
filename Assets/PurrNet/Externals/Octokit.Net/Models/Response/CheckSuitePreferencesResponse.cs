@@ -26,6 +26,7 @@ namespace Octokit
         /// </summary>
         public Repository Repository { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "Preferences: {0}, Repository: {1}", Preferences.DebuggerDisplay, Repository.DebuggerDisplay);
+        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture,
+            "Preferences: {0}, Repository: {1}", Preferences.DebuggerDisplay, Repository.DebuggerDisplay);
     }
 }

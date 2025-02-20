@@ -47,7 +47,8 @@ namespace Octokit
                     var pageCount = options.PageCount.Value;
 
                     var endPage = startPage + pageCount;
-                    if (pageValue.Equals(endPage.ToString(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase))
+                    if (pageValue.Equals(endPage.ToString(CultureInfo.InvariantCulture),
+                            StringComparison.OrdinalIgnoreCase))
                     {
                         return false;
                     }
@@ -67,7 +68,7 @@ namespace Octokit
                         // Trim the leading '?' character from the first key-value pair
                         keyValue = keyValue.Substring(1);
                     }
-                    
+
                     var indexOf = keyValue.IndexOf('=');
                     if (indexOf > 0)
                     {

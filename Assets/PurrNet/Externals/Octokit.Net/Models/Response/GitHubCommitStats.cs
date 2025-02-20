@@ -9,7 +9,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class GitHubCommitStats
     {
-        public GitHubCommitStats() { }
+        public GitHubCommitStats()
+        {
+        }
 
         public GitHubCommitStats(int additions, int deletions, int total)
         {
@@ -35,7 +37,11 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Stats: +{0} -{1} ={2}", Additions, Deletions, Total); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Stats: +{0} -{1} ={2}", Additions, Deletions,
+                    Total);
+            }
         }
     }
 }

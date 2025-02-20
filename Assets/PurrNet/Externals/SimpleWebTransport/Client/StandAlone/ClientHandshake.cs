@@ -44,7 +44,8 @@ namespace JamesFrowen.SimpleWeb
 
                 byte[] responseBuffer = new byte[1000];
 
-                int? lengthOrNull = ReadHelper.SafeReadTillMatch(stream, responseBuffer, 0, responseBuffer.Length, Constants.endOfHandshake);
+                int? lengthOrNull = ReadHelper.SafeReadTillMatch(stream, responseBuffer, 0, responseBuffer.Length,
+                    Constants.endOfHandshake);
 
                 if (!lengthOrNull.HasValue)
                 {
@@ -55,7 +56,8 @@ namespace JamesFrowen.SimpleWeb
                 string responseString = Encoding.ASCII.GetString(responseBuffer, 0, lengthOrNull.Value);
 
                 string acceptHeader = "Sec-WebSocket-Accept: ";
-                int startIndex = responseString.IndexOf(acceptHeader, StringComparison.InvariantCultureIgnoreCase) + acceptHeader.Length;
+                int startIndex = responseString.IndexOf(acceptHeader, StringComparison.InvariantCultureIgnoreCase) +
+                                 acceptHeader.Length;
                 int endIndex = responseString.IndexOf("\r\n", startIndex);
                 string responseKey = responseString.Substring(startIndex, endIndex - startIndex);
 

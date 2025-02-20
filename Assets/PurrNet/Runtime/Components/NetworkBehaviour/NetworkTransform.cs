@@ -18,7 +18,7 @@ namespace PurrNet
         Rotation = 2,
         Scale = 4
     }
-    
+
     public enum SyncMode : byte
     {
         No,
@@ -30,26 +30,34 @@ namespace PurrNet
     {
         [Header("What to Sync")]
         [Tooltip("Whether to sync the position of the transform. And if so, in what space.")]
-        [SerializeField, PurrLock] private SyncMode _syncPosition = SyncMode.World;
-        [Tooltip("Whether to sync the rotation of the transform. And if so, in what space.")]
-        [SerializeField, PurrLock] private SyncMode _syncRotation = SyncMode.World;
-        [Tooltip("Whether to sync the scale of the transform.")]
-        [SerializeField, PurrLock] private bool _syncScale = true;
+        [SerializeField, PurrLock]
+        private SyncMode _syncPosition = SyncMode.World;
+
+        [Tooltip("Whether to sync the rotation of the transform. And if so, in what space.")] [SerializeField, PurrLock]
+        private SyncMode _syncRotation = SyncMode.World;
+
+        [Tooltip("Whether to sync the scale of the transform.")] [SerializeField, PurrLock]
+        private bool _syncScale = true;
+
         [Tooltip("Whether to sync the parent of the transform. Only works if the parent is a NetworkIdentiy.")]
-        [SerializeField, PurrLock] private bool _syncParent = true;
-        
-        [Header("How to Sync")]
-        [Tooltip("What to interpolate when syncing the transform.")]
-        [SerializeField, PurrLock] private TransformSyncMode _interpolateSettings = 
+        [SerializeField, PurrLock]
+        private bool _syncParent = true;
+
+        [Header("How to Sync")] [Tooltip("What to interpolate when syncing the transform.")] [SerializeField, PurrLock]
+        private TransformSyncMode _interpolateSettings =
             TransformSyncMode.Position | TransformSyncMode.Rotation | TransformSyncMode.Scale;
 
         [Header("When to Sync")]
         [FormerlySerializedAs("_clientAuth")]
-        [Tooltip("If true, the client can send transform data to the server. If false, the client can't send transform data to the server.")]
-        [SerializeField, PurrLock] private bool _ownerAuth = true;
-        
-        [Tooltip("Will enforce the character controller getting enabled and disabled when attempting to sync the transform - CAUTION - Physics events can/will be called multiple times")] 
-        [SerializeField] private bool _characterControllerPatch;
+        [Tooltip(
+            "If true, the client can send transform data to the server. If false, the client can't send transform data to the server.")]
+        [SerializeField, PurrLock]
+        private bool _ownerAuth = true;
+
+        [Tooltip(
+            "Will enforce the character controller getting enabled and disabled when attempting to sync the transform - CAUTION - Physics events can/will be called multiple times")]
+        [SerializeField]
+        private bool _characterControllerPatch;
 
         /// <summary>
         /// Whether to sync the parent of the transform. Only works if the parent is a NetworkIdentiy.
@@ -74,32 +82,32 @@ namespace PurrNet
         /// Whether to sync the position of the transform.
         /// </summary>
         public bool syncPosition => _syncPosition != SyncMode.No;
-        
+
         /// <summary>
         /// Whether to sync the rotation of the transform.
         /// </summary>
         public bool syncRotation => _syncRotation != SyncMode.No;
-        
+
         /// <summary>
         /// Whether to sync the scale of the transform.
         /// </summary>
         public bool syncScale => _syncScale;
-        
+
         /// <summary>
         /// Whether to interpolate the position of the transform.
         /// </summary>
         public bool interpolatePosition => _interpolateSettings.HasFlag(TransformSyncMode.Position);
-        
+
         /// <summary>
         /// Whether to interpolate the rotation of the transform.
         /// </summary>
         public bool interpolateRotation => _interpolateSettings.HasFlag(TransformSyncMode.Rotation);
-        
+
         /// <summary>
         /// Whether to interpolate the scale of the transform.
         /// </summary>
         public bool interpolateScale => _interpolateSettings.HasFlag(TransformSyncMode.Scale);
-        
+
         /// <summary>
         /// Whether the client controls the transform if they are the owner.
         /// </summary>
@@ -114,13 +122,13 @@ namespace PurrNet
         private Transform _trs;
         private Rigidbody _rb;
         private CharacterController _controller;
-        
+
         private bool _prevWasController;
 
         static Vector3 NoInterpolation(Vector3 a, Vector3 b, float t) => b;
-        
+
         static Quaternion NoInterpolation(Quaternion a, Quaternion b, float t) => b;
-        
+
         private void Awake()
         {
             _trs = transform;
@@ -133,7 +141,7 @@ namespace PurrNet
             _currentData = GetCurrentTransformData();
             _lastSentDelta = _currentData;
         }
-        
+
         protected override void OnOwnerReconnected(PlayerID ownerId)
         {
             OnOwnerChanged(ownerId, ownerId, isServer);
@@ -143,7 +151,7 @@ namespace PurrNet
         {
             if (!_ownerAuth)
                 return;
-            
+
             if (asServer)
             {
                 if (newOwner.HasValue && newOwner != localPlayer)
@@ -167,52 +175,54 @@ namespace PurrNet
                 PurrLogger.LogError("NetworkTransformFactory not found");
                 return;
             }
-            
+
             if (!factory.TryGetModule(sceneId, out var ntModule))
                 return;
 
             if (!asServer && !isServer && IsController(localPlayerForced, _ownerAuth, false))
                 SendLatestStateToServer(_currentData);
-            
+
             ntModule.Register(this);
         }
-        
+
         protected override void OnDespawned(bool asServer)
         {
             if (!networkManager.TryGetModule<NetworkTransformFactory>(asServer, out var factory))
                 return;
-            
+
             if (!factory.TryGetModule(sceneId, out var ntModule))
                 return;
-            
+
             ntModule.Unregister(this);
         }
 
         protected override void OnEarlySpawn()
         {
             _trs = transform;
-            
+
             float sendDelta = networkManager.tickModule.tickDelta;
 
             if (syncPosition)
             {
-                _position = new Interpolated<Vector3>(interpolatePosition ? Vector3.Lerp : NoInterpolation, sendDelta, 
+                _position = new Interpolated<Vector3>(interpolatePosition ? Vector3.Lerp : NoInterpolation, sendDelta,
                     _syncPosition == SyncMode.World ? _trs.position : _trs.localPosition);
             }
-            
+
             if (syncRotation)
-                _rotation = new Interpolated<Quaternion>(interpolateRotation ? Quaternion.Lerp : NoInterpolation, sendDelta, 
+                _rotation = new Interpolated<Quaternion>(interpolateRotation ? Quaternion.Lerp : NoInterpolation,
+                    sendDelta,
                     _syncRotation == SyncMode.World ? _trs.rotation : _trs.localRotation);
-            
+
             if (syncScale)
-                _scale = new Interpolated<Vector3>(interpolateScale ? Vector3.Lerp : NoInterpolation, sendDelta, _trs.localScale);
+                _scale = new Interpolated<Vector3>(interpolateScale ? Vector3.Lerp : NoInterpolation, sendDelta,
+                    _trs.localScale);
         }
 
         protected override void OnSpawned()
         {
             int ticksPerSec = networkManager.tickModule.tickRate;
             int ticksPerBuffer = Mathf.CeilToInt(ticksPerSec * 0.15f) * 2;
-            
+
             if (syncPosition) _position.maxBufferSize = ticksPerBuffer;
             if (syncRotation) _rotation.maxBufferSize = ticksPerBuffer;
             if (syncScale) _scale.maxBufferSize = ticksPerBuffer;
@@ -235,7 +245,7 @@ namespace PurrNet
             TeleportToData(data);
             ApplyLerpedPosition();
         }
-        
+
         [TargetRpc]
         private void SendLatestState(PlayerID player, NetworkTransformData data)
         {
@@ -244,7 +254,7 @@ namespace PurrNet
             TeleportToData(data);
             ApplyLerpedPosition();
         }
-        
+
         public void OnTick(float delta)
         {
             if (_parentChanged)
@@ -266,17 +276,17 @@ namespace PurrNet
                 return;
 
             bool isLocalController = IsController(_ownerAuth);
-            
+
             if (!isLocalController)
             {
                 ApplyLerpedPosition();
             }
-            
+
             if (_prevWasController != isLocalController)
             {
                 if (isLocalController && _rb)
                     _rb.WakeUp();
-                
+
                 _prevWasController = isLocalController;
             }
         }
@@ -284,24 +294,24 @@ namespace PurrNet
         private void ApplyLerpedPosition()
         {
             bool disableController = _controller && _controller.enabled;
-            
+
             if (disableController && _characterControllerPatch)
                 _controller.enabled = false;
 
             if (syncPosition)
             {
                 if (_syncPosition == SyncMode.World)
-                     _trs.position = _position.Advance(Time.deltaTime);
+                    _trs.position = _position.Advance(Time.deltaTime);
                 else _trs.localPosition = _position.Advance(Time.deltaTime);
             }
 
             if (syncRotation)
             {
                 if (_syncRotation == SyncMode.World)
-                     _trs.rotation = _rotation.Advance(Time.deltaTime);
+                    _trs.rotation = _rotation.Advance(Time.deltaTime);
                 else _trs.localRotation = _rotation.Advance(Time.deltaTime);
             }
-            
+
             if (syncScale)
                 _trs.localScale = _scale.Advance(Time.deltaTime);
             if (disableController && _characterControllerPatch)
@@ -316,46 +326,46 @@ namespace PurrNet
                 SyncMode.Local => _trs.localPosition,
                 _ => Vector3.zero
             };
-            
+
             var rot = _syncRotation switch
             {
                 SyncMode.World => _trs.rotation,
                 SyncMode.Local => _trs.localRotation,
                 _ => Quaternion.identity
             };
-            
+
             var scale = _syncScale ? _trs.localScale : default;
-            
+
             return new NetworkTransformData(pos, rot, scale);
         }
-        
+
         private bool _parentChanged;
 
         void OnTransformParentChanged()
         {
             if (!isSpawned)
                 return;
-            
+
             var data = GetCurrentTransformData();
             TeleportLocalToData(data);
-            
+
             if (_isIgnoringParentChanges)
                 return;
-            
+
             _parentChanged = true;
         }
-        
+
         void OnTransformParentChangedDelayed()
         {
             if (_isIgnoringParentChanges)
                 return;
-            
+
             if (ApplicationContext.isQuitting)
                 return;
-            
+
             if (!isSpawned)
                 return;
-            
+
             if (!_trs)
                 return;
 
@@ -373,7 +383,7 @@ namespace PurrNet
         }
 
         private bool _isIgnoringParentChanges;
-        
+
         public void StartIgnoringParentChanges()
         {
             _isIgnoringParentChanges = true;
@@ -383,27 +393,27 @@ namespace PurrNet
         {
             _isIgnoringParentChanges = false;
         }
-        
+
         private void TeleportLocalToData(NetworkTransformData data)
         {
             if (_syncPosition == SyncMode.Local)
                 _position.Teleport(data.position);
-            
+
             if (_syncRotation == SyncMode.Local)
                 _rotation.Teleport(data.rotation);
-            
+
             if (syncScale)
                 _scale.Teleport(data.scale);
         }
-        
+
         private void TeleportToData(NetworkTransformData data)
         {
             if (syncPosition)
                 _position.Teleport(data.position);
-            
+
             if (syncRotation)
                 _rotation.Teleport(data.rotation);
-            
+
             if (syncScale)
                 _scale.Teleport(data.scale);
         }
@@ -412,10 +422,10 @@ namespace PurrNet
         {
             if (syncPosition)
                 _position.Add(data.position);
-            
+
             if (syncRotation)
                 _rotation.Add(data.rotation);
-            
+
             if (syncScale)
                 _scale.Add(data.scale);
         }
@@ -428,24 +438,25 @@ namespace PurrNet
         {
             int flagPos = packer.AdvanceBits(1);
             bool hasChanged = false;
-            
+
             if (syncPosition)
                 hasChanged = DeltaPacker<Vector3>.Write(packer, _lastSentDelta.position, _currentData.position);
-            
+
             if (syncRotation)
-                hasChanged = DeltaPacker<Quaternion>.Write(packer,_lastSentDelta.rotation, _currentData.rotation) || hasChanged;
-            
+                hasChanged = DeltaPacker<Quaternion>.Write(packer, _lastSentDelta.rotation, _currentData.rotation) ||
+                             hasChanged;
+
             if (syncScale)
-                hasChanged = DeltaPacker<Vector3>.Write(packer,_lastSentDelta.scale, _currentData.scale) || hasChanged;
-            
+                hasChanged = DeltaPacker<Vector3>.Write(packer, _lastSentDelta.scale, _currentData.scale) || hasChanged;
+
             packer.WriteAt(flagPos, hasChanged);
-            
+
             if (!hasChanged)
                 packer.SetBitPosition(flagPos + 1);
-            
+
             return hasChanged;
         }
-        
+
         public void DeltaRead(BitPacker packet)
         {
             _lastReadData = DeltaRead(packet, _lastReadData);
@@ -455,7 +466,7 @@ namespace PurrNet
         NetworkTransformData DeltaRead(BitPacker packet, NetworkTransformData oldValue)
         {
             bool hasChanged = default;
-            
+
             Packer<bool>.Read(packet, ref hasChanged);
 
             if (hasChanged)
@@ -466,21 +477,21 @@ namespace PurrNet
 
                 if (syncPosition)
                     DeltaPacker<Vector3>.Read(packet, pos, ref oldValue.position);
-                
+
                 if (syncRotation)
                     DeltaPacker<Quaternion>.Read(packet, rot, ref oldValue.rotation);
-                
+
                 if (syncScale)
                     DeltaPacker<Vector3>.Read(packet, scale, ref oldValue.scale);
             }
-            
+
             return oldValue;
         }
 
         public void GatherState()
         {
             _currentData = GetCurrentTransformData();
-            
+
             if (IsController(_ownerAuth))
                 TeleportToData(_currentData);
         }

@@ -14,7 +14,8 @@ namespace Octokit
         {
         }
 
-        public CopilotSeat(DateTimeOffset? createdAt, DateTimeOffset? updatedAt, string pendingCancellationDate, DateTimeOffset? lastActivityAt, string lastActivityEditor, User assignee, Team assigningTeam)
+        public CopilotSeat(DateTimeOffset? createdAt, DateTimeOffset? updatedAt, string pendingCancellationDate,
+            DateTimeOffset? lastActivityAt, string lastActivityEditor, User assignee, Team assigningTeam)
         {
             CreatedAt = createdAt;
             UpdatedAt = updatedAt;
@@ -56,18 +57,19 @@ namespace Octokit
         /// The assignee that has been granted access to GitHub Copilot
         /// </summary>
         public User Assignee { get; private set; }
-        
+
         /// <summary>
         /// The team that granted access to GitHub Copilot to the assignee. This will be null if the
         /// user was assigned a seat individually.
         /// </summary>
         public Team AssigningTeam { get; private set; }
-        
+
         internal string DebuggerDisplay
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "User: {0}, CreatedAt: {1}", Assignee.Name, CreatedAt);
+                return string.Format(CultureInfo.InvariantCulture, "User: {0}, CreatedAt: {1}", Assignee.Name,
+                    CreatedAt);
             }
         }
     }

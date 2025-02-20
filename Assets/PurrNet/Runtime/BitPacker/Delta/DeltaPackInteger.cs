@@ -11,7 +11,7 @@ namespace PurrNet.Packing
             Packer<bool>.Write(packer, hasChanged);
             return hasChanged;
         }
-        
+
         [UsedByIL]
         private static void ReadBool(BitPacker packer, bool oldvalue, ref bool value)
         {
@@ -19,7 +19,7 @@ namespace PurrNet.Packing
             Packer<bool>.Read(packer, ref hasChanged);
             value = hasChanged ? !oldvalue : oldvalue;
         }
-        
+
         [UsedByIL]
         private static bool WriteInt8(BitPacker packer, sbyte oldvalue, sbyte newvalue)
         {
@@ -31,10 +31,10 @@ namespace PurrNet.Packing
                 short diff = (short)(newvalue - oldvalue);
                 Packer<PackedShort>.Write(packer, diff);
             }
-            
+
             return hasChanged;
         }
-        
+
         [UsedByIL]
         private static void ReadInt8(BitPacker packer, sbyte oldvalue, ref sbyte value)
         {
@@ -49,7 +49,7 @@ namespace PurrNet.Packing
             }
             else value = oldvalue;
         }
-        
+
         [UsedByIL]
         private static bool WriteUInt8(BitPacker packer, byte oldvalue, byte newvalue)
         {
@@ -61,16 +61,16 @@ namespace PurrNet.Packing
                 short diff = (short)(newvalue - oldvalue);
                 Packer<PackedShort>.Write(packer, diff);
             }
-            
+
             return hasChanged;
         }
-        
+
         [UsedByIL]
         private static void ReadUInt8(BitPacker packer, byte oldvalue, ref byte value)
         {
             bool hasChanged = default;
             Packer<bool>.Read(packer, ref hasChanged);
-            
+
             if (hasChanged)
             {
                 PackedShort packed = default;
@@ -79,7 +79,7 @@ namespace PurrNet.Packing
             }
             else value = oldvalue;
         }
-        
+
         [UsedByIL]
         private static bool WriteInt16(BitPacker packer, short oldvalue, short newvalue)
         {
@@ -91,16 +91,16 @@ namespace PurrNet.Packing
                 int diff = newvalue - oldvalue;
                 Packer<PackedInt>.Write(packer, diff);
             }
-            
+
             return hasChanged;
         }
-        
+
         [UsedByIL]
         private static void ReadInt16(BitPacker packer, short oldvalue, ref short value)
         {
             bool hasChanged = default;
             Packer<bool>.Read(packer, ref hasChanged);
-            
+
             if (hasChanged)
             {
                 PackedInt packed = default;
@@ -109,7 +109,7 @@ namespace PurrNet.Packing
             }
             else value = oldvalue;
         }
-        
+
         [UsedByIL]
         private static bool WriteUInt16(BitPacker packer, ushort oldvalue, ushort newvalue)
         {
@@ -121,16 +121,16 @@ namespace PurrNet.Packing
                 int diff = (int)((uint)newvalue - oldvalue);
                 Packer<PackedInt>.Write(packer, diff);
             }
-            
+
             return hasChanged;
         }
-        
+
         [UsedByIL]
         private static void ReadUInt16(BitPacker packer, ushort oldvalue, ref ushort value)
         {
             bool hasChanged = default;
             Packer<bool>.Read(packer, ref hasChanged);
-            
+
             if (hasChanged)
             {
                 PackedInt packed = default;
@@ -139,7 +139,7 @@ namespace PurrNet.Packing
             }
             else value = oldvalue;
         }
-        
+
         [UsedByIL]
         private static bool WriteUInt32(BitPacker packer, uint oldvalue, uint newvalue)
         {
@@ -151,7 +151,7 @@ namespace PurrNet.Packing
                 long diff = newvalue - (long)oldvalue;
                 Packer<PackedLong>.Write(packer, diff);
             }
-            
+
             return hasChanged;
         }
 
@@ -160,7 +160,7 @@ namespace PurrNet.Packing
         {
             bool hasChanged = default;
             Packer<bool>.Read(packer, ref hasChanged);
-            
+
             if (hasChanged)
             {
                 PackedLong packed = default;
@@ -169,7 +169,7 @@ namespace PurrNet.Packing
             }
             else value = oldvalue;
         }
-        
+
         [UsedByIL]
         private static bool WriteUInt32(BitPacker packer, PackedUInt oldvalue, PackedUInt newvalue)
         {
@@ -181,7 +181,7 @@ namespace PurrNet.Packing
                 long diff = newvalue - (long)oldvalue;
                 Packer<PackedLong>.Write(packer, diff);
             }
-            
+
             return hasChanged;
         }
 
@@ -190,7 +190,7 @@ namespace PurrNet.Packing
         {
             bool hasChanged = default;
             Packer<bool>.Read(packer, ref hasChanged);
-            
+
             if (hasChanged)
             {
                 PackedLong packed = default;
@@ -205,13 +205,13 @@ namespace PurrNet.Packing
         {
             bool hasChanged = oldvalue != newvalue;
             Packer<bool>.Write(packer, hasChanged);
-            
+
             if (hasChanged)
             {
                 long diff = newvalue - (long)oldvalue;
                 Packer<PackedLong>.Write(packer, diff);
             }
-            
+
             return hasChanged;
         }
 
@@ -220,7 +220,7 @@ namespace PurrNet.Packing
         {
             bool hasChanged = default;
             Packer<bool>.Read(packer, ref hasChanged);
-            
+
             if (hasChanged)
             {
                 PackedLong packed = default;

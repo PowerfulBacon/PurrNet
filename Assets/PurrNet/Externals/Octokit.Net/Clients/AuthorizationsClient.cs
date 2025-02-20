@@ -147,7 +147,8 @@ namespace Octokit
             };
 
             var endpoint = ApiUrls.Authorizations();
-            return ApiConnection.Post<ApplicationAuthorization>(endpoint, requestData, null, twoFactorAuthenticationCode);
+            return ApiConnection.Post<ApplicationAuthorization>(endpoint, requestData, null,
+                twoFactorAuthenticationCode);
         }
 
         /// <summary>
@@ -237,7 +238,8 @@ namespace Octokit
             };
 
             var endpoint = ApiUrls.Authorizations();
-            return ApiConnection.Post<ApplicationAuthorization>(endpoint, requestData, null, null, twoFactorAuthenticationCode);
+            return ApiConnection.Post<ApplicationAuthorization>(endpoint, requestData, null, null,
+                twoFactorAuthenticationCode);
         }
 
         /// <summary>
@@ -327,7 +329,9 @@ namespace Octokit
             {
                 var endpoint = ApiUrls.AuthorizationsForClient(clientId);
 
-                return await ApiConnection.Put<ApplicationAuthorization>(endpoint, requestData, twoFactorAuthenticationCode).ConfigureAwait(false);
+                return await ApiConnection
+                    .Put<ApplicationAuthorization>(endpoint, requestData, twoFactorAuthenticationCode)
+                    .ConfigureAwait(false);
             }
             catch (AuthorizationException e)
             {

@@ -9,7 +9,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class GistChangeStatus
     {
-        public GistChangeStatus() { }
+        public GistChangeStatus()
+        {
+        }
 
         public GistChangeStatus(int deletions, int additions, int total)
         {
@@ -35,7 +37,11 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Deletions: {0}, Additions: {1}, Total: {2}", Deletions, Additions, Total); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Deletions: {0}, Additions: {1}, Total: {2}",
+                    Deletions, Additions, Total);
+            }
         }
     }
 }

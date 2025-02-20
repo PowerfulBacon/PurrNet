@@ -28,19 +28,19 @@ namespace PurrNet
         private TimerState _state;
         private float _remaining;
         private float _lastReconcile;
-        
+
         public float remaining => _remaining;
         public bool isRunning => _state == TimerState.Running;
         public bool isPaused => _state == TimerState.Paused;
 
         public int remainingInt => Mathf.CeilToInt(_remaining);
-        
+
         public Action onTimerEnd;
         public Action onTimerStart;
         public Action onTimerSecondTick;
         public Action onTimerPaused;
         public Action onTimerResumed;
-        
+
         public SyncTimer(bool ownerAuth = false, float reconcileInterval = 3)
         {
             _ownerAuth = ownerAuth;
@@ -54,14 +54,14 @@ namespace PurrNet
 
             int lastSecond = remainingInt;
             _remaining -= delta;
-            if(lastSecond != remainingInt)
+            if (lastSecond != remainingInt)
                 onTimerSecondTick?.Invoke();
-            
+
             if (_ownerAuth && isOwner || !_ownerAuth && isServer)
             {
-                if(_remaining <= 0)
+                if (_remaining <= 0)
                     HandleTimerEvent(TimerEvent.Stop);
-                
+
                 if (_lastReconcile + _reconcileInterval < Time.unscaledTime)
                 {
                     if (isServer)
@@ -99,18 +99,18 @@ namespace PurrNet
                     _lastReconcile = Time.unscaledTime;
                     onTimerStart?.Invoke();
                     break;
-                    
+
                 case TimerEvent.Stop:
                     _state = TimerState.Stopped;
                     _remaining = 0;
                     onTimerEnd?.Invoke();
                     break;
-                    
+
                 case TimerEvent.Pause:
                     _state = TimerState.Paused;
                     onTimerPaused?.Invoke();
                     break;
-                    
+
                 case TimerEvent.Resume:
                     _state = TimerState.Running;
                     _lastReconcile = Time.unscaledTime;
@@ -125,18 +125,20 @@ namespace PurrNet
         }
 
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
-        private void SendTimerEventToServer(TimerEvent timerEvent, float remainingTime, bool syncRemaining, RPCInfo info = default)
+        private void SendTimerEventToServer(TimerEvent timerEvent, float remainingTime, bool syncRemaining,
+            RPCInfo info = default)
         {
             ProcessTimerEvent(timerEvent, remainingTime, syncRemaining);
             SendTimerEventToAll(timerEvent, remainingTime, syncRemaining, info.sender);
         }
 
         [ObserversRpc(Channel.ReliableOrdered)]
-        private void SendTimerEventToAll(TimerEvent timerEvent, float remainingTime, bool syncRemaining, PlayerID? toIgnore = null)
+        private void SendTimerEventToAll(TimerEvent timerEvent, float remainingTime, bool syncRemaining,
+            PlayerID? toIgnore = null)
         {
-            if(toIgnore.HasValue && localPlayer.HasValue && toIgnore.Value.id == localPlayer.Value.id)
+            if (toIgnore.HasValue && localPlayer.HasValue && toIgnore.Value.id == localPlayer.Value.id)
                 return;
-            
+
             ProcessTimerEvent(timerEvent, remainingTime, syncRemaining);
         }
 
@@ -146,20 +148,21 @@ namespace PurrNet
                 _remaining = remainingTime;
 
             var previousState = _state;
-            
+
             switch (timerEvent)
             {
                 case TimerEvent.Start:
                     if (!syncRemaining)
                         _remaining = remainingTime;
-                        
+
                     if (previousState != TimerState.Running)
                     {
                         _state = TimerState.Running;
                         onTimerStart?.Invoke();
                     }
+
                     break;
-                    
+
                 case TimerEvent.Stop:
                     if (previousState != TimerState.Stopped)
                     {
@@ -168,29 +171,37 @@ namespace PurrNet
                             _remaining = 0;
                         onTimerEnd?.Invoke();
                     }
+
                     break;
-                    
+
                 case TimerEvent.Pause:
                     if (previousState != TimerState.Paused)
                     {
                         _state = TimerState.Paused;
                         onTimerPaused?.Invoke();
                     }
+
                     break;
-                    
+
                 case TimerEvent.Resume:
                     if (previousState != TimerState.Running)
                     {
                         _state = TimerState.Running;
                         onTimerResumed?.Invoke();
                     }
+
                     break;
             }
         }
 
         public void StartTimer(float duration) => HandleTimerEvent(TimerEvent.Start, duration);
-        public void StopTimer(bool syncRemaining = false) => HandleTimerEvent(TimerEvent.Stop, syncRemaining: syncRemaining);
-        public void PauseTimer(bool syncRemaining = false) => HandleTimerEvent(TimerEvent.Pause, syncRemaining: syncRemaining);
+
+        public void StopTimer(bool syncRemaining = false) =>
+            HandleTimerEvent(TimerEvent.Stop, syncRemaining: syncRemaining);
+
+        public void PauseTimer(bool syncRemaining = false) =>
+            HandleTimerEvent(TimerEvent.Pause, syncRemaining: syncRemaining);
+
         public void ResumeTimer() => HandleTimerEvent(TimerEvent.Resume);
     }
 }

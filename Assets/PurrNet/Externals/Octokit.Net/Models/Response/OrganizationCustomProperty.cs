@@ -9,9 +9,13 @@ namespace Octokit
     [ExcludeFromCtorWithAllPropertiesConventionTest(nameof(DefaultValues))]
     public class OrganizationCustomProperty
     {
-        public OrganizationCustomProperty() { }
+        public OrganizationCustomProperty()
+        {
+        }
 
-        public OrganizationCustomProperty(string propertyName, CustomPropertyValueType valueType, bool required, object defaultValue, string description, IReadOnlyList<string> allowedValues, CustomPropertyValuesEditableBy? valuesEditableBy)
+        public OrganizationCustomProperty(string propertyName, CustomPropertyValueType valueType, bool required,
+            object defaultValue, string description, IReadOnlyList<string> allowedValues,
+            CustomPropertyValuesEditableBy? valuesEditableBy)
         {
             PropertyName = propertyName;
             ValueType = valueType;
@@ -22,8 +26,7 @@ namespace Octokit
             ValuesEditableBy = valuesEditableBy;
         }
 
-        [Parameter(Key = "default_value")]
-        public object defaultValue { get; private set; }
+        [Parameter(Key = "default_value")] public object defaultValue { get; private set; }
 
         /// <summary>
         /// The name of the property
@@ -43,12 +46,15 @@ namespace Octokit
         /// <summary>
         /// Default value of the property
         /// </summary>
-        public string DefaultValue {
-            get {
+        public string DefaultValue
+        {
+            get
+            {
                 if (defaultValue is null)
                 {
                     return null;
                 }
+
                 if (defaultValue is string stringValue)
                 {
                     return stringValue;
@@ -65,8 +71,10 @@ namespace Octokit
         /// <summary>
         /// Default values of the property
         /// </summary>
-        public IReadOnlyList<string> DefaultValues {
-            get {
+        public IReadOnlyList<string> DefaultValues
+        {
+            get
+            {
                 if (defaultValue is null)
                 {
                     return null;
@@ -100,6 +108,7 @@ namespace Octokit
         /// </summary>
         public StringEnum<CustomPropertyValuesEditableBy>? ValuesEditableBy { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "PropertyName: {0}", PropertyName);
+        internal string DebuggerDisplay =>
+            string.Format(CultureInfo.InvariantCulture, "PropertyName: {0}", PropertyName);
     }
 }

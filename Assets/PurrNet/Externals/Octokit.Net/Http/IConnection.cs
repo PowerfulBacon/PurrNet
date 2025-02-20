@@ -69,7 +69,8 @@ namespace Octokit
         /// <param name="parameters">Querystring parameters for the request</param>
         /// <param name="accepts">Specifies accepted response media types.</param>
         /// <returns><seealso cref="IResponse"/> representing the received HTTP response</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords",
+            MessageId = "Get")]
         Task<IApiResponse<T>> Get<T>(Uri uri, IDictionary<string, string> parameters, string accepts);
 
         /// <summary>
@@ -82,8 +83,10 @@ namespace Octokit
         /// <param name="accepts">Specifies accepted response media types.</param>
         /// <param name="cancellationToken">A token used to cancel the Get request</param>
         /// <returns><seealso cref="IResponse"/> representing the received HTTP response</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get")]
-        Task<IApiResponse<T>> Get<T>(Uri uri, IDictionary<string, string> parameters, string accepts, CancellationToken cancellationToken);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords",
+            MessageId = "Get")]
+        Task<IApiResponse<T>> Get<T>(Uri uri, IDictionary<string, string> parameters, string accepts,
+            CancellationToken cancellationToken);
 
         /// <summary>
         /// Performs an asynchronous HTTP GET request.
@@ -96,8 +99,10 @@ namespace Octokit
         /// <param name="cancellationToken">A token used to cancel the Get request</param>
         /// <param name="preprocessResponseBody">Function to preprocess HTTP response prior to deserialization (can be null)</param>
         /// <returns><seealso cref="IResponse"/> representing the received HTTP response</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get")]
-        Task<IApiResponse<T>> Get<T>(Uri uri, IDictionary<string, string> parameters, string accepts, CancellationToken cancellationToken, Func<object, object> preprocessResponseBody);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords",
+            MessageId = "Get")]
+        Task<IApiResponse<T>> Get<T>(Uri uri, IDictionary<string, string> parameters, string accepts,
+            CancellationToken cancellationToken, Func<object, object> preprocessResponseBody);
 
         /// <summary>
         /// Performs an asynchronous HTTP GET request.
@@ -107,7 +112,8 @@ namespace Octokit
         /// <param name="uri">URI endpoint to send request to</param>
         /// <param name="timeout">Expiration time of the request</param>
         /// <returns><seealso cref="IResponse"/> representing the received HTTP response</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords",
+            MessageId = "Get")]
         Task<IApiResponse<T>> Get<T>(Uri uri, TimeSpan timeout);
 
         /// <summary>
@@ -223,7 +229,8 @@ namespace Octokit
         /// <param name="twoFactorAuthenticationCode">Two Factor Authentication Code</param>
         /// <param name="cancellationToken">An optional token to monitor for cancellation requests</param>
         /// <returns><seealso cref="IResponse"/> representing the received HTTP response</returns>
-        Task<IApiResponse<T>> Post<T>(Uri uri, object body, string accepts, string contentType, string twoFactorAuthenticationCode, CancellationToken cancellationToken = default);
+        Task<IApiResponse<T>> Post<T>(Uri uri, object body, string accepts, string contentType,
+            string twoFactorAuthenticationCode, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Performs an asynchronous HTTP POST request.
@@ -237,7 +244,8 @@ namespace Octokit
         /// <param name="timeout"></param>
         /// <param name="cancellationToken">An optional token to monitor for cancellation requests</param>
         /// <returns><seealso cref="IResponse"/> representing the received HTTP response</returns>
-        Task<IApiResponse<T>> Post<T>(Uri uri, object body, string accepts, string contentType, TimeSpan timeout, CancellationToken cancellationToken = default);
+        Task<IApiResponse<T>> Post<T>(Uri uri, object body, string accepts, string contentType, TimeSpan timeout,
+            CancellationToken cancellationToken = default);
 
 
         /// <summary>
@@ -256,7 +264,8 @@ namespace Octokit
         /// <param name="baseAddress">Allows overriding the base address for a post.</param>
         /// <param name="cancellationToken">An optional token to monitor for cancellation requests</param>
         /// <returns><seealso cref="IResponse"/> representing the received HTTP response</returns>
-        Task<IApiResponse<T>> Post<T>(Uri uri, object body, string accepts, string contentType, Uri baseAddress, CancellationToken cancellationToken = default);
+        Task<IApiResponse<T>> Post<T>(Uri uri, object body, string accepts, string contentType, Uri baseAddress,
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Performs an asynchronous HTTP PUT request.

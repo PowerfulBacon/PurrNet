@@ -12,7 +12,9 @@ namespace Octokit
     [ExcludeFromCtorWithAllPropertiesConventionTest(nameof(Values))]
     public class CustomPropertyValue
     {
-        public CustomPropertyValue() { }
+        public CustomPropertyValue()
+        {
+        }
 
         public CustomPropertyValue(string propertyName, object value)
         {
@@ -27,18 +29,20 @@ namespace Octokit
         public string PropertyName { get; private set; }
 
 
-        [Parameter(Key = "value")]
-        public object value { get; private set; }
+        [Parameter(Key = "value")] public object value { get; private set; }
 
         /// <summary>
         /// The value assigned to the property
         /// </summary>
-        public string Value {
-            get {
+        public string Value
+        {
+            get
+            {
                 if (value is null)
                 {
                     return null;
                 }
+
                 if (value is string stringValue)
                 {
                     return stringValue;
@@ -55,8 +59,10 @@ namespace Octokit
         /// <summary>
         /// The array of values assigned to the property
         /// </summary>
-        public IReadOnlyList<string> Values {
-            get {
+        public IReadOnlyList<string> Values
+        {
+            get
+            {
                 if (value is null)
                 {
                     return null;
@@ -74,6 +80,7 @@ namespace Octokit
             }
         }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "PropertyName: {0}", PropertyName);
+        internal string DebuggerDisplay =>
+            string.Format(CultureInfo.InvariantCulture, "PropertyName: {0}", PropertyName);
     }
 }

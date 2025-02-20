@@ -19,7 +19,8 @@ namespace Octokit.Internal
         /// <param name="cancellationToken">Used to cancel the request</param>
         /// <param name="preprocessResponseBody">Function to preprocess HTTP response prior to deserialization (can be null)</param>
         /// <returns>A <see cref="Task" /> of <see cref="IResponse"/></returns>
-        Task<IResponse> Send(IRequest request, CancellationToken cancellationToken, Func<object, object> preprocessResponseBody = null);
+        Task<IResponse> Send(IRequest request, CancellationToken cancellationToken,
+            Func<object, object> preprocessResponseBody = null);
 
 
         /// <summary>

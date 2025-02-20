@@ -2,22 +2,22 @@
 using PurrNet.Collections;
 using PurrNet.Pooling;
 using UnityEngine;
- 
+
 namespace PurrNet.Modules
 {
     internal class VisilityV2
     {
         readonly NetworkVisibilityRuleSet _defaultRuleSet;
-        
+
         public delegate void VisibilityChanged(PlayerID player, Transform scope, bool hasVisibility);
-        
+
         public event VisibilityChanged visibilityChanged;
-        
+
         public VisilityV2(NetworkManager manager)
         {
             _defaultRuleSet = manager.visibilityRules;
         }
-        
+
         /// <summary>
         /// Refreshes visibility for the given GameObject for the specified player.
         /// </summary>
@@ -28,49 +28,49 @@ namespace PurrNet.Modules
         {
             if (!transform)
                 return;
-            
+
             RefreshVisibilityForGameObject(player, transform, _defaultRuleSet, true, false);
         }
-        
+
         public void RefreshVisibilityForGameObject(PlayerID player, Transform transform, NetworkIdentity parent)
         {
             if (!transform)
                 return;
-            
+
             bool isParentVisible = !parent || parent.observers.Contains(player);
-            
+
             RefreshVisibilityForGameObject(player, transform, _defaultRuleSet, isParentVisible, false);
         }
-        
+
         public void ClearVisibilityForGameObject(Transform transform)
         {
             if (!transform)
                 return;
-            
+
             var affectedPlayers = HashSetPool<PlayerID>.Instantiate();
-            
+
             ClearVisibilityForGameObject(transform, affectedPlayers);
 
             foreach (var player in affectedPlayers)
                 visibilityChanged?.Invoke(player, transform, false);
-            
+
             HashSetPool<PlayerID>.Destroy(affectedPlayers);
         }
-        
+
         public void ClearVisibilityForGameObject(Transform transform, PlayerID player)
         {
             if (!transform)
                 return;
-            
+
             RefreshVisibilityForGameObject(transform, player);
             visibilityChanged?.Invoke(player, transform, false);
         }
-        
+
         private static bool RefreshVisibilityForGameObject(Transform transform, PlayerID player)
         {
             using var identities = new DisposableList<NetworkIdentity>(16);
             transform.GetComponents(identities.list);
-            
+
             bool removed = false;
 
             int ccount = identities.Count;
@@ -80,7 +80,7 @@ namespace PurrNet.Modules
                 if (identity.TryRemoveObserver(player))
                     removed = true;
             }
-            
+
             var directChildren = identities[0].directChildren;
             var dcount = directChildren.Count;
 
@@ -88,7 +88,7 @@ namespace PurrNet.Modules
             {
                 removed |= RefreshVisibilityForGameObject(directChildren[i].transform, player);
             }
-            
+
             return removed;
         }
 
@@ -105,36 +105,36 @@ namespace PurrNet.Modules
                 players.UnionWith(observers);
                 identity.ClearObservers();
             }
-            
+
             var directChildren = identities[0].directChildren;
             var dcount = directChildren.Count;
-            
+
             for (var i = 0; i < dcount; i++)
                 ClearVisibilityForGameObject(directChildren[i].transform, players);
         }
-        
+
         private void RefreshVisibilityForGameObject(PlayerID player, Transform transform,
             NetworkVisibilityRuleSet rules, bool isParentVisible, bool wasParentDirtied)
         {
             using var identities = new DisposableList<NetworkIdentity>(16);
 
             transform.GetComponents(identities.list);
-            
+
             var isVisible = Evaluate(player, identities.list, ref rules, isParentVisible, out bool fullyChanged);
             bool shouldTrigger = !wasParentDirtied && fullyChanged;
-            
+
             if (shouldTrigger)
                 wasParentDirtied = true;
 
             var directChildren = identities[0].directChildren;
             var count = directChildren.Count;
-            
+
             for (var i = 0; i < count; i++)
             {
                 var pair = directChildren[i];
                 RefreshVisibilityForGameObject(player, pair.transform, rules, isVisible, wasParentDirtied);
             }
-            
+
             if (shouldTrigger)
                 visibilityChanged?.Invoke(player, transform, isVisible);
         }
@@ -154,11 +154,11 @@ namespace PurrNet.Modules
                 hash.Add(root);
             }
 
-            
+
             foreach (var player in players)
-                foreach (var root in hash)
-                    RefreshVisibilityForGameObject(player, root.transform);
-            
+            foreach (var root in hash)
+                RefreshVisibilityForGameObject(player, root.transform);
+
             HashSetPool<NetworkIdentity>.Destroy(hash);
         }
 
@@ -166,23 +166,24 @@ namespace PurrNet.Modules
         /// Evaluate visibility of the object.
         /// Also adds/removes observers based on the visibility.
         /// </summary>
-        private static bool Evaluate(PlayerID player, List<NetworkIdentity> identities, ref NetworkVisibilityRuleSet rules, bool isParentVisible, out bool fullyChanged)
+        private static bool Evaluate(PlayerID player, List<NetworkIdentity> identities,
+            ref NetworkVisibilityRuleSet rules, bool isParentVisible, out bool fullyChanged)
         {
             fullyChanged = false;
-            
+
             if (!isParentVisible)
             {
                 for (var i = 0; i < identities.Count; i++)
                     identities[i].TryRemoveObserver(player);
                 return false;
             }
-            
+
             bool isAnyVisible = false;
 
             for (var i = 0; i < identities.Count; i++)
             {
                 var identity = identities[i];
-                
+
                 var r = identity.GetOverrideOrDefault(rules);
 
                 if (r && r.childrenInherit)
@@ -224,14 +225,14 @@ namespace PurrNet.Modules
                     if (identity.TryRemoveObserver(player))
                         fullyChanged = true;
                 }
-                else 
+                else
                 {
                     isAnyVisible = true;
                     if (identity.TryAddObserver(player))
                         fullyChanged = true;
                 }
             }
-            
+
             return isAnyVisible;
         }
     }

@@ -21,15 +21,15 @@ namespace PurrNet.Editor
             GUILayout.Space(EditorGUIUtility.singleLineHeight);
             var rect = GUILayoutUtility.GetLastRect();
             rect.height = EditorGUIUtility.singleLineHeight;
-            
+
             const float padding = 5;
-            
+
             rect.x += padding;
             rect.y += padding;
-            
+
             rect.width -= padding * 2;
             rect.height -= padding * 2;
-            
+
             GUI.DrawTexture(rect, white, ScaleMode.StretchToFill, true, 1f, color, 0, 10f);
         }
 
@@ -65,9 +65,9 @@ namespace PurrNet.Editor
             var transport = generic.transport;
 
             GUILayout.Space(10);
-            
+
             EditorGUILayout.LabelField("Protocol Status", EditorStyles.boldLabel);
-            
+
             if (!generic.isSupported)
             {
                 EditorGUILayout.HelpBox("Transport is not supported on this platform", MessageType.Info);
@@ -83,7 +83,7 @@ namespace PurrNet.Editor
             DrawLed(transport.clientState);
             EditorGUILayout.LabelField("Connected");
             GUILayout.EndHorizontal();
-            
+
             GUILayout.Space(10);
         }
     }

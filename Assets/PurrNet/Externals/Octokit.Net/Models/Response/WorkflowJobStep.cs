@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class WorkflowJobStep
     {
-        public WorkflowJobStep() { }
+        public WorkflowJobStep()
+        {
+        }
 
-        public WorkflowJobStep(string name, WorkflowJobStatus status, WorkflowJobConclusion conclusion, int number, DateTimeOffset? startedAt, DateTimeOffset? completedAt)
+        public WorkflowJobStep(string name, WorkflowJobStatus status, WorkflowJobConclusion conclusion, int number,
+            DateTimeOffset? startedAt, DateTimeOffset? completedAt)
         {
             Name = name;
             Status = status;
@@ -51,10 +54,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Number: {0} Name: {1}", Number, Name);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Number: {0} Name: {1}", Number, Name); }
         }
     }
 }

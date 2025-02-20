@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class ResourceRateLimit
     {
-        public ResourceRateLimit() { }
+        public ResourceRateLimit()
+        {
+        }
 
         public ResourceRateLimit(RateLimit core, RateLimit search, RateLimit graphQL)
         {
@@ -36,12 +38,11 @@ namespace Octokit
         public RateLimit Graphql { get; private set; }
 
 
-
         internal string DebuggerDisplay
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Core: {0}; Search: {1}; GraphQL: {2} ", 
+                return string.Format(CultureInfo.InvariantCulture, "Core: {0}; Search: {1}; GraphQL: {2} ",
                     Core.DebuggerDisplay, Search.DebuggerDisplay, Graphql.DebuggerDisplay);
             }
         }

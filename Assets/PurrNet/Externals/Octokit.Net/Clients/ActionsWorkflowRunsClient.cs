@@ -60,14 +60,16 @@ namespace Octokit
         /// <param name="workflowRunsRequest">Details to filter the request, such as by check suite Id.</param>
         /// <param name="options">Options to change the API response.</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/actions/runs")]
-        public async Task<WorkflowRunsResponse> List(string owner, string name, WorkflowRunsRequest workflowRunsRequest, ApiOptions options)
+        public async Task<WorkflowRunsResponse> List(string owner, string name, WorkflowRunsRequest workflowRunsRequest,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(workflowRunsRequest, nameof(workflowRunsRequest));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            var results = await ApiConnection.GetAll<WorkflowRunsResponse>(ApiUrls.ActionsWorkflowRuns(owner, name), workflowRunsRequest.ToParametersDictionary(), options).ConfigureAwait(false);
+            var results = await ApiConnection.GetAll<WorkflowRunsResponse>(ApiUrls.ActionsWorkflowRuns(owner, name),
+                workflowRunsRequest.ToParametersDictionary(), options).ConfigureAwait(false);
 
             return new WorkflowRunsResponse(
                 results.Count > 0 ? results.Max(x => x.TotalCount) : 0,
@@ -162,7 +164,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
 
-            return ApiConnection.Get<WorkflowRun>(ApiUrls.ActionsWorkflowRunAttempt(owner, name, runId, attemptNumber), null);
+            return ApiConnection.Get<WorkflowRun>(ApiUrls.ActionsWorkflowRunAttempt(owner, name, runId, attemptNumber),
+                null);
         }
 
         /// <summary>
@@ -181,7 +184,9 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
 
-            var response = await Connection.GetRaw(ApiUrls.ActionsGetWorkflowRunAttemptLogs(owner, name, runId, attemptNumber), null).ConfigureAwait(false);
+            var response = await Connection
+                .GetRaw(ApiUrls.ActionsGetWorkflowRunAttemptLogs(owner, name, runId, attemptNumber), null)
+                .ConfigureAwait(false);
             return response.Body;
         }
 
@@ -218,7 +223,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
 
-            var response = await Connection.GetRaw(ApiUrls.ActionsGetWorkflowRunLogs(owner, name, runId), null).ConfigureAwait(false);
+            var response = await Connection.GetRaw(ApiUrls.ActionsGetWorkflowRunLogs(owner, name, runId), null)
+                .ConfigureAwait(false);
             return response.Body;
         }
 
@@ -251,13 +257,15 @@ namespace Octokit
         /// <param name="runId">The Id of the workflow run.</param>
         /// <param name="review">The review for the pending deployment.</param>
         [ManualRoute("POST", "/repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments")]
-        public Task<Deployment> ReviewPendingDeployments(string owner, string name, long runId, PendingDeploymentReview review)
+        public Task<Deployment> ReviewPendingDeployments(string owner, string name, long runId,
+            PendingDeploymentReview review)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(review, nameof(review));
 
-            return ApiConnection.Post<Deployment>(ApiUrls.ActionsWorkflowRunPendingDeployments(owner, name, runId), review);
+            return ApiConnection.Post<Deployment>(ApiUrls.ActionsWorkflowRunPendingDeployments(owner, name, runId),
+                review);
         }
 
         /// <summary>
@@ -340,7 +348,8 @@ namespace Octokit
         /// <param name="workflowId">The Id of the workflow.</param>
         /// <param name="workflowRunsRequest">Details to filter the request, such as by check suite Id.</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs")]
-        public Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, long workflowId, WorkflowRunsRequest workflowRunsRequest)
+        public Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, long workflowId,
+            WorkflowRunsRequest workflowRunsRequest)
         {
             return ListByWorkflow(owner, name, workflowId, workflowRunsRequest, ApiOptions.None);
         }
@@ -357,14 +366,17 @@ namespace Octokit
         /// <param name="workflowRunsRequest">Details to filter the request, such as by check suite Id.</param>
         /// <param name="options">Options to change the API response.</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs")]
-        public async Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, long workflowId, WorkflowRunsRequest workflowRunsRequest, ApiOptions options)
+        public async Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, long workflowId,
+            WorkflowRunsRequest workflowRunsRequest, ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(workflowRunsRequest, nameof(workflowRunsRequest));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            var results = await ApiConnection.GetAll<WorkflowRunsResponse>(ApiUrls.ActionsListWorkflowRuns(owner, name, workflowId), workflowRunsRequest.ToParametersDictionary(), options).ConfigureAwait(false);
+            var results = await ApiConnection
+                .GetAll<WorkflowRunsResponse>(ApiUrls.ActionsListWorkflowRuns(owner, name, workflowId),
+                    workflowRunsRequest.ToParametersDictionary(), options).ConfigureAwait(false);
 
             return new WorkflowRunsResponse(
                 results.Count > 0 ? results.Max(x => x.TotalCount) : 0,
@@ -397,7 +409,8 @@ namespace Octokit
         /// <param name="workflowFileName">The workflow file name.</param>
         /// <param name="workflowRunsRequest">Details to filter the request, such as by check suite Id.</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs")]
-        public Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, string workflowFileName, WorkflowRunsRequest workflowRunsRequest)
+        public Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, string workflowFileName,
+            WorkflowRunsRequest workflowRunsRequest)
         {
             return ListByWorkflow(owner, name, workflowFileName, workflowRunsRequest, ApiOptions.None);
         }
@@ -414,7 +427,8 @@ namespace Octokit
         /// <param name="workflowRunsRequest">Details to filter the request, such as by check suite Id.</param>
         /// <param name="options">Options to change the API response.</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs")]
-        public async Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, string workflowFileName, WorkflowRunsRequest workflowRunsRequest, ApiOptions options)
+        public async Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, string workflowFileName,
+            WorkflowRunsRequest workflowRunsRequest, ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -422,7 +436,9 @@ namespace Octokit
             Ensure.ArgumentNotNull(workflowRunsRequest, nameof(workflowRunsRequest));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            var results = await ApiConnection.GetAll<WorkflowRunsResponse>(ApiUrls.ActionsListWorkflowRuns(owner, name, workflowFileName), workflowRunsRequest.ToParametersDictionary(), options).ConfigureAwait(false);
+            var results = await ApiConnection
+                .GetAll<WorkflowRunsResponse>(ApiUrls.ActionsListWorkflowRuns(owner, name, workflowFileName),
+                    workflowRunsRequest.ToParametersDictionary(), options).ConfigureAwait(false);
 
             return new WorkflowRunsResponse(
                 results.Count > 0 ? results.Max(x => x.TotalCount) : 0,

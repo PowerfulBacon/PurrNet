@@ -9,7 +9,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class UserRenameResponse
     {
-        public UserRenameResponse() { }
+        public UserRenameResponse()
+        {
+        }
 
         public UserRenameResponse(string message, string url)
         {
@@ -29,10 +31,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Message: {0}", Message);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Message: {0}", Message); }
         }
     }
 }

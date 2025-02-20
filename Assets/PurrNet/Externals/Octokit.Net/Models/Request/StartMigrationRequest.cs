@@ -18,13 +18,15 @@ namespace Octokit
         /// Parameter-less constructor needed for SimpleJsonSerializer.
         /// </summary>
         public StartMigrationRequest()
-        { }
+        {
+        }
 
         public StartMigrationRequest(
             IReadOnlyList<string> repositories
-            ) :
+        ) :
             this(repositories, false, false)
-        { }
+        {
+        }
 
         /// <summary>
         /// Instantiate a new Migration Request object.
@@ -61,10 +63,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Repos: {0}", Repositories);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Repos: {0}", Repositories); }
         }
     }
 }

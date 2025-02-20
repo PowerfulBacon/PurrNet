@@ -2,7 +2,9 @@ namespace Octokit
 {
     internal class ReadmeResponse
     {
-        public ReadmeResponse() { }
+        public ReadmeResponse()
+        {
+        }
 
         public ReadmeResponse(string content, string name, string htmlUrl, string url, string encoding)
         {

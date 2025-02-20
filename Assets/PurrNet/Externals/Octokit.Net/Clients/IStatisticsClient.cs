@@ -33,7 +33,8 @@ namespace Octokit
         /// <param name="owner">The owner of the repository</param>
         /// <param name="name">The name of the repository</param>
         /// <param name="cancellationToken">A token used to cancel this potentially long running request</param>
-        Task<IReadOnlyList<Contributor>> GetContributors(string owner, string name, CancellationToken cancellationToken);
+        Task<IReadOnlyList<Contributor>>
+            GetContributors(string owner, string name, CancellationToken cancellationToken);
 
         /// <summary>
         /// Returns a list of <see cref="Contributor"/> for the given repository

@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class MiscellaneousRateLimit
     {
-        public MiscellaneousRateLimit() { }
+        public MiscellaneousRateLimit()
+        {
+        }
 
         public MiscellaneousRateLimit(ResourceRateLimit resources, RateLimit rate)
         {
@@ -31,7 +33,9 @@ namespace Octokit
         {
             get
             {
-                return Resources == null ? "No rates found" : string.Format(CultureInfo.InvariantCulture, Resources.DebuggerDisplay);
+                return Resources == null
+                    ? "No rates found"
+                    : string.Format(CultureInfo.InvariantCulture, Resources.DebuggerDisplay);
             }
         }
     }

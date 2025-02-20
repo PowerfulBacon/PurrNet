@@ -158,7 +158,8 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(permissions, nameof(permissions));
 
-            return ApiConnection.Patch<RepositoryInvitation>(ApiUrls.RepositoryInvitations(repositoryId, invitationId), permissions);
+            return ApiConnection.Patch<RepositoryInvitation>(ApiUrls.RepositoryInvitations(repositoryId, invitationId),
+                permissions);
         }
     }
 }

@@ -32,10 +32,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "BaseTree: {0}", BaseTree);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "BaseTree: {0}", BaseTree); }
         }
     }
 }

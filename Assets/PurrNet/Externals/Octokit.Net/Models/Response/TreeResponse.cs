@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class TreeResponse
     {
-        public TreeResponse() { }
+        public TreeResponse()
+        {
+        }
 
         public TreeResponse(string sha, string url, IReadOnlyList<TreeItem> tree, bool truncated)
         {
@@ -39,10 +41,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Sha: {0}", Sha);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Sha: {0}", Sha); }
         }
     }
 }

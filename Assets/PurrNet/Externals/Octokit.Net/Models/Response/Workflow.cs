@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Workflow
     {
-        public Workflow() { }
+        public Workflow()
+        {
+        }
 
-        public Workflow(long id, string nodeId, string name, string path, WorkflowState state, DateTimeOffset createdAt, DateTimeOffset updatedAt, string url, string htmlUrl, string badgeUrl, DateTimeOffset? deletedAt)
+        public Workflow(long id, string nodeId, string name, string path, WorkflowState state, DateTimeOffset createdAt,
+            DateTimeOffset updatedAt, string url, string htmlUrl, string badgeUrl, DateTimeOffset? deletedAt)
         {
             Id = id;
             NodeId = nodeId;
@@ -81,10 +84,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Id: {0} Name: {1}", Id, Name);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Id: {0} Name: {1}", Id, Name); }
         }
     }
 }

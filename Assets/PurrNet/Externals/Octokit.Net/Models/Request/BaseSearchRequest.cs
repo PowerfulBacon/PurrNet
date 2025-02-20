@@ -38,10 +38,7 @@ namespace Octokit
         /// <summary>
         /// The sort field
         /// </summary>
-        public abstract string Sort
-        {
-            get;
-        }
+        public abstract string Sort { get; }
 
         /// <summary>
         /// Gets the sort order as a properly formatted lowercased query string parameter.
@@ -51,10 +48,7 @@ namespace Octokit
         /// </value>
         private string SortOrder
         {
-            get
-            {
-                return Order.ToParameter();
-            }
+            get { return Order.ToParameter(); }
         }
 
         /// <summary>
@@ -116,19 +110,20 @@ namespace Octokit
             {
                 var d = new Dictionary<string, string>
                 {
-                    { "page", Page.ToString(CultureInfo.CurrentCulture) }
-                    , { "per_page", PerPage.ToString(CultureInfo.CurrentCulture) }
-                    , { "order", SortOrder }
-                    , { "q", TermAndQualifiers }
+                    { "page", Page.ToString(CultureInfo.CurrentCulture) },
+                    { "per_page", PerPage.ToString(CultureInfo.CurrentCulture) }, { "order", SortOrder },
+                    { "q", TermAndQualifiers }
                 };
                 if (!string.IsNullOrWhiteSpace(Sort))
                 {
                     d.Add("sort", Sort);
                 }
+
                 foreach (var parameter in AdditionalParameters())
                 {
                     d.Add(parameter.Key, parameter.Value);
                 }
+
                 return d;
             }
         }

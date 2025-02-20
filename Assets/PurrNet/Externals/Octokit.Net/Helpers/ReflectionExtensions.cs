@@ -53,6 +53,7 @@ namespace Octokit
         {
             return type.GetTypeInfo().IsAssignableFrom(otherType.GetTypeInfo());
         }
+
         public static IEnumerable<PropertyInfo> GetAllProperties(this Type type)
         {
             var typeInfo = type.GetTypeInfo();

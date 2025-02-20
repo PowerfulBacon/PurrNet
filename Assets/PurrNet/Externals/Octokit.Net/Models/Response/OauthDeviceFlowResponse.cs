@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class OauthDeviceFlowResponse
     {
-        public OauthDeviceFlowResponse() { }
+        public OauthDeviceFlowResponse()
+        {
+        }
 
-        public OauthDeviceFlowResponse(string deviceCode, string userCode, string verificationUri, int expiresIn, int interval)
+        public OauthDeviceFlowResponse(string deviceCode, string userCode, string verificationUri, int expiresIn,
+            int interval)
         {
             DeviceCode = deviceCode;
             UserCode = userCode;
@@ -49,7 +52,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "DeviceCode: {0}, UserCode: {1}, VerificationUri: {2}, ExpiresIn: {3}, Interval: {4}",
+                return string.Format(CultureInfo.InvariantCulture,
+                    "DeviceCode: {0}, UserCode: {1}, VerificationUri: {2}, ExpiresIn: {3}, Interval: {4}",
                     DeviceCode,
                     UserCode,
                     VerificationUri,

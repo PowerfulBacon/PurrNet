@@ -28,7 +28,7 @@ namespace Octokit
         /// "heads/main" or "tags/release-1")
         /// </remarks>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
-             Justification = "Method makes a network request")]
+            Justification = "Method makes a network request")]
         Task<Reference> Get(string owner, string name, string reference);
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Octokit
         /// "heads/main" or "tags/release-1")
         /// </remarks>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
-             Justification = "Method makes a network request")]
+            Justification = "Method makes a network request")]
         Task<Reference> Get(long repositoryId, string reference);
 
         /// <summary>
@@ -126,7 +126,8 @@ namespace Octokit
         /// "refs/tags/release-1") or the shortened form (omitting "refs/", e.g.
         /// "heads/main" or "tags/release-1")
         /// </remarks>
-        Task<IReadOnlyList<Reference>> GetAllForSubNamespace(string owner, string name, string subNamespace, ApiOptions options);
+        Task<IReadOnlyList<Reference>> GetAllForSubNamespace(string owner, string name, string subNamespace,
+            ApiOptions options);
 
         /// <summary>
         /// Gets references for a given repository by sub-namespace, i.e. "tags" or "heads"
@@ -159,7 +160,8 @@ namespace Octokit
         /// "refs/tags/release-1") or the shortened form (omitting "refs/", e.g.
         /// "heads/main" or "tags/release-1")
         /// </remarks>
-        Task<IReadOnlyList<Reference>> GetAllForSubNamespace(long repositoryId, string subNamespace, ApiOptions options);
+        Task<IReadOnlyList<Reference>>
+            GetAllForSubNamespace(long repositoryId, string subNamespace, ApiOptions options);
 
         /// <summary>
         /// Creates a reference for a given repository

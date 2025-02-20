@@ -30,7 +30,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
 
-            return ApiConnection.Get<RequestedReviews>(ApiUrls.PullRequestReviewRequests(owner, name, pullRequestNumber));
+            return ApiConnection.Get<RequestedReviews>(
+                ApiUrls.PullRequestReviewRequests(owner, name, pullRequestNumber));
         }
 
         /// <summary>
@@ -42,7 +43,8 @@ namespace Octokit
         [ManualRoute("GET", "/repositories/{id}/pulls/{number}/requested_reviewers")]
         public Task<RequestedReviews> Get(long repositoryId, int pullRequestNumber)
         {
-            return ApiConnection.Get<RequestedReviews>(ApiUrls.PullRequestReviewRequests(repositoryId, pullRequestNumber));
+            return ApiConnection.Get<RequestedReviews>(
+                ApiUrls.PullRequestReviewRequests(repositoryId, pullRequestNumber));
         }
 
         /// <summary>
@@ -54,7 +56,8 @@ namespace Octokit
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="users">List of logins of user will be requested for review</param>
         [ManualRoute("POST", "/repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers")]
-        public Task<PullRequest> Create(string owner, string name, int pullRequestNumber, PullRequestReviewRequest users)
+        public Task<PullRequest> Create(string owner, string name, int pullRequestNumber,
+            PullRequestReviewRequest users)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));

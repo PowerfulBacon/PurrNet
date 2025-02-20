@@ -477,7 +477,8 @@ namespace Octokit
         /// </summary>
         public static Uri OrganizationInstallation(string organization)
         {
-            return "orgs/{0}/installation".FormatUri(organization); ;
+            return "orgs/{0}/installation".FormatUri(organization);
+            ;
         }
 
         /// <summary>
@@ -1656,6 +1657,7 @@ namespace Octokit
             {
                 usersReceivedEvents += "/public";
             }
+
             return usersReceivedEvents.FormatUri(user);
         }
 
@@ -1682,6 +1684,7 @@ namespace Octokit
             {
                 usersEvents += "/public";
             }
+
             return usersEvents.FormatUri(user);
         }
 
@@ -1754,7 +1757,8 @@ namespace Octokit
         /// <returns>The <see cref="Uri"/></returns>
         public static Uri PullRequestReviewDismissal(long repositoryId, int pullRequestNumber, long reviewId)
         {
-            return "repositories/{0}/pulls/{1}/reviews/{2}/dismissals".FormatUri(repositoryId, pullRequestNumber, reviewId);
+            return "repositories/{0}/pulls/{1}/reviews/{2}/dismissals".FormatUri(repositoryId, pullRequestNumber,
+                reviewId);
         }
 
         /// <summary>
@@ -1804,7 +1808,8 @@ namespace Octokit
         /// <returns>The <see cref="Uri"/> that </returns>
         public static Uri PullRequestReviewComments(long repositoryId, int pullRequestNumber, long reviewId)
         {
-            return "repositories/{0}/pulls/{1}/reviews/{2}/comments".FormatUri(repositoryId, pullRequestNumber, reviewId);
+            return "repositories/{0}/pulls/{1}/reviews/{2}/comments".FormatUri(repositoryId, pullRequestNumber,
+                reviewId);
         }
 
         /// <summary>
@@ -1917,6 +1922,7 @@ namespace Octokit
             {
                 blob += "/{2}";
             }
+
             return blob.FormatUri(owner, name, reference);
         }
 
@@ -2430,7 +2436,8 @@ namespace Octokit
         /// <returns></returns>
         public static Uri RepoRequiredStatusChecks(long repositoryId, string branchName)
         {
-            return "repositories/{0}/branches/{1}/protection/required_status_checks".FormatUri(repositoryId, branchName);
+            return "repositories/{0}/branches/{1}/protection/required_status_checks"
+                .FormatUri(repositoryId, branchName);
         }
 
         /// <summary>
@@ -2442,7 +2449,8 @@ namespace Octokit
         /// <returns></returns>
         public static Uri RepoRequiredStatusChecksContexts(string owner, string name, string branchName)
         {
-            return "repos/{0}/{1}/branches/{2}/protection/required_status_checks/contexts".FormatUri(owner, name, branchName);
+            return "repos/{0}/{1}/branches/{2}/protection/required_status_checks/contexts".FormatUri(owner, name,
+                branchName);
         }
 
         /// <summary>
@@ -2453,7 +2461,8 @@ namespace Octokit
         /// <returns></returns>
         public static Uri RepoRequiredStatusChecksContexts(long repositoryId, string branchName)
         {
-            return "repositories/{0}/branches/{1}/protection/required_status_checks/contexts".FormatUri(repositoryId, branchName);
+            return "repositories/{0}/branches/{1}/protection/required_status_checks/contexts".FormatUri(repositoryId,
+                branchName);
         }
 
         /// <summary>
@@ -2464,7 +2473,8 @@ namespace Octokit
         /// <param name="branchName">The name of the branch</param>
         public static Uri RepoProtectedBranchReviewEnforcement(string owner, string name, string branchName)
         {
-            return "repos/{0}/{1}/branches/{2}/protection/required_pull_request_reviews".FormatUri(owner, name, branchName);
+            return "repos/{0}/{1}/branches/{2}/protection/required_pull_request_reviews".FormatUri(owner, name,
+                branchName);
         }
 
         /// <summary>
@@ -2474,7 +2484,8 @@ namespace Octokit
         /// <param name="branchName">The name of the branch</param>
         public static Uri RepoProtectedBranchReviewEnforcement(long repositoryId, string branchName)
         {
-            return "repositories/{0}/branches/{1}/protection/required_pull_request_reviews".FormatUri(repositoryId, branchName);
+            return "repositories/{0}/branches/{1}/protection/required_pull_request_reviews".FormatUri(repositoryId,
+                branchName);
         }
 
         /// <summary>
@@ -2811,7 +2822,8 @@ namespace Octokit
         /// <param name="archiveFormat">The format of the archive. Can be either tarball or zipball</param>
         /// <param name="reference">A valid Git reference.</param>
         /// <returns>The <see cref="Uri"/> for getting an archive of a given repository's contents, in a specific format</returns>
-        public static Uri RepositoryArchiveLink(string owner, string name, ArchiveFormat archiveFormat, string reference)
+        public static Uri RepositoryArchiveLink(string owner, string name, ArchiveFormat archiveFormat,
+            string reference)
         {
             return "repos/{0}/{1}/{2}/{3}".FormatUri(owner, name, archiveFormat.ToParameter(), reference);
         }
@@ -2826,7 +2838,8 @@ namespace Octokit
         /// <returns>The <see cref="Uri"/> for getting the contents of the specified repository and path</returns>
         public static Uri RepositoryContent(string owner, string name, string path, string reference)
         {
-            return "repos/{0}/{1}/contents/{2}?ref={3}".FormatUri(owner, name, path == "/" ? "" : path.TrimEnd('/'), reference);
+            return "repos/{0}/{1}/contents/{2}?ref={3}".FormatUri(owner, name, path == "/" ? "" : path.TrimEnd('/'),
+                reference);
         }
 
         /// <summary>
@@ -3192,6 +3205,7 @@ namespace Octokit
             {
                 blob += "/{1}";
             }
+
             return blob.FormatUri(repositoryId, reference);
         }
 
@@ -4906,18 +4920,22 @@ namespace Octokit
         /// Returns the <see cref="Uri"/> for the Package Version request
         /// </summary>
         /// <returns>The <see cref="Uri"/> Package endpoint.</returns>
-        public static Uri PackageVersionOrg(string org, PackageType packageType, string packageName, int packageVersionId)
+        public static Uri PackageVersionOrg(string org, PackageType packageType, string packageName,
+            int packageVersionId)
         {
-            return "orgs/{0}/packages/{1}/{2}/versions/{3}".FormatUri(org, packageType.ToParameter(), packageName, packageVersionId);
+            return "orgs/{0}/packages/{1}/{2}/versions/{3}".FormatUri(org, packageType.ToParameter(), packageName,
+                packageVersionId);
         }
 
         /// <summary>
         /// Returns the <see cref="Uri"/> for the Package Version request
         /// </summary>
         /// <returns>The <see cref="Uri"/> Package endpoint.</returns>
-        public static Uri PackageVersionRestoreOrg(string org, PackageType packageType, string packageName, int packageVersionId)
+        public static Uri PackageVersionRestoreOrg(string org, PackageType packageType, string packageName,
+            int packageVersionId)
         {
-            return "orgs/{0}/packages/{1}/{2}/versions/{3}/restore".FormatUri(org, packageType.ToParameter(), packageName, packageVersionId);
+            return "orgs/{0}/packages/{1}/{2}/versions/{3}/restore".FormatUri(org, packageType.ToParameter(),
+                packageName, packageVersionId);
         }
 
         /// <summary>
@@ -4962,16 +4980,19 @@ namespace Octokit
         /// <returns>The <see cref="Uri"/> Package endpoint.</returns>
         public static Uri PackageVersionActiveUser(PackageType packageType, string packageName, int packageVersionId)
         {
-            return "user/packages/{0}/{1}/versions/{2}".FormatUri(packageType.ToParameter(), packageName, packageVersionId);
+            return "user/packages/{0}/{1}/versions/{2}".FormatUri(packageType.ToParameter(), packageName,
+                packageVersionId);
         }
 
         /// <summary>
         /// Returns the <see cref="Uri"/> for the Package Version request
         /// </summary>
         /// <returns>The <see cref="Uri"/> Package endpoint.</returns>
-        public static Uri PackageVersionRestoreActiveUser(PackageType packageType, string packageName, int packageVersionId)
+        public static Uri PackageVersionRestoreActiveUser(PackageType packageType, string packageName,
+            int packageVersionId)
         {
-            return "user/packages/{0}/{1}/versions/{2}/restore".FormatUri(packageType.ToParameter(), packageName, packageVersionId);
+            return "user/packages/{0}/{1}/versions/{2}/restore".FormatUri(packageType.ToParameter(), packageName,
+                packageVersionId);
         }
 
         /// <summary>
@@ -5014,18 +5035,22 @@ namespace Octokit
         /// Returns the <see cref="Uri"/> for the Package Version request
         /// </summary>
         /// <returns>The <see cref="Uri"/> Package endpoint.</returns>
-        public static Uri PackageVersionUser(string username, PackageType packageType, string packageName, int packageVersionId)
+        public static Uri PackageVersionUser(string username, PackageType packageType, string packageName,
+            int packageVersionId)
         {
-            return "users/{0}/packages/{1}/{2}/versions/{3}".FormatUri(username, packageType.ToParameter(), packageName, packageVersionId);
+            return "users/{0}/packages/{1}/{2}/versions/{3}".FormatUri(username, packageType.ToParameter(), packageName,
+                packageVersionId);
         }
 
         /// <summary>
         /// Returns the <see cref="Uri"/> for the Package Version request
         /// </summary>
         /// <returns>The <see cref="Uri"/> Package endpoint.</returns>
-        public static Uri PackageVersionRestoreUser(string username, PackageType packageType, string packageName, int packageVersionId)
+        public static Uri PackageVersionRestoreUser(string username, PackageType packageType, string packageName,
+            int packageVersionId)
         {
-            return "users/{0}/packages/{1}/{2}/versions/{3}/restore".FormatUri(username, packageType.ToParameter(), packageName, packageVersionId);
+            return "users/{0}/packages/{1}/{2}/versions/{3}/restore".FormatUri(username, packageType.ToParameter(),
+                packageName, packageVersionId);
         }
 
         /// <summary>
@@ -5049,7 +5074,8 @@ namespace Octokit
         /// <returns>The <see cref="Uri"/> that gets an Actions workflow for a repository.</returns>
         public static Uri ActionsDispatchWorkflow(string owner, string repo, string workflowFileName)
         {
-            return "repos/{0}/{1}/actions/workflows/{2}/dispatches".FormatUri(owner, repo, workflowFileName.UriEncode());
+            return "repos/{0}/{1}/actions/workflows/{2}/dispatches".FormatUri(owner, repo,
+                workflowFileName.UriEncode());
         }
 
         /// <summary>
@@ -5071,7 +5097,8 @@ namespace Octokit
         /// <returns>The <see cref="Uri"/> that gets an Actions workflow for a repository.</returns>
         public static Uri ActionsDispatchWorkflow(long repositoryId, string workflowFileName)
         {
-            return "repositories/{0}/actions/workflows/{1}/dispatches".FormatUri(repositoryId, workflowFileName.UriEncode());
+            return "repositories/{0}/actions/workflows/{1}/dispatches".FormatUri(repositoryId,
+                workflowFileName.UriEncode());
         }
 
         /// <summary>
@@ -5471,7 +5498,8 @@ namespace Octokit
         /// <param name="repo">The name of repo</param>
         /// <param name="runnerGroupId">The Id of the runner group.</param>
         /// <returns>The <see cref="Uri"/> that handles the Actions self-hosted runner for a runner group in a repository.</returns>
-        public static Uri ActionsListSelfHostedRunnersForRepositoryRunnerGroup(string owner, string repo, long runnerGroupId)
+        public static Uri ActionsListSelfHostedRunnersForRepositoryRunnerGroup(string owner, string repo,
+            long runnerGroupId)
         {
             return "repos/{0}/{1}/actions/runner-groups/{2}/runners".FormatUri(owner, repo, runnerGroupId);
         }
@@ -5651,7 +5679,7 @@ namespace Octokit
 
             return "repos/{0}/{1}/actions/runners/availability?ref={3}".FormatUri(owner, repo, reference);
         }
-        
+
         /// <summary>
         /// Returns the <see cref="Uri"/> that handles adding or removing of copilot licenses for an organisation
         /// </summary>

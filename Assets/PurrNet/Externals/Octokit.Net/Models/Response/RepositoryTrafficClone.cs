@@ -10,9 +10,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RepositoryTrafficCloneSummary
     {
-        public RepositoryTrafficCloneSummary() { }
+        public RepositoryTrafficCloneSummary()
+        {
+        }
 
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "It's a property from the api.")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly",
+            Justification = "It's a property from the api.")]
         public RepositoryTrafficCloneSummary(int count, int uniques, IReadOnlyList<RepositoryTrafficClone> clones)
         {
             Count = count;
@@ -22,7 +25,8 @@ namespace Octokit
 
         public int Count { get; private set; }
 
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "It's a property from the api.")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly",
+            Justification = "It's a property from the api.")]
         public int Uniques { get; private set; }
 
         public IReadOnlyList<RepositoryTrafficClone> Clones { get; private set; }
@@ -36,9 +40,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RepositoryTrafficClone
     {
-        public RepositoryTrafficClone() { }
+        public RepositoryTrafficClone()
+        {
+        }
 
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "It's a property from the api.")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly",
+            Justification = "It's a property from the api.")]
         public RepositoryTrafficClone(DateTimeOffset timestamp, int count, int uniques)
         {
             Timestamp = timestamp;
@@ -50,7 +57,8 @@ namespace Octokit
 
         public int Count { get; private set; }
 
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "It's a property from the api.")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly",
+            Justification = "It's a property from the api.")]
         public int Uniques { get; private set; }
 
         internal string DebuggerDisplay
@@ -61,10 +69,8 @@ namespace Octokit
 
     public enum TrafficDayOrWeek
     {
-        [Parameter(Value = "day")]
-        Day,
+        [Parameter(Value = "day")] Day,
 
-        [Parameter(Value = "week")]
-        Week
+        [Parameter(Value = "week")] Week
     }
 }

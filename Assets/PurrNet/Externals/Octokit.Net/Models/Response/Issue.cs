@@ -10,9 +10,16 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Issue
     {
-        public Issue() { }
+        public Issue()
+        {
+        }
 
-        public Issue(string url, string htmlUrl, string commentsUrl, string eventsUrl, int number, ItemState state, string title, string body, User closedBy, User user, IReadOnlyList<Label> labels, User assignee, IReadOnlyList<User> assignees, Milestone milestone, int comments, PullRequest pullRequest, DateTimeOffset? closedAt, DateTimeOffset createdAt, DateTimeOffset? updatedAt, long id, string nodeId, bool locked, Repository repository, ReactionSummary reactions, LockReason? activeLockReason, ItemStateReason? stateReason)
+        public Issue(string url, string htmlUrl, string commentsUrl, string eventsUrl, int number, ItemState state,
+            string title, string body, User closedBy, User user, IReadOnlyList<Label> labels, User assignee,
+            IReadOnlyList<User> assignees, Milestone milestone, int comments, PullRequest pullRequest,
+            DateTimeOffset? closedAt, DateTimeOffset createdAt, DateTimeOffset? updatedAt, long id, string nodeId,
+            bool locked, Repository repository, ReactionSummary reactions, LockReason? activeLockReason,
+            ItemStateReason? stateReason)
         {
             Id = id;
             NodeId = nodeId;
@@ -171,10 +178,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Number: {0} State: {1}", Number, State);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Number: {0} State: {1}", Number, State); }
         }
 
         public IssueUpdate ToUpdate()
@@ -198,7 +202,9 @@ namespace Octokit
                 Body = Body,
                 Milestone = milestoneId,
                 State = (State.TryParse(out state) ? (ItemState?)state : null),
-                StateReason = (StateReason.HasValue && StateReason.Value.TryParse(out stateReason) ? (ItemStateReason?)stateReason : null),
+                StateReason = (StateReason.HasValue && StateReason.Value.TryParse(out stateReason)
+                    ? (ItemStateReason?)stateReason
+                    : null),
                 Title = Title
             };
 

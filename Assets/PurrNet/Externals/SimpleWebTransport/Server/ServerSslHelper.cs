@@ -22,6 +22,7 @@ namespace JamesFrowen.SimpleWeb
             this.sslProtocols = sslProtocols;
         }
     }
+
     internal class ServerSslHelper
     {
         readonly SslConfig config;

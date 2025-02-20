@@ -32,7 +32,8 @@ namespace Octokit
         /// <param name="repo">The name of the repository</param>
         /// <param name="issueNumber">The issue number</param>
         /// <param name="options">Options for changing the API repsonse</param>
-        Task<IReadOnlyList<TimelineEventInfo>> GetAllForIssue(string owner, string repo, int issueNumber, ApiOptions options);
+        Task<IReadOnlyList<TimelineEventInfo>> GetAllForIssue(string owner, string repo, int issueNumber,
+            ApiOptions options);
 
         /// <summary>
         /// Gets all the various events that have occurred around an issue or pull request.

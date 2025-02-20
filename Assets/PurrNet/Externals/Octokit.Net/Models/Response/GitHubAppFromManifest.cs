@@ -11,10 +11,16 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class GitHubAppFromManifest : GitHubApp
     {
-        public GitHubAppFromManifest() { }
+        public GitHubAppFromManifest()
+        {
+        }
 
-        public GitHubAppFromManifest(long id, string slug, string nodeId, string name, User owner, string description, string externalUrl, string htmlUrl, DateTimeOffset createdAt, DateTimeOffset updatedAt, InstallationPermissions permissions, IReadOnlyList<string> events, string clientId, string clientSecret, string webhookSecret, string pem)
-            : base(id, slug, nodeId, name, owner, description, externalUrl, htmlUrl, createdAt, updatedAt, permissions, events)
+        public GitHubAppFromManifest(long id, string slug, string nodeId, string name, User owner, string description,
+            string externalUrl, string htmlUrl, DateTimeOffset createdAt, DateTimeOffset updatedAt,
+            InstallationPermissions permissions, IReadOnlyList<string> events, string clientId, string clientSecret,
+            string webhookSecret, string pem)
+            : base(id, slug, nodeId, name, owner, description, externalUrl, htmlUrl, createdAt, updatedAt, permissions,
+                events)
         {
             ClientId = clientId;
             ClientSecret = clientSecret;

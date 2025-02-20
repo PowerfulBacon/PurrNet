@@ -9,7 +9,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Application
     {
-        public Application() { }
+        public Application()
+        {
+        }
 
         public Application(string name, string url)
         {

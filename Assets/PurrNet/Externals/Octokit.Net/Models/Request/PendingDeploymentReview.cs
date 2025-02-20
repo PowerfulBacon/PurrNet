@@ -34,7 +34,11 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "EnvironmentIds: {0}, State: {1}, Comment: {2}", EnvironmentIds, State, Comment); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "EnvironmentIds: {0}, State: {1}, Comment: {2}",
+                    EnvironmentIds, State, Comment);
+            }
         }
     }
 }

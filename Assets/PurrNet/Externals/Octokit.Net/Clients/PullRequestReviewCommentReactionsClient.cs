@@ -44,7 +44,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Reaction>(ApiUrls.PullRequestReviewCommentReactions(owner, name, commentId), null, options);
+            return ApiConnection.GetAll<Reaction>(ApiUrls.PullRequestReviewCommentReactions(owner, name, commentId),
+                null, options);
         }
 
         /// <summary>
@@ -71,7 +72,8 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Reaction>(ApiUrls.PullRequestReviewCommentReactions(repositoryId, commentId), null, options);
+            return ApiConnection.GetAll<Reaction>(ApiUrls.PullRequestReviewCommentReactions(repositoryId, commentId),
+                null, options);
         }
 
         /// <summary>
@@ -89,7 +91,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(reaction, nameof(reaction));
 
-            return ApiConnection.Post<Reaction>(ApiUrls.PullRequestReviewCommentReactions(owner, name, commentId), reaction);
+            return ApiConnection.Post<Reaction>(ApiUrls.PullRequestReviewCommentReactions(owner, name, commentId),
+                reaction);
         }
 
         /// <summary>
@@ -104,7 +107,8 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(reaction, nameof(reaction));
 
-            return ApiConnection.Post<Reaction>(ApiUrls.PullRequestReviewCommentReactions(repositoryId, commentId), reaction);
+            return ApiConnection.Post<Reaction>(ApiUrls.PullRequestReviewCommentReactions(repositoryId, commentId),
+                reaction);
         }
 
         /// <summary>

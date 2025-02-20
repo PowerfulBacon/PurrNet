@@ -81,7 +81,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Reaction>(ApiUrls.CommitCommentReactions(owner, name, commentId), null, options);
+            return ApiConnection.GetAll<Reaction>(ApiUrls.CommitCommentReactions(owner, name, commentId), null,
+                options);
         }
 
         /// <summary>
@@ -110,7 +111,8 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Reaction>(ApiUrls.CommitCommentReactions(repositoryId, commentId), null, options);
+            return ApiConnection.GetAll<Reaction>(ApiUrls.CommitCommentReactions(repositoryId, commentId), null,
+                options);
         }
 
         /// <summary>

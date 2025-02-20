@@ -10,7 +10,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class UpsertOrganizationCustomProperty
     {
-        public UpsertOrganizationCustomProperty() { }
+        public UpsertOrganizationCustomProperty()
+        {
+        }
 
         public UpsertOrganizationCustomProperty(CustomPropertyValueType valueType)
         {
@@ -62,6 +64,7 @@ namespace Octokit
         /// </summary>
         public StringEnum<CustomPropertyValuesEditableBy>? ValuesEditableBy { get; set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "ValueType: {0}", ValueType.DebuggerDisplay);
+        internal string DebuggerDisplay =>
+            string.Format(CultureInfo.InvariantCulture, "ValueType: {0}", ValueType.DebuggerDisplay);
     }
 }

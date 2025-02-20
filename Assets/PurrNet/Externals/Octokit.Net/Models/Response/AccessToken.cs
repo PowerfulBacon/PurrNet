@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class AccessToken
     {
-        public AccessToken() { }
+        public AccessToken()
+        {
+        }
 
         public AccessToken(string token, DateTimeOffset expiresAt)
         {
@@ -27,10 +29,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Token: {0}, ExpiresAt: {1}", Token, ExpiresAt);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Token: {0}, ExpiresAt: {1}", Token, ExpiresAt); }
         }
     }
 }

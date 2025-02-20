@@ -49,7 +49,8 @@ namespace Octokit
         }
 
         [ManualRoute("POST", "/login/oauth/access_token")]
-        public async Task<OauthToken> CreateAccessToken(OauthTokenRequest request, CancellationToken cancellationToken = default)
+        public async Task<OauthToken> CreateAccessToken(OauthTokenRequest request,
+            CancellationToken cancellationToken = default)
         {
             Ensure.ArgumentNotNull(request, nameof(request));
 
@@ -57,12 +58,15 @@ namespace Octokit
 
             var body = new FormUrlEncodedContent(request.ToParametersDictionary());
 
-            var response = await connection.Post<OauthToken>(endPoint, body, "application/json", null, hostAddress, cancellationToken).ConfigureAwait(false);
+            var response = await connection
+                .Post<OauthToken>(endPoint, body, "application/json", null, hostAddress, cancellationToken)
+                .ConfigureAwait(false);
             return response.Body;
         }
 
         [ManualRoute("POST", "/login/device/code")]
-        public async Task<OauthDeviceFlowResponse> InitiateDeviceFlow(OauthDeviceFlowRequest request, CancellationToken cancellationToken = default)
+        public async Task<OauthDeviceFlowResponse> InitiateDeviceFlow(OauthDeviceFlowRequest request,
+            CancellationToken cancellationToken = default)
         {
             Ensure.ArgumentNotNull(request, nameof(request));
 
@@ -70,12 +74,15 @@ namespace Octokit
 
             var body = new FormUrlEncodedContent(request.ToParametersDictionary());
 
-            var response = await connection.Post<OauthDeviceFlowResponse>(endPoint, body, "application/json", null, hostAddress, cancellationToken).ConfigureAwait(false);
+            var response = await connection
+                .Post<OauthDeviceFlowResponse>(endPoint, body, "application/json", null, hostAddress, cancellationToken)
+                .ConfigureAwait(false);
             return response.Body;
         }
 
         [ManualRoute("POST", "/login/oauth/access_token")]
-        public async Task<OauthToken> CreateAccessTokenForDeviceFlow(string clientId, OauthDeviceFlowResponse deviceFlowResponse, CancellationToken cancellationToken = default)
+        public async Task<OauthToken> CreateAccessTokenForDeviceFlow(string clientId,
+            OauthDeviceFlowResponse deviceFlowResponse, CancellationToken cancellationToken = default)
         {
             Ensure.ArgumentNotNullOrEmptyString(clientId, nameof(clientId));
             Ensure.ArgumentNotNull(deviceFlowResponse, nameof(deviceFlowResponse));
@@ -90,7 +97,9 @@ namespace Octokit
 
                 var request = new OauthTokenRequestForDeviceFlow(clientId, deviceFlowResponse.DeviceCode);
                 var body = new FormUrlEncodedContent(request.ToParametersDictionary());
-                var response = await connection.Post<OauthToken>(endPoint, body, "application/json", null, hostAddress, cancellationToken).ConfigureAwait(false);
+                var response = await connection
+                    .Post<OauthToken>(endPoint, body, "application/json", null, hostAddress, cancellationToken)
+                    .ConfigureAwait(false);
 
                 if (response.Body.Error != null)
                 {
@@ -103,7 +112,9 @@ namespace Octokit
                             break;
                         case "expired_token":
                         default:
-                            throw new ApiException(string.Format(CultureInfo.InvariantCulture, "{0}: {1}\n{2}", response.Body.Error, response.Body.ErrorDescription, response.Body.ErrorUri), null);
+                            throw new ApiException(
+                                string.Format(CultureInfo.InvariantCulture, "{0}: {1}\n{2}", response.Body.Error,
+                                    response.Body.ErrorDescription, response.Body.ErrorUri), null);
                     }
 
                     await Task.Delay(TimeSpan.FromSeconds(pollingDelay), cancellationToken);
@@ -116,14 +127,17 @@ namespace Octokit
         }
 
         [ManualRoute("POST", "/login/oauth/access_token")]
-        public async Task<OauthToken> CreateAccessTokenFromRenewalToken(OauthTokenRenewalRequest request, CancellationToken cancellationToken = default)
+        public async Task<OauthToken> CreateAccessTokenFromRenewalToken(OauthTokenRenewalRequest request,
+            CancellationToken cancellationToken = default)
         {
             Ensure.ArgumentNotNull(request, nameof(request));
 
             var endPoint = ApiUrls.OauthAccessToken();
             var body = new FormUrlEncodedContent(request.ToParametersDictionary());
 
-            var response = await connection.Post<OauthToken>(endPoint, body, "application/json", null, hostAddress, cancellationToken).ConfigureAwait(false);
+            var response = await connection
+                .Post<OauthToken>(endPoint, body, "application/json", null, hostAddress, cancellationToken)
+                .ConfigureAwait(false);
             return response.Body;
         }
     }

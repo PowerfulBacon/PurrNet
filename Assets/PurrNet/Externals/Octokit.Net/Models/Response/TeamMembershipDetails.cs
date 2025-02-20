@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class TeamMembershipDetails
     {
-        public TeamMembershipDetails() { }
+        public TeamMembershipDetails()
+        {
+        }
 
         public TeamMembershipDetails(TeamRole role, MembershipState state)
         {
@@ -21,10 +23,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Role: {0} State: {1}", Role, State);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Role: {0} State: {1}", Role, State); }
         }
     }
 
@@ -36,13 +35,11 @@ namespace Octokit
         /// <summary>
         /// Regular Team Member
         /// </summary>
-        [Parameter(Value = "member")]
-        Member,
+        [Parameter(Value = "member")] Member,
 
         /// <summary>
         ///  Team Maintainer
         /// </summary>
-        [Parameter(Value = "maintainer")]
-        Maintainer
+        [Parameter(Value = "maintainer")] Maintainer
     }
 }

@@ -53,7 +53,7 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="issueNumber">The issue number</param>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
-             Justification = "Method makes a network request")]
+            Justification = "Method makes a network request")]
         Task<Issue> Get(string owner, string name, int issueNumber);
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="issueNumber">The issue number</param>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
-             Justification = "Method makes a network request")]
+            Justification = "Method makes a network request")]
         Task<Issue> Get(long repositoryId, int issueNumber);
 
         /// <summary>
@@ -261,7 +261,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="request">Used to filter and sort the list of issues returned</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<Issue>> GetAllForRepository(string owner, string name, RepositoryIssueRequest request, ApiOptions options);
+        Task<IReadOnlyList<Issue>> GetAllForRepository(string owner, string name, RepositoryIssueRequest request,
+            ApiOptions options);
 
         /// <summary>
         /// Gets issues for a repository.
@@ -272,7 +273,8 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="request">Used to filter and sort the list of issues returned</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<Issue>> GetAllForRepository(long repositoryId, RepositoryIssueRequest request, ApiOptions options);
+        Task<IReadOnlyList<Issue>> GetAllForRepository(long repositoryId, RepositoryIssueRequest request,
+            ApiOptions options);
 
         /// <summary>
         /// Creates an issue for the specified repository. Any user with pull access to a repository can create an
@@ -315,6 +317,5 @@ namespace Octokit
         /// <param name="issueUpdate">An <see cref="IssueUpdate"/> instance describing the changes to make to the issue
         /// </param>
         Task<Issue> Update(long repositoryId, int issueNumber, IssueUpdate issueUpdate);
-
     }
 }

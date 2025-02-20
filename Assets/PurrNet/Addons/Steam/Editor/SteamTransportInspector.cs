@@ -18,7 +18,7 @@ namespace PurrNet.Steam.Editor
             {
                 GUI.enabled = false;
                 base.OnInspectorGUI();
-                
+
                 if (!EditorApplication.isCompiling)
                     GUI.enabled = true;
 
@@ -31,10 +31,12 @@ namespace PurrNet.Steam.Editor
                     RemoveDefineSymbols("DISABLESTEAMWORKS");
                 }
 #else
-                EditorGUILayout.HelpBox("SteamWorks.NET is not installed. Please install it to use this transport.", MessageType.Warning);
+                EditorGUILayout.HelpBox("SteamWorks.NET is not installed. Please install it to use this transport.",
+                    MessageType.Warning);
                 if (GUILayout.Button("Add SteamWorks.NET to Package Manager"))
                 {
-                    Client.Add("https://github.com/rlabrecque/Steamworks.NET.git?path=/com.rlabrecque.steamworks.net#2024.8.0");
+                    Client.Add(
+                        "https://github.com/rlabrecque/Steamworks.NET.git?path=/com.rlabrecque.steamworks.net#2024.8.0");
                     Client.Resolve();
                 }
 #endif
@@ -46,16 +48,19 @@ namespace PurrNet.Steam.Editor
                 TransportInspector.DrawTransportStatus(generic);
             }
         }
-        
+
         static void RemoveDefineSymbols(string symbol)
         {
             string currentDefines;
             HashSet<string> defines;
 
 #if UNITY_2021_1_OR_NEWER
-            currentDefines = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup));
+            currentDefines =
+                PlayerSettings.GetScriptingDefineSymbols(
+                    NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup));
 #else
-		    currentDefines = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+		    currentDefines =
+ PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
 #endif
             defines = new HashSet<string>(currentDefines.Split(';'));
             defines.Remove(symbol);
@@ -64,7 +69,9 @@ namespace PurrNet.Steam.Editor
             if (newDefines != currentDefines)
             {
 #if UNITY_2021_1_OR_NEWER
-                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup), newDefines);
+                PlayerSettings.SetScriptingDefineSymbols(
+                    NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup),
+                    newDefines);
 #else
 			    PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, newDefines);
 #endif
@@ -84,7 +91,7 @@ namespace PurrNet.Steam.Editor
             if (generic && generic.transform != null)
                 generic.transport.onConnectionState -= OnDirty;
         }
-        
+
         private void OnDirty(ConnectionState state, bool asServer)
         {
             Repaint();

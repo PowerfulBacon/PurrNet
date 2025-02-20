@@ -7,13 +7,15 @@ namespace PurrNet
     public class ObserversRpcAttribute : PreserveAttribute
     {
         [UsedByIL]
-        public ObserversRpcAttribute(Channel channel = Channel.ReliableOrdered, 
+        public ObserversRpcAttribute(Channel channel = Channel.ReliableOrdered,
             bool runLocally = false,
             bool bufferLast = false,
-            bool requireServer = true, 
+            bool requireServer = true,
             bool excludeOwner = false,
             bool excludeSender = false,
             CompressionLevel compressionLevel = CompressionLevel.None,
-            float asyncTimeoutInSec = 5f) { }
+            float asyncTimeoutInSec = 5f)
+        {
+        }
     }
 }

@@ -11,19 +11,19 @@ namespace PurrNet.Modules
         Unload,
         SetActive
     }
-    
+
     internal struct SceneAction : IPackedSimple
     {
         public SceneActionType type;
-        
+
         public LoadSceneAction loadSceneAction;
         public UnloadSceneAction unloadSceneAction;
         public SetActiveSceneAction setActiveSceneAction;
-        
+
         public void Serialize(BitPacker packer)
         {
             Packer<SceneActionType>.Serialize(packer, ref type);
-            
+
             switch (type)
             {
                 case SceneActionType.Load:
@@ -40,18 +40,18 @@ namespace PurrNet.Modules
             }
         }
     }
-    
+
     internal struct SceneActionsBatch
     {
         public List<SceneAction> actions;
     }
-    
+
     internal struct LoadSceneAction
     {
         public int buildIndex;
         public SceneID sceneID;
-        public PurrSceneSettings parameters; 
-        
+        public PurrSceneSettings parameters;
+
         public LoadSceneParameters GetLoadSceneParameters()
         {
             return new LoadSceneParameters
@@ -61,25 +61,25 @@ namespace PurrNet.Modules
             };
         }
     }
-    
+
     internal struct UnloadSceneAction
     {
         public SceneID sceneID;
         public UnloadSceneOptions options;
     }
-    
+
     internal struct SetActiveSceneAction
     {
         public SceneID sceneID;
     }
-    
+
     internal class SceneHistory
     {
         readonly List<SceneAction> _actions = new List<SceneAction>();
         readonly List<SceneAction> _pending = new List<SceneAction>();
-        
+
         public bool hasUnflushedActions { get; private set; }
-        
+
         internal SceneActionsBatch GetFullHistory()
         {
             return new SceneActionsBatch
@@ -87,7 +87,7 @@ namespace PurrNet.Modules
                 actions = _actions
             };
         }
-        
+
         internal SceneActionsBatch GetDelta()
         {
             return new SceneActionsBatch
@@ -95,7 +95,7 @@ namespace PurrNet.Modules
                 actions = _pending
             };
         }
-        
+
         internal void Flush()
         {
             _actions.AddRange(_pending);
@@ -109,7 +109,7 @@ namespace PurrNet.Modules
         private void OptimizeHistory()
         {
             _sceneIds.Clear();
-            
+
             for (int i = 0; i < _actions.Count; i++)
             {
                 var action = _actions[i];
@@ -125,7 +125,7 @@ namespace PurrNet.Modules
                         break;
                 }
             }
-            
+
             for (int i = _actions.Count - 1; i >= 0; i--)
             {
                 var action = _actions[i];
@@ -142,7 +142,7 @@ namespace PurrNet.Modules
                 }
             }
         }
-        
+
         internal void AddLoadAction(LoadSceneAction action)
         {
             _pending.Add(new SceneAction
@@ -150,10 +150,10 @@ namespace PurrNet.Modules
                 type = SceneActionType.Load,
                 loadSceneAction = action
             });
-            
+
             hasUnflushedActions = true;
         }
-        
+
         internal void AddUnloadAction(UnloadSceneAction action)
         {
             _pending.Add(new SceneAction
@@ -161,7 +161,7 @@ namespace PurrNet.Modules
                 type = SceneActionType.Unload,
                 unloadSceneAction = action
             });
-            
+
             hasUnflushedActions = true;
         }
     }

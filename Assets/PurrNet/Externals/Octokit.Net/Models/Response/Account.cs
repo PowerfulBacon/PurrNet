@@ -7,9 +7,15 @@ namespace Octokit
     /// </summary>
     public abstract class Account
     {
-        protected Account() { }
+        protected Account()
+        {
+        }
 
-        protected Account(string avatarUrl, string bio, string blog, int collaborators, string company, DateTimeOffset createdAt, int diskUsage, string email, int followers, int following, bool? hireable, string htmlUrl, int totalPrivateRepos, long id, string location, string login, string name, string nodeId, int ownedPrivateRepos, Plan plan, int privateGists, int publicGists, int publicRepos, AccountType type, string url)
+        protected Account(string avatarUrl, string bio, string blog, int collaborators, string company,
+            DateTimeOffset createdAt, int diskUsage, string email, int followers, int following, bool? hireable,
+            string htmlUrl, int totalPrivateRepos, long id, string location, string login, string name, string nodeId,
+            int ownedPrivateRepos, Plan plan, int privateGists, int publicGists, int publicRepos, AccountType type,
+            string url)
         {
             AvatarUrl = avatarUrl;
             Bio = bio;
@@ -127,7 +133,8 @@ namespace Octokit
         /// <summary>
         /// The type of account associated with this entity
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming",
+            "CA1721:PropertyNamesShouldNotMatchGetMethods")]
         public AccountType? Type { get; protected set; }
 
 

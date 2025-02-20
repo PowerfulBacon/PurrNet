@@ -27,6 +27,7 @@ namespace Octokit
         /// </summary>
         public IReadOnlyList<RunnerGroup> RunnerGroups { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "TotalCount: {0}, Runner Groups: {1}", TotalCount, RunnerGroups.Count);
+        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture,
+            "TotalCount: {0}, Runner Groups: {1}", TotalCount, RunnerGroups.Count);
     }
 }

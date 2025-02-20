@@ -38,7 +38,6 @@ namespace Octokit
         /// https://developer.github.com/v3/enterprise/admin_stats/#get-statistics
         /// </remarks>
         /// <returns>The <see cref="AdminStatsMilestones"/> statistics.</returns>
-
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         Task<AdminStatsMilestones> GetStatisticsMilestones();
 

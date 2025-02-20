@@ -28,27 +28,23 @@ namespace Octokit
         [Parameter(Key = "filter")]
         public StringEnum<CheckRunCompletedAtFilter>? Filter { get; set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "CheckName: {0}, Status: {1}", CheckName, Status);
+        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "CheckName: {0}, Status: {1}",
+            CheckName, Status);
     }
 
     public enum CheckStatusFilter
     {
-        [Parameter(Value = "queued")]
-        Queued,
+        [Parameter(Value = "queued")] Queued,
 
-        [Parameter(Value = "in_progress")]
-        InProgress,
+        [Parameter(Value = "in_progress")] InProgress,
 
-        [Parameter(Value = "completed")]
-        Completed,
+        [Parameter(Value = "completed")] Completed,
     }
 
     public enum CheckRunCompletedAtFilter
     {
-        [Parameter(Value = "latest")]
-        Latest,
+        [Parameter(Value = "latest")] Latest,
 
-        [Parameter(Value = "all")]
-        All
+        [Parameter(Value = "all")] All
     }
 }

@@ -27,6 +27,7 @@ namespace Octokit
         [Parameter(Key = "page")]
         public int Page { get; set; } = 1;
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "Page: {0}, PerPage: {1} ", Page, PerPage);
+        internal string DebuggerDisplay =>
+            string.Format(CultureInfo.InvariantCulture, "Page: {0}, PerPage: {1} ", Page, PerPage);
     }
 }

@@ -27,7 +27,8 @@ namespace Octokit
             if (input == null)
                 return null;
 
-            return input.ToDictionary(item => new string(item.Key.ToCharArray()), item => new Uri(item.Value.ToString()));
+            return input.ToDictionary(item => new string(item.Key.ToCharArray()),
+                item => new Uri(item.Value.ToString()));
         }
     }
 }

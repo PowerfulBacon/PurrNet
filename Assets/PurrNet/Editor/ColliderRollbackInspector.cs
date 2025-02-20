@@ -22,9 +22,9 @@ namespace PurrNet.Editor
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
-            
+
             serializedObject.Update();
-            
+
             EditorGUILayout.PropertyField(_storeHistoryInSeconds);
             EditorGUILayout.PropertyField(_autoAddAllChildren);
 

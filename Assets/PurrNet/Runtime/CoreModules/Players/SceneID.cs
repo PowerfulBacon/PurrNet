@@ -32,7 +32,7 @@ namespace PurrNet
         {
             return obj is SceneID other && Equals(other);
         }
-        
+
         public static bool operator ==(SceneID a, SceneID b)
         {
             return a._id == b._id;

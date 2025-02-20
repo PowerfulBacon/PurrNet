@@ -11,9 +11,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Activity
     {
-        public Activity() { }
+        public Activity()
+        {
+        }
 
-        public Activity(string type, bool @public, Repository repo, User actor, Organization org, DateTimeOffset createdAt, string id, ActivityPayload payload)
+        public Activity(string type, bool @public, Repository repo, User actor, Organization org,
+            DateTimeOffset createdAt, string id, ActivityPayload payload)
         {
             Type = type;
             Public = @public;
@@ -68,10 +71,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Type: {0}", Type);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Type: {0}", Type); }
         }
     }
 }

@@ -8,55 +8,58 @@ namespace PurrNet.Modules
     {
         public SceneID scene;
     }
-    
+
     public delegate void OnPlayerSceneEvent(PlayerID player, SceneID scene, bool asServer);
 
     public class ScenePlayersModule : INetworkModule
     {
-        private readonly Dictionary<SceneID, PurrHashSet<PlayerID>> _scenePlayers = new Dictionary<SceneID, PurrHashSet<PlayerID>>();
-        private readonly Dictionary<SceneID, PurrHashSet<PlayerID>> _sceneLoadedPlayers = new Dictionary<SceneID, PurrHashSet<PlayerID>>();
-        
+        private readonly Dictionary<SceneID, PurrHashSet<PlayerID>> _scenePlayers =
+            new Dictionary<SceneID, PurrHashSet<PlayerID>>();
+
+        private readonly Dictionary<SceneID, PurrHashSet<PlayerID>> _sceneLoadedPlayers =
+            new Dictionary<SceneID, PurrHashSet<PlayerID>>();
+
         readonly ScenesModule _scenes;
         readonly PlayersManager _players;
-        
+
         /// <summary>
         /// Called once the player has started joining the scene (before loading)
         /// </summary>
         public event OnPlayerSceneEvent onPlayerJoinedScene;
-        
+
         /// <summary>
         /// Called once the player has finished loading the scene
         /// </summary>
         public event OnPlayerSceneEvent onPrePlayerloadedScene;
-        
+
         /// <summary>
         /// Called once the player has finished loading the scene
         /// </summary>
         public event OnPlayerSceneEvent onPlayerLoadedScene;
-        
+
         /// <summary>
         /// Called once the player has finished loading the scene
         /// </summary>
         public event OnPlayerSceneEvent onPostPlayerLoadedScene;
-        
+
         public event OnPlayerSceneEvent onPlayerLeftScene;
         public event OnPlayerSceneEvent onPlayerUnloadedScene;
-        
+
         private bool _asServer;
-        
+
         private readonly NetworkManager _manager;
-        
+
         public ScenePlayersModule(NetworkManager manager, ScenesModule scenes, PlayersManager players)
         {
             _manager = manager;
             _scenes = scenes;
             _players = players;
         }
-        
+
         public void Enable(bool asServer)
         {
             _asServer = asServer;
-            
+
             if (asServer)
             {
                 var scenes = _scenes.sceneStates;
@@ -66,7 +69,7 @@ namespace PurrNet.Modules
                     if (sceneState.scene.isLoaded)
                         OnSceneLoaded(id, true);
                 }
-                
+
                 _scenes.onSceneLoaded += OnSceneLoaded;
                 _scenes.onSceneUnloaded += OnSceneUnloaded;
                 _scenes.onSceneVisibilityChanged += OnSceneVisibilityChanged;
@@ -78,7 +81,7 @@ namespace PurrNet.Modules
             else
             {
                 if (_players.localPlayerId.HasValue)
-                     OnLocalPlayerReady(_players.localPlayerId.Value);
+                    OnLocalPlayerReady(_players.localPlayerId.Value);
                 else _players.onLocalPlayerReceivedID += OnLocalPlayerReady;
 
                 _scenes.onSceneLoaded += OnClientSceneLoaded;
@@ -94,7 +97,7 @@ namespace PurrNet.Modules
                 if (sceneState.scene.isLoaded)
                     OnClientSceneLoaded(id, _asServer);
             }
-            
+
             _players.onLocalPlayerReceivedID -= OnLocalPlayerReady;
         }
 
@@ -107,7 +110,7 @@ namespace PurrNet.Modules
                 _scenes.onSceneVisibilityChanged -= OnSceneVisibilityChanged;
                 _players.onPlayerJoined -= OnPlayerJoined;
                 _players.onPlayerLeft -= OnPlayerLeft;
-                
+
                 _players.Unsubscribe<ClientFinishedLoadingScene>(RemoteClientLoadedScene);
             }
             else
@@ -126,9 +129,10 @@ namespace PurrNet.Modules
                     if (players.Remove(player))
                         onPlayerUnloadedScene?.Invoke(player, scene, _asServer);
                 }
+
                 return;
             }
-            
+
             foreach (var (scene, players) in _scenePlayers)
             {
                 if (!players.Contains(player))
@@ -142,22 +146,22 @@ namespace PurrNet.Modules
         {
             if (!_players.localPlayerId.HasValue)
                 return;
-            
+
             onPrePlayerloadedScene?.Invoke(_players.localPlayerId.Value, scene, asServer);
             onPlayerLoadedScene?.Invoke(_players.localPlayerId.Value, scene, asServer);
             onPostPlayerLoadedScene?.Invoke(_players.localPlayerId.Value, scene, asServer);
-            
+
             _players.SendToServer(new ClientFinishedLoadingScene { scene = scene });
         }
-        
+
         private void RemoteClientLoadedScene(PlayerID player, ClientFinishedLoadingScene data, bool asServer)
         {
             if (!_scenePlayers.TryGetValue(data.scene, out var playersInScene))
                 return;
-            
+
             if (!playersInScene.Contains(player))
                 return;
-            
+
             if (_sceneLoadedPlayers.TryGetValue(data.scene, out var loadedPlayers))
             {
                 loadedPlayers.Add(player);
@@ -166,7 +170,7 @@ namespace PurrNet.Modules
             {
                 PurrLogger.LogError($"SceneID '{data.scene}' not found in scene loaded players dictionary");
             }
-            
+
             onPrePlayerloadedScene?.Invoke(player, data.scene, asServer);
             onPlayerLoadedScene?.Invoke(player, data.scene, asServer);
             onPostPlayerLoadedScene?.Invoke(player, data.scene, asServer);
@@ -182,11 +186,11 @@ namespace PurrNet.Modules
                 players = data;
                 return true;
             }
-            
+
             players = null;
             return false;
         }
-        
+
         /// <summary>
         /// Get all players attached to a scene, regardless of whether they have finished loading the scene or not
         /// </summary>
@@ -197,7 +201,7 @@ namespace PurrNet.Modules
                 players = data;
                 return true;
             }
-            
+
             players = null;
             return false;
         }
@@ -205,10 +209,10 @@ namespace PurrNet.Modules
         private void OnSceneVisibilityChanged(SceneID scene, bool isPublic, bool asServer)
         {
             if (!isPublic) return;
-            
+
             if (!_scenePlayers.TryGetValue(scene, out var playersInScene))
                 return;
-            
+
             // if the scene is public, add all connected players to the scene
             int connectedPlayersCount = _players.players.Count;
 
@@ -229,16 +233,16 @@ namespace PurrNet.Modules
                 {
                     if (players.Contains(player))
                         continue;
-                    
+
                     AddPlayerToScene
                 }*/
                 return;
             }
-            
+
             for (var i = 0; i < _scenes.scenes.Count; i++)
             {
                 var scene = _scenes.scenes[i];
-                
+
                 if (!_scenes.TryGetSceneState(scene, out var state))
                     continue;
 
@@ -248,7 +252,7 @@ namespace PurrNet.Modules
                 AddPlayerToScene(player, scene);
             }
         }
-        
+
         public bool IsPlayerLoadedInScene(PlayerID player, SceneID scene)
         {
             return _sceneLoadedPlayers.TryGetValue(scene, out var playersInScene) && playersInScene.Contains(player);
@@ -258,7 +262,7 @@ namespace PurrNet.Modules
         {
             return _scenePlayers.TryGetValue(scene, out var playersInScene) && playersInScene.Contains(player);
         }
-        
+
         public IEnumerator<SceneID> GetPlayerScenes(PlayerID player)
         {
             foreach (var (scene, players) in _scenePlayers)
@@ -275,15 +279,15 @@ namespace PurrNet.Modules
         {
             if (_scenePlayers.TryGetValue(scene, out var playersInScene) && !playersInScene.Contains(player))
                 AddPlayerToScene(player, scene);
-            
+
             foreach (var (existingScene, players) in _scenePlayers)
             {
                 if (scene == existingScene)
                     continue;
-                
+
                 if (!players.Contains(player))
                     continue;
-                
+
                 RemovePlayerFromScene(player, existingScene);
             }
         }
@@ -326,7 +330,7 @@ namespace PurrNet.Modules
             return false;
         }
 
-        
+
         public void RemovePlayerFromScene(PlayerID player, SceneID scene)
         {
             if (!_asServer)
@@ -334,27 +338,28 @@ namespace PurrNet.Modules
                 PurrLogger.LogError("RemovePlayerFromScene can only be called on the server; for now ;)");
                 return;
             }
-            
+
             RemovePlayerFromLoadedScene(player, scene);
-            
+
             if (!_scenePlayers.TryGetValue(scene, out var playersInScene))
             {
                 PurrLogger.LogError($"SceneID '{scene}' not found in scenes module; aborting RemovePlayerFromScene");
                 return;
             }
-            
+
             if (playersInScene.Remove(player))
                 onPlayerLeftScene?.Invoke(player, scene, _asServer);
         }
-        
+
         private void RemovePlayerFromLoadedScene(PlayerID player, SceneID scene)
         {
             if (!_sceneLoadedPlayers.TryGetValue(scene, out var playersInScene))
             {
-                PurrLogger.LogError($"SceneID '{scene}' not found in scene loaded players dictionary; aborting RemovePlayerFromLoadedScene");
+                PurrLogger.LogError(
+                    $"SceneID '{scene}' not found in scene loaded players dictionary; aborting RemovePlayerFromLoadedScene");
                 return;
             }
-            
+
             if (playersInScene.Remove(player))
                 onPlayerUnloadedScene?.Invoke(player, scene, _asServer);
         }
@@ -369,10 +374,10 @@ namespace PurrNet.Modules
 
             _scenePlayers.Add(scene, new PurrHashSet<PlayerID>());
             _sceneLoadedPlayers.Add(scene, new PurrHashSet<PlayerID>());
-            
+
             OnSceneVisibilityChanged(scene, state.settings.isPublic, asServer);
         }
-        
+
         private void OnSceneUnloaded(SceneID scene, bool asServer)
         {
             if (_scenePlayers.TryGetValue(scene, out var playersInScene))
@@ -383,7 +388,7 @@ namespace PurrNet.Modules
                     onPlayerLeftScene?.Invoke(player, scene, asServer);
                     onPlayerUnloadedScene?.Invoke(player, scene, asServer);
                 }
-                
+
                 _scenePlayers.Remove(scene);
                 _sceneLoadedPlayers.Remove(scene);
             }

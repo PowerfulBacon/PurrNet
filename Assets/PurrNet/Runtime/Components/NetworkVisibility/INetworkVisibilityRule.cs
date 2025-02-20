@@ -7,7 +7,7 @@
         /// We will prioritize rules with lower complexity first.
         /// </summary>
         int complexity { get; }
-        
+
         /// <summary>
         /// Check if a player can see a target.
         /// </summary>

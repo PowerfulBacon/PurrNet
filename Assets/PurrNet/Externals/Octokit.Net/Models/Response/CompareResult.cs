@@ -7,9 +7,13 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class CompareResult
     {
-        public CompareResult() { }
+        public CompareResult()
+        {
+        }
 
-        public CompareResult(string url, string htmlUrl, string permalinkUrl, string diffUrl, string patchUrl, GitHubCommit baseCommit, GitHubCommit mergeBaseCommit, string status, int aheadBy, int behindBy, int totalCommits, IReadOnlyList<GitHubCommit> commits, IReadOnlyList<GitHubCommitFile> files)
+        public CompareResult(string url, string htmlUrl, string permalinkUrl, string diffUrl, string patchUrl,
+            GitHubCommit baseCommit, GitHubCommit mergeBaseCommit, string status, int aheadBy, int behindBy,
+            int totalCommits, IReadOnlyList<GitHubCommit> commits, IReadOnlyList<GitHubCommitFile> files)
         {
             Url = url;
             HtmlUrl = htmlUrl;
@@ -44,7 +48,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Status: {0} Ahead By: {1}, Behind By: {2}", Status, AheadBy, BehindBy);
+                return string.Format(CultureInfo.InvariantCulture, "Status: {0} Ahead By: {1}, Behind By: {2}", Status,
+                    AheadBy, BehindBy);
             }
         }
     }

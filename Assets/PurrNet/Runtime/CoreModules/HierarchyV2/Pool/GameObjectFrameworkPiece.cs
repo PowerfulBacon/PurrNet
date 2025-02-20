@@ -9,7 +9,7 @@ namespace PurrNet.Modules
         public readonly int childCount;
         public readonly bool isActive;
         public readonly int[] inversedRelativePath;
-        
+
         public GameObjectFrameworkPiece(PrefabPieceID pid, NetworkID id, int childCount, bool isActive,
             int[] path)
         {
@@ -37,6 +37,7 @@ namespace PurrNet.Modules
                 if (i < inversedRelativePath.Length - 1)
                     builder.Append(" <- ");
             }
+
             builder.Append(" }");
             return builder.ToString();
         }

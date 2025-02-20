@@ -32,6 +32,7 @@ namespace Octokit
         /// </summary>
         public string Caption { get; set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "Alt: {0}, ImageUrl: {1}", Alt, ImageUrl);
+        internal string DebuggerDisplay =>
+            string.Format(CultureInfo.InvariantCulture, "Alt: {0}, ImageUrl: {1}", Alt, ImageUrl);
     }
 }

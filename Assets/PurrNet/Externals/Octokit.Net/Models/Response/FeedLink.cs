@@ -9,9 +9,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class FeedLinks
     {
-        public FeedLinks() { }
+        public FeedLinks()
+        {
+        }
 
-        public FeedLinks(FeedLink timeline, FeedLink user, FeedLink currentUserPublic, FeedLink currentUser, FeedLink currentUserActor, FeedLink currentUserOrganization)
+        public FeedLinks(FeedLink timeline, FeedLink user, FeedLink currentUserPublic, FeedLink currentUser,
+            FeedLink currentUserActor, FeedLink currentUserOrganization)
         {
             Timeline = timeline;
             User = user;
@@ -53,7 +56,11 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Timeline: {0}, User: {1}, CurrentUser: {2}", Timeline, User, CurrentUser); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Timeline: {0}, User: {1}, CurrentUser: {2}",
+                    Timeline, User, CurrentUser);
+            }
         }
     }
 
@@ -63,7 +70,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class FeedLink
     {
-        public FeedLink() { }
+        public FeedLink()
+        {
+        }
 
         public FeedLink(string href, string type)
         {
@@ -79,7 +88,8 @@ namespace Octokit
         /// <summary>
         /// Feed type, e.g. application/atom+xml
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming",
+            "CA1721:PropertyNamesShouldNotMatchGetMethods")]
         public string Type { get; private set; }
 
         internal string DebuggerDisplay

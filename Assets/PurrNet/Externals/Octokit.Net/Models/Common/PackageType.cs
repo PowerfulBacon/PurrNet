@@ -7,37 +7,31 @@ namespace Octokit
         /// <summary>
         /// Npm repository packages
         /// </summary>
-        [Parameter(Value = "npm")]
-        Npm,
+        [Parameter(Value = "npm")] Npm,
 
         /// <summary>
         /// Gradle registry packages
         /// </summary>
-        [Parameter(Value = "maven")]
-        Maven,
+        [Parameter(Value = "maven")] Maven,
 
         /// <summary>
         /// RubyGems packages
         /// </summary>
-        [Parameter(Value = "rubygems")]
-        RubyGems,
+        [Parameter(Value = "rubygems")] RubyGems,
 
         /// <summary>
         /// Docker container registry packages
         /// </summary>
-        [Parameter(Value = "docker")]
-        Docker,
+        [Parameter(Value = "docker")] Docker,
 
         /// <summary>
         /// Nuget registry packages
         /// </summary>
-        [Parameter(Value = "nuget")]
-        Nuget,
+        [Parameter(Value = "nuget")] Nuget,
 
         /// <summary>
         /// Container registry packages
         /// </summary>
-        [Parameter(Value = "container")]
-        Container,
+        [Parameter(Value = "container")] Container,
     }
 }

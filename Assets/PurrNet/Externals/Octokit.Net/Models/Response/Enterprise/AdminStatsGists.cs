@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class AdminStatsGists
     {
-        public AdminStatsGists() { }
+        public AdminStatsGists()
+        {
+        }
 
         public AdminStatsGists(int totalGists, int privateGists, int publicGists)
         {
@@ -16,29 +18,18 @@ namespace Octokit
             PublicGists = publicGists;
         }
 
-        public int TotalGists
-        {
-            get;
-            private set;
-        }
+        public int TotalGists { get; private set; }
 
-        public int PrivateGists
-        {
-            get;
-            private set;
-        }
+        public int PrivateGists { get; private set; }
 
-        public int PublicGists
-        {
-            get;
-            private set;
-        }
+        public int PublicGists { get; private set; }
 
         internal string DebuggerDisplay
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "TotalGists: {0} PrivateGists: {1} PublicGists: {2}", TotalGists, PrivateGists, PublicGists);
+                return string.Format(CultureInfo.InvariantCulture, "TotalGists: {0} PrivateGists: {1} PublicGists: {2}",
+                    TotalGists, PrivateGists, PublicGists);
             }
         }
     }

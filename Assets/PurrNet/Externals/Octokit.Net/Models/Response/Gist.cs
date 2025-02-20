@@ -8,9 +8,14 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Gist
     {
-        public Gist() { }
+        public Gist()
+        {
+        }
 
-        public Gist(string url, string id, string nodeId, string description, bool @public, User owner, IReadOnlyDictionary<string, GistFile> files, int comments, string commentsUrl, string htmlUrl, string gitPullUrl, string gitPushUrl, DateTimeOffset createdAt, DateTimeOffset updatedAt, IReadOnlyList<GistFork> forks, IReadOnlyList<GistHistory> history)
+        public Gist(string url, string id, string nodeId, string description, bool @public, User owner,
+            IReadOnlyDictionary<string, GistFile> files, int comments, string commentsUrl, string htmlUrl,
+            string gitPullUrl, string gitPushUrl, DateTimeOffset createdAt, DateTimeOffset updatedAt,
+            IReadOnlyList<GistFork> forks, IReadOnlyList<GistHistory> history)
         {
             Url = url;
             Id = id;
@@ -118,10 +123,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Description: {0}", Description);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Description: {0}", Description); }
         }
     }
 }

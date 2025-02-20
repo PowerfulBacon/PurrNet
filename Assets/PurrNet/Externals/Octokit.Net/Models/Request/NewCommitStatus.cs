@@ -35,7 +35,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Description: {0}, Context: {1}", Description, Context);
+                return string.Format(CultureInfo.InvariantCulture, "Description: {0}, Context: {1}", Description,
+                    Context);
             }
         }
     }

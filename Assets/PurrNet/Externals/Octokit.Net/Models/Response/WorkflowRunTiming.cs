@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class WorkflowRunTiming
     {
-        public WorkflowRunTiming() { }
+        public WorkflowRunTiming()
+        {
+        }
 
         public WorkflowRunTiming(long jobId, long durationMs)
         {

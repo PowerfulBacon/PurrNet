@@ -25,7 +25,7 @@ namespace PurrNet.Codegen
         DisposableList,
         DisposableHashSet
     }
-    
+
     public static class GenerateSerializersProcessor
     {
         public static bool ValideType(TypeReference type)
@@ -35,7 +35,7 @@ namespace PurrNet.Codegen
             {
                 return false;
             }
-            
+
             bool isDelegate = PostProcessor.InheritsFrom(type.Resolve(), typeof(Delegate).FullName);
 
             if (isDelegate)
@@ -46,11 +46,12 @@ namespace PurrNet.Codegen
             {
                 if (genericInstance.GenericArguments.Count == 0)
                     return false;
-                
+
                 // Recursively validate all generic arguments
                 foreach (var argument in genericInstance.GenericArguments)
                 {
-                    if (argument.ContainsGenericParameter || argument.Resolve()?.IsInterface == true || !ValideType(argument))
+                    if (argument.ContainsGenericParameter || argument.Resolve()?.IsInterface == true ||
+                        !ValideType(argument))
                     {
                         return false;
                     }
@@ -74,10 +75,11 @@ namespace PurrNet.Codegen
             // If no open generics or interfaces are found, return true
             return true;
         }
-        
+
         public static string MakeFullNameValidCSharp(string name)
         {
-            return name.Replace("<", "_").Replace(">", "_").Replace(",", "_").Replace(" ", "_").Replace(".", "_").Replace("`", "_").Replace("/", "_").Replace("[", "_I_").Replace("]", "_I_");
+            return name.Replace("<", "_").Replace(">", "_").Replace(",", "_").Replace(" ", "_").Replace(".", "_")
+                .Replace("`", "_").Replace("/", "_").Replace("[", "_I_").Replace("]", "_I_");
         }
 
         public static void HandleType(bool hashOnly, AssemblyDefinition assembly, TypeReference type,
@@ -198,122 +200,144 @@ namespace PurrNet.Codegen
 
             if (ignoreDelta?.Contains(type) == false)
                 GenerateDeltaSerializersProcessor.HandleType(assembly, type, serializerClass);
-            
+
             RegisterSerializersProcessor.HandleType(type.Module, serializerClass, isEditor, null, null);
         }
 
-        private static void HandleHashOnly(AssemblyDefinition assembly, TypeReference type, TypeDefinition serializerClass, bool isEditor)
+        private static void HandleHashOnly(AssemblyDefinition assembly, TypeReference type,
+            TypeDefinition serializerClass, bool isEditor)
         {
-            var registerMethod = new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
-            
-            var attributeType = assembly.MainModule.GetTypeDefinition<RuntimeInitializeOnLoadMethodAttribute>(); 
-            var constructor = attributeType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters).Import(assembly.MainModule);
+            var registerMethod =
+                new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
+
+            var attributeType = assembly.MainModule.GetTypeDefinition<RuntimeInitializeOnLoadMethodAttribute>();
+            var constructor = attributeType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
+                .Import(assembly.MainModule);
             var attribute = new CustomAttribute(constructor);
             registerMethod.CustomAttributes.Add(attribute);
 
             if (isEditor)
             {
-                var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>().Import(assembly.MainModule);
-                var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters).Import(assembly.MainModule);
+                var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>()
+                    .Import(assembly.MainModule);
+                var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+                    .Import(assembly.MainModule);
                 var editorAttribute = new CustomAttribute(editorConstructor);
                 registerMethod.CustomAttributes.Add(editorAttribute);
             }
-            
-            attribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, (int)RuntimeInitializeLoadType.AfterAssembliesLoaded));
+
+            attribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32,
+                (int)RuntimeInitializeLoadType.AfterAssembliesLoaded));
             registerMethod.Body = new MethodBody(registerMethod)
             {
                 InitLocals = true
             };
-            
+
             var il = registerMethod.Body.GetILProcessor();
-            
-            var networkRegister = assembly.MainModule.GetTypeDefinition(typeof(NetworkRegister)).Import(assembly.MainModule);
+
+            var networkRegister = assembly.MainModule.GetTypeDefinition(typeof(NetworkRegister))
+                .Import(assembly.MainModule);
             var hashMethod = networkRegister.GetMethod("Hash").Import(assembly.MainModule);
-            
+
             // NetworkRegister.Hash(RuntimeTypeHandle handle);
             il.Emit(OpCodes.Ldtoken, type);
             il.Emit(OpCodes.Call, hashMethod);
             il.Emit(OpCodes.Ret);
-            
+
             serializerClass.Methods.Add(registerMethod);
         }
 
         private static void HandleNetworkIdentity(AssemblyDefinition assembly, TypeReference type,
             TypeDefinition serializerClass, bool isEditor)
         {
-            var registerMethod = new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
-            
-            var attributeType = assembly.MainModule.GetTypeDefinition<RuntimeInitializeOnLoadMethodAttribute>(); 
-            var constructor = attributeType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters).Import(assembly.MainModule);
+            var registerMethod =
+                new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
+
+            var attributeType = assembly.MainModule.GetTypeDefinition<RuntimeInitializeOnLoadMethodAttribute>();
+            var constructor = attributeType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
+                .Import(assembly.MainModule);
             var attribute = new CustomAttribute(constructor);
             registerMethod.CustomAttributes.Add(attribute);
-            
+
             if (isEditor)
             {
                 var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
-                var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters).Import(assembly.MainModule);
+                var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+                    .Import(assembly.MainModule);
                 var editorAttribute = new CustomAttribute(editorConstructor);
                 registerMethod.CustomAttributes.Add(editorAttribute);
             }
-            
-            attribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, (int)RuntimeInitializeLoadType.AfterAssembliesLoaded));
+
+            attribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32,
+                (int)RuntimeInitializeLoadType.AfterAssembliesLoaded));
             registerMethod.Body = new MethodBody(registerMethod)
             {
                 InitLocals = true
             };
-            
+
             var register = registerMethod.Body.GetILProcessor();
             GenerateRegisterMethodForIdentity(type, register);
             serializerClass.Methods.Add(registerMethod);
         }
-        
+
         private static void HandleNetworkModule(AssemblyDefinition assembly, TypeReference type,
             TypeDefinition serializerClass, bool isEditor)
         {
-            var registerMethod = new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
-            var attributeType = assembly.MainModule.GetTypeDefinition<RuntimeInitializeOnLoadMethodAttribute>(); 
-            var constructor = attributeType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters).Import(assembly.MainModule);
+            var registerMethod =
+                new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
+            var attributeType = assembly.MainModule.GetTypeDefinition<RuntimeInitializeOnLoadMethodAttribute>();
+            var constructor = attributeType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
+                .Import(assembly.MainModule);
             var attribute = new CustomAttribute(constructor);
             registerMethod.CustomAttributes.Add(attribute);
             if (isEditor)
             {
                 var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
-                var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters).Import(assembly.MainModule);
+                var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+                    .Import(assembly.MainModule);
                 var editorAttribute = new CustomAttribute(editorConstructor);
                 registerMethod.CustomAttributes.Add(editorAttribute);
             }
-            attribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, (int)RuntimeInitializeLoadType.AfterAssembliesLoaded));
+
+            attribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32,
+                (int)RuntimeInitializeLoadType.AfterAssembliesLoaded));
             registerMethod.Body = new MethodBody(registerMethod)
             {
                 InitLocals = true
             };
-            
+
             var register = registerMethod.Body.GetILProcessor();
             GenerateRegisterMethodForModule(type, register);
             serializerClass.Methods.Add(registerMethod);
         }
 
-        private static void HandleGenerics(AssemblyDefinition assembly, TypeReference type, HandledGenericTypes genericT,
+        private static void HandleGenerics(AssemblyDefinition assembly, TypeReference type,
+            HandledGenericTypes genericT,
             TypeDefinition serializerClass, bool isEditor)
         {
-            var registerMethod = new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
-            var attributeType = assembly.MainModule.GetTypeDefinition<RuntimeInitializeOnLoadMethodAttribute>(); 
-            var constructor = attributeType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters).Import(assembly.MainModule);
+            var registerMethod =
+                new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
+            var attributeType = assembly.MainModule.GetTypeDefinition<RuntimeInitializeOnLoadMethodAttribute>();
+            var constructor = attributeType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
+                .Import(assembly.MainModule);
             var attribute = new CustomAttribute(constructor);
             registerMethod.CustomAttributes.Add(attribute);
             if (isEditor)
             {
                 var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
-                var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters).Import(assembly.MainModule);
+                var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+                    .Import(assembly.MainModule);
                 var editorAttribute = new CustomAttribute(editorConstructor);
                 registerMethod.CustomAttributes.Add(editorAttribute);
             }
-            attribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, (int)RuntimeInitializeLoadType.AfterAssembliesLoaded));
+
+            attribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32,
+                (int)RuntimeInitializeLoadType.AfterAssembliesLoaded));
             registerMethod.Body = new MethodBody(registerMethod)
             {
                 InitLocals = true
             };
-            
+
             var register = registerMethod.Body.GetILProcessor();
             GenerateRegisterMethod(assembly.MainModule, type, register, genericT);
             serializerClass.Methods.Add(registerMethod);
@@ -323,112 +347,116 @@ namespace PurrNet.Codegen
         {
             var packType = type.Module.GetTypeDefinition(typeof(PackNetworkIdentity));
             var registerMethod = packType.GetMethod("RegisterIdentity", true).Import(type.Module);
-            
+
             var genericRegisterMethod = new GenericInstanceMethod(registerMethod);
             genericRegisterMethod.GenericArguments.Add(type);
-            
-            il.Emit(OpCodes.Call, genericRegisterMethod);
-            il.Emit(OpCodes.Ret);
-        }
-        
-        private static void GenerateRegisterMethodForModule(TypeReference type, ILProcessor il)
-        {
-            var packType = type.Module.GetTypeDefinition(typeof(PackNetworkModule));
-            var registerMethod = packType.GetMethod("RegisterNetworkModule", true).Import(type.Module);
-            
-            var genericRegisterMethod = new GenericInstanceMethod(registerMethod);
-            genericRegisterMethod.GenericArguments.Add(type);
-            
+
             il.Emit(OpCodes.Call, genericRegisterMethod);
             il.Emit(OpCodes.Ret);
         }
 
-        private static void GenerateRegisterMethod(ModuleDefinition module, TypeReference type, ILProcessor il, HandledGenericTypes handledType)
+        private static void GenerateRegisterMethodForModule(TypeReference type, ILProcessor il)
+        {
+            var packType = type.Module.GetTypeDefinition(typeof(PackNetworkModule));
+            var registerMethod = packType.GetMethod("RegisterNetworkModule", true).Import(type.Module);
+
+            var genericRegisterMethod = new GenericInstanceMethod(registerMethod);
+            genericRegisterMethod.GenericArguments.Add(type);
+
+            il.Emit(OpCodes.Call, genericRegisterMethod);
+            il.Emit(OpCodes.Ret);
+        }
+
+        private static void GenerateRegisterMethod(ModuleDefinition module, TypeReference type, ILProcessor il,
+            HandledGenericTypes handledType)
         {
             var importedType = type.Import(module);
             var packCollectionsType = module.GetTypeDefinition(typeof(PackCollections)).Import(module);
-            
+
             switch (handledType)
             {
                 case HandledGenericTypes.List when importedType is GenericInstanceType listType:
-                    
+
                     var registerListMethod = packCollectionsType.GetMethod("RegisterList", true).Import(module);
                     var genericRegisterListMethod = new GenericInstanceMethod(registerListMethod);
                     genericRegisterListMethod.GenericArguments.Add(listType.GenericArguments[0]);
-                    
+
                     il.Emit(OpCodes.Call, genericRegisterListMethod);
-                    
+
                     break;
                 case HandledGenericTypes.Array when importedType is ArrayType arrayType:
-                    
+
                     var registerArrayMethod = packCollectionsType.GetMethod("RegisterArray", true).Import(module);
                     var genericRegisterArrayMethod = new GenericInstanceMethod(registerArrayMethod);
                     genericRegisterArrayMethod.GenericArguments.Add(arrayType.ElementType);
-                    
+
                     il.Emit(OpCodes.Call, genericRegisterArrayMethod);
                     break;
                 case HandledGenericTypes.HashSet when importedType is GenericInstanceType hashSetType:
-                    
+
                     var registerHashSetMethod = packCollectionsType.GetMethod("RegisterHashSet", true).Import(module);
                     var genericRegisterHashSetMethod = new GenericInstanceMethod(registerHashSetMethod);
                     genericRegisterHashSetMethod.GenericArguments.Add(hashSetType.GenericArguments[0]);
-                    
+
                     il.Emit(OpCodes.Call, genericRegisterHashSetMethod);
                     break;
                 case HandledGenericTypes.Queue when importedType is GenericInstanceType queueType:
-                    
+
                     var registerQueueMethod = packCollectionsType.GetMethod("RegisterQueue", true).Import(module);
                     var genericregisterQueueMethod = new GenericInstanceMethod(registerQueueMethod);
                     genericregisterQueueMethod.GenericArguments.Add(queueType.GenericArguments[0]);
-                    
+
                     il.Emit(OpCodes.Call, genericregisterQueueMethod);
                     break;
                 case HandledGenericTypes.Stack when importedType is GenericInstanceType stackType:
-                    
+
                     var registerStackMethod = packCollectionsType.GetMethod("RegisterStack", true).Import(module);
                     var genericRegisterStackMethod = new GenericInstanceMethod(registerStackMethod);
                     genericRegisterStackMethod.GenericArguments.Add(stackType.GenericArguments[0]);
-                    
+
                     il.Emit(OpCodes.Call, genericRegisterStackMethod);
                     break;
                 case HandledGenericTypes.DisposableList when importedType is GenericInstanceType stackType:
-                    
-                    var registerDisposableListMethod = packCollectionsType.GetMethod("RegisterDisposableList", true).Import(module);
+
+                    var registerDisposableListMethod =
+                        packCollectionsType.GetMethod("RegisterDisposableList", true).Import(module);
                     var genericRegisterDListMethod = new GenericInstanceMethod(registerDisposableListMethod);
                     genericRegisterDListMethod.GenericArguments.Add(stackType.GenericArguments[0]);
-                    
+
                     il.Emit(OpCodes.Call, genericRegisterDListMethod);
                     break;
                 case HandledGenericTypes.DisposableHashSet when importedType is GenericInstanceType stackType:
-                    
-                    var registerDisposableHashSetMethod = packCollectionsType.GetMethod("RegisterDisposableHashSet", true).Import(module);
+
+                    var registerDisposableHashSetMethod =
+                        packCollectionsType.GetMethod("RegisterDisposableHashSet", true).Import(module);
                     var genericRegisterDSetMethod = new GenericInstanceMethod(registerDisposableHashSetMethod);
                     genericRegisterDSetMethod.GenericArguments.Add(stackType.GenericArguments[0]);
                     il.Emit(OpCodes.Call, genericRegisterDSetMethod);
                     break;
                 case HandledGenericTypes.Dictionary when importedType is GenericInstanceType dictionaryType:
-                    
-                    var registerDictionaryMethod = packCollectionsType.GetMethod("RegisterDictionary", true).Import(module);
+
+                    var registerDictionaryMethod =
+                        packCollectionsType.GetMethod("RegisterDictionary", true).Import(module);
                     var genericRegisterDictionaryMethod = new GenericInstanceMethod(registerDictionaryMethod);
                     genericRegisterDictionaryMethod.GenericArguments.Add(dictionaryType.GenericArguments[0]);
                     genericRegisterDictionaryMethod.GenericArguments.Add(dictionaryType.GenericArguments[1]);
-                    
+
                     il.Emit(OpCodes.Call, genericRegisterDictionaryMethod);
                     break;
                 case HandledGenericTypes.Nullable when importedType is GenericInstanceType nullableType:
                     var registerNullableMethod = packCollectionsType.GetMethod("RegisterNullable", true).Import(module);
                     var genericRegisterNullableMethod = new GenericInstanceMethod(registerNullableMethod);
                     genericRegisterNullableMethod.GenericArguments.Add(nullableType.GenericArguments[0]);
-                    
+
                     il.Emit(OpCodes.Call, genericRegisterNullableMethod);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(handledType), handledType, null);
             }
-            
+
             il.Emit(OpCodes.Ret);
         }
-        
+
         public static bool HasInterface(TypeDefinition def, Type interfaceType)
         {
             return def.Interfaces.Any(i => i.InterfaceType.FullName == interfaceType.FullName);
@@ -437,21 +465,21 @@ namespace PurrNet.Codegen
         private static MethodReference CreateSetterMethod(TypeDefinition parent, FieldDefinition field)
         {
             var name = MakeFullNameValidCSharp($"Purrnet_Set_{field.Name}");
-            
+
             foreach (var m in parent.Methods)
             {
                 if (m.Name == name)
                     return m;
             }
-            
+
             var method = new MethodDefinition(name, MethodAttributes.Public, parent.Module.TypeSystem.Void);
             var valueArg = new ParameterDefinition("value", ParameterAttributes.None, field.FieldType);
             method.Parameters.Add(valueArg);
-            
+
             var setter = method.Body.GetILProcessor();
-            
+
             FieldReference fieldRef;
-            
+
             if (parent.HasGenericParameters)
             {
                 // Link the field to the open generic instance
@@ -471,32 +499,33 @@ namespace PurrNet.Codegen
                 // Use the field directly if no generics are involved
                 fieldRef = field;
             }
-            
+
             setter.Emit(OpCodes.Ldarg_0);
             setter.Emit(OpCodes.Ldarg_1);
             setter.Emit(OpCodes.Stfld, fieldRef);
-            
+
             setter.Emit(OpCodes.Ret);
-            
+
             parent.Methods.Add(method);
             return method;
         }
-        
+
         private static MethodReference CreateGetterMethod(TypeDefinition parent, FieldDefinition field)
         {
             var name = MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}");
-            
+
             foreach (var m in parent.Methods)
             {
                 if (m.Name == name)
                     return m;
             }
-            
-            var method = new MethodDefinition(MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}"), MethodAttributes.Public, field.FieldType);
+
+            var method = new MethodDefinition(MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}"),
+                MethodAttributes.Public, field.FieldType);
             var getter = method.Body.GetILProcessor();
-            
+
             FieldReference fieldRef;
-            
+
             if (parent.HasGenericParameters)
             {
                 // Link the field to the open generic instance
@@ -520,11 +549,11 @@ namespace PurrNet.Codegen
             getter.Emit(OpCodes.Ldarg_0); // Load "this"
             getter.Emit(OpCodes.Ldfld, fieldRef); // Load field in the correct generic context
             getter.Emit(OpCodes.Ret); // Return the field value
-            
+
             parent.Methods.Add(method);
             return method;
         }
-        
+
         private static void GenerateMethod(
             bool isWriting, MethodDefinition method, MethodReference serialize, TypeReference typeRef, ILProcessor il,
             ModuleDefinition mainmodule, ParameterDefinition valueArg)
@@ -532,7 +561,7 @@ namespace PurrNet.Codegen
             var bitPackerType = mainmodule.GetTypeDefinition(typeof(BitPacker)).Import(mainmodule);
             var packerType = mainmodule.GetTypeDefinition(typeof(Packer<>)).Import(mainmodule);
             var type = typeRef.Resolve();
-            
+
             var writeIsNull = bitPackerType.GetMethod("WriteIsNull", true).Import(mainmodule);
             var readIsNull = bitPackerType.GetMethod("ReadIsNull", true).Import(mainmodule);
             bool isClass = !type.IsValueType;
@@ -546,7 +575,7 @@ namespace PurrNet.Codegen
                 {
                     var genericIsNull = new GenericInstanceMethod(writeIsNull);
                     genericIsNull.GenericArguments.Add(typeRef);
-                    
+
                     il.Emit(OpCodes.Ldarg_0);
                     il.Emit(OpCodes.Ldarg_1);
                     il.Emit(OpCodes.Call, genericIsNull);
@@ -555,16 +584,16 @@ namespace PurrNet.Codegen
                 {
                     var genericIsNull = new GenericInstanceMethod(readIsNull);
                     genericIsNull.GenericArguments.Add(typeRef);
-                    
+
                     il.Emit(OpCodes.Ldarg_0);
                     il.Emit(OpCodes.Ldarg_1);
                     il.Emit(OpCodes.Call, genericIsNull);
                 }
-                
+
                 // if returned false, just return
                 il.Emit(OpCodes.Brfalse, ret);
             }
-            
+
             if (type.IsEnum)
             {
                 HandleEnums(isWriting, method, serialize, type, il, packerType, mainmodule);
@@ -576,26 +605,26 @@ namespace PurrNet.Codegen
                 HandleIData(isWriting, type, il, mainmodule, valueArg);
                 return;
             }
-            
+
             if (HasInterface(type, typeof(IPackedSimple)))
             {
                 HandleIDataSimple(isWriting, type, il, mainmodule, valueArg);
                 return;
             }
-            
+
             foreach (var field in type.Fields)
             {
                 if (field.IsStatic)
                     continue;
-                
+
                 bool isDelegate = PostProcessor.InheritsFrom(field.FieldType.Resolve(), typeof(Delegate).FullName);
-            
+
                 if (isDelegate)
                     continue;
 
                 var fieldType = ResolveGenericFieldType(field, typeRef);
                 var genericM = CreateGenericMethod(packerType, fieldType, serialize, mainmodule);
-                
+
                 // make field public
                 if (!field.IsPublic)
                 {
@@ -611,16 +640,17 @@ namespace PurrNet.Codegen
                             };
 
                             foreach (var param in getter.Parameters)
-                                copy.Parameters.Add(new ParameterDefinition(param.Name, param.Attributes, param.ParameterType));
-                        
+                                copy.Parameters.Add(new ParameterDefinition(param.Name, param.Attributes,
+                                    param.ParameterType));
+
                             foreach (var genericParam in getter.GenericParameters)
                                 copy.GenericParameters.Add(new GenericParameter(genericParam.Name, copy));
-                            
+
                             getter = copy;
                         }
-                        
+
                         il.Emit(OpCodes.Ldarg_0);
-                        
+
                         if (isClass)
                             il.Emit(OpCodes.Ldarg_1);
                         else
@@ -633,7 +663,7 @@ namespace PurrNet.Codegen
                     {
                         var variable = new VariableDefinition(fieldType);
                         method.Body.Variables.Add(variable);
-                        
+
                         var setter = CreateSetterMethod(type, field);
 
                         if (typeRef is GenericInstanceType genericInstanceType)
@@ -642,20 +672,21 @@ namespace PurrNet.Codegen
                             {
                                 HasThis = setter.HasThis
                             };
-                            
+
                             foreach (var param in setter.Parameters)
-                                copy.Parameters.Add(new ParameterDefinition(param.Name, param.Attributes, param.ParameterType));
-                        
+                                copy.Parameters.Add(new ParameterDefinition(param.Name, param.Attributes,
+                                    param.ParameterType));
+
                             foreach (var genericParam in setter.GenericParameters)
                                 copy.GenericParameters.Add(new GenericParameter(genericParam.Name, copy));
-                            
+
                             setter = copy;
                         }
-                        
+
                         il.Emit(OpCodes.Ldarg_0);
                         il.Emit(OpCodes.Ldloca, variable);
                         il.Emit(OpCodes.Call, genericM);
-                        
+
                         il.Emit(OpCodes.Ldarg_1);
                         if (isClass) il.Emit(OpCodes.Ldind_Ref);
 
@@ -668,23 +699,22 @@ namespace PurrNet.Codegen
                     il.Emit(OpCodes.Ldarg_0);
                     il.Emit(OpCodes.Ldarg_1);
                     if (isClass && !isWriting) il.Emit(OpCodes.Ldind_Ref);
-                    
+
                     var fieldRef = new FieldReference(field.Name, field.FieldType, typeRef).Import(mainmodule);
-                    
+
                     il.Emit(isWriting ? OpCodes.Ldfld : OpCodes.Ldflda, fieldRef);
                     il.Emit(OpCodes.Call, genericM);
                 }
-
             }
-            
+
             /*il.Emit(OpCodes.Ldarg_S, valueArg);
             if (isClass) il.Emit(OpCodes.Ldind_Ref);
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Call, readData);*/
-            
+
             il.Append(ret);
         }
-        
+
         public static TypeReference ResolveGenericFieldType(FieldDefinition field, TypeReference declaringType)
         {
             var fieldType = field.FieldType;
@@ -718,6 +748,7 @@ namespace PurrNet.Codegen
                             resolvedInstance.GenericArguments.Add(arg);
                         }
                     }
+
                     return resolvedInstance;
                 }
             }
@@ -746,10 +777,10 @@ namespace PurrNet.Codegen
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Call, readData);
             }
-                
+
             il.Emit(OpCodes.Ret);
         }
-        
+
         private static void HandleIDataSimple(bool isWriting, TypeDefinition type,
             ILProcessor il, ModuleDefinition mainmodule, ParameterDefinition valueArg)
         {
@@ -769,7 +800,7 @@ namespace PurrNet.Codegen
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Call, readData);
             }
-                
+
             il.Emit(OpCodes.Ret);
         }
 
@@ -778,16 +809,16 @@ namespace PurrNet.Codegen
         {
             var underlyingType = type.GetField("value__").FieldType;
             var enumWriteMethod = CreateGenericMethod(packerType, underlyingType, serialize, mainmodule);
-                
+
             var tmpVar = new VariableDefinition(underlyingType);
-                
+
             if (!isWriting)
             {
                 method.Body.Variables.Add(tmpVar);
                 il.Emit(OpCodes.Ldc_I4_0);
                 il.Emit(OpCodes.Stloc_0);
             }
-                
+
             il.Emit(OpCodes.Ldarg_0);
 
             // load the address of the field
@@ -805,7 +836,7 @@ namespace PurrNet.Codegen
                 il.Emit(OpCodes.Ldloc_0);
                 EmitStindForEnum(il, type);
             }
-                
+
             il.Emit(OpCodes.Ret);
         }
 
@@ -814,67 +845,69 @@ namespace PurrNet.Codegen
         {
             var genericPackerType = new GenericInstanceType(packerType);
             genericPackerType.GenericArguments.Add(type);
-                
-            var genericWriteMethod = new MethodReference(writeMethod.Name, writeMethod.ReturnType, genericPackerType.Import(mainmodule))
+
+            var genericWriteMethod = new MethodReference(writeMethod.Name, writeMethod.ReturnType,
+                genericPackerType.Import(mainmodule))
             {
                 HasThis = writeMethod.HasThis
-            }; 
-                
+            };
+
             foreach (var param in writeMethod.Parameters)
-                genericWriteMethod.Parameters.Add(new ParameterDefinition(param.Name, param.Attributes, param.ParameterType));
+                genericWriteMethod.Parameters.Add(new ParameterDefinition(param.Name, param.Attributes,
+                    param.ParameterType));
             return genericWriteMethod.Import(mainmodule);
         }
 
         private static bool IsGeneric(TypeReference typeDef, out HandledGenericTypes type)
-        {        
+        {
             if (typeDef.IsArray)
             {
-                type = HandledGenericTypes.Array; 
+                type = HandledGenericTypes.Array;
                 return true;
             }
-            
+
             if (IsGeneric(typeDef, typeof(DisposableList<>)))
             {
                 type = HandledGenericTypes.DisposableList;
                 return true;
             }
-            
+
             if (IsGeneric(typeDef, typeof(DisposableHashSet<>)))
             {
                 type = HandledGenericTypes.DisposableHashSet;
                 return true;
             }
-            
+
             if (IsGeneric(typeDef, typeof(List<>)))
             {
                 type = HandledGenericTypes.List;
                 return true;
             }
-            
+
             if (IsGeneric(typeDef, typeof(Queue<>)))
             {
                 type = HandledGenericTypes.Queue;
                 return true;
             }
-            
+
             if (IsGeneric(typeDef, typeof(Stack<>)))
             {
                 type = HandledGenericTypes.Stack;
                 return true;
             }
-            
+
             if (IsGeneric(typeDef, typeof(HashSet<>)))
             {
                 type = HandledGenericTypes.HashSet;
                 return true;
             }
-            
+
             if (IsGeneric(typeDef, typeof(Dictionary<,>)))
             {
                 type = HandledGenericTypes.Dictionary;
                 return true;
             }
-            
+
             if (IsGeneric(typeDef, typeof(Nullable<>)))
             {
                 type = HandledGenericTypes.Nullable;
@@ -884,7 +917,7 @@ namespace PurrNet.Codegen
             type = HandledGenericTypes.None;
             return false;
         }
-        
+
         private static bool IsGeneric(TypeReference typeDef, Type type)
         {
             // Ensure method has a generic return type
@@ -899,7 +932,7 @@ namespace PurrNet.Codegen
 
             return false;
         }
-        
+
         private static TypeReference GetEnumUnderlyingType(TypeDefinition typeDef)
         {
             if (!typeDef.IsEnum)
@@ -908,7 +941,7 @@ namespace PurrNet.Codegen
             var valueField = typeDef.Fields.FirstOrDefault(f => f.Name == "value__");
             return valueField?.FieldType;
         }
-        
+
         private static void EmitStindForEnum(ILProcessor il, TypeDefinition enumType)
         {
             if (!enumType.IsEnum)
@@ -921,7 +954,8 @@ namespace PurrNet.Codegen
 
             if (underlyingType == null)
             {
-                throw new InvalidOperationException($"Unable to determine the underlying type of the enum {enumType.FullName}.");
+                throw new InvalidOperationException(
+                    $"Unable to determine the underlying type of the enum {enumType.FullName}.");
             }
 
             // Emit the appropriate Stind opcode based on the underlying type

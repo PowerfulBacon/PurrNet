@@ -10,9 +10,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Feed
     {
-        public Feed() { }
+        public Feed()
+        {
+        }
 
-        public Feed(string timelineUrl, string userUrl, string currentUserPublicUrl, string currentUserUrl, string currentUserActorUrl, string currentUserOrganizationUrl, FeedLinks links)
+        public Feed(string timelineUrl, string userUrl, string currentUserPublicUrl, string currentUserUrl,
+            string currentUserActorUrl, string currentUserOrganizationUrl, FeedLinks links)
         {
             TimelineUrl = timelineUrl;
             UserUrl = userUrl;
@@ -61,10 +64,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Public Url: {0} ", CurrentUserPublicUrl);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Public Url: {0} ", CurrentUserPublicUrl); }
         }
     }
 }

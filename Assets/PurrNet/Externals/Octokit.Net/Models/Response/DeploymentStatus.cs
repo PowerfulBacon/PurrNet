@@ -9,9 +9,13 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class DeploymentStatus
     {
-        public DeploymentStatus() { }
+        public DeploymentStatus()
+        {
+        }
 
-        public DeploymentStatus(long id, string nodeId, string url, DeploymentState state, User creator, IReadOnlyDictionary<string, string> payload, string targetUrl, string logUrl, string environmentUrl, DateTimeOffset createdAt, DateTimeOffset updatedAt, string description)
+        public DeploymentStatus(long id, string nodeId, string url, DeploymentState state, User creator,
+            IReadOnlyDictionary<string, string> payload, string targetUrl, string logUrl, string environmentUrl,
+            DateTimeOffset createdAt, DateTimeOffset updatedAt, string description)
         {
             Id = id;
             NodeId = nodeId;
@@ -93,34 +97,24 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "State: {0} UpdatedAt: {1}", State, UpdatedAt);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "State: {0} UpdatedAt: {1}", State, UpdatedAt); }
         }
     }
 
     public enum DeploymentState
     {
-        [Parameter(Value = "pending")]
-        Pending,
+        [Parameter(Value = "pending")] Pending,
 
-        [Parameter(Value = "success")]
-        Success,
+        [Parameter(Value = "success")] Success,
 
-        [Parameter(Value = "error")]
-        Error,
+        [Parameter(Value = "error")] Error,
 
-        [Parameter(Value = "failure")]
-        Failure,
+        [Parameter(Value = "failure")] Failure,
 
-        [Parameter(Value = "inactive")]
-        Inactive,
+        [Parameter(Value = "inactive")] Inactive,
 
-        [Parameter(Value = "in_progress")]
-        InProgress,
+        [Parameter(Value = "in_progress")] InProgress,
 
-        [Parameter(Value = "queued")]
-        Queued
+        [Parameter(Value = "queued")] Queued
     }
 }

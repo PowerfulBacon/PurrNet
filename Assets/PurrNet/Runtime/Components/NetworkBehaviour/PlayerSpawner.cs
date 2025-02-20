@@ -12,7 +12,7 @@ namespace PurrNet
 
         [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
         private int _currentSpawnPoint;
-        
+
         private void Awake()
         {
             CleanupSpawnPoints();
@@ -30,7 +30,7 @@ namespace PurrNet
                     i--;
                 }
             }
-            
+
             if (hadNullEntry)
                 PurrLogger.LogWarning($"Some spawn points were invalid and have been cleaned up.", this);
         }
@@ -52,10 +52,10 @@ namespace PurrNet
 
                 if (!manager.TryGetModule(out ScenesModule scenes, true))
                     return;
-            
+
                 if (!scenes.TryGetSceneID(gameObject.scene, out var sceneID))
                     return;
-                
+
                 if (scenePlayersModule.TryGetPlayersInScene(sceneID, out var players))
                 {
                     foreach (var player in players)
@@ -69,25 +69,26 @@ namespace PurrNet
             if (asServer && manager.TryGetModule(out ScenePlayersModule scenePlayersModule, true))
                 scenePlayersModule.onPlayerLoadedScene -= OnPlayerLoadedScene;
         }
- 
+
         private void OnDestroy()
         {
-            if(NetworkManager.main && NetworkManager.main.TryGetModule(out ScenePlayersModule scenePlayersModule, true))
+            if (NetworkManager.main &&
+                NetworkManager.main.TryGetModule(out ScenePlayersModule scenePlayersModule, true))
                 scenePlayersModule.onPlayerLoadedScene -= OnPlayerLoadedScene;
         }
 
         private void OnPlayerLoadedScene(PlayerID player, SceneID scene, bool asServer)
         {
             var main = NetworkManager.main;
-            
+
             if (!main || !main.TryGetModule(out ScenesModule scenes, true))
                 return;
 
             var unityScene = gameObject.scene;
-            
+
             if (!scenes.TryGetSceneID(unityScene, out var sceneID))
                 return;
-            
+
             if (sceneID != scene)
                 return;
 
@@ -95,14 +96,14 @@ namespace PurrNet
                 return;
 
             bool isDestroyOnDisconnectEnabled = main.networkRules.ShouldDespawnOnOwnerDisconnect();
-            if (!isDestroyOnDisconnectEnabled && main.TryGetModule(out GlobalOwnershipModule ownership, true) && 
+            if (!isDestroyOnDisconnectEnabled && main.TryGetModule(out GlobalOwnershipModule ownership, true) &&
                 ownership.PlayerOwnsSomething(player))
                 return;
-            
+
             GameObject newPlayer;
-            
+
             CleanupSpawnPoints();
-            
+
             if (spawnPoints.Count > 0)
             {
                 var spawnPoint = spawnPoints[_currentSpawnPoint];
@@ -114,7 +115,7 @@ namespace PurrNet
                 _playerPrefab.transform.GetPositionAndRotation(out var position, out var rotation);
                 newPlayer = UnityProxy.Instantiate(_playerPrefab, position, rotation, unityScene);
             }
-            
+
             if (newPlayer.TryGetComponent(out NetworkIdentity identity))
                 identity.GiveOwnership(player);
         }

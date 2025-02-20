@@ -12,7 +12,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Participation
     {
-        public Participation() { }
+        public Participation()
+        {
+        }
 
         public Participation(IEnumerable<int> all, IEnumerable<int> owner)
         {

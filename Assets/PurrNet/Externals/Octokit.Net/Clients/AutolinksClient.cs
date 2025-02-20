@@ -12,7 +12,8 @@ namespace Octokit
         /// </summary>
         /// <param name="apiConnection">An API connection</param>
         public AutolinksClient(IApiConnection apiConnection) : base(apiConnection)
-        { }
+        {
+        }
 
 
         /// <inheritdoc/>

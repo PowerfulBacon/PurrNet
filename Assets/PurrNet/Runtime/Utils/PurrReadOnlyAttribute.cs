@@ -7,9 +7,8 @@ namespace PurrNet.Utils
 {
     public class PurrReadOnlyAttribute : PropertyAttribute
     {
-        
     }
-    
+
 #if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(PurrReadOnlyAttribute))]
     public class PurrReadOnlyDrawer : PropertyDrawer

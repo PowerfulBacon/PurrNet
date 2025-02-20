@@ -17,9 +17,9 @@ namespace PurrNet.Codegen
 
                 if (isProxyItself)
                     return;
-                
+
                 var module = type.Module;
-                
+
                 string objectClassFullName = typeof(UnityEngine.Object).FullName;
                 var unityProxyType = module.GetTypeReference(typeof(UnityProxy)).Import(module).Resolve();
 
@@ -43,29 +43,30 @@ namespace PurrNet.Codegen
                             continue;
 
                         var resolved = methodReference.Resolve();
-                        
+
                         if (resolved == null)
                             continue;
-                        
+
                         var targetMethod = GetInstantiateDefinition(resolved, unityProxyType);
-                        
+
                         if (targetMethod == null)
                             continue;
-                        
+
                         var targerRef = module.ImportReference(targetMethod);
-                        
+
                         if (methodReference is GenericInstanceMethod genericInstanceMethod)
                         {
                             var genRef = new GenericInstanceMethod(targerRef);
-                            
+
                             for (var j = 0; j < genericInstanceMethod.GenericArguments.Count; j++)
                                 genRef.GenericArguments.Add(genericInstanceMethod.GenericArguments[j]);
 
                             for (var j = 0; j < genRef.GenericParameters.Count; j++)
                                 genRef.GenericParameters.Add(genRef.GenericParameters[j]);
-                            
+
                             targerRef = module.ImportReference(genRef);
                         }
+
                         processor.Replace(instruction, processor.Create(OpCodes.Call, targerRef));
                     }
                 }
@@ -79,7 +80,7 @@ namespace PurrNet.Codegen
                 });
             }
         }
-        
+
         static MethodDefinition GetInstantiateDefinition(
             MethodReference originalMethod,
             TypeDefinition declaringType)
@@ -115,7 +116,8 @@ namespace PurrNet.Codegen
 
                         for (int j = 0; j < originalParam.Constraints.Count; j++)
                         {
-                            if (!TypesMatch(originalParam.Constraints[j].ConstraintType, candidateParam.Constraints[j].ConstraintType))
+                            if (!TypesMatch(originalParam.Constraints[j].ConstraintType,
+                                    candidateParam.Constraints[j].ConstraintType))
                                 goto NextMethod;
                         }
                     }
@@ -166,6 +168,5 @@ namespace PurrNet.Codegen
 
             return true;
         }
-
     }
 }

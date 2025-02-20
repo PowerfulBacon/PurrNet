@@ -19,8 +19,8 @@ namespace JamesFrowen.SimpleWeb
             string[] all = message.Split(lineSplitChars, StringSplitOptions.RemoveEmptyEntries);
             RequestLine = all.First();
             Headers = all.Skip(1)
-                         .Select(header => header.Split(headerSplitChars, 2, StringSplitOptions.RemoveEmptyEntries))
-                         .ToDictionary(split => split[0].Trim(), split => split[1].Trim());
+                .Select(header => header.Split(headerSplitChars, 2, StringSplitOptions.RemoveEmptyEntries))
+                .ToDictionary(split => split[0].Trim(), split => split[1].Trim());
         }
     }
 }

@@ -7,9 +7,14 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class IssueEvent
     {
-        public IssueEvent() { }
+        public IssueEvent()
+        {
+        }
 
-        public IssueEvent(long id, string nodeId, string url, User actor, User assignee, Label label, EventInfoState @event, string commitId, DateTimeOffset createdAt, Issue issue, string commitUrl, RenameInfo rename, IssueEventProjectCard projectCard, User reviewRequester, User requestedReviewer, User assigner, LockReason lockReason, DismissedReviewInfo dismissedReview, Milestone milestone)
+        public IssueEvent(long id, string nodeId, string url, User actor, User assignee, Label label,
+            EventInfoState @event, string commitId, DateTimeOffset createdAt, Issue issue, string commitUrl,
+            RenameInfo rename, IssueEventProjectCard projectCard, User reviewRequester, User requestedReviewer,
+            User assigner, LockReason lockReason, DismissedReviewInfo dismissedReview, Milestone milestone)
         {
             Id = id;
             NodeId = nodeId;

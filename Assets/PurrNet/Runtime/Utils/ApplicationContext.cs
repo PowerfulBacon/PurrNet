@@ -27,7 +27,7 @@ namespace PurrNet.Utils
         public static bool isServerBuild => !Application.isEditor && Application.isBatchMode;
         public static bool isClientBuild => false;
 #endif
-            
+
 #if !UNITY_EDITOR
         public static bool isClone => false;
         public static bool isMainEditor => false;

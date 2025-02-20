@@ -37,17 +37,14 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Note: {0}, Id: {1}", Note, ContentId);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Note: {0}, Id: {1}", Note, ContentId); }
         }
     }
 
     public enum ProjectCardContentType
     {
-        [Parameter(Value = nameof(Issue))]
-        Issue,
+        [Parameter(Value = nameof(Issue))] Issue,
+
         [Parameter(Value = nameof(PullRequest))]
         PullRequest
     }

@@ -70,6 +70,7 @@ namespace Octokit
         /// </summary>
         public IReadOnlyList<NewCheckRunAction> Actions { get; set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "Name: {0}, HeadSha: {1}, Status: {2}, Conclusion: {3}", Name, HeadSha, Status, Conclusion);
+        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture,
+            "Name: {0}, HeadSha: {1}, Status: {2}, Conclusion: {3}", Name, HeadSha, Status, Conclusion);
     }
 }

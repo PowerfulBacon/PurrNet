@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class MaintenanceModeActiveProcesses
     {
-        public MaintenanceModeActiveProcesses() { }
+        public MaintenanceModeActiveProcesses()
+        {
+        }
 
         public MaintenanceModeActiveProcesses(string name, int number)
         {
@@ -25,10 +27,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return this.ToString();
-            }
+            get { return this.ToString(); }
         }
     }
 }

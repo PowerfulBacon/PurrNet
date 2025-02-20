@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RunnerLabel
     {
-        public RunnerLabel() { }
+        public RunnerLabel()
+        {
+        }
 
         public RunnerLabel(long id, string name, string type)
         {
@@ -21,7 +23,10 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Id: {0}; Name: {1}; Type: {2};", Id, Name, Type); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Id: {0}; Name: {1}; Type: {2};", Id, Name, Type);
+            }
         }
     }
 }

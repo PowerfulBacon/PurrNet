@@ -9,9 +9,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class EventInfo
     {
-        public EventInfo() { }
+        public EventInfo()
+        {
+        }
 
-        public EventInfo(long id, string nodeId, string url, User actor, User assignee, Label label, EventInfoState @event, string commitId, DateTimeOffset createdAt)
+        public EventInfo(long id, string nodeId, string url, User actor, User assignee, Label label,
+            EventInfoState @event, string commitId, DateTimeOffset createdAt)
         {
             Id = id;
             NodeId = nodeId;
@@ -71,10 +74,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Id: {0} CreatedAt: {1}", Id, CreatedAt);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Id: {0} CreatedAt: {1}", Id, CreatedAt); }
         }
     }
 
@@ -89,8 +89,7 @@ namespace Octokit
         /// <summary>
         /// The issue was assigned to the actor.
         /// </summary>
-        [Parameter(Value = "assigned")]
-        Assigned,
+        [Parameter(Value = "assigned")] Assigned,
 
         /// <summary>
         /// GitHub unsuccessfully attempted to automatically change the base branch of the pull request.
@@ -114,27 +113,23 @@ namespace Octokit
         /// The issue was closed by the actor. When the commit_id is present, it identifies the commit that
         /// closed the issue using “closes / fixes #NN” syntax.
         /// </summary>
-        [Parameter(Value = "closed")]
-        Closed,
+        [Parameter(Value = "closed")] Closed,
 
         /// <summary>
         /// A comment was added to the issue.
         /// </summary>
-        [Parameter(Value = "commented")]
-        Commented,
+        [Parameter(Value = "commented")] Commented,
 
         /// <summary>
         /// A commit was added to the pull request's HEAD branch.
         /// Only provided for pull requests.
         /// </summary>
-        [Parameter(Value = "committed")]
-        Committed,
+        [Parameter(Value = "committed")] Committed,
 
         /// <summary>
         /// An issue was connected.
         /// </summary>
-        [Parameter(Value = "connected")]
-        Connected,
+        [Parameter(Value = "connected")] Connected,
 
         /// <summary>
         /// The pull request was converted to draft mode.
@@ -153,7 +148,8 @@ namespace Octokit
         /// The source attribute contains the id, actor, and
         /// url of the reference's source.
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Crossreferenced")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly",
+            MessageId = "Crossreferenced")]
         [Parameter(Value = "cross-referenced")]
         Crossreferenced,
 
@@ -167,8 +163,7 @@ namespace Octokit
         /// <summary>
         /// The pull request was deployed.
         /// </summary>
-        [Parameter(Value = "deployed")]
-        Deployed,
+        [Parameter(Value = "deployed")] Deployed,
 
         /// <summary>
         /// The pull request deployment environment was changed.
@@ -179,8 +174,7 @@ namespace Octokit
         /// <summary>
         /// The issue or pull request was unlinked from another issue or pull request.
         /// </summary>
-        [Parameter(Value = "disconnected")]
-        Disconnected,
+        [Parameter(Value = "disconnected")] Disconnected,
 
         /// <summary>
         /// The pull request’s branch was deleted.
@@ -203,20 +197,17 @@ namespace Octokit
         /// <summary>
         /// A label was added to the issue.
         /// </summary>
-        [Parameter(Value = "labeled")]
-        Labeled,
+        [Parameter(Value = "labeled")] Labeled,
 
         /// <summary>
         /// The issue was locked by the actor.
         /// </summary>
-        [Parameter(Value = "locked")]
-        Locked,
+        [Parameter(Value = "locked")] Locked,
 
         /// <summary>
         /// The actor was @mentioned in an issue body.
         /// </summary>
-        [Parameter(Value = "mentioned")]
-        Mentioned,
+        [Parameter(Value = "mentioned")] Mentioned,
 
         /// <summary>
         /// A user with write permissions marked an issue as a duplicate of another issue or a pull request as a duplicate of another pull request.
@@ -227,8 +218,7 @@ namespace Octokit
         /// <summary>
         /// The issue was merged by the actor. The commit_id attribute is the SHA1 of the HEAD commit that was merged.
         /// </summary>
-        [Parameter(Value = "merged")]
-        Merged,
+        [Parameter(Value = "merged")] Merged,
 
         /// <summary>
         /// The issue was added to a milestone.
@@ -246,8 +236,7 @@ namespace Octokit
         /// <summary>
         /// An issue was pinned.
         /// </summary>
-        [Parameter(Value = "pinned")]
-        Pinned,
+        [Parameter(Value = "pinned")] Pinned,
 
         /// <summary>
         /// The pull request is ready for review
@@ -259,8 +248,7 @@ namespace Octokit
         /// The issue was referenced from a commit message. The commit_id attribute is the commit SHA1 of where
         /// that happened.
         /// </summary>
-        [Parameter(Value = "referenced")]
-        Referenced,
+        [Parameter(Value = "referenced")] Referenced,
 
         /// <summary>
         /// The issue was removed from a project board.
@@ -271,14 +259,12 @@ namespace Octokit
         /// <summary>
         /// The issue title was changed.
         /// </summary>
-        [Parameter(Value = "renamed")]
-        Renamed,
+        [Parameter(Value = "renamed")] Renamed,
 
         /// <summary>
         /// The issue was reopened by the actor.
         /// </summary>
-        [Parameter(Value = "reopened")]
-        Reopened,
+        [Parameter(Value = "reopened")] Reopened,
 
         /// <summary>
         /// The actor dismissed a review from the pull request.
@@ -301,38 +287,32 @@ namespace Octokit
         /// <summary>
         /// The issue was reviewed.
         /// </summary>
-        [Parameter(Value = "reviewed")]
-        Reviewed,
+        [Parameter(Value = "reviewed")] Reviewed,
 
         /// <summary>
         /// The actor subscribed to receive notifications for an issue.
         /// </summary>
-        [Parameter(Value = "subscribed")]
-        Subscribed,
+        [Parameter(Value = "subscribed")] Subscribed,
 
         /// <summary>
         /// An issue was transferred.
         /// </summary>
-        [Parameter(Value = "transferred")]
-        Transferred,
+        [Parameter(Value = "transferred")] Transferred,
 
         /// <summary>
         /// The issue was unassigned to the actor.
         /// </summary>
-        [Parameter(Value = "unassigned")]
-        Unassigned,
+        [Parameter(Value = "unassigned")] Unassigned,
 
         /// <summary>
         /// A label was removed from the issue.
         /// </summary>
-        [Parameter(Value = "unlabeled")]
-        Unlabeled,
+        [Parameter(Value = "unlabeled")] Unlabeled,
 
         /// <summary>
         /// The issue was unlocked by the actor.
         /// </summary>
-        [Parameter(Value = "unlocked")]
-        Unlocked,
+        [Parameter(Value = "unlocked")] Unlocked,
 
         /// <summary>
         /// An issue that a user had previously marked as a duplicate of another issue is no longer considered a duplicate.
@@ -343,35 +323,23 @@ namespace Octokit
         /// <summary>
         /// An issue was unpinned.
         /// </summary>
-        [Parameter(Value = "unpinned")]
-        Unpinned,
+        [Parameter(Value = "unpinned")] Unpinned,
 
         /// <summary>
         /// The actor unsubscribed from notifications for an issue.
         /// </summary>
-        [Parameter(Value = "unsubscribed")]
-        Unsubscribed,
+        [Parameter(Value = "unsubscribed")] Unsubscribed,
 
         /// <summary>
         /// An organization owner blocked a user from the organization.
         /// </summary>
-        [Parameter(Value = "user_blocked")]
-        UserBlocked,
-
-
-
-
-
-
-
-
+        [Parameter(Value = "user_blocked")] UserBlocked,
 
 
         /// <summary>
         /// A line comment was made.
         /// </summary>
-        [Parameter(Value = "line-commented")]
-        LineCommented,
+        [Parameter(Value = "line-commented")] LineCommented,
 
         /// <summary>
         /// A commit comment was made.
@@ -380,15 +348,9 @@ namespace Octokit
         CommitCommented,
 
 
-
         /// <summary>
         /// An issue comment was deleted.
         /// </summary>
-        [Parameter(Value = "comment_deleted")]
-        CommentDeleted,
-
-
-
-
+        [Parameter(Value = "comment_deleted")] CommentDeleted,
     }
 }

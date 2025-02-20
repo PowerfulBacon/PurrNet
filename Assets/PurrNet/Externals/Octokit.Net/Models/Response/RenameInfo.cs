@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RenameInfo
     {
-        public RenameInfo() { }
+        public RenameInfo()
+        {
+        }
 
         public RenameInfo(string from, string to)
         {

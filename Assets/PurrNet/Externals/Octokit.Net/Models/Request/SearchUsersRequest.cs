@@ -80,10 +80,7 @@ namespace Octokit
         /// </summary>
         public IEnumerable<UserInQualifier> In
         {
-            get
-            {
-                return _inQualifier;
-            }
+            get { return _inQualifier; }
             set
             {
                 if (value != null && value.Any())
@@ -135,10 +132,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Term: {0} Sort: {1}", Term, Sort);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Term: {0} Sort: {1}", Term, Sort); }
         }
     }
 
@@ -150,14 +144,12 @@ namespace Octokit
         /// <summary>
         ///  User account
         /// </summary>
-        [Parameter(Value = "user")]
-        User,
+        [Parameter(Value = "user")] User,
 
         /// <summary>
         /// Organization account
         /// </summary>
-        [Parameter(Value = "org")]
-        Org
+        [Parameter(Value = "org")] Org
     }
 
     /// <summary>
@@ -175,8 +167,7 @@ namespace Octokit
         /// <summary>
         /// Search by the user's email address
         /// </summary>
-        [Parameter(Value = "email")]
-        Email,
+        [Parameter(Value = "email")] Email,
 
         /// <summary>
         /// Search by the user's full name
@@ -191,13 +182,10 @@ namespace Octokit
     /// </summary>
     public enum UsersSearchSort
     {
-        [Parameter(Value = "followers")]
-        Followers,
+        [Parameter(Value = "followers")] Followers,
 
-        [Parameter(Value = "repositories")]
-        Repositories,
+        [Parameter(Value = "repositories")] Repositories,
 
-        [Parameter(Value = "joined")]
-        Joined
+        [Parameter(Value = "joined")] Joined
     }
 }

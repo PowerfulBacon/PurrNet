@@ -19,6 +19,7 @@ namespace Octokit
         public IPackageVersionsClient PackageVersions { get; private set; }
 
         #region Organization
+
         /// <summary>
         /// List all packages for an organisations, readable by the current user
         /// </summary>
@@ -65,7 +66,8 @@ namespace Octokit
         /// <param name="packageType">Required: The type of package</param>
         /// <param name="packageVisibility">Optional: The visibility of the package</param>
         [ManualRoute("GET", "/orgs/{org}/packages")]
-        public Task<IReadOnlyList<Package>> GetAllForOrg(string org, PackageType packageType, PackageVisibility? packageVisibility)
+        public Task<IReadOnlyList<Package>> GetAllForOrg(string org, PackageType packageType,
+            PackageVisibility? packageVisibility)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNull(packageType, nameof(packageType));
@@ -84,14 +86,16 @@ namespace Octokit
         /// <param name="packageVisibility">Optional: The visibility of the package</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/orgs/{org}/packages")]
-        public Task<IReadOnlyList<Package>> GetAllForOrg(string org, PackageType packageType, PackageVisibility? packageVisibility, ApiOptions options)
+        public Task<IReadOnlyList<Package>> GetAllForOrg(string org, PackageType packageType,
+            PackageVisibility? packageVisibility, ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNull(packageType, nameof(packageType));
             Ensure.ArgumentNotNull(options, nameof(options));
 
             var route = ApiUrls.PackagesOrg(org);
-            var parameters = ParameterBuilder.AddParameter("package_type", packageType).AddOptionalParameter("visibility", packageVisibility);
+            var parameters = ParameterBuilder.AddParameter("package_type", packageType)
+                .AddOptionalParameter("visibility", packageVisibility);
 
             return ApiConnection.GetAll<Package>(route, parameters, options);
         }
@@ -156,9 +160,11 @@ namespace Octokit
 
             return ApiConnection.Post(route);
         }
+
         #endregion
 
         #region Active User
+
         /// <summary>
         /// Lists packages owned by the authenticated user within the user's namespace
         /// </summary>
@@ -200,7 +206,8 @@ namespace Octokit
         /// <param name="packageType">Required: The type of package</param>
         /// <param name="packageVisibility">Optional: The visibility of the package</param>
         [ManualRoute("GET", "/user/packages")]
-        public Task<IReadOnlyList<Package>> GetAllForActiveUser(PackageType packageType, PackageVisibility? packageVisibility)
+        public Task<IReadOnlyList<Package>> GetAllForActiveUser(PackageType packageType,
+            PackageVisibility? packageVisibility)
         {
             Ensure.ArgumentNotNull(packageType, nameof(packageType));
 
@@ -217,13 +224,15 @@ namespace Octokit
         /// <param name="packageVisibility">Optional: The visibility of the package</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/user/packages")]
-        public Task<IReadOnlyList<Package>> GetAllForActiveUser(PackageType packageType, PackageVisibility? packageVisibility, ApiOptions options)
+        public Task<IReadOnlyList<Package>> GetAllForActiveUser(PackageType packageType,
+            PackageVisibility? packageVisibility, ApiOptions options)
         {
             Ensure.ArgumentNotNull(packageType, nameof(packageType));
             Ensure.ArgumentNotNull(options, nameof(options));
 
             var route = ApiUrls.PackagesActiveUser();
-            var parameters = ParameterBuilder.AddParameter("package_type", packageType).AddOptionalParameter("visibility", packageVisibility);
+            var parameters = ParameterBuilder.AddParameter("package_type", packageType)
+                .AddOptionalParameter("visibility", packageVisibility);
 
             return ApiConnection.GetAll<Package>(route, parameters, options);
         }
@@ -281,9 +290,11 @@ namespace Octokit
 
             return ApiConnection.Post(route);
         }
+
         #endregion
 
         #region Specific User
+
         /// <summary>
         /// Lists packages owned by the authenticated user within the user's namespace
         /// </summary>
@@ -329,7 +340,8 @@ namespace Octokit
         /// <param name="packageType">Required: The type of package</param>
         /// <param name="packageVisibility">Optional: The visibility of the package</param>
         [ManualRoute("GET", "/users/{username}/packages")]
-        public Task<IReadOnlyList<Package>> GetAllForUser(string username, PackageType packageType, PackageVisibility? packageVisibility)
+        public Task<IReadOnlyList<Package>> GetAllForUser(string username, PackageType packageType,
+            PackageVisibility? packageVisibility)
         {
             Ensure.ArgumentNotNullOrEmptyString(username, nameof(username));
             Ensure.ArgumentNotNull(packageType, nameof(packageType));
@@ -348,14 +360,16 @@ namespace Octokit
         /// <param name="packageVisibility">Optional: The visibility of the package</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/users/{username}/packages")]
-        public Task<IReadOnlyList<Package>> GetAllForUser(string username, PackageType packageType, PackageVisibility? packageVisibility, ApiOptions options)
+        public Task<IReadOnlyList<Package>> GetAllForUser(string username, PackageType packageType,
+            PackageVisibility? packageVisibility, ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(username, nameof(username));
             Ensure.ArgumentNotNull(packageType, nameof(packageType));
             Ensure.ArgumentNotNull(options, nameof(options));
 
             var route = ApiUrls.PackagesUser(username);
-            var parameters = ParameterBuilder.AddParameter("package_type", packageType).AddOptionalParameter("visibility", packageVisibility);
+            var parameters = ParameterBuilder.AddParameter("package_type", packageType)
+                .AddOptionalParameter("visibility", packageVisibility);
 
             return ApiConnection.GetAll<Package>(route, parameters, options);
         }
@@ -419,6 +433,7 @@ namespace Octokit
 
             return ApiConnection.Post(route);
         }
+
         #endregion
     }
 }

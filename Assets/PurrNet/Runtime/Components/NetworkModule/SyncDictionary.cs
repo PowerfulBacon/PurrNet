@@ -17,7 +17,7 @@ namespace PurrNet
         Set,
         Cleared
     }
-    
+
     /// <summary>
     /// All the data relevant to the change that happened to the dictionary
     /// </summary>
@@ -45,25 +45,29 @@ namespace PurrNet
     public class SyncDictionary<TKey, TValue> : NetworkModule, IDictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
         [SerializeField] private bool _ownerAuth;
-        [SerializeField] private SerializableDictionary<TKey, TValue> _serializedDict = new SerializableDictionary<TKey, TValue>();
+
+        [SerializeField]
+        private SerializableDictionary<TKey, TValue> _serializedDict = new SerializableDictionary<TKey, TValue>();
+
         private Dictionary<TKey, TValue> _dict = new Dictionary<TKey, TValue>();
-        
+
         public delegate void SyncDictionaryChanged<Key, Value>(SyncDictionaryChange<Key, Value> change);
-        
+
         /// <summary>
         /// Event that is invoked when the dictionary is changed
         /// </summary>
         public event SyncDictionaryChanged<TKey, TValue> onChanged;
-        
+
         /// <summary>
         /// Whether it is the owner or the server that has the authority to modify the dictionary
         /// </summary>
         public bool ownerAuth => _ownerAuth;
-        
+
         /// <summary>
         /// The amount of entries in the dictionary
         /// </summary>
         public int Count => _dict.Count;
+
         public bool IsReadOnly => false;
         public ICollection<TKey> Keys => _dict.Keys;
         public ICollection<TValue> Values => _dict.Values;
@@ -83,24 +87,24 @@ namespace PurrNet
             set
             {
                 ValidateAuthority();
-                
+
                 bool isNewKey = !_dict.ContainsKey(key);
                 _dict[key] = value;
-                
+
                 var operation = isNewKey ? SyncDictionaryOperation.Added : SyncDictionaryOperation.Set;
                 var change = new SyncDictionaryChange<TKey, TValue>(operation, key, value);
                 InvokeChange(change);
-                
+
                 if (isSpawned)
                 {
                     if (isServer)
                         SendSetToAll(key, value, isNewKey);
-                    else 
+                    else
                         SendSetToServer(key, value, isNewKey);
                 }
             }
         }
-        
+
         public void OnBeforeSerialize()
         {
             _serializedDict.FromDictionary(_dict);
@@ -114,9 +118,9 @@ namespace PurrNet
         public override void OnSpawn()
         {
             base.OnSpawn();
-            
+
             if (!IsController(_ownerAuth)) return;
-            
+
             if (isServer)
                 SendInitialStateToAll(_dict);
             else SendInitialStateToServer(_dict);
@@ -126,38 +130,39 @@ namespace PurrNet
         {
             HandleInitialStateTarget(player, _dict);
         }
-        
+
         [TargetRpc(Channel.ReliableOrdered)]
         private void HandleInitialStateTarget(PlayerID player, Dictionary<TKey, TValue> initialState)
         {
             HandleInitialState(initialState);
         }
-        
+
         [ObserversRpc(Channel.ReliableOrdered)]
         private void SendInitialStateToAll(Dictionary<TKey, TValue> initialState)
         {
             HandleInitialState(initialState);
         }
-        
+
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
         private void SendInitialStateToServer(Dictionary<TKey, TValue> initialState)
         {
             if (!_ownerAuth) return;
             SendInitialStateToOthers(initialState);
         }
-        
+
         [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true)]
         private void SendInitialStateToOthers(Dictionary<TKey, TValue> initialState)
         {
             if (!isServer || isHost)
             {
                 _dict = initialState;
-                
+
                 InvokeChange(new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared));
 
                 foreach (var kvp in _dict)
                 {
-                    InvokeChange(new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, kvp.Key, kvp.Value));
+                    InvokeChange(
+                        new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, kvp.Key, kvp.Value));
                 }
             }
         }
@@ -166,20 +171,21 @@ namespace PurrNet
         {
             if (!isHost)
             {
-                if(initialState == null)
+                if (initialState == null)
                     return;
-                
+
                 _dict = initialState;
-                
+
                 InvokeChange(new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared));
 
                 foreach (var kvp in _dict)
                 {
-                    InvokeChange(new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, kvp.Key, kvp.Value));
+                    InvokeChange(
+                        new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, kvp.Key, kvp.Value));
                 }
             }
         }
-        
+
 #if UNITY_EDITOR
         private void UpdateSerializedDict(SyncDictionaryChange<TKey, TValue> _)
         {
@@ -195,11 +201,11 @@ namespace PurrNet
         public void Add(TKey key, TValue value)
         {
             ValidateAuthority();
-            
+
             _dict.Add(key, value);
             var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, key, value);
             InvokeChange(change);
-            
+
             if (isSpawned)
             {
                 if (isServer)
@@ -220,14 +226,14 @@ namespace PurrNet
         public bool Remove(TKey key)
         {
             ValidateAuthority();
-            
+
             if (!_dict.TryGetValue(key, out TValue value))
                 return false;
-                
+
             _dict.Remove(key);
             var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Removed, key, value);
             InvokeChange(change);
-            
+
             if (isSpawned)
             {
                 if (isServer)
@@ -235,7 +241,7 @@ namespace PurrNet
                 else
                     SendRemoveToServer(key);
             }
-            
+
             return true;
         }
 
@@ -243,7 +249,7 @@ namespace PurrNet
         {
             if (!Contains(item))
                 return false;
-                
+
             return Remove(item.Key);
         }
 
@@ -253,11 +259,11 @@ namespace PurrNet
         public void Clear()
         {
             ValidateAuthority();
-            
+
             _dict.Clear();
             var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
             InvokeChange(change);
-            
+
             if (isSpawned)
             {
                 if (isServer)
@@ -266,7 +272,7 @@ namespace PurrNet
                     SendClearToServer();
             }
         }
-        
+
         /// <summary>
         /// Creates a new Dictionary from the SyncDictionary
         /// </summary>
@@ -279,7 +285,10 @@ namespace PurrNet
         public bool ContainsKey(TKey key) => _dict.ContainsKey(key);
         public bool TryGetValue(TKey key, out TValue value) => _dict.TryGetValue(key, out value);
         public bool Contains(KeyValuePair<TKey, TValue> item) => (_dict as IDictionary<TKey, TValue>).Contains(item);
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => (_dict as IDictionary<TKey, TValue>).CopyTo(array, arrayIndex);
+
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) =>
+            (_dict as IDictionary<TKey, TValue>).CopyTo(array, arrayIndex);
+
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dict.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -303,6 +312,7 @@ namespace PurrNet
         }
 
         #region RPCs
+
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
         private void SendAddToServer(TKey key, TValue value)
         {
@@ -417,7 +427,7 @@ namespace PurrNet
                 InvokeChange(new SyncDictionaryChange<TKey, TValue>(operation, key, value));
             }
         }
-        
+
         /// <summary>
         /// Forces the dictionary to be synced again at the given key. Good for when you modify something inside a value
         /// </summary>
@@ -425,17 +435,17 @@ namespace PurrNet
         public void SetDirty(TKey key)
         {
             if (!isSpawned) return;
-    
+
             ValidateAuthority();
-    
+
             if (!_dict.TryGetValue(key, out TValue value))
             {
                 PurrLogger.LogError($"Key {key} not found in SyncDictionary when trying to SetDirty", parent);
                 return;
             }
-    
+
             InvokeChange(new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Set, key, value));
-    
+
             if (isServer)
                 SendSetDirtyToAll(key, value);
             else
@@ -474,31 +484,34 @@ namespace PurrNet
                 }
             }
         }
+
         #endregion
     }
-    
+
     [Serializable]
     public class SerializableDictionary<TKey, TValue>
     {
         [SerializeField] private List<TKey> keys = new List<TKey>();
         [SerializeField] private List<TValue> values = new List<TValue>();
-        
+
         [SerializeField] private List<string> stringKeys = new List<string>();
         [SerializeField] private List<string> stringValues = new List<string>();
-        
+
         private bool isKeySerializable;
         private bool isValueSerializable;
 
         public SerializableDictionary()
         {
-            isKeySerializable = typeof(TKey).IsSerializable || typeof(UnityEngine.Object).IsAssignableFrom(typeof(TKey));
-            isValueSerializable = typeof(TValue).IsSerializable || typeof(UnityEngine.Object).IsAssignableFrom(typeof(TValue));
+            isKeySerializable =
+                typeof(TKey).IsSerializable || typeof(UnityEngine.Object).IsAssignableFrom(typeof(TKey));
+            isValueSerializable = typeof(TValue).IsSerializable ||
+                                  typeof(UnityEngine.Object).IsAssignableFrom(typeof(TValue));
         }
 
         public Dictionary<TKey, TValue> ToDictionary()
         {
             var dict = new Dictionary<TKey, TValue>();
-    
+
             if (isKeySerializable && isValueSerializable)
             {
                 int count = Mathf.Min(keys.Count, values.Count);
@@ -517,7 +530,7 @@ namespace PurrNet
                         dict.Add(default(TKey), default(TValue));
                 }
             }
-    
+
             return dict;
         }
 
@@ -542,13 +555,15 @@ namespace PurrNet
                 }
             }
         }
+
         public bool IsSerializable => isKeySerializable && isValueSerializable;
         public int Count => isKeySerializable ? keys.Count : stringKeys.Count;
-        public string GetDisplayKey(int index) => isKeySerializable ? 
-            (keys[index]?.ToString() ?? "null") : 
-            (stringKeys[index] ?? "null");
-        public string GetDisplayValue(int index) => isValueSerializable ? 
-            (values[index]?.ToString() ?? "null") : 
-            (stringValues[index] ?? "null");
+
+        public string GetDisplayKey(int index) =>
+            isKeySerializable ? (keys[index]?.ToString() ?? "null") : (stringKeys[index] ?? "null");
+
+        public string GetDisplayValue(int index) => isValueSerializable
+            ? (values[index]?.ToString() ?? "null")
+            : (stringValues[index] ?? "null");
     }
 }

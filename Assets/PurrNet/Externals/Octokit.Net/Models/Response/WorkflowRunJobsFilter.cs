@@ -13,12 +13,11 @@ namespace Octokit
         /// <summary>
         /// Returns jobs from the most recent execution of the workflow run.
         /// </summary>
-        [Parameter(Value = "latest")]
-        Latest,
+        [Parameter(Value = "latest")] Latest,
+
         /// <summary>
         /// Returns all jobs for a workflow run, including from old executions of the workflow run.
         /// </summary>
-        [Parameter(Value = "all")]
-        All,
+        [Parameter(Value = "all")] All,
     }
 }

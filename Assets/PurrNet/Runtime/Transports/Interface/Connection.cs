@@ -10,7 +10,7 @@ namespace PurrNet.Transports
         }
 
         public int connectionId { get; private set; }
-        
+
         public bool isValid { get; private set; }
 
         public Connection(int connectionId)
@@ -18,22 +18,22 @@ namespace PurrNet.Transports
             this.connectionId = connectionId;
             isValid = true;
         }
-        
+
         public static bool operator ==(Connection a, Connection b)
         {
             return a.connectionId == b.connectionId;
         }
-        
+
         public static bool operator !=(Connection a, Connection b)
         {
             return a.connectionId != b.connectionId;
         }
-        
+
         public override bool Equals(object obj)
         {
             return obj is Connection other && Equals(other);
         }
-        
+
         public bool Equals(Connection other)
         {
             return connectionId == other.connectionId && isValid == other.isValid;

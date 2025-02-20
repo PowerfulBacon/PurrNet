@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class NotificationInfo
     {
-        public NotificationInfo() { }
+        public NotificationInfo()
+        {
+        }
 
         public NotificationInfo(string title, string url, string latestCommentUrl, string type)
         {

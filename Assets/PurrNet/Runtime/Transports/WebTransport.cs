@@ -8,82 +8,123 @@ namespace PurrNet.Transports
 {
     public class WebTransport : GenericTransport, ITransport
     {
-        [Header("Server Settings")]
-        [SerializeField] private ushort _serverPort = 5001;
+        [Header("Server Settings")] [SerializeField]
+        private ushort _serverPort = 5001;
+
         [SerializeField] private int _maxConnections = 100;
 
-        [Header("Client Settings")]
-        [SerializeField] private string _address = "127.0.0.1";
+        [Header("Client Settings")] [SerializeField]
+        private string _address = "127.0.0.1";
+
         [Tooltip("The query to add to the address.\nEx: 'name=John' results in ws://localhost:5001?name=John")]
-        [SerializeField] private string _query = "";
-        [Tooltip("The path to add to the address.\nEx: '/game' results in ws://localhost:5001/game")]
-        [SerializeField] private string _path = "";
-        
+        [SerializeField]
+        private string _query = "";
+
+        [Tooltip("The path to add to the address.\nEx: '/game' results in ws://localhost:5001/game")] [SerializeField]
+        private string _path = "";
+
         // TODO: Implement timeout
         /*[Header("Shared Settings")]
         [Tooltip("The amount of time in seconds before socket is disconnected due to no data being received.")]
         [SerializeField] private float _timeoutInSeconds = 5f;*/
-        
-        [Header("SSL Settings")]
-        [SerializeField] private bool _enableSSL;
+
+        [Header("SSL Settings")] [SerializeField]
+        private bool _enableSSL;
+
         [SerializeField] private string _certPath;
         [SerializeField] private string _certPassword;
         [SerializeField] private SslProtocols _sslProtocols;
-        
+
         public event OnConnected onConnected;
         public event OnDisconnected onDisconnected;
         public event OnDataReceived onDataReceived;
         public event OnDataSent onDataSent;
         public event OnConnectionState onConnectionState;
 
-        public string address { get => _address; set => _address = value; }
-        
-        public string query { get => _query; set => _query = value; }
-        
-        public string path { get => _path; set => _path = value; }
-        
-        public ushort serverPort { get => _serverPort; set => _serverPort = value; }
-        
-        public int maxConnections { get => _maxConnections; set => _maxConnections = value; }
-        
-        public bool enableSSL { get => _enableSSL; set => _enableSSL = value; }
-        
-        public string certPath { get => _certPath; set => _certPath = value; }
-        
-        public string certPassword { get => _certPassword; set => _certPassword = value; }
-        
-        public SslProtocols sslProtocols { get => _sslProtocols; set => _sslProtocols = value; }
+        public string address
+        {
+            get => _address;
+            set => _address = value;
+        }
+
+        public string query
+        {
+            get => _query;
+            set => _query = value;
+        }
+
+        public string path
+        {
+            get => _path;
+            set => _path = value;
+        }
+
+        public ushort serverPort
+        {
+            get => _serverPort;
+            set => _serverPort = value;
+        }
+
+        public int maxConnections
+        {
+            get => _maxConnections;
+            set => _maxConnections = value;
+        }
+
+        public bool enableSSL
+        {
+            get => _enableSSL;
+            set => _enableSSL = value;
+        }
+
+        public string certPath
+        {
+            get => _certPath;
+            set => _certPath = value;
+        }
+
+        public string certPassword
+        {
+            get => _certPassword;
+            set => _certPassword = value;
+        }
+
+        public SslProtocols sslProtocols
+        {
+            get => _sslProtocols;
+            set => _sslProtocols = value;
+        }
 
         public IReadOnlyList<Connection> connections => _connections;
 
         public ConnectionState listenerState { get; private set; } = ConnectionState.Disconnected;
 
         public ConnectionState clientState { get; private set; } = ConnectionState.Disconnected;
-        
+
         private SimpleWebServer _server;
         private SimpleWebClient _client;
 
         public bool shouldClientSendKeepAlive => true;
-        
+
         private readonly List<Connection> _connections = new List<Connection>();
 
         public override ITransport transport => this;
-        
+
         public override bool isSupported => true;
 
-        readonly TcpConfig _tcpConfig = new (noDelay: true, sendTimeout: 0, receiveTimeout: 0);
+        readonly TcpConfig _tcpConfig = new(noDelay: true, sendTimeout: 0, receiveTimeout: 0);
 
         private void Awake()
         {
             ReconstructServer();
-            
+
             _client = SimpleWebClient.Create(ushort.MaxValue, 5000, _tcpConfig);
             _client.onConnect += OnClientConnected;
             _client.onDisconnect += OnClientDisconnected;
             _client.onData += OnClientReceivedData;
             _client.onError += OnClientError;
         }
-        
+
         public void RaiseDataReceived(Connection conn, ByteData data, bool asServer)
         {
             onDataReceived?.Invoke(conn, data, asServer);
@@ -104,7 +145,7 @@ namespace PurrNet.Transports
             {
                 if (_server.Active)
                     _server.Stop();
-                
+
                 _server.onConnect -= OnClientConnectedToServer;
                 _server.onDisconnect -= OnClientDisconnectedFromServer;
                 _server.onData -= OnServerReceivedData;
@@ -127,13 +168,13 @@ namespace PurrNet.Transports
         private void OnClientDisconnected()
         {
             var wasConnected = clientState == ConnectionState.Connected;
-            
+
             clientState = ConnectionState.Disconnecting;
             TriggerConnectionStateEvent(false);
 
             if (wasConnected)
                 onDisconnected?.Invoke(new Connection(0), DisconnectReason.ClientRequest, false);
-            
+
             clientState = ConnectionState.Disconnected;
             TriggerConnectionStateEvent(false);
         }
@@ -147,10 +188,10 @@ namespace PurrNet.Transports
         {
             clientState = ConnectionState.Connected;
             TriggerConnectionStateEvent(false);
-            
+
             onConnected?.Invoke(new Connection(0), false);
         }
-        
+
         public void TickUpdate(float delta)
         {
             _server.ProcessMessageQueue();
@@ -172,7 +213,7 @@ namespace PurrNet.Transports
             TriggerConnectionStateEvent(true);
 
             _server.Start(port);
-            
+
             listenerState = ConnectionState.Connected;
             TriggerConnectionStateEvent(true);
         }
@@ -197,7 +238,7 @@ namespace PurrNet.Transports
         private void OnClientDisconnectedFromServer(int clientId)
         {
             var conn = new Connection(clientId);
-            
+
             for (int i = 0; i < _connections.Count; i++)
             {
                 if (_connections[i] == conn)
@@ -206,8 +247,8 @@ namespace PurrNet.Transports
                     break;
                 }
             }
-            
-            onDisconnected?.Invoke(conn, DisconnectReason.ClientRequest,true);
+
+            onDisconnected?.Invoke(conn, DisconnectReason.ClientRequest, true);
         }
 
         private void OnClientConnectedToServer(int clientId)
@@ -218,7 +259,7 @@ namespace PurrNet.Transports
                 _server.KickClient(clientId);
                 return;
             }
-            
+
             var conn = new Connection(clientId);
             _connections.Add(conn);
             onConnected?.Invoke(conn, true);
@@ -228,15 +269,15 @@ namespace PurrNet.Transports
         {
             if (listenerState is ConnectionState.Disconnecting or ConnectionState.Disconnected)
                 return;
-            
+
             listenerState = ConnectionState.Disconnecting;
             TriggerConnectionStateEvent(true);
-            
+
             _server.Stop();
-            
+
             listenerState = ConnectionState.Disconnected;
             TriggerConnectionStateEvent(true);
-            
+
             ReconstructServer();
         }
 
@@ -244,7 +285,7 @@ namespace PurrNet.Transports
         {
             if (clientState is ConnectionState.Connecting or ConnectionState.Connected)
                 return;
-            
+
             var builder = new UriBuilder
             {
                 Scheme = _enableSSL ? "wss" : "ws",
@@ -256,9 +297,9 @@ namespace PurrNet.Transports
 
             clientState = ConnectionState.Connecting;
             TriggerConnectionStateEvent(false);
-            
+
             _client.Connect(builder.Uri);
-            
+
             clientState = _client.ConnectionState switch
             {
                 ClientState.Connected => ConnectionState.Connected,
@@ -266,13 +307,13 @@ namespace PurrNet.Transports
                 ClientState.Disconnecting => ConnectionState.Disconnecting,
                 _ => ConnectionState.Disconnected
             };
-            
+
             TriggerConnectionStateEvent(false);
         }
 
         ConnectionState _prevClientState = ConnectionState.Disconnected;
         ConnectionState _prevServerState = ConnectionState.Disconnected;
-        
+
         private void TriggerConnectionStateEvent(bool asServer)
         {
             if (asServer)
@@ -302,7 +343,7 @@ namespace PurrNet.Transports
         {
             if (clientState is ConnectionState.Disconnecting or ConnectionState.Disconnected)
                 return;
-            
+
             _client.Disconnect();
             TriggerConnectionStateEvent(false);
         }
@@ -317,10 +358,10 @@ namespace PurrNet.Transports
         {
             if (listenerState != ConnectionState.Connected)
                 return;
-            
+
             if (!target.isValid)
                 return;
-            
+
             _server.SendOne(target.connectionId, new ArraySegment<byte>(data.data, data.offset, data.length));
             RaiseDataSent(target, data, true);
         }
@@ -338,10 +379,10 @@ namespace PurrNet.Transports
         {
             if (listenerState != ConnectionState.Connected)
                 return;
-            
+
             if (!conn.isValid)
                 return;
-            
+
             _server.KickClient(conn.connectionId);
         }
     }

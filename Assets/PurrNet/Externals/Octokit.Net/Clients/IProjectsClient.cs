@@ -73,7 +73,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="request">Used to filter the list of projects returned</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<Project>> GetAllForRepository(string owner, string name, ProjectRequest request, ApiOptions options);
+        Task<IReadOnlyList<Project>> GetAllForRepository(string owner, string name, ProjectRequest request,
+            ApiOptions options);
 
         /// <summary>
         /// Get all projects for this repository.
@@ -134,7 +135,8 @@ namespace Octokit
         /// <param name="organization">The name of the organization</param>
         /// <param name="request">Used to filter the list of projects returned</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<Project>> GetAllForOrganization(string organization, ProjectRequest request, ApiOptions options);
+        Task<IReadOnlyList<Project>> GetAllForOrganization(string organization, ProjectRequest request,
+            ApiOptions options);
 
         /// <summary>
         /// Gets a single project for this repository.

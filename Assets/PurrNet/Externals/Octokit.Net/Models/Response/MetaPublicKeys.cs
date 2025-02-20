@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class MetaPublicKeys
     {
-        public MetaPublicKeys() { }
+        public MetaPublicKeys()
+        {
+        }
 
         public MetaPublicKeys(IReadOnlyList<MetaPublicKey> publicKeys)
         {

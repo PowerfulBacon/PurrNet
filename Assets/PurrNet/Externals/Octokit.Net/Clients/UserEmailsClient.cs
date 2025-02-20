@@ -19,7 +19,8 @@ namespace Octokit
         /// <param name="apiConnection">An API connection</param>
         public UserEmailsClient(IApiConnection apiConnection)
             : base(apiConnection)
-        { }
+        {
+        }
 
         /// <summary>
         /// Gets all email addresses for the authenticated user.

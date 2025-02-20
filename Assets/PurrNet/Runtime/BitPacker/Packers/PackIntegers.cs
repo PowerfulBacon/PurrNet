@@ -16,7 +16,7 @@ namespace PurrNet.Packing
         {
             value = (long)packer.ReadBits(64);
         }
-        
+
         [UsedByIL]
         public static void Write(this BitPacker packer, int value)
         {
@@ -28,7 +28,7 @@ namespace PurrNet.Packing
         {
             value = (int)packer.ReadBits(32);
         }
-        
+
         [UsedByIL]
         public static void Write(this BitPacker packer, short value)
         {
@@ -40,7 +40,7 @@ namespace PurrNet.Packing
         {
             value = (short)packer.ReadBits(16);
         }
-        
+
         [UsedByIL]
         public static void Write(this BitPacker packer, sbyte value)
         {
@@ -52,7 +52,7 @@ namespace PurrNet.Packing
         {
             value = (sbyte)packer.ReadBits(8);
         }
-        
+
         [UsedByIL]
         public static void Write(this BitPacker packer, bool value)
         {
@@ -64,19 +64,19 @@ namespace PurrNet.Packing
         {
             value = packer.ReadBits(1) == 1;
         }
-        
+
         [UsedByIL]
         public static void Write(this BitPacker packer, TimeSpan value)
         {
             packer.WriteBits((ulong)value.Ticks, 64);
         }
-        
+
         [UsedByIL]
         public static void Read(this BitPacker packer, ref TimeSpan value)
         {
             value = new TimeSpan((long)packer.ReadBits(64));
         }
-        
+
         [UsedByIL]
         public static void Write(this BitPacker packer, DateTime value)
         {
@@ -88,6 +88,5 @@ namespace PurrNet.Packing
         {
             value = new DateTime((long)packer.ReadBits(64));
         }
-
     }
 }

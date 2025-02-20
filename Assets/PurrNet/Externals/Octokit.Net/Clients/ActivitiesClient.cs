@@ -26,18 +26,22 @@
         /// Client for the Events API
         /// </summary>
         public IEventsClient Events { get; private set; }
+
         /// <summary>
         /// Client for the Starring API
         /// </summary>
         public IStarredClient Starring { get; private set; }
+
         /// <summary>
         /// Client for the Watching API
         /// </summary>
         public IWatchedClient Watching { get; private set; }
+
         /// <summary>
         /// Client for the Feeds API
         /// </summary>
         public IFeedsClient Feeds { get; private set; }
+
         /// <summary>
         /// Client for the Notifications API
         /// </summary>

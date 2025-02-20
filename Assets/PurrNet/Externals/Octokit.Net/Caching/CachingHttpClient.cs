@@ -17,11 +17,14 @@ namespace Octokit.Caching
             Ensure.ArgumentNotNull(httpClient, nameof(httpClient));
             Ensure.ArgumentNotNull(responseCache, nameof(responseCache));
 
-            _httpClient = httpClient is CachingHttpClient cachingHttpClient ? cachingHttpClient._httpClient : httpClient;
+            _httpClient = httpClient is CachingHttpClient cachingHttpClient
+                ? cachingHttpClient._httpClient
+                : httpClient;
             _responseCache = responseCache;
         }
 
-        public async Task<IResponse> Send(IRequest request, CancellationToken cancellationToken, Func<object, object> preprocessResponseBody = null)
+        public async Task<IResponse> Send(IRequest request, CancellationToken cancellationToken,
+            Func<object, object> preprocessResponseBody = null)
         {
             Ensure.ArgumentNotNull(request, nameof(request));
 
@@ -65,10 +68,11 @@ namespace Octokit.Caching
         {
             try
             {
-                if(!response.IsSuccessStatusCode())
+                if (!response.IsSuccessStatusCode())
                 {
                     return;
                 }
+
                 await _responseCache.SetAsync(request, CachedResponse.V1.Create(response));
             }
             catch (Exception)

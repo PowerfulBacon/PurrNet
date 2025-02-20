@@ -5,9 +5,13 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class GitTag : GitReference
     {
-        public GitTag() { }
+        public GitTag()
+        {
+        }
 
-        public GitTag(string nodeId, string url, string label, string @ref, string sha, User user, Repository repository, string tag, string message, Committer tagger, TagObject @object, Verification verification)
+        public GitTag(string nodeId, string url, string label, string @ref, string sha, User user,
+            Repository repository, string tag, string message, Committer tagger, TagObject @object,
+            Verification verification)
             : base(nodeId, url, label, @ref, sha, user, repository)
         {
             Tag = tag;

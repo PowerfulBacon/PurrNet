@@ -13,50 +13,55 @@ namespace PurrNet
     public interface IPurrEvents
     {
         void Subscribe(NetworkManager manager, bool asServer);
-        
+
         void Unsubscribe(NetworkManager manager, bool asServer);
     }
-    
+
     public delegate void OnSubscribeDelegate(NetworkManager manager, bool asServer);
+
     public delegate void OnSubscribeSimpleDelegate(NetworkManager manager);
 
     public sealed partial class NetworkManager
     {
         readonly List<RegisterEventsDelegate> _subscribeEvents = new List<RegisterEventsDelegate>();
         readonly List<RegisterEventsDelegate> _unsubscribeEvents = new List<RegisterEventsDelegate>();
-        private readonly Dictionary<Type, List<object>> _serverPendingSubscriptions = new Dictionary<Type, List<object>>();
-        private readonly Dictionary<Type, List<object>> _clientPendingSubscriptions = new Dictionary<Type, List<object>>();
-        
+
+        private readonly Dictionary<Type, List<object>> _serverPendingSubscriptions =
+            new Dictionary<Type, List<object>>();
+
+        private readonly Dictionary<Type, List<object>> _clientPendingSubscriptions =
+            new Dictionary<Type, List<object>>();
+
         /// <summary>
         /// Event called when the network is started.
         /// This should be used to subscribe to network events.
         /// This is called twice, once for the server and once for the client.
         /// </summary>
         public event OnSubscribeDelegate onNetworkStarted;
-        
+
         /// <summary>
         /// Event called when the network is shutdown.
         /// This should be used to unsubscribe from network events.
         /// This is called twice, once for the server and once for the client.
         /// </summary>
         public event OnSubscribeDelegate onNetworkShutdown;
-        
+
         /// <summary>
         /// Event called when the network is started.
         /// This should be used to subscribe to network events.
         /// This is called once even if the network is started as both server and client.
         /// </summary>
         public event OnSubscribeSimpleDelegate onNetworkStartedSimple;
-        
+
         /// <summary>
         /// Event called when the network is shutdown.
         /// This should be used to unsubscribe from network events.
         /// This is called once even if the network is started as both server and client.
         /// </summary>
         public event OnSubscribeSimpleDelegate onNetworkShutdownSimple;
-        
+
         bool _isSubscribed;
-        
+
         private void TriggerSubscribeEvents(bool asServer)
         {
             if (!_isSubscribed)
@@ -64,9 +69,9 @@ namespace PurrNet
                 _isSubscribed = true;
                 onNetworkStartedSimple?.Invoke(this);
             }
-            
+
             onNetworkStarted?.Invoke(this, asServer);
-            
+
             for (var i = 0; i < _subscribeEvents.Count; i++)
             {
                 try
@@ -79,7 +84,7 @@ namespace PurrNet
                 }
             }
         }
-        
+
         private void TriggerUnsubscribeEvents(bool asServer)
         {
             if (_isSubscribed)
@@ -87,9 +92,9 @@ namespace PurrNet
                 _isSubscribed = false;
                 onNetworkShutdownSimple?.Invoke(this);
             }
-            
+
             onNetworkShutdown?.Invoke(this, asServer);
-            
+
             for (var i = 0; i < _unsubscribeEvents.Count; i++)
             {
                 try
@@ -102,7 +107,7 @@ namespace PurrNet
                 }
             }
         }
-        
+
         /// <summary>
         /// Register events to be called when the manager is initialized.
         /// This ensures the modules are present and ready to be used.
@@ -113,23 +118,23 @@ namespace PurrNet
         public void RegisterEvents(RegisterEventsDelegate subscribe, RegisterEventsDelegate unsubscribe)
         {
             if (subscribe != null)
-            {           
+            {
                 bool serverConnected = serverState == ConnectionState.Connected;
                 bool clientConnected = clientState == ConnectionState.Connected;
 
                 _subscribeEvents.Add(subscribe);
-                
+
                 if (serverConnected)
                     subscribe(this, true);
-                
+
                 if (clientConnected)
                     subscribe(this, false);
             }
-            
-            if (unsubscribe != null) 
+
+            if (unsubscribe != null)
                 _unsubscribeEvents.Add(unsubscribe);
         }
-        
+
         /// <summary>
         /// Unregister events from the manager.
         /// </summary>
@@ -137,13 +142,13 @@ namespace PurrNet
         /// <param name="unsubscribe">Unsubscribe callback</param>
         public void UnregisterEvents(RegisterEventsDelegate subscribe, RegisterEventsDelegate unsubscribe)
         {
-            if (subscribe != null) 
+            if (subscribe != null)
                 _subscribeEvents.Remove(subscribe);
 
             if (unsubscribe != null)
                 _unsubscribeEvents.Remove(unsubscribe);
         }
-        
+
         /// <summary>
         /// Register events to be called when the manager is initialized.
         /// This ensures the modules are present and ready to be used.
@@ -154,7 +159,7 @@ namespace PurrNet
         {
             RegisterEvents(events.Subscribe, events.Unsubscribe);
         }
-        
+
         /// <summary>
         /// Unregister events from the manager.
         /// </summary>
@@ -163,7 +168,7 @@ namespace PurrNet
         {
             UnregisterEvents(events.Subscribe, events.Unsubscribe);
         }
-        
+
         /// <summary>
         /// Subscribe to a broadcast
         /// </summary>
@@ -190,7 +195,7 @@ namespace PurrNet
                 broadcaster.Subscribe(callback);
             }
         }
-        
+
         /// <summary>
         /// Subscribe to a broadcast
         /// </summary>
@@ -202,7 +207,7 @@ namespace PurrNet
             Subscribe(callback, true);
             Subscribe(callback, false);
         }
-        
+
         private void RenewSubscriptions(bool asServer)
         {
             if (!TryGetModule(out PlayersBroadcaster broadcaster, asServer))
@@ -220,7 +225,7 @@ namespace PurrNet
                 }
             }
         }
-        
+
         /// <summary>
         /// Unsubscribe to a broadcast
         /// </summary>
@@ -243,7 +248,7 @@ namespace PurrNet
                 broadcaster.Unsubscribe(callback);
             }
         }
-        
+
         /// <summary>
         /// Unsubscribe from a broadcast
         /// </summary>
@@ -270,7 +275,7 @@ namespace PurrNet
             broadcaster.Send(player, data, method);
         }
 
-        
+
         /// <summary>
         /// Send a broadcast to a given set of players
         /// </summary>
@@ -284,7 +289,7 @@ namespace PurrNet
             var broadcaster = GetModule<PlayersBroadcaster>(true);
             broadcaster.Send(playersCollection, data, method);
         }
-        
+
         /// <summary>
         /// Send a broadcast to everyone within a given scene
         /// </summary>
@@ -297,7 +302,7 @@ namespace PurrNet
         {
             var broadcaster = GetModule<PlayersBroadcaster>(true);
             var scenePlayers = GetModule<ScenePlayersModule>(true);
-            
+
             if (scenePlayers.TryGetPlayersInScene(sceneId, out var playersInScene))
                 broadcaster.Send(playersInScene, data, method);
         }
@@ -331,12 +336,12 @@ namespace PurrNet
                 PurrLogger.LogWarning($"Can't send broadcast to all as non-server.");
                 return;
             }
-            
+
             var broadcaster = GetModule<PlayersBroadcaster>(true);
             broadcaster.SendToAll(data, method);
         }
-        
-        private interface IPendingSubscription 
+
+        private interface IPendingSubscription
         {
             void Subscribe(PlayersBroadcaster broadcaster);
         }
@@ -351,7 +356,7 @@ namespace PurrNet
                 Callback = callback;
                 AsServer = asServer;
             }
-    
+
             public void Subscribe(PlayersBroadcaster broadcaster)
             {
                 broadcaster.Subscribe(Callback);

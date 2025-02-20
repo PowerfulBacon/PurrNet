@@ -15,7 +15,8 @@ namespace Octokit
     /// </remarks>
     public class ApiPagination : IApiPagination
     {
-        public async Task<IReadOnlyList<T>> GetAllPages<T>(Func<Task<IReadOnlyPagedCollection<T>>> getFirstPage, Uri uri)
+        public async Task<IReadOnlyList<T>> GetAllPages<T>(Func<Task<IReadOnlyPagedCollection<T>>> getFirstPage,
+            Uri uri)
         {
             Ensure.ArgumentNotNull(getFirstPage, nameof(getFirstPage));
             try
@@ -27,12 +28,14 @@ namespace Octokit
                 {
                     allItems.AddRange(page);
                 }
+
                 return new ReadOnlyCollection<T>(allItems);
             }
             catch (NotFoundException)
             {
                 throw new NotFoundException(
-                    string.Format(CultureInfo.InvariantCulture, "{0} was not found.", uri.OriginalString), HttpStatusCode.NotFound);
+                    string.Format(CultureInfo.InvariantCulture, "{0} was not found.", uri.OriginalString),
+                    HttpStatusCode.NotFound);
             }
         }
     }

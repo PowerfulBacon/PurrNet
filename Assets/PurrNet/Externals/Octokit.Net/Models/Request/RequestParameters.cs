@@ -25,10 +25,10 @@ namespace Octokit
         {
             var map = _propertiesMap.GetOrAdd(GetType(), GetPropertyParametersForType);
             return (from property in map
-                    let value = property.GetValue(this)
-                    let key = property.Key
-                    where value != null
-                    select new { key, value }).ToDictionary(kvp => kvp.key, kvp => kvp.value);
+                let value = property.GetValue(this)
+                let key = property.Key
+                where value != null
+                select new { key, value }).ToDictionary(kvp => kvp.key, kvp => kvp.value);
         }
 
         static List<PropertyParameter> GetPropertyParametersForType(Type type)
@@ -61,7 +61,7 @@ namespace Octokit
                 {
                     if (value == null) return null;
                     return ((DateTimeOffset)value).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ",
-                      CultureInfo.InvariantCulture);
+                        CultureInfo.InvariantCulture);
                 };
             }
 
@@ -107,6 +107,7 @@ namespace Octokit
         {
             readonly Func<PropertyInfo, object, string> _valueFunc;
             readonly PropertyInfo _property;
+
             public PropertyParameter(PropertyInfo property)
             {
                 _property = property;

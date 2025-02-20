@@ -19,7 +19,7 @@ namespace Octokit
         {
             Licensing = new CopilotLicenseClient(apiConnection);
         }
-        
+
         /// <summary>
         /// Returns a summary of the Copilot for Business configuration for an organization. Includes a seat 
         /// details summary of the current billing cycle, and the mode of seat management.
@@ -30,10 +30,10 @@ namespace Octokit
         public async Task<BillingSettings> GetSummaryForOrganization(string organization)
         {
             Ensure.ArgumentNotNull(organization, nameof(organization));
-            
+
             return await ApiConnection.Get<BillingSettings>(ApiUrls.CopilotBillingSettings(organization));
         }
-        
+
         /// <summary>
         /// Client for maintaining Copilot licenses for users in an organization.
         /// </summary>

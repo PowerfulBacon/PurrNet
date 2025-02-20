@@ -8,12 +8,12 @@ namespace PurrNet.Packing
         public Half y;
         public Half z;
         public Half w;
-        
+
         public static implicit operator Vector4(HalfVector4 value)
         {
             return new Vector4(value.x, value.y, value.z, value.w);
         }
-        
+
         public static implicit operator HalfVector4(Vector4 value)
         {
             return new HalfVector4

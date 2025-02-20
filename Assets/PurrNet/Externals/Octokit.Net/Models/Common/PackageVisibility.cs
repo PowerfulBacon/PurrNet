@@ -7,19 +7,16 @@ namespace Octokit
         /// <summary>
         /// Only public packages
         /// </summary>
-        [Parameter(Value = "public")]
-        Public,
+        [Parameter(Value = "public")] Public,
 
         /// <summary>
         /// Only private packages
         /// </summary>
-        [Parameter(Value = "private")]
-        Private,
+        [Parameter(Value = "private")] Private,
 
         /// <summary>
         /// Only supported by container package types, otherwise the same as private
         /// </summary>
-        [Parameter(Value = "internal")]
-        Internal
+        [Parameter(Value = "internal")] Internal
     }
 }

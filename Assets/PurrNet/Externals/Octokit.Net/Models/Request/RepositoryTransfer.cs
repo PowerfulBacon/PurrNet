@@ -51,7 +51,8 @@ namespace Octokit
             get
             {
                 string teamIdsStr = string.Join(", ", TeamIds ?? new long[0]);
-                return string.Format(CultureInfo.InvariantCulture, "NewOwner: {0}, TeamIds: [{1}]", NewOwner, teamIdsStr);
+                return string.Format(CultureInfo.InvariantCulture, "NewOwner: {0}, TeamIds: [{1}]", NewOwner,
+                    teamIdsStr);
             }
         }
     }

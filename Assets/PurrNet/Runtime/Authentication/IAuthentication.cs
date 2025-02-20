@@ -13,14 +13,14 @@ namespace PurrNet.Authentication
     {
         [CanBeNull] public string cookie;
     }
-    
+
     public struct AuthenticationRequest<T> : IPackedAuto
     {
         /// <summary>
         /// This will be used to retrieve the same PlayerID from past sessions if present.
         /// </summary>
         [CanBeNull] public string cookie;
-        
+
         /// <summary>
         /// The payload to be validated.
         /// </summary>
@@ -32,7 +32,7 @@ namespace PurrNet.Authentication
             cookie = null;
         }
     }
-    
+
     public struct AuthenticationResponse : IPackedAuto
     {
         /// <summary>
@@ -41,37 +41,39 @@ namespace PurrNet.Authentication
         /// Else, the client will be disconnected.
         /// </summary>
         public bool success;
-        
+
         /// <summary>
         /// Optional cookie, this overrides the cookie in the AuthenticationRequest.
         /// This will be used to retrieve the same PlayerID from past sessions if present.
         /// </summary>
         [CanBeNull] public string cookie;
-        
+
         public static implicit operator bool(AuthenticationResponse response) => response.success;
-        
-        public static implicit operator AuthenticationResponse(bool success) => new AuthenticationResponse { success = success };
+
+        public static implicit operator AuthenticationResponse(bool success) =>
+            new AuthenticationResponse { success = success };
     }
-    
+
     public abstract class AuthenticationLayer : MonoBehaviour
     {
         [Tooltip("The time in seconds before the authentication times out and the client is disconnected.")]
-        [SerializeField] private float _timeout = 5f;
+        [SerializeField]
+        private float _timeout = 5f;
 
         public float timeout
         {
             get => _timeout;
             set => _timeout = value;
         }
-        
+
         public event Action<Connection, AuthenticationResponse> onAuthenticationComplete;
-        
+
         public abstract void Subscribe(BroadcastModule broadcastModule);
-        
+
         public abstract void Unsubscribe(BroadcastModule broadcastModule);
-        
+
         public abstract void SendClientPayload(BroadcastModule broadcastModule, CookiesModule cookies);
-        
+
         protected void TrigerAuthenticationComplete(Connection conn, AuthenticationResponse response)
         {
             try
@@ -84,7 +86,7 @@ namespace PurrNet.Authentication
             }
         }
     }
-    
+
     public abstract class AuthenticationBehaviour<T> : AuthenticationLayer
     {
         public override void Subscribe(BroadcastModule broadcastModule)
@@ -133,7 +135,7 @@ namespace PurrNet.Authentication
         /// </summary>
         /// <returns>The client payload to be validated.</returns>
         protected abstract Task<AuthenticationRequest<T>> GetClientPlayload();
-        
+
         /// <summary>
         /// Once the client payload is received, this method is called to validate the payload.
         /// This only runs on the server.

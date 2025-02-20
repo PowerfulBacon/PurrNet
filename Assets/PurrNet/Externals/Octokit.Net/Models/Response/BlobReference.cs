@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class BlobReference
     {
-        public BlobReference() { }
+        public BlobReference()
+        {
+        }
 
         public BlobReference(string sha)
         {
@@ -20,10 +22,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Sha: {0}", Sha);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Sha: {0}", Sha); }
         }
     }
 }

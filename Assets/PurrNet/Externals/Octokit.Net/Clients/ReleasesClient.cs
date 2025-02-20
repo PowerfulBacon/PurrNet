@@ -31,7 +31,8 @@ namespace Octokit
         /// <param name="data">The request for generating release notes</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         [ManualRoute("POST", "/repos/{owner}/{repo}/releases/generate-notes")]
-        public Task<GeneratedReleaseNotes> GenerateReleaseNotes(string owner, string name, GenerateReleaseNotesRequest data)
+        public Task<GeneratedReleaseNotes> GenerateReleaseNotes(string owner, string name,
+            GenerateReleaseNotesRequest data)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -401,7 +402,8 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         [ManualRoute("GET", "/repos/{owner}/{repo}/releases/{release_id}/assets")]
-        public Task<IReadOnlyList<ReleaseAsset>> GetAllAssets(string owner, string name, long releaseId, ApiOptions options)
+        public Task<IReadOnlyList<ReleaseAsset>> GetAllAssets(string owner, string name, long releaseId,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -441,7 +443,8 @@ namespace Octokit
         /// <param name="cancellationToken">An optional token to monitor for cancellation requests</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         [ManualRoute("POST", "{server}/repos/{owner}/{repo}/releases/{release_id}/assets")]
-        public Task<ReleaseAsset> UploadAsset(Release release, ReleaseAssetUpload data, CancellationToken cancellationToken = default)
+        public Task<ReleaseAsset> UploadAsset(Release release, ReleaseAssetUpload data,
+            CancellationToken cancellationToken = default)
         {
             Ensure.ArgumentNotNull(release, nameof(release));
             Ensure.ArgumentNotNull(data, nameof(data));

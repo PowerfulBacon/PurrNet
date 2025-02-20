@@ -116,7 +116,7 @@ namespace PurrNet
         /// </summary>
         public void Generate()
         {
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
             if (ApplicationContext.isClone)
                 return;
 
@@ -214,8 +214,9 @@ namespace PurrNet
                 });
 
                 EditorUtility.DisplayProgressBar("Getting Network Prefabs", "Removing invalid prefabs...", 0.95f);
-                
-                int removed = prefabs.RemoveAll(prefabData => !prefabData.prefab || !File.Exists(AssetDatabase.GetAssetPath(prefabData.prefab)));
+
+                int removed = prefabs.RemoveAll(prefabData =>
+                    !prefabData.prefab || !File.Exists(AssetDatabase.GetAssetPath(prefabData.prefab)));
 
                 for (int i = 0; i < prefabs.Count; i++)
                 {
@@ -250,7 +251,7 @@ namespace PurrNet
                 EditorUtility.ClearProgressBar();
                 _generating = false;
             }
-        #endif
+#endif
         }
     }
 }

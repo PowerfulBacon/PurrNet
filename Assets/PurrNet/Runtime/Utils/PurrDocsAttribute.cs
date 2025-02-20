@@ -25,7 +25,8 @@ namespace PurrNet.Utils
             iconContent ??= EditorGUIUtility.IconContent("_Help");
 
             var iconRect = new Rect(position.x, position.y, IconWidth, EditorGUIUtility.singleLineHeight);
-            var propertyRect = new Rect(position.x + IconWidth, position.y, position.width - IconWidth, position.height);
+            var propertyRect = new Rect(position.x + IconWidth, position.y, position.width - IconWidth,
+                position.height);
 
             if (GUI.Button(iconRect, iconContent, GUIStyle.none))
             {

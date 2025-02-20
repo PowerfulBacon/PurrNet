@@ -12,35 +12,35 @@ namespace PurrNet.Editor
         private SerializedProperty _roomName;
         private SerializedProperty _region;
         private SerializedProperty _host;
-        
+
         private bool _lookingForBestRegion;
         static string[] _regions = Array.Empty<string>();
         static string[] _hosts = Array.Empty<string>();
- 
+
         void OnEnable()
         {
             _masterServer = serializedObject.FindProperty("_masterServer");
             _roomName = serializedObject.FindProperty("_roomName");
             _region = serializedObject.FindProperty("_region");
             _host = serializedObject.FindProperty("_host");
-            
+
             if (_regions.Length == 0)
                 LoadRegions();
         }
 
         public static string _bestRegion;
         static bool _loadingRegions;
-        
+
         async void LoadRegions()
         {
             try
             {
                 if (_loadingRegions)
                     return;
-                
+
                 _loadingRegions = true;
                 var servers = await PurrTransportUtils.GetRelayServersAsync(_masterServer.stringValue);
-                
+
                 _hosts = new string[servers.servers.Length];
                 _regions = new string[servers.servers.Length];
 
@@ -49,7 +49,7 @@ namespace PurrNet.Editor
                     _hosts[i] = servers.servers[i].host;
                     _regions[i] = servers.servers[i].region;
                 }
-                
+
                 _loadingRegions = false;
             }
             catch (Exception e)
@@ -58,7 +58,7 @@ namespace PurrNet.Editor
                 Debug.LogException(e);
             }
         }
-        
+
         static int RegionId(string region, string host)
         {
             for (var i = 0; i < _regions.Length; i++)
@@ -80,16 +80,16 @@ namespace PurrNet.Editor
             {
                 if (_lookingForBestRegion)
                     return;
-                
+
                 _lookingForBestRegion = true;
-            
+
                 var server = await PurrTransportUtils.GetRelayServerAsync(_masterServer.stringValue);
-            
+
                 _region.stringValue = server.region;
                 _bestRegion = server.region;
-                
+
                 serializedObject.ApplyModifiedProperties();
-            
+
                 _lookingForBestRegion = false;
             }
             catch (Exception e)
@@ -104,11 +104,11 @@ namespace PurrNet.Editor
             base.OnInspectorGUI();
 
             EditorGUILayout.Space();
-            
+
             var transport = (PurrTransport)target;
-            
+
             EditorGUILayout.PropertyField(_masterServer);
-            
+
             var server = _masterServer.stringValue;
             if (Uri.TryCreate(server, UriKind.Absolute, out var url) && url.Host.EndsWith("riten.dev"))
             {
@@ -117,15 +117,15 @@ namespace PurrNet.Editor
                                         "Usage in production is strictly prohibited.\n" +
                                         "You need to host your own relay servers for production.", MessageType.Warning);
             }
-            
+
             EditorGUILayout.PropertyField(_roomName);
-            
+
             bool oldEnabled = GUI.enabled;
             if (_lookingForBestRegion)
                 GUI.enabled = false;
-            
+
             EditorGUILayout.BeginHorizontal();
-            
+
             if (_regions.Length == 0)
             {
                 bool enabled = GUI.enabled;
@@ -137,7 +137,7 @@ namespace PurrNet.Editor
             {
                 int region = RegionId(transport.region, transport.host);
                 var newRegion = EditorGUILayout.Popup("Region", region, _regions);
-                
+
                 if (newRegion < 0 && _regions.Length > 0)
                     newRegion = 0;
 
@@ -147,14 +147,14 @@ namespace PurrNet.Editor
                     _host.stringValue = _hosts[newRegion];
                 }
             }
-            
+
             if (GUILayout.Button("Find Best Region", GUILayout.ExpandWidth(false)))
                 FindBestRegion();
 
             GUI.enabled = oldEnabled;
-            
+
             EditorGUILayout.EndHorizontal();
-            
+
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             GUI.color = new Color(0.8f, 0.8f, 0.8f);
@@ -163,7 +163,7 @@ namespace PurrNet.Editor
             EditorGUILayout.EndHorizontal();
 
             TransportInspector.DrawTransportStatus(transport);
-            
+
             serializedObject.ApplyModifiedProperties();
         }
     }

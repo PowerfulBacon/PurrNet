@@ -23,6 +23,7 @@ namespace JamesFrowen.SimpleWeb
                     {
                         throw new ReadHelperException("returned 0");
                     }
+
                     received += read;
                 }
             }
@@ -68,7 +69,8 @@ namespace JamesFrowen.SimpleWeb
             }
         }
 
-        public static int? SafeReadTillMatch(Stream stream, byte[] outBuffer, int outOffset, int maxLength, byte[] endOfHeader)
+        public static int? SafeReadTillMatch(Stream stream, byte[] outBuffer, int outOffset, int maxLength,
+            byte[] endOfHeader)
         {
             try
             {
@@ -123,7 +125,9 @@ namespace JamesFrowen.SimpleWeb
     [Serializable]
     public class ReadHelperException : Exception
     {
-        public ReadHelperException(string message) : base(message) { }
+        public ReadHelperException(string message) : base(message)
+        {
+        }
 
         protected ReadHelperException(SerializationInfo info, StreamingContext context) : base(info, context)
         {

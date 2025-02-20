@@ -317,7 +317,8 @@ namespace Octokit
         /// <param name="repo">The name of the repository. The name is not case sensitive.</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns></returns>
-        Task<TeamRepository> CheckTeamPermissionsForARepositoryWithCustomAcceptHeader(string org, string teamSlug, string owner, string repo);
+        Task<TeamRepository> CheckTeamPermissionsForARepositoryWithCustomAcceptHeader(string org, string teamSlug,
+            string owner, string repo);
 
         /// <summary>
         /// Add or update team repository permissions
@@ -338,7 +339,8 @@ namespace Octokit
         /// </param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns></returns>
-        Task AddOrUpdateTeamRepositoryPermissions(string org, string teamSlug, string owner, string repo, string permission);
+        Task AddOrUpdateTeamRepositoryPermissions(string org, string teamSlug, string owner, string repo,
+            string permission);
 
         /// <summary>
         /// Remove a repository from a team

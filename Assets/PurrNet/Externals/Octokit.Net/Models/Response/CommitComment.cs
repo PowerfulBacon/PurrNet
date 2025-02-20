@@ -7,9 +7,13 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class CommitComment
     {
-        public CommitComment() { }
+        public CommitComment()
+        {
+        }
 
-        public CommitComment(long id, string nodeId, string url, string htmlUrl, string body, string path, int position, int? line, string commitId, User user, DateTimeOffset createdAt, DateTimeOffset? updatedAt, ReactionSummary reactions)
+        public CommitComment(long id, string nodeId, string url, string htmlUrl, string body, string path, int position,
+            int? line, string commitId, User user, DateTimeOffset createdAt, DateTimeOffset? updatedAt,
+            ReactionSummary reactions)
         {
             Id = id;
             NodeId = nodeId;
@@ -95,7 +99,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Id: {0}, Commit Id: {1}, CreatedAt: {2}", Id, CommitId, CreatedAt);
+                return string.Format(CultureInfo.InvariantCulture, "Id: {0}, Commit Id: {1}, CreatedAt: {2}", Id,
+                    CommitId, CreatedAt);
             }
         }
     }

@@ -26,6 +26,7 @@ namespace Octokit
         /// https://developer.github.com/v3/enterprise/management_console/#check-maintenance-status
         /// </remarks>
         /// <returns>The <see cref="MaintenanceModeResponse"/>.</returns>
-        Task<MaintenanceModeResponse> EditMaintenanceMode(UpdateMaintenanceRequest maintenance, string managementConsolePassword);
+        Task<MaintenanceModeResponse> EditMaintenanceMode(UpdateMaintenanceRequest maintenance,
+            string managementConsolePassword);
     }
 }

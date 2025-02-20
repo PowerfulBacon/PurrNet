@@ -12,7 +12,8 @@ namespace Octokit
     {
         public EnterpriseAdminStatsClient(IApiConnection apiConnection)
             : base(apiConnection)
-        { }
+        {
+        }
 
         /// <summary>
         /// Gets GitHub Enterprise Issue statistics (must be Site Admin user).

@@ -27,15 +27,15 @@ public class GeneratedDeltaPackingTests
     {
         var oldVal = new SomeStruct { value = 3 };
         var newVal = new SomeStruct { value = 60 };
-        
+
         packer.ResetPositionAndMode(false);
         DeltaPacker<SomeStruct>.Write(packer, oldVal, newVal);
-        
+
         var readValue = oldVal;
         packer.ResetPositionAndMode(true);
-        
+
         DeltaPacker<SomeStruct>.Read(packer, oldVal, ref readValue);
-        
+
         Assert.That(readValue.value, Is.EqualTo(newVal.value));
     }
 }

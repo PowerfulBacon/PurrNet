@@ -13,12 +13,13 @@ namespace Octokit
         /// One or more usernames to be added or removed from a Copilot-enabled organization.
         /// </summary>
         public string[] SelectedUsernames { get; set; }
-        
+
         internal string DebuggerDisplay
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "SelectedUsernames: {0}", string.Join(",", SelectedUsernames));
+                return string.Format(CultureInfo.InvariantCulture, "SelectedUsernames: {0}",
+                    string.Join(",", SelectedUsernames));
             }
         }
     }

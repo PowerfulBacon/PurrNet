@@ -14,7 +14,7 @@ namespace PurrNet.Editor
         {
             if (!NetworkManager.main)
                 return false;
-            
+
             foreach (var obj in objectsToDelete)
             {
                 switch (obj)
@@ -24,7 +24,7 @@ namespace PurrNet.Editor
                         return true;
                 }
             }
-            
+
             return false;
         }
 
@@ -33,7 +33,7 @@ namespace PurrNet.Editor
             // if nothing network related just do normal delete
             if (!IsAnyNetworked(objectsToDelete))
                 return false;
-            
+
             var objectsToDeleteList = new List<Object>(objectsToDelete);
 
             for (int i = 0; i < objectsToDeleteList.Count; i++)
@@ -57,6 +57,7 @@ namespace PurrNet.Editor
                             foreach (var child in children)
                                 child.identity.Despawn();
                         }
+
                         break;
                     }
                     case NetworkIdentity identity:
@@ -72,7 +73,7 @@ namespace PurrNet.Editor
 
             // deselect all objects
             Selection.objects = Array.Empty<Object>();
-            
+
             return true;
         }
     }

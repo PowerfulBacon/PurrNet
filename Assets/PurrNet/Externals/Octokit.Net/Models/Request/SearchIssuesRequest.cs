@@ -63,6 +63,7 @@ namespace Octokit
         /// https://help.github.com/articles/searching-issues/#scope-the-search-fields
         /// </remarks>
         private IEnumerable<IssueInQualifier> _inQualifier;
+
         public IEnumerable<IssueInQualifier> In
         {
             get { return _inQualifier; }
@@ -133,6 +134,7 @@ namespace Octokit
         public ItemState? State { get; set; }
 
         private IEnumerable<string> _labels;
+
         /// <summary>
         /// Filters issues based on the labels assigned.
         /// </summary>
@@ -328,7 +330,8 @@ namespace Octokit
 
             if (Labels != null)
             {
-                parameters.AddRange(Labels.Select(label => string.Format(CultureInfo.InvariantCulture, "label:{0}", FormatLabel(label))));
+                parameters.AddRange(Labels.Select(label =>
+                    string.Format(CultureInfo.InvariantCulture, "label:{0}", FormatLabel(label))));
             }
 
             if (No.HasValue)
@@ -343,7 +346,8 @@ namespace Octokit
 
             if (Is != null)
             {
-                parameters.AddRange(Is.Select(x => string.Format(CultureInfo.InvariantCulture, "is:{0}", x.ToParameter())));
+                parameters.AddRange(Is.Select(x =>
+                    string.Format(CultureInfo.InvariantCulture, "is:{0}", x.ToParameter())));
             }
 
             if (Created != null)
@@ -404,12 +408,14 @@ namespace Octokit
 
             if (Milestone.IsNotBlank())
             {
-                parameters.Add(string.Format(CultureInfo.InvariantCulture, "milestone:\"{0}\"", Milestone.EscapeDoubleQuotes()));
+                parameters.Add(string.Format(CultureInfo.InvariantCulture, "milestone:\"{0}\"",
+                    Milestone.EscapeDoubleQuotes()));
             }
 
             if (Archived != null)
             {
-                parameters.Add(string.Format(CultureInfo.InvariantCulture, "archived:{0}", Archived.ToString().ToLower()));
+                parameters.Add(string.Format(CultureInfo.InvariantCulture, "archived:{0}",
+                    Archived.ToString().ToLower()));
             }
 
             // Add any exclusion parameters
@@ -425,7 +431,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Search: {0} {1}", Term, string.Join(" ", MergedQualifiers()));
+                return string.Format(CultureInfo.InvariantCulture, "Search: {0} {1}", Term,
+                    string.Join(" ", MergedQualifiers()));
             }
         }
 
@@ -458,77 +465,57 @@ namespace Octokit
         /// <summary>
         /// search by number of comments
         /// </summary>
-        [Parameter(Value = "comments")]
-        Comments,
+        [Parameter(Value = "comments")] Comments,
+
         /// <summary>
         /// search by created
         /// </summary>
-        [Parameter(Value = "created")]
-        Created,
+        [Parameter(Value = "created")] Created,
+
         /// <summary>
         /// search by last updated
         /// </summary>
-        [Parameter(Value = "updated")]
-        Updated,
+        [Parameter(Value = "updated")] Updated,
+
         /// <summary>
         /// search by last merged
         /// </summary>
-        [Parameter(Value = "merged")]
-        Merged
+        [Parameter(Value = "merged")] Merged
     }
 
     public enum IssueTypeQualifier
     {
-        [Parameter(Value = "pr")]
-        PullRequest,
-        [Parameter(Value = "issue")]
-        Issue
+        [Parameter(Value = "pr")] PullRequest,
+        [Parameter(Value = "issue")] Issue
     }
 
     public enum IssueInQualifier
     {
-        [Parameter(Value = "title")]
-        Title,
-        [Parameter(Value = "body")]
-        Body,
-        [Parameter(Value = "comment")]
-        Comment
+        [Parameter(Value = "title")] Title,
+        [Parameter(Value = "body")] Body,
+        [Parameter(Value = "comment")] Comment
     }
 
     public enum IssueIsQualifier
     {
-        [Parameter(Value = "open")]
-        Open,
-        [Parameter(Value = "closed")]
-        Closed,
-        [Parameter(Value = "merged")]
-        Merged,
-        [Parameter(Value = "unmerged")]
-        Unmerged,
-        [Parameter(Value = "pr")]
-        PullRequest,
-        [Parameter(Value = "issue")]
-        Issue,
-        [Parameter(Value = "private")]
-        Private,
-        [Parameter(Value = "public")]
-        Public,
-        [Parameter(Value = "locked")]
-        Locked,
-        [Parameter(Value = "unlocked")]
-        Unlocked
+        [Parameter(Value = "open")] Open,
+        [Parameter(Value = "closed")] Closed,
+        [Parameter(Value = "merged")] Merged,
+        [Parameter(Value = "unmerged")] Unmerged,
+        [Parameter(Value = "pr")] PullRequest,
+        [Parameter(Value = "issue")] Issue,
+        [Parameter(Value = "private")] Private,
+        [Parameter(Value = "public")] Public,
+        [Parameter(Value = "locked")] Locked,
+        [Parameter(Value = "unlocked")] Unlocked
     }
 
     public enum IssueNoMetadataQualifier
     {
-        [Parameter(Value = "label")]
-        Label,
-        [Parameter(Value = "milestone")]
-        Milestone,
-        [Parameter(Value = "assignee")]
-        Assignee,
-        [Parameter(Value = "project")]
-        Project
+        [Parameter(Value = "label")] Label,
+        [Parameter(Value = "milestone")] Milestone,
+        [Parameter(Value = "assignee")] Assignee,
+        [Parameter(Value = "project")] Project
     }
 
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
@@ -559,10 +546,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Repositories: {0}", Count);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Repositories: {0}", Count); }
         }
     }
 }

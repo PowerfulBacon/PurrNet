@@ -7,16 +7,16 @@ namespace PurrNet.Modules
     {
         protected readonly ScenesModule scenes;
 
-        protected readonly List<T> modules = new ();
-        readonly Dictionary<SceneID, T> _modules = new ();
-        
+        protected readonly List<T> modules = new();
+        readonly Dictionary<SceneID, T> _modules = new();
+
         protected bool asServer;
 
         protected SceneScopedFactory(ScenesModule scenes)
         {
             this.scenes = scenes;
         }
-        
+
         public void Enable(bool asServer)
         {
             this.asServer = asServer;
@@ -40,17 +40,18 @@ namespace PurrNet.Modules
             scenes.onPreSceneLoaded -= OnPreSceneLoaded;
             scenes.onSceneUnloaded -= OnSceneUnloaded;
         }
-        
+
         protected abstract T CreateModule(SceneID scene, bool asServer);
 
         private void OnPreSceneLoaded(SceneID scene, bool asServer)
         {
             if (_modules.ContainsKey(scene))
             {
-                PurrLogger.LogError($"Hierarchy module for scene {scene} already exists; trying to create another one?");
+                PurrLogger.LogError(
+                    $"Hierarchy module for scene {scene} already exists; trying to create another one?");
                 return;
             }
-            
+
             var module = CreateModule(scene, asServer);
 
             module.Enable(asServer);

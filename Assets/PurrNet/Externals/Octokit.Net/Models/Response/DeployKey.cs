@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class DeployKey
     {
-        public DeployKey() { }
+        public DeployKey()
+        {
+        }
 
         public DeployKey(int id, string key, string url, string title)
         {

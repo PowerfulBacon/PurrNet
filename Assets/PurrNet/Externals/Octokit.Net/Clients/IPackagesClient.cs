@@ -37,7 +37,8 @@ namespace Octokit
         /// <param name="org">Required: Organisation Name</param>
         /// <param name="packageType">Required: The type of package</param>
         /// <param name="packageVisibility">Optional: The visibility of the package</param>
-        Task<IReadOnlyList<Package>> GetAllForOrg(string org, PackageType packageType, PackageVisibility? packageVisibility);
+        Task<IReadOnlyList<Package>> GetAllForOrg(string org, PackageType packageType,
+            PackageVisibility? packageVisibility);
 
         /// <summary>
         /// List all packages for an organisations, readable by the current user
@@ -50,7 +51,8 @@ namespace Octokit
         /// <param name="packageType">Required: The type of package</param>
         /// <param name="packageVisibility">Optional: The visibility of the package</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<Package>> GetAllForOrg(string org, PackageType packageType, PackageVisibility? packageVisibility, ApiOptions options);
+        Task<IReadOnlyList<Package>> GetAllForOrg(string org, PackageType packageType,
+            PackageVisibility? packageVisibility, ApiOptions options);
 
         /// <summary>
         /// Get a specific package for an Organization.
@@ -124,7 +126,8 @@ namespace Octokit
         /// <param name="packageType">Required: The type of package</param>
         /// <param name="packageVisibility">Optional: The visibility of the package</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<Package>> GetAllForActiveUser(PackageType packageType, PackageVisibility? packageVisibility, ApiOptions options);
+        Task<IReadOnlyList<Package>> GetAllForActiveUser(PackageType packageType, PackageVisibility? packageVisibility,
+            ApiOptions options);
 
         /// <summary>
         /// Gets a specific package for a package owned by the authenticated user.
@@ -186,7 +189,8 @@ namespace Octokit
         /// <param name="username">Required: Username</param>
         /// <param name="packageType">Required: The type of package</param>
         /// <param name="packageVisibility">Optional: The visibility of the package</param>
-        Task<IReadOnlyList<Package>> GetAllForUser(string username, PackageType packageType, PackageVisibility? packageVisibility);
+        Task<IReadOnlyList<Package>> GetAllForUser(string username, PackageType packageType,
+            PackageVisibility? packageVisibility);
 
         /// <summary>
         /// Lists packages owned by the authenticated user within the user's namespace
@@ -199,7 +203,8 @@ namespace Octokit
         /// <param name="packageType">Required: The type of package</param>
         /// <param name="packageVisibility">Optional: The visibility of the package</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<Package>> GetAllForUser(string username, PackageType packageType, PackageVisibility? packageVisibility, ApiOptions options);
+        Task<IReadOnlyList<Package>> GetAllForUser(string username, PackageType packageType,
+            PackageVisibility? packageVisibility, ApiOptions options);
 
         /// <summary>
         /// Gets a specific package metadata for a public package owned by a user.

@@ -8,11 +8,13 @@ namespace PurrNet
     {
         [UsedByIL]
         public TargetRpcAttribute(
-            Channel channel = Channel.ReliableOrdered, 
-            bool runLocally = false, 
-            bool bufferLast = false, 
+            Channel channel = Channel.ReliableOrdered,
+            bool runLocally = false,
+            bool bufferLast = false,
             bool requireServer = true,
             CompressionLevel compressionLevel = CompressionLevel.None,
-            float asyncTimeoutInSec = 5f) { }
+            float asyncTimeoutInSec = 5f)
+        {
+        }
     }
 }

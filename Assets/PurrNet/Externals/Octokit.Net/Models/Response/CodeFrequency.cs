@@ -12,13 +12,16 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class CodeFrequency
     {
-        public CodeFrequency() { }
+        public CodeFrequency()
+        {
+        }
 
         public CodeFrequency(IEnumerable<AdditionsAndDeletions> additionsAndDeletionsByWeek)
         {
             Ensure.ArgumentNotNull(additionsAndDeletionsByWeek, nameof(additionsAndDeletionsByWeek));
 
-            AdditionsAndDeletionsByWeek = new ReadOnlyCollection<AdditionsAndDeletions>(additionsAndDeletionsByWeek.ToList());
+            AdditionsAndDeletionsByWeek =
+                new ReadOnlyCollection<AdditionsAndDeletions>(additionsAndDeletionsByWeek.ToList());
         }
 
         /// <summary>

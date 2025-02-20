@@ -88,10 +88,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "SHA: {0} Message: {1}", Sha, Message);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "SHA: {0} Message: {1}", Sha, Message); }
         }
     }
 
@@ -108,7 +105,8 @@ namespace Octokit
         /// <param name="message">The message.</param>
         /// <param name="content">The content.</param>
         public CreateFileRequest(string message, string content) : this(message, content, true)
-        { }
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateFileRequest"/> class.
@@ -117,7 +115,8 @@ namespace Octokit
         /// <param name="content">The content.</param>
         /// <param name="branch">The branch the request is for.</param>
         public CreateFileRequest(string message, string content, string branch) : this(message, content, branch, true)
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates an instance of a <see cref="CreateFileRequest" />.
@@ -133,6 +132,7 @@ namespace Octokit
             {
                 content = content.ToBase64String();
             }
+
             Content = content;
         }
 
@@ -143,7 +143,8 @@ namespace Octokit
         /// <param name="content">The content.</param>
         /// <param name="branch">The branch the request is for.</param>
         /// <param name="convertContentToBase64">True to convert content to base64.</param>
-        public CreateFileRequest(string message, string content, string branch, bool convertContentToBase64) : base(message, branch)
+        public CreateFileRequest(string message, string content, string branch, bool convertContentToBase64) : base(
+            message, branch)
         {
             Ensure.ArgumentNotNullOrEmptyString(content, nameof(content));
 
@@ -151,6 +152,7 @@ namespace Octokit
             {
                 content = content.ToBase64String();
             }
+
             Content = content;
         }
 
@@ -161,10 +163,7 @@ namespace Octokit
 
         internal virtual string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Message: {0} Content: {1}", Message, Content);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Message: {0} Content: {1}", Message, Content); }
         }
     }
 
@@ -182,7 +181,8 @@ namespace Octokit
         /// <param name="sha">The sha.</param>
         public UpdateFileRequest(string message, string content, string sha)
             : this(message, content, sha, true)
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates an instance of a <see cref="UpdateFileRequest" />.
@@ -192,8 +192,9 @@ namespace Octokit
         /// <param name="sha">The sha.</param>
         /// <param name="branch">The branch the request is for.</param>
         public UpdateFileRequest(string message, string content, string sha, string branch)
-           : this(message, content, sha, branch, true)
-        { }
+            : this(message, content, sha, branch, true)
+        {
+        }
 
         /// <summary>
         /// Creates an instance of a <see cref="UpdateFileRequest" />.
@@ -219,7 +220,7 @@ namespace Octokit
         /// <param name="branch">The branch the request is for.</param>
         /// <param name="convertContentToBase64">True to convert content to base64.</param>
         public UpdateFileRequest(string message, string content, string sha, string branch, bool convertContentToBase64)
-           : base(message, content, branch, convertContentToBase64)
+            : base(message, content, branch, convertContentToBase64)
         {
             Ensure.ArgumentNotNullOrEmptyString(sha, nameof(sha));
 
@@ -233,10 +234,7 @@ namespace Octokit
 
         internal override string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "SHA: {0} Message: {1}", Sha, Message);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "SHA: {0} Message: {1}", Sha, Message); }
         }
     }
 }

@@ -11,7 +11,8 @@ namespace Octokit
     public class AutolinkRequest
     {
         public AutolinkRequest()
-        { }
+        {
+        }
 
         public AutolinkRequest(string keyPrefix, string urlTemplate, bool isAlphanumeric)
         {
@@ -20,7 +21,7 @@ namespace Octokit
             this.IsAlphanumeric = isAlphanumeric;
         }
 
-        
+
         /// <summary>
         /// This prefix appended by certain characters will generate a link any time it is found in an issue, pull request, or commit.
         /// </summary>
@@ -39,10 +40,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return new SimpleJsonSerializer().Serialize(this);
-            }
+            get { return new SimpleJsonSerializer().Serialize(this); }
         }
     }
 }

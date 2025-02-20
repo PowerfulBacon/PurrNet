@@ -8,9 +8,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class PackageVersion
     {
-        public PackageVersion() { }
+        public PackageVersion()
+        {
+        }
 
-        public PackageVersion(long id, string name, string url, string packageHtmlUrl, DateTime createdAt, DateTime updatedAt, string htmlUrl, PackageVersionMetadata metadata)
+        public PackageVersion(long id, string name, string url, string packageHtmlUrl, DateTime createdAt,
+            DateTime updatedAt, string htmlUrl, PackageVersionMetadata metadata)
         {
             Id = id;
             Name = name;
@@ -44,7 +47,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class PackageVersionMetadata
     {
-        public PackageVersionMetadata() { }
+        public PackageVersionMetadata()
+        {
+        }
 
         public PackageVersionMetadata(string packageType, PackageVersionMetadataContainer container)
         {
@@ -62,7 +67,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class PackageVersionMetadataContainer
     {
-        public PackageVersionMetadataContainer() { }
+        public PackageVersionMetadataContainer()
+        {
+        }
 
         public PackageVersionMetadataContainer(IReadOnlyList<string> tags)
         {

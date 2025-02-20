@@ -8,24 +8,25 @@ namespace PurrNet.Modules
     {
         public SceneID scene;
         public readonly ByteData packet;
-        
+
         public NetworkTransformDelta(SceneID context, BitPacker packer)
         {
             scene = context;
             packet = packer.ToByteData();
         }
     }
-    
+
     public class NetworkTransformModule : INetworkModule, IFixedUpdate
     {
-        private readonly List<NetworkTransform> _networkTransforms = new ();
+        private readonly List<NetworkTransform> _networkTransforms = new();
         private readonly ScenePlayersModule _scenePlayers;
         private readonly PlayersBroadcaster _broadcaster;
         private readonly NetworkManager _manager;
         private readonly SceneID _scene;
         private bool _asServer;
-        
-        public NetworkTransformModule(NetworkManager manager, PlayersBroadcaster broadcaster, ScenePlayersModule scenePlayers, SceneID scene)
+
+        public NetworkTransformModule(NetworkManager manager, PlayersBroadcaster broadcaster,
+            ScenePlayersModule scenePlayers, SceneID scene)
         {
             _manager = manager;
             _scenePlayers = scenePlayers;
@@ -48,11 +49,11 @@ namespace PurrNet.Modules
         {
             if (data.scene != _scene)
                 return;
-            
+
             using var packet = BitPackerPool.Get(data.packet);
-            
+
             packet.ResetPositionAndMode(true);
-            
+
             int ntCount = _networkTransforms.Count;
 
             if (asServer)
@@ -74,7 +75,7 @@ namespace PurrNet.Modules
                 }
             }
         }
-        
+
         public PlayerID GetLocalPlayer()
         {
             if (_manager.TryGetModule<PlayersManager>(false, out var _players))
@@ -106,15 +107,15 @@ namespace PurrNet.Modules
                         anyWritten = nt.DeltaWrite(packer) || anyWritten;
                 }
             }
-            
+
             return anyWritten;
         }
-        
+
         public void Register(NetworkTransform networkTransform)
         {
             if (!networkTransform.id.HasValue)
                 return;
-            
+
             int insertPos = 0;
             var b = networkTransform.id.Value;
 
@@ -129,10 +130,10 @@ namespace PurrNet.Modules
                     insertPos = i + 1;
                 }
             }
-            
+
             _networkTransforms.Insert(insertPos, networkTransform);
         }
-        
+
         public void Unregister(NetworkTransform networkTransform)
         {
             _networkTransforms.Remove(networkTransform);
@@ -142,7 +143,7 @@ namespace PurrNet.Modules
         {
             var localPlayer = GetLocalPlayer();
             int ntCount = _networkTransforms.Count;
-            
+
             for (var i = 0; i < ntCount; i++)
             {
                 var nt = _networkTransforms[i];
@@ -163,14 +164,14 @@ namespace PurrNet.Modules
                 {
                     if (player == localPlayer)
                         continue;
-                    
+
                     using var packer = BitPackerPool.Get();
-                    
+
                     if (PrepareDeltaState(packer, player) && packer.positionInBits > 0)
                         _broadcaster.Send(player, new NetworkTransformDelta(_scene, packer));
                 }
             }
-            
+
             for (var i = 0; i < ntCount; i++)
             {
                 var nt = _networkTransforms[i];

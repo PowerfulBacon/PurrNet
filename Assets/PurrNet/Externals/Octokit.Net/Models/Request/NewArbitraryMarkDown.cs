@@ -36,7 +36,6 @@ namespace Octokit
         /// </summary>
         /// <param name="text">The Markdown text to render
         /// </param>
-
         public NewArbitraryMarkdown(string text)
             : this(text, _markdown, null)
         {
@@ -76,7 +75,8 @@ namespace Octokit
         /// </value>
         public string Context { get; private set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "gfm")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming",
+            "CA2204:Literals should be spelled correctly", MessageId = "gfm")]
         static string GetMode(string mode)
         {
             if (mode != _markdown && mode != _gfm)
@@ -86,12 +86,10 @@ namespace Octokit
             else
                 return mode;
         }
+
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Text: {0}", Text);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Text: {0}", Text); }
         }
     }
 }
