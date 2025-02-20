@@ -9,10 +9,17 @@ public class ShootTargetTests : NetworkBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            var ray = _camera.ScreenPointToRay(Input.mousePosition);
+            var shootTarget = _camera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 5));
+            var ray = new Ray(transform.position, shootTarget - transform.position);
+            
+            transform.localRotation = Quaternion.LookRotation(ray.direction);
 
             if (Physics.Raycast(ray, out var hit))
                 Debug.DrawLine(hit.point, hit.point + hit.normal, Color.red, 5f);
+
+            var hit2D = Physics2D.Raycast(ray.origin, ray.direction);
+            if (hit2D.collider != null)
+                Debug.DrawLine(hit2D.point, hit2D.point + hit2D.normal, Color.blue, 5f);
             
             Shoot(rollbackTick, ray);
         }
@@ -23,5 +30,9 @@ public class ShootTargetTests : NetworkBehaviour
     {
         if (rollbackModule.Raycast(preciseTick, ray, out var hit))
             Debug.DrawLine(hit.point, hit.point + hit.normal, Color.green, 5f);
+        
+        var ray2d = new Ray2D(ray.origin, ray.direction);
+        if (rollbackModule.Raycast(preciseTick, ray2d, out var hit2D))
+            Debug.DrawLine(hit2D.point, hit2D.point + hit2D.normal, Color.yellow, 5f);
     }
 }

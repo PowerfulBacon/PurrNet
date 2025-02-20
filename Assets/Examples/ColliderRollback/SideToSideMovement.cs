@@ -16,11 +16,5 @@ public class SideToSideMovement : NetworkBehaviour
             transform.position.y,
             transform.position.z
         );
-        
-        transform.rotation = Quaternion.Euler(
-            transform.rotation.eulerAngles.x,
-            Mathf.Sin(Time.time * _speed) * 45f,
-            transform.rotation.eulerAngles.z
-        );
     }
 }
