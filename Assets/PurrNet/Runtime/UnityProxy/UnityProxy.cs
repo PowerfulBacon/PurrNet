@@ -23,7 +23,7 @@ namespace PurrNet
             };
         }
 
-        static T OnPreInstantiate<T>(NetworkPrefabs.PrefabData prefabData, InstantiateData<T> instantiateData) where T : Object
+        static T OnPreInstantiate<T>(PrefabData prefabData, InstantiateData<T> instantiateData) where T : Object
         {
             var prefab = prefabData.prefab;
 
@@ -95,7 +95,7 @@ namespace PurrNet
             return shouldDestroy;
         }
         
-        static bool TryGetPrefabData(Object prefab, out NetworkPrefabs.PrefabData prefabData)
+        static bool TryGetPrefabData(Object prefab, out PrefabData prefabData)
         {
             var prefabGo = GetGameObject(prefab);
             
@@ -113,7 +113,7 @@ namespace PurrNet
                 return false;
             }
             
-            return manager.TryGetPrefabData(prefabGo, out prefabData, out _);
+            return manager.prefabProvider.TryGetPrefabData(prefabGo, out prefabData);
         }
         
         [UsedByIL]

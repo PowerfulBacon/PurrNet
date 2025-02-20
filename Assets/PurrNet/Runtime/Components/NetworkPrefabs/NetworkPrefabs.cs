@@ -18,50 +18,48 @@ namespace PurrNet
         public bool networkOnly = true;
         public bool poolByDefault;
         public Object folder;
-        public List<PrefabData> prefabs = new List<PrefabData>();
-        
+        public List<UserPrefabData> prefabs = new List<UserPrefabData>();
+
         [Serializable]
-        public struct PrefabData
+        public struct UserPrefabData
         {
             public GameObject prefab;
             public bool pooled;
             public int warmupCount;
         }
 
-        public override IReadOnlyList<PrefabData> allPrefabs => prefabs;
+        public override IEnumerable<PrefabData> allPrefabs => prefabLookup.Values;
 
-        public override bool TryGetPrefab(int id, out GameObject prefab)
+        private readonly Dictionary<int, PrefabData> prefabLookup = new();
+
+        public override bool TryGetPrefabData(int prefabId, out PrefabData prefabData)
         {
-            if (id < 0 || id >= prefabs.Count)
+            return this.prefabLookup.TryGetValue(prefabId, out prefabData);
+        }
+
+        public override bool TryGetPrefabData(GameObject prefab, out PrefabData prefabData)
+        {
+            foreach (var data in this.allPrefabs)
+            {
+                if (data.prefab == prefab)
+                {
+                    prefabData = data;
+                    return true;
+                }
+            }
+            prefabData = default;
+            return false;
+        }
+
+        public override bool TryGetPrefab(int prefabId, int offset, out GameObject prefab)
+        {
+            if (!TryGetPrefabData(prefabId, out var prefabData))
             {
                 prefab = null;
                 return false;
             }
 
-            prefab = prefabs[id].prefab;
-            return true;
-        }
-
-        public override bool TryGetPrefabData(int id, out PrefabData prefab)
-        {
-            if (id < 0 || id >= prefabs.Count)
-            {
-                prefab = default;
-                return false;
-            }
-
-            prefab = prefabs[id];
-            return true;
-        }
-
-        public override bool TryGetPrefab(int id, int offset, out GameObject prefab)
-        {
-            if (!TryGetPrefab(id, out var root))
-            {
-                prefab = null;
-                return false;
-            }
-
+            var root = prefabData.prefab;
             if (offset == 0)
             {
                 prefab = root;
@@ -89,6 +87,20 @@ namespace PurrNet
         {
             if (autoGenerate)
                 Generate();
+
+            prefabLookup.Clear();
+            var prefabId = 0;
+            foreach (var prefabData in prefabs)
+            {
+                prefabLookup.Add(prefabId, new PrefabData
+                {
+                    prefabId = prefabId,
+                    prefab = prefabData.prefab,
+                    pooled = prefabData.pooled,
+                    warmupCount = prefabData.warmupCount
+                });
+                prefabId++;
+            }
         }
 
         /// <summary>
@@ -213,7 +225,7 @@ namespace PurrNet
                     var foundPath = AssetDatabase.GetAssetPath(foundPrefab);
                     if (!existingPaths.Contains(foundPath))
                     {
-                        prefabs.Add(new PrefabData { prefab = foundPrefab, pooled = poolByDefault, warmupCount = 5});
+                        prefabs.Add(new UserPrefabData { prefab = foundPrefab, pooled = poolByDefault, warmupCount = 5});
                         added++;
                     }
                 }

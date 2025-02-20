@@ -340,25 +340,6 @@ namespace PurrNet
 
             ListPool<NetworkIdentity>.Destroy(children);
         }
-        
-        public bool TryGetPrefabData(GameObject prefab, out NetworkPrefabs.PrefabData o, out int pid)
-        {
-            var prefabs = _networkPrefabs.prefabs;
-            for (var i = 0; i < prefabs.Count; i++)
-            {
-                var data = prefabs[i];
-                if (data.prefab == prefab)
-                {
-                    o = data;
-                    pid = i;
-                    return true;
-                }
-            }
-            
-            o = default;
-            pid = -1;
-            return false;
-        }
 
         static void RefreshHashes()
         {

@@ -45,22 +45,20 @@ namespace PurrNet.Modules
             if (_prefabs == null)
                 return;
             
-            for (int i = 0 ; i < _prefabs.allPrefabs.Count; i++)
+            foreach (var prefabData in _prefabs.allPrefabs)
             {
-                var prefab = _prefabs.allPrefabs[i];
-
-                if (prefab.pooled && _alreadyWarmedUp.Add(prefab.prefab))
+                if (prefabData.pooled && _alreadyWarmedUp.Add(prefabData.prefab))
                 {
-                    for (int j = 0; j < prefab.warmupCount; j++)
-                        Warmup(prefab, i);
+                    for (int j = 0; j < prefabData.warmupCount; j++)
+                        Warmup(prefabData);
                 }
             }
         }
 
-        private void Warmup(NetworkPrefabs.PrefabData prefabData, int pid)
+        private void Warmup(PrefabData prefabData)
         {
             var copy = UnityProxy.InstantiateDirectly(prefabData.prefab, _parent);
-            NetworkManager.SetupPrefabInfo(copy, pid, prefabData.pooled);
+            NetworkManager.SetupPrefabInfo(copy, prefabData.prefabId, prefabData.pooled);
             
             if (!_prefabPrototypes.ContainsKey(prefabData.prefab))
             {
@@ -296,8 +294,8 @@ namespace PurrNet.Modules
         {
             if (pid.prefabId >= 0 && _prefabs != null)
             {
-                if (_prefabs.TryGetPrefabData(pid.prefabId, out var prefab))
-                    Warmup(prefab, pid.prefabId);
+                if (_prefabs.TryGetPrefabData(pid.prefabId, out var prefabData))
+                    Warmup(prefabData);
                 else PurrLogger.LogError($"Prefab with piece id of '{pid}' was not found");
             }
         }

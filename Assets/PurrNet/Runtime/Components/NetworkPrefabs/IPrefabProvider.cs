@@ -3,25 +3,33 @@ using UnityEngine;
 
 namespace PurrNet
 {
+    public struct PrefabData
+    {
+        public int prefabId;
+        public GameObject prefab;
+        public bool pooled;
+        public int warmupCount;
+    }
+
     public interface IPrefabProvider
     {
-        IReadOnlyList<NetworkPrefabs.PrefabData> allPrefabs { get; }
-        
-        bool TryGetPrefab(int id, out GameObject prefab);
-        
-        bool TryGetPrefabData(int id, out NetworkPrefabs.PrefabData prefab);
-        
-        bool TryGetPrefab(int id, int offset, out GameObject prefab);
+        IEnumerable<PrefabData> allPrefabs { get; }
+
+        bool TryGetPrefabData(int prefabId, out PrefabData prefabData);
+
+        bool TryGetPrefabData(GameObject prefab, out PrefabData prefabData);
+
+        bool TryGetPrefab(int prefabId, int offset, out GameObject prefab);
     }
 
     public abstract class PrefabProviderScriptable : ScriptableObject, IPrefabProvider
     {
-        public abstract IReadOnlyList<NetworkPrefabs.PrefabData> allPrefabs { get; }
+        public abstract IEnumerable<PrefabData> allPrefabs { get; }
 
-        public abstract bool TryGetPrefab(int id, out GameObject prefab);
-        
-        public abstract bool TryGetPrefabData(int id, out NetworkPrefabs.PrefabData prefab);
-        
-        public abstract bool TryGetPrefab(int id, int offset, out GameObject prefab);
+        public abstract bool TryGetPrefabData(int prefabId, out PrefabData prefabData);
+
+        public abstract bool TryGetPrefabData(GameObject prefab, out PrefabData prefabData);
+
+        public abstract bool TryGetPrefab(int prefabId, int offset, out GameObject prefab);
     }
 }
