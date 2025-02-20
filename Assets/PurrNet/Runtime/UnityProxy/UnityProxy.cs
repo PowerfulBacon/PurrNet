@@ -23,7 +23,7 @@ namespace PurrNet
             };
         }
 
-        static T OnPreInstantiate<T>(NetworkPrefabs.PrefabData prefabData, InstantiateData<T> instantiateData)
+        static T OnPreInstantiate<T>(PrefabData prefabData, InstantiateData<T> instantiateData)
             where T : Object
         {
             var prefab = prefabData.prefab;
@@ -96,7 +96,7 @@ namespace PurrNet
             return shouldDestroy;
         }
 
-        static bool TryGetPrefabData(Object prefab, out NetworkPrefabs.PrefabData prefabData)
+        static bool TryGetPrefabData(Object prefab, out PrefabData prefabData)
         {
             var prefabGo = GetGameObject(prefab);
 
@@ -114,7 +114,7 @@ namespace PurrNet
                 return false;
             }
 
-            return manager.TryGetPrefabData(prefabGo, out prefabData, out _);
+            return manager.prefabProvider.TryGetPrefabData(prefabGo, out prefabData);
         }
 
         [UsedByIL]
@@ -220,7 +220,7 @@ namespace PurrNet
                 return Object.Instantiate(original, parameters);
             return OnPreInstantiate(prefabData, new InstantiateData<T>(original, parameters));
         }
-        
+
         [UsedByIL]
         public static T Instantiate<T>(T original, Vector3 pos, Quaternion rot, InstantiateParameters parameters) where T : Object
         {
@@ -228,11 +228,11 @@ namespace PurrNet
                 return Object.Instantiate(original, pos, rot, parameters);
             return OnPreInstantiate(prefabData, new InstantiateData<T>(original, pos, rot, parameters));
         }
-        
+
         [UsedByIL]
         public static T InstantiateDirectly<T>(T original, InstantiateParameters parameters) where T : Object
             => Object.Instantiate(original, parameters);
-        
+
         [UsedByIL]
         public static T InstantiateDirectly<T>(T original, Vector3 pos, Quaternion rot, InstantiateParameters parameters) where T : Object
             => Object.Instantiate(original, pos, rot, parameters);
