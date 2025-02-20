@@ -87,7 +87,15 @@ namespace PurrNet
         {
             if (autoGenerate)
                 Generate();
+        }
 
+        private void OnEnable()
+        {
+            RegeneratePrefabLookup();
+        }
+
+        private void RegeneratePrefabLookup()
+        {
             prefabLookup.Clear();
             var prefabId = 0;
             foreach (var prefabData in prefabs)
