@@ -22,7 +22,7 @@ namespace Octokit
 
         /// <summary>
         /// Specifies the commitish value that determines where the Git tag is created from. Can be any branch or
-        /// commit SHA. Unused if the Git tag already exists. Default: the repository’s default branch
+        /// commit SHA. Unused if the Git tag already exists. Default: the repositoryï¿½s default branch
         /// (usually main).
         /// </summary>
         /// <value>
@@ -72,12 +72,10 @@ namespace Octokit
         ///   <c>Legacy</c> specifies that the latest release should be determined based on the release creation date and higher semantic version.
         /// </value>
         public MakeLatestQualifier? MakeLatest { get; set; }
+
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Name: {0} TagName: {1}", Name, TagName);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Name: {0} TagName: {1}", Name, TagName); }
         }
     }
 }

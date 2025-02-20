@@ -27,6 +27,7 @@ namespace Octokit
         /// </summary>
         public IReadOnlyList<CheckSuite> CheckSuites { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "TotalCount: {0}, CheckSuites: {1}", TotalCount, CheckSuites.Count);
+        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture,
+            "TotalCount: {0}, CheckSuites: {1}", TotalCount, CheckSuites.Count);
     }
 }

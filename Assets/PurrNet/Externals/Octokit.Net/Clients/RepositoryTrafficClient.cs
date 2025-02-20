@@ -73,7 +73,8 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(per, nameof(per));
 
-            return ApiConnection.Get<RepositoryTrafficCloneSummary>(ApiUrls.RepositoryTrafficClones(repositoryId), per.ToParametersDictionary());
+            return ApiConnection.Get<RepositoryTrafficCloneSummary>(ApiUrls.RepositoryTrafficClones(repositoryId),
+                per.ToParametersDictionary());
         }
 
         /// <summary>
@@ -90,7 +91,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(per, nameof(per));
 
-            return ApiConnection.Get<RepositoryTrafficCloneSummary>(ApiUrls.RepositoryTrafficClones(owner, name), per.ToParametersDictionary());
+            return ApiConnection.Get<RepositoryTrafficCloneSummary>(ApiUrls.RepositoryTrafficClones(owner, name),
+                per.ToParametersDictionary());
         }
 
         /// <summary>
@@ -104,7 +106,8 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(per, nameof(per));
 
-            return ApiConnection.Get<RepositoryTrafficViewSummary>(ApiUrls.RepositoryTrafficViews(repositoryId), per.ToParametersDictionary());
+            return ApiConnection.Get<RepositoryTrafficViewSummary>(ApiUrls.RepositoryTrafficViews(repositoryId),
+                per.ToParametersDictionary());
         }
 
         /// <summary>
@@ -121,7 +124,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(per, nameof(per));
 
-            return ApiConnection.Get<RepositoryTrafficViewSummary>(ApiUrls.RepositoryTrafficViews(owner, name), per.ToParametersDictionary());
+            return ApiConnection.Get<RepositoryTrafficViewSummary>(ApiUrls.RepositoryTrafficViews(owner, name),
+                per.ToParametersDictionary());
         }
     }
 }

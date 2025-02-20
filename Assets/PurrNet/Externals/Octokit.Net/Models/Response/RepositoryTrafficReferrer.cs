@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RepositoryTrafficReferrer
     {
-        public RepositoryTrafficReferrer() { }
+        public RepositoryTrafficReferrer()
+        {
+        }
 
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "It's a property from the api.")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly",
+            Justification = "It's a property from the api.")]
         public RepositoryTrafficReferrer(string referrer, int count, int uniques)
         {
             Referrer = referrer;
@@ -21,7 +24,8 @@ namespace Octokit
 
         public int Count { get; private set; }
 
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "It's a property from the api.")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly",
+            Justification = "It's a property from the api.")]
         public int Uniques { get; private set; }
 
         internal string DebuggerDisplay

@@ -10,8 +10,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Autolink
     {
-        public Autolink() 
-        { }
+        public Autolink()
+        {
+        }
 
         public Autolink(int id, string keyPrefix, string urlTemplate, bool isAlphanumeric)
         {
@@ -45,10 +46,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return new SimpleJsonSerializer().Serialize(this);
-            }
+            get { return new SimpleJsonSerializer().Serialize(this); }
         }
     }
 }

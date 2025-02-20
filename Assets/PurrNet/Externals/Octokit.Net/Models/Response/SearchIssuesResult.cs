@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class SearchIssuesResult : SearchResult<Issue>
     {
-        public SearchIssuesResult() { }
+        public SearchIssuesResult()
+        {
+        }
 
         public SearchIssuesResult(int totalCount, bool incompleteResults, IReadOnlyList<Issue> items)
             : base(totalCount, incompleteResults, items)

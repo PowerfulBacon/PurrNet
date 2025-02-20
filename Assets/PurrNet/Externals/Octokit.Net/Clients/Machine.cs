@@ -13,7 +13,8 @@ namespace Octokit
         public long MemoryInBytes { get; private set; }
         public long CpuCount { get; private set; }
 
-        public Machine(string name, string displayName, string operatingSystem, long storageInBytes, long memoryInBytes, long cpuCount)
+        public Machine(string name, string displayName, string operatingSystem, long storageInBytes, long memoryInBytes,
+            long cpuCount)
         {
             Name = name;
             DisplayName = displayName;
@@ -23,7 +24,9 @@ namespace Octokit
             CpuCount = cpuCount;
         }
 
-        public Machine() { }
+        public Machine()
+        {
+        }
 
         internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "Machine: {0}", DisplayName);
     }

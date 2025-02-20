@@ -11,7 +11,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class CustomPropertyValueUpdate
     {
-        public CustomPropertyValueUpdate() { }
+        public CustomPropertyValueUpdate()
+        {
+        }
 
         public CustomPropertyValueUpdate(string propertyName, string value)
         {
@@ -37,6 +39,7 @@ namespace Octokit
         [Parameter(Key = "value")]
         public object Value { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "PropertyName: {0}", PropertyName);
+        internal string DebuggerDisplay =>
+            string.Format(CultureInfo.InvariantCulture, "PropertyName: {0}", PropertyName);
     }
 }

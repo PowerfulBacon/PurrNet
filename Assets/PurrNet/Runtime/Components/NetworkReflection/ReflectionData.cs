@@ -8,7 +8,7 @@ namespace PurrNet
     {
         public ReflectionType type;
         public string name;
-        
+
         public FieldInfo GetField(Type reflectionType)
         {
             var fields = reflectionType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
@@ -19,13 +19,14 @@ namespace PurrNet
                 if (field.Name == name)
                     return field;
             }
-            
+
             return null;
         }
-        
+
         public PropertyInfo GetProperty(Type reflectionType)
         {
-            var properties = reflectionType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var properties =
+                reflectionType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
             for (var i = 0; i < properties.Length; i++)
             {
@@ -33,7 +34,7 @@ namespace PurrNet
                 if (property.Name == name)
                     return property;
             }
-            
+
             return null;
         }
 
@@ -43,24 +44,24 @@ namespace PurrNet
             {
                 case ReflectionType.Field:
                     var field = GetField(reflectionType);
-                    
+
                     if (field == null)
                     {
                         valueType = null;
                         return null;
                     }
-                    
+
                     valueType = field.FieldType;
                     return value => field.SetValue(target, value);
                 case ReflectionType.Property:
                     var property = GetProperty(reflectionType);
-                    
+
                     if (property == null)
                     {
                         valueType = null;
                         return null;
                     }
-                    
+
                     valueType = property.PropertyType;
                     return value => property.SetValue(target, value);
                 default:
@@ -68,7 +69,7 @@ namespace PurrNet
                     return null;
             }
         }
-        
+
         public Func<object> GetGetter(UnityEngine.Object target, Type reflectionType)
         {
             switch (type)

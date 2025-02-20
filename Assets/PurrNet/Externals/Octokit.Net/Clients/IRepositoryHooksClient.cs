@@ -51,7 +51,8 @@ namespace Octokit
         /// <param name="name">The repository's name</param>
         /// <param name="hookId">The repository's hook id</param>
         /// <remarks>See <a href="http://developer.github.com/v3/repos/hooks/#get-single-hook">API documentation</a> for more information.</remarks>
-        [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "This is ok; we're matching HTTP verbs not keywords")]
+        [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
+            Justification = "This is ok; we're matching HTTP verbs not keywords")]
         Task<RepositoryHook> Get(string owner, string name, int hookId);
 
         /// <summary>
@@ -60,7 +61,8 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="hookId">The repository's hook id</param>
         /// <remarks>See <a href="http://developer.github.com/v3/repos/hooks/#get-single-hook">API documentation</a> for more information.</remarks>
-        [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "This is ok; we're matching HTTP verbs not keywords")]
+        [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
+            Justification = "This is ok; we're matching HTTP verbs not keywords")]
         Task<RepositoryHook> Get(long repositoryId, int hookId);
 
         /// <summary>

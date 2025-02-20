@@ -21,20 +21,20 @@ namespace PurrNet.Transports
             SERVER_AUTHENTICATED = 3,
             SERVER_AUTHENTICATION_FAILED = 4
         }
-    
+
         enum HOST_PACKET_TYPE : byte
         {
             SEND_KEEPALIVE = 0,
             SEND_ONE = 1
         }
-        
+
         [Serializable, UsedImplicitly]
         private struct ClientAuthenticate
         {
             public string roomName;
             public string clientSecret;
         }
-        
+
         [SerializeField, HideInInspector] private string _masterServer = "https://purrbalancer.riten.dev:8080/";
         [SerializeField, HideInInspector] private string _roomName;
         [SerializeField, HideInInspector] private string _region = "eu-central";
@@ -45,38 +45,38 @@ namespace PurrNet.Transports
             get => _region;
             set => _region = value;
         }
-        
+
         public string host
         {
             get => _host;
             set => _host = value;
         }
-        
+
         public string roomName
         {
             get => _roomName;
             set => _roomName = value;
         }
-        
+
         public bool hasRegionAndHost => !string.IsNullOrEmpty(_region) && !string.IsNullOrEmpty(_host);
-        
+
         public override bool isSupported => true;
-        
+
         public override ITransport transport => this;
-        
+
         public event OnConnected onConnected;
         public event OnDisconnected onDisconnected;
         public event OnDataReceived onDataReceived;
         public event OnDataSent onDataSent;
         public event OnConnectionState onConnectionState;
-        
+
         private ConnectionState _listenerState = ConnectionState.Disconnected;
         private ConnectionState _clientState = ConnectionState.Disconnected;
-        
+
         public bool shouldServerSendKeepAlive => true;
 
         public bool shouldClientSendKeepAlive => true;
-        
+
         public ConnectionState listenerState
         {
             get => _listenerState;
@@ -84,7 +84,7 @@ namespace PurrNet.Transports
             {
                 if (_listenerState == value)
                     return;
-                
+
                 _listenerState = value;
                 onConnectionState?.Invoke(value, true);
             }
@@ -97,12 +97,12 @@ namespace PurrNet.Transports
             {
                 if (_clientState == value)
                     return;
-                
+
                 _clientState = value;
                 onConnectionState?.Invoke(value, false);
             }
         }
-        
+
         public IReadOnlyList<Connection> connections => _connections;
         private readonly List<Connection> _connections = new List<Connection>();
 
@@ -113,7 +113,7 @@ namespace PurrNet.Transports
 
         readonly List<CancellationTokenSource> _cancellationTokenSourcesServer = new List<CancellationTokenSource>();
         readonly List<CancellationTokenSource> _cancellationTokenSourcesClient = new List<CancellationTokenSource>();
-        
+
         private void CancelAll(bool asServer)
         {
             var sources = asServer ? _cancellationTokenSourcesServer : _cancellationTokenSourcesClient;
@@ -121,14 +121,14 @@ namespace PurrNet.Transports
                 sources[i].Cancel();
             sources.Clear();
         }
-        
+
         private void AddCancellation(CancellationTokenSource token, bool asServer)
         {
             if (asServer)
-                 _cancellationTokenSourcesServer.Add(token);
+                _cancellationTokenSourcesServer.Add(token);
             else _cancellationTokenSourcesClient.Add(token);
         }
-        
+
         protected override void StartClientInternal()
         {
             Connect(null, 0);
@@ -137,7 +137,7 @@ namespace PurrNet.Transports
         private SimpleWebClient _server;
         private SimpleWebClient _client;
         private HostJoinInfo _hostJoinInfo;
-        readonly TcpConfig _tcpConfig = new (noDelay: true, sendTimeout: 0, receiveTimeout: 0);
+        readonly TcpConfig _tcpConfig = new(noDelay: true, sendTimeout: 0, receiveTimeout: 0);
 
         protected override void StartServerInternal()
         {
@@ -148,7 +148,7 @@ namespace PurrNet.Transports
         {
             if (data.Array == null || data.Count == 0)
                 return;
-            
+
             var type = (SERVER_PACKET_TYPE)data.Array[data.Offset];
 
             switch (type)
@@ -164,7 +164,7 @@ namespace PurrNet.Transports
                     _packer.ResetPositionAndMode(false);
                     _packer.WriteBytes(new ByteData(data.Array, data.Offset + 1, data.Count - 1));
                     _packer.ResetPositionAndMode(true);
-                    
+
                     int clientId = default;
                     int connectionCount = (data.Count - 1) / 4;
 
@@ -181,14 +181,14 @@ namespace PurrNet.Transports
                 case SERVER_PACKET_TYPE.SERVER_CLIENT_DISCONNECTED:
                 {
                     var subdata = new ByteData(data.Array, data.Offset + 1, data.Count - 1);
-                    
+
                     _packer.ResetPositionAndMode(false);
                     _packer.WriteBytes(subdata);
                     _packer.ResetPositionAndMode(true);
-                    
+
                     int clientId = default;
                     Packer<int>.Read(_packer, ref clientId);
-                    
+
                     var conn = new Connection(clientId);
                     _connections.Remove(conn);
                     onDisconnected?.Invoke(conn, DisconnectReason.ClientRequest, true);
@@ -198,19 +198,20 @@ namespace PurrNet.Transports
                 {
                     if (data.Count < 5)
                         return;
-                    
-                    int connId = data.Array[data.Offset + 1] | 
-                                 data.Array[data.Offset + 2] << 8 | 
-                                 data.Array[data.Offset + 3] << 16 | 
+
+                    int connId = data.Array[data.Offset + 1] |
+                                 data.Array[data.Offset + 2] << 8 |
+                                 data.Array[data.Offset + 3] << 16 |
                                  data.Array[data.Offset + 4] << 24;
 
-                    RaiseDataReceived(new Connection(connId), new ByteData(data.Array, data.Offset + 5, data.Count - 5), true);
+                    RaiseDataReceived(new Connection(connId), new ByteData(data.Array, data.Offset + 5, data.Count - 5),
+                        true);
                     break;
                 }
                 default: throw new ArgumentOutOfRangeException(type.ToString());
             }
         }
-        
+
         private void OnClientData(ArraySegment<byte> data)
         {
             if (clientState == ConnectionState.Connected)
@@ -246,13 +247,13 @@ namespace PurrNet.Transports
                 roomName = _roomName,
                 clientSecret = _hostJoinInfo.secret
             };
-            
+
             string json = JsonUtility.ToJson(authenticate);
             var data = Encoding.UTF8.GetBytes(json);
-            
+
             _server.Send(data);
         }
-        
+
         private void OnClientConnected()
         {
             ClientAuthenticate authenticate = new ClientAuthenticate()
@@ -260,10 +261,10 @@ namespace PurrNet.Transports
                 roomName = _roomName,
                 clientSecret = _clientJoinInfo.secret
             };
-            
+
             string json = JsonUtility.ToJson(authenticate);
             var data = Encoding.UTF8.GetBytes(json);
-            
+
             _client.Send(data);
         }
 
@@ -271,7 +272,7 @@ namespace PurrNet.Transports
         {
             StopListening();
         }
-        
+
         private void OnClientDisconnected()
         {
             Disconnect();
@@ -283,15 +284,15 @@ namespace PurrNet.Transports
             {
                 if (listenerState != ConnectionState.Disconnected)
                     StopListening();
-                
+
                 listenerState = ConnectionState.Connecting;
-                
+
                 _server = SimpleWebClient.Create(ushort.MaxValue, 5000, _tcpConfig);
-                
+
                 _server.onConnect += OnHostConnected;
                 _server.onData += OnHostData;
                 _server.onDisconnect += OnHostDisconnected;
-                
+
                 try
                 {
                     var token = new CancellationTokenSource();
@@ -308,7 +309,7 @@ namespace PurrNet.Transports
                         return;
 
                     _hostJoinInfo = await PurrTransportUtils.Alloc(_masterServer, _region, _roomName);
-                    
+
                     var builder = new UriBuilder
                     {
                         Scheme = _hostJoinInfo.ssl ? "wss" : "ws",
@@ -317,7 +318,7 @@ namespace PurrNet.Transports
                         Query = string.Empty,
                         Path = string.Empty
                     };
-                    
+
                     _server.Connect(builder.Uri);
                 }
                 catch (Exception e)
@@ -347,19 +348,19 @@ namespace PurrNet.Transports
             }
 
             _server = null;
-            
+
             if (listenerState is ConnectionState.Connecting or ConnectionState.Connected)
                 listenerState = ConnectionState.Disconnecting;
             listenerState = ConnectionState.Disconnected;
         }
-        
+
         public void Disconnect()
         {
             if (clientState != ConnectionState.Disconnected)
                 onDisconnected?.Invoke(default, DisconnectReason.ClientRequest, false);
-            
+
             CancelAll(false);
-            
+
             if (_client != null)
             {
                 _client.onConnect -= OnClientConnected;
@@ -369,7 +370,7 @@ namespace PurrNet.Transports
             }
 
             _client = null;
-            
+
             if (clientState is ConnectionState.Connecting or ConnectionState.Connected)
                 clientState = ConnectionState.Disconnecting;
             clientState = ConnectionState.Disconnected;
@@ -383,32 +384,32 @@ namespace PurrNet.Transports
             {
                 if (clientState != ConnectionState.Disconnected)
                     Disconnect();
-                
+
                 clientState = ConnectionState.Connecting;
 
                 while (listenerState == ConnectionState.Connecting)
                     await UniTask.DelayFrame(1);
-                
+
                 _client = SimpleWebClient.Create(ushort.MaxValue, 5000, _tcpConfig);
-                
+
                 _client.onConnect += OnClientConnected;
                 _client.onData += OnClientData;
                 _client.onDisconnect += OnClientDisconnected;
-                
+
                 try
                 {
                     var token = new CancellationTokenSource();
                     AddCancellation(token, false);
 
                     _clientJoinInfo = await PurrTransportUtils.Join(_masterServer, _roomName);
-                    
+
                     var builder = new UriBuilder
                     {
                         Scheme = _clientJoinInfo.ssl ? "wss" : "ws",
                         Host = _clientJoinInfo.host,
                         Port = _clientJoinInfo.port
                     };
-                    
+
                     _client.Connect(builder.Uri);
                 }
                 catch (Exception e)
@@ -423,7 +424,7 @@ namespace PurrNet.Transports
                 PurrLogger.LogException(e.Message);
             }
         }
-        
+
         public void RaiseDataReceived(Connection conn, ByteData data, bool asServer)
         {
             onDataReceived?.Invoke(conn, data, asServer);
@@ -433,14 +434,14 @@ namespace PurrNet.Transports
         {
             onDataSent?.Invoke(conn, data, asServer);
         }
-        
+
         static readonly BitPacker _packer = new BitPacker();
-        
+
         public void SendServerKeepAlive()
         {
             if (_server == null)
                 return;
-            
+
             _packer.ResetPositionAndMode(false);
             Packer<byte>.Write(_packer, (byte)HOST_PACKET_TYPE.SEND_KEEPALIVE);
             var data = _packer.ToByteData();
@@ -456,7 +457,7 @@ namespace PurrNet.Transports
                 return;
 
             _packer.ResetPositionAndMode(false);
-            
+
             Packer<byte>.Write(_packer, (byte)HOST_PACKET_TYPE.SEND_ONE);
             Packer<int>.Write(_packer, target.connectionId);
             _packer.WriteBytes(odata);

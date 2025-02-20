@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class ThreadSubscription
     {
-        public ThreadSubscription() { }
+        public ThreadSubscription()
+        {
+        }
 
-        public ThreadSubscription(bool subscribed, bool ignored, string reason, DateTimeOffset createdAt, string url, string threadUrl)
+        public ThreadSubscription(bool subscribed, bool ignored, string reason, DateTimeOffset createdAt, string url,
+            string threadUrl)
         {
             Subscribed = subscribed;
             Ignored = ignored;

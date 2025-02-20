@@ -17,7 +17,8 @@ namespace Octokit.Internal
                                                     "probably did something wrong.");
             }
 
-            request.Headers["Authorization"] = string.Format(CultureInfo.InvariantCulture, "Bearer {0}", credentials.Password);
+            request.Headers["Authorization"] =
+                string.Format(CultureInfo.InvariantCulture, "Bearer {0}", credentials.Password);
         }
     }
 }

@@ -71,11 +71,13 @@ namespace Octokit
                 _propertyInfo.SetValue(instance, value);
                 return;
             }
+
             if (_fieldInfo != null)
             {
                 _fieldInfo.SetValue(instance, value);
                 return;
             }
+
             throw new InvalidOperationException("Property and Field cannot both be null");
         }
 
@@ -93,6 +95,7 @@ namespace Octokit
                 {
                     getDelegate = ReflectionUtils.GetGetMethod(_propertyInfo);
                 }
+
                 if (_fieldInfo != null)
                 {
                     getDelegate = ReflectionUtils.GetGetMethod(_fieldInfo);
@@ -106,7 +109,7 @@ namespace Octokit
 
                 if (Base64Encoded)
                 {
-                    return delegate (object source)
+                    return delegate(object source)
                     {
                         var value = getDelegate(source);
                         var stringValue = value as string;
@@ -117,6 +120,7 @@ namespace Octokit
                 return getDelegate;
             }
         }
+
         public ReflectionUtils.SetDelegate SetDelegate
         {
             get
@@ -126,26 +130,31 @@ namespace Octokit
                 {
                     setDelegate = ReflectionUtils.GetSetMethod(_propertyInfo);
                 }
+
                 if (_fieldInfo != null)
                 {
                     setDelegate = ReflectionUtils.GetSetMethod(_fieldInfo);
                 }
+
                 if (setDelegate == null)
                 {
                     throw new InvalidOperationException("Property and Field cannot both be null");
                 }
+
                 if (Base64Encoded)
                 {
-                    return delegate (object source, object value)
+                    return delegate(object source, object value)
                     {
                         var stringValue = value as string;
                         if (stringValue == null)
                         {
                             setDelegate(source, value);
                         }
+
                         setDelegate(source, stringValue.FromBase64String());
                     };
                 }
+
                 return setDelegate;
             }
         }
@@ -158,10 +167,12 @@ namespace Octokit
                 {
                     return _propertyInfo.PropertyType;
                 }
+
                 if (_fieldInfo != null)
                 {
                     return _fieldInfo.FieldType;
                 }
+
                 throw new InvalidOperationException("Property and Field cannot both be null");
             }
         }
@@ -171,9 +182,9 @@ namespace Octokit
             get
             {
                 return (IsPublic || HasParameterAttribute)
-                    && !IsStatic
-                    && CanWrite
-                    && (_fieldInfo == null || !_fieldInfo.IsInitOnly);
+                       && !IsStatic
+                       && CanWrite
+                       && (_fieldInfo == null || !_fieldInfo.IsInitOnly);
             }
         }
 

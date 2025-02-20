@@ -7,10 +7,9 @@
 <#
     var tMax = 15;
     Func<int, string> typeArgs = x => string.Join(", ", Enumerable.Range(1, x).Select(x => $"T{x}")) + ", TResult";
-    Func<int, string> paramArgs = x => string.Join(", ", Enumerable.Range(1, x).Select(x => $"IUniTaskAsyncEnumerable<T{x}> source{x}"));
+    Func<int, string> paramArgs =
+        x => string.Join(", ", Enumerable.Range(1, x).Select(x => $"IUniTaskAsyncEnumerable<T{x}> source{x}"));
     Func<int, string> parameters = x => string.Join(", ", Enumerable.Range(1, x).Select(x => $"source{x}"));
-
-
 #>
 using Cysharp.Threading.Tasks.Internal;
 using System;
@@ -20,33 +19,56 @@ namespace Cysharp.Threading.Tasks.Linq
 {
     public static partial class UniTaskAsyncEnumerable
     {
-<# for(var i = 2; i <= tMax; i++) { #>
+<#
+    for (var i = 2; i <= tMax; i++)
+    {
+#>
         public static IUniTaskAsyncEnumerable<TResult> CombineLatest<<#= typeArgs(i) #>>(this <#= paramArgs(i) #>, Func<<#= typeArgs(i) #>> resultSelector)
         {
-<# for(var j = 1; j <= i; j++) { #>
+<#
+        for (var j = 1; j <= i; j++)
+        {
+#>
             Error.ThrowArgumentNullException(source<#= j #>, nameof(source<#= j #>));
-<# } #>
+<#
+        }
+#>
             Error.ThrowArgumentNullException(resultSelector, nameof(resultSelector));
 
             return new CombineLatest<<#= typeArgs(i) #>>(<#= parameters(i) #>, resultSelector);
         }
 
-<# } #>
+<#
+    }
+#>
     }
 
-<# for(var i = 2; i <= tMax; i++) { #>
+<#
+    for (var i = 2; i <= tMax; i++)
+    {
+#>
     internal class CombineLatest<<#= typeArgs(i) #>> : IUniTaskAsyncEnumerable<TResult>
     {
-<# for(var j = 1; j <= i; j++) { #>
+<#
+        for (var j = 1; j <= i; j++)
+        {
+#>
         readonly IUniTaskAsyncEnumerable<T<#= j #>> source<#= j #>;
-<# } #>        
+<#
+        }
+#>        
         readonly Func<<#= typeArgs(i) #>> resultSelector;
 
         public CombineLatest(<#= paramArgs(i) #>, Func<<#= typeArgs(i) #>> resultSelector)
         {
-<# for(var j = 1; j <= i; j++) { #>
+<#
+        for (var j = 1; j <= i; j++)
+        {
+#>
             this.source<#= j #> = source<#= j #>;
-<# } #>        
+<#
+        }
+#>        
             this.resultSelector = resultSelector;
         }
 
@@ -57,34 +79,54 @@ namespace Cysharp.Threading.Tasks.Linq
 
         class _CombineLatest : MoveNextSource, IUniTaskAsyncEnumerator<TResult>
         {
-<# for(var j = 1; j <= i; j++) { #>
+<#
+        for (var j = 1; j <= i; j++)
+        {
+#>
             static readonly Action<object> Completed<#= j #>Delegate = Completed<#= j #>;
-<# } #>
+<#
+        }
+#>
             const int CompleteCount = <#= i #>;
 
-<# for(var j = 1; j <= i; j++) { #>
+<#
+        for (var j = 1; j <= i; j++)
+        {
+#>
             readonly IUniTaskAsyncEnumerable<T<#= j #>> source<#= j #>;
-<# } #>       
+<#
+        }
+#>       
             readonly Func<<#= typeArgs(i) #>> resultSelector;
             CancellationToken cancellationToken;
 
-<# for(var j = 1; j <= i; j++) { #>
+<#
+        for (var j = 1; j <= i; j++)
+        {
+#>
             IUniTaskAsyncEnumerator<T<#= j #>> enumerator<#= j #>;
             UniTask<bool>.Awaiter awaiter<#= j #>;
             bool hasCurrent<#= j #>;
             bool running<#= j #>;
             T<#= j #> current<#= j #>;
 
-<# } #>
+<#
+        }
+#>
             int completedCount;
             bool syncRunning;
             TResult result;
 
             public _CombineLatest(<#= paramArgs(i) #>, Func<<#= typeArgs(i) #>> resultSelector, CancellationToken cancellationToken)
             {
-<# for(var j = 1; j <= i; j++) { #>
+<#
+        for (var j = 1; j <= i; j++)
+        {
+#>
                 this.source<#= j #> = source<#= j #>;
-<# } #>                
+<#
+        }
+#>                
                 this.resultSelector = resultSelector;
                 this.cancellationToken = cancellationToken;
                 TaskTracker.TrackActiveTask(this, 3);
@@ -99,16 +141,24 @@ namespace Cysharp.Threading.Tasks.Linq
 
                 if (enumerator1 == null)
                 {
-<# for(var j = 1; j <= i; j++) { #>
+<#
+        for (var j = 1; j <= i; j++)
+        {
+#>
                     enumerator<#= j #> = source<#= j #>.GetAsyncEnumerator(cancellationToken);
-<# } #>
+<#
+        }
+#>
                 }
 
                 completionSource.Reset();
 
                 AGAIN:
                 syncRunning = true;
-<# for(var j = 1; j <= i; j++) { #>
+<#
+        for (var j = 1; j <= i; j++)
+        {
+#>
                 if (!running<#= j #>)
                 {
                     running<#= j #> = true;
@@ -122,9 +172,12 @@ namespace Cysharp.Threading.Tasks.Linq
                         awaiter<#= j #>.SourceOnCompleted(Completed<#= j #>Delegate, this);
                     }
                 }
-<# } #>
+<#
+        }
+#>
 
-                if (<#= string.Join(" || ", Enumerable.Range(1, i).Select(x => $"!running{x}")) #>)
+                if (<#=
+                string.Join(" || ", Enumerable.Range(1, i).Select(x => $"!running{x}")) #>)
                 {
                     goto AGAIN;
                 }
@@ -133,7 +186,10 @@ namespace Cysharp.Threading.Tasks.Linq
                 return new UniTask<bool>(this, completionSource.Version);
             }
 
-<# for(var j = 1; j <= i; j++) { #>
+<#
+        for (var j = 1; j <= i; j++)
+        {
+#>
             static void Completed<#= j #>(object state)
             {
                 var self = (_CombineLatest)state;
@@ -189,12 +245,16 @@ namespace Cysharp.Threading.Tasks.Linq
                 return;
             }
 
-<# } #>
+<#
+        }
+#>
             bool TrySetResult()
             {
-                if (<#= string.Join(" && ", Enumerable.Range(1, i).Select(x => $"hasCurrent{x}")) #>)
+                if (<#=
+                string.Join(" && ", Enumerable.Range(1, i).Select(x => $"hasCurrent{x}")) #>)
                 {
-                    result = resultSelector(<#= string.Join(", ", Enumerable.Range(1, i).Select(x => $"current{x}")) #>);
+                    result = resultSelector(<#=
+                string.Join(", ", Enumerable.Range(1, i).Select(x => $"current{x}")) #>);
                     completionSource.TrySetResult(true);
                     return true;
                 }
@@ -207,15 +267,22 @@ namespace Cysharp.Threading.Tasks.Linq
             public async UniTask DisposeAsync()
             {
                 TaskTracker.RemoveTracking(this);
-<# for(var j = 1; j <= i; j++) { #>
+<#
+        for (var j = 1; j <= i; j++)
+        {
+#>
                 if (enumerator<#= j #> != null)
                 {
                     await enumerator<#= j #>.DisposeAsync();
                 }
-<# } #>
+<#
+        }
+#>
             }
         }
     }
 
-<# } #>
+<#
+    }
+#>
 }

@@ -21,10 +21,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Encoding: {0}", Encoding);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Encoding: {0}", Encoding); }
         }
     }
 }

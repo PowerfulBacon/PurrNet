@@ -6,12 +6,12 @@ namespace PurrNet.Packing
     {
         public Half x;
         public Half y;
-        
+
         public static implicit operator Vector2(HalfVector2 value)
         {
             return new Vector2(value.x, value.y);
         }
-        
+
         public static implicit operator HalfVector2(Vector2 value)
         {
             return new HalfVector2

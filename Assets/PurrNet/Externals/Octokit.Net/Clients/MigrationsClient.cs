@@ -18,7 +18,8 @@ namespace Octokit
         /// </summary>
         /// <param name="apiConnection">An API connection.</param>
         public MigrationsClient(IApiConnection apiConnection) : base(apiConnection)
-        { }
+        {
+        }
 
         /// <summary>
         /// Starts a new migration specified for the given organization.

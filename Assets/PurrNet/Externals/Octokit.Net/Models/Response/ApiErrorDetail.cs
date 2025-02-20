@@ -8,7 +8,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class ApiErrorDetail
     {
-        public ApiErrorDetail() { }
+        public ApiErrorDetail()
+        {
+        }
 
         public ApiErrorDetail(string message, string code, string field, string resource)
         {
@@ -30,7 +32,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Message: {0}, Code: {1}, Field: {2}", Message, Code, Field);
+                return string.Format(CultureInfo.InvariantCulture, "Message: {0}, Code: {1}, Field: {2}", Message, Code,
+                    Field);
             }
         }
     }

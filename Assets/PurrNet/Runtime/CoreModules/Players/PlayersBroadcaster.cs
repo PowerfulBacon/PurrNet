@@ -11,14 +11,14 @@ namespace PurrNet
     internal interface IPlayerBroadcastCallback
     {
         bool IsSame(object callback);
-        
+
         void TriggerCallback(PlayerID playerId, object data, bool asServer);
     }
-    
+
     internal readonly struct PlayerBroadcastCallback<T> : IPlayerBroadcastCallback
     {
         readonly PlayerBroadcastDelegate<T> callback;
-        
+
         public PlayerBroadcastCallback(PlayerBroadcastDelegate<T> callback)
         {
             this.callback = callback;
@@ -35,17 +35,19 @@ namespace PurrNet
                 callback?.Invoke(playerId, value, asServer);
         }
     }
-    
+
     public class PlayersBroadcaster : INetworkModule, IPlayerBroadcaster
     {
         private readonly BroadcastModule _broadcastModule;
         private readonly PlayersManager _playersManager;
-        
-        private readonly Dictionary<uint, List<IPlayerBroadcastCallback>> _actions = new Dictionary<uint, List<IPlayerBroadcastCallback>>();
+
+        private readonly Dictionary<uint, List<IPlayerBroadcastCallback>> _actions =
+            new Dictionary<uint, List<IPlayerBroadcastCallback>>();
+
         private readonly List<Connection> _connections = new List<Connection>();
-        
+
         private bool _asServer;
-        
+
         public PlayersBroadcaster(BroadcastModule broadcastModule, PlayersManager playersManager)
         {
             _broadcastModule = broadcastModule;
@@ -62,7 +64,7 @@ namespace PurrNet
         {
             if (!_playersManager.TryGetPlayer(conn, out var player))
                 player = default;
-            
+
             if (_actions.TryGetValue(hash, out var actions))
             {
                 for (int i = 0; i < actions.Count; i++)
@@ -84,7 +86,7 @@ namespace PurrNet
                 actions.Add(new PlayerBroadcastCallback<T>(callback));
                 return;
             }
-            
+
             _actions.Add(hash, new List<IPlayerBroadcastCallback>
             {
                 new PlayerBroadcastCallback<T>(callback)
@@ -96,7 +98,7 @@ namespace PurrNet
             var hash = Hasher.GetStableHashU32(typeof(T));
             if (!_actions.TryGetValue(hash, out var actions))
                 return;
-            
+
             object boxed = callback;
 
             for (int i = 0; i < actions.Count; i++)
@@ -108,7 +110,7 @@ namespace PurrNet
                 }
             }
         }
-        
+
         public void SendRaw(PlayerID player, ByteData data, Channel method = Channel.ReliableOrdered)
         {
             if (player.isBot)
@@ -117,11 +119,11 @@ namespace PurrNet
             if (_playersManager.TryGetConnection(player, out var conn))
                 _broadcastModule.SendRaw(conn, data, method);
         }
-        
+
         public void SendRaw(IEnumerable<PlayerID> players, ByteData data, Channel method = Channel.ReliableOrdered)
         {
             _connections.Clear();
-            
+
             foreach (var player in players)
             {
                 if (player.isBot)
@@ -130,23 +132,23 @@ namespace PurrNet
                 if (_playersManager.TryGetConnection(player, out var conn))
                     _connections.Add(conn);
             }
-            
+
             _broadcastModule.Send(_connections, data, method);
         }
-        
+
         public void Send<T>(PlayerID player, T data, Channel method = Channel.ReliableOrdered)
         {
             if (player.isBot)
                 return;
 
             if (_playersManager.TryGetConnection(player, out var conn))
-                 _broadcastModule.Send(conn, data, method);
+                _broadcastModule.Send(conn, data, method);
         }
-        
+
         public void Send<T>(IEnumerable<PlayerID> players, T data, Channel method = Channel.ReliableOrdered)
         {
             _connections.Clear();
-            
+
             foreach (var player in players)
             {
                 if (player.isBot)
@@ -155,15 +157,15 @@ namespace PurrNet
                 if (_playersManager.TryGetConnection(player, out var conn))
                     _connections.Add(conn);
             }
-            
+
             _broadcastModule.Send(_connections, data, method);
         }
-        
+
         public void SendToAll<T>(T data, Channel method = Channel.ReliableOrdered)
         {
             _broadcastModule.SendToAll(data, method);
         }
-        
+
         public void SendToServer<T>(T data, Channel method = Channel.ReliableOrdered)
         {
             _broadcastModule.SendToServer(data, method);

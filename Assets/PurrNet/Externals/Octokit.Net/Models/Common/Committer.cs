@@ -14,7 +14,9 @@ namespace Octokit
         /// <summary>
         /// Initializes a new instance of the <see cref="Committer"/> class.
         /// </summary>
-        public Committer() { }
+        public Committer()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Committer"/> class.
@@ -75,7 +77,10 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Name: {0} Email: {1} Date: {2}", Name, Email, Date); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Name: {0} Email: {1} Date: {2}", Name, Email, Date);
+            }
         }
     }
 }

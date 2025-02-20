@@ -176,7 +176,8 @@ namespace Octokit
         /// "heads/main" or "tags/release-1")
         /// </remarks>
         [ManualRoute("GET", "/repos/{owner}/{repo}/git/refs/{ref}")]
-        public Task<IReadOnlyList<Reference>> GetAllForSubNamespace(string owner, string name, string subNamespace, ApiOptions options)
+        public Task<IReadOnlyList<Reference>> GetAllForSubNamespace(string owner, string name, string subNamespace,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -222,7 +223,8 @@ namespace Octokit
         /// "heads/main" or "tags/release-1")
         /// </remarks>
         [ManualRoute("GET", "/repositories/{id}/git/refs/{ref}")]
-        public Task<IReadOnlyList<Reference>> GetAllForSubNamespace(long repositoryId, string subNamespace, ApiOptions options)
+        public Task<IReadOnlyList<Reference>> GetAllForSubNamespace(long repositoryId, string subNamespace,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(subNamespace, nameof(subNamespace));
             Ensure.ArgumentNotNull(options, nameof(options));

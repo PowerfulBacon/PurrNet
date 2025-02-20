@@ -81,12 +81,14 @@ namespace Octokit
         /// Returns available machines for the specified repository.
         /// </summary>
         [ManualRoute("GET", "/repos/{repoOwner}/{repoName}/machines")]
-        public Task<MachinesCollection> GetAvailableMachinesForRepo(string repoOwner, string repoName, string reference = null)
+        public Task<MachinesCollection> GetAvailableMachinesForRepo(string repoOwner, string repoName,
+            string reference = null)
         {
             Ensure.ArgumentNotNullOrEmptyString(repoOwner, nameof(repoOwner));
             Ensure.ArgumentNotNullOrEmptyString(repoName, nameof(repoName));
 
-            return ApiConnection.Get<MachinesCollection>(ApiUrls.GetAvailableMachinesForRepo(repoOwner, repoName, reference));
+            return ApiConnection.Get<MachinesCollection>(
+                ApiUrls.GetAvailableMachinesForRepo(repoOwner, repoName, reference));
         }
 
         /// <summary>

@@ -16,7 +16,8 @@ namespace Octokit
         /// <param name="packageName">Required: The name of the package</param>
         /// <param name="state">Optional: Return packages with a state. Defaults to Active</param>
         /// <param name="options">Optional: Paging options</param>
-        Task<IReadOnlyList<PackageVersion>> GetAllForOrg(string org, PackageType packageType, string packageName, PackageVersionState state = PackageVersionState.Active, ApiOptions options = null);
+        Task<IReadOnlyList<PackageVersion>> GetAllForOrg(string org, PackageType packageType, string packageName,
+            PackageVersionState state = PackageVersionState.Active, ApiOptions options = null);
 
         /// <summary>
         /// Get a specific version of a package.
@@ -64,7 +65,8 @@ namespace Octokit
         /// <param name="packageName">Required: The name of the package</param>
         /// <param name="state">Optional: Return packages with a state. Defaults to Active</param>
         /// <param name="options">Optional: Paging options</param>
-        Task<IReadOnlyList<PackageVersion>> GetAllForActiveUser(PackageType packageType, string packageName, PackageVersionState state = PackageVersionState.Active, ApiOptions options = null);
+        Task<IReadOnlyList<PackageVersion>> GetAllForActiveUser(PackageType packageType, string packageName,
+            PackageVersionState state = PackageVersionState.Active, ApiOptions options = null);
 
         /// <summary>
         /// Gets a specific package version for a package owned by the authenticated user.
@@ -110,7 +112,8 @@ namespace Octokit
         /// <param name="packageName">Required: The name of the package</param>
         /// <param name="state">Optional: Return packages with a state. Defaults to Active</param>
         /// <param name="options">Optional: Paging options</param>
-        Task<IReadOnlyList<PackageVersion>> GetAllForUser(string username, PackageType packageType, string packageName, PackageVersionState state = PackageVersionState.Active, ApiOptions options = null);
+        Task<IReadOnlyList<PackageVersion>> GetAllForUser(string username, PackageType packageType, string packageName,
+            PackageVersionState state = PackageVersionState.Active, ApiOptions options = null);
 
         /// <summary>
         /// Gets a specific package version for a public package owned by a specified user.
@@ -122,7 +125,8 @@ namespace Octokit
         /// <param name="packageType">Required: The type of package</param>
         /// <param name="packageName">Required: The name of the package</param>
         /// <param name="packageVersionId">Required: The id of the package version</param>
-        Task<PackageVersion> GetForUser(string username, PackageType packageType, string packageName, int packageVersionId);
+        Task<PackageVersion> GetForUser(string username, PackageType packageType, string packageName,
+            int packageVersionId);
 
         /// <summary>
         /// Deletes a specific package version for a user.

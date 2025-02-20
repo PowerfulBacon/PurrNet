@@ -111,13 +111,15 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
         [ManualRoute("GET", "/repos/{owner}/{repo}/stargazers")]
-        public Task<IReadOnlyList<UserStar>> GetAllStargazersWithTimestamps(string owner, string name, ApiOptions options)
+        public Task<IReadOnlyList<UserStar>> GetAllStargazersWithTimestamps(string owner, string name,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<UserStar>(ApiUrls.Stargazers(owner, name), null, AcceptHeaders.StarJson, options);
+            return ApiConnection.GetAll<UserStar>(ApiUrls.Stargazers(owner, name), null, AcceptHeaders.StarJson,
+                options);
         }
 
         /// <summary>
@@ -131,7 +133,8 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<UserStar>(ApiUrls.Stargazers(repositoryId), null, AcceptHeaders.StarJson, options);
+            return ApiConnection.GetAll<UserStar>(ApiUrls.Stargazers(repositoryId), null, AcceptHeaders.StarJson,
+                options);
         }
 
         /// <summary>
@@ -185,7 +188,8 @@ namespace Octokit
         /// </summary>
         /// <param name="request">Star-specific request parameters that sort the results</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design",
+            "CA1011:ConsiderPassingBaseTypesAsParameters",
             Justification = "But i think i do need star-specific request parameters")]
         [ManualRoute("GET", "/user/starred")]
         public Task<IReadOnlyList<Repository>> GetAllForCurrent(StarredRequest request)
@@ -215,7 +219,8 @@ namespace Octokit
         /// </summary>
         /// <param name="request">Star-specific request parameters that sort the results</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design",
+            "CA1011:ConsiderPassingBaseTypesAsParameters",
             Justification = "But i think i do need star-specific request parameters")]
         [ManualRoute("GET", "/user/starred")]
         public Task<IReadOnlyList<RepositoryStar>> GetAllForCurrentWithTimestamps(StarredRequest request)
@@ -232,12 +237,14 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
         [ManualRoute("GET", "/user/starred")]
-        public Task<IReadOnlyList<RepositoryStar>> GetAllForCurrentWithTimestamps(StarredRequest request, ApiOptions options)
+        public Task<IReadOnlyList<RepositoryStar>> GetAllForCurrentWithTimestamps(StarredRequest request,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<RepositoryStar>(ApiUrls.Starred(), request.ToParametersDictionary(), AcceptHeaders.StarJson, options);
+            return ApiConnection.GetAll<RepositoryStar>(ApiUrls.Starred(), request.ToParametersDictionary(),
+                AcceptHeaders.StarJson, options);
         }
 
         /// <summary>
@@ -293,7 +300,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(user, nameof(user));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<RepositoryStar>(ApiUrls.StarredByUser(user), null, AcceptHeaders.StarJson, options);
+            return ApiConnection.GetAll<RepositoryStar>(ApiUrls.StarredByUser(user), null, AcceptHeaders.StarJson,
+                options);
         }
 
         /// <summary>
@@ -302,7 +310,8 @@ namespace Octokit
         /// <param name="user">The login of the user</param>
         /// <param name="request">Star-specific request parameters that sort the results</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design",
+            "CA1011:ConsiderPassingBaseTypesAsParameters")]
         [ManualRoute("GET", "/users/{username}/starred")]
         public Task<IReadOnlyList<Repository>> GetAllForUser(string user, StarredRequest request)
         {
@@ -326,7 +335,8 @@ namespace Octokit
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Repository>(ApiUrls.StarredByUser(user), request.ToParametersDictionary(), options);
+            return ApiConnection.GetAll<Repository>(ApiUrls.StarredByUser(user), request.ToParametersDictionary(),
+                options);
         }
 
         /// <summary>
@@ -335,7 +345,8 @@ namespace Octokit
         /// <param name="user">The login of the user</param>
         /// <param name="request">Star-specific request parameters that sort the results</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design",
+            "CA1011:ConsiderPassingBaseTypesAsParameters")]
         [ManualRoute("GET", "/users/{username}/starred")]
         public Task<IReadOnlyList<RepositoryStar>> GetAllForUserWithTimestamps(string user, StarredRequest request)
         {
@@ -353,13 +364,15 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
         [ManualRoute("GET", "/users/{username}/starred")]
-        public Task<IReadOnlyList<RepositoryStar>> GetAllForUserWithTimestamps(string user, StarredRequest request, ApiOptions options)
+        public Task<IReadOnlyList<RepositoryStar>> GetAllForUserWithTimestamps(string user, StarredRequest request,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(user, nameof(user));
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<RepositoryStar>(ApiUrls.StarredByUser(user), request.ToParametersDictionary(), AcceptHeaders.StarJson, options);
+            return ApiConnection.GetAll<RepositoryStar>(ApiUrls.StarredByUser(user), request.ToParametersDictionary(),
+                AcceptHeaders.StarJson, options);
         }
 
         /// <summary>
@@ -376,7 +389,8 @@ namespace Octokit
 
             try
             {
-                var response = await Connection.Get<object>(ApiUrls.Starred(owner, name), null, null).ConfigureAwait(false);
+                var response = await Connection.Get<object>(ApiUrls.Starred(owner, name), null, null)
+                    .ConfigureAwait(false);
                 return response.HttpResponse.StatusCode == HttpStatusCode.NoContent;
             }
             catch (NotFoundException)
@@ -398,7 +412,8 @@ namespace Octokit
 
             try
             {
-                var response = await Connection.Put<object>(ApiUrls.Starred(owner, name), null, null).ConfigureAwait(false);
+                var response = await Connection.Put<object>(ApiUrls.Starred(owner, name), null, null)
+                    .ConfigureAwait(false);
                 return response.HttpResponse.StatusCode == HttpStatusCode.NoContent;
             }
             catch (NotFoundException)

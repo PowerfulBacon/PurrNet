@@ -9,14 +9,25 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Repository
     {
-        public Repository() { }
+        public Repository()
+        {
+        }
 
         public Repository(long id)
         {
             Id = id;
         }
 
-        public Repository(string url, string htmlUrl, string cloneUrl, string gitUrl, string sshUrl, string svnUrl, string mirrorUrl, string archiveUrl, long id, string nodeId, User owner, string name, string fullName, bool isTemplate, string description, string homepage, string language, bool @private, bool fork, int forksCount, int stargazersCount, string defaultBranch, int openIssuesCount, DateTimeOffset? pushedAt, DateTimeOffset createdAt, DateTimeOffset updatedAt, RepositoryPermissions permissions, Repository parent, Repository source, LicenseMetadata license, bool hasDiscussions, bool hasIssues, bool hasWiki, bool hasDownloads, bool hasPages, int subscribersCount, long size, bool? allowRebaseMerge, bool? allowSquashMerge, bool? allowMergeCommit, bool archived, int watchersCount, bool? deleteBranchOnMerge, RepositoryVisibility visibility, IEnumerable<string> topics, bool? allowAutoMerge, bool? allowUpdateBranch, bool? webCommitSignoffRequired, SecurityAndAnalysis securityAndAnalysis)
+        public Repository(string url, string htmlUrl, string cloneUrl, string gitUrl, string sshUrl, string svnUrl,
+            string mirrorUrl, string archiveUrl, long id, string nodeId, User owner, string name, string fullName,
+            bool isTemplate, string description, string homepage, string language, bool @private, bool fork,
+            int forksCount, int stargazersCount, string defaultBranch, int openIssuesCount, DateTimeOffset? pushedAt,
+            DateTimeOffset createdAt, DateTimeOffset updatedAt, RepositoryPermissions permissions, Repository parent,
+            Repository source, LicenseMetadata license, bool hasDiscussions, bool hasIssues, bool hasWiki,
+            bool hasDownloads, bool hasPages, int subscribersCount, long size, bool? allowRebaseMerge,
+            bool? allowSquashMerge, bool? allowMergeCommit, bool archived, int watchersCount, bool? deleteBranchOnMerge,
+            RepositoryVisibility visibility, IEnumerable<string> topics, bool? allowAutoMerge, bool? allowUpdateBranch,
+            bool? webCommitSignoffRequired, SecurityAndAnalysis securityAndAnalysis)
         {
             Url = url;
             HtmlUrl = htmlUrl;
@@ -115,7 +126,8 @@ namespace Octokit
 
         public int StargazersCount { get; private set; }
 
-        [Obsolete("WatchersCount returns the same data as StargazersCount. You are likely looking to use SubscribersCount. Update your code to use SubscribersCount, as this field will stop containing data in the future")]
+        [Obsolete(
+            "WatchersCount returns the same data as StargazersCount. You are likely looking to use SubscribersCount. Update your code to use SubscribersCount, as this field will stop containing data in the future")]
         public int WatchersCount { get; private set; }
 
         public string DefaultBranch { get; private set; }
@@ -170,7 +182,7 @@ namespace Octokit
 
         public bool? WebCommitSignoffRequired { get; private set; }
 
-        public SecurityAndAnalysis SecurityAndAnalysis { get; private set;}
+        public SecurityAndAnalysis SecurityAndAnalysis { get; private set; }
 
         internal string DebuggerDisplay
         {

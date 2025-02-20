@@ -11,9 +11,13 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class GitHubApp
     {
-        public GitHubApp() { }
+        public GitHubApp()
+        {
+        }
 
-        public GitHubApp(long id, string slug, string nodeId, string name, User owner, string description, string externalUrl, string htmlUrl, DateTimeOffset createdAt, DateTimeOffset updatedAt, InstallationPermissions permissions, IReadOnlyList<string> events)
+        public GitHubApp(long id, string slug, string nodeId, string name, User owner, string description,
+            string externalUrl, string htmlUrl, DateTimeOffset createdAt, DateTimeOffset updatedAt,
+            InstallationPermissions permissions, IReadOnlyList<string> events)
         {
             Id = id;
             Slug = slug;

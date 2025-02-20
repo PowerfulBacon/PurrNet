@@ -39,7 +39,8 @@ namespace Octokit.Internal
         /// <param name="cancellationToken">Used to cancel the request</param>
         /// <param name="preprocessResponseBody">Function to preprocess HTTP response prior to deserialization (can be null)</param>
         /// <returns>A <see cref="Task" /> of <see cref="IResponse"/></returns>
-        public async Task<IResponse> Send(IRequest request, CancellationToken cancellationToken, Func<object, object> preprocessResponseBody = null)
+        public async Task<IResponse> Send(IRequest request, CancellationToken cancellationToken,
+            Func<object, object> preprocessResponseBody = null)
         {
             Ensure.ArgumentNotNull(request, nameof(request));
 
@@ -47,7 +48,8 @@ namespace Octokit.Internal
 
             using (var requestMessage = BuildRequestMessage(request))
             {
-                var responseMessage = await SendAsync(requestMessage, cancellationTokenForRequest).ConfigureAwait(false);
+                var responseMessage =
+                    await SendAsync(requestMessage, cancellationTokenForRequest).ConfigureAwait(false);
 
                 return await BuildResponse(responseMessage, preprocessResponseBody).ConfigureAwait(false);
             }
@@ -61,14 +63,17 @@ namespace Octokit.Internal
             if (request.Timeout != TimeSpan.Zero)
             {
                 var timeoutCancellation = new CancellationTokenSource(request.Timeout);
-                var unifiedCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCancellation.Token);
+                var unifiedCancellationToken =
+                    CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCancellation.Token);
 
                 cancellationTokenForRequest = unifiedCancellationToken.Token;
             }
+
             return cancellationTokenForRequest;
         }
 
-        protected virtual async Task<IResponse> BuildResponse(HttpResponseMessage responseMessage, Func<object, object> preprocessResponseBody)
+        protected virtual async Task<IResponse> BuildResponse(HttpResponseMessage responseMessage,
+            Func<object, object> preprocessResponseBody)
         {
             Ensure.ArgumentNotNull(responseMessage, nameof(responseMessage));
 
@@ -77,11 +82,13 @@ namespace Octokit.Internal
 
             // We added support for downloading images,zip-files and application/octet-stream.
             // Let's constrain this appropriately.
-            var binaryContentTypes = new[] {
+            var binaryContentTypes = new[]
+            {
                 AcceptHeaders.RawContentMediaType,
-                "application/zip" ,
-                "application/x-gzip" ,
-                "application/octet-stream"};
+                "application/zip",
+                "application/x-gzip",
+                "application/octet-stream"
+            };
 
             var content = responseMessage.Content;
             if (content != null)
@@ -135,6 +142,7 @@ namespace Octokit.Internal
                 {
                     requestMessage.Headers.Add(header.Key, header.Value);
                 }
+
                 var httpContent = request.Body as HttpContent;
                 if (httpContent != null)
                 {
@@ -151,7 +159,8 @@ namespace Octokit.Internal
                 if (bodyStream != null)
                 {
                     requestMessage.Content = new StreamContent(bodyStream);
-                    requestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(request.ContentType);
+                    requestMessage.Content.Headers.ContentType =
+                        new System.Net.Http.Headers.MediaTypeHeaderValue(request.ContentType);
                 }
             }
             catch (Exception)
@@ -160,6 +169,7 @@ namespace Octokit.Internal
                 {
                     requestMessage.Dispose();
                 }
+
                 throw;
             }
 
@@ -179,7 +189,7 @@ namespace Octokit.Internal
             {
                 return "application/zip";
             }
-            
+
             return null;
         }
 
@@ -197,18 +207,20 @@ namespace Octokit.Internal
             }
         }
 
-        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+            CancellationToken cancellationToken)
         {
             // Clone the request/content in case we get a redirect
             var clonedRequest = await CloneHttpRequestMessageAsync(request).ConfigureAwait(false);
 
             // Send initial response
-            var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+            var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+                .ConfigureAwait(false);
             // Need to determine time on client computer as soon as possible.
             var receivedTime = DateTimeOffset.Now;
             // Since Properties are stored as objects, serialize to HTTP round-tripping string (Format: r)
             // Resolution is limited to one-second, matching the resolution of the HTTP Date header
-            request.Properties[ApiInfoParser.ReceivedTimeHeaderName] = 
+            request.Properties[ApiInfoParser.ReceivedTimeHeaderName] =
                 receivedTime.ToString("r", CultureInfo.InvariantCulture);
 
             // Can't redirect without somewhere to redirect to.
@@ -223,17 +235,18 @@ namespace Octokit.Internal
             {
                 redirectCount = (int)request.Properties[RedirectCountKey];
             }
+
             if (redirectCount > 3)
             {
                 throw new InvalidOperationException("The redirect count for this request has been exceeded. Aborting.");
             }
 
             if (response.StatusCode == HttpStatusCode.MovedPermanently
-                        || response.StatusCode == HttpStatusCode.Redirect
-                        || response.StatusCode == HttpStatusCode.Found
-                        || response.StatusCode == HttpStatusCode.SeeOther
-                        || response.StatusCode == HttpStatusCode.TemporaryRedirect
-                        || (int)response.StatusCode == 308)
+                || response.StatusCode == HttpStatusCode.Redirect
+                || response.StatusCode == HttpStatusCode.Found
+                || response.StatusCode == HttpStatusCode.SeeOther
+                || response.StatusCode == HttpStatusCode.TemporaryRedirect
+                || (int)response.StatusCode == 308)
             {
                 if (response.StatusCode == HttpStatusCode.SeeOther)
                 {
@@ -248,7 +261,8 @@ namespace Octokit.Internal
                 clonedRequest.RequestUri = response.Headers.Location;
 
                 // Clear authentication if redirected to a different host
-                if (string.Compare(clonedRequest.RequestUri.Host, request.RequestUri.Host, StringComparison.OrdinalIgnoreCase) != 0)
+                if (string.Compare(clonedRequest.RequestUri.Host, request.RequestUri.Host,
+                        StringComparison.OrdinalIgnoreCase) != 0)
                 {
                     clonedRequest.Headers.Authorization = null;
                 }

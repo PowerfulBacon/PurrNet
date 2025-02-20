@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Project
     {
-        public Project() { }
+        public Project()
+        {
+        }
 
-        public Project(string ownerUrl, string url, string htmlUrl, int id, string nodeId, string name, string body, int number, ItemState state, User creator, DateTimeOffset createdAt, DateTimeOffset updatedAt)
+        public Project(string ownerUrl, string url, string htmlUrl, int id, string nodeId, string name, string body,
+            int number, ItemState state, User creator, DateTimeOffset createdAt, DateTimeOffset updatedAt)
         {
             OwnerUrl = ownerUrl;
             Url = url;
@@ -87,10 +90,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Name: {0}, Number: {1}", Name, Number);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Name: {0}, Number: {1}", Name, Number); }
         }
     }
 }

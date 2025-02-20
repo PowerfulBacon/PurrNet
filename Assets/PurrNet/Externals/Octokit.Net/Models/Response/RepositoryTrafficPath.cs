@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RepositoryTrafficPath
     {
-        public RepositoryTrafficPath() { }
+        public RepositoryTrafficPath()
+        {
+        }
 
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "It's a property from the api.")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly",
+            Justification = "It's a property from the api.")]
         public RepositoryTrafficPath(string path, string title, int count, int uniques)
         {
             Path = path;
@@ -24,7 +27,8 @@ namespace Octokit
 
         public int Count { get; private set; }
 
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "It's a property from the api.")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly",
+            Justification = "It's a property from the api.")]
         public int Uniques { get; private set; }
 
         internal string DebuggerDisplay

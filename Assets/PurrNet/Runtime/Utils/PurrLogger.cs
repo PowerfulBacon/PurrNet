@@ -15,27 +15,32 @@ namespace PurrNet.Logging
             Debug.LogError(message, reference);
         }
 
-        public static void Log(string message, Object reference = null, LogStyle logStyle = default, [CallerFilePath] string filePath = "")
+        public static void Log(string message, Object reference = null, LogStyle logStyle = default,
+            [CallerFilePath] string filePath = "")
         {
             LogMessage(message, reference, logStyle, LogType.Log, filePath);
         }
 
-        public static void LogWarning(string message, Object reference = null, LogStyle logStyle = default, [CallerFilePath] string filePath = "")
+        public static void LogWarning(string message, Object reference = null, LogStyle logStyle = default,
+            [CallerFilePath] string filePath = "")
         {
             LogMessage(message, reference, logStyle, LogType.Warning, filePath);
         }
 
-        public static void LogError(string message, Object reference = null, LogStyle logStyle = default, [CallerFilePath] string filePath = "")
+        public static void LogError(string message, Object reference = null, LogStyle logStyle = default,
+            [CallerFilePath] string filePath = "")
         {
             LogMessage(message, reference, logStyle, LogType.Error, filePath);
         }
 
-        public static void LogException(string message, Object reference = null, LogStyle logStyle = default, [CallerFilePath] string filePath = "")
+        public static void LogException(string message, Object reference = null, LogStyle logStyle = default,
+            [CallerFilePath] string filePath = "")
         {
             LogMessage(message, reference, logStyle, LogType.Exception, filePath);
         }
 
-        private static void LogMessage(string message, Object reference, LogStyle logStyle, LogType logType, string filePath)
+        private static void LogMessage(string message, Object reference, LogStyle logStyle, LogType logType,
+            string filePath)
         {
             string formattedMessage = FormatMessage_Internal(message, logStyle, filePath);
 
@@ -55,13 +60,15 @@ namespace PurrNet.Logging
                     break;
             }
         }
-        
-        public static string FormatMessage(string message, LogStyle logStyle = default, [CallerFilePath] string filePath = "")
+
+        public static string FormatMessage(string message, LogStyle logStyle = default,
+            [CallerFilePath] string filePath = "")
         {
             return FormatMessage_Internal(message, logStyle, filePath);
         }
-        
-        public static void Throw<T>(string message, LogStyle logStyle = default, [CallerFilePath] string filePath = "") where T : Exception
+
+        public static void Throw<T>(string message, LogStyle logStyle = default, [CallerFilePath] string filePath = "")
+            where T : Exception
         {
             string formattedMessage = FormatMessage_Internal(message, logStyle, filePath);
             throw (T)Activator.CreateInstance(typeof(T), formattedMessage);
@@ -70,13 +77,15 @@ namespace PurrNet.Logging
         private static string FormatMessage_Internal(string message, LogStyle logStyle, string filePath)
         {
             string fileName = System.IO.Path.GetFileName(filePath).Replace(".cs", "");
-            
-            var prefix = logStyle.headerColor.HasValue ? $"<color=#{ColorUtility.ToHtmlStringRGB(logStyle.headerColor.Value)}>[{fileName}]</color>" :
-                $"[{fileName}]";
-            
-            var text = logStyle.textColor.HasValue ? $"<color=#{ColorUtility.ToHtmlStringRGB(logStyle.textColor.Value)}>{message}</color>" :
-                message;
-            
+
+            var prefix = logStyle.headerColor.HasValue
+                ? $"<color=#{ColorUtility.ToHtmlStringRGB(logStyle.headerColor.Value)}>[{fileName}]</color>"
+                : $"[{fileName}]";
+
+            var text = logStyle.textColor.HasValue
+                ? $"<color=#{ColorUtility.ToHtmlStringRGB(logStyle.textColor.Value)}>{message}</color>"
+                : message;
+
             return $"{prefix} {text}";
         }
     }

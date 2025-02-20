@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Subscription
     {
-        public Subscription() { }
+        public Subscription()
+        {
+        }
 
-        public Subscription(bool subscribed, bool ignored, string reason, DateTimeOffset createdAt, string url, string repositoryUrl)
+        public Subscription(bool subscribed, bool ignored, string reason, DateTimeOffset createdAt, string url,
+            string repositoryUrl)
         {
             Subscribed = subscribed;
             Ignored = ignored;

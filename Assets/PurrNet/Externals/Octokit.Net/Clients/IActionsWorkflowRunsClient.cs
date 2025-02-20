@@ -42,7 +42,8 @@ namespace Octokit
         /// <param name="name">The name of the repository.</param>
         /// <param name="workflowRunsRequest">Details to filter the request, such as by check suite Id.</param>
         /// <param name="options">Options to change the API response.</param>
-        Task<WorkflowRunsResponse> List(string owner, string name, WorkflowRunsRequest workflowRunsRequest, ApiOptions options);
+        Task<WorkflowRunsResponse> List(string owner, string name, WorkflowRunsRequest workflowRunsRequest,
+            ApiOptions options);
 
         /// <summary>
         /// Gets a specific workflow run in a repository. Anyone with read access to the repository can use this endpoint.
@@ -89,7 +90,8 @@ namespace Octokit
         /// <param name="name">The name of the repository.</param>
         /// <param name="runId">The Id of the workflow run.</param>
         /// <param name="review">The review for the pending deployment.</param>
-        Task<Deployment> ReviewPendingDeployments(string owner, string name, long runId, PendingDeploymentReview review);
+        Task<Deployment> ReviewPendingDeployments(string owner, string name, long runId,
+            PendingDeploymentReview review);
 
         /// <summary>
         /// Approves a workflow run for a pull request from a public fork of a first time contributor.
@@ -224,7 +226,8 @@ namespace Octokit
         /// <param name="name">The name of the repository.</param>
         /// <param name="workflowId">The Id of the workflow.</param>
         /// <param name="workflowRunsRequest">Details to filter the request, such as by check suite Id.</param>
-        Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, long workflowId, WorkflowRunsRequest workflowRunsRequest);
+        Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, long workflowId,
+            WorkflowRunsRequest workflowRunsRequest);
 
         /// <summary>
         /// List all workflow runs for a workflow.
@@ -236,7 +239,8 @@ namespace Octokit
         /// <param name="name">The name of the repository.</param>
         /// <param name="workflowFileName">The workflow file name.</param>
         /// <param name="workflowRunsRequest">Details to filter the request, such as by check suite Id.</param>
-        Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, string workflowFileName, WorkflowRunsRequest workflowRunsRequest);
+        Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, string workflowFileName,
+            WorkflowRunsRequest workflowRunsRequest);
 
         /// <summary>
         /// List all workflow runs for a workflow.
@@ -249,7 +253,8 @@ namespace Octokit
         /// <param name="workflowId">The Id of the workflow.</param>
         /// <param name="workflowRunsRequest">Details to filter the request, such as by check suite Id.</param>
         /// <param name="options">Options to change the API response.</param>
-        Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, long workflowId, WorkflowRunsRequest workflowRunsRequest, ApiOptions options);
+        Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, long workflowId,
+            WorkflowRunsRequest workflowRunsRequest, ApiOptions options);
 
         /// <summary>
         /// List all workflow runs for a workflow.
@@ -262,6 +267,7 @@ namespace Octokit
         /// <param name="workflowFileName">The workflow file name.</param>
         /// <param name="workflowRunsRequest">Details to filter the request, such as by check suite Id.</param>
         /// <param name="options">Options to change the API response.</param>
-        Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, string workflowFileName, WorkflowRunsRequest workflowRunsRequest, ApiOptions options);
+        Task<WorkflowRunsResponse> ListByWorkflow(string owner, string name, string workflowFileName,
+            WorkflowRunsRequest workflowRunsRequest, ApiOptions options);
     }
 }

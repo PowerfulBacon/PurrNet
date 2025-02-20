@@ -9,14 +9,21 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class CommitPullRequest
     {
-        public CommitPullRequest() { }
+        public CommitPullRequest()
+        {
+        }
 
         public CommitPullRequest(int number)
         {
             Number = number;
         }
 
-        public CommitPullRequest(long id, string nodeId, string url, string htmlUrl, string diffUrl, string patchUrl, string issueUrl, string statusesUrl, int number, ItemState state, string title, string body, DateTimeOffset createdAt, DateTimeOffset updatedAt, DateTimeOffset? closedAt, DateTimeOffset? mergedAt, GitReference head, GitReference @base, User user, User assignee, IReadOnlyList<User> assignees, bool draft, bool? mergeable, MergeableState? mergeableState, User mergedBy, string mergeCommitSha, Milestone milestone, IReadOnlyList<User> requestedReviewers, IReadOnlyList<Team> requestedTeams, IReadOnlyList<Label> labels)
+        public CommitPullRequest(long id, string nodeId, string url, string htmlUrl, string diffUrl, string patchUrl,
+            string issueUrl, string statusesUrl, int number, ItemState state, string title, string body,
+            DateTimeOffset createdAt, DateTimeOffset updatedAt, DateTimeOffset? closedAt, DateTimeOffset? mergedAt,
+            GitReference head, GitReference @base, User user, User assignee, IReadOnlyList<User> assignees, bool draft,
+            bool? mergeable, MergeableState? mergeableState, User mergedBy, string mergeCommitSha, Milestone milestone,
+            IReadOnlyList<User> requestedReviewers, IReadOnlyList<Team> requestedTeams, IReadOnlyList<Label> labels)
         {
             Id = id;
             NodeId = nodeId;

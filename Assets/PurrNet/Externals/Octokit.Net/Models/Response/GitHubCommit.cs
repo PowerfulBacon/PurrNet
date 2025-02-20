@@ -9,9 +9,13 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class GitHubCommit : GitReference
     {
-        public GitHubCommit() { }
+        public GitHubCommit()
+        {
+        }
 
-        public GitHubCommit(string nodeId, string url, string label, string @ref, string sha, User user, Repository repository, Author author, string commentsUrl, Commit commit, Author committer, string htmlUrl, GitHubCommitStats stats, IReadOnlyList<GitReference> parents, IReadOnlyList<GitHubCommitFile> files)
+        public GitHubCommit(string nodeId, string url, string label, string @ref, string sha, User user,
+            Repository repository, Author author, string commentsUrl, Commit commit, Author committer, string htmlUrl,
+            GitHubCommitStats stats, IReadOnlyList<GitReference> parents, IReadOnlyList<GitHubCommitFile> files)
             : base(nodeId, url, label, @ref, sha, user, repository)
         {
             Author = author;

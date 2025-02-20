@@ -13,7 +13,8 @@ namespace Octokit
         {
         }
 
-        public SeatBreakdown(long total, long addedThisCycle, long pendingInvitation, long pendingCancellation, long activeThisCycle, long inactiveThisCycle)
+        public SeatBreakdown(long total, long addedThisCycle, long pendingInvitation, long pendingCancellation,
+            long activeThisCycle, long inactiveThisCycle)
         {
             Total = total;
             AddedThisCycle = addedThisCycle;
@@ -22,16 +23,16 @@ namespace Octokit
             ActiveThisCycle = activeThisCycle;
             InactiveThisCycle = inactiveThisCycle;
         }
-        
+
         /// <summary>
         /// The total number of seats being billed for the organization as of the current billing cycle.
         /// </summary>
-        public long Total { get; private set;  }
+        public long Total { get; private set; }
 
         /// <summary>
         /// Seats added during the current billing cycle
         /// </summary>
-        public long AddedThisCycle { get; private set;  }
+        public long AddedThisCycle { get; private set; }
 
         /// <summary>
         /// The number of seats that have been assigned to users that have not yet accepted an invitation to this organization.
@@ -52,13 +53,10 @@ namespace Octokit
         /// The number of seats that have not used Copilot during the current billing cycle
         /// </summary>
         public long InactiveThisCycle { get; private set; }
-        
+
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Total: {0}", Total);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Total: {0}", Total); }
         }
     }
 }

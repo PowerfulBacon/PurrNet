@@ -22,7 +22,7 @@ namespace PurrNet.Editor
             return $"{name} -> {url}{query}{fragment}";
         }
     }
-    
+
     public class PurrNetBranchManager : EditorWindow
     {
         [MenuItem("Tools/PurrNet/Version Manager")]
@@ -30,17 +30,17 @@ namespace PurrNet.Editor
         {
             GetWindow<PurrNetBranchManager>("PurrNet Version Manager");
         }
-        
+
         static readonly Uri repositoryUrl = new Uri("https://github.com/BlenMiner/PurrNet");
 
         private bool _usingBranches;
         private GitHubClient _client;
         private PurrNetEntry? _purrnetEntry;
-        
+
         private readonly List<Branch> _branches = new List<Branch>();
         private readonly List<Release> _releases = new List<Release>();
         private readonly List<RepositoryContributor> _contributors = new List<RepositoryContributor>();
-        
+
         private Texture2D _logo;
 
         private string[] _optionsActual = Array.Empty<string>();
@@ -50,7 +50,7 @@ namespace PurrNet.Editor
         {
             const string PATH = "Packages/manifest.json";
             var manifestString = File.ReadAllText(PATH);
-            
+
             var manifest = (JObject)JObject.Parse(manifestString)["dependencies"];
             if (manifest != null && manifest.TryGetValue("purrnet", out var purrnet))
             {
@@ -65,7 +65,7 @@ namespace PurrNet.Editor
                 };
                 return true;
             }
-            
+
             entry = default;
             return false;
         }
@@ -73,48 +73,48 @@ namespace PurrNet.Editor
         static string GetToken()
         {
             var token = Environment.GetEnvironmentVariable("GITHUB_TOKEN", EnvironmentVariableTarget.Process);
-            
+
             if (!string.IsNullOrEmpty(token))
                 return token;
 
             token = Environment.GetEnvironmentVariable("GITHUB_TOKEN", EnvironmentVariableTarget.User);
-            
+
             if (!string.IsNullOrEmpty(token))
                 return token;
-            
+
             token = Environment.GetEnvironmentVariable("GITHUB_TOKEN", EnvironmentVariableTarget.Machine);
-            
+
             if (!string.IsNullOrEmpty(token))
                 return token;
-            
+
             return null;
         }
-        
+
         private void OnEnable()
         {
             _isRefreshingBranches = false;
             _isRefreshingReleases = false;
             _isRefreshingContributors = false;
-            
+
             _logo = Resources.Load<Texture2D>("purrlogo");
             if (TryGetPurrnetEntry(out var entry))
-                 _purrnetEntry = entry;
+                _purrnetEntry = entry;
             else _purrnetEntry = null;
-            
+
             _client ??= new GitHubClient(new ProductHeaderValue("purrnet"), repositoryUrl);
             var token = GetToken();
-            
+
             if (!string.IsNullOrEmpty(token))
             {
                 var credentials = new Credentials(token);
                 _client.Credentials = credentials;
             }
-            
+
             RefreshBranches();
             RefreshReleases();
             RefreshContributors();
         }
-        
+
         private bool _isRefreshingBranches;
 
         private async void RefreshBranches()
@@ -145,26 +145,26 @@ namespace PurrNet.Editor
                 Repaint();
             }
         }
-        
+
         private bool _isRefreshingReleases;
-        
+
         private async void RefreshReleases()
         {
             try
             {
                 if (_isRefreshingReleases)
                     return;
-                
+
                 _isRefreshingReleases = true;
-                
+
                 var releases = await _client.Repository.Release.GetAll("BlenMiner", "PurrNet", new ApiOptions
                 {
                     PageCount = 1,
                     PageSize = 100
                 });
-                
+
                 _releases.Clear();
-                
+
                 foreach (var release in releases)
                     _releases.Add(release);
             }
@@ -179,9 +179,9 @@ namespace PurrNet.Editor
                 Repaint();
             }
         }
-        
+
         private bool _isRefreshingContributors;
-        
+
         private async void RefreshContributors()
         {
             try
@@ -212,7 +212,7 @@ namespace PurrNet.Editor
                 Repaint();
             }
         }
-        
+
         private void RefreshOptions()
         {
             var options = new List<string>();
@@ -226,17 +226,15 @@ namespace PurrNet.Editor
 
             foreach (var release in _releases)
             {
-                options.Add(release.Prerelease ? 
-                    $"PreRelease/{release.Name}" : 
-                    $"Release/{release.Name}");
-                
+                options.Add(release.Prerelease ? $"PreRelease/{release.Name}" : $"Release/{release.Name}");
+
                 optionsReal.Add(release.Name);
             }
-            
+
             _options = options.ToArray();
             _optionsActual = optionsReal.ToArray();
         }
-        
+
         private Vector2 _scrollPosition;
 
         private int GetCurrentIndex(string version)
@@ -249,20 +247,20 @@ namespace PurrNet.Editor
 
             return -1;
         }
-        
+
         private string _targetVersion;
-        
+
         private void OnGUI()
         {
             bool anyRefreshing = _isRefreshingBranches || _isRefreshingReleases || _isRefreshingContributors;
 
             GUI.DrawTexture(new Rect(10, 10, 64, 64), _logo);
-            
+
             EditorGUILayout.BeginHorizontal();
             GUILayout.Space(10 + 64 + 10);
             EditorGUILayout.BeginVertical();
             GUILayout.Space(10);
-            
+
             if (_purrnetEntry == null)
             {
                 EditorGUILayout.LabelField("PurrNet not found in manifest.json", EditorStyles.boldLabel);
@@ -274,7 +272,8 @@ namespace PurrNet.Editor
             }
             else
             {
-                EditorGUILayout.LabelField($"PurrNet Version - {_purrnetEntry?.query}#{_purrnetEntry?.fragment}", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField($"PurrNet Version - {_purrnetEntry?.query}#{_purrnetEntry?.fragment}",
+                    EditorStyles.boldLabel);
 
                 string currentFragment = _targetVersion ?? _purrnetEntry?.fragment ?? "release";
                 int actual = GetCurrentIndex(currentFragment);
@@ -287,12 +286,12 @@ namespace PurrNet.Editor
 
                 if (newActual != actual)
                     _targetVersion = _optionsActual[newActual];
-                
+
                 DrawButtons(anyRefreshing);
             }
 
             GUILayout.FlexibleSpace();
-            
+
             EditorGUILayout.LabelField("PurrNet Contributors", EditorStyles.boldLabel);
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition, false, false,
                 GUILayout.MaxWidth(Screen.width - (10 + 64 + 10 + 20)));
@@ -302,7 +301,7 @@ namespace PurrNet.Editor
             {
                 EditorGUILayout.BeginVertical(GUILayout.Width(100));
                 var texture = UrlTexture.TryGetTexture(c.AvatarUrl);
-                
+
                 if (texture != null)
                 {
                     GUILayout.Label(string.Empty, GUILayout.Width(64), GUILayout.Height(64));
@@ -312,30 +311,31 @@ namespace PurrNet.Editor
                     outlineRect.y -= 2;
                     outlineRect.width += 4;
                     outlineRect.height += 4;
-                    
+
                     // draw outline
-                    GUI.DrawTexture(outlineRect, Texture2D.whiteTexture, ScaleMode.ScaleToFit, false, 
+                    GUI.DrawTexture(outlineRect, Texture2D.whiteTexture, ScaleMode.ScaleToFit, false,
                         0f, Color.white, 0f, 32f);
-                    
-                    GUI.DrawTexture(rect, texture, ScaleMode.ScaleToFit, false, 
+
+                    GUI.DrawTexture(rect, texture, ScaleMode.ScaleToFit, false,
                         0f, Color.white, 0f, 32f);
-                    
+
                     // Make the texture clickable
                     if (GUI.Button(rect, GUIContent.none, GUIStyle.none)) // Invisible button over the texture
                         Application.OpenURL(c.HtmlUrl);
-                    
+
                     EditorGUIUtility.AddCursorRect(rect, MouseCursor.Link);
                 }
-                
+
                 if (EditorGUILayout.LinkButton(c.Login))
                     Application.OpenURL(c.HtmlUrl);
                 EditorGUILayout.EndVertical();
             }
+
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndScrollView();
 
             GUILayout.Space(20);
-            
+
             EditorGUILayout.EndVertical();
             GUILayout.Space(10 + 64 + 10);
             EditorGUILayout.EndHorizontal();
@@ -365,6 +365,7 @@ namespace PurrNet.Editor
                         _targetVersion = null;
                     }
                 }
+
                 GUI.backgroundColor = Color.white;
             }
 
@@ -373,7 +374,7 @@ namespace PurrNet.Editor
                 RefreshBranches();
                 RefreshReleases();
             }
-            
+
             EditorGUILayout.EndHorizontal();
         }
     }

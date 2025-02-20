@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class AdminStatsUsers
     {
-        public AdminStatsUsers() { }
+        public AdminStatsUsers()
+        {
+        }
 
         public AdminStatsUsers(int totalUsers, int adminUsers, int suspendedUsers)
         {
@@ -16,29 +18,18 @@ namespace Octokit
             SuspendedUsers = suspendedUsers;
         }
 
-        public int TotalUsers
-        {
-            get;
-            private set;
-        }
+        public int TotalUsers { get; private set; }
 
-        public int AdminUsers
-        {
-            get;
-            private set;
-        }
+        public int AdminUsers { get; private set; }
 
-        public int SuspendedUsers
-        {
-            get;
-            private set;
-        }
+        public int SuspendedUsers { get; private set; }
 
         internal string DebuggerDisplay
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "TotalUsers: {0} AdminUsers: {1} SuspendedUsers: {2}", TotalUsers, AdminUsers, SuspendedUsers);
+                return string.Format(CultureInfo.InvariantCulture,
+                    "TotalUsers: {0} AdminUsers: {1} SuspendedUsers: {2}", TotalUsers, AdminUsers, SuspendedUsers);
             }
         }
     }

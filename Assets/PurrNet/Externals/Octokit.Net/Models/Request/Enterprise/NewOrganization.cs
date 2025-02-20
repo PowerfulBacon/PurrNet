@@ -15,7 +15,8 @@ namespace Octokit
         /// <param name="login">The organization's username</param>
         /// <param name="admin">The login of the user who will manage this organization</param>
         public NewOrganization(string login, string admin) : this(login, admin, null)
-        { }
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NewOrganization"/> class.
@@ -49,7 +50,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Login: {0} Admin: {1} ProfileName: {2}", Login, Admin, ProfileName ?? "");
+                return string.Format(CultureInfo.InvariantCulture, "Login: {0} Admin: {1} ProfileName: {2}", Login,
+                    Admin, ProfileName ?? "");
             }
         }
     }

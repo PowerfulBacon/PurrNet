@@ -193,7 +193,8 @@ namespace Octokit
         /// <param name="request">Star-specific request parameters that sort the results</param>
         /// <param name="options">Options for changing the API response</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
-        Task<IReadOnlyList<RepositoryStar>> GetAllForUserWithTimestamps(string user, StarredRequest request, ApiOptions options);
+        Task<IReadOnlyList<RepositoryStar>> GetAllForUserWithTimestamps(string user, StarredRequest request,
+            ApiOptions options);
 
         /// <summary>
         /// Check if a repository is starred by the current authenticated user.

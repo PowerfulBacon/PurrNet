@@ -36,7 +36,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<PullRequestReviewComment>> GetAll(string owner, string name, int pullRequestNumber, ApiOptions options);
+        Task<IReadOnlyList<PullRequestReviewComment>> GetAll(string owner, string name, int pullRequestNumber,
+            ApiOptions options);
 
         /// <summary>
         /// Gets review comments for a specified pull request.
@@ -45,7 +46,8 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<PullRequestReviewComment>> GetAll(long repositoryId, int pullRequestNumber, ApiOptions options);
+        Task<IReadOnlyList<PullRequestReviewComment>> GetAll(long repositoryId, int pullRequestNumber,
+            ApiOptions options);
 
         /// <summary>
         /// Gets a list of the pull request review comments in a specified repository.
@@ -69,7 +71,8 @@ namespace Octokit
         /// <param name="owner">The owner of the repository</param>
         /// <param name="name">The name of the repository</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(string owner, string name, ApiOptions options);
+        Task<IReadOnlyList<PullRequestReviewComment>>
+            GetAllForRepository(string owner, string name, ApiOptions options);
 
         /// <summary>
         /// Gets a list of the pull request review comments in a specified repository.
@@ -86,7 +89,8 @@ namespace Octokit
         /// <param name="owner">The owner of the repository</param>
         /// <param name="name">The name of the repository</param>
         /// <param name="request">The sorting <see cref="PullRequestReviewCommentRequest">parameters</see></param>
-        Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(string owner, string name, PullRequestReviewCommentRequest request);
+        Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(string owner, string name,
+            PullRequestReviewCommentRequest request);
 
         /// <summary>
         /// Gets a list of the pull request review comments in a specified repository.
@@ -94,7 +98,8 @@ namespace Octokit
         /// <remarks>http://developer.github.com/v3/pulls/comments/#list-comments-in-a-repository</remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="request">The sorting <see cref="PullRequestReviewCommentRequest">parameters</see></param>
-        Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(long repositoryId, PullRequestReviewCommentRequest request);
+        Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(long repositoryId,
+            PullRequestReviewCommentRequest request);
 
         /// <summary>
         /// Gets a list of the pull request review comments in a specified repository.
@@ -104,7 +109,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="request">The sorting <see cref="PullRequestReviewCommentRequest">parameters</see></param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(string owner, string name, PullRequestReviewCommentRequest request, ApiOptions options);
+        Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(string owner, string name,
+            PullRequestReviewCommentRequest request, ApiOptions options);
 
         /// <summary>
         /// Gets a list of the pull request review comments in a specified repository.
@@ -113,7 +119,8 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="request">The sorting <see cref="PullRequestReviewCommentRequest">parameters</see></param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(long repositoryId, PullRequestReviewCommentRequest request, ApiOptions options);
+        Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(long repositoryId,
+            PullRequestReviewCommentRequest request, ApiOptions options);
 
         /// <summary>
         /// Gets a single pull request review comment by number.
@@ -140,7 +147,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="comment">The comment</param>
-        Task<PullRequestReviewComment> Create(string owner, string name, int pullRequestNumber, PullRequestReviewCommentCreate comment);
+        Task<PullRequestReviewComment> Create(string owner, string name, int pullRequestNumber,
+            PullRequestReviewCommentCreate comment);
 
         /// <summary>
         /// Creates a comment on a pull request review.
@@ -149,7 +157,8 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="comment">The comment</param>
-        Task<PullRequestReviewComment> Create(long repositoryId, int pullRequestNumber, PullRequestReviewCommentCreate comment);
+        Task<PullRequestReviewComment> Create(long repositoryId, int pullRequestNumber,
+            PullRequestReviewCommentCreate comment);
 
         /// <summary>
         /// Creates a comment on a pull request review as a reply to another comment.
@@ -159,7 +168,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="comment">The comment</param>
-        Task<PullRequestReviewComment> CreateReply(string owner, string name, int pullRequestNumber, PullRequestReviewCommentReplyCreate comment);
+        Task<PullRequestReviewComment> CreateReply(string owner, string name, int pullRequestNumber,
+            PullRequestReviewCommentReplyCreate comment);
 
         /// <summary>
         /// Creates a comment on a pull request review as a reply to another comment.
@@ -168,7 +178,8 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="comment">The comment</param>
-        Task<PullRequestReviewComment> CreateReply(long repositoryId, int pullRequestNumber, PullRequestReviewCommentReplyCreate comment);
+        Task<PullRequestReviewComment> CreateReply(long repositoryId, int pullRequestNumber,
+            PullRequestReviewCommentReplyCreate comment);
 
         /// <summary>
         /// Edits a comment on a pull request review.
@@ -178,7 +189,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="commentId">The pull request review comment id</param>
         /// <param name="comment">The edited comment</param>
-        Task<PullRequestReviewComment> Edit(string owner, string name, long commentId, PullRequestReviewCommentEdit comment);
+        Task<PullRequestReviewComment> Edit(string owner, string name, long commentId,
+            PullRequestReviewCommentEdit comment);
 
         /// <summary>
         /// Edits a comment on a pull request review.

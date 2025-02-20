@@ -12,7 +12,7 @@ namespace PurrNet.Modules
         public Connection conn;
         public float addedTimeStamp;
     }
-    
+
     public class AuthModule : INetworkModule, IConnectionListener, IFixedUpdate
     {
         private readonly NetworkManager _manager;
@@ -23,26 +23,26 @@ namespace PurrNet.Modules
         private readonly List<WaitingConnectionAuth> _waitingConnections = new List<WaitingConnectionAuth>();
 
         public event Action<Connection, AuthenticationResponse> onConnection;
-        
+
         public AuthModule(NetworkManager manager, BroadcastModule broadcastModule, CookiesModule cookiesModule)
         {
             _cookiesModule = cookiesModule;
             _manager = manager;
             _broadcastModule = broadcastModule;
         }
-        
+
         public void Enable(bool asServer)
         {
             _authenticator = _manager.authenticator;
 
             if (!asServer)
                 return;
-            
+
             _broadcastModule.Subscribe<AuthenticationRequest>(OnNonAuthRequest);
 
             if (!_authenticator)
                 return;
-            
+
             _authenticator.onAuthenticationComplete += OnAuthenticationComplete;
             _authenticator.Subscribe(_broadcastModule);
         }
@@ -56,7 +56,7 @@ namespace PurrNet.Modules
 
             if (!_authenticator)
                 return;
-            
+
             _authenticator.onAuthenticationComplete -= OnAuthenticationComplete;
             _authenticator.Unsubscribe(_broadcastModule);
         }
@@ -77,6 +77,7 @@ namespace PurrNet.Modules
                         cookie = cookie
                     });
                 }
+
                 return;
             }
 
@@ -87,13 +88,15 @@ namespace PurrNet.Modules
             });
         }
 
-        public void OnDisconnected(Connection conn, bool asServer) { }
-        
+        public void OnDisconnected(Connection conn, bool asServer)
+        {
+        }
+
         private void OnNonAuthRequest(Connection conn, AuthenticationRequest data, bool asserver)
         {
             if (!asserver)
                 return;
-            
+
             RemoveFromWaitingList(conn);
 
             if (_authenticator)
@@ -102,25 +105,25 @@ namespace PurrNet.Modules
                 _manager.CloseConnection(conn);
                 return;
             }
-            
+
             onConnection?.Invoke(conn, new AuthenticationResponse
             {
                 success = true,
                 cookie = data.cookie
             });
         }
-        
+
         private void OnAuthenticationComplete(Connection conn, AuthenticationResponse response)
         {
             RemoveFromWaitingList(conn);
-            
+
             if (!response.success)
             {
                 PurrLogger.LogError($"Authentication failed for conn `{conn}`");
                 _manager.CloseConnection(conn);
                 return;
             }
-            
+
             onConnection?.Invoke(conn, response);
         }
 
@@ -131,7 +134,7 @@ namespace PurrNet.Modules
                 var waitingConnection = _waitingConnections[i];
                 if (waitingConnection.conn != conn)
                     continue;
-                
+
                 _waitingConnections.RemoveAt(i);
             }
         }

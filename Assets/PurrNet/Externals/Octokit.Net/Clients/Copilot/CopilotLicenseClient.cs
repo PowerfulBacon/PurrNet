@@ -15,7 +15,7 @@ public class CopilotLicenseClient : ApiClient, ICopilotLicenseClient
     public CopilotLicenseClient(IApiConnection apiConnection) : base(apiConnection)
     {
     }
-    
+
     /// <summary>
     /// Removes a license for a user
     /// </summary>
@@ -48,7 +48,8 @@ public class CopilotLicenseClient : ApiClient, ICopilotLicenseClient
         Ensure.ArgumentNotNull(organization, nameof(organization));
         Ensure.ArgumentNotNull(userSeatAllocation, nameof(userSeatAllocation));
 
-        return await ApiConnection.Delete<CopilotSeatAllocation>(ApiUrls.CopilotBillingLicense(organization), userSeatAllocation);
+        return await ApiConnection.Delete<CopilotSeatAllocation>(ApiUrls.CopilotBillingLicense(organization),
+            userSeatAllocation);
     }
 
     /// <summary>
@@ -70,7 +71,7 @@ public class CopilotLicenseClient : ApiClient, ICopilotLicenseClient
 
         return await Assign(organization, allocation);
     }
-    
+
     /// <summary>
     /// Assigns a license for one or many users
     /// </summary>
@@ -83,7 +84,8 @@ public class CopilotLicenseClient : ApiClient, ICopilotLicenseClient
         Ensure.ArgumentNotNull(organization, nameof(organization));
         Ensure.ArgumentNotNull(userSeatAllocation, nameof(userSeatAllocation));
 
-        return await ApiConnection.Post<CopilotSeatAllocation>(ApiUrls.CopilotBillingLicense(organization), userSeatAllocation);
+        return await ApiConnection.Post<CopilotSeatAllocation>(ApiUrls.CopilotBillingLicense(organization),
+            userSeatAllocation);
     }
 
     /// <summary>
@@ -102,6 +104,7 @@ public class CopilotLicenseClient : ApiClient, ICopilotLicenseClient
             PageSize = options.PageSize
         };
 
-        return await ApiConnection.GetAll<CopilotSeats>(ApiUrls.CopilotAllocatedLicenses(organization), extendedOptions);
+        return await ApiConnection.GetAll<CopilotSeats>(ApiUrls.CopilotAllocatedLicenses(organization),
+            extendedOptions);
     }
 }

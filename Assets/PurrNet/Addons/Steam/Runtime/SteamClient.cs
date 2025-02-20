@@ -36,7 +36,7 @@ namespace PurrNet.Steam
         public event Action<ConnectionState> onConnectionState;
 
         private ConnectionState _state = ConnectionState.Disconnected;
-        
+
         public ConnectionState connectionState
         {
             get => _state;
@@ -44,7 +44,7 @@ namespace PurrNet.Steam
             {
                 if (_state == value)
                     return;
-                
+
                 _state = value;
                 onConnectionState?.Invoke(_state);
             }
@@ -67,7 +67,7 @@ namespace PurrNet.Steam
             PostConnect();
 #endif
         }
-        
+
         public IEnumerator ConnectP2P(string steamId, bool dedicated = false)
         {
             yield return null;
@@ -91,7 +91,7 @@ namespace PurrNet.Steam
             PostConnect();
 #endif
         }
-        
+
         public void Send(ByteData data, Channel channel)
         {
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
@@ -116,7 +116,7 @@ namespace PurrNet.Steam
             else SteamNetworkingSockets.SendMessageToConnection(_connection, ptr, (uint)data.length, sendFlag, out _);
 #endif
         }
-        
+
         public void RunCallbacks()
         {
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
@@ -124,7 +124,7 @@ namespace PurrNet.Steam
             ReceiveMessages();
 #endif
         }
-        
+
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
         private void SendQueuesMessages()
         {
@@ -172,7 +172,8 @@ namespace PurrNet.Steam
             }
             
             connectionState = ConnectionState.Connecting;
-            _onLocalConnectionState = Callback<SteamNetConnectionStatusChangedCallback_t>.Create(OnLocalConnectionState);
+            _onLocalConnectionState =
+ Callback<SteamNetConnectionStatusChangedCallback_t>.Create(OnLocalConnectionState);
         }
 
         private void OnLocalConnectionState(SteamNetConnectionStatusChangedCallback_t param)

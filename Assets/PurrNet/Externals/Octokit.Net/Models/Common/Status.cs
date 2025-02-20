@@ -4,9 +4,7 @@ namespace Octokit
 {
     public enum Status
     {
-        [Parameter(Value = "enabled")]
-        Enabled,
-        [Parameter(Value = "disabled")]
-        Disabled
+        [Parameter(Value = "enabled")] Enabled,
+        [Parameter(Value = "disabled")] Disabled
     }
 }

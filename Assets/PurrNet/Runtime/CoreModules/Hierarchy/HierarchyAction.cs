@@ -20,7 +20,7 @@ namespace PurrNet.Modules
         ComponentOnly,
         GameObject
     }
-    
+
     internal struct HierarchyAction : IPackedSimple
     {
         public HierarchyActionType type;
@@ -33,23 +33,23 @@ namespace PurrNet.Modules
         public SetEnabledAction setEnabledAction;
 
         static readonly StringBuilder _sb = new StringBuilder();
-        
+
         [UsedImplicitly]
         public static void WriteType(BitPacker packer, HierarchyAction type)
         {
             type.Serialize(packer);
         }
-        
+
         [UsedImplicitly]
         public static void ReadType(BitPacker packer, ref HierarchyAction type)
         {
             type.Serialize(packer);
         }
-        
+
         public override string ToString()
         {
             _sb.Clear();
-            
+
             switch (type)
             {
                 case HierarchyActionType.Spawn:
@@ -76,7 +76,7 @@ namespace PurrNet.Modules
         {
             Packer<HierarchyActionType>.Serialize(packer, ref type);
             Packer<PlayerID>.Serialize(packer, ref actor);
-            
+
             switch (type)
             {
                 case HierarchyActionType.Spawn:
@@ -96,7 +96,7 @@ namespace PurrNet.Modules
                     break;
             }
         }
-        
+
         public NetworkID? GetIdentityId()
         {
             return type switch
@@ -110,12 +110,12 @@ namespace PurrNet.Modules
             };
         }
     }
-    
+
     internal struct HierarchyActionBatch : IPacked
     {
         public SceneID sceneId;
         public List<HierarchyAction> actions;
-        
+
         public void Write(BitPacker packer)
         {
             Packer<SceneID>.Write(packer, sceneId);
@@ -136,20 +136,20 @@ namespace PurrNet.Modules
 
         public override string ToString() => $"Despawn: {identityId} ({despawnType})";
     }
-    
+
     internal struct SetActiveAction : IPackedAuto
     {
         public NetworkID identityId { get; set; }
         public bool active { get; set; }
-        
+
         public override string ToString() => $"SetActive: {identityId} ({active})";
     }
-    
+
     internal struct SetEnabledAction : IPackedAuto
     {
         public NetworkID identityId { get; set; }
         public bool enabled { get; set; }
-        
+
         public override string ToString() => $"SetEnabled: {identityId} ({enabled})";
     }
 
@@ -165,7 +165,7 @@ namespace PurrNet.Modules
         /// This avoids the need to spawn the root, get the child and then despawn the root.
         /// </summary>
         public ushort childOffset { get; set; }
-        
+
         public override string ToString() => $"Spawn: {identityId} (pid: {prefabId}, children: {childCount})";
     }
 
@@ -173,7 +173,7 @@ namespace PurrNet.Modules
     {
         public NetworkID identityId { get; set; }
         public NetworkID? parentId { get; set; }
-        
+
         public override string ToString() => $"ChangeParent: {identityId} (target parent id: {parentId})";
     }
 
@@ -199,7 +199,7 @@ namespace PurrNet.Modules
             {
                 parentId = null;
             }
-            
+
             localPos = trs.localPosition;
             localRot = trs.localRotation;
             localScale = trs.localScale;

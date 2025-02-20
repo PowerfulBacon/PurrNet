@@ -15,23 +15,23 @@ namespace PurrNet
         {
             var myPos = networkIdentity.transform.position;
             bool wasPreviouslyVisible = networkIdentity.observers.Contains(player);
-                
+
             foreach (var playerIdentity in manager.EnumerateAllPlayerOwnedIds(player, true))
             {
                 var layer = playerIdentity.layer;
-                    
+
                 if ((_layerMask & (1 << layer)) == 0)
                     continue;
-                    
+
                 if (!playerIdentity.isActiveAndEnabled)
                     continue;
-                    
+
                 var playerPos = playerIdentity.transform.position;
                 var distance = Vector3.Distance(myPos, playerPos);
 
                 if (wasPreviouslyVisible)
                 {
-                    if (!(distance <= _distance + _deadZone)) 
+                    if (!(distance <= _distance + _deadZone))
                         continue;
                 }
                 else if (!(distance <= _distance))
@@ -39,7 +39,7 @@ namespace PurrNet
 
                 return true;
             }
-            
+
             return false;
         }
     }

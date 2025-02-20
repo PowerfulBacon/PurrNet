@@ -43,7 +43,8 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<ProjectColumn>(ApiUrls.ProjectColumns(projectId), new Dictionary<string, string>(), options);
+            return ApiConnection.GetAll<ProjectColumn>(ApiUrls.ProjectColumns(projectId),
+                new Dictionary<string, string>(), options);
         }
 
         /// <summary>

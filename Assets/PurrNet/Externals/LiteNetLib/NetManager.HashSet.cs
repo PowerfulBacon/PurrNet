@@ -10,6 +10,7 @@ namespace LiteNetLib
         private const int MaxPrimeArrayLength = 0x7FFFFFC3;
         private const int HashPrime = 101;
         private const int Lower31BitMask = 0x7FFFFFFF;
+
         private static readonly int[] Primes =
         {
             3, 7, 11, 17, 23, 29, 37, 47, 59, 71, 89, 107, 131, 163, 197, 239, 293, 353, 431, 521, 631, 761, 919,
@@ -33,6 +34,7 @@ namespace LiteNetLib
                 if (IsPrime(i) && ((i - 1) % HashPrime != 0))
                     return i;
             }
+
             return min;
 
             bool IsPrime(int candidate)
@@ -45,8 +47,10 @@ namespace LiteNetLib
                         if (candidate % divisor == 0)
                             return false;
                     }
+
                     return true;
                 }
+
                 return candidate == 2;
             }
         }
@@ -79,6 +83,7 @@ namespace LiteNetLib
                 _count = 0;
                 _freeList = -1;
             }
+
             _peersArray = new NetPeer[32];
             _peersLock.ExitWriteLock();
         }
@@ -94,6 +99,7 @@ namespace LiteNetLib
                         return true;
                 }
             }
+
             return false;
         }
 
@@ -127,6 +133,7 @@ namespace LiteNetLib
                 peer.NextPeer = _headPeer;
                 _headPeer.PrevPeer = peer;
             }
+
             _headPeer = peer;
             AddPeerToSet(peer);
             if (peer.Id >= _peersArray.Length)
@@ -136,6 +143,7 @@ namespace LiteNetLib
                     newSize *= 2;
                 Array.Resize(ref _peersArray, newSize);
             }
+
             _peersArray[peer.Id] = peer;
             _peersLock.ExitWriteLock();
         }
@@ -193,9 +201,11 @@ namespace LiteNetLib
                     {
                         _freeList = i;
                     }
+
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -205,7 +215,8 @@ namespace LiteNetLib
             {
 #if NET8_0_OR_GREATER
                 //can be NetPeer or IPEndPoint
-                int hashCode = (UseNativeSockets ? endPoint.GetHashCode() : endPoint.Serialize().GetHashCode()) & Lower31BitMask;
+                int hashCode =
+ (UseNativeSockets ? endPoint.GetHashCode() : endPoint.Serialize().GetHashCode()) & Lower31BitMask;
 #else
                 int hashCode = endPoint.GetHashCode() & Lower31BitMask;
 #endif
@@ -219,8 +230,10 @@ namespace LiteNetLib
                         return true;
                     }
                 }
+
                 _peersLock.ExitReadLock();
             }
+
             actualValue = null;
             return false;
         }
@@ -241,8 +254,10 @@ namespace LiteNetLib
                         return true;
                     }
                 }
+
                 _peersLock.ExitReadLock();
             }
+
             actualValue = null;
             return false;
         }
@@ -290,13 +305,16 @@ namespace LiteNetLib
                         newSlots[i].Next = _buckets[b] - 1;
                         _buckets[b] = i + 1;
                     }
+
                     _slots = newSlots;
                     // this will change during resize
                     bucket = hashCode % _buckets.Length;
                 }
+
                 index = _lastIndex;
                 _lastIndex++;
             }
+
             _slots[index].HashCode = hashCode;
             _slots[index].Value = value;
             _slots[index].Next = _buckets[bucket] - 1;
@@ -306,5 +324,4 @@ namespace LiteNetLib
             return true;
         }
     }
-
 }

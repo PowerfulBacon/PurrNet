@@ -9,14 +9,23 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class PullRequest
     {
-        public PullRequest() { }
+        public PullRequest()
+        {
+        }
 
         public PullRequest(int number)
         {
             Number = number;
         }
 
-        public PullRequest(long id, string nodeId, string url, string htmlUrl, string diffUrl, string patchUrl, string issueUrl, string statusesUrl, int number, ItemState state, string title, string body, DateTimeOffset createdAt, DateTimeOffset updatedAt, DateTimeOffset? closedAt, DateTimeOffset? mergedAt, GitReference head, GitReference @base, User user, User assignee, IReadOnlyList<User> assignees, bool draft, bool? mergeable, MergeableState? mergeableState, User mergedBy, string mergeCommitSha, int comments, int commits, int additions, int deletions, int changedFiles, Milestone milestone, bool locked, bool? maintainerCanModify, IReadOnlyList<User> requestedReviewers, IReadOnlyList<Team> requestedTeams, IReadOnlyList<Label> labels, LockReason? activeLockReason)
+        public PullRequest(long id, string nodeId, string url, string htmlUrl, string diffUrl, string patchUrl,
+            string issueUrl, string statusesUrl, int number, ItemState state, string title, string body,
+            DateTimeOffset createdAt, DateTimeOffset updatedAt, DateTimeOffset? closedAt, DateTimeOffset? mergedAt,
+            GitReference head, GitReference @base, User user, User assignee, IReadOnlyList<User> assignees, bool draft,
+            bool? mergeable, MergeableState? mergeableState, User mergedBy, string mergeCommitSha, int comments,
+            int commits, int additions, int deletions, int changedFiles, Milestone milestone, bool locked,
+            bool? maintainerCanModify, IReadOnlyList<User> requestedReviewers, IReadOnlyList<Team> requestedTeams,
+            IReadOnlyList<Label> labels, LockReason? activeLockReason)
         {
             Id = id;
             NodeId = nodeId;
@@ -271,49 +280,41 @@ namespace Octokit
         /// <summary>
         /// Merge conflict. Merging is blocked.
         /// </summary>
-        [Parameter(Value = "dirty")]
-        Dirty,
+        [Parameter(Value = "dirty")] Dirty,
 
         /// <summary>
         /// Mergeability was not checked yet. Merging is blocked.
         /// </summary>
-        [Parameter(Value = "unknown")]
-        Unknown,
+        [Parameter(Value = "unknown")] Unknown,
 
         /// <summary>
         /// Failing/missing required status check.  Merging is blocked.
         /// </summary>
-        [Parameter(Value = "blocked")]
-        Blocked,
+        [Parameter(Value = "blocked")] Blocked,
 
         /// <summary>
         /// Head branch is behind the base branch. Only if required status checks is enabled but loose policy is not. Merging is blocked.
         /// </summary>
-        [Parameter(Value = "behind")]
-        Behind,
+        [Parameter(Value = "behind")] Behind,
 
         /// <summary>
         /// Failing/pending commit status that is not part of the required status checks. Merging is still allowed.
         /// </summary>
-        [Parameter(Value = "unstable")]
-        Unstable,
+        [Parameter(Value = "unstable")] Unstable,
 
         /// <summary>
         /// GitHub Enterprise only, if a repo has custom pre-receive hooks. Merging is allowed.
         /// </summary>
-        [Parameter(Value = "has_hooks")]
-        HasHooks,
+        [Parameter(Value = "has_hooks")] HasHooks,
 
         /// <summary>
         /// No conflicts, everything good. Merging is allowed.
         /// </summary>
-        [Parameter(Value = "clean")]
-        Clean,
+        [Parameter(Value = "clean")] Clean,
 
         /// <summary>
         /// Not ready for review. Merging is blocked.
         /// </summary>
-        [Parameter(Value = "draft")]
-        Draft
+        [Parameter(Value = "draft")] Draft
     }
 }

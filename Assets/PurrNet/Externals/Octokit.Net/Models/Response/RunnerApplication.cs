@@ -1,4 +1,3 @@
-
 using System.Diagnostics;
 
 namespace Octokit
@@ -6,9 +5,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RunnerApplication
     {
-        public RunnerApplication() { }
+        public RunnerApplication()
+        {
+        }
 
-        public RunnerApplication(string os, string architecture, string downloadUrl, string filename, string tempDownloadToken)
+        public RunnerApplication(string os, string architecture, string downloadUrl, string filename,
+            string tempDownloadToken)
         {
             Os = os;
             Architecture = architecture;
@@ -27,8 +29,9 @@ namespace Octokit
         {
             get
             {
-                return string.Format("Os: {0}; Architecture: {1}; DownloadUrl: {2}; Filename: {3}; TempDownloadToken: {4}",
-                  Os, Architecture, DownloadUrl, Filename, TempDownloadToken);
+                return string.Format(
+                    "Os: {0}; Architecture: {1}; DownloadUrl: {2}; Filename: {3}; TempDownloadToken: {4}",
+                    Os, Architecture, DownloadUrl, Filename, TempDownloadToken);
             }
         }
     }

@@ -15,9 +15,14 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Installation : InstallationId
     {
-        public Installation() { }
+        public Installation()
+        {
+        }
 
-        public Installation(long id, User account, string accessTokensUrl, string repositoriesUrl, string htmlUrl, long appId, long targetId, AccountType targetType, InstallationPermissions permissions, IReadOnlyList<string> events, string singleFileName, string repositorySelection, User suspendedBy, DateTimeOffset? suspendedAt) : base(id)
+        public Installation(long id, User account, string accessTokensUrl, string repositoriesUrl, string htmlUrl,
+            long appId, long targetId, AccountType targetType, InstallationPermissions permissions,
+            IReadOnlyList<string> events, string singleFileName, string repositorySelection, User suspendedBy,
+            DateTimeOffset? suspendedAt) : base(id)
         {
             Account = account;
             AccessTokensUrl = accessTokensUrl;
@@ -93,15 +98,14 @@ namespace Octokit
         /// </summary>
         public DateTimeOffset? SuspendedAt { get; private set; }
 
-        internal new string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "Id: {0} AppId: {1}", Id, AppId);
+        internal new string DebuggerDisplay =>
+            string.Format(CultureInfo.InvariantCulture, "Id: {0} AppId: {1}", Id, AppId);
     }
 
     public enum InstallationRepositorySelection
     {
-        [Parameter(Value = "all")]
-        All,
+        [Parameter(Value = "all")] All,
 
-        [Parameter(Value = "selected")]
-        Selected
+        [Parameter(Value = "selected")] Selected
     }
 }

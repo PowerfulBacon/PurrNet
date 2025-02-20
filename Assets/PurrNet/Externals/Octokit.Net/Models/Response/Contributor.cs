@@ -10,7 +10,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Contributor
     {
-        public Contributor() { }
+        public Contributor()
+        {
+        }
 
         public Contributor(Author author, int total, IReadOnlyList<WeeklyHash> weeks)
         {

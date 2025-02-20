@@ -9,32 +9,25 @@ namespace Octokit
 {
     public enum InstallationReadWritePermissionLevel
     {
-        [Parameter(Value = "read")]
-        Read,
-        [Parameter(Value = "write")]
-        Write
+        [Parameter(Value = "read")] Read,
+        [Parameter(Value = "write")] Write
     }
 
     public enum InstallationReadWriteAdminPermissionLevel
     {
-        [Parameter(Value = "read")]
-        Read,
-        [Parameter(Value = "write")]
-        Write,
-        [Parameter(Value = "admin")]
-        Admin
+        [Parameter(Value = "read")] Read,
+        [Parameter(Value = "write")] Write,
+        [Parameter(Value = "admin")] Admin
     }
 
     public enum InstallationWritePermissionLevel
     {
-        [Parameter(Value = "write")]
-        Write
+        [Parameter(Value = "write")] Write
     }
 
     public enum InstallationReadPermissionLevel
     {
-        [Parameter(Value = "read")]
-        Read
+        [Parameter(Value = "read")] Read
     }
 
     /// <summary>
@@ -42,12 +35,9 @@ namespace Octokit
     /// </summary>
     public enum TeamPermissionLegacy
     {
-        [Parameter(Value = "pull")]
-        Pull,
-        [Parameter(Value = "push")]
-        Push,
-        [Parameter(Value = "admin")]
-        Admin
+        [Parameter(Value = "pull")] Pull,
+        [Parameter(Value = "push")] Push,
+        [Parameter(Value = "admin")] Admin
     }
 
     /// <summary>
@@ -60,14 +50,12 @@ namespace Octokit
         /// <summary>
         /// team members can pull, but not push to these repositories
         /// </summary>
-        [Parameter(Value = "pull")]
-        Pull,
+        [Parameter(Value = "pull")] Pull,
 
         /// <summary>
         /// team members can pull and push to these repositories
         /// </summary>
-        [Parameter(Value = "push")]
-        Push
+        [Parameter(Value = "push")] Push
     }
 
     /// <summary>
@@ -75,30 +63,20 @@ namespace Octokit
     /// </summary>
     public enum InvitationPermissionType
     {
-        [Parameter(Value = "read")]
-        Read,
-        [Parameter(Value = "write")]
-        Write,
-        [Parameter(Value = "admin")]
-        Admin,
-        [Parameter(Value = "triage")]
-        Triage,
-        [Parameter(Value = "maintain")]
-        Maintain
+        [Parameter(Value = "read")] Read,
+        [Parameter(Value = "write")] Write,
+        [Parameter(Value = "admin")] Admin,
+        [Parameter(Value = "triage")] Triage,
+        [Parameter(Value = "maintain")] Maintain
     }
 
     public enum CollaboratorPermission
     {
-        [Parameter(Value = "pull")]
-        Pull,
-        [Parameter(Value = "triage")]
-        Triage,
-        [Parameter(Value = "push")]
-        Push,
-        [Parameter(Value = "maintain")]
-        Maintain,
-        [Parameter(Value = "admin")]
-        Admin
+        [Parameter(Value = "pull")] Pull,
+        [Parameter(Value = "triage")] Triage,
+        [Parameter(Value = "push")] Push,
+        [Parameter(Value = "maintain")] Maintain,
+        [Parameter(Value = "admin")] Admin
     }
 
     /// <summary>
@@ -107,7 +85,10 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class TeamRepositoryPermissions
     {
-        public TeamRepositoryPermissions() { }
+        public TeamRepositoryPermissions()
+        {
+        }
+
         public TeamRepositoryPermissions(bool pull, bool triage, bool push, bool maintain, bool admin)
         {
             Pull = pull;
@@ -153,7 +134,7 @@ namespace Octokit
         public bool Admin { get; private set; }
 
         internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture,
-                    $"Permissions: Pull: {Pull}, Triage: {Triage}, Push: {Push}, Maintain: {Maintain}, Admin: {Admin}");
+            $"Permissions: Pull: {Pull}, Triage: {Triage}, Push: {Push}, Maintain: {Maintain}, Admin: {Admin}");
     }
 
     /// <summary>
@@ -162,7 +143,10 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class CollaboratorPermissions
     {
-        public CollaboratorPermissions() { }
+        public CollaboratorPermissions()
+        {
+        }
+
         public CollaboratorPermissions(bool pull, bool? triage, bool push, bool? maintain, bool admin)
         {
             Pull = pull;
@@ -183,6 +167,6 @@ namespace Octokit
         public bool Admin { get; private set; }
 
         internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture,
-                    $"Permissions: Pull: {Pull}, Triage: {Triage}, Push: {Push}, Maintain: {Maintain}, Admin: {Admin}");
+            $"Permissions: Pull: {Pull}, Triage: {Triage}, Push: {Push}, Maintain: {Maintain}, Admin: {Admin}");
     }
 }

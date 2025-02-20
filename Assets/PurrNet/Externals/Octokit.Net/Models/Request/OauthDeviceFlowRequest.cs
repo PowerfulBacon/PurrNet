@@ -45,10 +45,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "ClientId: {0}, Scopes: {1}", ClientId, Scopes);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "ClientId: {0}, Scopes: {1}", ClientId, Scopes); }
         }
     }
 }

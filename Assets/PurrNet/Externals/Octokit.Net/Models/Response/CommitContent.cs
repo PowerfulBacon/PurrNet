@@ -10,9 +10,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RepositoryContentInfo
     {
-        public RepositoryContentInfo() { }
+        public RepositoryContentInfo()
+        {
+        }
 
-        public RepositoryContentInfo(string name, string path, string sha, int size, ContentType type, string downloadUrl, string url, string gitUrl, string htmlUrl)
+        public RepositoryContentInfo(string name, string path, string sha, int size, ContentType type,
+            string downloadUrl, string url, string gitUrl, string htmlUrl)
         {
             Name = name;
             Path = path;
@@ -48,7 +51,8 @@ namespace Octokit
         /// <summary>
         /// The type of this content. It might be a File, Directory, Submodule, or Symlink
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "Matches the property name used by the API")]
+        [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods",
+            Justification = "Matches the property name used by the API")]
         public StringEnum<ContentType> Type { get; protected set; }
 
         /// <summary>

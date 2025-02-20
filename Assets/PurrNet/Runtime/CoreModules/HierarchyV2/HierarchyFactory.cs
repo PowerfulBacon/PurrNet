@@ -7,18 +7,19 @@ namespace PurrNet.Modules
     public class HierarchyFactory : INetworkModule, IFixedUpdate, IPreFixedUpdate, ICleanup
     {
         readonly ScenesModule _scenes;
-        
+
         readonly NetworkManager _manager;
 
         readonly ScenePlayersModule _scenePlayersModule;
-        
-        readonly Dictionary<SceneID, HierarchyV2> _hierarchies = new ();
-        
-        readonly List<HierarchyV2> _rawHierarchies = new ();
-        
+
+        readonly Dictionary<SceneID, HierarchyV2> _hierarchies = new();
+
+        readonly List<HierarchyV2> _rawHierarchies = new();
+
         readonly PlayersManager _playersManager;
-        
-        public HierarchyFactory(NetworkManager manager, ScenesModule scenes, ScenePlayersModule scenePlayersModule, PlayersManager playersManager)
+
+        public HierarchyFactory(NetworkManager manager, ScenesModule scenes, ScenePlayersModule scenePlayersModule,
+            PlayersManager playersManager)
         {
             _manager = manager;
             _scenes = scenes;
@@ -29,11 +30,11 @@ namespace PurrNet.Modules
         public event IdentityAction onEarlyIdentityAdded;
 
         public event IdentityAction onIdentityAdded;
-        
+
         public event IdentityAction onIdentityRemoved;
 
         public event ObserverAction onEarlyObserverAdded;
-        
+
         // public event ObserverAction onObserverAdded;
 
         public void Enable(bool asServer)
@@ -63,23 +64,25 @@ namespace PurrNet.Modules
         {
             if (_hierarchies.ContainsKey(scene))
             {
-                PurrLogger.LogError($"Hierarchy module for scene {scene} already exists; trying to create another one?");
+                PurrLogger.LogError(
+                    $"Hierarchy module for scene {scene} already exists; trying to create another one?");
                 return;
             }
-            
+
             if (!_scenes.TryGetSceneState(scene, out var sceneState))
             {
                 PurrLogger.LogError($"Scene {scene} doesn't exist; trying to create hierarchy module for it?");
                 return;
             }
-            
-            var hierarchy = new HierarchyV2(_manager, scene, sceneState.scene, _scenePlayersModule, _playersManager, asServer);
+
+            var hierarchy = new HierarchyV2(_manager, scene, sceneState.scene, _scenePlayersModule, _playersManager,
+                asServer);
 
             hierarchy.onEarlyIdentityAdded += OnEarlyIdentityAdded;
             hierarchy.onObserverAdded += OnObserverAdded;
             hierarchy.onIdentityAdded += OnIdentityAdded;
             hierarchy.onIdentityRemoved += OnIdentityRemoved;
-            
+
             hierarchy.Enable();
 
             _rawHierarchies.Add(hierarchy);
@@ -87,11 +90,12 @@ namespace PurrNet.Modules
         }
 
         private void OnEarlyIdentityAdded(NetworkIdentity identity) => onEarlyIdentityAdded?.Invoke(identity);
-        
-        private void OnObserverAdded(PlayerID player, NetworkIdentity identity) => onEarlyObserverAdded?.Invoke(player, identity);
-        
+
+        private void OnObserverAdded(PlayerID player, NetworkIdentity identity) =>
+            onEarlyObserverAdded?.Invoke(player, identity);
+
         private void OnIdentityAdded(NetworkIdentity identity) => onIdentityAdded?.Invoke(identity);
-        
+
         private void OnIdentityRemoved(NetworkIdentity identity) => onIdentityRemoved?.Invoke(identity);
 
         private void OnSceneUnloaded(SceneID scene, bool asserver)
@@ -101,24 +105,24 @@ namespace PurrNet.Modules
                 PurrLogger.LogError($"Hierarchy module for scene {scene} doesn't exist; trying to unload it?");
                 return;
             }
-            
+
             hierarchy.Disable();
-            
+
             hierarchy.onEarlyIdentityAdded -= OnEarlyIdentityAdded;
             hierarchy.onObserverAdded -= OnObserverAdded;
             hierarchy.onIdentityAdded -= OnIdentityAdded;
             hierarchy.onIdentityRemoved -= OnIdentityRemoved;
-            
+
             _rawHierarchies.Remove(hierarchy);
             _hierarchies.Remove(scene);
         }
-        
+
         public void FixedUpdate()
         {
             for (var i = 0; i < _rawHierarchies.Count; i++)
                 _rawHierarchies[i].PostNetworkMessages();
         }
-        
+
         public void PreFixedUpdate()
         {
             for (var i = 0; i < _rawHierarchies.Count; i++)
@@ -129,7 +133,7 @@ namespace PurrNet.Modules
         {
             return _hierarchies.TryGetValue(sceneId, out o);
         }
-        
+
         public bool TryGetHierarchy(Scene scene, out HierarchyV2 o)
         {
             if (_scenes.TryGetSceneID(scene, out var sceneId))

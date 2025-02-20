@@ -11,18 +11,18 @@ namespace PurrNet
             var hashes = Resources.Load<TextAsset>($"PurrHashes");
             if (hashes == null)
                 return;
-            
+
             File.WriteAllText("hashes.txt", hashes.text);
 
             var hashesRuntume = Hasher.GetAllHashesAsText();
             File.WriteAllText("myhashes.txt", hashesRuntume);
-            
+
             string names = "";
-            
+
             var rootGameObjects = gameObject.scene.GetRootGameObjects();
-            
+
             PurrSceneInfo sceneInfo = null;
-            
+
             foreach (var rootObject in rootGameObjects)
             {
                 if (rootObject.TryGetComponent<PurrSceneInfo>(out var si))
@@ -37,7 +37,7 @@ namespace PurrNet
                 File.WriteAllText("scene.txt", "No PurrSceneInfo found");
                 return;
             }
-            
+
             for (var i = 0; i < sceneInfo.rootGameObjects.Count; i++)
             {
                 var rootObject = sceneInfo.rootGameObjects[i];

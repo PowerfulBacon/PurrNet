@@ -8,18 +8,18 @@ namespace PurrNet
         public static void CreateDelta(BitPacker origin, BitPacker target, BitPacker result)
         {
             result.ResetPositionAndMode(false);
-            
+
             var o = origin.ToByteData().span;
             var t = target.ToByteData().span;
-            
+
             Fossil.Delta.Create(o, t, result);
 
             var pickled = LZ4Pickler.Pickle(result.ToByteData().span);
-            
+
             result.ResetPositionAndMode(true);
             result.WriteBytes(pickled);
         }
-        
+
         public static void ApplyDelta(BitPacker origin, BitPacker delta, BitPacker result)
         {
             result.ResetPositionAndMode(false);

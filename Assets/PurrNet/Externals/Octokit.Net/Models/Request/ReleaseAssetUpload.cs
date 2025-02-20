@@ -10,9 +10,9 @@ namespace Octokit
     /// </summary>
     /// <remarks>
     /// This endpoint makes use of a Hypermedia relation to determine which URL to access. This endpoint is provided
-    /// by a URI template in the release’s API response. You need to use an HTTP client which supports SNI to make
+    /// by a URI template in the releaseï¿½s API response. You need to use an HTTP client which supports SNI to make
     /// calls to this endpoint. The asset data is expected in its raw binary form, rather than JSON. Everything else
-    ///  about the endpoint is the same as the rest of the API. For example, you’ll still need to pass your
+    ///  about the endpoint is the same as the rest of the API. For example, youï¿½ll still need to pass your
     ///  authentication to be able to upload an asset.
     /// </remarks>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
@@ -21,7 +21,9 @@ namespace Octokit
         /// <summary>
         /// Initializes a new instance of the <see cref="ReleaseAssetUpload"/> class.
         /// </summary>
-        public ReleaseAssetUpload() { }
+        public ReleaseAssetUpload()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReleaseAssetUpload"/> class.
@@ -75,10 +77,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "FileName: {0} ", FileName);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "FileName: {0} ", FileName); }
         }
     }
 }

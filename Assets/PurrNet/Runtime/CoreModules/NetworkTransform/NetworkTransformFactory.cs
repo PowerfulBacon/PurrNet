@@ -10,17 +10,18 @@ namespace PurrNet.Modules
         readonly PlayersBroadcaster _broadcaster;
         readonly NetworkManager _manager;
 
-        readonly List<NetworkTransformModule> _rawModules = new ();
-        readonly Dictionary<SceneID, NetworkTransformModule> _modules = new ();
+        readonly List<NetworkTransformModule> _rawModules = new();
+        readonly Dictionary<SceneID, NetworkTransformModule> _modules = new();
 
-        public NetworkTransformFactory(ScenesModule scenes, ScenePlayersModule scenePlayers, PlayersBroadcaster broadcaster, NetworkManager manager)
+        public NetworkTransformFactory(ScenesModule scenes, ScenePlayersModule scenePlayers,
+            PlayersBroadcaster broadcaster, NetworkManager manager)
         {
             _scenes = scenes;
             _scenePlayers = scenePlayers;
             _broadcaster = broadcaster;
             _manager = manager;
         }
-        
+
         public void Enable(bool asServer)
         {
             var scenes = _scenes.sceneStates;
@@ -48,10 +49,11 @@ namespace PurrNet.Modules
         {
             if (_modules.ContainsKey(scene))
             {
-                PurrLogger.LogError($"Hierarchy module for scene {scene} already exists; trying to create another one?");
+                PurrLogger.LogError(
+                    $"Hierarchy module for scene {scene} already exists; trying to create another one?");
                 return;
             }
-            
+
             var hierarchy = new NetworkTransformModule(_manager, _broadcaster, _scenePlayers, scene);
 
             hierarchy.Enable(asServer);

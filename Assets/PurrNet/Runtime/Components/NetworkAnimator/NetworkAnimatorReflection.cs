@@ -19,12 +19,12 @@ namespace PurrNet
         protected override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
         {
             bool isControlling = IsController(_ownerAuth);
-            
+
             bool shouldReconcile = (hasConnectedOwner && isOwner && !asServer) || (asServer && isControlling);
 
             if (shouldReconcile)
                 Reconcile();
-            
+
             if (_wasController != isControlling)
             {
                 _wasController = isControlling;
@@ -37,7 +37,7 @@ namespace PurrNet
         {
             if (!_animator || !_animator.runtimeAnimatorController)
                 return;
-            
+
             int paramCount = _animator.parameterCount;
 
             for (var i = 0; i < paramCount; i++)
@@ -46,7 +46,7 @@ namespace PurrNet
 
                 if (_dontSyncHashes.Contains(param.nameHash))
                     continue;
-                
+
                 switch (param.type)
                 {
                     case AnimatorControllerParameterType.Bool:
@@ -61,18 +61,18 @@ namespace PurrNet
                 }
             }
         }
-        
+
         private void CheckForParameterChanges()
         {
             if (!_animator || !_animator.runtimeAnimatorController)
                 return;
-            
+
             int paramCount = _animator.parameterCount;
 
             for (var i = 0; i < paramCount; i++)
             {
                 var param = _animator.parameters[i];
-                
+
                 if (_dontSyncHashes.Contains(param.nameHash))
                     continue;
 
@@ -82,33 +82,34 @@ namespace PurrNet
                     {
                         if (_boolValues.TryGetValue(param.nameHash, out var v) && v == _animator.GetBool(param.name))
                             continue;
-                        
+
                         var setBool = new SetBool
                         {
                             value = _animator.GetBool(param.name),
                             nameHash = param.nameHash
                         };
-                        
+
                         _boolValues[param.nameHash] = setBool.value;
-                        
-                        IfSameReplace(new NetAnimatorRPC(setBool), 
+
+                        IfSameReplace(new NetAnimatorRPC(setBool),
                             (a, b) => a._bool.nameHash == b._bool.nameHash);
                         break;
                     }
                     case AnimatorControllerParameterType.Float:
                     {
-                        if (_floatValues.TryGetValue(param.nameHash, out var v) && Mathf.Approximately(v, _animator.GetFloat(param.name)))
+                        if (_floatValues.TryGetValue(param.nameHash, out var v) &&
+                            Mathf.Approximately(v, _animator.GetFloat(param.name)))
                             continue;
-                        
+
                         var setFloat = new SetFloat
                         {
                             value = _animator.GetFloat(param.name),
                             nameHash = param.nameHash
                         };
-                        
+
                         _floatValues[param.nameHash] = setFloat.value;
-                        
-                        IfSameReplace(new NetAnimatorRPC(setFloat), 
+
+                        IfSameReplace(new NetAnimatorRPC(setFloat),
                             (a, b) => a._float.nameHash == b._float.nameHash);
                         break;
                     }
@@ -116,16 +117,16 @@ namespace PurrNet
                     {
                         if (_intValues.TryGetValue(param.nameHash, out var v) && v == _animator.GetInteger(param.name))
                             continue;
-                        
+
                         var setInt = new SetInt
                         {
                             value = _animator.GetInteger(param.name),
                             nameHash = param.nameHash
                         };
-                        
+
                         _intValues[param.nameHash] = setInt.value;
-                        
-                        IfSameReplace(new NetAnimatorRPC(setInt), 
+
+                        IfSameReplace(new NetAnimatorRPC(setInt),
                             (a, b) => a._int.nameHash == b._int.nameHash);
                         break;
                     }

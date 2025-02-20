@@ -42,6 +42,5 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="issueNumber">The issue number</param>
         Task Unlock(long repositoryId, int issueNumber);
-
     }
 }

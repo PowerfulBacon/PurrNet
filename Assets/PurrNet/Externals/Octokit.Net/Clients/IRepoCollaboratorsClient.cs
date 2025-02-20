@@ -89,7 +89,8 @@ namespace Octokit
         /// <param name="request">Used to request and filter a list of repository collaborators</param>
         /// <param name="options">Options for changing the API response</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
-        Task<IReadOnlyList<Collaborator>> GetAll(string owner, string name, RepositoryCollaboratorListRequest request, ApiOptions options);
+        Task<IReadOnlyList<Collaborator>> GetAll(string owner, string name, RepositoryCollaboratorListRequest request,
+            ApiOptions options);
 
         /// <summary>
         /// Gets all the collaborators on a repository.
@@ -101,7 +102,8 @@ namespace Octokit
         /// <param name="request">Used to request and filter a list of repository collaborators</param>
         /// <param name="options">Options for changing the API response</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
-        Task<IReadOnlyList<Collaborator>> GetAll(long repositoryId, RepositoryCollaboratorListRequest request, ApiOptions options);
+        Task<IReadOnlyList<Collaborator>> GetAll(long repositoryId, RepositoryCollaboratorListRequest request,
+            ApiOptions options);
 
         /// <summary>
         /// Checks if a user is a collaborator on a repository.

@@ -6,8 +6,8 @@ namespace PurrNet.Authentication
     [RegisterNetworkType(typeof(AuthenticationRequest<string>))]
     public class SimpleAuthenticator : AuthenticationBehaviour<string>
     {
-        [Tooltip("The password required to authenticate the client.")]
-        [SerializeField] private string _password = "PurrNet";
+        [Tooltip("The password required to authenticate the client.")] [SerializeField]
+        private string _password = "PurrNet";
 
         protected override Task<AuthenticationRequest<string>> GetClientPlayload()
         {

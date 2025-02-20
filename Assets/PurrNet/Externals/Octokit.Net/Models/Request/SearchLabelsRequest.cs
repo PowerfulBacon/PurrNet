@@ -60,7 +60,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Term: {0} Sort: {1} RepositoryId: {2}", Term, Sort, RepositoryId);
+                return string.Format(CultureInfo.InvariantCulture, "Term: {0} Sort: {1} RepositoryId: {2}", Term, Sort,
+                    RepositoryId);
             }
         }
     }
@@ -70,13 +71,11 @@ namespace Octokit
         /// <summary>
         /// search by created
         /// </summary>
-        [Parameter(Value = "created")]
-        Created,
+        [Parameter(Value = "created")] Created,
 
         /// <summary>
         /// search by last updated
         /// </summary>
-        [Parameter(Value = "updated")]
-        Updated
+        [Parameter(Value = "updated")] Updated
     }
 }

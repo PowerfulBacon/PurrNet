@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class CombinedCommitStatus
     {
-        public CombinedCommitStatus() { }
+        public CombinedCommitStatus()
+        {
+        }
 
-        public CombinedCommitStatus(CommitState state, string sha, int totalCount, IReadOnlyList<CommitStatus> statuses, Repository repository)
+        public CombinedCommitStatus(CommitState state, string sha, int totalCount, IReadOnlyList<CommitStatus> statuses,
+            Repository repository)
         {
             State = state;
             Sha = sha;
@@ -47,7 +50,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "SHA: {0}, State: {1}, TotalCount: {2}", Sha, State, TotalCount);
+                return string.Format(CultureInfo.InvariantCulture, "SHA: {0}, State: {1}, TotalCount: {2}", Sha, State,
+                    TotalCount);
             }
         }
     }

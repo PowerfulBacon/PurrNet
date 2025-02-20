@@ -15,7 +15,8 @@ namespace Octokit
         /// <param name="endLine">Required. The end line of the annotation</param>
         /// <param name="annotationLevel">Required. The level of the annotation. Can be one of notice, warning, or failure</param>
         /// <param name="message">Required. A short description of the feedback for these lines of code. The maximum size is 64 KB</param>
-        public NewCheckRunAnnotation(string path, int startLine, int endLine, CheckAnnotationLevel annotationLevel, string message)
+        public NewCheckRunAnnotation(string path, int startLine, int endLine, CheckAnnotationLevel annotationLevel,
+            string message)
         {
             Path = path;
             StartLine = startLine;
@@ -40,8 +41,10 @@ namespace Octokit
         /// <param name="endLine">Required. The end line of the annotation</param>
         /// <param name="warningLevel">Required. The warning level of the annotation. Can be one of notice, warning, or failure</param>
         /// <param name="message">Required. A short description of the feedback for these lines of code. The maximum size is 64 KB</param>
-        [Obsolete("This ctor taking Filename, BlobHref and WarningLevel is deprecated but may still be required on GitHub Enterprise 2.14")]
-        public NewCheckRunAnnotation(string filename, string blobHref, int startLine, int endLine, CheckWarningLevel warningLevel, string message)
+        [Obsolete(
+            "This ctor taking Filename, BlobHref and WarningLevel is deprecated but may still be required on GitHub Enterprise 2.14")]
+        public NewCheckRunAnnotation(string filename, string blobHref, int startLine, int endLine,
+            CheckWarningLevel warningLevel, string message)
         {
             Filename = filename;
             BlobHref = blobHref;
@@ -119,7 +122,9 @@ namespace Octokit
         public string RawDetails { get; set; }
 
 #pragma warning disable CS0618 // Type or member is obsolete
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "Path: {0}, StartLine: {1}, AnnotationLevel: {2}", Path ?? Filename, StartLine, AnnotationLevel?.DebuggerDisplay ?? WarningLevel?.DebuggerDisplay);
+        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture,
+            "Path: {0}, StartLine: {1}, AnnotationLevel: {2}", Path ?? Filename, StartLine,
+            AnnotationLevel?.DebuggerDisplay ?? WarningLevel?.DebuggerDisplay);
 #pragma warning restore CS0618 // Type or member is obsolete
     }
 }

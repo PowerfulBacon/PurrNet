@@ -20,14 +20,14 @@ namespace PurrNet.Transports
         public int webSocketsPort;
         public string region;
     }
-    
+
     [UsedImplicitly]
     [Serializable]
     public struct Relayers
     {
         public RelayServer[] servers;
     }
-    
+
     [UsedImplicitly]
     [Serializable]
     public struct HostJoinInfo
@@ -36,7 +36,7 @@ namespace PurrNet.Transports
         public string secret;
         public int port;
     }
-    
+
     [UsedImplicitly]
     [Serializable]
     public struct ClientJoinInfo
@@ -46,7 +46,7 @@ namespace PurrNet.Transports
         public string host;
         public int port;
     }
-    
+
     public static class PurrTransportUtils
     {
         static UniTask<string> Get(string url)
@@ -54,7 +54,7 @@ namespace PurrNet.Transports
             var request = UnityWebRequest.Get(url);
             return request.SendWebRequest().ToUniTask().ContinueWith(_ => request.downloadHandler.text);
         }
-        
+
         internal static async UniTask<ClientJoinInfo> Join(string server, string roomName)
         {
             var url = $"{server}join";
@@ -62,7 +62,7 @@ namespace PurrNet.Transports
             request.SetRequestHeader("name", roomName);
             var response = await request.SendWebRequest().ToUniTask();
             var text = response.downloadHandler.text;
-            var res =  JsonUtility.FromJson<ClientJoinInfo>(text);
+            var res = JsonUtility.FromJson<ClientJoinInfo>(text);
 #if USE_LOCAL_MASTER
             res.ssl = false;
 #else
@@ -70,7 +70,7 @@ namespace PurrNet.Transports
 #endif
             return res;
         }
-        
+
         internal static async UniTask<HostJoinInfo> Alloc(string server, string region, string roomName)
         {
             var url = $"{server}allocate_ws";
@@ -80,7 +80,7 @@ namespace PurrNet.Transports
             request.SetRequestHeader("name", roomName);
             var response = await request.SendWebRequest().ToUniTask();
             var text = response.downloadHandler.text;
-            var res =  JsonUtility.FromJson<HostJoinInfo>(text);
+            var res = JsonUtility.FromJson<HostJoinInfo>(text);
 #if USE_LOCAL_MASTER
             res.ssl = false;
 #else
@@ -88,7 +88,7 @@ namespace PurrNet.Transports
 #endif
             return res;
         }
-        
+
         static async UniTask<float> PingInMS(string url)
         {
             var request = UnityWebRequest.Get(url);
@@ -104,13 +104,13 @@ namespace PurrNet.Transports
             var response = await Get(master);
             return JsonUtility.FromJson<Relayers>(response);
         }
-        
+
         public static async UniTask<RelayServer> GetRelayServerAsync(string masterServer)
         {
             var servers = await GetRelayServersAsync(masterServer);
             float minPing = float.MaxValue;
             RelayServer result = default;
-            
+
             var pings = new List<Task<float>>();
 
             foreach (var server in servers.servers)
@@ -122,13 +122,13 @@ namespace PurrNet.Transports
 #endif
                 pings.Add(PingInMS(pingUrl).AsTask());
             }
-            
+
             await Task.WhenAny(pings);
 
             for (var i = 0; i < pings.Count; i++)
             {
                 var ping = pings[i];
-                
+
                 if (ping.Status != TaskStatus.RanToCompletion)
                     continue;
 
@@ -140,7 +140,7 @@ namespace PurrNet.Transports
                     result = servers.servers[i];
                 }
             }
-            
+
             return result;
         }
     }

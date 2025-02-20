@@ -11,10 +11,12 @@ namespace Octokit
     public class SecurityAndAnalysisRequest
     {
         public SecurityAndAnalysisRequest()
-        { }
+        {
+        }
 
-        public SecurityAndAnalysisRequest(AdvancedSecurityRequest advancedSecurity, DependabotSecurityUpdatesRequest dependabotSecurityUpdates, 
-            SecretScanningRequest secretScanning, SecretScanningPushProtectionRequest secretScanningPushProtection, 
+        public SecurityAndAnalysisRequest(AdvancedSecurityRequest advancedSecurity,
+            DependabotSecurityUpdatesRequest dependabotSecurityUpdates,
+            SecretScanningRequest secretScanning, SecretScanningPushProtectionRequest secretScanningPushProtection,
             SecretScanningValidityChecksRequest secretScanningValidityChecks)
         {
             this.AdvancedSecurity = advancedSecurity;
@@ -34,10 +36,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return new SimpleJsonSerializer().Serialize(this);
-            }
+            get { return new SimpleJsonSerializer().Serialize(this); }
         }
     }
 
@@ -49,7 +48,8 @@ namespace Octokit
     public class AdvancedSecurityRequest
     {
         public AdvancedSecurityRequest()
-        { }
+        {
+        }
 
         public AdvancedSecurityRequest(Status? status)
         {
@@ -63,10 +63,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return new SimpleJsonSerializer().Serialize(this);
-            }
+            get { return new SimpleJsonSerializer().Serialize(this); }
         }
     }
 
@@ -77,7 +74,8 @@ namespace Octokit
     public class DependabotSecurityUpdatesRequest
     {
         public DependabotSecurityUpdatesRequest()
-        { }
+        {
+        }
 
         public DependabotSecurityUpdatesRequest(Status? status)
         {
@@ -91,10 +89,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return new SimpleJsonSerializer().Serialize(this);
-            }
+            get { return new SimpleJsonSerializer().Serialize(this); }
         }
     }
 
@@ -105,7 +100,8 @@ namespace Octokit
     public class SecretScanningRequest
     {
         public SecretScanningRequest()
-        { }
+        {
+        }
 
         public SecretScanningRequest(Status? status)
         {
@@ -119,10 +115,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return new SimpleJsonSerializer().Serialize(this);
-            }
+            get { return new SimpleJsonSerializer().Serialize(this); }
         }
     }
 
@@ -133,7 +126,8 @@ namespace Octokit
     public class SecretScanningPushProtectionRequest
     {
         public SecretScanningPushProtectionRequest()
-        { }
+        {
+        }
 
         public SecretScanningPushProtectionRequest(Status? status)
         {
@@ -147,10 +141,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return new SimpleJsonSerializer().Serialize(this);
-            }
+            get { return new SimpleJsonSerializer().Serialize(this); }
         }
     }
 
@@ -161,7 +152,8 @@ namespace Octokit
     public class SecretScanningValidityChecksRequest
     {
         public SecretScanningValidityChecksRequest()
-        { }
+        {
+        }
 
         public SecretScanningValidityChecksRequest(Status? status)
         {
@@ -175,10 +167,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return new SimpleJsonSerializer().Serialize(this);
-            }
+            get { return new SimpleJsonSerializer().Serialize(this); }
         }
     }
 }

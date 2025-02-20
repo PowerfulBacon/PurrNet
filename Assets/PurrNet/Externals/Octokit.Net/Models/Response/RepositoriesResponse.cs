@@ -27,6 +27,7 @@ namespace Octokit
         /// </summary>
         public IReadOnlyList<Repository> Repositories { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "TotalCount: {0}, Repositories: {1}", TotalCount, Repositories.Count);
+        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture,
+            "TotalCount: {0}, Repositories: {1}", TotalCount, Repositories.Count);
     }
 }

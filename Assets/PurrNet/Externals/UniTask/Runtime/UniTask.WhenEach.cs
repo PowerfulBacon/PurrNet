@@ -57,6 +57,7 @@ namespace Cysharp.Threading.Tasks
             {
                 ExceptionDispatchInfo.Capture(Exception).Throw();
             }
+
             return Result;
         }
 
@@ -89,7 +90,8 @@ namespace Cysharp.Threading.Tasks
             this.source = source;
         }
 
-        public IUniTaskAsyncEnumerator<WhenEachResult<T>> GetAsyncEnumerator(CancellationToken cancellationToken = default)
+        public IUniTaskAsyncEnumerator<WhenEachResult<T>> GetAsyncEnumerator(
+            CancellationToken cancellationToken = default)
         {
             return new Enumerator(source, cancellationToken);
         }

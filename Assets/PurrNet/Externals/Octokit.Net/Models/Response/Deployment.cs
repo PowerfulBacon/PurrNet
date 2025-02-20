@@ -11,9 +11,14 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Deployment
     {
-        public Deployment() { }
+        public Deployment()
+        {
+        }
 
-        public Deployment(long id, string nodeId, string sha, string @ref, string url, User creator, IReadOnlyDictionary<string, string> payload, DateTimeOffset createdAt, DateTimeOffset updatedAt, string description, string statusesUrl, string repositoryUrl, string environment, string originalEnvironment, bool transientEnvironment, bool productionEnvironment, string task)
+        public Deployment(long id, string nodeId, string sha, string @ref, string url, User creator,
+            IReadOnlyDictionary<string, string> payload, DateTimeOffset createdAt, DateTimeOffset updatedAt,
+            string description, string statusesUrl, string repositoryUrl, string environment,
+            string originalEnvironment, bool transientEnvironment, bool productionEnvironment, string task)
         {
             Id = id;
             NodeId = nodeId;
@@ -121,10 +126,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "CreatedAt: {0}", CreatedAt);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "CreatedAt: {0}", CreatedAt); }
         }
     }
 }

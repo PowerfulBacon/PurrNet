@@ -9,32 +9,33 @@ using UnityEngine.SceneManagement;
 
 namespace PurrNet.Editor
 {
-    public class PurrNetSceneProcessor : IProcessSceneWithReport, IPreprocessBuildWithReport, IPostprocessBuildWithReport
+    public class PurrNetSceneProcessor : IProcessSceneWithReport, IPreprocessBuildWithReport,
+        IPostprocessBuildWithReport
     {
         static void CallAllRegisters()
         {
             // call all static functions with RegisterPackersAttribute on static classes
-            
+
             var allAssemblies = System.AppDomain.CurrentDomain.GetAssemblies();
-            
+
             foreach (var assembly in allAssemblies)
             {
                 var types = assembly.GetTypes();
-                
+
                 foreach (var type in types)
                 {
                     if (!type.IsAbstract || !type.IsSealed)
                         continue;
-                    
-                    var methods = type.GetMethods(System.Reflection.BindingFlags.Static | 
-                                                  System.Reflection.BindingFlags.Public | 
+
+                    var methods = type.GetMethods(System.Reflection.BindingFlags.Static |
+                                                  System.Reflection.BindingFlags.Public |
                                                   System.Reflection.BindingFlags.NonPublic);
-                    
+
                     foreach (var method in methods)
                     {
                         if (!method.IsStatic)
                             continue;
-                        
+
                         var attributes = method.GetCustomAttributes(typeof(RegisterPackersAttribute), false);
                         if (attributes.Length > 0)
                         {
@@ -52,19 +53,19 @@ namespace PurrNet.Editor
                 }
             }
         }
-        
+
         public int callbackOrder => 0;
-        
+
         public void OnPostprocessBuild(BuildReport report)
         {
             const string PATH = "Assets/Resources/PurrHashes.json";
-            
+
             if (File.Exists(PATH))
                 File.Delete(PATH);
-            
+
             if (File.Exists(PATH + ".meta"))
                 File.Delete(PATH + ".meta");
-            
+
             bool isResourcesFolderEmpty = Directory.GetFiles("Assets/Resources").Length == 0 &&
                                           Directory.GetDirectories("Assets/Resources").Length == 0;
 
@@ -74,7 +75,7 @@ namespace PurrNet.Editor
                 if (File.Exists("Assets/Resources.meta"))
                     File.Delete("Assets/Resources.meta");
             }
-            
+
             AssetDatabase.Refresh();
         }
 
@@ -84,10 +85,10 @@ namespace PurrNet.Editor
 
             const string PATH = "Assets/Resources/PurrHashes.json";
             Directory.CreateDirectory(Path.GetDirectoryName(PATH) ?? string.Empty);
-            
+
             var hashes = Hasher.GetAllHashesAsText();
             File.WriteAllText(PATH, hashes);
-            
+
             AssetDatabase.Refresh();
         }
 
@@ -95,13 +96,13 @@ namespace PurrNet.Editor
         {
             var rootObjects = scene.GetRootGameObjects();
             var obj = new GameObject("PurrNetSceneHelper");
-            
+
             if (report == null)
                 obj.hideFlags = HideFlags.HideAndDontSave;
 
             var sceneInfo = obj.AddComponent<PurrSceneInfo>();
             sceneInfo.rootGameObjects = new System.Collections.Generic.List<GameObject>();
-            
+
             for (uint i = 0; i < rootObjects.Length; i++)
             {
                 sceneInfo.rootGameObjects.Add(rootObjects[i]);

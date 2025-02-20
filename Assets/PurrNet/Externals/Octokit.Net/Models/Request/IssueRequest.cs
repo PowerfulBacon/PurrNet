@@ -81,10 +81,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Filter: {0} State: {1}", Filter, State);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Filter: {0} State: {1}", Filter, State); }
         }
     }
 
@@ -97,32 +94,27 @@ namespace Octokit
         /// <summary>
         /// Issues assigned to the authenticated user. (Default)
         /// </summary>
-        [Parameter(Value = "assigned")]
-        Assigned,
+        [Parameter(Value = "assigned")] Assigned,
 
         /// <summary>
         /// Issues created by the authenticated user.
         /// </summary>
-        [Parameter(Value = "created")]
-        Created,
+        [Parameter(Value = "created")] Created,
 
         /// <summary>
         /// Issues mentioning the authenticated user.
         /// </summary>
-        [Parameter(Value = "mentioned")]
-        Mentioned,
+        [Parameter(Value = "mentioned")] Mentioned,
 
         /// <summary>
         /// Issues the authenticated user is subscribed to for updates.
         /// </summary>
-        [Parameter(Value = "subscribed")]
-        Subscribed,
+        [Parameter(Value = "subscribed")] Subscribed,
 
         /// <summary>
         /// All issues the authenticated user can see, regardless of participation or creation.
         /// </summary>
-        [Parameter(Value = "all")]
-        All
+        [Parameter(Value = "all")] All
     }
 
     /// <summary>
@@ -133,20 +125,17 @@ namespace Octokit
         /// <summary>
         /// Items that are open.
         /// </summary>
-        [Parameter(Value = "open")]
-        Open,
+        [Parameter(Value = "open")] Open,
 
         /// <summary>
         /// Items that are closed.
         /// </summary>
-        [Parameter(Value = "closed")]
-        Closed,
+        [Parameter(Value = "closed")] Closed,
 
         /// <summary>
         /// All the items.
         /// </summary>
-        [Parameter(Value = "all")]
-        All
+        [Parameter(Value = "all")] All
     }
 
     /// <summary>
@@ -157,14 +146,12 @@ namespace Octokit
         /// <summary>
         /// Items that are open
         /// </summary>
-        [Parameter(Value = "open")]
-        Open,
+        [Parameter(Value = "open")] Open,
 
         /// <summary>
         /// Items that are closed
         /// </summary>
-        [Parameter(Value = "closed")]
-        Closed
+        [Parameter(Value = "closed")] Closed
     }
 
     /// <summary>
@@ -172,23 +159,20 @@ namespace Octokit
     /// </summary>
     public enum ItemStateReason
     {
-      /// <summary>
-      /// Item closed as completed.
-      /// </summary>
-      [Parameter(Value = "completed")]
-      Completed,
+        /// <summary>
+        /// Item closed as completed.
+        /// </summary>
+        [Parameter(Value = "completed")] Completed,
 
-      /// <summary>
-      /// Item closed as unplanned.
-      /// </summary>
-      [Parameter(Value = "not_planned")]
-      NotPlanned,
+        /// <summary>
+        /// Item closed as unplanned.
+        /// </summary>
+        [Parameter(Value = "not_planned")] NotPlanned,
 
-      /// <summary>
-      /// Item reopened.
-      /// </summary>
-      [Parameter(Value = "reopened")]
-      Reopened
+        /// <summary>
+        /// Item reopened.
+        /// </summary>
+        [Parameter(Value = "reopened")] Reopened
     }
 
     /// <summary>
@@ -199,20 +183,17 @@ namespace Octokit
         /// <summary>
         /// Sort by create date (default)
         /// </summary>
-        [Parameter(Value = "created")]
-        Created,
+        [Parameter(Value = "created")] Created,
 
         /// <summary>
         /// Sort by the date of the last update
         /// </summary>
-        [Parameter(Value = "updated")]
-        Updated,
+        [Parameter(Value = "updated")] Updated,
 
         /// <summary>
         /// Sort by the number of comments
         /// </summary>
-        [Parameter(Value = "comments")]
-        Comments
+        [Parameter(Value = "comments")] Comments
     }
 
     /// <summary>
@@ -223,13 +204,11 @@ namespace Octokit
         /// <summary>
         /// Sort ascending
         /// </summary>
-        [Parameter(Value = "asc")]
-        Ascending,
+        [Parameter(Value = "asc")] Ascending,
 
         /// <summary>
         /// Sort descending
         /// </summary>
-        [Parameter(Value = "desc")]
-        Descending
+        [Parameter(Value = "desc")] Descending
     }
 }

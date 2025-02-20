@@ -22,10 +22,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Role {0}", Role);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Role {0}", Role); }
         }
     }
 }

@@ -13,10 +13,11 @@ namespace PurrNet
         [SerializeField] private bool _ownerAuth;
         [SerializeField] private SerializableQueue<T> _serializedQueue = new SerializableQueue<T>();
         private Queue<T> _queue = new Queue<T>();
-        
+
         public delegate void SyncQueueChanged<TYPE>(SyncQueueChange<TYPE> change);
+
         public event SyncQueueChanged<T> onChanged;
-        
+
         public bool ownerAuth => _ownerAuth;
         public int Count => _queue.Count;
 
@@ -51,10 +52,10 @@ namespace PurrNet
         public override void OnSpawn()
         {
             if (!IsController(_ownerAuth)) return;
-            
+
             if (isServer)
                 SendInitialStateToAll(_queue);
-            else 
+            else
                 SendInitialStateToServer(_queue);
         }
 
@@ -67,7 +68,7 @@ namespace PurrNet
         {
             if (_queue.Count == 0)
                 throw new InvalidOperationException("Queue is empty");
-                
+
             return _queue.Peek();
         }
 
@@ -78,7 +79,7 @@ namespace PurrNet
                 result = default;
                 return false;
             }
-            
+
             result = _queue.Peek();
             return true;
         }
@@ -86,11 +87,11 @@ namespace PurrNet
         public void Enqueue(T item)
         {
             ValidateAuthority();
-            
+
             _queue.Enqueue(item);
             var change = new SyncQueueChange<T>(SyncQueueOperation.Enqueued, item);
             InvokeChange(change);
-            
+
             if (isSpawned)
             {
                 if (isServer)
@@ -103,14 +104,14 @@ namespace PurrNet
         public T Dequeue()
         {
             ValidateAuthority();
-            
+
             if (_queue.Count == 0)
                 throw new InvalidOperationException("Queue is empty");
-                
+
             T item = _queue.Dequeue();
             var change = new SyncQueueChange<T>(SyncQueueOperation.Dequeued, item);
             InvokeChange(change);
-            
+
             if (isSpawned)
             {
                 if (isServer)
@@ -118,7 +119,7 @@ namespace PurrNet
                 else
                     SendDequeueToServer();
             }
-            
+
             return item;
         }
 
@@ -129,7 +130,7 @@ namespace PurrNet
                 result = default;
                 return false;
             }
-            
+
             result = Dequeue();
             return true;
         }
@@ -137,11 +138,11 @@ namespace PurrNet
         public void Clear()
         {
             ValidateAuthority();
-            
+
             _queue.Clear();
             var change = new SyncQueueChange<T>(SyncQueueOperation.Cleared);
             InvokeChange(change);
-            
+
             if (isSpawned)
             {
                 if (isServer)
@@ -152,11 +153,11 @@ namespace PurrNet
         }
 
         public bool Contains(T item) => _queue.Contains(item);
-        
+
         public void CopyTo(T[] array, int arrayIndex) => _queue.CopyTo(array, arrayIndex);
-        
+
         public IEnumerator<T> GetEnumerator() => _queue.GetEnumerator();
-        
+
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         private void ValidateAuthority()
@@ -179,6 +180,7 @@ namespace PurrNet
         }
 
         #region Initial State Handling
+
         [TargetRpc(Channel.ReliableOrdered)]
         private void SendInitialToTarget(PlayerID player, Queue<T> items)
         {
@@ -190,20 +192,20 @@ namespace PurrNet
         {
             HandleInitialState(items);
         }
-        
+
         private void HandleInitialState(Queue<T> items)
         {
             if (!isHost)
             {
                 if (items == null)
                     return;
-                    
+
                 _queue.Clear();
                 foreach (var item in items)
                 {
                     _queue.Enqueue(item);
                 }
-                
+
                 InvokeChange(new SyncQueueChange<T>(SyncQueueOperation.Cleared));
                 foreach (var item in items)
                 {
@@ -211,7 +213,7 @@ namespace PurrNet
                 }
             }
         }
-        
+
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
         private void SendInitialStateToServer(Queue<T> items)
         {
@@ -229,7 +231,7 @@ namespace PurrNet
                 {
                     _queue.Enqueue(item);
                 }
-                
+
                 InvokeChange(new SyncQueueChange<T>(SyncQueueOperation.Cleared));
                 foreach (var item in items)
                 {
@@ -237,9 +239,11 @@ namespace PurrNet
                 }
             }
         }
+
         #endregion
 
         #region RPCs
+
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
         private void SendEnqueueToServer(T item)
         {
@@ -326,9 +330,10 @@ namespace PurrNet
                 InvokeChange(new SyncQueueChange<T>(SyncQueueOperation.Cleared));
             }
         }
+
         #endregion
     }
-    
+
     public enum SyncQueueOperation
     {
         Enqueued,
@@ -352,13 +357,13 @@ namespace PurrNet
             return $"Value: {value} | Operation: {operation}";
         }
     }
-    
+
     [Serializable]
     public class SerializableQueue<T>
     {
         [SerializeField] private List<T> _values = new List<T>();
         [SerializeField] private List<string> _stringValues = new List<string>();
-        
+
         private bool _isValueSerializable;
 
         public SerializableQueue()
@@ -369,7 +374,7 @@ namespace PurrNet
         public Queue<T> ToQueue()
         {
             var queue = new Queue<T>();
-    
+
             if (_isValueSerializable)
             {
                 foreach (var value in _values)
@@ -384,7 +389,7 @@ namespace PurrNet
                     queue.Enqueue(default);
                 }
             }
-    
+
             return queue;
         }
 
@@ -408,8 +413,9 @@ namespace PurrNet
 
         public bool IsSerializable => _isValueSerializable;
         public int Count => _isValueSerializable ? _values.Count : _stringValues.Count;
-        public string GetDisplayValue(int index) => _isValueSerializable ? 
-            (_values[index]?.ToString() ?? "null") : 
-            (_stringValues[index] ?? "null");
+
+        public string GetDisplayValue(int index) => _isValueSerializable
+            ? (_values[index]?.ToString() ?? "null")
+            : (_stringValues[index] ?? "null");
     }
 }

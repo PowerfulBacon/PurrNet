@@ -7,10 +7,10 @@ namespace Octokit
     {
         public OrganizationMembership()
         {
-
         }
 
-        public OrganizationMembership(string url, StringEnum<MembershipState> state, StringEnum<MembershipRole> role, string organizationUrl, Organization organization, User user)
+        public OrganizationMembership(string url, StringEnum<MembershipState> state, StringEnum<MembershipRole> role,
+            string organizationUrl, Organization organization, User user)
         {
             Url = url;
             State = state;
@@ -27,6 +27,7 @@ namespace Octokit
         public Organization Organization { get; private set; }
         public User User { get; private set; }
 
-        internal string DebuggerDisplay => $"{nameof(OrganizationMembership)}: User: {User.Login}; Organization: {Organization.Login}; State: {State}; Role: {Role}";
+        internal string DebuggerDisplay =>
+            $"{nameof(OrganizationMembership)}: User: {User.Login}; Organization: {Organization.Login}; State: {State}; Role: {Role}";
     }
 }

@@ -33,6 +33,7 @@ namespace Octokit
         [Parameter(Key = "repositories")]
         public IReadOnlyList<Repository> Repositories { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "OrganizationSecretRepositoryCollection: Count: {0}", Count);
+        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture,
+            "OrganizationSecretRepositoryCollection: Count: {0}", Count);
     }
 }

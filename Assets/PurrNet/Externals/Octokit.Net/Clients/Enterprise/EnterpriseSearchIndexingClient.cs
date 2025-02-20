@@ -13,7 +13,8 @@ namespace Octokit
     {
         public EnterpriseSearchIndexingClient(IApiConnection apiConnection)
             : base(apiConnection)
-        { }
+        {
+        }
 
         /// <summary>
         /// Queue an indexing job for a user or organization account (must be Site Admin user).
@@ -50,7 +51,8 @@ namespace Octokit
             Ensure.ArgumentNotNull(repository, nameof(repository));
 
             var endpoint = ApiUrls.EnterpriseSearchIndexing();
-            var target = new SearchIndexTarget(string.Format(CultureInfo.InvariantCulture, "{0}/{1}", owner, repository));
+            var target =
+                new SearchIndexTarget(string.Format(CultureInfo.InvariantCulture, "{0}/{1}", owner, repository));
 
             return ApiConnection.Post<SearchIndexingResponse>(endpoint, target);
         }
@@ -90,7 +92,8 @@ namespace Octokit
             Ensure.ArgumentNotNull(repository, nameof(repository));
 
             var endpoint = ApiUrls.EnterpriseSearchIndexing();
-            var target = new SearchIndexTarget(string.Format(CultureInfo.InvariantCulture, "{0}/{1}/issues", owner, repository));
+            var target =
+                new SearchIndexTarget(string.Format(CultureInfo.InvariantCulture, "{0}/{1}/issues", owner, repository));
 
             return ApiConnection.Post<SearchIndexingResponse>(endpoint, target);
         }
@@ -130,7 +133,8 @@ namespace Octokit
             Ensure.ArgumentNotNull(repository, nameof(repository));
 
             var endpoint = ApiUrls.EnterpriseSearchIndexing();
-            var target = new SearchIndexTarget(string.Format(CultureInfo.InvariantCulture, "{0}/{1}/code", owner, repository));
+            var target =
+                new SearchIndexTarget(string.Format(CultureInfo.InvariantCulture, "{0}/{1}/code", owner, repository));
 
             return ApiConnection.Post<SearchIndexingResponse>(endpoint, target);
         }

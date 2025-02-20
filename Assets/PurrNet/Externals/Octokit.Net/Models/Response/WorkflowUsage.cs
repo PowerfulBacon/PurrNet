@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class WorkflowUsage
     {
-        public WorkflowUsage() { }
+        public WorkflowUsage()
+        {
+        }
 
         public WorkflowUsage(WorkflowBillable billable)
         {
@@ -20,10 +22,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Billing: {0}", Billable);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Billing: {0}", Billable); }
         }
     }
 }

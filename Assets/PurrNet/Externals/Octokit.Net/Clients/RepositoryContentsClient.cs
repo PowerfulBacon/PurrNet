@@ -126,7 +126,8 @@ namespace Octokit
         /// <param name="path">The content path</param>
         /// <param name="reference">The name of the commit/branch/tag. Default: the repository�s default branch (usually main)</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/contents/{path}?ref={ref}")]
-        public Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(string owner, string name, string path, string reference)
+        public Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(string owner, string name, string path,
+            string reference)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -169,7 +170,8 @@ namespace Octokit
         /// <param name="path">The content path</param>
         /// <param name="reference">The name of the commit/branch/tag. Default: the repository’s default branch (usually main)</param>
         [ManualRoute("GET", "/repositories/{id}/contents/{path}?ref={ref}")]
-        public Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(long repositoryId, string path, string reference)
+        public Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(long repositoryId, string path,
+            string reference)
         {
             Ensure.ArgumentNotNullOrEmptyString(path, nameof(path));
             Ensure.ArgumentNotNullOrEmptyString(reference, nameof(reference));
@@ -386,7 +388,8 @@ namespace Octokit
         /// <param name="reference">A valid Git reference.</param>
         /// <param name="timeout"> Time span until timeout </param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/{archive_format}/{ref}")]
-        public async Task<byte[]> GetArchive(string owner, string name, ArchiveFormat archiveFormat, string reference, TimeSpan timeout)
+        public async Task<byte[]> GetArchive(string owner, string name, ArchiveFormat archiveFormat, string reference,
+            TimeSpan timeout)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -409,7 +412,8 @@ namespace Octokit
         /// <param name="reference">A valid Git reference.</param>
         /// <param name="timeout"> Time span until timeout </param>
         [ManualRoute("GET", "/repositories/{id}/{archive_format}/{ref}")]
-        public async Task<byte[]> GetArchive(long repositoryId, ArchiveFormat archiveFormat, string reference, TimeSpan timeout)
+        public async Task<byte[]> GetArchive(long repositoryId, ArchiveFormat archiveFormat, string reference,
+            TimeSpan timeout)
         {
             Ensure.ArgumentNotNull(reference, nameof(reference));
             Ensure.GreaterThanZero(timeout, nameof(timeout));
@@ -429,7 +433,8 @@ namespace Octokit
         /// <param name="path">The path to the file</param>
         /// <param name="request">Information about the file to create</param>
         [ManualRoute("PUT", "/repos/{owner}/{repo}/contents/{path}")]
-        public Task<RepositoryContentChangeSet> CreateFile(string owner, string name, string path, CreateFileRequest request)
+        public Task<RepositoryContentChangeSet> CreateFile(string owner, string name, string path,
+            CreateFileRequest request)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -464,7 +469,8 @@ namespace Octokit
         /// <param name="path">The path to the file</param>
         /// <param name="request">Information about the file to update</param>
         [ManualRoute("PUT", "/repos/{owner}/{repo}/contents/{path}")]
-        public Task<RepositoryContentChangeSet> UpdateFile(string owner, string name, string path, UpdateFileRequest request)
+        public Task<RepositoryContentChangeSet> UpdateFile(string owner, string name, string path,
+            UpdateFileRequest request)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));

@@ -31,6 +31,7 @@ namespace Octokit
         /// </summary>
         public IReadOnlyList<RepositorySecret> Secrets { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "RepositorySecretsCollection: Count: {0}", TotalCount);
+        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture,
+            "RepositorySecretsCollection: Count: {0}", TotalCount);
     }
 }

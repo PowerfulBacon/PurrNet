@@ -11,9 +11,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class UpsertOrganizationSecret : UpsertRepositorySecret
     {
-        public UpsertOrganizationSecret() { }
+        public UpsertOrganizationSecret()
+        {
+        }
 
-        public UpsertOrganizationSecret(string encryptedValue, string encryptionKeyId, string visibility, IEnumerable<long> selectedRepositoriesIds)
+        public UpsertOrganizationSecret(string encryptedValue, string encryptionKeyId, string visibility,
+            IEnumerable<long> selectedRepositoriesIds)
         {
             EncryptedValue = encryptedValue;
             KeyId = encryptionKeyId;
@@ -33,6 +36,7 @@ namespace Octokit
         [Parameter(Key = "selected_repository_ids")]
         public IEnumerable<long> SelectedRepositoriesIds { get; set; }
 
-        internal new string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "UpsertOrganizationSecret: Key ID: {0}", KeyId);
+        internal new string DebuggerDisplay =>
+            string.Format(CultureInfo.CurrentCulture, "UpsertOrganizationSecret: Key ID: {0}", KeyId);
     }
 }

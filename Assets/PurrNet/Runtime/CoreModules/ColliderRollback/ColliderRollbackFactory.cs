@@ -3,8 +3,8 @@ namespace PurrNet.Modules
     public class ColliderRollbackFactory : SceneScopedFactory<RollbackModule>, IPostFixedUpdate
     {
         readonly TickManager _tick;
-        
-        public ColliderRollbackFactory(TickManager tick, ScenesModule scenes) 
+
+        public ColliderRollbackFactory(TickManager tick, ScenesModule scenes)
             : base(scenes)
         {
             _tick = tick;

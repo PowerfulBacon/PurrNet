@@ -15,7 +15,7 @@ namespace PurrNet
             value = new StringUTF8(packer.ReadString(Encoding.UTF8));
         }
     }
-    
+
     public readonly struct StringUTF8
     {
         public readonly string value;
@@ -44,12 +44,12 @@ namespace PurrNet
         {
             return value.GetHashCode();
         }
-        
+
         public static implicit operator string(StringUTF8 value)
         {
             return value.value;
         }
-        
+
         public static implicit operator StringUTF8(string value)
         {
             return new StringUTF8(value);

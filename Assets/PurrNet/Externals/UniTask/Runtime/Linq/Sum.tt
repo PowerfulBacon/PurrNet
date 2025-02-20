@@ -12,7 +12,6 @@
         typeof(float),
         typeof(double),
         typeof(decimal),
-        
         typeof(int?),
         typeof(long?),
         typeof(float?),
@@ -32,7 +31,10 @@ namespace Cysharp.Threading.Tasks.Linq
 {
     public static partial class UniTaskAsyncEnumerable
     {
-<# foreach(var t in types) { #>
+<#
+    foreach (var t in types)
+    {
+#>
         public static UniTask<<#= TypeName(t) #>> SumAsync(this IUniTaskAsyncEnumerable<<#= TypeName(t) #>> source, CancellationToken cancellationToken = default)
         {
             Error.ThrowArgumentNullException(source, nameof(source));
@@ -64,12 +66,17 @@ namespace Cysharp.Threading.Tasks.Linq
             return Sum.SumAwaitWithCancellationAsync(source, selector, cancellationToken);
         }
 
-<# } #>
+<#
+    }
+#>
     }
 
     internal static class Sum
     {
-<# foreach(var t in types) { #>
+<#
+    foreach (var t in types)
+    {
+#>
         public static async UniTask<<#= TypeName(t) #>> SumAsync(IUniTaskAsyncEnumerable<<#= TypeName(t) #>> source, CancellationToken cancellationToken)
         {
             <#= TypeName(t) #> sum = default;
@@ -162,6 +169,8 @@ namespace Cysharp.Threading.Tasks.Linq
             return sum;
         }
 
-<# } #>
+<#
+    }
+#>
     }
 }

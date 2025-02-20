@@ -57,7 +57,8 @@ namespace Octokit
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns>The rendered Markdown.</returns>
         [ManualRoute("POST", "/markdown/raw")]
-        [Obsolete("This client is being deprecated and will be removed in the future. Use MarkdownClient.RenderRawMarkdown instead.")]
+        [Obsolete(
+            "This client is being deprecated and will be removed in the future. Use MarkdownClient.RenderRawMarkdown instead.")]
         public Task<string> RenderRawMarkdown(string markdown)
         {
             return _markdownClient.RenderRawMarkdown(markdown);
@@ -70,7 +71,8 @@ namespace Octokit
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns>The rendered Markdown.</returns>
         [ManualRoute("POST", "/markdown")]
-        [Obsolete("This client is being deprecated and will be removed in the future. Use MarkdownClient.RenderArbitraryMarkdown instead.")]
+        [Obsolete(
+            "This client is being deprecated and will be removed in the future. Use MarkdownClient.RenderArbitraryMarkdown instead.")]
         public Task<string> RenderArbitraryMarkdown(NewArbitraryMarkdown markdown)
         {
             return _markdownClient.RenderArbitraryMarkdown(markdown);
@@ -81,7 +83,8 @@ namespace Octokit
         /// </summary>
         /// <returns>A list of template names</returns>
         [ManualRoute("GET", "/gitignore/templates")]
-        [Obsolete("This client is being deprecated and will be removed in the future. Use GitIgnoreClient.GetAllGitIgnoreTemplates instead.")]
+        [Obsolete(
+            "This client is being deprecated and will be removed in the future. Use GitIgnoreClient.GetAllGitIgnoreTemplates instead.")]
         public Task<IReadOnlyList<string>> GetAllGitIgnoreTemplates()
         {
             return _gitIgnoreClient.GetAllGitIgnoreTemplates();
@@ -93,7 +96,8 @@ namespace Octokit
         /// <param name="templateName"></param>
         /// <returns>A template and its source</returns>
         [ManualRoute("GET", "/gitignore/templates/{name}")]
-        [Obsolete("This client is being deprecated and will be removed in the future. Use GitIgnoreClient.GetGitIgnoreTemplate instead.")]
+        [Obsolete(
+            "This client is being deprecated and will be removed in the future. Use GitIgnoreClient.GetGitIgnoreTemplate instead.")]
         public Task<GitIgnoreTemplate> GetGitIgnoreTemplate(string templateName)
         {
             Ensure.ArgumentNotNullOrEmptyString(templateName, nameof(templateName));
@@ -106,7 +110,8 @@ namespace Octokit
         /// list of all possible OSS licenses.
         /// </summary>
         /// <returns>A list of licenses available on the site</returns>
-        [Obsolete("This client is being deprecated and will be removed in the future. Use LicensesClient.GetAllLicenses instead.")]
+        [Obsolete(
+            "This client is being deprecated and will be removed in the future. Use LicensesClient.GetAllLicenses instead.")]
         [ManualRoute("GET", "/licenses")]
         public Task<IReadOnlyList<LicenseMetadata>> GetAllLicenses()
         {
@@ -120,7 +125,8 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <returns>A list of licenses available on the site</returns>
         [ManualRoute("GET", "/licenses")]
-        [Obsolete("This client is being deprecated and will be removed in the future. Use LicensesClient.GetAllLicenses instead.")]
+        [Obsolete(
+            "This client is being deprecated and will be removed in the future. Use LicensesClient.GetAllLicenses instead.")]
         public Task<IReadOnlyList<LicenseMetadata>> GetAllLicenses(ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, "options");
@@ -134,7 +140,8 @@ namespace Octokit
         /// <param name="key"></param>
         /// <returns>A <see cref="License" /> that includes the license key, text, and attributes of the license.</returns>
         [ManualRoute("GET", "/licenses/{key}")]
-        [Obsolete("This client is being deprecated and will be removed in the future. Use LicensesClient.GetLicense instead.")]
+        [Obsolete(
+            "This client is being deprecated and will be removed in the future. Use LicensesClient.GetLicense instead.")]
         public Task<License> GetLicense(string key)
         {
             return _licensesClient.GetLicense(key);
@@ -146,7 +153,8 @@ namespace Octokit
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns>An <see cref="MiscellaneousRateLimit"/> of Rate Limits.</returns>
         [ManualRoute("GET", "/rate_limit")]
-        [Obsolete("This client is being deprecated and will be removed in the future. Use RateLimitClient.GetRateLimits instead.")]
+        [Obsolete(
+            "This client is being deprecated and will be removed in the future. Use RateLimitClient.GetRateLimits instead.")]
         public Task<MiscellaneousRateLimit> GetRateLimits()
         {
             return _rateLimitClient.GetRateLimits();
@@ -158,7 +166,8 @@ namespace Octokit
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns>An <see cref="Meta"/> containing metadata about the GitHub instance.</returns>
         [ManualRoute("GET", "/meta")]
-        [Obsolete("This client is being deprecated and will be removed in the future. Use MetaClient.GetMetadata instead.")]
+        [Obsolete(
+            "This client is being deprecated and will be removed in the future. Use MetaClient.GetMetadata instead.")]
         public Task<Meta> GetMetadata()
         {
             return _metaClient.GetMetadata();

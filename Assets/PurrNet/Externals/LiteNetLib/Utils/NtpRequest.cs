@@ -27,6 +27,7 @@ namespace LiteNetLib.Utils
             {
                 return false;
             }
+
             var packet = new NtpPacket();
             try
             {

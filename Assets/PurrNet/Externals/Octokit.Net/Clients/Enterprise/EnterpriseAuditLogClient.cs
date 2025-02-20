@@ -15,7 +15,8 @@ namespace Octokit
     {
         public EnterpriseAuditLogClient(IApiConnection apiConnection)
             : base(apiConnection)
-        { }
+        {
+        }
 
         /// <summary>
         /// Gets GitHub Enterprise Audit Log Entries (must be Site Admin user).  Note: Defaults to 100 entries per page (max count).
@@ -80,7 +81,8 @@ namespace Octokit
         /// <param name="auditLogApiOptions">Options for changing the API response</param>
         /// <returns>The <see cref="AuditLogEvent"/> list.</returns>
         [ManualRoute("GET", "/enterprise/audit-log")]
-        public Task<IReadOnlyList<AuditLogEvent>> GetAll(string enterprise, AuditLogRequest request, AuditLogApiOptions auditLogApiOptions)
+        public Task<IReadOnlyList<AuditLogEvent>> GetAll(string enterprise, AuditLogRequest request,
+            AuditLogApiOptions auditLogApiOptions)
         {
             Ensure.ArgumentNotNull(enterprise, nameof(enterprise));
             Ensure.ArgumentNotNull(auditLogApiOptions, nameof(auditLogApiOptions));
@@ -90,7 +92,9 @@ namespace Octokit
                 PageSize = auditLogApiOptions.PageSize
             };
 
-            return ApiConnection.GetAll<AuditLogEvent>(ApiUrls.EnterpriseAuditLog(enterprise), request.ToParametersDictionary(), null, options, GeneratePreProcessFunction(auditLogApiOptions, options));
+            return ApiConnection.GetAll<AuditLogEvent>(ApiUrls.EnterpriseAuditLog(enterprise),
+                request.ToParametersDictionary(), null, options,
+                GeneratePreProcessFunction(auditLogApiOptions, options));
         }
 
         /// <summary>
@@ -155,7 +159,8 @@ namespace Octokit
         /// <param name="auditLogApiOptions">Options for changing the API response</param>
         /// <returns>The <see cref="AuditLogEvent"/> list.</returns>
         [ManualRoute("GET", "/enterprise/audit-log")]
-        public Task<IReadOnlyList<object>> GetAllJson(string enterprise, AuditLogRequest request, AuditLogApiOptions auditLogApiOptions)
+        public Task<IReadOnlyList<object>> GetAllJson(string enterprise, AuditLogRequest request,
+            AuditLogApiOptions auditLogApiOptions)
         {
             Ensure.ArgumentNotNull(enterprise, nameof(enterprise));
             Ensure.ArgumentNotNull(auditLogApiOptions, nameof(auditLogApiOptions));
@@ -165,10 +170,13 @@ namespace Octokit
                 PageSize = auditLogApiOptions.PageSize
             };
 
-            return ApiConnection.GetAll<object>(ApiUrls.EnterpriseAuditLog(enterprise), request.ToParametersDictionary(), null, options, GeneratePreProcessFunction(auditLogApiOptions, options));
+            return ApiConnection.GetAll<object>(ApiUrls.EnterpriseAuditLog(enterprise),
+                request.ToParametersDictionary(), null, options,
+                GeneratePreProcessFunction(auditLogApiOptions, options));
         }
 
-        private static Func<object, object> GeneratePreProcessFunction(AuditLogApiOptions auditLogApiOptions, ApiOptionsExtended options)
+        private static Func<object, object> GeneratePreProcessFunction(AuditLogApiOptions auditLogApiOptions,
+            ApiOptionsExtended options)
         {
             Func<object, object> preProcessResponseBody = null;
             if (string.IsNullOrEmpty(auditLogApiOptions?.StopWhenFound))
@@ -189,6 +197,7 @@ namespace Octokit
 
                         r = body.Replace("_document_id", "document_id").Replace("@timestamp", "timestamp");
                     }
+
                     return r;
                 };
 

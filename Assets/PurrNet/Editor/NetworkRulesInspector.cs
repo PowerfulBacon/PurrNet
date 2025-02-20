@@ -14,10 +14,10 @@ namespace PurrNet.Editor
 
             GUILayout.Label(description, DescriptionStyle());
             GUILayout.Space(10);
-            
+
             DrawDefaultInspector();
         }
-        
+
         private static GUIStyle DescriptionStyle()
         {
             var headerStyle = new GUIStyle(GUI.skin.label)
@@ -25,7 +25,7 @@ namespace PurrNet.Editor
                 wordWrap = true
             };
 
-            return headerStyle; 
+            return headerStyle;
         }
     }
 }

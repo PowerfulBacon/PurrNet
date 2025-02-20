@@ -9,17 +9,17 @@ namespace PurrNet.Editor
     {
         static readonly Dictionary<string, Texture2D> _textures = new Dictionary<string, Texture2D>();
         static readonly HashSet<string> _loading = new HashSet<string>();
-        
+
         public static Texture2D TryGetTexture(string url)
         {
             if (_textures.TryGetValue(url, out var texture))
                 return texture;
-            
+
             if (_loading.Add(url))
                 LoadTexture(url);
             return null;
         }
-        
+
         static async void LoadTexture(string url)
         {
             try

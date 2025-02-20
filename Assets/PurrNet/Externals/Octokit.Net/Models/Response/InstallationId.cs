@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class InstallationId
     {
-        public InstallationId() { }
+        public InstallationId()
+        {
+        }
 
         public InstallationId(long id)
         {

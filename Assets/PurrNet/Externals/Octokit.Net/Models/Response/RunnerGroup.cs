@@ -1,4 +1,3 @@
-
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,14 +7,18 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RunnerGroup
     {
-        public RunnerGroup() { }
+        public RunnerGroup()
+        {
+        }
 
         public RunnerGroup(long id)
         {
             Id = id;
         }
 
-        public RunnerGroup(long id, string name, string visibility, bool @default, string runnersUrl, bool inherited, bool allowsPublicRepositories, bool restrictedToWorkflows, List<string> selectedWorkflows, bool workflowRestrictionsReadOnly)
+        public RunnerGroup(long id, string name, string visibility, bool @default, string runnersUrl, bool inherited,
+            bool allowsPublicRepositories, bool restrictedToWorkflows, List<string> selectedWorkflows,
+            bool workflowRestrictionsReadOnly)
         {
             Id = id;
             Name = name;
@@ -40,7 +43,9 @@ namespace Octokit
         public IReadOnlyList<string> SelectedWorkflows { get; private set; }
         public bool WorkflowRestrictionsReadOnly { get; private set; }
 
-        internal string DebuggerDisplay => string.Format("Id: {0}, Name: {1}, Visibility: {2}, Default: {3}, RunnersUrl: {4}, Inherited: {5}, AllowsPublicRepositories: {6}, RestrictedToWorkflows: {7}, SelectedWorkflows: {8}, WorkflowRestrictionsReadOnly: {9}",
-         Id, Name, Visibility, Default, RunnersUrl, Inherited, AllowsPublicRepositories, RestrictedToWorkflows, string.Join(", ", SelectedWorkflows.Select(x => x.ToString())), WorkflowRestrictionsReadOnly);
+        internal string DebuggerDisplay => string.Format(
+            "Id: {0}, Name: {1}, Visibility: {2}, Default: {3}, RunnersUrl: {4}, Inherited: {5}, AllowsPublicRepositories: {6}, RestrictedToWorkflows: {7}, SelectedWorkflows: {8}, WorkflowRestrictionsReadOnly: {9}",
+            Id, Name, Visibility, Default, RunnersUrl, Inherited, AllowsPublicRepositories, RestrictedToWorkflows,
+            string.Join(", ", SelectedWorkflows.Select(x => x.ToString())), WorkflowRestrictionsReadOnly);
     }
 }

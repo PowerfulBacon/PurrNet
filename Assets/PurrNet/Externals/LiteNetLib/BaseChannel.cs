@@ -22,6 +22,7 @@ namespace LiteNetLib
             {
                 OutgoingQueue.Enqueue(packet);
             }
+
             AddToPeerChannelSendQueue();
         }
 

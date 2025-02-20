@@ -46,7 +46,8 @@ namespace Octokit
         /// <value>
         /// The type.
         /// </value>
-        [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "Property name as defined by web api")]
+        [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods",
+            Justification = "Property name as defined by web api")]
         public TaggedType Type { get; set; }
 
         /// <summary>
@@ -59,10 +60,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Tag {0} Type: {1}", Tag, Type);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Tag {0} Type: {1}", Tag, Type); }
         }
     }
 }

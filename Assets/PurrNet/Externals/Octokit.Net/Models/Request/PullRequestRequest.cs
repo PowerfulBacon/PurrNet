@@ -46,10 +46,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Base: {0} ", Base);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Base: {0} ", Base); }
         }
     }
 
@@ -58,25 +55,21 @@ namespace Octokit
         /// <summary>
         /// Sort by created date (default)
         /// </summary>
-        [Parameter(Value = "created")]
-        Created,
+        [Parameter(Value = "created")] Created,
 
         /// <summary>
         /// Sort by last updated date
         /// </summary>
-        [Parameter(Value = "updated")]
-        Updated,
+        [Parameter(Value = "updated")] Updated,
 
         /// <summary>
         /// Sort by popularity (comment count)
         /// </summary>
-        [Parameter(Value = "popularity")]
-        Popularity,
+        [Parameter(Value = "popularity")] Popularity,
 
         /// <summary>
         /// Sort by age (filtering by pulls updated in the last month)
         /// </summary>
-        [Parameter(Value = "long-running")]
-        LongRunning
+        [Parameter(Value = "long-running")] LongRunning
     }
 }

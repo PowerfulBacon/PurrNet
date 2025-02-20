@@ -27,6 +27,7 @@ namespace Octokit
         /// </summary>
         public IReadOnlyList<Installation> Installations { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "TotalCount: {0}, Installations: {1}", TotalCount, Installations.Count);
+        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture,
+            "TotalCount: {0}, Installations: {1}", TotalCount, Installations.Count);
     }
 }

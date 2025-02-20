@@ -36,7 +36,8 @@ namespace Octokit
         }
 
         // https://developer.github.com/v3/orgs/outside_collaborators/#response-if-user-is-a-member-of-the-organization
-        public override string Message => ApiErrorMessageSafe ?? "User could not be removed as an outside collaborator.";
+        public override string Message =>
+            ApiErrorMessageSafe ?? "User could not be removed as an outside collaborator.";
 
         /// <summary>
         /// Constructs an instance of <see cref="UserIsOrganizationMemberException"/>.

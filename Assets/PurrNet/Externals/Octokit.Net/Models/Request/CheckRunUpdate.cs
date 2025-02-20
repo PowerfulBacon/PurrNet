@@ -61,6 +61,7 @@ namespace Octokit
         /// </summary>
         public IReadOnlyList<NewCheckRunAction> Actions { get; set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "Name: {0}, Status: {1}, Conclusion: {2}", Name, Status, Conclusion);
+        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture,
+            "Name: {0}, Status: {1}, Conclusion: {2}", Name, Status, Conclusion);
     }
 }

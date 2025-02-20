@@ -7,7 +7,7 @@ namespace PurrNet
     internal struct NetAnimatorActionBatch : IPackedAuto
     {
         public List<NetAnimatorRPC> actions;
-        
+
         public static NetAnimatorActionBatch CreateReconcile(HashSet<int> ignoreHashes, Animator animator, bool ik)
         {
             var actions = new List<NetAnimatorRPC>();
@@ -49,7 +49,7 @@ namespace PurrNet
                     value = animator.cullingMode
                 }));
             }
-            
+
             return new NetAnimatorActionBatch
             {
                 actions = actions
@@ -66,7 +66,7 @@ namespace PurrNet
                     value = animator.GetIKPositionWeight(goal)
                 }));
             }
-            
+
             if (animator.GetIKRotationWeight(goal) > 0)
             {
                 actions.Add(new NetAnimatorRPC(new SetIKRotationWeight
@@ -75,7 +75,7 @@ namespace PurrNet
                     value = animator.GetIKRotationWeight(goal)
                 }));
             }
-            
+
             if (animator.GetIKPosition(goal) != default)
             {
                 actions.Add(new NetAnimatorRPC(new SetIKPosition
@@ -84,7 +84,7 @@ namespace PurrNet
                     position = animator.GetIKPosition(goal)
                 }));
             }
-            
+
             if (animator.GetIKRotation(goal) != Quaternion.identity)
             {
                 actions.Add(new NetAnimatorRPC(new SetIKRotation
@@ -94,7 +94,7 @@ namespace PurrNet
                 }));
             }
         }
-        
+
         private static void SyncIKHint(AvatarIKHint hint, Animator animator, List<NetAnimatorRPC> actions)
         {
             if (animator.GetIKHintPositionWeight(hint) > 0)
@@ -105,7 +105,7 @@ namespace PurrNet
                     value = animator.GetIKHintPositionWeight(hint)
                 }));
             }
-            
+
             if (animator.GetIKHintPosition(hint) != default)
             {
                 actions.Add(new NetAnimatorRPC(new SetIKHintPosition
@@ -120,7 +120,7 @@ namespace PurrNet
         {
             if (!animator.runtimeAnimatorController)
                 return;
-            
+
             for (var i = 0; i < animator.layerCount; i++)
             {
                 var info = animator.GetCurrentAnimatorStateInfo(i);
@@ -137,13 +137,13 @@ namespace PurrNet
         {
             if (!animator.runtimeAnimatorController)
                 return;
-            
+
             int paramCount = animator.parameterCount;
 
             for (var i = 0; i < paramCount; i++)
             {
                 var param = animator.parameters[i];
-                
+
                 if (ignoreHashes.Contains(param.nameHash))
                     continue;
 
@@ -167,7 +167,7 @@ namespace PurrNet
                             value = animator.GetFloat(param.name),
                             nameHash = param.nameHash
                         };
-                        
+
                         actions.Add(new NetAnimatorRPC(setFloat));
                         break;
                     }
@@ -178,7 +178,7 @@ namespace PurrNet
                             value = animator.GetInteger(param.name),
                             nameHash = param.nameHash
                         };
-                        
+
                         actions.Add(new NetAnimatorRPC(setInt));
                         break;
                     }

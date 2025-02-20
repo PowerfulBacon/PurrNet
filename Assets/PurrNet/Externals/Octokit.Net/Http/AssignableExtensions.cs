@@ -17,24 +17,24 @@ namespace Octokit
             }
 
             return givenType == genericType
-              || givenType.MapsToGenericTypeDefinition(genericType)
-              || givenType.HasInterfaceThatMapsToGenericTypeDefinition(genericType)
-              || givenType.BaseType.IsAssignableToGenericType(genericType);
+                   || givenType.MapsToGenericTypeDefinition(genericType)
+                   || givenType.HasInterfaceThatMapsToGenericTypeDefinition(genericType)
+                   || givenType.BaseType.IsAssignableToGenericType(genericType);
         }
 
         private static bool HasInterfaceThatMapsToGenericTypeDefinition(this Type givenType, Type genericType)
         {
             return givenType
-              .GetInterfaces()
-              .Where(it => it.IsGenericType)
-              .Any(it => it.GetGenericTypeDefinition() == genericType);
+                .GetInterfaces()
+                .Where(it => it.IsGenericType)
+                .Any(it => it.GetGenericTypeDefinition() == genericType);
         }
 
         private static bool MapsToGenericTypeDefinition(this Type givenType, Type genericType)
         {
             return genericType.IsGenericTypeDefinition
-              && givenType.IsGenericType
-              && givenType.GetGenericTypeDefinition() == genericType;
+                   && givenType.IsGenericType
+                   && givenType.GetGenericTypeDefinition() == genericType;
         }
     }
 }

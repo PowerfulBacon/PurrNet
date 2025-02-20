@@ -11,7 +11,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class TeamRepository
     {
-        public TeamRepository() { }
+        public TeamRepository()
+        {
+        }
 
         public TeamRepository(long id,
             string nodeId,
@@ -323,6 +325,7 @@ namespace Octokit
         /// example: http://api.github.com/repos/octocat/Hello-World/forks
         /// </summary>
         public string ForksUrl { get; private set; }
+
         ///example: http://api.github.com/repos/octocat/Hello-World/git/commits{/sha}
         public string GitCommitUrl { get; private set; }
 

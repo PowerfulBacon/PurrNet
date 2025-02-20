@@ -54,13 +54,15 @@ namespace Octokit
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/pulls/{pull_number}/comments")]
-        public Task<IReadOnlyList<PullRequestReviewComment>> GetAll(string owner, string name, int pullRequestNumber, ApiOptions options)
+        public Task<IReadOnlyList<PullRequestReviewComment>> GetAll(string owner, string name, int pullRequestNumber,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<PullRequestReviewComment>(ApiUrls.PullRequestReviewComments(owner, name, pullRequestNumber), null, options);
+            return ApiConnection.GetAll<PullRequestReviewComment>(
+                ApiUrls.PullRequestReviewComments(owner, name, pullRequestNumber), null, options);
         }
 
         /// <summary>
@@ -71,11 +73,13 @@ namespace Octokit
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repositories/{id}/pulls/{number}/comments")]
-        public Task<IReadOnlyList<PullRequestReviewComment>> GetAll(long repositoryId, int pullRequestNumber, ApiOptions options)
+        public Task<IReadOnlyList<PullRequestReviewComment>> GetAll(long repositoryId, int pullRequestNumber,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<PullRequestReviewComment>(ApiUrls.PullRequestReviewComments(repositoryId, pullRequestNumber), options);
+            return ApiConnection.GetAll<PullRequestReviewComment>(
+                ApiUrls.PullRequestReviewComments(repositoryId, pullRequestNumber), options);
         }
 
         /// <summary>
@@ -112,7 +116,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/pulls/comments")]
-        public Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(string owner, string name, ApiOptions options)
+        public Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(string owner, string name,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -143,7 +148,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="request">The sorting <see cref="PullRequestReviewCommentRequest">parameters</see></param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/pulls/comments")]
-        public Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(string owner, string name, PullRequestReviewCommentRequest request)
+        public Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(string owner, string name,
+            PullRequestReviewCommentRequest request)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -159,7 +165,8 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="request">The sorting <see cref="PullRequestReviewCommentRequest">parameters</see></param>
         [ManualRoute("GET", "/repositories/{id}/pulls/comments")]
-        public Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(long repositoryId, PullRequestReviewCommentRequest request)
+        public Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(long repositoryId,
+            PullRequestReviewCommentRequest request)
         {
             Ensure.ArgumentNotNull(request, nameof(request));
 
@@ -175,14 +182,16 @@ namespace Octokit
         /// <param name="request">The sorting <see cref="PullRequestReviewCommentRequest">parameters</see></param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/pulls/comments")]
-        public Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(string owner, string name, PullRequestReviewCommentRequest request, ApiOptions options)
+        public Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(string owner, string name,
+            PullRequestReviewCommentRequest request, ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<PullRequestReviewComment>(ApiUrls.PullRequestReviewCommentsRepository(owner, name), request.ToParametersDictionary(), options);
+            return ApiConnection.GetAll<PullRequestReviewComment>(
+                ApiUrls.PullRequestReviewCommentsRepository(owner, name), request.ToParametersDictionary(), options);
         }
 
         /// <summary>
@@ -193,12 +202,14 @@ namespace Octokit
         /// <param name="request">The sorting <see cref="PullRequestReviewCommentRequest">parameters</see></param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repositories/{id}/pulls/comments")]
-        public Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(long repositoryId, PullRequestReviewCommentRequest request, ApiOptions options)
+        public Task<IReadOnlyList<PullRequestReviewComment>> GetAllForRepository(long repositoryId,
+            PullRequestReviewCommentRequest request, ApiOptions options)
         {
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<PullRequestReviewComment>(ApiUrls.PullRequestReviewCommentsRepository(repositoryId), request.ToParametersDictionary(), options);
+            return ApiConnection.GetAll<PullRequestReviewComment>(
+                ApiUrls.PullRequestReviewCommentsRepository(repositoryId), request.ToParametersDictionary(), options);
         }
 
         /// <summary>
@@ -214,7 +225,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
 
-            return ApiConnection.Get<PullRequestReviewComment>(ApiUrls.PullRequestReviewComment(owner, name, commentId), new Dictionary<string, string>());
+            return ApiConnection.Get<PullRequestReviewComment>(ApiUrls.PullRequestReviewComment(owner, name, commentId),
+                new Dictionary<string, string>());
         }
 
         /// <summary>
@@ -226,7 +238,8 @@ namespace Octokit
         [ManualRoute("GET", "/repositories/{id}/pulls/comments/{number}")]
         public Task<PullRequestReviewComment> GetComment(long repositoryId, long commentId)
         {
-            return ApiConnection.Get<PullRequestReviewComment>(ApiUrls.PullRequestReviewComment(repositoryId, commentId));
+            return ApiConnection.Get<PullRequestReviewComment>(
+                ApiUrls.PullRequestReviewComment(repositoryId, commentId));
         }
 
         /// <summary>
@@ -238,18 +251,21 @@ namespace Octokit
         /// <param name="pullRequestNumber">The Pull Request number</param>
         /// <param name="comment">The comment</param>
         [ManualRoute("POST", "/repos/{owner}/{repo}/pulls/{pull_number}/comments")]
-        public async Task<PullRequestReviewComment> Create(string owner, string name, int pullRequestNumber, PullRequestReviewCommentCreate comment)
+        public async Task<PullRequestReviewComment> Create(string owner, string name, int pullRequestNumber,
+            PullRequestReviewCommentCreate comment)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(comment, nameof(comment));
 
             var endpoint = ApiUrls.PullRequestReviewComments(owner, name, pullRequestNumber);
-            var response = await ApiConnection.Connection.Post<PullRequestReviewComment>(endpoint, comment, null, null).ConfigureAwait(false);
+            var response = await ApiConnection.Connection.Post<PullRequestReviewComment>(endpoint, comment, null, null)
+                .ConfigureAwait(false);
 
             if (response.HttpResponse.StatusCode != HttpStatusCode.Created)
             {
-                throw new ApiException("Invalid Status Code returned. Expected a 201", response.HttpResponse.StatusCode);
+                throw new ApiException("Invalid Status Code returned. Expected a 201",
+                    response.HttpResponse.StatusCode);
             }
 
             return response.Body;
@@ -263,16 +279,19 @@ namespace Octokit
         /// <param name="pullRequestNumber">The Pull Request number</param>
         /// <param name="comment">The comment</param>
         [ManualRoute("POST", "/repositories/{id}/pulls/{number}/comments")]
-        public async Task<PullRequestReviewComment> Create(long repositoryId, int pullRequestNumber, PullRequestReviewCommentCreate comment)
+        public async Task<PullRequestReviewComment> Create(long repositoryId, int pullRequestNumber,
+            PullRequestReviewCommentCreate comment)
         {
             Ensure.ArgumentNotNull(comment, nameof(comment));
 
             var endpoint = ApiUrls.PullRequestReviewComments(repositoryId, pullRequestNumber);
-            var response = await ApiConnection.Connection.Post<PullRequestReviewComment>(endpoint, comment, null, null).ConfigureAwait(false);
+            var response = await ApiConnection.Connection.Post<PullRequestReviewComment>(endpoint, comment, null, null)
+                .ConfigureAwait(false);
 
             if (response.HttpResponse.StatusCode != HttpStatusCode.Created)
             {
-                throw new ApiException("Invalid Status Code returned. Expected a 201", response.HttpResponse.StatusCode);
+                throw new ApiException("Invalid Status Code returned. Expected a 201",
+                    response.HttpResponse.StatusCode);
             }
 
             return response.Body;
@@ -287,18 +306,21 @@ namespace Octokit
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="comment">The comment</param>
         [ManualRoute("POST", "/repos/{owner}/{repo}/pulls/{pull_number}/comment")]
-        public async Task<PullRequestReviewComment> CreateReply(string owner, string name, int pullRequestNumber, PullRequestReviewCommentReplyCreate comment)
+        public async Task<PullRequestReviewComment> CreateReply(string owner, string name, int pullRequestNumber,
+            PullRequestReviewCommentReplyCreate comment)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(comment, nameof(comment));
 
             var endpoint = ApiUrls.PullRequestReviewComments(owner, name, pullRequestNumber);
-            var response = await ApiConnection.Connection.Post<PullRequestReviewComment>(endpoint, comment, null, null).ConfigureAwait(false);
+            var response = await ApiConnection.Connection.Post<PullRequestReviewComment>(endpoint, comment, null, null)
+                .ConfigureAwait(false);
 
             if (response.HttpResponse.StatusCode != HttpStatusCode.Created)
             {
-                throw new ApiException("Invalid Status Code returned. Expected a 201", response.HttpResponse.StatusCode);
+                throw new ApiException("Invalid Status Code returned. Expected a 201",
+                    response.HttpResponse.StatusCode);
             }
 
             return response.Body;
@@ -312,16 +334,19 @@ namespace Octokit
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="comment">The comment</param>
         [ManualRoute("POST", "/repositories/{id}/pulls/{number}/comments")]
-        public async Task<PullRequestReviewComment> CreateReply(long repositoryId, int pullRequestNumber, PullRequestReviewCommentReplyCreate comment)
+        public async Task<PullRequestReviewComment> CreateReply(long repositoryId, int pullRequestNumber,
+            PullRequestReviewCommentReplyCreate comment)
         {
             Ensure.ArgumentNotNull(comment, nameof(comment));
 
             var endpoint = ApiUrls.PullRequestReviewComments(repositoryId, pullRequestNumber);
-            var response = await ApiConnection.Connection.Post<PullRequestReviewComment>(endpoint, comment, null, null).ConfigureAwait(false);
+            var response = await ApiConnection.Connection.Post<PullRequestReviewComment>(endpoint, comment, null, null)
+                .ConfigureAwait(false);
 
             if (response.HttpResponse.StatusCode != HttpStatusCode.Created)
             {
-                throw new ApiException("Invalid Status Code returned. Expected a 201", response.HttpResponse.StatusCode);
+                throw new ApiException("Invalid Status Code returned. Expected a 201",
+                    response.HttpResponse.StatusCode);
             }
 
             return response.Body;
@@ -336,13 +361,15 @@ namespace Octokit
         /// <param name="commentId">The pull request review comment id</param>
         /// <param name="comment">The edited comment</param>
         [ManualRoute("PATCH", "/repos/{owner}/{repo}/pulls/comments/{comment_id}")]
-        public Task<PullRequestReviewComment> Edit(string owner, string name, long commentId, PullRequestReviewCommentEdit comment)
+        public Task<PullRequestReviewComment> Edit(string owner, string name, long commentId,
+            PullRequestReviewCommentEdit comment)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(comment, nameof(comment));
 
-            return ApiConnection.Patch<PullRequestReviewComment>(ApiUrls.PullRequestReviewComment(owner, name, commentId), comment);
+            return ApiConnection.Patch<PullRequestReviewComment>(
+                ApiUrls.PullRequestReviewComment(owner, name, commentId), comment);
         }
 
         /// <summary>
@@ -353,11 +380,13 @@ namespace Octokit
         /// <param name="commentId">The pull request review comment id</param>
         /// <param name="comment">The edited comment</param>
         [ManualRoute("PATCH", "/repositories/{id}/pulls/comments/{number}")]
-        public Task<PullRequestReviewComment> Edit(long repositoryId, long commentId, PullRequestReviewCommentEdit comment)
+        public Task<PullRequestReviewComment> Edit(long repositoryId, long commentId,
+            PullRequestReviewCommentEdit comment)
         {
             Ensure.ArgumentNotNull(comment, nameof(comment));
 
-            return ApiConnection.Patch<PullRequestReviewComment>(ApiUrls.PullRequestReviewComment(repositoryId, commentId), comment);
+            return ApiConnection.Patch<PullRequestReviewComment>(
+                ApiUrls.PullRequestReviewComment(repositoryId, commentId), comment);
         }
 
         /// <summary>

@@ -237,7 +237,8 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <returns>A list of <see cref="OrganizationCredential"/>s.</returns>
         [ManualRoute("GET", "/orgs/{org}/credential-authorizations")]
-        public Task<IReadOnlyList<OrganizationCredential>> GetAllAuthorizations(string org, string login, ApiOptions options)
+        public Task<IReadOnlyList<OrganizationCredential>> GetAllAuthorizations(string org, string login,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNullOrEmptyString(login, nameof(login));

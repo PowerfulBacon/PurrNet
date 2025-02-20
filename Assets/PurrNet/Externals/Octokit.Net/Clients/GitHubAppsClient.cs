@@ -103,7 +103,8 @@ namespace Octokit
         [ManualRoute("GET", "/user/installations")]
         public async Task<InstallationsResponse> GetAllInstallationsForCurrentUser()
         {
-            var results = await ApiConnection.GetAll<InstallationsResponse>(ApiUrls.UserInstallations()).ConfigureAwait(false);
+            var results = await ApiConnection.GetAll<InstallationsResponse>(ApiUrls.UserInstallations())
+                .ConfigureAwait(false);
 
             return new InstallationsResponse(
                 results.Count > 0 ? results.Max(x => x.TotalCount) : 0,
@@ -119,7 +120,8 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            var results = await ApiConnection.GetAll<InstallationsResponse>(ApiUrls.UserInstallations(), null, options).ConfigureAwait(false);
+            var results = await ApiConnection.GetAll<InstallationsResponse>(ApiUrls.UserInstallations(), null, options)
+                .ConfigureAwait(false);
 
             return new InstallationsResponse(
                 results.Count > 0 ? results.Max(x => x.TotalCount) : 0,

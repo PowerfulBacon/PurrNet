@@ -8,9 +8,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class CommitStatus
     {
-        public CommitStatus() { }
+        public CommitStatus()
+        {
+        }
 
-        public CommitStatus(DateTimeOffset createdAt, DateTimeOffset updatedAt, CommitState state, string targetUrl, string description, string context, long id, string nodeId, string url, User creator)
+        public CommitStatus(DateTimeOffset createdAt, DateTimeOffset updatedAt, CommitState state, string targetUrl,
+            string description, string context, long id, string nodeId, string url, User creator)
         {
             CreatedAt = createdAt;
             UpdatedAt = updatedAt;
@@ -77,10 +80,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "CreatedAt: {0} State: {1}", CreatedAt, State);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "CreatedAt: {0} State: {1}", CreatedAt, State); }
         }
     }
 
@@ -92,25 +92,21 @@ namespace Octokit
         /// <summary>
         /// The commit state is still being determined. A build server might set this when it starts a build.
         /// </summary>
-        [Parameter(Value = "pending")]
-        Pending,
+        [Parameter(Value = "pending")] Pending,
 
         /// <summary>
         /// The build was successful for the commit.
         /// </summary>
-        [Parameter(Value = "success")]
-        Success,
+        [Parameter(Value = "success")] Success,
 
         /// <summary>
         /// There was some error with the build.
         /// </summary>
-        [Parameter(Value = "error")]
-        Error,
+        [Parameter(Value = "error")] Error,
 
         /// <summary>
         /// The build completed and reports a failure.
         /// </summary>
-        [Parameter(Value = "failure")]
-        Failure
+        [Parameter(Value = "failure")] Failure
     }
 }

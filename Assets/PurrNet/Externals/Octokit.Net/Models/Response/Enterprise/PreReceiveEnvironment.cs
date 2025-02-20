@@ -11,9 +11,11 @@ namespace Octokit
     public class PreReceiveEnvironment
     {
         public PreReceiveEnvironment()
-        { }
+        {
+        }
 
-        public PreReceiveEnvironment(long id, string name, string url, string imageUrl, string htmlUrl, bool defaultEnvironment, DateTimeOffset? createdAt, int hooksCount, PreReceiveEnvironmentDownload download)
+        public PreReceiveEnvironment(long id, string name, string url, string imageUrl, string htmlUrl,
+            bool defaultEnvironment, DateTimeOffset? createdAt, int hooksCount, PreReceiveEnvironmentDownload download)
         {
             Id = id;
             Name = name;
@@ -86,7 +88,11 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Id: {0} Name: {1} ImageUrl: {2}", Id, Name, ImageUrl); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Id: {0} Name: {1} ImageUrl: {2}", Id, Name,
+                    ImageUrl);
+            }
         }
     }
 }

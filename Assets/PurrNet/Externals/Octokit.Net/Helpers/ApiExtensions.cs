@@ -81,7 +81,8 @@ namespace Octokit
         /// <param name="cancellationToken">A token used to cancel the GetResponse request</param>
         /// <returns>The API resource.</returns>
         /// <exception cref="ApiException">Thrown when an API error occurs.</exception>
-        public static Task<IApiResponse<T>> GetResponse<T>(this IConnection connection, Uri uri, CancellationToken cancellationToken)
+        public static Task<IApiResponse<T>> GetResponse<T>(this IConnection connection, Uri uri,
+            CancellationToken cancellationToken)
         {
             Ensure.ArgumentNotNull(connection, nameof(connection));
             Ensure.ArgumentNotNull(uri, nameof(uri));
@@ -108,6 +109,7 @@ namespace Octokit
             {
                 throw new ApiException("Invalid Status Code returned. Expected a 204 or a 404", response.StatusCode);
             }
+
             return response.StatusCode == HttpStatusCode.NoContent;
         }
     }

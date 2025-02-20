@@ -8,9 +8,15 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class WorkflowJob
     {
-        public WorkflowJob() { }
+        public WorkflowJob()
+        {
+        }
 
-        public WorkflowJob(long id, long runId, string runUrl, string nodeId, string headSha, string url, string htmlUrl, WorkflowJobStatus status, WorkflowJobConclusion? conclusion, DateTimeOffset? createdAt, DateTimeOffset startedAt, DateTimeOffset? completedAt, string name, IReadOnlyList<WorkflowJobStep> steps, string checkRunUrl, IReadOnlyList<string> labels, long? runnerId = default, string runnerName = default, long? runnerGroupId = default, string runnerGroupName = default)
+        public WorkflowJob(long id, long runId, string runUrl, string nodeId, string headSha, string url,
+            string htmlUrl, WorkflowJobStatus status, WorkflowJobConclusion? conclusion, DateTimeOffset? createdAt,
+            DateTimeOffset startedAt, DateTimeOffset? completedAt, string name, IReadOnlyList<WorkflowJobStep> steps,
+            string checkRunUrl, IReadOnlyList<string> labels, long? runnerId = default, string runnerName = default,
+            long? runnerGroupId = default, string runnerGroupName = default)
         {
             Id = id;
             RunId = runId;
@@ -136,10 +142,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Id: {0} Name: {1}", Id, Name);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Id: {0} Name: {1}", Id, Name); }
         }
     }
 }

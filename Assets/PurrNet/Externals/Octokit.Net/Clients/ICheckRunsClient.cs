@@ -86,7 +86,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="reference">The commit reference (can be a SHA, branch name, or a tag name)</param>
         /// <param name="checkRunRequest">Details to filter the request, such as by check name</param>
-        Task<CheckRunsResponse> GetAllForReference(string owner, string name, string reference, CheckRunRequest checkRunRequest);
+        Task<CheckRunsResponse> GetAllForReference(string owner, string name, string reference,
+            CheckRunRequest checkRunRequest);
 
         /// <summary>
         /// Lists check runs for a commit ref. The ref can be a SHA, branch name, or a tag name
@@ -97,7 +98,8 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="reference">The commit reference (can be a SHA, branch name, or a tag name)</param>
         /// <param name="checkRunRequest">Details to filter the request, such as by check name</param>
-        Task<CheckRunsResponse> GetAllForReference(long repositoryId, string reference, CheckRunRequest checkRunRequest);
+        Task<CheckRunsResponse> GetAllForReference(long repositoryId, string reference,
+            CheckRunRequest checkRunRequest);
 
         /// <summary>
         /// Lists check runs for a commit ref. The ref can be a SHA, branch name, or a tag name
@@ -110,7 +112,8 @@ namespace Octokit
         /// <param name="reference">The commit reference (can be a SHA, branch name, or a tag name)</param>
         /// <param name="checkRunRequest">Details to filter the request, such as by check name</param>
         /// <param name="options">Options to change the API response</param>
-        Task<CheckRunsResponse> GetAllForReference(string owner, string name, string reference, CheckRunRequest checkRunRequest, ApiOptions options);
+        Task<CheckRunsResponse> GetAllForReference(string owner, string name, string reference,
+            CheckRunRequest checkRunRequest, ApiOptions options);
 
         /// <summary>
         /// Lists check runs for a commit ref. The ref can be a SHA, branch name, or a tag name
@@ -122,7 +125,8 @@ namespace Octokit
         /// <param name="reference">The commit reference (can be a SHA, branch name, or a tag name)</param>
         /// <param name="checkRunRequest">Details to filter the request, such as by check name</param>
         /// <param name="options">Options to change the API response</param>
-        Task<CheckRunsResponse> GetAllForReference(long repositoryId, string reference, CheckRunRequest checkRunRequest, ApiOptions options);
+        Task<CheckRunsResponse> GetAllForReference(long repositoryId, string reference, CheckRunRequest checkRunRequest,
+            ApiOptions options);
 
         /// <summary>
         /// Lists check runs for a check suite using its Id
@@ -155,7 +159,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="checkSuiteId">The Id of the check suite</param>
         /// <param name="checkRunRequest">Details to filter the request, such as by check name</param>
-        Task<CheckRunsResponse> GetAllForCheckSuite(string owner, string name, long checkSuiteId, CheckRunRequest checkRunRequest);
+        Task<CheckRunsResponse> GetAllForCheckSuite(string owner, string name, long checkSuiteId,
+            CheckRunRequest checkRunRequest);
 
         /// <summary>
         /// Lists check runs for a check suite using its Id
@@ -166,7 +171,8 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="checkSuiteId">The Id of the check suite</param>
         /// <param name="checkRunRequest">Details to filter the request, such as by check name</param>
-        Task<CheckRunsResponse> GetAllForCheckSuite(long repositoryId, long checkSuiteId, CheckRunRequest checkRunRequest);
+        Task<CheckRunsResponse> GetAllForCheckSuite(long repositoryId, long checkSuiteId,
+            CheckRunRequest checkRunRequest);
 
         /// <summary>
         /// Lists check runs for a check suite using its Id
@@ -179,7 +185,8 @@ namespace Octokit
         /// <param name="checkSuiteId">The Id of the check suite</param>
         /// <param name="checkRunRequest">Details to filter the request, such as by check name</param>
         /// <param name="options">Options to change the API response</param>
-        Task<CheckRunsResponse> GetAllForCheckSuite(string owner, string name, long checkSuiteId, CheckRunRequest checkRunRequest, ApiOptions options);
+        Task<CheckRunsResponse> GetAllForCheckSuite(string owner, string name, long checkSuiteId,
+            CheckRunRequest checkRunRequest, ApiOptions options);
 
         /// <summary>
         /// Lists check runs for a check suite using its Id
@@ -191,7 +198,8 @@ namespace Octokit
         /// <param name="checkSuiteId">The Id of the check suite</param>
         /// <param name="checkRunRequest">Details to filter the request, such as by check name</param>
         /// <param name="options">Options to change the API response</param>
-        Task<CheckRunsResponse> GetAllForCheckSuite(long repositoryId, long checkSuiteId, CheckRunRequest checkRunRequest, ApiOptions options);
+        Task<CheckRunsResponse> GetAllForCheckSuite(long repositoryId, long checkSuiteId,
+            CheckRunRequest checkRunRequest, ApiOptions options);
 
         /// <summary>
         /// Gets a single check run using its Id
@@ -246,7 +254,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="checkRunId">The Id of the check run</param>
         /// <param name="options">Options to change the API response</param>
-        Task<IReadOnlyList<CheckRunAnnotation>> GetAllAnnotations(string owner, string name, long checkRunId, ApiOptions options);
+        Task<IReadOnlyList<CheckRunAnnotation>> GetAllAnnotations(string owner, string name, long checkRunId,
+            ApiOptions options);
 
         /// <summary>
         /// Lists annotations for a check run using the check run Id
@@ -257,6 +266,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="checkRunId">The Id of the check run</param>
         /// <param name="options">Options to change the API response</param>
-        Task<IReadOnlyList<CheckRunAnnotation>> GetAllAnnotations(long repositoryId, long checkRunId, ApiOptions options);
+        Task<IReadOnlyList<CheckRunAnnotation>> GetAllAnnotations(long repositoryId, long checkRunId,
+            ApiOptions options);
     }
 }

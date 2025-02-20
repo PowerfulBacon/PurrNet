@@ -54,12 +54,14 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="cancellationToken">A token used to cancel this potentially long running request</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/stats/contributors")]
-        public Task<IReadOnlyList<Contributor>> GetContributors(string owner, string name, CancellationToken cancellationToken)
+        public Task<IReadOnlyList<Contributor>> GetContributors(string owner, string name,
+            CancellationToken cancellationToken)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
 
-            return ApiConnection.GetQueuedOperation<Contributor>(ApiUrls.StatsContributors(owner, name), cancellationToken);
+            return ApiConnection.GetQueuedOperation<Contributor>(ApiUrls.StatsContributors(owner, name),
+                cancellationToken);
         }
 
         /// <summary>
@@ -70,7 +72,8 @@ namespace Octokit
         [ManualRoute("GET", "/repositories/{id}/stats/contributors")]
         public Task<IReadOnlyList<Contributor>> GetContributors(long repositoryId, CancellationToken cancellationToken)
         {
-            return ApiConnection.GetQueuedOperation<Contributor>(ApiUrls.StatsContributors(repositoryId), cancellationToken);
+            return ApiConnection.GetQueuedOperation<Contributor>(ApiUrls.StatsContributors(repositoryId),
+                cancellationToken);
         }
 
         /// <summary>
@@ -104,12 +107,15 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="cancellationToken">A token used to cancel this potentially long running request</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/stats/commit_activity")]
-        public async Task<CommitActivity> GetCommitActivity(string owner, string name, CancellationToken cancellationToken)
+        public async Task<CommitActivity> GetCommitActivity(string owner, string name,
+            CancellationToken cancellationToken)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
 
-            var activity = await ApiConnection.GetQueuedOperation<WeeklyCommitActivity>(ApiUrls.StatsCommitActivity(owner, name), cancellationToken).ConfigureAwait(false);
+            var activity = await ApiConnection
+                .GetQueuedOperation<WeeklyCommitActivity>(ApiUrls.StatsCommitActivity(owner, name), cancellationToken)
+                .ConfigureAwait(false);
             return new CommitActivity(activity);
         }
 
@@ -121,7 +127,9 @@ namespace Octokit
         [ManualRoute("GET", "/repositories/{id}/stats/commit_activity")]
         public async Task<CommitActivity> GetCommitActivity(long repositoryId, CancellationToken cancellationToken)
         {
-            var activity = await ApiConnection.GetQueuedOperation<WeeklyCommitActivity>(ApiUrls.StatsCommitActivity(repositoryId), cancellationToken).ConfigureAwait(false);
+            var activity = await ApiConnection
+                .GetQueuedOperation<WeeklyCommitActivity>(ApiUrls.StatsCommitActivity(repositoryId), cancellationToken)
+                .ConfigureAwait(false);
             return new CommitActivity(activity);
         }
 
@@ -156,12 +164,15 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="cancellationToken">A token used to cancel this potentially long running request</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/stats/code_frequency")]
-        public async Task<CodeFrequency> GetCodeFrequency(string owner, string name, CancellationToken cancellationToken)
+        public async Task<CodeFrequency> GetCodeFrequency(string owner, string name,
+            CancellationToken cancellationToken)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
 
-            var rawFrequencies = await ApiConnection.GetQueuedOperation<long[]>(ApiUrls.StatsCodeFrequency(owner, name), cancellationToken).ConfigureAwait(false);
+            var rawFrequencies = await ApiConnection
+                .GetQueuedOperation<long[]>(ApiUrls.StatsCodeFrequency(owner, name), cancellationToken)
+                .ConfigureAwait(false);
             return new CodeFrequency(rawFrequencies);
         }
 
@@ -173,7 +184,9 @@ namespace Octokit
         [ManualRoute("GET", "/repositories/{id}/stats/code_frequency")]
         public async Task<CodeFrequency> GetCodeFrequency(long repositoryId, CancellationToken cancellationToken)
         {
-            var rawFrequencies = await ApiConnection.GetQueuedOperation<long[]>(ApiUrls.StatsCodeFrequency(repositoryId), cancellationToken).ConfigureAwait(false);
+            var rawFrequencies = await ApiConnection
+                .GetQueuedOperation<long[]>(ApiUrls.StatsCodeFrequency(repositoryId), cancellationToken)
+                .ConfigureAwait(false);
             return new CodeFrequency(rawFrequencies);
         }
 
@@ -208,12 +221,15 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="cancellationToken">A token used to cancel this potentially long running request</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/stats/participation")]
-        public async Task<Participation> GetParticipation(string owner, string name, CancellationToken cancellationToken)
+        public async Task<Participation> GetParticipation(string owner, string name,
+            CancellationToken cancellationToken)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
 
-            var result = await ApiConnection.GetQueuedOperation<Participation>(ApiUrls.StatsParticipation(owner, name), cancellationToken).ConfigureAwait(false);
+            var result = await ApiConnection
+                .GetQueuedOperation<Participation>(ApiUrls.StatsParticipation(owner, name), cancellationToken)
+                .ConfigureAwait(false);
             return result.FirstOrDefault();
         }
 
@@ -225,7 +241,9 @@ namespace Octokit
         [ManualRoute("GET", "/repositories/{id}/stats/participation")]
         public async Task<Participation> GetParticipation(long repositoryId, CancellationToken cancellationToken)
         {
-            var result = await ApiConnection.GetQueuedOperation<Participation>(ApiUrls.StatsParticipation(repositoryId), cancellationToken).ConfigureAwait(false);
+            var result = await ApiConnection
+                .GetQueuedOperation<Participation>(ApiUrls.StatsParticipation(repositoryId), cancellationToken)
+                .ConfigureAwait(false);
             return result.FirstOrDefault();
         }
 
@@ -265,7 +283,9 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
 
-            var punchCardData = await ApiConnection.GetQueuedOperation<int[]>(ApiUrls.StatsPunchCard(owner, name), cancellationToken).ConfigureAwait(false);
+            var punchCardData = await ApiConnection
+                .GetQueuedOperation<int[]>(ApiUrls.StatsPunchCard(owner, name), cancellationToken)
+                .ConfigureAwait(false);
             return new PunchCard(punchCardData);
         }
 
@@ -277,7 +297,9 @@ namespace Octokit
         [ManualRoute("GET", "/repositories/{id}/stats/punch_card")]
         public async Task<PunchCard> GetPunchCard(long repositoryId, CancellationToken cancellationToken)
         {
-            var punchCardData = await ApiConnection.GetQueuedOperation<int[]>(ApiUrls.StatsPunchCard(repositoryId), cancellationToken).ConfigureAwait(false);
+            var punchCardData = await ApiConnection
+                .GetQueuedOperation<int[]>(ApiUrls.StatsPunchCard(repositoryId), cancellationToken)
+                .ConfigureAwait(false);
             return new PunchCard(punchCardData);
         }
     }

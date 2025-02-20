@@ -36,17 +36,20 @@ namespace Octokit
             string clientSecret,
             NewAuthorization newAuthorization,
             Func<TwoFactorRequiredException, Task<TwoFactorChallengeResult>> twoFactorChallengeHandler
-            )
+        )
         {
             TwoFactorRequiredException twoFactorException = null;
             try
             {
-                return await authorizationsClient.GetOrCreateApplicationAuthentication(clientId, clientSecret, newAuthorization).ConfigureAwait(false);
+                return await authorizationsClient
+                    .GetOrCreateApplicationAuthentication(clientId, clientSecret, newAuthorization)
+                    .ConfigureAwait(false);
             }
             catch (TwoFactorRequiredException exception)
             {
                 twoFactorException = exception;
             }
+
             var twoFactorChallengeResult = await twoFactorChallengeHandler(twoFactorException).ConfigureAwait(false);
 
             return await (twoFactorChallengeResult.ResendCodeRequested

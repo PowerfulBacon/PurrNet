@@ -103,7 +103,6 @@ namespace Octokit
         Task<IReadOnlyList<Gist>> GetAllPublic(DateTimeOffset since, ApiOptions options);
 
 
-
         /// <summary>
         /// List the authenticated user’s starred gists
         /// </summary>

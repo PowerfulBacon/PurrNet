@@ -8,7 +8,7 @@ namespace PurrNet
     public static class InstanceHandler
     {
         private static readonly Dictionary<Type, object> _instances = new Dictionary<Type, object>();
-        
+
         /// <summary>
         /// Returns the NetworkManager instance. It will dynamically find it if it's null.
         /// </summary>
@@ -22,13 +22,14 @@ namespace PurrNet
                     //if (!_networkManager) //Not sure we should be logging this, as it will also log when they try and do a null check
                     //    PurrLogger.LogError($"No {nameof(NetworkManager)} found in scene!");
                 }
+
                 return _networkManager;
             }
             private set => _networkManager = value;
         }
 
         private static NetworkManager _networkManager;
-        
+
         /// <summary>
         /// Clears every instance in the handler.
         /// </summary>
@@ -38,7 +39,7 @@ namespace PurrNet
             NetworkManager = null;
         }
 
-        
+
         /// <summary>
         /// Registers a instance of the given type, in order to use GetInstance later.
         /// </summary>
@@ -48,7 +49,7 @@ namespace PurrNet
         {
             _instances[typeof(T)] = instance;
         }
-        
+
         /// <summary>
         /// Unregisters a instance of the given type.
         /// </summary>
@@ -57,7 +58,7 @@ namespace PurrNet
         {
             _instances.Remove(typeof(T));
         }
-        
+
         /// <summary>
         /// Get a registered instance of the given type
         /// </summary>
@@ -68,10 +69,10 @@ namespace PurrNet
         {
             if (!_instances.TryGetValue(typeof(T), out var instance))
                 throw new KeyNotFoundException($"Singleton of type {typeof(T)} not found");
-            
+
             return (T)instance;
         }
-        
+
         /// <summary>
         /// Try and get a registered instance
         /// </summary>

@@ -17,7 +17,8 @@ namespace Octokit
         /// <param name="apiConnection">An API connection</param>
         public EnterprisePreReceiveHooksClient(IApiConnection apiConnection)
             : base(apiConnection)
-        { }
+        {
+        }
 
         /// <summary>
         /// Gets all <see cref="PreReceiveHook"/>s.

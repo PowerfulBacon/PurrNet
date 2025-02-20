@@ -5,7 +5,9 @@ namespace Octokit.Internal
 {
     public abstract class SearchResult<T>
     {
-        protected SearchResult() { }
+        protected SearchResult()
+        {
+        }
 
         protected SearchResult(int totalCount, bool incompleteResults, IReadOnlyList<T> items)
         {
@@ -31,10 +33,7 @@ namespace Octokit.Internal
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "TotalCount: {0}", TotalCount);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "TotalCount: {0}", TotalCount); }
         }
     }
 }

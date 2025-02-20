@@ -10,9 +10,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class EnvironmentApproval
     {
-        public EnvironmentApproval() { }
+        public EnvironmentApproval()
+        {
+        }
 
-        public EnvironmentApproval(long id, string nodeId, string name, string url, string htmlUrl, DateTimeOffset createdAt, DateTimeOffset updatedAt)
+        public EnvironmentApproval(long id, string nodeId, string name, string url, string htmlUrl,
+            DateTimeOffset createdAt, DateTimeOffset updatedAt)
         {
             Id = id;
             NodeId = nodeId;
@@ -60,10 +63,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Id: {0}, Name: {1}", Id, Name);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Id: {0}, Name: {1}", Id, Name); }
         }
     }
 }

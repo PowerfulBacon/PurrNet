@@ -93,7 +93,8 @@ namespace Octokit
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns>A <see cref="RepositorySecret"/> instance for the repository secret that was created or updated.</returns>
         [ManualRoute("PUT", "/repos/{owner}/{repo}/actions/secrets/{secretName}")]
-        public async Task<RepositorySecret> CreateOrUpdate(string owner, string repoName, string secretName, UpsertRepositorySecret upsertSecret)
+        public async Task<RepositorySecret> CreateOrUpdate(string owner, string repoName, string secretName,
+            UpsertRepositorySecret upsertSecret)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(repoName, nameof(repoName));

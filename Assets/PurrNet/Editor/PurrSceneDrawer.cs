@@ -22,7 +22,7 @@ namespace PurrNet
 
             sceneCache.Clear();
             string[] sceneGuids = AssetDatabase.FindAssets("t:SceneAsset");
-            
+
             foreach (string guid in sceneGuids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);

@@ -11,13 +11,15 @@ namespace JamesFrowen.SimpleWeb
         Connected = 2,
         Disconnecting = 3,
     }
+
     /// <summary>
     /// Client used to control websockets
     /// <para>Base class used by WebSocketClientWebGl and WebSocketClientStandAlone</para>
     /// </summary>
     public abstract class SimpleWebClient
     {
-        public static SimpleWebClient Create(int maxMessageSize, int maxMessagesPerTick, TcpConfig tcpConfig, bool allowSSLErrors = false)
+        public static SimpleWebClient Create(int maxMessageSize, int maxMessagesPerTick, TcpConfig tcpConfig,
+            bool allowSSLErrors = false)
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
             return new WebSocketClientWebGl(maxMessageSize, maxMessagesPerTick);
@@ -69,7 +71,7 @@ namespace JamesFrowen.SimpleWeb
                 processedCount < maxMessagesPerTick &&
                 // Dequeue last
                 receiveQueue.TryDequeue(out Message next)
-                )
+            )
             {
                 processedCount++;
 

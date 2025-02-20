@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Package
     {
-        public Package() { }
+        public Package()
+        {
+        }
 
-        public Package(long id, string name, PackageType packageType, Author owner, int versionCount, PackageVisibility visibility, string url, DateTime createdAt, DateTime updatedAt, string htmlUrl)
+        public Package(long id, string name, PackageType packageType, Author owner, int versionCount,
+            PackageVisibility visibility, string url, DateTime createdAt, DateTime updatedAt, string htmlUrl)
         {
             Id = id;
             Name = name;

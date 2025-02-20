@@ -22,6 +22,7 @@ namespace JamesFrowen.SimpleWeb
         /// <para>Only valid on server</para>
         /// </summary>
         public Request request;
+
         /// <summary>
         /// RemoteEndpoint address or address from request header
         /// <para>Only valid on server</para>

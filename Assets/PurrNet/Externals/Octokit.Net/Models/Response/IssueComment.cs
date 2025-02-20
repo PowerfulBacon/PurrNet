@@ -8,9 +8,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class IssueComment
     {
-        public IssueComment() { }
+        public IssueComment()
+        {
+        }
 
-        public IssueComment(long id, string nodeId, string url, string htmlUrl, string body, DateTimeOffset createdAt, DateTimeOffset? updatedAt, User user, ReactionSummary reactions, AuthorAssociation authorAssociation)
+        public IssueComment(long id, string nodeId, string url, string htmlUrl, string body, DateTimeOffset createdAt,
+            DateTimeOffset? updatedAt, User user, ReactionSummary reactions, AuthorAssociation authorAssociation)
         {
             Id = id;
             NodeId = nodeId;
@@ -85,13 +88,11 @@ namespace Octokit
         /// <summary>
         /// Sort by create date (default)
         /// </summary>
-        [Parameter(Value = "created")]
-        Created,
+        [Parameter(Value = "created")] Created,
 
         /// <summary>
         /// Sort by the date of the last update
         /// </summary>
-        [Parameter(Value = "updated")]
-        Updated
+        [Parameter(Value = "updated")] Updated
     }
 }

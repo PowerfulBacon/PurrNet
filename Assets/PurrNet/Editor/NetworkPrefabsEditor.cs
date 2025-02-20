@@ -12,20 +12,20 @@ namespace PurrNet
         private SerializedProperty prefabs;
         private bool? allPoolingState = null;
         private ReorderableList reorderableList;
-        
+
         private const float POOL_TOGGLE_WIDTH = 45f;
         const float WARMUP_COUNT_WIDTH = 60f;
         private const float SPACING = 8f;
         private const float REORDERABLE_LIST_BUTTON_WIDTH = 25f;
-        
+
         private void OnEnable()
         {
             networkPrefabs = (NetworkPrefabs)target;
             prefabs = serializedObject.FindProperty("prefabs");
-            
+
             if (networkPrefabs.autoGenerate)
                 networkPrefabs.Generate();
-                
+
             UpdateAllPoolingState();
             SetupReorderableList();
         }
@@ -34,14 +34,15 @@ namespace PurrNet
         {
             reorderableList = new ReorderableList(serializedObject, prefabs, true, true, true, true);
             reorderableList.elementHeight = EditorGUIUtility.singleLineHeight;
-            
+
             reorderableList.drawHeaderCallback = (Rect rect) =>
             {
                 float fullWidth = rect.width - REORDERABLE_LIST_BUTTON_WIDTH;
                 CalculateWidths(fullWidth, out float prefabWidth, out float poolWidth, out float warmupWidth);
 
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, prefabWidth, rect.height), "Prefab");
-                EditorGUI.LabelField(new Rect(rect.x + prefabWidth + SPACING, rect.y, poolWidth + warmupWidth, rect.height), "Pool");
+                EditorGUI.LabelField(
+                    new Rect(rect.x + prefabWidth + SPACING, rect.y, poolWidth + warmupWidth, rect.height), "Pool");
             };
 
             reorderableList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
@@ -54,12 +55,17 @@ namespace PurrNet
                 float fullWidth = rect.width - REORDERABLE_LIST_BUTTON_WIDTH;
                 CalculateWidths(fullWidth, out float prefabWidth, out float poolWidth, out float warmupWidth);
 
-                EditorGUI.PropertyField(new Rect(rect.x, rect.y, prefabWidth, rect.height), prefabProp, GUIContent.none);
-                poolProp.boolValue = EditorGUI.Toggle(new Rect(rect.x + prefabWidth + SPACING, rect.y, poolWidth, rect.height), poolProp.boolValue);
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y, prefabWidth, rect.height), prefabProp,
+                    GUIContent.none);
+                poolProp.boolValue =
+                    EditorGUI.Toggle(new Rect(rect.x + prefabWidth + SPACING, rect.y, poolWidth, rect.height),
+                        poolProp.boolValue);
 
                 if (poolProp.boolValue)
                 {
-                    EditorGUI.PropertyField(new Rect(rect.x + prefabWidth + poolWidth + (SPACING * 2), rect.y, warmupWidth, rect.height), warmupCountProp, GUIContent.none);
+                    EditorGUI.PropertyField(
+                        new Rect(rect.x + prefabWidth + poolWidth + (SPACING * 2), rect.y, warmupWidth, rect.height),
+                        warmupCountProp, GUIContent.none);
                 }
             };
 
@@ -77,7 +83,7 @@ namespace PurrNet
                     serializedObject.ApplyModifiedProperties();
                     UpdateAllPoolingState();
                 });
-                
+
                 menu.AddItem(new GUIContent("Add Selected Prefabs"), false, () =>
                 {
                     bool addedAny = false;
@@ -94,17 +100,18 @@ namespace PurrNet
                             element.FindPropertyRelative("warmupCount").intValue = 5;
                         }
                     }
+
                     if (addedAny)
                     {
                         serializedObject.ApplyModifiedProperties();
                         UpdateAllPoolingState();
                     }
                 });
-                
+
                 menu.ShowAsContext();
             };
         }
-        
+
         private void CalculateWidths(float fullWidth, out float prefabWidth, out float poolWidth, out float warmupWidth)
         {
             float spacing = SPACING;
@@ -133,15 +140,15 @@ namespace PurrNet
                 }
             }
         }
-        
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
 
             GUILayout.Label("Network Prefabs", EditorStyles.boldLabel, GUILayout.ExpandWidth(true));
             const string description = "This asset is used to store any prefabs containing a Network Behaviour. " +
-                                     "You can add prefabs to this asset manually or auto generate the references. " +
-                                     "This list is used by the NetworkManager to spawn network prefabs.";
+                                       "You can add prefabs to this asset manually or auto generate the references. " +
+                                       "This list is used by the NetworkManager to spawn network prefabs.";
 
             GUILayout.Label(description, DescriptionStyle());
 
@@ -172,7 +179,7 @@ namespace PurrNet
                 prefabs = serializedObject.FindProperty("prefabs");
                 UpdateAllPoolingState();
             }
-            
+
             GUILayout.Space(10);
 
             EditorGUI.BeginDisabledGroup(networkPrefabs.autoGenerate);
@@ -200,8 +207,10 @@ namespace PurrNet
                     prefabs = serializedObject.FindProperty("prefabs");
                     UpdateAllPoolingState();
                 }
+
                 EditorUtility.SetDirty(networkPrefabs);
             }
+
             GUI.color = Color.white;
         }
 

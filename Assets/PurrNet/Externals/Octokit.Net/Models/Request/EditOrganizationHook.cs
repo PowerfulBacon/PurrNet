@@ -16,7 +16,8 @@ namespace Octokit
         /// Initializes a new instance of the <see cref="EditOrganizationHook"/> class.
         /// </summary>
         public EditOrganizationHook() : this(null)
-        { }
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EditOrganizationHook"/> class.

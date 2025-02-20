@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace JamesFrowen.SimpleWeb
 {
-
     public class SslConfigLoader
     {
         internal struct Cert
@@ -12,6 +11,7 @@ namespace JamesFrowen.SimpleWeb
             public string path;
             public string password;
         }
+
         public static SslConfig Load(bool sslEnabled, string sslCertJson, SslProtocols sslProtocols)
         {
             // dont need to load anything if ssl is not enabled
@@ -39,6 +39,7 @@ namespace JamesFrowen.SimpleWeb
             {
                 throw new InvalidDataException("Cert Json didn't not contain \"path\"");
             }
+
             // dont use IsNullOrWhiteSpace here because whitespace could be a valid password for a cert
             if (string.IsNullOrEmpty(cert.password))
             {

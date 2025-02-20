@@ -10,19 +10,16 @@ namespace Octokit
         /// <summary>
         /// Indicates the pre-receive hook will not run.
         /// </summary>
-        [Parameter(Value = "disabled")]
-        Disabled,
+        [Parameter(Value = "disabled")] Disabled,
 
         /// <summary>
         /// Indicates it will run and reject any pushes that result in a non-zero status.
         /// </summary>
-        [Parameter(Value = "enabled")]
-        Enabled,
+        [Parameter(Value = "enabled")] Enabled,
 
         /// <summary>
         /// Means the script will run but will not cause any pushes to be rejected.
         /// </summary>
-        [Parameter(Value = "testing")]
-        Testing
+        [Parameter(Value = "testing")] Testing
     }
 }

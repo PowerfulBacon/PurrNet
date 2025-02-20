@@ -10,30 +10,31 @@ namespace PurrNet.Modules
         /// <summary>
         /// Casts a ray, from point origin, in direction direction, of length maxDistance, against all colliders in the scene.
         /// </summary>
-        public int Raycast(double preciseTick, Ray2D ray, RaycastHit2D[] raycastHits, 
-            float maxDistance = float.PositiveInfinity, 
+        public int Raycast(double preciseTick, Ray2D ray, RaycastHit2D[] raycastHits,
+            float maxDistance = float.PositiveInfinity,
             ContactFilter2D contactFilter = default)
         {
             if (!_physicsScene2D.IsValid())
                 return 0;
-            
+
             int hitCount = _physicsScene2D.Raycast(ray.origin, ray.direction, maxDistance, contactFilter, raycastHits);
             int colliderCount = _colliders2D.Count;
-            
+
             // remove any colliders that we are handling manually
             hitCount = FilterColliders(hitCount, raycastHits);
-            
+
             // handle raycast hits manually
-            hitCount = DoManualRaycasts(ray, raycastHits, maxDistance, colliderCount, hitCount, preciseTick, contactFilter);
-            
+            hitCount = DoManualRaycasts(ray, raycastHits, maxDistance, colliderCount, hitCount, preciseTick,
+                contactFilter);
+
             return hitCount;
         }
 
         /// <summary>
         /// Casts a ray, from point origin, in direction direction, of length maxDistance, against all colliders in the scene.
         /// </summary>
-        public bool Raycast(double preciseTick, Ray2D ray, out RaycastHit2D hit, 
-            float maxDistance = float.PositiveInfinity, 
+        public bool Raycast(double preciseTick, Ray2D ray, out RaycastHit2D hit,
+            float maxDistance = float.PositiveInfinity,
             ContactFilter2D contactFilter = default)
         {
             if (!_physicsScene2D.IsValid())
@@ -41,9 +42,10 @@ namespace PurrNet.Modules
                 hit = default;
                 return false;
             }
-            
-            int hitCount = _physicsScene2D.Raycast(ray.origin, ray.direction, maxDistance, contactFilter, _raycastHits2D);
-            
+
+            int hitCount =
+                _physicsScene2D.Raycast(ray.origin, ray.direction, maxDistance, contactFilter, _raycastHits2D);
+
             // return the closest hit
             if (hitCount > 0)
             {
@@ -53,9 +55,10 @@ namespace PurrNet.Modules
                     if (_raycastHits2D[i].distance < hit.distance)
                         hit = _raycastHits2D[i];
                 }
+
                 return true;
             }
-            
+
             hit = default;
             return false;
         }
@@ -69,9 +72,10 @@ namespace PurrNet.Modules
                 hit = default;
                 return false;
             }
-            
-            int hitCount = _physicsScene2D.Raycast(ray.origin, ray.direction, maxDistance, contactFilter, _raycastHits2DCache);
-            
+
+            int hitCount = _physicsScene2D.Raycast(ray.origin, ray.direction, maxDistance, contactFilter,
+                _raycastHits2DCache);
+
             // return the closest hit
             if (hitCount > 0)
             {
@@ -79,16 +83,17 @@ namespace PurrNet.Modules
                 for (var i = 1; i < hitCount; i++)
                 {
                     var result = _raycastHits2DCache[i];
-                    
+
                     if (result.collider != target)
                         continue;
-                    
+
                     if (result.distance < hit.distance)
                         hit = result;
                 }
+
                 return hit.collider == target;
             }
-            
+
             hit = default;
             return false;
         }
@@ -100,14 +105,14 @@ namespace PurrNet.Modules
             {
                 if (hitCount >= hits.Length)
                     break;
-                
+
                 var col = _colliders2D[i];
                 if (!col || !PassesFilters(col, contactFilter))
                     continue;
 
                 if (!TryGetColliderState(preciseTick, col, out var state))
                     continue;
-                
+
                 var trs = col.transform;
 
                 // Get the transform matrix for the historical position
@@ -117,7 +122,7 @@ namespace PurrNet.Modules
 
                 // Transform world ray to historical local space
                 var rayHistoricalLocal = new Ray2D(
-                    worldToHistorical.MultiplyPoint3x4(ray.origin), 
+                    worldToHistorical.MultiplyPoint3x4(ray.origin),
                     worldToHistorical.MultiplyVector(ray.direction)
                 );
 
@@ -127,7 +132,7 @@ namespace PurrNet.Modules
                     currentWorldMatrix.MultiplyPoint3x4(rayHistoricalLocal.origin),
                     currentWorldMatrix.MultiplyVector(rayHistoricalLocal.direction)
                 );
-                
+
                 if (RaycastOnly(col, rayCurrentWorld, out var hit, maxDistance))
                     hits[hitCount++] = hit;
             }
@@ -140,7 +145,7 @@ namespace PurrNet.Modules
             if (!filter.isFiltering)
                 return true;
 
-            return !filter.IsFilteringTrigger(col) && 
+            return !filter.IsFilteringTrigger(col) &&
                    !filter.IsFilteringLayerMask(col.gameObject);
         }
 

@@ -33,7 +33,8 @@ namespace Octokit
         /// <param name="org">The organizations name</param>
         /// <param name="hookId">The repository's hook id</param>
         /// <remarks>See <a href="https://developer.github.com/v3/orgs/hooks/#get-single-hook">API documentation</a> for more information.</remarks>
-        [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get", Justification = "This is ok; we're matching HTTP verbs not keywords")]
+        [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
+            Justification = "This is ok; we're matching HTTP verbs not keywords")]
         Task<OrganizationHook> Get(string org, int hookId);
 
         /// <summary>

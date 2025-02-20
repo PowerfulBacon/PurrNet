@@ -10,7 +10,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class WeeklyCommitActivity
     {
-        public WeeklyCommitActivity() { }
+        public WeeklyCommitActivity()
+        {
+        }
 
         public WeeklyCommitActivity(IEnumerable<int> days, int total, long week)
         {

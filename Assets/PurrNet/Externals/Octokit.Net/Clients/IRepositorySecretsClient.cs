@@ -33,7 +33,7 @@ namespace Octokit
         /// <param name="repoName">The name of the repository</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns>A <see cref="RepositorySecretsCollection"/> instance for the list of repository secrets.</returns>
-        Task<RepositorySecretsCollection> GetAll (string owner, string repoName);
+        Task<RepositorySecretsCollection> GetAll(string owner, string repoName);
 
         /// <summary>
         /// Get a secret from a repository.
@@ -60,7 +60,8 @@ namespace Octokit
         /// <param name="upsertSecret">The encrypted value and id of the encryption key</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns>A <see cref="RepositorySecret"/> instance for the repository secret that was created or updated.</returns>
-        Task<RepositorySecret> CreateOrUpdate(string owner, string repoName, string secretName, UpsertRepositorySecret upsertSecret);
+        Task<RepositorySecret> CreateOrUpdate(string owner, string repoName, string secretName,
+            UpsertRepositorySecret upsertSecret);
 
         /// <summary>
         /// Delete a secret in a repository.

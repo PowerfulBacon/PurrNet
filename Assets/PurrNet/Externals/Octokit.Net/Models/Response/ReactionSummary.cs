@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class ReactionSummary
     {
-        public ReactionSummary() { }
+        public ReactionSummary()
+        {
+        }
 
-        public ReactionSummary(int totalCount, int plus1, int minus1, int laugh, int confused, int heart, int hooray, int eyes, int rocket, string url)
+        public ReactionSummary(int totalCount, int plus1, int minus1, int laugh, int confused, int heart, int hooray,
+            int eyes, int rocket, string url)
         {
             TotalCount = totalCount;
             Plus1 = plus1;
@@ -24,10 +27,8 @@ namespace Octokit
         }
 
         public int TotalCount { get; private set; }
-        [Parameter(Key = "+1")]
-        public int Plus1 { get; private set; }
-        [Parameter(Key = "-1")]
-        public int Minus1 { get; private set; }
+        [Parameter(Key = "+1")] public int Plus1 { get; private set; }
+        [Parameter(Key = "-1")] public int Minus1 { get; private set; }
         public int Laugh { get; private set; }
         public int Confused { get; private set; }
         public int Heart { get; private set; }
@@ -49,9 +50,9 @@ namespace Octokit
                     Laugh,
                     Confused,
                     Heart,
-                    Hooray, 
-					Eyes,
-					Rocket);
+                    Hooray,
+                    Eyes,
+                    Rocket);
             }
         }
     }

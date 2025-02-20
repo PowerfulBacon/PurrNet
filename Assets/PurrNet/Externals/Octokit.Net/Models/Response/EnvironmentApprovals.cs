@@ -10,9 +10,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class EnvironmentApprovals
     {
-        public EnvironmentApprovals() { }
+        public EnvironmentApprovals()
+        {
+        }
 
-        public EnvironmentApprovals(IReadOnlyList<EnvironmentApproval> environments, User user, EnvironmentApprovalState state, string comment)
+        public EnvironmentApprovals(IReadOnlyList<EnvironmentApproval> environments, User user,
+            EnvironmentApprovalState state, string comment)
         {
             Environments = environments;
             User = user;
@@ -42,10 +45,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "State: {0}, Comment: {1}", State, Comment);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "State: {0}, Comment: {1}", State, Comment); }
         }
     }
 }

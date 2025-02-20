@@ -15,7 +15,9 @@ namespace JamesFrowen.SimpleWeb
         const int ResponseLength = 129;
         internal const int KeyLength = 24;
         const int MergedKeyLength = 60;
+
         const string KeyHeaderString = "\r\nSec-WebSocket-Key: ";
+
         // this isn't an official max, just a reasonable size for a websocket handshake
         readonly int maxHttpHeaderSize = 3000;
 
@@ -46,7 +48,8 @@ namespace JamesFrowen.SimpleWeb
 
                 if (!IsGet(getHeader.array))
                 {
-                    Log.Warn($"First bytes from client was not 'GET' for handshake, instead was {Log.BufferToString(getHeader.array, 0, GetSize)}");
+                    Log.Warn(
+                        $"First bytes from client was not 'GET' for handshake, instead was {Log.BufferToString(getHeader.array, 0, GetSize)}");
                     return false;
                 }
             }
@@ -76,7 +79,8 @@ namespace JamesFrowen.SimpleWeb
         {
             using (ArrayBuffer readBuffer = bufferPool.Take(maxHttpHeaderSize))
             {
-                int? readCountOrFail = ReadHelper.SafeReadTillMatch(stream, readBuffer.array, 0, maxHttpHeaderSize, Constants.endOfHandshake);
+                int? readCountOrFail = ReadHelper.SafeReadTillMatch(stream, readBuffer.array, 0, maxHttpHeaderSize,
+                    Constants.endOfHandshake);
                 if (!readCountOrFail.HasValue)
                     return null;
 
@@ -94,14 +98,14 @@ namespace JamesFrowen.SimpleWeb
             // just check bytes here instead of using Encoding.ASCII
             return getHeader[0] == 71 && // G
                    getHeader[1] == 69 && // E
-                   getHeader[2] == 84;   // T
+                   getHeader[2] == 84; // T
         }
 
         void AcceptHandshake(Stream stream, string msg)
         {
             using (
                 ArrayBuffer keyBuffer = bufferPool.Take(KeyLength + Constants.HandshakeGUIDLength),
-                            responseBuffer = bufferPool.Take(ResponseLength))
+                responseBuffer = bufferPool.Take(ResponseLength))
             {
                 GetKey(msg, keyBuffer.array);
                 AppendGuid(keyBuffer.array);
@@ -114,7 +118,8 @@ namespace JamesFrowen.SimpleWeb
 
         internal static void GetKey(string msg, byte[] keyBuffer)
         {
-            int start = msg.IndexOf(KeyHeaderString, StringComparison.InvariantCultureIgnoreCase) + KeyHeaderString.Length;
+            int start = msg.IndexOf(KeyHeaderString, StringComparison.InvariantCultureIgnoreCase) +
+                        KeyHeaderString.Length;
 
             Log.Verbose($"Handshake Key: {msg.Substring(start, KeyLength)}");
             Encoding.ASCII.GetBytes(msg, start, KeyLength, keyBuffer, 0);

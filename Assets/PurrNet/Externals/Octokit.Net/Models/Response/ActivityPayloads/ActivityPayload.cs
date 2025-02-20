@@ -5,7 +5,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class ActivityPayload
     {
-        public ActivityPayload() { }
+        public ActivityPayload()
+        {
+        }
 
 
         public ActivityPayload(Repository repository, User sender, InstallationId installation)

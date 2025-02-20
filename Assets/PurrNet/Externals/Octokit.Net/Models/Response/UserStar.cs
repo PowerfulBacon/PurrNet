@@ -10,7 +10,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class UserStar
     {
-        public UserStar() { }
+        public UserStar()
+        {
+        }
 
         public UserStar(DateTimeOffset starredAt, User user)
         {
@@ -30,10 +32,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, User.DebuggerDisplay);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, User.DebuggerDisplay); }
         }
     }
 }

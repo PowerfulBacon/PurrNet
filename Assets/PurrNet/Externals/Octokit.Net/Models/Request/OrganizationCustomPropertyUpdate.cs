@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class OrganizationCustomPropertyUpdate
     {
-        public OrganizationCustomPropertyUpdate() { }
+        public OrganizationCustomPropertyUpdate()
+        {
+        }
 
-        public OrganizationCustomPropertyUpdate(string propertyName, CustomPropertyValueType valueType, string defaultValue)
+        public OrganizationCustomPropertyUpdate(string propertyName, CustomPropertyValueType valueType,
+            string defaultValue)
         {
             PropertyName = propertyName;
             ValueType = valueType;
@@ -17,7 +20,8 @@ namespace Octokit
             DefaultValue = defaultValue;
         }
 
-        public OrganizationCustomPropertyUpdate(string propertyName, CustomPropertyValueType valueType, IReadOnlyList<string> defaultValue)
+        public OrganizationCustomPropertyUpdate(string propertyName, CustomPropertyValueType valueType,
+            IReadOnlyList<string> defaultValue)
         {
             PropertyName = propertyName;
             ValueType = valueType;
@@ -61,6 +65,7 @@ namespace Octokit
         /// </summary>
         public StringEnum<CustomPropertyValuesEditableBy>? ValuesEditableBy { get; set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "PropertyName: {0}", PropertyName);
+        internal string DebuggerDisplay =>
+            string.Format(CultureInfo.InvariantCulture, "PropertyName: {0}", PropertyName);
     }
 }

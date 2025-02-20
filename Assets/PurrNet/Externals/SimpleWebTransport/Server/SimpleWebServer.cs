@@ -18,7 +18,8 @@ namespace JamesFrowen.SimpleWeb
 
         public bool Active { get; private set; }
 
-        public SimpleWebServer(int maxMessagesPerTick, TcpConfig tcpConfig, int maxMessageSize, int handshakeMaxSize, SslConfig sslConfig)
+        public SimpleWebServer(int maxMessagesPerTick, TcpConfig tcpConfig, int maxMessageSize, int handshakeMaxSize,
+            SslConfig sslConfig)
         {
             this.maxMessagesPerTick = maxMessagesPerTick;
             // use max because bufferpool is used for both messages and handshake
@@ -122,7 +123,7 @@ namespace JamesFrowen.SimpleWeb
                 processedCount < maxMessagesPerTick &&
                 // Dequeue last
                 server.receiveQueue.TryDequeue(out Message next)
-                )
+            )
             {
                 processedCount++;
 

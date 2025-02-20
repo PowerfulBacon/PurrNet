@@ -70,7 +70,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
 
-            var response = await Connection.Get<string>(ApiUrls.ActionsGetWorkflowJobLogs(owner, name, jobId), null).ConfigureAwait(false);
+            var response = await Connection.Get<string>(ApiUrls.ActionsGetWorkflowJobLogs(owner, name, jobId), null)
+                .ConfigureAwait(false);
             return response.Body;
         }
 
@@ -100,7 +101,8 @@ namespace Octokit
         /// <param name="runId">The Id of the workflow run.</param>
         /// <param name="workflowRunJobsRequest">Details to filter the request, such as by when completed.</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/actions/runs/{run_id}/jobs")]
-        public Task<WorkflowJobsResponse> List(string owner, string name, long runId, WorkflowRunJobsRequest workflowRunJobsRequest)
+        public Task<WorkflowJobsResponse> List(string owner, string name, long runId,
+            WorkflowRunJobsRequest workflowRunJobsRequest)
         {
             return List(owner, name, runId, workflowRunJobsRequest, ApiOptions.None);
         }
@@ -117,13 +119,16 @@ namespace Octokit
         /// <param name="workflowRunJobsRequest">Details to filter the request, such as by when completed.</param>
         /// <param name="options">Options to change the API response.</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/actions/runs/{run_id}/jobs")]
-        public async Task<WorkflowJobsResponse> List(string owner, string name, long runId, WorkflowRunJobsRequest workflowRunJobsRequest, ApiOptions options)
+        public async Task<WorkflowJobsResponse> List(string owner, string name, long runId,
+            WorkflowRunJobsRequest workflowRunJobsRequest, ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(workflowRunJobsRequest, nameof(workflowRunJobsRequest));
 
-            var results = await ApiConnection.GetAll<WorkflowJobsResponse>(ApiUrls.ActionsListWorkflowJobs(owner, name, runId), workflowRunJobsRequest.ToParametersDictionary(), options).ConfigureAwait(false);
+            var results = await ApiConnection
+                .GetAll<WorkflowJobsResponse>(ApiUrls.ActionsListWorkflowJobs(owner, name, runId),
+                    workflowRunJobsRequest.ToParametersDictionary(), options).ConfigureAwait(false);
 
             return new WorkflowJobsResponse(
                 results.Count > 0 ? results.Max(x => x.TotalCount) : 0,
@@ -158,12 +163,15 @@ namespace Octokit
         /// <param name="attemptNumber">The attempt number of the workflow run.</param>
         /// <param name="options">Options to change the API response.</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/jobs")]
-        public async Task<WorkflowJobsResponse> List(string owner, string name, long runId, int attemptNumber, ApiOptions options)
+        public async Task<WorkflowJobsResponse> List(string owner, string name, long runId, int attemptNumber,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
 
-            var results = await ApiConnection.GetAll<WorkflowJobsResponse>(ApiUrls.ActionsListWorkflowJobs(owner, name, runId, attemptNumber), null, options).ConfigureAwait(false);
+            var results = await ApiConnection
+                .GetAll<WorkflowJobsResponse>(ApiUrls.ActionsListWorkflowJobs(owner, name, runId, attemptNumber), null,
+                    options).ConfigureAwait(false);
 
             return new WorkflowJobsResponse(
                 results.Count > 0 ? results.Max(x => x.TotalCount) : 0,

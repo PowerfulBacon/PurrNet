@@ -437,7 +437,8 @@ namespace Octokit
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns></returns>
         [ManualRoute("PUT", "/teams/{team_id}/repos/{owner}/{repo}")]
-        public async Task<bool> AddRepository(long teamId, string organization, string repoName, RepositoryPermissionRequest permission)
+        public async Task<bool> AddRepository(long teamId, string organization, string repoName,
+            RepositoryPermissionRequest permission)
         {
             Ensure.ArgumentNotNullOrEmptyString(organization, nameof(organization));
             Ensure.ArgumentNotNullOrEmptyString(repoName, nameof(repoName));
@@ -458,7 +459,8 @@ namespace Octokit
 
             try
             {
-                var httpStatusCode = await ApiConnection.Connection.Put<HttpStatusCode>(endpoint, permission).ConfigureAwait(false);
+                var httpStatusCode = await ApiConnection.Connection.Put<HttpStatusCode>(endpoint, permission)
+                    .ConfigureAwait(false);
                 return httpStatusCode.HttpResponse.StatusCode == HttpStatusCode.NoContent;
             }
             catch (NotFoundException)
@@ -526,7 +528,8 @@ namespace Octokit
 
             try
             {
-                var response = await ApiConnection.Connection.Get<string>(endpoint, null, AcceptHeaders.StableVersionJson).ConfigureAwait(false);
+                var response = await ApiConnection.Connection
+                    .Get<string>(endpoint, null, AcceptHeaders.StableVersionJson).ConfigureAwait(false);
                 return response.HttpResponse.StatusCode == HttpStatusCode.NoContent;
             }
             catch (NotFoundException)
@@ -563,9 +566,11 @@ namespace Octokit
         /// <param name="options">Options to change API behaviour</param>
         /// <returns></returns>
         [ManualRoute("GET", "/teams/{team_id}/invitations")]
-        public Task<IReadOnlyList<OrganizationMembershipInvitation>> GetAllPendingInvitations(long teamId, ApiOptions options)
+        public Task<IReadOnlyList<OrganizationMembershipInvitation>> GetAllPendingInvitations(long teamId,
+            ApiOptions options)
         {
-            return ApiConnection.GetAll<OrganizationMembershipInvitation>(ApiUrls.TeamPendingInvitations(teamId), null, options);
+            return ApiConnection.GetAll<OrganizationMembershipInvitation>(ApiUrls.TeamPendingInvitations(teamId), null,
+                options);
         }
 
         /// <summary>
@@ -596,7 +601,7 @@ namespace Octokit
                 var response = await ApiConnection.Get<TeamRepository>(endpoint);
                 return response == null;
             }
-            catch(NotFoundException)
+            catch (NotFoundException)
             {
                 return false;
             }
@@ -617,7 +622,8 @@ namespace Octokit
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns></returns>
         [ManualRoute("GET", "/orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}")]
-        public Task<TeamRepository> CheckTeamPermissionsForARepositoryWithCustomAcceptHeader(string org, string teamId, string owner, string repo)
+        public Task<TeamRepository> CheckTeamPermissionsForARepositoryWithCustomAcceptHeader(string org, string teamId,
+            string owner, string repo)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNullOrEmptyString(teamId, nameof(teamId));
@@ -649,7 +655,8 @@ namespace Octokit
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns></returns>
         [ManualRoute("PUT", "/orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}")]
-        public Task AddOrUpdateTeamRepositoryPermissions(string org, string teamId, string owner, string repo, string permission)
+        public Task AddOrUpdateTeamRepositoryPermissions(string org, string teamId, string owner, string repo,
+            string permission)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNullOrEmptyString(teamId, nameof(teamId));

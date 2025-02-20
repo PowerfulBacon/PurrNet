@@ -7,7 +7,7 @@ namespace PurrNet.Packing
     {
         private static readonly BitPackerPool _instance;
         private static readonly BitPackerPool _instanceTmp;
-        
+
         static BitPackerPool()
         {
             _instance = new BitPackerPool();
@@ -17,9 +17,11 @@ namespace PurrNet.Packing
         static BitPacker Factory() => new BitPacker();
 
         static void Reset(BitPacker list) => list.ResetPosition();
-        
-        public BitPackerPool() : base(Factory, Reset) { }
-        
+
+        public BitPackerPool() : base(Factory, Reset)
+        {
+        }
+
         public static BitPacker Get(bool readMode = false)
         {
             var packer = _instance.Allocate();
@@ -30,7 +32,7 @@ namespace PurrNet.Packing
         public static void Free(BitPacker packer)
         {
             if (packer.isWrapper)
-                 _instanceTmp.Delete(packer);
+                _instanceTmp.Delete(packer);
             else _instance.Delete(packer);
         }
 

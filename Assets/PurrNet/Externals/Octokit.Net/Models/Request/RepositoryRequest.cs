@@ -82,32 +82,27 @@ namespace Octokit
         /// <summary>
         /// Return all repositories.
         /// </summary>
-        [Parameter(Value = "all")]
-        All,
+        [Parameter(Value = "all")] All,
 
         /// <summary>
         /// Return repositories that the current authenticated user owns.
         /// </summary>
-        [Parameter(Value = "owner")]
-        Owner,
+        [Parameter(Value = "owner")] Owner,
 
         /// <summary>
         /// Returns public repositories.
         /// </summary>
-        [Parameter(Value = "public")]
-        Public,
+        [Parameter(Value = "public")] Public,
 
         /// <summary>
         /// The privateReturn private repositories.
         /// </summary>
-        [Parameter(Value = "private")]
-        Private,
+        [Parameter(Value = "private")] Private,
 
         /// <summary>
         /// Return repositories for which the current authenticated user is a member of the org or team.
         /// </summary>
-        [Parameter(Value = "member")]
-        Member
+        [Parameter(Value = "member")] Member
     }
 
     /// <summary>
@@ -118,26 +113,22 @@ namespace Octokit
         /// <summary>
         /// Sort by the date the repository was created.
         /// </summary>
-        [Parameter(Value = "created")]
-        Created,
+        [Parameter(Value = "created")] Created,
 
         /// <summary>
         /// Sort by the date the repository was last updated.
         /// </summary>
-        [Parameter(Value = "updated")]
-        Updated,
+        [Parameter(Value = "updated")] Updated,
 
         /// <summary>
         /// Sort by the date the repository was last pushed.
         /// </summary>
-        [Parameter(Value = "pushed")]
-        Pushed,
+        [Parameter(Value = "pushed")] Pushed,
 
         /// <summary>
         /// Sort by the repository name.
         /// </summary>
-        [Parameter(Value = "full_name")]
-        FullName
+        [Parameter(Value = "full_name")] FullName
     }
 
     /// <summary>
@@ -148,26 +139,22 @@ namespace Octokit
         /// <summary>
         /// Returns only public repositories
         /// </summary>
-        [Parameter(Value = "public")]
-        Public,
+        [Parameter(Value = "public")] Public,
 
         /// <summary>
         /// Returns only private repositories
         /// </summary>
-        [Parameter(Value = "private")]
-        Private,
+        [Parameter(Value = "private")] Private,
 
         /// <summary>
         /// Return both public and private repositories
         /// </summary>
-        [Parameter(Value = "all")]
-        All,
+        [Parameter(Value = "all")] All,
 
         /// <summary>
         /// Returns only internal repositories
         /// </summary>
-        [Parameter(Value = "internal")]
-        Internal,
+        [Parameter(Value = "internal")] Internal,
     }
 
     /// <summary>
@@ -178,14 +165,12 @@ namespace Octokit
         /// <summary>
         /// Repositories that are owned by the authenticated user
         /// </summary>
-        [Parameter(Value = "owner")]
-        Owner,
+        [Parameter(Value = "owner")] Owner,
 
         /// <summary>
         /// Repositories that the user has been added to as a collaborator.
         /// </summary>
-        [Parameter(Value = "collaborator")]
-        Collaborator,
+        [Parameter(Value = "collaborator")] Collaborator,
 
         /// <summary>
         /// Repositories that the user has access to through being a member of an organization.

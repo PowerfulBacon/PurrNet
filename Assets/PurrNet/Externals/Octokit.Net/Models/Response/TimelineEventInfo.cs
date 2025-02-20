@@ -7,9 +7,13 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class TimelineEventInfo
     {
-        public TimelineEventInfo() { }
+        public TimelineEventInfo()
+        {
+        }
 
-        public TimelineEventInfo(long id, string nodeId, string url, User actor, string commitId, EventInfoState @event, DateTimeOffset createdAt, Label label, User assignee, Milestone milestone, SourceInfo source, RenameInfo rename, IssueEventProjectCard projectCard)
+        public TimelineEventInfo(long id, string nodeId, string url, User actor, string commitId, EventInfoState @event,
+            DateTimeOffset createdAt, Label label, User assignee, Milestone milestone, SourceInfo source,
+            RenameInfo rename, IssueEventProjectCard projectCard)
         {
             Id = id;
             NodeId = nodeId;
@@ -62,7 +66,11 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Id: {0} CreatedAt: {1} Event: {2}", Id, CreatedAt, Event); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Id: {0} CreatedAt: {1} Event: {2}", Id, CreatedAt,
+                    Event);
+            }
         }
     }
 }

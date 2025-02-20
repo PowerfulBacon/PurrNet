@@ -10,19 +10,21 @@ namespace PurrNet.Pooling
         {
             return new T();
         }
-        
+
         static void Reset(T collection)
         {
             collection.Clear();
         }
-        
-        public CollectionPool() : base(Factory, Reset) { }
-        
+
+        public CollectionPool() : base(Factory, Reset)
+        {
+        }
+
         public static T New()
         {
             return _instance.Allocate();
         }
-        
+
         public static void Destroy(T list)
         {
             _instance.Delete(list);

@@ -14,7 +14,9 @@ namespace Octokit
         /// <summary>
         /// Initializes a new instance of the <see cref="PushWebhookCommitter"/> class.
         /// </summary>
-        public PushWebhookCommitter() { }
+        public PushWebhookCommitter()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PushWebhookCommitter"/> class.
@@ -55,7 +57,11 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Name: {0} Email: {1} Username: {2}", Name, Email, Username); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Name: {0} Email: {1} Username: {2}", Name, Email,
+                    Username);
+            }
         }
     }
 }

@@ -12,9 +12,12 @@ namespace Octokit.Models.Response
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class DeploymentEnvironment
     {
-        public DeploymentEnvironment() { }
+        public DeploymentEnvironment()
+        {
+        }
 
-        public DeploymentEnvironment(long id, string nodeID, string name, string url, string htmlUrl, DateTimeOffset createdAt, DateTimeOffset updatedAt)
+        public DeploymentEnvironment(long id, string nodeID, string name, string url, string htmlUrl,
+            DateTimeOffset createdAt, DateTimeOffset updatedAt)
         {
             Id = id;
             NodeId = nodeID;
@@ -33,7 +36,7 @@ namespace Octokit.Models.Response
         /// <summary>
         /// GraphQL Node Id
         /// </summary>
-        public string NodeId{ get; private set; }
+        public string NodeId { get; private set; }
 
         /// <summary>
         /// Environment Name
@@ -62,10 +65,7 @@ namespace Octokit.Models.Response
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Name: {0}, CreatedAt: {1}", Name, CreatedAt);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Name: {0}, CreatedAt: {1}", Name, CreatedAt); }
         }
     }
 }

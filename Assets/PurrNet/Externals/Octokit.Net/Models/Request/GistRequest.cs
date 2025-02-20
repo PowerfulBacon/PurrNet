@@ -35,10 +35,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Since: {0}", Since);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Since: {0}", Since); }
         }
     }
 }

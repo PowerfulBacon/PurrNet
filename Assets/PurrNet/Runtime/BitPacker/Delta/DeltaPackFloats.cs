@@ -19,7 +19,7 @@ namespace PurrNet.Packing
             Packer<ushort>.Read(packer, ref rawValue);
             value = Half.FromRawValue(rawValue);
         }
-        
+
         [UsedByIL]
         private static bool WriteHalf(BitPacker packer, Half oldvalue, Half newvalue)
         {
@@ -33,15 +33,15 @@ namespace PurrNet.Packing
             DeltaPacker<ushort>.Read(packer, oldvalue.rawValue, ref newValue);
             value = Half.FromRawValue(newValue);
         }
-        
+
         [UsedByIL]
         private static unsafe bool WriteDouble(BitPacker packer, double oldvalue, double newvalue)
         {
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             bool hasChanged = oldvalue != newvalue;
-            
+
             Packer<bool>.Write(packer, hasChanged);
-            
+
             if (hasChanged)
             {
                 ulong oldBits = *(ulong*)&oldvalue;
@@ -49,7 +49,7 @@ namespace PurrNet.Packing
                 long diff = (long)(newBits - oldBits);
                 Packer<PackedLong>.Write(packer, diff);
             }
-            
+
             return hasChanged;
         }
 
@@ -69,27 +69,28 @@ namespace PurrNet.Packing
             }
             else value = oldvalue;
         }
-        
+
         public const float PRECISION = 0.001f;
-        
+
         [UsedByIL]
         private static bool WriteSingle(BitPacker packer, float oldvalue, float newvalue)
         {
             float delta = newvalue - oldvalue;
-            
+
             if (System.Math.Abs(delta) < PRECISION)
             {
                 Packer<bool>.Write(packer, false);
                 return false;
             }
+
             Packer<bool>.Write(packer, true);
-            
+
             var deltaAsInt = Mathf.RoundToInt(delta / PRECISION);
             var estimatedNewValue = oldvalue + deltaAsInt * PRECISION;
             bool isCorrect = Mathf.Abs(newvalue - estimatedNewValue) < PRECISION * 2;
-            
+
             Packer<bool>.Write(packer, isCorrect);
-            
+
             if (isCorrect)
             {
                 Packer<PackedInt>.Write(packer, deltaAsInt);

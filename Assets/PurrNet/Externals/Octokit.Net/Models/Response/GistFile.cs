@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class GistFile
     {
-        public GistFile() { }
+        public GistFile()
+        {
+        }
 
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly")]
         public GistFile(int size, string filename, string type, string language, string content, string rawUrl)
@@ -54,7 +56,11 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Filename: {0}, Size: {1}, Type: {2}, Language: {3}", Filename, Size, Type, Language); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Filename: {0}, Size: {1}, Type: {2}, Language: {3}",
+                    Filename, Size, Type, Language);
+            }
         }
     }
 }

@@ -10,7 +10,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class NewImpersonationToken
     {
-        public NewImpersonationToken() { }
+        public NewImpersonationToken()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NewImpersonationToken"/> class.
@@ -28,10 +30,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Scopes: {0}", string.Join("\r\n", Scopes));
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Scopes: {0}", string.Join("\r\n", Scopes)); }
         }
     }
 }

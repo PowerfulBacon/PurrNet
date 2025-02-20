@@ -10,31 +10,31 @@ namespace PurrNet.Modules
         /// Tracks local ticks starting from client connection to the server for synchronization.
         /// </summary>
         public uint localTick { get; private set; }
-        
+
         /// <summary>
         /// Tracks the ticks aligned with the servers ticks for synchronization.
         /// </summary>
-        public uint syncedTick 
+        public uint syncedTick
         {
             get
             {
-                if(_networkManager.isServer)
+                if (_networkManager.isServer)
                     return localTick;
                 return _syncedTick;
             }
             private set => _syncedTick = value;
         }
-        
+
         /// <summary>
         /// This is the round trip time. Local time it takes for the client to get a response from the server
         /// </summary>
         public double rtt { get; private set; }
-        
+
         /// <summary>
         /// Uses floating point values for ticks to allow fractional updates, allowing to get precise tick timing within update
         /// </summary>
         public double floatingPoint { get; private set; }
-        
+
         public double syncedPreciseTick => syncedTick + floatingPoint;
 
         public double rollbackTick
@@ -58,7 +58,7 @@ namespace PurrNet.Modules
                 localPreciseTick = value;
             }
         }
-        
+
         /// <summary>
         /// The amount of ticks per second
         /// </summary>
@@ -68,12 +68,12 @@ namespace PurrNet.Modules
         /// Time between each tick as a float
         /// </summary>
         public readonly float tickDelta;
-        
+
         /// <summary>
         /// Time between each tick as a double
         /// </summary>
         public readonly double tickDeltaDouble;
-        
+
         public event Action onPreTick, onTick, onPostTick;
 
         private readonly NetworkManager _networkManager;
@@ -81,7 +81,7 @@ namespace PurrNet.Modules
         private float _lastSyncTime = -99;
         private float _lastTickTime;
         private const int MaxTickPerFrame = 5;
-        
+
         public TickManager(int tickRate, NetworkManager nm)
         {
             _lastTickTime = Time.unscaledTime;
@@ -95,7 +95,9 @@ namespace PurrNet.Modules
         {
         }
 
-        public void Disable(bool asServer) { }
+        public void Disable(bool asServer)
+        {
+        }
 
         public void Update()
         {
@@ -104,13 +106,13 @@ namespace PurrNet.Modules
 
             if (_networkManager.isServer || !_networkManager.isClient)
                 return;
-            if(_lastSyncTime + _networkManager.networkRules.GetSyncedTickUpdateInterval() < Time.unscaledTime)
+            if (_lastSyncTime + _networkManager.networkRules.GetSyncedTickUpdateInterval() < Time.unscaledTime)
             {
                 _lastSyncTime = Time.unscaledTime;
                 HandleTickSync();
             }
         }
-        
+
         private void HandleTick()
         {
             int ticksHandled = 0;
@@ -120,7 +122,7 @@ namespace PurrNet.Modules
                 localTick++;
                 syncedTick++;
                 floatingPoint = 0;
-                
+
                 onPreTick?.Invoke();
                 onTick?.Invoke();
                 onPostTick?.Invoke();
@@ -148,7 +150,7 @@ namespace PurrNet.Modules
         {
             return (float)(preciseTick / tickRate);
         }
-        
+
         /// <summary>
         /// Converts the input float time to ticks
         /// </summary>
@@ -157,7 +159,7 @@ namespace PurrNet.Modules
         {
             return (uint)Math.Round(time * tickRate);
         }
-        
+
         /// <summary>
         /// Converts the input float time to precise ticks (double)
         /// </summary>
@@ -166,7 +168,7 @@ namespace PurrNet.Modules
         {
             return time * tickRate;
         }
-        
+
         /// <summary>
         /// Converts the input float time to precise ticks (double)
         /// </summary>

@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class ProjectColumn
     {
-        public ProjectColumn() { }
+        public ProjectColumn()
+        {
+        }
 
-        public ProjectColumn(int id, string nodeId, string name, string projectUrl, DateTimeOffset createdAt, DateTimeOffset updatedAt)
+        public ProjectColumn(int id, string nodeId, string name, string projectUrl, DateTimeOffset createdAt,
+            DateTimeOffset updatedAt)
         {
             Id = id;
             NodeId = nodeId;
@@ -51,10 +54,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Name: {0}, Id: {1}", Name, Id);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Name: {0}, Id: {1}", Name, Id); }
         }
     }
 }

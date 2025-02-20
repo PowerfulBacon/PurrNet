@@ -9,9 +9,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RepositoryTrafficViewSummary
     {
-        public RepositoryTrafficViewSummary() { }
+        public RepositoryTrafficViewSummary()
+        {
+        }
 
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "It's a property from the api.")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly",
+            Justification = "It's a property from the api.")]
         public RepositoryTrafficViewSummary(int count, int uniques, IReadOnlyList<RepositoryTrafficView> views)
         {
             Count = count;
@@ -21,7 +24,8 @@ namespace Octokit
 
         public int Count { get; private set; }
 
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "It's a property from the api.")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly",
+            Justification = "It's a property from the api.")]
         public int Uniques { get; private set; }
 
         public IReadOnlyList<RepositoryTrafficView> Views { get; private set; }
@@ -35,9 +39,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RepositoryTrafficView
     {
-        public RepositoryTrafficView() { }
+        public RepositoryTrafficView()
+        {
+        }
 
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "It's a property from the api.")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly",
+            Justification = "It's a property from the api.")]
         public RepositoryTrafficView(DateTimeOffset timestamp, int count, int uniques)
         {
             Timestamp = timestamp;
@@ -49,12 +56,17 @@ namespace Octokit
 
         public int Count { get; private set; }
 
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "It's a property from the api.")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly",
+            Justification = "It's a property from the api.")]
         public int Uniques { get; private set; }
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Timestamp: {0} Number: {1} Uniques: {2}", Timestamp, Count, Uniques); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Timestamp: {0} Number: {1} Uniques: {2}", Timestamp,
+                    Count, Uniques);
+            }
         }
     }
 }

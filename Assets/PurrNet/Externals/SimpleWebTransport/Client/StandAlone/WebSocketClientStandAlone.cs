@@ -11,7 +11,8 @@ namespace JamesFrowen.SimpleWeb
         readonly TcpConfig tcpConfig;
         Connection conn;
 
-        internal WebSocketClientStandAlone(int maxMessageSize, int maxMessagesPerTick, TcpConfig tcpConfig, bool allowSSLErrors) : base(maxMessageSize, maxMessagesPerTick)
+        internal WebSocketClientStandAlone(int maxMessageSize, int maxMessagesPerTick, TcpConfig tcpConfig,
+            bool allowSSLErrors) : base(maxMessageSize, maxMessagesPerTick)
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
             throw new NotSupportedException();
@@ -100,9 +101,18 @@ namespace JamesFrowen.SimpleWeb
                     bufferPool);
                 ReceiveLoop.Loop(config);
             }
-            catch (ThreadInterruptedException e) { Log.InfoException(e); }
-            catch (ThreadAbortException e) { Log.InfoException(e); }
-            catch (Exception e) { Log.Exception(e); }
+            catch (ThreadInterruptedException e)
+            {
+                Log.InfoException(e);
+            }
+            catch (ThreadAbortException e)
+            {
+                Log.InfoException(e);
+            }
+            catch (Exception e)
+            {
+                Log.Exception(e);
+            }
             finally
             {
                 // close here in case connect fails

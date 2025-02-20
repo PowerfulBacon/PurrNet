@@ -7,13 +7,11 @@ namespace Octokit
         /// <summary>
         /// Copilot API public keys for validating request signatures
         /// </summary>
-        [Parameter(Value = "copilot_api")]
-        CopilotApi,
+        [Parameter(Value = "copilot_api")] CopilotApi,
 
         /// <summary>
         /// Secret scanning public keys for validating request signatures
         /// </summary>
-        [Parameter(Value = "secret_scanning")]
-        SecretScanning
+        [Parameter(Value = "secret_scanning")] SecretScanning
     }
 }

@@ -20,10 +20,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Permission: {0}", Permissions);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Permission: {0}", Permissions); }
         }
     }
 }

@@ -12,7 +12,6 @@
         typeof(float),
         typeof(double),
         typeof(decimal),
-        
         typeof(int?),
         typeof(long?),
         typeof(float?),
@@ -30,10 +29,16 @@ using Cysharp.Threading.Tasks.Internal;
 
 namespace Cysharp.Threading.Tasks.Linq
 {
-<# foreach(var (minMax, op) in new[]{("Min",">"), ("Max", "<")}) { #>
+<#
+    foreach (var (minMax, op) in new[] { ("Min",">"), ("Max", "<") })
+    {
+#>
     public static partial class UniTaskAsyncEnumerable
     {
-<# foreach(var t in types) { #>
+<#
+        foreach (var t in types)
+        {
+#>
         public static UniTask<<#= TypeName(t) #>> <#= minMax #>Async(this IUniTaskAsyncEnumerable<<#= TypeName(t) #>> source, CancellationToken cancellationToken = default)
         {
             Error.ThrowArgumentNullException(source, nameof(source));
@@ -65,12 +70,17 @@ namespace Cysharp.Threading.Tasks.Linq
             return <#= minMax #>.<#= minMax #>AwaitWithCancellationAsync(source, selector, cancellationToken);
         }
 
-<# } #>
+<#
+        }
+#>
     }
 
     internal static partial class <#= minMax #>
     {
-<# foreach(var t in types) { #>
+<#
+        foreach (var t in types)
+        {
+#>
         public static async UniTask<<#= TypeName(t) #>> <#= minMax #>Async(IUniTaskAsyncEnumerable<<#= TypeName(t) #>> source, CancellationToken cancellationToken)
         {
             <#= TypeName(t) #> value = default;
@@ -81,25 +91,44 @@ namespace Cysharp.Threading.Tasks.Linq
                 while (await e.MoveNextAsync())
                 {
                     value = e.Current;
-<# if (IsNullable(t)) { #>
+<#
+            if (IsNullable(t))
+            {
+#>
                     if(value == null) continue;
-<# } #>                
+<#
+            }
+#>                
                     goto NEXT_LOOP;
                 }
 
-<# if (IsNullable(t)) { #>
+<#
+            if (IsNullable(t))
+            {
+#>
                 return default;
-<# } else { #>
+<#
+            }
+            else
+            {
+#>
                 throw Error.NoElements();
-<# } #>                
+<#
+            }
+#>                
                 NEXT_LOOP:
 
                 while (await e.MoveNextAsync())
                 {
                     var x = e.Current;
-<# if (IsNullable(t)) { #>
+<#
+            if (IsNullable(t))
+            {
+#>
                     if( x == null) continue;
-<# } #>
+<#
+            }
+#>
                     if (value <#= op #> x)
                     {
                         value = x;
@@ -127,25 +156,44 @@ namespace Cysharp.Threading.Tasks.Linq
                 while (await e.MoveNextAsync())
                 {
                     value = selector(e.Current);
-<# if (IsNullable(t)) { #>
+<#
+            if (IsNullable(t))
+            {
+#>
                     if(value == null) continue;
-<# } #>                
+<#
+            }
+#>                
                     goto NEXT_LOOP;
                 }
 
-<# if (IsNullable(t)) { #>
+<#
+            if (IsNullable(t))
+            {
+#>
                 return default;
-<# } else { #>
+<#
+            }
+            else
+            {
+#>
                 throw Error.NoElements();
-<# } #>                
+<#
+            }
+#>                
                 NEXT_LOOP:
 
                 while (await e.MoveNextAsync())
                 {
                     var x = selector(e.Current);
-<# if (IsNullable(t)) { #>
+<#
+            if (IsNullable(t))
+            {
+#>
                     if( x == null) continue;
-<# } #>
+<#
+            }
+#>
                     if (value <#= op #> x)
                     {
                         value = x;
@@ -173,25 +221,44 @@ namespace Cysharp.Threading.Tasks.Linq
                 while (await e.MoveNextAsync())
                 {
                     value = await selector(e.Current);
-<# if (IsNullable(t)) { #>
+<#
+            if (IsNullable(t))
+            {
+#>
                     if(value == null) continue;
-<# } #>                
+<#
+            }
+#>                
                     goto NEXT_LOOP;
                 }
 
-<# if (IsNullable(t)) { #>
+<#
+            if (IsNullable(t))
+            {
+#>
                 return default;
-<# } else { #>
+<#
+            }
+            else
+            {
+#>
                 throw Error.NoElements();
-<# } #>                
+<#
+            }
+#>                
                 NEXT_LOOP:
 
                 while (await e.MoveNextAsync())
                 {
                     var x = await selector(e.Current);
-<# if (IsNullable(t)) { #>
+<#
+            if (IsNullable(t))
+            {
+#>
                     if( x == null) continue;
-<# } #>
+<#
+            }
+#>
                     if (value <#= op #> x)
                     {
                         value = x;
@@ -219,25 +286,44 @@ namespace Cysharp.Threading.Tasks.Linq
                 while (await e.MoveNextAsync())
                 {
                     value = await selector(e.Current, cancellationToken);
-<# if (IsNullable(t)) { #>
+<#
+            if (IsNullable(t))
+            {
+#>
                     if(value == null) continue;
-<# } #>                
+<#
+            }
+#>                
                     goto NEXT_LOOP;
                 }
 
-<# if (IsNullable(t)) { #>
+<#
+            if (IsNullable(t))
+            {
+#>
                 return default;
-<# } else { #>
+<#
+            }
+            else
+            {
+#>
                 throw Error.NoElements();
-<# } #>                
+<#
+            }
+#>                
                 NEXT_LOOP:
 
                 while (await e.MoveNextAsync())
                 {
                     var x = await selector(e.Current, cancellationToken);
-<# if (IsNullable(t)) { #>
+<#
+            if (IsNullable(t))
+            {
+#>
                     if( x == null) continue;
-<# } #>
+<#
+            }
+#>
                     if (value <#= op #> x)
                     {
                         value = x;
@@ -255,8 +341,12 @@ namespace Cysharp.Threading.Tasks.Linq
             return value;
         }
 
-<# } #>
+<#
+        }
+#>
     }
 
-<# } #>
+<#
+    }
+#>
 }

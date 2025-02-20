@@ -10,18 +10,17 @@ namespace PurrNet
         public NetworkManager manager;
         public PlayerID sender;
         public bool asServer;
-        
-        [UsedByIL]
-        public RPCSignature compileTimeSignature;
+
+        [UsedByIL] public RPCSignature compileTimeSignature;
     }
-    
+
     public enum RPCType
     {
         ServerRPC,
         ObserversRPC,
         TargetRPC
     }
-    
+
     public struct RPCSignature
     {
         public RPCType type;
@@ -39,7 +38,9 @@ namespace PurrNet
         public PlayerID? targetPlayer;
 
         [UsedImplicitly]
-        public static RPCSignature Make(RPCType type, Channel channel, bool runLocally, bool requireOwnership, bool bufferLast, bool requireServer, bool excludeOwner, string name, bool isStatic, float asyncTimoutInSec, CompressionLevel compressionLevel, bool excludeSender)
+        public static RPCSignature Make(RPCType type, Channel channel, bool runLocally, bool requireOwnership,
+            bool bufferLast, bool requireServer, bool excludeOwner, string name, bool isStatic, float asyncTimoutInSec,
+            CompressionLevel compressionLevel, bool excludeSender)
         {
             return new RPCSignature
             {
@@ -58,11 +59,14 @@ namespace PurrNet
                 compressionLevel = compressionLevel
             };
         }
-        
+
         [UsedImplicitly]
-        public static RPCSignature MakeWithTarget(RPCType type, Channel channel, bool runLocally, bool requireOwnership, bool bufferLast, bool requireServer, bool excludeOwner, string name, bool isStatic, float asyncTimoutInSec, CompressionLevel compressionLevel, bool excludeSender, PlayerID playerID)
+        public static RPCSignature MakeWithTarget(RPCType type, Channel channel, bool runLocally, bool requireOwnership,
+            bool bufferLast, bool requireServer, bool excludeOwner, string name, bool isStatic, float asyncTimoutInSec,
+            CompressionLevel compressionLevel, bool excludeSender, PlayerID playerID)
         {
-            var rpc = Make(type, channel, runLocally, requireOwnership, bufferLast, requireServer, excludeOwner, name, isStatic, asyncTimoutInSec, compressionLevel, excludeSender);
+            var rpc = Make(type, channel, runLocally, requireOwnership, bufferLast, requireServer, excludeOwner, name,
+                isStatic, asyncTimoutInSec, compressionLevel, excludeSender);
             rpc.targetPlayer = playerID;
             return rpc;
         }

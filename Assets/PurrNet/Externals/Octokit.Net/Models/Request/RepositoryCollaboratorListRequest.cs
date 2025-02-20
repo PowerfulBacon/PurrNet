@@ -31,7 +31,8 @@ namespace Octokit
         /// </summary>
         public CollaboratorPermission? Permission { get; set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, $"Affiliation: {Affiliation} Permission: {Permission}");
+        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture,
+            $"Affiliation: {Affiliation} Permission: {Permission}");
     }
 
     /// <summary>
@@ -42,18 +43,17 @@ namespace Octokit
         /// <summary>
         /// All collaborators the authenticated user can see.
         /// </summary>
-        [Parameter(Value = "all")]
-        All,
+        [Parameter(Value = "all")] All,
+
         /// <summary>
         /// All collaborators with permissions to an organization-owned repository,
         /// regardless of organization membership status.
         /// </summary>
-        [Parameter(Value = "direct")]
-        Direct,
+        [Parameter(Value = "direct")] Direct,
+
         /// <summary>
         /// All outside collaborators of an organization-owned repository.
         /// </summary>
-        [Parameter(Value = "outside")]
-        Outside
+        [Parameter(Value = "outside")] Outside
     }
 }

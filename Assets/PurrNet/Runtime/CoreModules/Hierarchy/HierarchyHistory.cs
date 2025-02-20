@@ -9,19 +9,19 @@ namespace PurrNet.Modules
     {
         readonly List<HierarchyAction> _actions = new List<HierarchyAction>();
         readonly List<HierarchyAction> _pending = new List<HierarchyAction>();
-        
+
         readonly SceneID _sceneId;
-        
+
         static readonly List<Prefab> _prefabs = new List<Prefab>();
         static readonly List<int> _toRemove = new List<int>();
-        
+
         public bool hasUnflushedActions { get; private set; }
 
         public HierarchyHistory(SceneID sceneId)
         {
             _sceneId = sceneId;
         }
-        
+
         internal HierarchyActionBatch GetFullHistory()
         {
             return new HierarchyActionBatch
@@ -30,7 +30,7 @@ namespace PurrNet.Modules
                 actions = _actions
             };
         }
-        
+
         internal HierarchyActionBatch GetHistoryThatAffects(List<NetworkIdentity> roots)
         {
             var actions = new List<HierarchyAction>();
@@ -42,9 +42,9 @@ namespace PurrNet.Modules
             for (var rootIdx = 0; rootIdx < roots.Count; rootIdx++)
             {
                 var rootIdentity = roots[rootIdx];
-                
+
                 if (!rootIdentity) continue;
-                
+
                 rootIdentity.GetComponentsInChildren(true, tmp);
 
                 for (var index = 0; index < tmp.Count; index++)
@@ -56,7 +56,7 @@ namespace PurrNet.Modules
             }
 
             ListPool<NetworkIdentity>.Destroy(tmp);
-            
+
             for (var i = 0; i < _actions.Count; ++i)
             {
                 var action = _actions[i];
@@ -68,7 +68,7 @@ namespace PurrNet.Modules
                     {
                         var spawnAction = action.spawnAction;
                         bool isRelevant = false;
-                        
+
                         for (int child = 0; child < spawnAction.childCount; ++child)
                         {
                             var childNid = new NetworkID(spawnAction.identityId, (ushort)child);
@@ -89,16 +89,19 @@ namespace PurrNet.Modules
 
                             actions.Add(action);
                         }
+
                         break;
                     }
                     // apply actions to the prefab list
                     case HierarchyActionType.Despawn:
                     {
-                        if (spawned.Contains(action.despawnAction.identityId) || relevant.Contains(action.despawnAction.identityId))
+                        if (spawned.Contains(action.despawnAction.identityId) ||
+                            relevant.Contains(action.despawnAction.identityId))
                         {
                             spawned.Remove(action.despawnAction.identityId);
                             actions.Add(action);
                         }
+
                         break;
                     }
                     // apply actions to the prefab list
@@ -124,7 +127,7 @@ namespace PurrNet.Modules
                         throw new ArgumentOutOfRangeException();
                 }
             }
-            
+
             spawned.ExceptWith(relevant);
 
             foreach (var spawnedButNotUsed in spawned)
@@ -140,10 +143,10 @@ namespace PurrNet.Modules
                     }
                 });
             }
-            
+
             HashSetPool<NetworkID>.Destroy(relevant);
             HashSetPool<NetworkID>.Destroy(spawned);
-            
+
             return new HierarchyActionBatch
             {
                 sceneId = _sceneId,
@@ -176,10 +179,10 @@ namespace PurrNet.Modules
                 actor = actor,
                 spawnAction = action
             });
-            
+
             hasUnflushedActions = true;
         }
-        
+
         internal void AddDespawnAction(DespawnAction action, PlayerID actor)
         {
             _pending.Add(new HierarchyAction
@@ -188,10 +191,10 @@ namespace PurrNet.Modules
                 actor = actor,
                 despawnAction = action
             });
-            
+
             hasUnflushedActions = true;
         }
-        
+
         internal void AddChangeParentAction(ChangeParentAction action, PlayerID actor)
         {
             _pending.Add(new HierarchyAction
@@ -200,10 +203,10 @@ namespace PurrNet.Modules
                 actor = actor,
                 changeParentAction = action
             });
-            
+
             hasUnflushedActions = true;
         }
-        
+
         internal void AddSetActiveAction(SetActiveAction action, PlayerID actor)
         {
             _pending.Add(new HierarchyAction
@@ -212,10 +215,10 @@ namespace PurrNet.Modules
                 actor = actor,
                 setActiveAction = action
             });
-            
+
             hasUnflushedActions = true;
         }
-        
+
         internal void AddSetEnabledAction(SetEnabledAction action, PlayerID actor)
         {
             _pending.Add(new HierarchyAction
@@ -224,7 +227,7 @@ namespace PurrNet.Modules
                 actor = actor,
                 setEnabledAction = action
             });
-            
+
             hasUnflushedActions = true;
         }
 
@@ -238,7 +241,7 @@ namespace PurrNet.Modules
         private void CleanupPrefabs()
         {
             _prefabs.Clear();
-            
+
             for (var i = 0; i < _actions.Count; ++i)
             {
                 var action = _actions[i];
@@ -280,12 +283,12 @@ namespace PurrNet.Modules
             for (var i = 0; i < _prefabs.Count; ++i)
             {
                 var prefab = _prefabs[i];
-                
+
                 if (prefab.despawnedChildren == prefab.childCount)
                     RemoveRelevantActions(prefab);
             }
         }
-        
+
         private void RemoveIrrelevantActions()
         {
             for (int i = _actions.Count - 1; i >= 0; i--)
@@ -296,7 +299,7 @@ namespace PurrNet.Modules
                     case HierarchyActionType.SetActive:
                     {
                         var identityId = action.setActiveAction.identityId;
-                        
+
                         for (int j = i - 1; j >= 0; j--)
                         {
                             var previousAction = _actions[j];
@@ -307,7 +310,7 @@ namespace PurrNet.Modules
                                 i--;
                             }
                         }
-                        
+
                         break;
                     }
                     case HierarchyActionType.SetEnabled:
@@ -324,13 +327,13 @@ namespace PurrNet.Modules
                                 i--;
                             }
                         }
-                        
+
                         break;
                     }
                 }
             }
         }
-        
+
         private void CompressParentChanges()
         {
             for (int i = _actions.Count - 1; i >= 0; i--)
@@ -359,7 +362,7 @@ namespace PurrNet.Modules
         private void RemoveRelevantActions(Prefab prefab)
         {
             _toRemove.Clear();
-            
+
             for (int i = 0; i < _actions.Count; i++)
             {
                 var identityId = GetObjectId(_actions[i]);
@@ -369,7 +372,7 @@ namespace PurrNet.Modules
                     _toRemove.Add(i);
                 }
             }
-            
+
             for (int i = _toRemove.Count - 1; i >= 0; i--)
             {
                 _actions.RemoveAt(_toRemove[i]);
@@ -388,7 +391,7 @@ namespace PurrNet.Modules
                 _ => throw new ArgumentException("Unknown action type")
             };
         }
-        
+
         private struct Prefab
         {
             public ushort childCount;
@@ -399,7 +402,7 @@ namespace PurrNet.Modules
             {
                 if (id.scope != identityId.scope)
                     return false;
-                
+
                 return id.id >= identityId.id && id.id < identityId.id + childCount;
             }
         }

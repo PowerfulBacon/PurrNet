@@ -33,6 +33,7 @@ namespace Octokit
         [Parameter(Key = "secrets")]
         public IReadOnlyList<OrganizationSecret> Secrets { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "OrganizationSecretCollection: Count: {0}", Count);
+        internal string DebuggerDisplay =>
+            string.Format(CultureInfo.CurrentCulture, "OrganizationSecretCollection: Count: {0}", Count);
     }
 }

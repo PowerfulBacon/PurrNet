@@ -127,7 +127,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="milestoneNumber">The number of the milestone</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<Label>> GetAllForMilestone(string owner, string name, int milestoneNumber, ApiOptions options);
+        Task<IReadOnlyList<Label>> GetAllForMilestone(string owner, string name, int milestoneNumber,
+            ApiOptions options);
 
         /// <summary>
         /// Gets labels for every issue in a milestone
@@ -150,7 +151,7 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="labelName">The name of the label</param>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
-        Justification = "Method makes a network request")]
+            Justification = "Method makes a network request")]
         Task<Label> Get(string owner, string name, string labelName);
 
         /// <summary>
@@ -162,7 +163,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="labelName">The name of the label</param>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
-        Justification = "Method makes a network request")]
+            Justification = "Method makes a network request")]
         Task<Label> Get(long repositoryId, string labelName);
 
         /// <summary>

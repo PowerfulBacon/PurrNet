@@ -16,12 +16,12 @@ namespace PurrNet.Codegen
                 var body = method.Body.GetILProcessor();
                 var firstInstruction = method.Body.Instructions[0];
                 var baseMethod = networkIdentityType.GetMethod(method.Name).Import(method.Module);
-                
+
                 body.InsertBefore(firstInstruction, body.Create(OpCodes.Ldarg_0));
                 body.InsertBefore(firstInstruction, body.Create(OpCodes.Call, baseMethod));
             }
         }
-        
+
         static bool IsCallingBase(MethodDefinition method, string methodName)
         {
             var instructions = method.Body.Instructions;
@@ -30,10 +30,13 @@ namespace PurrNet.Codegen
                 var instruction = instructions[i];
                 if (instruction.OpCode.Code == Code.Call && instruction.Operand is MethodReference methodReference)
                 {
-                    if (methodReference.Name == methodName && PostProcessor.InheritsFrom(methodReference.DeclaringType.Resolve(), typeof(NetworkIdentity).FullName))
+                    if (methodReference.Name == methodName &&
+                        PostProcessor.InheritsFrom(methodReference.DeclaringType.Resolve(),
+                            typeof(NetworkIdentity).FullName))
                         return true;
                 }
             }
+
             return false;
         }
 
@@ -41,16 +44,16 @@ namespace PurrNet.Codegen
         {
             if (method.DeclaringType.FullName == typeof(NetworkIdentity).FullName)
                 return false;
-            
+
             if (method.ReturnType != method.Module.TypeSystem.Void)
                 return false;
-            
+
             if (method.Parameters.Count > 0)
                 return false;
-            
+
             if (method.IsStatic)
                 return false;
-            
+
             if (method.HasGenericParameters)
                 return false;
 

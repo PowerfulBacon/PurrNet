@@ -8,14 +8,18 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class PullRequestReview
     {
-        public PullRequestReview() { }
+        public PullRequestReview()
+        {
+        }
 
         public PullRequestReview(long id)
         {
             Id = id;
         }
 
-        public PullRequestReview(long id, string nodeId, string commitId, User user, string body, string htmlUrl, string pullRequestUrl, PullRequestReviewState state, AuthorAssociation authorAssociation, DateTimeOffset submittedAt)
+        public PullRequestReview(long id, string nodeId, string commitId, User user, string body, string htmlUrl,
+            string pullRequestUrl, PullRequestReviewState state, AuthorAssociation authorAssociation,
+            DateTimeOffset submittedAt)
         {
             Id = id;
             NodeId = nodeId;
@@ -81,25 +85,25 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Id: {0}, State: {1}, User: {2}", Id, State.DebuggerDisplay, User.DebuggerDisplay); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Id: {0}, State: {1}, User: {2}", Id,
+                    State.DebuggerDisplay, User.DebuggerDisplay);
+            }
         }
     }
 
     public enum PullRequestReviewState
     {
-        [Parameter(Value = "APPROVED")]
-        Approved,
+        [Parameter(Value = "APPROVED")] Approved,
 
         [Parameter(Value = "CHANGES_REQUESTED")]
         ChangesRequested,
 
-        [Parameter(Value = "COMMENTED")]
-        Commented,
+        [Parameter(Value = "COMMENTED")] Commented,
 
-        [Parameter(Value = "DISMISSED")]
-        Dismissed,
+        [Parameter(Value = "DISMISSED")] Dismissed,
 
-        [Parameter(Value = "PENDING")]
-        Pending
+        [Parameter(Value = "PENDING")] Pending
     }
 }

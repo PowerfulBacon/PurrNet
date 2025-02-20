@@ -17,7 +17,7 @@ namespace PurrNet.Packing
             Packer<PackedUShort>.Read(packer, ref id);
             value = new SceneID(id);
         }
-        
+
         [UsedByIL]
         public static void Write(BitPacker packer, NetworkID value)
         {
@@ -30,13 +30,13 @@ namespace PurrNet.Packing
         {
             PackedUInt id = default;
             PlayerID scope = default;
-            
+
             Packer<PackedUInt>.Read(packer, ref id);
             Packer<PlayerID>.Read(packer, ref scope);
-            
+
             value = new NetworkID(id, scope);
         }
-        
+
         [UsedByIL]
         public static void Write(BitPacker packer, PlayerID value)
         {
@@ -49,10 +49,10 @@ namespace PurrNet.Packing
         {
             PackedUShort id = default;
             bool isBot = default;
-            
+
             Packer<PackedUShort>.Read(packer, ref id);
             Packer<bool>.Read(packer, ref isBot);
-            
+
             value = new PlayerID(id, isBot);
         }
     }

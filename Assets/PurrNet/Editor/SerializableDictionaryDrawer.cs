@@ -12,7 +12,7 @@ namespace PurrNet.Editor
         private const float BottomPadding = 8f;
         private const float ColumnHeaderHeight = 18f;
         private bool _foldout = true;
-        
+
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             var keysProp = property.FindPropertyRelative("keys");
@@ -20,12 +20,12 @@ namespace PurrNet.Editor
             var displayKeysProp = (keysProp != null && keysProp.arraySize > 0) ? keysProp : stringKeysProp;
 
             if (!_foldout) return HeaderHeight;
-        
+
             float totalHeight = HeaderHeight + ColumnHeaderHeight;
             int count = displayKeysProp?.arraySize ?? 0;
             totalHeight += (EditorGUIUtility.singleLineHeight + ElementPadding) * count;
             totalHeight += BottomPadding;
-        
+
             return totalHeight;
         }
 
@@ -49,17 +49,20 @@ namespace PurrNet.Editor
             {
                 EditorGUI.indentLevel++;
                 float yOffset = HeaderHeight;
-                
+
                 Rect headerBgRect = new Rect(position.x, position.y + yOffset, position.width, ColumnHeaderHeight);
                 EditorGUI.DrawRect(headerBgRect, new Color(0.7f, 0.7f, 0.7f, 0.1f));
-                
+
                 float headerLabelOffset = 2f;
-                Rect keyHeaderRect = new Rect(position.x, position.y + yOffset + headerLabelOffset, position.width * 0.45f, EditorGUIUtility.singleLineHeight);
-                Rect valueHeaderRect = new Rect(position.x + position.width * 0.5f, position.y + yOffset + headerLabelOffset, position.width * 0.45f, EditorGUIUtility.singleLineHeight);
-                
+                Rect keyHeaderRect = new Rect(position.x, position.y + yOffset + headerLabelOffset,
+                    position.width * 0.45f, EditorGUIUtility.singleLineHeight);
+                Rect valueHeaderRect = new Rect(position.x + position.width * 0.5f,
+                    position.y + yOffset + headerLabelOffset, position.width * 0.45f,
+                    EditorGUIUtility.singleLineHeight);
+
                 EditorGUI.LabelField(keyHeaderRect, "Key");
                 EditorGUI.LabelField(valueHeaderRect, "Value");
-                
+
                 yOffset += ColumnHeaderHeight;
 
                 if (displayKeysProp != null && displayValuesProp != null)
@@ -68,8 +71,10 @@ namespace PurrNet.Editor
                     for (int i = 0; i < count; i++)
                     {
                         float elementHeight = EditorGUIUtility.singleLineHeight;
-                        Rect keyRect = new Rect(position.x, position.y + yOffset, position.width * 0.45f, elementHeight);
-                        Rect valueRect = new Rect(position.x + position.width * 0.5f, position.y + yOffset, position.width * 0.45f, elementHeight);
+                        Rect keyRect = new Rect(position.x, position.y + yOffset, position.width * 0.45f,
+                            elementHeight);
+                        Rect valueRect = new Rect(position.x + position.width * 0.5f, position.y + yOffset,
+                            position.width * 0.45f, elementHeight);
 
                         if (i % 2 == 1)
                         {
@@ -79,8 +84,10 @@ namespace PurrNet.Editor
 
                         using (new EditorGUI.DisabledScope(true))
                         {
-                            EditorGUI.PropertyField(keyRect, displayKeysProp.GetArrayElementAtIndex(i), GUIContent.none);
-                            EditorGUI.PropertyField(valueRect, displayValuesProp.GetArrayElementAtIndex(i), GUIContent.none);
+                            EditorGUI.PropertyField(keyRect, displayKeysProp.GetArrayElementAtIndex(i),
+                                GUIContent.none);
+                            EditorGUI.PropertyField(valueRect, displayValuesProp.GetArrayElementAtIndex(i),
+                                GUIContent.none);
                         }
 
                         yOffset += elementHeight + ElementPadding;

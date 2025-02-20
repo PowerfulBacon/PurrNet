@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Label
     {
-        public Label() { }
+        public Label()
+        {
+        }
 
         public Label(long id, string url, string name, string nodeId, string color, string description, bool @default)
         {

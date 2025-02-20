@@ -197,7 +197,8 @@ namespace Octokit
         /// <param name="role">The role filter to use when getting the users, <see cref="OrganizationMembersRole"/></param>
         /// <param name="options">Options for changing the API response</param>
         /// <returns>The users</returns>
-        Task<IReadOnlyList<User>> GetAll(string org, OrganizationMembersFilter filter, OrganizationMembersRole role, ApiOptions options);
+        Task<IReadOnlyList<User>> GetAll(string org, OrganizationMembersFilter filter, OrganizationMembersRole role,
+            ApiOptions options);
 
         /// <summary>
         /// List all users who have publicized their membership of the organization.
@@ -308,7 +309,8 @@ namespace Octokit
         /// <param name="addOrUpdateRequest">An <see cref="OrganizationMembershipUpdate"/> instance describing the
         /// changes to make to the user's organization membership</param>
         /// <returns></returns>
-        Task<OrganizationMembership> AddOrUpdateOrganizationMembership(string org, string user, OrganizationMembershipUpdate addOrUpdateRequest);
+        Task<OrganizationMembership> AddOrUpdateOrganizationMembership(string org, string user,
+            OrganizationMembershipUpdate addOrUpdateRequest);
 
         /// <summary>
         /// Create an organization invitation for a user
@@ -323,7 +325,8 @@ namespace Octokit
         /// <param name="invitationRequest">An <see cref="OrganizationInvitationRequest"/> instance containing the
         /// details of the organization invitation</param>
         /// <returns></returns>
-        Task<OrganizationMembershipInvitation> CreateOrganizationInvitation(string org, OrganizationInvitationRequest invitationRequest);
+        Task<OrganizationMembershipInvitation> CreateOrganizationInvitation(string org,
+            OrganizationInvitationRequest invitationRequest);
 
         /// <summary>
         /// Remove a user's membership with an organization.
@@ -419,6 +422,5 @@ namespace Octokit
         /// <param name="options">Options to change API behaviour</param>
         /// <returns>A list of the current user's <see cref="OrganizationMembership"/>s.</returns>
         Task<IReadOnlyList<OrganizationMembership>> GetAllOrganizationMembershipsForCurrent(ApiOptions options);
-
     }
 }

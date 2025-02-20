@@ -88,55 +88,55 @@ namespace PurrNet.Pooling
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableHashSet<T>));
             return _set.IsSupersetOf(other);
         }
-        
+
         public bool IsProperSupersetOf(IEnumerable<T> other)
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableHashSet<T>));
             return _set.IsProperSupersetOf(other);
         }
-        
+
         public bool IsProperSubsetOf(IEnumerable<T> other)
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableHashSet<T>));
             return _set.IsProperSubsetOf(other);
         }
-        
+
         public bool Overlaps(IEnumerable<T> other)
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableHashSet<T>));
             return _set.Overlaps(other);
         }
-        
+
         public bool SetEquals(IEnumerable<T> other)
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableHashSet<T>));
             return _set.SetEquals(other);
         }
-        
+
         public void Clear()
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableHashSet<T>));
             _set.Clear();
         }
-        
+
         public bool Contains(T item)
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableHashSet<T>));
             return _set.Contains(item);
         }
-        
+
         public void CopyTo(T[] array, int arrayIndex)
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableHashSet<T>));
             _set.CopyTo(array, arrayIndex);
         }
-        
+
         public bool Remove(T item)
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableHashSet<T>));
             return _set.Remove(item);
         }
-        
+
         public int Count
         {
             get
@@ -162,30 +162,30 @@ namespace PurrNet.Pooling
             isDisposed = false;
             _shouldDispose = true;
         }
-        
+
         public DisposableList(int capacity)
         {
             var newList = ListPool<T>.Instantiate();
-            
+
             if (newList.Capacity < capacity)
                 newList.Capacity = capacity;
-            
+
             list = newList;
             isDisposed = false;
             _shouldDispose = true;
         }
-        
+
         public void AddRange(IEnumerable<T> collection)
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
             foreach (var item in collection)
                 list.Add(item);
         }
-        
+
         public void Dispose()
         {
             if (isDisposed) return;
-            
+
             if (_shouldDispose && list != null)
                 ListPool<T>.Destroy(list);
             isDisposed = true;

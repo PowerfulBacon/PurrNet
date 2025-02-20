@@ -10,9 +10,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RepositoryInvitation
     {
-        public RepositoryInvitation() { }
+        public RepositoryInvitation()
+        {
+        }
 
-        public RepositoryInvitation(long id, string nodeId, Repository repository, User invitee, User inviter, InvitationPermissionType permissions, DateTimeOffset createdAt, bool expired, string url, string htmlUrl)
+        public RepositoryInvitation(long id, string nodeId, Repository repository, User invitee, User inviter,
+            InvitationPermissionType permissions, DateTimeOffset createdAt, bool expired, string url, string htmlUrl)
         {
             Id = id;
             NodeId = nodeId;
@@ -62,6 +65,6 @@ namespace Octokit
         public string HtmlUrl { get; private set; }
 
         internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture,
-                    "Repository Invitation: Id: {0} Permissions: {1}", Id, Permissions);
+            "Repository Invitation: Id: {0} Permissions: {1}", Id, Permissions);
     }
 }

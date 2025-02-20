@@ -15,7 +15,9 @@ namespace Octokit
         /// <summary>
         /// Creates an object that describes an update to a repository on GitHub.
         /// </summary>
-        public RepositoryUpdate() { }
+        public RepositoryUpdate()
+        {
+        }
 
         /// <summary>
         /// Required. Gets or sets the repository name.
@@ -123,7 +125,7 @@ namespace Octokit
         /// </summary>
         public bool? AllowUpdateBranch { get; set; }
 
-         /// <summary>
+        /// <summary>
         /// Optional. Either true to require contributors to sign off on web-based commits, or false to not require contributors to sign off on web-based commits.
         /// The default when created is false.
         /// </summary>

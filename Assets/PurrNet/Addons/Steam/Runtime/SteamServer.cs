@@ -30,18 +30,20 @@ namespace PurrNet.Steam
         Callback<SteamNetConnectionStatusChangedCallback_t> _connectionStatusChanged;
         
         private readonly List<HSteamNetConnection> _connections = new List<HSteamNetConnection>();
-        private readonly Dictionary<int, HSteamNetConnection> _connectionById = new Dictionary<int, HSteamNetConnection>();
-        private readonly Dictionary<HSteamNetConnection, int> _idByConnection = new Dictionary<HSteamNetConnection, int>();
+        private readonly Dictionary<int, HSteamNetConnection> _connectionById =
+ new Dictionary<int, HSteamNetConnection>();
+        private readonly Dictionary<HSteamNetConnection, int> _idByConnection =
+ new Dictionary<HSteamNetConnection, int>();
         
         readonly IntPtr[] _messages = new IntPtr[MAX_MESSAGES];
 #endif
-        
+
 #pragma warning disable CS0067 // Event is never used
         public event Action<int> onRemoteConnected;
         public event Action<int> onRemoteDisconnected;
         public event Action<int, ByteData> onDataReceived;
 #pragma warning restore CS0067 // Event is never used
-        
+
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
         public bool listening => _listenSocket != HSteamListenSocket.Invalid;
 #else
@@ -77,7 +79,7 @@ namespace PurrNet.Steam
             PostListen();
 #endif
         }
-        
+
         public void ListenP2P(bool dedicated = false)
         {
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
@@ -103,7 +105,7 @@ namespace PurrNet.Steam
             PostListen();
 #endif
         }
-        
+
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
         private void PostListen()
         {
@@ -174,7 +176,6 @@ namespace PurrNet.Steam
         public void Kick(int id)
         {
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
-
             if (!_connectionById.TryGetValue(id, out var conn))
                 return;
             
@@ -194,7 +195,6 @@ namespace PurrNet.Steam
         public void SendToConnection(int connId, ByteData data, Channel channel)
         {
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
-
             if (!_connectionById.TryGetValue(connId, out var conn))
                 return;
 
@@ -219,7 +219,7 @@ namespace PurrNet.Steam
             else SteamNetworkingSockets.SendMessageToConnection(conn, ptr, (uint)data.length, sendFlag, out _);
 #endif
         }
-        
+
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
         private void AddConnection(HSteamNetConnection connection)
         {

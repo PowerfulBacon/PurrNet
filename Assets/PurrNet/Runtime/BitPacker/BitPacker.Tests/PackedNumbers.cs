@@ -23,26 +23,26 @@ public class PackedNumberTests
     {
         var value = new PackedUShort(0);
         Packer<PackedUShort>.Write(packer, value);
-        
+
         packer.ResetPositionAndMode(true);
-        
+
         PackedUShort read = default;
         Packer<PackedUShort>.Read(packer, ref read);
-        
+
         Assert.That(read.value, Is.EqualTo(0), "Failed to pack and unpack ushort value 0");
     }
-    
+
     [Test]
     public void TestIntZero()
     {
         var value = new PackedInt(0);
         Packer<PackedInt>.Write(packer, value);
-        
+
         packer.ResetPositionAndMode(true);
-        
+
         PackedInt read = default;
         Packer<PackedInt>.Read(packer, ref read);
-        
+
         Assert.That(read.value, Is.EqualTo(0), "Failed to pack and unpack int value 0");
     }
 
@@ -56,13 +56,13 @@ public class PackedNumberTests
     {
         var packed = new PackedInt(value);
         Packer<PackedInt>.Write(packer, packed);
-        
+
         packer.ResetPositionAndMode(true);
-        
+
         PackedInt read = default;
         Packer<PackedInt>.Read(packer, ref read);
-        
-        Assert.That(read.value, Is.EqualTo(value), 
+
+        Assert.That(read.value, Is.EqualTo(value),
             $"Failed to pack and unpack int value {value}\n" +
             $"Expected binary: {Convert.ToString(value, 2).PadLeft(32, value < 0 ? '1' : '0')}\n" +
             $"Got binary:      {Convert.ToString(read.value, 2).PadLeft(32, read.value < 0 ? '1' : '0')}");
@@ -80,13 +80,13 @@ public class PackedNumberTests
     {
         var packed = new PackedUShort(value);
         Packer<PackedUShort>.Write(packer, packed);
-        
+
         packer.ResetPositionAndMode(true);
-        
+
         PackedUShort read = default;
         Packer<PackedUShort>.Read(packer, ref read);
-        
-        Assert.That(read.value, Is.EqualTo(value), 
+
+        Assert.That(read.value, Is.EqualTo(value),
             $"Failed to pack and unpack ushort value {value}\n" +
             $"Expected binary: {Convert.ToString(value, 2).PadLeft(16, '0')}\n" +
             $"Got binary:      {Convert.ToString(read.value, 2).PadLeft(16, '0')}");
@@ -102,13 +102,13 @@ public class PackedNumberTests
     {
         var packed = new PackedUShort(value);
         Packer<PackedUShort>.Write(packer, packed);
-        
+
         packer.ResetPositionAndMode(true);
-        
+
         PackedUShort read = default;
         Packer<PackedUShort>.Read(packer, ref read);
-        
-        Assert.That(read.value, Is.EqualTo(value), 
+
+        Assert.That(read.value, Is.EqualTo(value),
             $"Failed to pack and unpack typical ushort value {value}");
     }
 
@@ -119,15 +119,15 @@ public class PackedNumberTests
     [TestCase(0x0000FFFFU)]
     [TestCase(0xFFFF0000U)]
     public void TestUintEdgeCases(uint value)
-    { 
+    {
         var packed = new PackedUInt(value);
         Packer<PackedUInt>.Write(packer, packed);
-        
+
         packer.ResetPositionAndMode(true);
-        
+
         PackedUInt read = default;
         Packer<PackedUInt>.Read(packer, ref read);
-        
+
         Assert.That(read.value, Is.EqualTo(value),
             $"Failed to pack and unpack uint value {value:X8}\n" +
             $"Expected binary: {Convert.ToString((int)value, 2).PadLeft(32, '0')}\n" +
@@ -138,17 +138,17 @@ public class PackedNumberTests
     [TestCase(69420U)]
     [TestCase(1000000U)]
     [TestCase(0x12345678U)]
-    [TestCase(2147483648U)]  // 2^31
+    [TestCase(2147483648U)] // 2^31
     public void TestUintTypicalValues(uint value)
     {
         var packed = new PackedUInt(value);
         Packer<PackedUInt>.Write(packer, packed);
-        
+
         packer.ResetPositionAndMode(true);
-        
+
         PackedUInt read = default;
         Packer<PackedUInt>.Read(packer, ref read);
-        
+
         Assert.That(read.value, Is.EqualTo(value),
             $"Failed to pack and unpack typical uint value {value}");
     }
@@ -186,7 +186,8 @@ public class PackedNumberTests
     public void TestBitPatterns()
     {
         // Test alternating bit patterns
-        ushort[] patterns = {
+        ushort[] patterns =
+        {
             0b1010101010101010,
             0b0101010101010101,
             0b1111000011110000,
@@ -205,7 +206,7 @@ public class PackedNumberTests
         {
             PackedUShort read = default;
             Packer<PackedUShort>.Read(packer, ref read);
-            
+
             Assert.That(read.value, Is.EqualTo(expected),
                 $"Failed to preserve bit pattern {Convert.ToString(expected, 2).PadLeft(16, '0')}");
         }
@@ -229,7 +230,7 @@ public class PackedNumberTests
             ushort expected = (ushort)(1 << i);
             PackedUShort read = default;
             Packer<PackedUShort>.Read(packer, ref read);
-            
+
             Assert.That(read.value, Is.EqualTo(expected),
                 $"Failed for value with {15 - i} leading zeros: {expected}");
         }

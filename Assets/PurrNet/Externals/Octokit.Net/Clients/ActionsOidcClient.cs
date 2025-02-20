@@ -2,7 +2,6 @@
 
 namespace Octokit.Clients
 {
-
     /// <summary>
     /// A client for GitHub's Actions OIDC API.
     /// </summary>
@@ -26,12 +25,14 @@ namespace Octokit.Clients
         {
             Ensure.ArgumentNotNullOrEmptyString(organization, nameof(organization));
 
-            return ApiConnection.Get<OrganizationOidcSubjectClaim>(ApiUrls.ActionsOrganizationOidcSubjectClaim(organization));
+            return ApiConnection.Get<OrganizationOidcSubjectClaim>(
+                ApiUrls.ActionsOrganizationOidcSubjectClaim(organization));
         }
 
         /// <inheritdoc/>
         [ManualRoute("PUT", "/orgs/{organization}/actions/oidc/customization/sub")]
-        public Task SetOrganizationOidcSubjectClaim(string organization, OrganizationOidcSubjectClaimRequest oidcSubjectClaim)
+        public Task SetOrganizationOidcSubjectClaim(string organization,
+            OrganizationOidcSubjectClaimRequest oidcSubjectClaim)
         {
             Ensure.ArgumentNotNullOrEmptyString(organization, nameof(organization));
             Ensure.ArgumentNotNull(oidcSubjectClaim, nameof(oidcSubjectClaim));
@@ -46,12 +47,14 @@ namespace Octokit.Clients
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(repository, nameof(repository));
 
-            return ApiConnection.Get<RepositoryOidcSubjectClaim>(ApiUrls.ActionsRepositoryOidcSubjectClaim(owner, repository));
+            return ApiConnection.Get<RepositoryOidcSubjectClaim>(
+                ApiUrls.ActionsRepositoryOidcSubjectClaim(owner, repository));
         }
 
         /// <inheritdoc/>
         [ManualRoute("PUT", "/repos/{owner}/{repository}/actions/oidc/customization/sub")]
-        public Task SetRepositoryOidcSubjectClaim(string owner, string repository, RepositoryOidcSubjectClaimRequest oidcSubjectClaim)
+        public Task SetRepositoryOidcSubjectClaim(string owner, string repository,
+            RepositoryOidcSubjectClaimRequest oidcSubjectClaim)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(repository, nameof(repository));

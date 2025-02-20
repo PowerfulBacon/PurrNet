@@ -166,7 +166,8 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <returns></returns>
         [ManualRoute("GET", "/repos/{owner}/{repo}/milestones")]
-        public Task<IReadOnlyList<Milestone>> GetAllForRepository(string owner, string name, MilestoneRequest request, ApiOptions options)
+        public Task<IReadOnlyList<Milestone>> GetAllForRepository(string owner, string name, MilestoneRequest request,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -188,7 +189,8 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <returns></returns>
         [ManualRoute("GET", "/repositories/{id}/milestones")]
-        public Task<IReadOnlyList<Milestone>> GetAllForRepository(long repositoryId, MilestoneRequest request, ApiOptions options)
+        public Task<IReadOnlyList<Milestone>> GetAllForRepository(long repositoryId, MilestoneRequest request,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));

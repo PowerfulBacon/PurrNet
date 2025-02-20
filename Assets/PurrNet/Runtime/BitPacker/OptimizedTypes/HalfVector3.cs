@@ -8,12 +8,12 @@ namespace PurrNet.Packing
         public Half x;
         public Half y;
         public Half z;
-        
+
         public static implicit operator Vector3(HalfVector3 value)
         {
             return new Vector3(value.x, value.y, value.z);
         }
-        
+
         public static implicit operator HalfVector3(Vector3 value)
         {
             return new HalfVector3
@@ -38,7 +38,7 @@ namespace PurrNet.Packing
         {
             return HashCode.Combine(x, y, z);
         }
-        
+
         public static HalfVector3 operator +(HalfVector3 a, HalfVector3 b)
         {
             return new HalfVector3
@@ -48,7 +48,7 @@ namespace PurrNet.Packing
                 z = a.z + b.z
             };
         }
-        
+
         public static HalfVector3 operator -(HalfVector3 a, HalfVector3 b)
         {
             return new HalfVector3

@@ -6,7 +6,7 @@ namespace PurrNet.Modules
     {
         readonly int packetIdx;
         public readonly PlayerID player;
-        
+
         public SpawnID(int packetIdx, PlayerID player)
         {
             this.packetIdx = packetIdx;

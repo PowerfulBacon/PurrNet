@@ -17,7 +17,8 @@ namespace Octokit.Caching
     {
         public sealed class V1 : IResponse
         {
-            public V1(object body, IReadOnlyDictionary<string, string> headers, ApiInfo apiInfo, HttpStatusCode statusCode, string contentType)
+            public V1(object body, IReadOnlyDictionary<string, string> headers, ApiInfo apiInfo,
+                HttpStatusCode statusCode, string contentType)
             {
                 Ensure.ArgumentNotNull(headers, nameof(headers));
 
@@ -30,18 +31,22 @@ namespace Octokit.Caching
 
             /// <inheritdoc/>
             public object Body { get; private set; }
+
             /// <summary>
             /// Information about the API.
             /// </summary>
             public IReadOnlyDictionary<string, string> Headers { get; private set; }
+
             /// <summary>
             /// Information about the API response parsed from the response headers.
             /// </summary>
             public ApiInfo ApiInfo { get; internal set; } // This setter is internal for use in tests.
+
             /// <summary>
             /// The response status code.
             /// </summary>
             public HttpStatusCode StatusCode { get; private set; }
+
             /// <summary>
             /// The content type of the response.
             /// </summary>
@@ -54,7 +59,8 @@ namespace Octokit.Caching
             {
                 Ensure.ArgumentNotNull(response, nameof(response));
 
-                return new V1(response.Body, response.Headers, response.ApiInfo, response.StatusCode, response.ContentType);
+                return new V1(response.Body, response.Headers, response.ApiInfo, response.StatusCode,
+                    response.ContentType);
             }
         }
     }

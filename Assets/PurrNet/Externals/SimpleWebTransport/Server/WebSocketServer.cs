@@ -23,7 +23,8 @@ namespace JamesFrowen.SimpleWeb
 
         int _idCounter = 0;
 
-        public WebSocketServer(TcpConfig tcpConfig, int maxMessageSize, int handshakeMaxSize, SslConfig sslConfig, BufferPool bufferPool)
+        public WebSocketServer(TcpConfig tcpConfig, int maxMessageSize, int handshakeMaxSize, SslConfig sslConfig,
+            BufferPool bufferPool)
         {
             this.tcpConfig = tcpConfig;
             this.maxMessageSize = maxMessageSize;
@@ -95,9 +96,18 @@ namespace JamesFrowen.SimpleWeb
                     throw;
                 }
             }
-            catch (ThreadInterruptedException e) { Log.InfoException(e); }
-            catch (ThreadAbortException e) { Log.InfoException(e); }
-            catch (Exception e) { Log.Exception(e); }
+            catch (ThreadInterruptedException e)
+            {
+                Log.InfoException(e);
+            }
+            catch (ThreadAbortException e)
+            {
+                Log.InfoException(e);
+            }
+            catch (Exception e)
+            {
+                Log.Exception(e);
+            }
         }
 
         void HandshakeAndReceiveLoop(Connection conn)
@@ -161,9 +171,18 @@ namespace JamesFrowen.SimpleWeb
 
                 ReceiveLoop.Loop(receiveConfig);
             }
-            catch (ThreadInterruptedException e) { Log.InfoException(e); }
-            catch (ThreadAbortException e) { Log.InfoException(e); }
-            catch (Exception e) { Log.Exception(e); }
+            catch (ThreadInterruptedException e)
+            {
+                Log.InfoException(e);
+            }
+            catch (ThreadAbortException e)
+            {
+                Log.InfoException(e);
+            }
+            catch (Exception e)
+            {
+                Log.Exception(e);
+            }
             finally
             {
                 // close here in case connect fails
@@ -189,7 +208,8 @@ namespace JamesFrowen.SimpleWeb
             }
             else
             {
-                Log.Warn($"Cant send message to {id} because connection was not found in dictionary. Maybe it disconnected.");
+                Log.Warn(
+                    $"Cant send message to {id} because connection was not found in dictionary. Maybe it disconnected.");
             }
         }
 

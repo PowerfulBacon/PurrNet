@@ -104,7 +104,8 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Reaction>(ApiUrls.IssueCommentReactions(repositoryId, commentId), null, options);
+            return ApiConnection.GetAll<Reaction>(ApiUrls.IssueCommentReactions(repositoryId, commentId), null,
+                options);
         }
 
         /// <summary>

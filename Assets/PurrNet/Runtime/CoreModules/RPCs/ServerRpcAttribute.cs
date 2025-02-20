@@ -11,15 +11,17 @@ namespace PurrNet
         Balanced,
         Best
     }
-    
+
     public class ServerRpcAttribute : PreserveAttribute
     {
         [UsedByIL]
         public ServerRpcAttribute(
             Channel channel = Channel.ReliableOrdered,
-            bool runLocally = false, 
+            bool runLocally = false,
             bool requireOwnership = true,
             CompressionLevel compressionLevel = CompressionLevel.None,
-            float asyncTimeoutInSec = 5f) {  }
+            float asyncTimeoutInSec = 5f)
+        {
+        }
     }
 }

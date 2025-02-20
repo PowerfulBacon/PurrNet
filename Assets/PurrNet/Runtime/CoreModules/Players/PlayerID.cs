@@ -8,11 +8,11 @@ namespace PurrNet
         private ushort _id { get; }
 
         public bool isBot { get; }
-        
+
         public ushort id => _id;
-        
+
         public static readonly PlayerID Server = new PlayerID(0, false);
-        
+
         public bool isServer => _id == 0;
 
         public PlayerID(ushort id, bool isBot)
@@ -40,7 +40,7 @@ namespace PurrNet
         {
             return obj is PlayerID other && Equals(other);
         }
-        
+
         public static bool operator ==(PlayerID a, PlayerID b)
         {
             return a._id == b._id;

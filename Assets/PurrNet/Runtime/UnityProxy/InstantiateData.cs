@@ -18,7 +18,7 @@ namespace PurrNet
         ParametersWithPosRot,
         PositionRotationScene
     }
-    
+
     internal readonly struct InstantiateData<T> where T : Object
     {
         public readonly InstantiateType type;
@@ -28,11 +28,11 @@ namespace PurrNet
         public readonly Transform parent;
         public readonly Scene scene;
         public readonly bool instantiateInWorldSpace;
-        
+
 #if UNITY_6000_0_35
         public readonly InstantiateParameters parameters;
 #endif
-        
+
         public InstantiateData(T original) : this()
         {
             type = InstantiateType.Default;
@@ -43,7 +43,7 @@ namespace PurrNet
             scene = default;
             instantiateInWorldSpace = false;
         }
-        
+
         public InstantiateData(T original, Transform parent, bool instantiateInWorldSpace) : this()
         {
             type = InstantiateType.Parent;
@@ -54,7 +54,7 @@ namespace PurrNet
             scene = default;
             this.instantiateInWorldSpace = instantiateInWorldSpace;
         }
-        
+
         public InstantiateData(T original, Vector3 position, Quaternion rotation) : this()
         {
             type = InstantiateType.PositionRotation;
@@ -65,7 +65,7 @@ namespace PurrNet
             scene = default;
             instantiateInWorldSpace = false;
         }
-        
+
         public InstantiateData(T original, Vector3 position, Quaternion rotation, Scene scene) : this()
         {
             type = InstantiateType.PositionRotationScene;
@@ -74,7 +74,7 @@ namespace PurrNet
             this.rotation = rotation;
             this.scene = scene;
         }
-        
+
         public InstantiateData(T original, Vector3 position, Quaternion rotation, Transform parent) : this()
         {
             type = InstantiateType.PositionRotationParent;
@@ -83,7 +83,7 @@ namespace PurrNet
             this.rotation = rotation;
             this.parent = parent;
         }
-        
+
         public InstantiateData(T original, Scene scene) : this()
         {
             type = InstantiateType.Scene;
@@ -94,7 +94,7 @@ namespace PurrNet
             this.scene = scene;
             instantiateInWorldSpace = false;
         }
-        
+
         public InstantiateData(T original, Transform parent) : this()
         {
             type = InstantiateType.SceneParent;
@@ -105,7 +105,7 @@ namespace PurrNet
             scene = default;
             instantiateInWorldSpace = false;
         }
-        
+
 #if UNITY_6000_0_35
         public InstantiateData(T original, InstantiateParameters parameters)
         {
@@ -131,45 +131,45 @@ namespace PurrNet
             this.parameters = parameters;
         }
 #endif
-        
+
         public bool TryGetHierarchy(out HierarchyV2 result)
         {
             var manager = NetworkManager.main;
-            
+
             if (!manager)
             {
                 result = default;
                 return false;
             }
-            
+
             bool isServer = manager.isServer;
-            
+
             if (!manager.TryGetModule<HierarchyFactory>(isServer, out var factory))
             {
                 result = default;
                 return false;
             }
-            
+
             if (!manager.TryGetModule<ScenesModule>(isServer, out var scenes))
             {
                 result = default;
                 return false;
             }
-            
+
             var sceneCopy = scene;
 
             if (!sceneCopy.IsValid())
                 sceneCopy = parent ? parent.gameObject.scene : SceneManager.GetActiveScene();
-            
+
             if (!scenes.TryGetSceneID(sceneCopy, out var sceneID))
             {
                 result = default;
                 return false;
             }
-            
+
             return factory.TryGetHierarchy(sceneID, out result);
         }
-        
+
         public T Instantiate()
         {
             return type switch
@@ -177,8 +177,10 @@ namespace PurrNet
                 InstantiateType.Default => UnityProxy.InstantiateDirectly(original),
                 InstantiateType.Parent => UnityProxy.InstantiateDirectly(original, parent, instantiateInWorldSpace),
                 InstantiateType.PositionRotation => UnityProxy.InstantiateDirectly(original, position, rotation),
-                InstantiateType.PositionRotationParent => UnityProxy.InstantiateDirectly(original, position, rotation, parent),
-                InstantiateType.PositionRotationScene => UnityProxy.InstantiateDirectly(original, position, rotation, scene),
+                InstantiateType.PositionRotationParent => UnityProxy.InstantiateDirectly(original, position, rotation,
+                    parent),
+                InstantiateType.PositionRotationScene => UnityProxy.InstantiateDirectly(original, position, rotation,
+                    scene),
                 InstantiateType.SceneParent => UnityProxy.InstantiateDirectly(original, parent),
 #if UNITY_2023_1_OR_NEWER
                 InstantiateType.Scene => UnityProxy.InstantiateDirectly(original, scene),
@@ -221,6 +223,7 @@ namespace PurrNet
                             prefab.transform.localRotation
                         );
                     }
+
                     break;
                 case InstantiateType.SceneParent:
                     trs.SetPositionAndRotation(

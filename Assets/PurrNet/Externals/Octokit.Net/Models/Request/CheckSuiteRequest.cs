@@ -22,6 +22,7 @@ namespace Octokit
         [Parameter(Key = "check_name")]
         public string CheckName { get; set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "AppId: {0}, CheckName: {1}", AppId, CheckName);
+        internal string DebuggerDisplay =>
+            string.Format(CultureInfo.InvariantCulture, "AppId: {0}, CheckName: {1}", AppId, CheckName);
     }
 }

@@ -15,7 +15,7 @@ namespace Octokit
         public User BillableOwner { get; private set; }
         public Repository Repository { get; private set; }
         public Machine Machine { get; private set; }
-        public DateTime CreatedAt { get;private set; }
+        public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }
         public DateTime LastUsedAt { get; private set; }
         public StringEnum<CodespaceState> State { get; private set; }
@@ -26,7 +26,9 @@ namespace Octokit
         public string StopUrl { get; private set; }
         public StringEnum<CodespaceLocation> Location { get; private set; }
 
-        public Codespace(long id, string name, User owner, User billableOwner, Repository repository, Machine machine, DateTime createdAt, DateTime updatedAt, DateTime lastUsedAt, StringEnum<CodespaceState> state, string url, string machinesUrl, string webUrl, string startUrl, string stopUrl, StringEnum<CodespaceLocation> location)
+        public Codespace(long id, string name, User owner, User billableOwner, Repository repository, Machine machine,
+            DateTime createdAt, DateTime updatedAt, DateTime lastUsedAt, StringEnum<CodespaceState> state, string url,
+            string machinesUrl, string webUrl, string startUrl, string stopUrl, StringEnum<CodespaceLocation> location)
         {
             Id = id;
             Name = name;
@@ -46,7 +48,10 @@ namespace Octokit
             Location = location;
         }
 
-        public Codespace() { }
+        public Codespace()
+        {
+        }
+
         internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "Codespace: Id: {0}", Id);
     }
 }

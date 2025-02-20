@@ -10,9 +10,13 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Team
     {
-        public Team() { }
+        public Team()
+        {
+        }
 
-        public Team(string url, string htmlUrl, long id, string nodeId, string slug, string name, string description, TeamPrivacy privacy, string permission, TeamRepositoryPermissions teamRepositoryPermissions, int membersCount, int reposCount, Organization organization, Team parent, string ldapDistinguishedName)
+        public Team(string url, string htmlUrl, long id, string nodeId, string slug, string name, string description,
+            TeamPrivacy privacy, string permission, TeamRepositoryPermissions teamRepositoryPermissions,
+            int membersCount, int reposCount, Organization organization, Team parent, string ldapDistinguishedName)
         {
             Url = url;
             HtmlUrl = htmlUrl;
@@ -121,13 +125,11 @@ namespace Octokit
         /// <summary>
         /// Only visible to organization owners and members of the team.
         /// </summary>
-        [Parameter(Value = "secret")]
-        Secret,
+        [Parameter(Value = "secret")] Secret,
 
         /// <summary>
         /// Visible to all members of the organization.
         /// </summary>
-        [Parameter(Value = "closed")]
-        Closed
+        [Parameter(Value = "closed")] Closed
     }
 }

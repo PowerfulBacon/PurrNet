@@ -10,9 +10,11 @@ namespace Octokit
     public class PreReceiveHook
     {
         public PreReceiveHook()
-        { }
+        {
+        }
 
-        public PreReceiveHook(long id, string name, StringEnum<PreReceiveHookEnforcement> enforcement, string script, Repository scriptRepository, PreReceiveEnvironment environment, bool allowDownstreamConfiguration)
+        public PreReceiveHook(long id, string name, StringEnum<PreReceiveHookEnforcement> enforcement, string script,
+            Repository scriptRepository, PreReceiveEnvironment environment, bool allowDownstreamConfiguration)
         {
             Id = id;
             Name = name;
@@ -79,7 +81,10 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Id: {0} Name: {1} Script: {2}", Id, Name, Script); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Id: {0} Name: {1} Script: {2}", Id, Name, Script);
+            }
         }
     }
 }

@@ -12,7 +12,10 @@ namespace Octokit
         {
         }
 
-        public CheckRun(long id, string headSha, string externalId, string url, string htmlUrl, string detailsUrl, CheckStatus status, CheckConclusion? conclusion, DateTimeOffset startedAt, DateTimeOffset? completedAt, CheckRunOutputResponse output, string name, CheckSuite checkSuite, GitHubApp app, IReadOnlyList<PullRequest> pullRequests)
+        public CheckRun(long id, string headSha, string externalId, string url, string htmlUrl, string detailsUrl,
+            CheckStatus status, CheckConclusion? conclusion, DateTimeOffset startedAt, DateTimeOffset? completedAt,
+            CheckRunOutputResponse output, string name, CheckSuite checkSuite, GitHubApp app,
+            IReadOnlyList<PullRequest> pullRequests)
         {
             Id = id;
             HeadSha = headSha;
@@ -106,6 +109,7 @@ namespace Octokit
         /// </summary>
         public IReadOnlyList<PullRequest> PullRequests { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "Id: {0}, HeadSha: {1}, Conclusion: {2}", Id, HeadSha, Conclusion);
+        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture,
+            "Id: {0}, HeadSha: {1}, Conclusion: {2}", Id, HeadSha, Conclusion);
     }
 }

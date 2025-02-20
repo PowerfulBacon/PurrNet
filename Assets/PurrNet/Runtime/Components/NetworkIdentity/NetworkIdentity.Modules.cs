@@ -7,10 +7,10 @@ namespace PurrNet
     public partial class NetworkIdentity
     {
         public IReadOnlyList<NetworkModule> modules => _externalModulesView;
-        
+
         private readonly List<NetworkModule> _externalModulesView = new List<NetworkModule>();
         private readonly List<NetworkModule> _modules = new List<NetworkModule>();
-        
+
         private byte _moduleId;
 
         [UsedByIL]
@@ -21,7 +21,7 @@ namespace PurrNet
                 throw new System.Exception($"Too many modules in {GetType().Name}! Max is {byte.MaxValue}.\n" +
                                            $"This could also happen with circular dependencies.");
             }
-            
+
             if (module == null)
             {
                 ++_moduleId;
@@ -30,7 +30,7 @@ namespace PurrNet
                 if (isNetworkIdentity)
                 {
                     PurrLogger.LogWarning($"Module in {GetType().Name} is null: <i>{type}</i> {moduleName};\n" +
-                                        $"You can initialize it on Awake or override OnInitializeModules.",
+                                          $"You can initialize it on Awake or override OnInitializeModules.",
                         this);
                 }
 
@@ -38,11 +38,11 @@ namespace PurrNet
             }
 
             module.SetComponentParent(this, _moduleId++, moduleName);
-            
+
             _modules.Add(module);
             _externalModulesView.Add(module);
         }
-        
+
         public bool TryGetModule(byte moduleId, out NetworkModule module)
         {
             if (moduleId >= _modules.Count)
@@ -50,7 +50,7 @@ namespace PurrNet
                 module = null;
                 return false;
             }
-            
+
             module = _modules[moduleId];
             return true;
         }
