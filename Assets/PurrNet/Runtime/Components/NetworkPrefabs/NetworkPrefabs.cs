@@ -51,7 +51,6 @@ namespace PurrNet
             return false;
         }
 
-        static readonly List<NetworkIdentity> _identities = new List<NetworkIdentity>();
 #if UNITY_EDITOR
         private bool _generating;
 #endif
@@ -148,6 +147,7 @@ namespace PurrNet
                 EditorUtility.DisplayProgressBar("Getting Network Prefabs", "Finding paths...", 0.1f);
 
                 List<GameObject> foundPrefabs = new List<GameObject>();
+                List<NetworkIdentity> identities = new List<NetworkIdentity>();
                 string[] guids = AssetDatabase.FindAssets("t:prefab", new[] { folderPath });
                 for (var i = 0; i < guids.Length; i++)
                 {
@@ -166,9 +166,9 @@ namespace PurrNet
                             continue;
                         }
 
-                        prefab.GetComponentsInChildren(true, _identities);
+                        prefab.GetComponentsInChildren(true, identities);
 
-                        if (_identities.Count > 0)
+                        if (identities.Count > 0)
                             foundPrefabs.Add(prefab);
                     }
                 }
