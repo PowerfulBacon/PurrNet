@@ -4,10 +4,8 @@ namespace Octokit
 {
     public enum ChangeType
     {
-        [Parameter(Value = "Added")]
-        Added,
+        [Parameter(Value = "Added")] Added,
 
-        [Parameter(Value = "Removed")]
-        Removed
+        [Parameter(Value = "Removed")] Removed
     }
 }

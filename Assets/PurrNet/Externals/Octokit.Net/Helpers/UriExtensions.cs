@@ -52,8 +52,8 @@ namespace Octokit
             var hasQueryString = uri.OriginalString.IndexOf("?", StringComparison.Ordinal);
 
             string uriWithoutQuery = hasQueryString == -1
-                    ? uri.ToString()
-                    : uri.OriginalString.Substring(0, hasQueryString);
+                ? uri.ToString()
+                : uri.OriginalString.Substring(0, hasQueryString);
 
             string queryString;
             if (uri.IsAbsoluteUri)
@@ -68,11 +68,11 @@ namespace Octokit
             }
 
             var values = queryString.Replace("?", "")
-                                    .Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
+                .Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
 
             var existingParameters = values.ToDictionary(
-                        key => key.Substring(0, key.IndexOf('=')),
-                        value => value.Substring(value.IndexOf('=') + 1));
+                key => key.Substring(0, key.IndexOf('=')),
+                value => value.Substring(value.IndexOf('=') + 1));
 
             foreach (var existing in existingParameters)
             {
@@ -89,7 +89,8 @@ namespace Octokit
                 }
             }
 
-            Func<string, string, string> mapValueFunc = (key, value) => (key == "q" || key =="before" || key=="after") ? value : Uri.EscapeDataString(value);
+            Func<string, string, string> mapValueFunc = (key, value) =>
+                (key == "q" || key == "before" || key == "after") ? value : Uri.EscapeDataString(value);
 
             string query = string.Join("&", p.Select(kvp => kvp.Key + "=" + mapValueFunc(kvp.Key, kvp.Value)));
             if (uri.IsAbsoluteUri)

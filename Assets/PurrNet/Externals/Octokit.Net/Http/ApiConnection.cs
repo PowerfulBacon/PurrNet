@@ -102,11 +102,13 @@ namespace Octokit
         /// <param name="preprocessResponseBody">Function to preprocess HTTP response prior to deserialization (can be null)</param>
         /// <returns>The API resource.</returns>
         /// <exception cref="ApiException">Thrown when an API error occurs.</exception>
-        public async Task<T> Get<T>(Uri uri, IDictionary<string, string> parameters, string accepts, Func<object, object> preprocessResponseBody)
+        public async Task<T> Get<T>(Uri uri, IDictionary<string, string> parameters, string accepts,
+            Func<object, object> preprocessResponseBody)
         {
             Ensure.ArgumentNotNull(uri, nameof(uri));
 
-            var response = await Connection.Get<T>(uri, parameters, accepts, CancellationToken.None, preprocessResponseBody).ConfigureAwait(false);
+            var response = await Connection
+                .Get<T>(uri, parameters, accepts, CancellationToken.None, preprocessResponseBody).ConfigureAwait(false);
             return response.Body;
         }
 
@@ -139,7 +141,7 @@ namespace Octokit
             var response = await Connection.GetRaw(uri, parameters).ConfigureAwait(false);
             return response.Body;
         }
-        
+
         /// <inheritdoc/>
         public async Task<Stream> GetRawStream(Uri uri, IDictionary<string, string> parameters)
         {
@@ -227,27 +229,33 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(uri, nameof(uri));
 
-            return _pagination.GetAllPages(async () => await GetPage<T>(uri, parameters, accepts).ConfigureAwait(false), uri);
+            return _pagination.GetAllPages(async () => await GetPage<T>(uri, parameters, accepts).ConfigureAwait(false),
+                uri);
         }
 
-        public Task<IReadOnlyList<T>> GetAll<T>(Uri uri, IDictionary<string, string> parameters, string accepts, ApiOptions options)
+        public Task<IReadOnlyList<T>> GetAll<T>(Uri uri, IDictionary<string, string> parameters, string accepts,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNull(uri, nameof(uri));
             Ensure.ArgumentNotNull(options, nameof(options));
 
             parameters = Pagination.Setup(parameters, options);
 
-            return _pagination.GetAllPages(async () => await GetPage<T>(uri, parameters, accepts, options).ConfigureAwait(false), uri);
+            return _pagination.GetAllPages(
+                async () => await GetPage<T>(uri, parameters, accepts, options).ConfigureAwait(false), uri);
         }
 
-        public Task<IReadOnlyList<T>> GetAll<T>(Uri uri, IDictionary<string, string> parameters, string accepts, ApiOptions options, Func<object, object> preprocessResponseBody)
+        public Task<IReadOnlyList<T>> GetAll<T>(Uri uri, IDictionary<string, string> parameters, string accepts,
+            ApiOptions options, Func<object, object> preprocessResponseBody)
         {
             Ensure.ArgumentNotNull(uri, nameof(uri));
             Ensure.ArgumentNotNull(options, nameof(options));
 
             parameters = Pagination.Setup(parameters, options);
 
-            return _pagination.GetAllPages(async () => await GetPage<T>(uri, parameters, accepts, options, preprocessResponseBody).ConfigureAwait(false), uri);
+            return _pagination.GetAllPages(
+                async () => await GetPage<T>(uri, parameters, accepts, options, preprocessResponseBody)
+                    .ConfigureAwait(false), uri);
         }
 
         /// <summary>
@@ -323,12 +331,14 @@ namespace Octokit
         /// <param name="cancellationToken">An optional token to monitor for cancellation requests</param>
         /// <returns>The created API resource.</returns>
         /// <exception cref="ApiException">Thrown when an API error occurs.</exception>
-        public async Task<T> Post<T>(Uri uri, object data, string accepts, string contentType, CancellationToken cancellationToken = default)
+        public async Task<T> Post<T>(Uri uri, object data, string accepts, string contentType,
+            CancellationToken cancellationToken = default)
         {
             Ensure.ArgumentNotNull(uri, nameof(uri));
             Ensure.ArgumentNotNull(data, nameof(data));
 
-            var response = await Connection.Post<T>(uri, data, accepts, contentType, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var response = await Connection
+                .Post<T>(uri, data, accepts, contentType, cancellationToken: cancellationToken).ConfigureAwait(false);
             return response.Body;
         }
 
@@ -344,23 +354,28 @@ namespace Octokit
         /// <param name="cancellationToken">An optional token to monitor for cancellation requests</param>
         /// <returns>The created API resource.</returns>
         /// <exception cref="ApiException">Thrown when an API error occurs.</exception>
-        public async Task<T> Post<T>(Uri uri, object data, string accepts, string contentType, string twoFactorAuthenticationCode, CancellationToken cancellationToken = default)
+        public async Task<T> Post<T>(Uri uri, object data, string accepts, string contentType,
+            string twoFactorAuthenticationCode, CancellationToken cancellationToken = default)
         {
             Ensure.ArgumentNotNull(uri, nameof(uri));
             Ensure.ArgumentNotNull(data, nameof(data));
             Ensure.ArgumentNotNull(twoFactorAuthenticationCode, nameof(twoFactorAuthenticationCode));
 
-            var response = await Connection.Post<T>(uri, data, accepts, contentType, twoFactorAuthenticationCode, cancellationToken).ConfigureAwait(false);
+            var response = await Connection
+                .Post<T>(uri, data, accepts, contentType, twoFactorAuthenticationCode, cancellationToken)
+                .ConfigureAwait(false);
             return response.Body;
         }
 
 
-        public async Task<T> Post<T>(Uri uri, object data, string accepts, string contentType, TimeSpan timeout, CancellationToken cancellationToken = default)
+        public async Task<T> Post<T>(Uri uri, object data, string accepts, string contentType, TimeSpan timeout,
+            CancellationToken cancellationToken = default)
         {
             Ensure.ArgumentNotNull(uri, nameof(uri));
             Ensure.ArgumentNotNull(data, nameof(data));
 
-            var response = await Connection.Post<T>(uri, data, accepts, contentType, timeout, cancellationToken).ConfigureAwait(false);
+            var response = await Connection.Post<T>(uri, data, accepts, contentType, timeout, cancellationToken)
+                .ConfigureAwait(false);
             return response.Body;
         }
 
@@ -443,7 +458,8 @@ namespace Octokit
             Ensure.ArgumentNotNull(uri, nameof(uri));
             Ensure.ArgumentNotNull(data, nameof(data));
 
-            var response = await Connection.Put<T>(uri, data, twoFactorAuthenticationCode, accepts).ConfigureAwait(false);
+            var response = await Connection.Put<T>(uri, data, twoFactorAuthenticationCode, accepts)
+                .ConfigureAwait(false);
 
             return response.Body;
         }
@@ -667,7 +683,8 @@ namespace Octokit
             {
                 Ensure.ArgumentNotNull(uri, nameof(uri));
 
-                var response = await Connection.GetResponse<IReadOnlyList<T>>(uri, cancellationToken).ConfigureAwait(false);
+                var response = await Connection.GetResponse<IReadOnlyList<T>>(uri, cancellationToken)
+                    .ConfigureAwait(false);
 
                 switch (response.HttpResponse.StatusCode)
                 {
@@ -692,10 +709,13 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(uri, nameof(uri));
 
-            var response = await Connection.Get<List<T>>(uri, parameters, accepts, CancellationToken.None, preprocessResponseBody).ConfigureAwait(false);
+            var response = await Connection
+                .Get<List<T>>(uri, parameters, accepts, CancellationToken.None, preprocessResponseBody)
+                .ConfigureAwait(false);
             return new ReadOnlyPagedCollection<T>(
                 response,
-                nextPageUri => Connection.Get<List<T>>(nextPageUri, parameters, accepts, CancellationToken.None, preprocessResponseBody));
+                nextPageUri => Connection.Get<List<T>>(nextPageUri, parameters, accepts, CancellationToken.None,
+                    preprocessResponseBody));
         }
 
         async Task<IReadOnlyPagedCollection<TU>> GetPage<TU>(
@@ -709,7 +729,9 @@ namespace Octokit
 
             var connection = Connection;
 
-            var response = await connection.Get<List<TU>>(uri, parameters, accepts, CancellationToken.None, preprocessResponseBody).ConfigureAwait(false);
+            var response = await connection
+                .Get<List<TU>>(uri, parameters, accepts, CancellationToken.None, preprocessResponseBody)
+                .ConfigureAwait(false);
             return new ReadOnlyPagedCollection<TU>(
                 response,
                 nextPageUri =>
@@ -719,7 +741,8 @@ namespace Octokit
                         options);
 
                     return shouldContinue
-                        ? connection.Get<List<TU>>(nextPageUri, parameters, accepts, CancellationToken.None, preprocessResponseBody)
+                        ? connection.Get<List<TU>>(nextPageUri, parameters, accepts, CancellationToken.None,
+                            preprocessResponseBody)
                         : null;
                 });
         }

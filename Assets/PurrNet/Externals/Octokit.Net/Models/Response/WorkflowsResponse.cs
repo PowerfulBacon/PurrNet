@@ -27,6 +27,7 @@ namespace Octokit
         /// </summary>
         public IReadOnlyList<Workflow> Workflows { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "TotalCount: {0}, Workflows: {1}", TotalCount, Workflows.Count);
+        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "TotalCount: {0}, Workflows: {1}",
+            TotalCount, Workflows.Count);
     }
 }

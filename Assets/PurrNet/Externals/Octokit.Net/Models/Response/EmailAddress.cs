@@ -11,7 +11,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class EmailAddress
     {
-        public EmailAddress() { }
+        public EmailAddress()
+        {
+        }
 
         public EmailAddress(string email, bool verified, bool primary, EmailVisibility visibility)
         {
@@ -49,7 +51,8 @@ namespace Octokit
             get
             {
                 return string.Format(CultureInfo.InvariantCulture,
-                    "EmailAddress: Email: {0}; Primary: {1}, Verified: {2}, Visibility: {3}", Email, Primary, Verified, Visibility);
+                    "EmailAddress: Email: {0}; Primary: {1}, Verified: {2}, Visibility: {3}", Email, Primary, Verified,
+                    Visibility);
             }
         }
     }
@@ -62,13 +65,11 @@ namespace Octokit
         /// <summary>
         /// Primary email address and is public
         /// </summary>
-        [Parameter(Value = "public")]
-        Public,
+        [Parameter(Value = "public")] Public,
 
         /// <summary>
         /// Primary email address and is private
         /// </summary>
-        [Parameter(Value = "private")]
-        Private
+        [Parameter(Value = "private")] Private
     }
 }

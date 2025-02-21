@@ -16,7 +16,8 @@ namespace Octokit
         /// <param name="script">The script that the hook runs.</param>
         /// <param name="scriptRepository">The repository where the script is kept.</param>
         /// <param name="environment">The pre-receive environment where the script is executed.</param>
-        public NewPreReceiveHook(string name, Repository scriptRepository, string script, PreReceiveEnvironment environment)
+        public NewPreReceiveHook(string name, Repository scriptRepository, string script,
+            PreReceiveEnvironment environment)
         {
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(scriptRepository, nameof(scriptRepository));
@@ -92,7 +93,11 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Name: {0} Repo: {1} Script: {2}", Name, ScriptRepository.FullName, Script); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Name: {0} Repo: {1} Script: {2}", Name,
+                    ScriptRepository.FullName, Script);
+            }
         }
     }
 }

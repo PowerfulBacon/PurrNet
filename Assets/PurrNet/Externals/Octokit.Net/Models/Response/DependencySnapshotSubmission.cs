@@ -8,9 +8,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class DependencySnapshotSubmission
     {
-        public DependencySnapshotSubmission() { }
+        public DependencySnapshotSubmission()
+        {
+        }
 
-        public DependencySnapshotSubmission(long id, DateTimeOffset createdAt, DependencySnapshotSubmissionResult result, string message)
+        public DependencySnapshotSubmission(long id, DateTimeOffset createdAt,
+            DependencySnapshotSubmissionResult result, string message)
         {
             Id = id;
             CreatedAt = createdAt;
@@ -40,10 +43,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Id: {0} Created at: {1}", Id, CreatedAt);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Id: {0} Created at: {1}", Id, CreatedAt); }
         }
     }
 
@@ -52,19 +52,16 @@ namespace Octokit
         /// <summary>
         /// The snapshot was successfully created and the repository's dependencies were updated.
         /// </summary>
-        [Parameter(Value = "Success")]
-        Success,
+        [Parameter(Value = "Success")] Success,
 
         /// <summary>
         /// The snapshot was successfully created, but the repository's dependencies were not updated.
         /// </summary>
-        [Parameter(Value = "Accepted")]
-        Accepted,
+        [Parameter(Value = "Accepted")] Accepted,
 
         /// <summary>
         /// The snapshot was malformed.
         /// </summary>
-        [Parameter(Value = "Invalid")]
-        Invalid
+        [Parameter(Value = "Invalid")] Invalid
     }
 }

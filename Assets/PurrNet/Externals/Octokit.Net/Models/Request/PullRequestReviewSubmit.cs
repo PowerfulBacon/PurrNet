@@ -27,10 +27,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Event: {0} ", Event);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Event: {0} ", Event); }
         }
     }
 
@@ -39,19 +36,16 @@ namespace Octokit
         /// <summary>
         /// The review is approved
         /// </summary>
-        [Parameter(Value = "APPROVE")]
-        Approve,
+        [Parameter(Value = "APPROVE")] Approve,
 
         /// <summary>
         /// The review requests changes that must be addressed before merging
         /// </summary>
-        [Parameter(Value = "REQUEST_CHANGES")]
-        RequestChanges,
+        [Parameter(Value = "REQUEST_CHANGES")] RequestChanges,
 
         /// <summary>
         /// The review provides comment without explicit approval
         /// </summary>
-        [Parameter(Value = "COMMENT")]
-        Comment
+        [Parameter(Value = "COMMENT")] Comment
     }
 }

@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class GistFork
     {
-        public GistFork() { }
+        public GistFork()
+        {
+        }
 
         public GistFork(string nodeId, User user, string url, DateTimeOffset createdAt)
         {
@@ -39,7 +41,10 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "User: {0}, Url: {1}", User.DebuggerDisplay, Url); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "User: {0}, Url: {1}", User.DebuggerDisplay, Url);
+            }
         }
     }
 }

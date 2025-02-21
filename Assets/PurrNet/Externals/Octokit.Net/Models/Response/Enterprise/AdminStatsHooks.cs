@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class AdminStatsHooks
     {
-        public AdminStatsHooks() { }
+        public AdminStatsHooks()
+        {
+        }
 
         public AdminStatsHooks(int totalHooks, int activeHooks, int inactiveHooks)
         {
@@ -16,29 +18,18 @@ namespace Octokit
             InactiveHooks = inactiveHooks;
         }
 
-        public int TotalHooks
-        {
-            get;
-            private set;
-        }
+        public int TotalHooks { get; private set; }
 
-        public int ActiveHooks
-        {
-            get;
-            private set;
-        }
+        public int ActiveHooks { get; private set; }
 
-        public int InactiveHooks
-        {
-            get;
-            private set;
-        }
+        public int InactiveHooks { get; private set; }
 
         internal string DebuggerDisplay
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "TotalHooks: {0} ActiveHooks: {1} InactiveHooks: {2}", TotalHooks, ActiveHooks, InactiveHooks);
+                return string.Format(CultureInfo.InvariantCulture,
+                    "TotalHooks: {0} ActiveHooks: {1} InactiveHooks: {2}", TotalHooks, ActiveHooks, InactiveHooks);
             }
         }
     }

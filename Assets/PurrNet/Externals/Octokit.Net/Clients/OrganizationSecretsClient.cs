@@ -13,7 +13,9 @@ namespace Octokit
     /// </remarks>
     public class OrganizationSecretsClient : ApiClient, IOrganizationSecretsClient
     {
-        public OrganizationSecretsClient(IApiConnection apiConnection) : base(apiConnection) { }
+        public OrganizationSecretsClient(IApiConnection apiConnection) : base(apiConnection)
+        {
+        }
 
         /// <summary>
         /// Get the public signing key to encrypt secrets for an organization.
@@ -80,7 +82,8 @@ namespace Octokit
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns>A <see cref="OrganizationSecret"/> instance for the organization secret that was created or updated.</returns>
         [ManualRoute("PUT", "/orgs/{org}/actions/secrets/{secretName}")]
-        public async Task<OrganizationSecret> CreateOrUpdate(string org, string secretName, UpsertOrganizationSecret upsertSecret)
+        public async Task<OrganizationSecret> CreateOrUpdate(string org, string secretName,
+            UpsertOrganizationSecret upsertSecret)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNullOrEmptyString(secretName, nameof(secretName));
@@ -89,7 +92,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(upsertSecret.EncryptedValue, nameof(upsertSecret.EncryptedValue));
             Ensure.ArgumentNotNullOrEmptyString(upsertSecret.Visibility, nameof(upsertSecret.Visibility));
 
-            await ApiConnection.Put<OrganizationSecret>(ApiUrls.OrganizationRepositorySecret(org, secretName), upsertSecret);
+            await ApiConnection.Put<OrganizationSecret>(ApiUrls.OrganizationRepositorySecret(org, secretName),
+                upsertSecret);
             return await ApiConnection.Get<OrganizationSecret>(ApiUrls.OrganizationRepositorySecret(org, secretName));
         }
 
@@ -121,12 +125,14 @@ namespace Octokit
         /// <param name="secretName">The name of the secret</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         [ManualRoute("GET", "/orgs/{org}/actions/secrets/{secretName}/repositories")]
-        public Task<OrganizationSecretRepositoryCollection> GetSelectedRepositoriesForSecret(string org, string secretName)
+        public Task<OrganizationSecretRepositoryCollection> GetSelectedRepositoriesForSecret(string org,
+            string secretName)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNullOrEmptyString(secretName, nameof(secretName));
 
-            return ApiConnection.Get<OrganizationSecretRepositoryCollection>(ApiUrls.OrganizationRepositorySecretRepositories(org, secretName));
+            return ApiConnection.Get<OrganizationSecretRepositoryCollection>(
+                ApiUrls.OrganizationRepositorySecretRepositories(org, secretName));
         }
 
         /// <summary>
@@ -140,14 +146,16 @@ namespace Octokit
         /// <param name="repositories">The list of repositories that should have access to view and use the secret</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         [ManualRoute("PUT", "/orgs/{org}/actions/secrets/{secretName}/repositories")]
-        public async Task SetSelectedRepositoriesForSecret(string org, string secretName, SelectedRepositoryCollection repositories)
+        public async Task SetSelectedRepositoriesForSecret(string org, string secretName,
+            SelectedRepositoryCollection repositories)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNullOrEmptyString(secretName, nameof(secretName));
             Ensure.ArgumentNotNull(repositories, nameof(repositories));
             Ensure.ArgumentNotNull(repositories.SelectedRepositoryIds, nameof(repositories.SelectedRepositoryIds));
 
-            await ApiConnection.Put<SelectedRepositoryCollection>(ApiUrls.OrganizationRepositorySecretRepositories(org, secretName), repositories);
+            await ApiConnection.Put<SelectedRepositoryCollection>(
+                ApiUrls.OrganizationRepositorySecretRepositories(org, secretName), repositories);
             return;
         }
 

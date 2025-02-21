@@ -12,7 +12,7 @@ namespace PurrNet.Editor
         private const float BottomPadding = 8f;
         private const float ColumnHeaderHeight = 18f;
         private bool _foldout = true;
-        
+
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             var valuesProp = property.FindPropertyRelative("_values");
@@ -20,12 +20,12 @@ namespace PurrNet.Editor
             var displayValuesProp = (valuesProp != null && valuesProp.arraySize > 0) ? valuesProp : stringValuesProp;
 
             if (!_foldout) return HeaderHeight;
-        
+
             float totalHeight = HeaderHeight + ColumnHeaderHeight;
             int count = displayValuesProp?.arraySize ?? 0;
             totalHeight += (EditorGUIUtility.singleLineHeight + ElementPadding) * count;
             totalHeight += BottomPadding;
-        
+
             return totalHeight;
         }
 
@@ -46,13 +46,14 @@ namespace PurrNet.Editor
             {
                 EditorGUI.indentLevel++;
                 float yOffset = HeaderHeight;
-                
+
                 //Rect headerBgRect = new Rect(position.x, position.y + yOffset, position.width, ColumnHeaderHeight);
                 //EditorGUI.DrawRect(headerBgRect, new Color(0.7f, 0.7f, 0.7f, 0.1f));
-                
+
                 float headerLabelOffset = 2f;
-                Rect valueHeaderRect = new Rect(position.x, position.y + yOffset + headerLabelOffset, position.width * 0.9f, EditorGUIUtility.singleLineHeight);
-                
+                Rect valueHeaderRect = new Rect(position.x, position.y + yOffset + headerLabelOffset,
+                    position.width * 0.9f, EditorGUIUtility.singleLineHeight);
+
                 yOffset += ColumnHeaderHeight;
 
                 if (displayValuesProp != null)
@@ -61,7 +62,8 @@ namespace PurrNet.Editor
                     for (int i = 0; i < count; i++)
                     {
                         float elementHeight = EditorGUIUtility.singleLineHeight;
-                        Rect valueRect = new Rect(position.x, position.y + yOffset, position.width * 0.9f, elementHeight);
+                        Rect valueRect = new Rect(position.x, position.y + yOffset, position.width * 0.9f,
+                            elementHeight);
 
                         if (i % 2 == 1)
                         {
@@ -71,7 +73,8 @@ namespace PurrNet.Editor
 
                         using (new EditorGUI.DisabledScope(true))
                         {
-                            EditorGUI.PropertyField(valueRect, displayValuesProp.GetArrayElementAtIndex(i), GUIContent.none);
+                            EditorGUI.PropertyField(valueRect, displayValuesProp.GetArrayElementAtIndex(i),
+                                GUIContent.none);
                         }
 
                         yOffset += elementHeight + ElementPadding;

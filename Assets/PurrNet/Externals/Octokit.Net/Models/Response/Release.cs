@@ -9,9 +9,14 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Release
     {
-        public Release() { }
+        public Release()
+        {
+        }
 
-        public Release(string url, string htmlUrl, string assetsUrl, string uploadUrl, long id, string nodeId, string tagName, string targetCommitish, string name, string body, bool draft, bool prerelease, DateTimeOffset createdAt, DateTimeOffset? publishedAt, Author author, string tarballUrl, string zipballUrl, IReadOnlyList<ReleaseAsset> assets)
+        public Release(string url, string htmlUrl, string assetsUrl, string uploadUrl, long id, string nodeId,
+            string tagName, string targetCommitish, string name, string body, bool draft, bool prerelease,
+            DateTimeOffset createdAt, DateTimeOffset? publishedAt, Author author, string tarballUrl, string zipballUrl,
+            IReadOnlyList<ReleaseAsset> assets)
         {
             Url = url;
             HtmlUrl = htmlUrl;

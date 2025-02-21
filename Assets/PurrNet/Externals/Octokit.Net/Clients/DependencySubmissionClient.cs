@@ -14,7 +14,9 @@ namespace Octokit
         /// Initializes a new GitHub Dependency Submission API client.
         /// </summary>
         /// <param name="apiConnection">An API connection</param>
-        public DependencySubmissionClient(IApiConnection apiConnection) : base(apiConnection) { }
+        public DependencySubmissionClient(IApiConnection apiConnection) : base(apiConnection)
+        {
+        }
 
         /// <summary>
         /// Creates a new dependency snapshot.
@@ -36,7 +38,8 @@ namespace Octokit
 
             var newDependencySnapshotAsObject = ConvertToJsonObject(snapshot);
 
-            return ApiConnection.Post<DependencySnapshotSubmission>(ApiUrls.DependencySubmission(owner, name), newDependencySnapshotAsObject);
+            return ApiConnection.Post<DependencySnapshotSubmission>(ApiUrls.DependencySubmission(owner, name),
+                newDependencySnapshotAsObject);
         }
 
         /// <summary>
@@ -56,7 +59,8 @@ namespace Octokit
 
             var newDependencySnapshotAsObject = ConvertToJsonObject(snapshot);
 
-            return ApiConnection.Post<DependencySnapshotSubmission>(ApiUrls.DependencySubmission(repositoryId), newDependencySnapshotAsObject);
+            return ApiConnection.Post<DependencySnapshotSubmission>(ApiUrls.DependencySubmission(repositoryId),
+                newDependencySnapshotAsObject);
         }
 
         /// <summary>

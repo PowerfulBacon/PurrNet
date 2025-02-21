@@ -41,6 +41,7 @@ namespace LiteNetLib
     {
         public static INetLogger Logger = null;
         private static readonly object DebugLogLock = new object();
+
         private static void WriteLogic(NetLogLevel logLevel, string str, params object[] args)
         {
             lock (DebugLogLock)

@@ -45,7 +45,6 @@ namespace Octokit
             Project = new ProjectsClient(apiConnection);
             Actions = new RepositoryActionsClient(apiConnection);
             Autolinks = new AutolinksClient(apiConnection);
-            
         }
 
         /// <summary>
@@ -94,7 +93,8 @@ namespace Octokit
         /// <param name="newRepository"></param>
         /// <returns></returns>
         [ManualRoute("POST", "/repos/{owner}/{repo}/generate")]
-        public Task<Repository> Generate(string templateOwner, string templateRepo, NewRepositoryFromTemplate newRepository)
+        public Task<Repository> Generate(string templateOwner, string templateRepo,
+            NewRepositoryFromTemplate newRepository)
         {
             Ensure.ArgumentNotNull(templateOwner, nameof(templateOwner));
             Ensure.ArgumentNotNull(templateRepo, nameof(templateRepo));
@@ -116,9 +116,9 @@ namespace Octokit
                 string errorMessage = e.ApiError.FirstErrorMessageSafe();
 
                 if (string.Equals(
-                    "name already exists on this account",
-                    errorMessage,
-                    StringComparison.OrdinalIgnoreCase))
+                        "name already exists on this account",
+                        errorMessage,
+                        StringComparison.OrdinalIgnoreCase))
                 {
                     if (string.IsNullOrEmpty(organizationLogin))
                     {
@@ -134,7 +134,8 @@ namespace Octokit
                         baseAddress, e);
                 }
 
-                if (errorMessage != null && errorMessage.EndsWith("is an unknown gitignore template.", StringComparison.OrdinalIgnoreCase))
+                if (errorMessage != null && errorMessage.EndsWith("is an unknown gitignore template.",
+                        StringComparison.OrdinalIgnoreCase))
                 {
                     throw new InvalidGitIgnoreTemplateException(e);
                 }
@@ -231,7 +232,8 @@ namespace Octokit
 
             try
             {
-                var response = await Connection.Get<object>(ApiUrls.RepositoryVulnerabilityAlerts(owner, name), null, null).ConfigureAwait(false);
+                var response = await Connection
+                    .Get<object>(ApiUrls.RepositoryVulnerabilityAlerts(owner, name), null, null).ConfigureAwait(false);
                 return response.HttpResponse.IsTrue();
             }
             catch (NotFoundException)
@@ -669,7 +671,8 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <returns>All contributors of the repository.</returns>
         [ManualRoute("GET", "/repos/{owner}/{repo}/contributors")]
-        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(string owner, string name, ApiOptions options)
+        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(string owner, string name,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -706,7 +709,8 @@ namespace Octokit
         /// <param name="includeAnonymous">True if anonymous contributors should be included in result; Otherwise false</param>
         /// <returns>All contributors of the repository.</returns>
         [ManualRoute("GET", "/repos/{owner}/{repo}/contributors")]
-        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(string owner, string name, bool includeAnonymous)
+        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(string owner, string name,
+            bool includeAnonymous)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -741,7 +745,8 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <returns>All contributors of the repository.</returns>
         [ManualRoute("GET", "/repos/{owner}/{repo}/contributors")]
-        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(string owner, string name, bool includeAnonymous, ApiOptions options)
+        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(string owner, string name,
+            bool includeAnonymous, ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -751,7 +756,8 @@ namespace Octokit
             if (includeAnonymous)
                 parameters.Add("anon", "1");
 
-            return ApiConnection.GetAll<RepositoryContributor>(ApiUrls.RepositoryContributors(owner, name), parameters, options);
+            return ApiConnection.GetAll<RepositoryContributor>(ApiUrls.RepositoryContributors(owner, name), parameters,
+                options);
         }
 
         /// <summary>
@@ -765,7 +771,8 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <returns>All contributors of the repository.</returns>
         [ManualRoute("GET", "/repositories/{id}/contributors")]
-        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(long repositoryId, bool includeAnonymous, ApiOptions options)
+        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(long repositoryId, bool includeAnonymous,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, nameof(options));
 
@@ -773,7 +780,8 @@ namespace Octokit
             if (includeAnonymous)
                 parameters.Add("anon", "1");
 
-            return ApiConnection.GetAll<RepositoryContributor>(ApiUrls.RepositoryContributors(repositoryId), parameters, options);
+            return ApiConnection.GetAll<RepositoryContributor>(ApiUrls.RepositoryContributors(repositoryId), parameters,
+                options);
         }
 
         /// <summary>
@@ -804,7 +812,6 @@ namespace Octokit
         /// <param name="repositoryId">The ID of the repository</param>
         /// <returns>All topics associated with the repository.</returns>
         [ManualRoute("GET", "/repositories/{id}/topics")]
-
         public Task<RepositoryTopics> GetAllTopics(long repositoryId)
         {
             return GetAllTopics(repositoryId, ApiOptions.None);
@@ -843,7 +850,6 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <returns>All topics associated with the repository.</returns>
         [ManualRoute("GET", "/repos/{owner}/{repo}/topics")]
-
         public Task<RepositoryTopics> GetAllTopics(string owner, string name)
         {
             return GetAllTopics(owner, name, ApiOptions.None);

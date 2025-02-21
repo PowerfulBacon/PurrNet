@@ -7,9 +7,14 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Author
     {
-        public Author() { }
+        public Author()
+        {
+        }
 
-        public Author(string login, long id, string nodeId, string avatarUrl, string url, string htmlUrl, string followersUrl, string followingUrl, string gistsUrl, string type, string starredUrl, string subscriptionsUrl, string organizationsUrl, string reposUrl, string eventsUrl, string receivedEventsUrl, bool siteAdmin)
+        public Author(string login, long id, string nodeId, string avatarUrl, string url, string htmlUrl,
+            string followersUrl, string followingUrl, string gistsUrl, string type, string starredUrl,
+            string subscriptionsUrl, string organizationsUrl, string reposUrl, string eventsUrl,
+            string receivedEventsUrl, bool siteAdmin)
         {
             Login = login;
             Id = id;
@@ -63,7 +68,8 @@ namespace Octokit
 
         public string ReceivedEventsUrl { get; protected set; }
 
-        [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "This is what is returned from the API")]
+        [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods",
+            Justification = "This is what is returned from the API")]
         public string Type { get; protected set; }
 
         public bool SiteAdmin { get; protected set; }

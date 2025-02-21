@@ -40,6 +40,7 @@ namespace Octokit
         class JsonParameter
         {
             readonly PropertyInfo _property;
+
             public JsonParameter(PropertyInfo property)
             {
                 _property = property;

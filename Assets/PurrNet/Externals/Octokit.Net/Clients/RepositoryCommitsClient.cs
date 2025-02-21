@@ -41,7 +41,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(sha1, nameof(sha1));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Branch>(ApiUrls.RepositoryCommitsBranchesWhereHead(repositoryId, sha1), null, options);
+            return ApiConnection.GetAll<Branch>(ApiUrls.RepositoryCommitsBranchesWhereHead(repositoryId, sha1), null,
+                options);
         }
 
         /// <summary>
@@ -71,7 +72,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(sha1, nameof(sha1));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Branch>(ApiUrls.RepositoryCommitsBranchesWhereHead(owner, name, sha1), null, options);
+            return ApiConnection.GetAll<Branch>(ApiUrls.RepositoryCommitsBranchesWhereHead(owner, name, sha1), null,
+                options);
         }
 
         /// <summary>
@@ -291,14 +293,16 @@ namespace Octokit
         /// <param name="request">Used to filter list of commits returned</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/commits")]
-        public Task<IReadOnlyList<GitHubCommit>> GetAll(string owner, string name, CommitRequest request, ApiOptions options)
+        public Task<IReadOnlyList<GitHubCommit>> GetAll(string owner, string name, CommitRequest request,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<GitHubCommit>(ApiUrls.RepositoryCommits(owner, name), request.ToParametersDictionary(), options);
+            return ApiConnection.GetAll<GitHubCommit>(ApiUrls.RepositoryCommits(owner, name),
+                request.ToParametersDictionary(), options);
         }
 
         /// <summary>
@@ -313,7 +317,8 @@ namespace Octokit
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<GitHubCommit>(ApiUrls.RepositoryCommits(repositoryId), request.ToParametersDictionary(), options);
+            return ApiConnection.GetAll<GitHubCommit>(ApiUrls.RepositoryCommits(repositoryId),
+                request.ToParametersDictionary(), options);
         }
 
         /// <summary>
@@ -368,7 +373,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(sha1, nameof(sha1));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<CommitPullRequest>(ApiUrls.RepositoryCommitsPull(repositoryId, sha1), null, options);
+            return ApiConnection.GetAll<CommitPullRequest>(ApiUrls.RepositoryCommitsPull(repositoryId, sha1), null,
+                options);
         }
 
         /// <summary>
@@ -391,14 +397,16 @@ namespace Octokit
         /// <param name="sha1">Used to find all pull requests containing the provided commit SHA, which can be from any point in the commit history</param>
         /// /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/commits/{commit_sha}/pulls")]
-        public Task<IReadOnlyList<CommitPullRequest>> PullRequests(string owner, string name, string sha1, ApiOptions options)
+        public Task<IReadOnlyList<CommitPullRequest>> PullRequests(string owner, string name, string sha1,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNullOrEmptyString(sha1, nameof(sha1));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<CommitPullRequest>(ApiUrls.RepositoryCommitsPull(owner, name, sha1), null, options);
+            return ApiConnection.GetAll<CommitPullRequest>(ApiUrls.RepositoryCommitsPull(owner, name, sha1), null,
+                options);
         }
     }
 }

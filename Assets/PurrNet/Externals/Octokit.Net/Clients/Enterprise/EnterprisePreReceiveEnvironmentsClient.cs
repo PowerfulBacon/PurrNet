@@ -17,7 +17,8 @@ namespace Octokit
         /// <param name="apiConnection">An API connection</param>
         public EnterprisePreReceiveEnvironmentsClient(IApiConnection apiConnection)
             : base(apiConnection)
-        { }
+        {
+        }
 
         /// <summary>
         /// Gets all <see cref="PreReceiveEnvironment"/>s.
@@ -91,7 +92,8 @@ namespace Octokit
         /// <exception cref="NotFoundException">Thrown when the specified <paramref name="preReceiveEnvironmentId"/> does not exist.</exception>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         [ManualRoute("PATCH", "/admin/pre-receive-environments/{pre_receive_environment_id}")]
-        public Task<PreReceiveEnvironment> Edit(long preReceiveEnvironmentId, UpdatePreReceiveEnvironment updatePreReceiveEnvironment)
+        public Task<PreReceiveEnvironment> Edit(long preReceiveEnvironmentId,
+            UpdatePreReceiveEnvironment updatePreReceiveEnvironment)
         {
             Ensure.ArgumentNotNull(updatePreReceiveEnvironment, nameof(updatePreReceiveEnvironment));
 

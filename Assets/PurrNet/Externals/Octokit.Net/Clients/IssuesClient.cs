@@ -220,7 +220,8 @@ namespace Octokit
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Issue>(ApiUrls.IssuesForOwnedAndMember(), request.ToParametersDictionary(), options);
+            return ApiConnection.GetAll<Issue>(ApiUrls.IssuesForOwnedAndMember(), request.ToParametersDictionary(),
+                options);
         }
 
         /// <summary>
@@ -282,7 +283,8 @@ namespace Octokit
         /// <param name="request">Used to filter and sort the list of issues returned</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/orgs/{org}/issues")]
-        public Task<IReadOnlyList<Issue>> GetAllForOrganization(string organization, IssueRequest request, ApiOptions options)
+        public Task<IReadOnlyList<Issue>> GetAllForOrganization(string organization, IssueRequest request,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(organization, nameof(organization));
             Ensure.ArgumentNotNull(request, nameof(request));
@@ -402,7 +404,8 @@ namespace Octokit
         /// <param name="request">Used to filter and sort the list of issues returned</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/issues")]
-        public Task<IReadOnlyList<Issue>> GetAllForRepository(string owner, string name, RepositoryIssueRequest request, ApiOptions options)
+        public Task<IReadOnlyList<Issue>> GetAllForRepository(string owner, string name, RepositoryIssueRequest request,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -422,7 +425,8 @@ namespace Octokit
         /// <param name="request">Used to filter and sort the list of issues returned</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repositories/{id}/issues")]
-        public Task<IReadOnlyList<Issue>> GetAllForRepository(long repositoryId, RepositoryIssueRequest request, ApiOptions options)
+        public Task<IReadOnlyList<Issue>> GetAllForRepository(long repositoryId, RepositoryIssueRequest request,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));

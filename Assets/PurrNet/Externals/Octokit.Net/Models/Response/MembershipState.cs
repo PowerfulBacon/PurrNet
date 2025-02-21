@@ -11,13 +11,11 @@ namespace Octokit
         /// <summary>
         /// The membership is pending
         /// </summary>
-        [Parameter(Value = "pending")]
-        Pending,
+        [Parameter(Value = "pending")] Pending,
 
         /// <summary>
         /// The membership is active
         /// </summary>
-        [Parameter(Value = "active")]
-        Active
+        [Parameter(Value = "active")] Active
     }
 }

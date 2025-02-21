@@ -28,7 +28,7 @@ namespace PurrNet.Editor
         private const int sectionOneWidth = 250;
 
         private GUIStyle wrapStyle;
-        
+
         [MenuItem("Tools/PurrNet/Addon Library")]
         public static void ShowWindow()
         {
@@ -55,7 +55,8 @@ namespace PurrNet.Editor
             {
                 if (!imageRequest.isDone)
                 {
-                    if (imageRequest.result == UnityWebRequest.Result.ConnectionError || imageRequest.result == UnityWebRequest.Result.ProtocolError)
+                    if (imageRequest.result == UnityWebRequest.Result.ConnectionError ||
+                        imageRequest.result == UnityWebRequest.Result.ProtocolError)
                     {
                         HandleError(imageRequest.result.ToString());
                         return;
@@ -71,7 +72,7 @@ namespace PurrNet.Editor
                     return;
                 }
             }
-            
+
             List<string> availableTabs = new List<string>();
 
             availableTabs.Add("All");
@@ -148,7 +149,7 @@ namespace PurrNet.Editor
 
                     foreach (var addon in wrapper.addons)
                     {
-                        var imageRequest = UnityWebRequestTexture.GetTexture(addon.imageUrl); 
+                        var imageRequest = UnityWebRequestTexture.GetTexture(addon.imageUrl);
                         imageRequest.SendWebRequest();
                         _imageRequests.Add(imageRequest);
                         addon.icon = defaultIcon;
@@ -247,7 +248,7 @@ namespace PurrNet.Editor
                     AddAddon(addon);
                 return;
             }
-            
+
             if (addon.asManifest)
             {
                 GUIStyle redButtonStyle = new GUIStyle(GUI.skin.button);
@@ -279,7 +280,7 @@ namespace PurrNet.Editor
             GUILayout.Label(message);
             GUILayout.EndVertical();
         }
-        
+
         private void HandleError(string error)
         {
             EditorGUILayout.HelpBox("Failed to fetch addons: " + error, MessageType.Error);
@@ -299,7 +300,7 @@ namespace PurrNet.Editor
 
             return false;
         }
-        
+
         private void RemoveFromManifest(Addon addon)
         {
             string manifestPath = "Packages/manifest.json";
@@ -307,15 +308,15 @@ namespace PurrNet.Editor
             var dependencies = manifest["dependencies"] as JObject;
 
             string parsedName = "com.purrnet." + addon.name.Replace(" ", "").ToLower();
-    
+
             if (dependencies.ContainsKey(parsedName))
             {
                 dependencies.Remove(parsedName);
                 File.WriteAllText(manifestPath, manifest.ToString());
-                AssetDatabase.Refresh(); 
+                AssetDatabase.Refresh();
             }
         }
-        
+
         private void AddAddon_Manifest(Addon addon)
         {
             string manifestPath = "Packages/manifest.json";
@@ -323,11 +324,11 @@ namespace PurrNet.Editor
             var dependencies = manifest["dependencies"] as JObject;
 
             string parsedName = addon.name.Replace(" ", "").ToLower();
-            dependencies["com.purrnet."+parsedName] = addon.projectUrl;
+            dependencies["com.purrnet." + parsedName] = addon.projectUrl;
             File.WriteAllText(manifestPath, manifest.ToString());
             AssetDatabase.Refresh();
         }
-        
+
         private void AddAddon_Assets(Addon addon)
         {
             string parsedName = addon.name.Replace(" ", "").ToLower();
@@ -342,13 +343,13 @@ namespace PurrNet.Editor
             {
                 AssetDatabase.ImportPackage(tempPath, true);
                 File.Delete(tempPath);
-                
+
                 EditorUtility.FocusProjectWindow();
                 Selection.activeObject = AssetDatabase.LoadMainAssetAtPath("Assets");
             }
             else
             {
-                PurrLogger.LogError($"Couldn't get the {addon.name} package and install it or delete the temp file."); 
+                PurrLogger.LogError($"Couldn't get the {addon.name} package and install it or delete the temp file.");
             }
         }
 

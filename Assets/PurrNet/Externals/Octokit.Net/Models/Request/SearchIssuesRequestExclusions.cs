@@ -70,6 +70,7 @@ namespace Octokit
         public ItemState? State { get; set; }
 
         private IEnumerable<string> _labels;
+
         /// <summary>
         /// Excludes issues based on the labels assigned.
         /// </summary>
@@ -165,12 +166,14 @@ namespace Octokit
 
             if (Labels != null)
             {
-                parameters.AddRange(Labels.Select(label => string.Format(CultureInfo.InvariantCulture, "-label:{0}", label)));
+                parameters.AddRange(Labels.Select(label =>
+                    string.Format(CultureInfo.InvariantCulture, "-label:{0}", label)));
             }
 
             if (Language != null)
             {
-                parameters.Add(string.Format(CultureInfo.InvariantCulture, "-language:\"{0}\"", Language.ToParameter()));
+                parameters.Add(string.Format(CultureInfo.InvariantCulture, "-language:\"{0}\"",
+                    Language.ToParameter()));
             }
 
             if (Status.HasValue)
@@ -190,7 +193,8 @@ namespace Octokit
 
             if (Milestone.IsNotBlank())
             {
-                parameters.Add(string.Format(CultureInfo.InvariantCulture, "-milestone:\"{0}\"", Milestone.EscapeDoubleQuotes()));
+                parameters.Add(string.Format(CultureInfo.InvariantCulture, "-milestone:\"{0}\"",
+                    Milestone.EscapeDoubleQuotes()));
             }
 
             return new ReadOnlyCollection<string>(parameters);
@@ -200,7 +204,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Exclusions: {0}", string.Join(" ", MergedQualifiers()));
+                return string.Format(CultureInfo.InvariantCulture, "Exclusions: {0}",
+                    string.Join(" ", MergedQualifiers()));
             }
         }
     }

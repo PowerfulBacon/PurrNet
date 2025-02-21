@@ -12,7 +12,9 @@ namespace Octokit
     {
         readonly Lazy<Task<string>> htmlContent;
 
-        public Readme() { }
+        public Readme()
+        {
+        }
 
         internal Readme(ReadmeResponse response, IApiConnection client)
         {
@@ -27,6 +29,7 @@ namespace Octokit
                 var contentAsBytes = Convert.FromBase64String(response.Content);
                 Content = Encoding.UTF8.GetString(contentAsBytes, 0, contentAsBytes.Length);
             }
+
             htmlContent = new Lazy<Task<string>>(async () => await client.GetHtml(new Uri(Url)).ConfigureAwait(false));
         }
 
@@ -53,10 +56,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Name: {0} ", Name);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Name: {0} ", Name); }
         }
     }
 }

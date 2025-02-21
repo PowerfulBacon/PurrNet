@@ -10,11 +10,11 @@ namespace PurrNet.StateMachine
     public sealed class StateMachine : NetworkBehaviour
     {
         [SerializeField] private bool ownerAuth = false;
-        
+
         [SerializeField] List<StateNode> _states;
-        
+
         public IReadOnlyList<StateNode> states => _states;
-        
+
         /// <summary>
         /// Invoked for clients when receiving changes to the state machine from the server
         /// </summary>
@@ -24,20 +24,23 @@ namespace PurrNet.StateMachine
         /// Invoked for both server and client when state changes
         /// </summary>
         public event Action onStateChanged;
-        
+
         StateMachineState _currentState;
         private int _previousStateId = -1;
-        
+
         public StateMachineState currentState => _currentState;
         public int previousStateId => _previousStateId;
-        public StateNode currentStateNode => _currentState.stateId < 0 || _currentState.stateId >= _states.Count ? 
-                    null : _states[_currentState.stateId];
+
+        public StateNode currentStateNode => _currentState.stateId < 0 || _currentState.stateId >= _states.Count
+            ? null
+            : _states[_currentState.stateId];
+
         private bool _initialized;
 
         private void Awake()
         {
             _currentState.stateId = -1;
-            
+
             for (var i = 0; i < _states.Count; i++)
             {
                 var state = _states[i];
@@ -49,7 +52,7 @@ namespace PurrNet.StateMachine
         {
             if (_currentState.stateId < 0 || _currentState.stateId >= _states.Count)
                 return;
-            
+
             var node = _states[_currentState.stateId];
             node.StateUpdate(isServer);
         }
@@ -60,13 +63,13 @@ namespace PurrNet.StateMachine
 
             if (!IsController(ownerAuth))
                 return;
-            
+
             if (_initialized)
                 return;
-            
-            if(_states.Count > 0)
+
+            if (_states.Count > 0)
                 SetState(_states[0]);
-            
+
             _initialized = true;
         }
 
@@ -74,7 +77,7 @@ namespace PurrNet.StateMachine
         {
             if (stateId < 0 || stateId >= _states.Count)
                 return null;
-            
+
             var node = _states[stateId];
             var type = node.GetType();
             var generics = type.BaseType!.GenericTypeArguments;
@@ -88,27 +91,28 @@ namespace PurrNet.StateMachine
             RpcStateChange<T>(state, hasData, data);
         }
 
-        [ObserversRpc(bufferLast:true)]
+        [ObserversRpc(bufferLast: true)]
         private void RpcStateChange<T>(StateMachineState state, bool hasData, T data)
         {
             if (IsController(ownerAuth)) return;
-    
-            var activeState = _currentState.stateId < 0 || _currentState.stateId >= _states.Count ? 
-                null : _states[_currentState.stateId];
-            
+
+            var activeState = _currentState.stateId < 0 || _currentState.stateId >= _states.Count
+                ? null
+                : _states[_currentState.stateId];
+
             if (activeState != null)
             {
                 activeState.Exit(false);
             }
-    
+
             _currentState = state;
             _currentState.data = data;
-    
+
             if (_currentState.stateId < 0 || _currentState.stateId >= _states.Count)
                 return;
-    
+
             var newState = _states[_currentState.stateId];
-    
+
             if (hasData && newState is StateNode<T> node)
             {
                 node.Enter(data, false);
@@ -117,7 +121,7 @@ namespace PurrNet.StateMachine
             {
                 newState.Enter(false);
             }
-    
+
             onStateChanged?.Invoke();
             onReceivedNewData?.Invoke();
         }
@@ -125,14 +129,15 @@ namespace PurrNet.StateMachine
         private void UpdateStateId(StateNode node)
         {
             var idx = node == null ? -2 : _states.IndexOf(node);
-            
-            if (idx == -1) 
+
+            if (idx == -1)
                 PurrLogger.LogException($"State '{node.name}' of type {node.GetType().Name} not in states list");
 
             var newStateId = idx < 0 ? -1 : idx;
-            
-            var oldState = _currentState.stateId < 0 || _currentState.stateId >= _states.Count ? 
-                null : _states[_currentState.stateId];
+
+            var oldState = _currentState.stateId < 0 || _currentState.stateId >= _states.Count
+                ? null
+                : _states[_currentState.stateId];
 
             if (oldState)
             {
@@ -140,7 +145,7 @@ namespace PurrNet.StateMachine
                 if (!IsController(ownerAuth))
                     oldState.Exit(false);
             }
-            
+
             _previousStateId = _currentState.stateId;
             _currentState.stateId = newStateId;
         }
@@ -163,8 +168,8 @@ namespace PurrNet.StateMachine
 
             UpdateStateId(state);
             _currentState.data = data;
-    
-            if(isServer)
+
+            if (isServer)
                 RpcStateChange(_currentState, true, data);
             else
                 RpcStateChange_Server(_currentState, true, data);
@@ -180,7 +185,7 @@ namespace PurrNet.StateMachine
                     //state.Enter(false);
                 }
             }
-            
+
             onStateChanged?.Invoke();
         }
 
@@ -200,8 +205,8 @@ namespace PurrNet.StateMachine
 
             UpdateStateId(state);
             _currentState.data = null;
-    
-            if(isServer)
+
+            if (isServer)
                 RpcStateChange<ushort>(_currentState, false, 0);
             else
                 RpcStateChange_Server<ushort>(_currentState, false, 0);
@@ -213,7 +218,7 @@ namespace PurrNet.StateMachine
                 if (!IsController(ownerAuth))
                     state.Enter(false);
             }
-            
+
             onStateChanged?.Invoke();
         }
 
@@ -227,7 +232,7 @@ namespace PurrNet.StateMachine
             var nextNodeId = _currentState.stateId + 1;
             if (nextNodeId >= _states.Count)
                 nextNodeId = 0;
-        
+
             var nextNode = _states[nextNodeId];
 
             if (nextNode is StateNode<T> stateNode)
@@ -236,9 +241,11 @@ namespace PurrNet.StateMachine
             }
             else
             {
-                PurrLogger.LogException($"Node {nextNode.name}:{nextNode.GetType().Name} does not have a generic type argument of type {typeof(T).Name}");
+                PurrLogger.LogException(
+                    $"Node {nextNode.name}:{nextNode.GetType().Name} does not have a generic type argument of type {typeof(T).Name}");
             }
         }
+
         /// <summary>
         /// Takes the state machine to the next state in the states list
         /// </summary>
@@ -247,7 +254,7 @@ namespace PurrNet.StateMachine
             var nextNodeId = _currentState.stateId + 1;
             if (nextNodeId >= _states.Count)
                 nextNodeId = 0;
-    
+
             SetState(_states[nextNodeId]);
         }
 
@@ -259,7 +266,7 @@ namespace PurrNet.StateMachine
             var prevNodeId = _currentState.stateId - 1;
             if (prevNodeId < 0)
                 prevNodeId = _states.Count - 1;
-    
+
             SetState(_states[prevNodeId]);
         }
 
@@ -273,7 +280,7 @@ namespace PurrNet.StateMachine
             var prevNodeId = _currentState.stateId - 1;
             if (prevNodeId < 0)
                 prevNodeId = _states.Count - 1;
-    
+
             var prevNode = _states[prevNodeId];
 
             if (prevNode is StateNode<T> stateNode)
@@ -282,16 +289,17 @@ namespace PurrNet.StateMachine
             }
             else
             {
-                PurrLogger.LogException($"Node {prevNode.name}:{prevNode.GetType().Name} does not have a generic type argument of type {typeof(T).Name}");
+                PurrLogger.LogException(
+                    $"Node {prevNode.name}:{prevNode.GetType().Name} does not have a generic type argument of type {typeof(T).Name}");
             }
         }
     }
-    
+
     public struct StateMachineState : IPacked
     {
         public int stateId;
         public object data;
-        
+
         public void Write(BitPacker packer)
         {
             Packer<int>.Write(packer, stateId);

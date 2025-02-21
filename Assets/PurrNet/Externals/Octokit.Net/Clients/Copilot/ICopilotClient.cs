@@ -14,7 +14,7 @@ namespace Octokit
         /// <param name="organization">the organization name to retrieve billing settings for</param>
         /// <returns>A <see cref="BillingSettings"/> instance</returns>
         Task<BillingSettings> GetSummaryForOrganization(string organization);
-        
+
         /// <summary>
         /// For checking and managing licenses for GitHub Copilot for Business
         /// </summary>

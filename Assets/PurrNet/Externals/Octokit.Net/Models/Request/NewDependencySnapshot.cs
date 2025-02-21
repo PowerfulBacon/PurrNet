@@ -19,7 +19,8 @@ namespace Octokit
         /// <param name="scanned">Required. The time at which the snapshot was scanned.</param>
         /// <param name="job">Required. The job associated with this dependency snapshot.</param>
         /// <param name="detector">Required. A description of the detector used.</param>
-        public NewDependencySnapshot(long version, string sha, string @ref, string scanned, NewDependencySnapshotJob job, NewDependencySnapshotDetector detector)
+        public NewDependencySnapshot(long version, string sha, string @ref, string scanned,
+            NewDependencySnapshotJob job, NewDependencySnapshotDetector detector)
         {
             Ensure.ArgumentNotNullOrEmptyString(sha, nameof(sha));
             Ensure.ArgumentNotNullOrEmptyString(@ref, nameof(@ref));
@@ -77,10 +78,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Sha: {0}, Version: {1}", Sha, Version);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Sha: {0}, Version: {1}", Sha, Version); }
         }
     }
 }

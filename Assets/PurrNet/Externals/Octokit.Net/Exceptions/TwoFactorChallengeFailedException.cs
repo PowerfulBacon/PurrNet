@@ -62,6 +62,7 @@ namespace Octokit
             if (info == null) return;
             AuthorizationCode = info.GetString("AuthorizationCode");
         }
+
         [SecurityCritical]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {

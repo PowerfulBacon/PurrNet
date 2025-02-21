@@ -12,7 +12,8 @@ namespace Octokit
     {
         public EnterpriseLicenseClient(IApiConnection apiConnection)
             : base(apiConnection)
-        { }
+        {
+        }
 
         /// <summary>
         /// Gets GitHub Enterprise License Information (must be Site Admin user).

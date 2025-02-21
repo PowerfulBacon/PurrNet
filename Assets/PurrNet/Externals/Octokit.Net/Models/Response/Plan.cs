@@ -9,9 +9,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Plan
     {
-        public Plan() { }
+        public Plan()
+        {
+        }
 
-        public Plan(long collaborators, string name, long privateRepos, long space, string billingEmail, int filledSeats, int seats)
+        public Plan(long collaborators, string name, long privateRepos, long space, string billingEmail,
+            int filledSeats, int seats)
         {
             Collaborators = collaborators;
             Name = name;
@@ -53,7 +56,7 @@ namespace Octokit
         /// <summary>
         /// The number of seats filled on this plan
         /// </summary>
-        public int FilledSeats { get; private set; } 
+        public int FilledSeats { get; private set; }
 
         /// <summary>
         /// The number of seats available for this plan

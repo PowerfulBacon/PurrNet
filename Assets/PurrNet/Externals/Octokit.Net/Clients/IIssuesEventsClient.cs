@@ -106,7 +106,7 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="eventId">The event id</param>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
-             Justification = "Method makes a network request")]
+            Justification = "Method makes a network request")]
         Task<IssueEvent> Get(string owner, string name, long eventId);
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="eventId">The event id</param>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
-             Justification = "Method makes a network request")]
+            Justification = "Method makes a network request")]
         Task<IssueEvent> Get(long repositoryId, long eventId);
     }
 }

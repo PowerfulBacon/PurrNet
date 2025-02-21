@@ -14,9 +14,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class OrganizationSecret : RepositorySecret
     {
-        public OrganizationSecret() { }
+        public OrganizationSecret()
+        {
+        }
 
-        public OrganizationSecret(string name, DateTime createdAt, DateTime updatedAt, string visibility, string selectedRepositoriesUrl)
+        public OrganizationSecret(string name, DateTime createdAt, DateTime updatedAt, string visibility,
+            string selectedRepositoriesUrl)
         {
             Name = name;
             CreatedAt = createdAt;

@@ -14,7 +14,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RateLimit : ISerializable
     {
-        public RateLimit() { }
+        public RateLimit()
+        {
+        }
 
         public RateLimit(IDictionary<string, string> responseHeaders)
         {
@@ -112,7 +114,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Limit {0}, Remaining {1}, Reset {2} ", Limit, Remaining, Reset);
+                return string.Format(CultureInfo.InvariantCulture, "Limit {0}, Remaining {1}, Reset {2} ", Limit,
+                    Remaining, Reset);
             }
         }
 

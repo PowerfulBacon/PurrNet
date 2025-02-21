@@ -14,16 +14,18 @@ namespace PurrNet.Packing
             Hasher.PrepareType(type);
         }
     }
-    
-    public interface IPackedAuto { }
-    
+
+    public interface IPackedAuto
+    {
+    }
+
     public interface IPacked
     {
         void Write(BitPacker packer);
 
         void Read(BitPacker packer);
     }
-    
+
     public interface IPackedSimple
     {
         void Serialize(BitPacker packer);

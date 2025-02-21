@@ -11,7 +11,9 @@ namespace Octokit
         {
         }
 
-        public CheckSuite(long id, string headBranch, string headSha, CheckStatus status, CheckConclusion? conclusion, string url, string before, string after, IReadOnlyList<PullRequest> pullRequests, GitHubApp app, Repository repository)
+        public CheckSuite(long id, string headBranch, string headSha, CheckStatus status, CheckConclusion? conclusion,
+            string url, string before, string after, IReadOnlyList<PullRequest> pullRequests, GitHubApp app,
+            Repository repository)
         {
             Id = id;
             HeadBranch = headBranch;
@@ -81,6 +83,7 @@ namespace Octokit
         /// </summary>
         public Repository Repository { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "Id: {0}, HeadBranch: {1}, HeadSha: {2}, Conclusion: {3}", Id, HeadBranch, HeadSha, Conclusion);
+        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture,
+            "Id: {0}, HeadBranch: {1}, HeadSha: {2}, Conclusion: {3}", Id, HeadBranch, HeadSha, Conclusion);
     }
 }

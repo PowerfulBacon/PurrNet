@@ -11,14 +11,14 @@ namespace PurrNet.Transports
         /// This will return false if the transport is not supported.
         /// </summary>
         public abstract bool isSupported { get; }
-        
+
         /// <summary>
         /// Access the underlying transport interface.
         /// This is used for low-level operations and should not be used directly.
         /// Unless you know what you are doing.
         /// </summary>
         public abstract ITransport transport { get; }
-        
+
         bool TryGetNetworkManager(NetworkManager manager, out NetworkManager networkManager)
         {
             if (manager)
@@ -26,32 +26,32 @@ namespace PurrNet.Transports
                 networkManager = manager;
                 return true;
             }
-            
+
             if (TryGetComponent(out networkManager))
                 return true;
-            
+
             var parentNm = GetComponentInParent<NetworkManager>();
-            
+
             if (parentNm)
             {
                 networkManager = parentNm;
                 return true;
             }
-            
+
             var childNm = GetComponentInChildren<NetworkManager>();
-            
+
             if (childNm)
             {
                 networkManager = childNm;
                 return true;
             }
-            
+
             if (NetworkManager.main)
             {
                 networkManager = NetworkManager.main;
                 return true;
             }
-            
+
             networkManager = null;
             return false;
         }
@@ -68,7 +68,7 @@ namespace PurrNet.Transports
                 networkManager.InternalRegisterServerModules();
             StartServerInternal();
         }
-        
+
         /// <summary>
         /// Stops the server.
         /// This will disconnect all clients.
@@ -80,7 +80,7 @@ namespace PurrNet.Transports
 
             StopServerInternal();
         }
-        
+
         /// <summary>
         /// Starts the client.
         /// Optionally, you can pass a NetworkManager to register client modules.
@@ -91,7 +91,7 @@ namespace PurrNet.Transports
         {
             if (TryGetNetworkManager(manager, out var networkManager))
                 networkManager.InternalRegisterClientModules();
-            
+
             StartClientInternal();
         }
 
@@ -106,7 +106,7 @@ namespace PurrNet.Transports
         {
             if (TryGetNetworkManager(manager, out var networkManager))
                 networkManager.InternalUnregisterClientModules();
-            
+
             StopClientInternal();
         }
 

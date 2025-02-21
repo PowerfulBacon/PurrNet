@@ -27,6 +27,7 @@ namespace Octokit
         [Parameter(Key = "selected_repository_ids")]
         public IEnumerable<long> SelectedRepositoryIds { get; set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "SelectedRepositoryCollection: Count: {0}", SelectedRepositoryIds.Count());
+        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture,
+            "SelectedRepositoryCollection: Count: {0}", SelectedRepositoryIds.Count());
     }
 }

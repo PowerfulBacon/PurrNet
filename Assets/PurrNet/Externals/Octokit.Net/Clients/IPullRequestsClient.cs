@@ -40,7 +40,7 @@ namespace Octokit
         /// http://developer.github.com/v3/pulls/#get-a-single-pull-request
         /// </remarks>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
-             Justification = "Method makes a network request")]
+            Justification = "Method makes a network request")]
         Task<PullRequest> Get(string owner, string name, int pullRequestNumber);
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace Octokit
         /// http://developer.github.com/v3/pulls/#get-a-single-pull-request
         /// </remarks>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
-             Justification = "Method makes a network request")]
+            Justification = "Method makes a network request")]
         Task<PullRequest> Get(long repositoryId, int pullRequestNumber);
 
         /// <summary>
@@ -124,7 +124,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="request">Used to filter and sort the list of pull requests returned</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<PullRequest>> GetAllForRepository(string owner, string name, PullRequestRequest request, ApiOptions options);
+        Task<IReadOnlyList<PullRequest>> GetAllForRepository(string owner, string name, PullRequestRequest request,
+            ApiOptions options);
 
         /// <summary>
         /// Query pull requests for the repository based on criteria
@@ -135,7 +136,8 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="request">Used to filter and sort the list of pull requests returned</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<PullRequest>> GetAllForRepository(long repositoryId, PullRequestRequest request, ApiOptions options);
+        Task<IReadOnlyList<PullRequest>> GetAllForRepository(long repositoryId, PullRequestRequest request,
+            ApiOptions options);
 
         /// <summary>
         /// Create a pull request for the specified repository.
@@ -183,7 +185,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="mergePullRequest">A <see cref="MergePullRequest"/> instance describing a pull request merge</param>
-        Task<PullRequestMerge> Merge(string owner, string name, int pullRequestNumber, MergePullRequest mergePullRequest);
+        Task<PullRequestMerge> Merge(string owner, string name, int pullRequestNumber,
+            MergePullRequest mergePullRequest);
 
         /// <summary>
         /// Merge a pull request.
@@ -236,7 +239,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="pullRequestNumber">The pull request number</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<PullRequestFile>> Files(string owner, string name, int pullRequestNumber, ApiOptions options);
+        Task<IReadOnlyList<PullRequestFile>> Files(string owner, string name, int pullRequestNumber,
+            ApiOptions options);
 
         /// <summary>
         /// Get the list of files on a pull request.

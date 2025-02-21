@@ -1,5 +1,4 @@
-﻿using System;
-using PurrNet.Modules;
+﻿using PurrNet.Modules;
 using PurrNet.Transports;
 using UnityEngine.Scripting;
 
@@ -9,10 +8,13 @@ namespace PurrNet
     {
         [UsedByIL]
         public TargetRpcAttribute(
-            Channel channel = Channel.ReliableOrdered, 
-            bool runLocally = false, 
-            bool bufferLast = false, 
+            Channel channel = Channel.ReliableOrdered,
+            bool runLocally = false,
+            bool bufferLast = false,
             bool requireServer = true,
-            float asyncTimeoutInSec = 5f) { }
+            CompressionLevel compressionLevel = CompressionLevel.None,
+            float asyncTimeoutInSec = 5f)
+        {
+        }
     }
 }

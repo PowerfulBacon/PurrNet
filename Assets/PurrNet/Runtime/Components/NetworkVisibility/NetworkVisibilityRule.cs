@@ -5,7 +5,7 @@ namespace PurrNet
     public abstract class NetworkVisibilityRule : ScriptableObject, INetworkVisibilityRule
     {
         protected NetworkManager manager;
-        
+
         public void Setup(NetworkManager nmanager)
         {
             manager = nmanager;

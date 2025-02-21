@@ -82,6 +82,7 @@ namespace Octokit
         [Parameter(Key = "team_ids")]
         public long[] TeamIds { get; set; }
 
-        internal string DebuggerDisplay => $"InviteeId: {InviteeId}; Email: {Email}; Role: {Role}; Team IDs: {(TeamIds != null ? string.Join(", ", TeamIds) : "")}";
+        internal string DebuggerDisplay =>
+            $"InviteeId: {InviteeId}; Email: {Email}; Role: {Role}; Team IDs: {(TeamIds != null ? string.Join(", ", TeamIds) : "")}";
     }
 }

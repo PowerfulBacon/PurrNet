@@ -16,7 +16,9 @@ namespace Octokit
         /// <summary>
         /// Initializes a new instance of the <see cref="PullRequestMerge"/> class.
         /// </summary>
-        public PullRequestMerge() { }
+        public PullRequestMerge()
+        {
+        }
 
         public PullRequestMerge(string sha, bool merged, string message)
         {
@@ -42,10 +44,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Sha: {0} Message: {1}", Sha, Message);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Sha: {0} Message: {1}", Sha, Message); }
         }
     }
 }

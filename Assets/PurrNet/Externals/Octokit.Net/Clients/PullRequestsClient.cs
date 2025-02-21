@@ -143,7 +143,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="request">Used to filter and sort the list of pull requests returned</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/pulls")]
-        public Task<IReadOnlyList<PullRequest>> GetAllForRepository(string owner, string name, PullRequestRequest request)
+        public Task<IReadOnlyList<PullRequest>> GetAllForRepository(string owner, string name,
+            PullRequestRequest request)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -179,14 +180,16 @@ namespace Octokit
         /// <param name="request">Used to filter and sort the list of pull requests returned</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/pulls")]
-        public Task<IReadOnlyList<PullRequest>> GetAllForRepository(string owner, string name, PullRequestRequest request, ApiOptions options)
+        public Task<IReadOnlyList<PullRequest>> GetAllForRepository(string owner, string name,
+            PullRequestRequest request, ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<PullRequest>(ApiUrls.PullRequests(owner, name), request.ToParametersDictionary(), options);
+            return ApiConnection.GetAll<PullRequest>(ApiUrls.PullRequests(owner, name),
+                request.ToParametersDictionary(), options);
         }
 
         /// <summary>
@@ -199,12 +202,14 @@ namespace Octokit
         /// <param name="request">Used to filter and sort the list of pull requests returned</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repositories/{id}/pulls")]
-        public Task<IReadOnlyList<PullRequest>> GetAllForRepository(long repositoryId, PullRequestRequest request, ApiOptions options)
+        public Task<IReadOnlyList<PullRequest>> GetAllForRepository(long repositoryId, PullRequestRequest request,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<PullRequest>(ApiUrls.PullRequests(repositoryId), request.ToParametersDictionary(), options);
+            return ApiConnection.GetAll<PullRequest>(ApiUrls.PullRequests(repositoryId),
+                request.ToParametersDictionary(), options);
         }
 
         /// <summary>
@@ -248,13 +253,15 @@ namespace Octokit
         /// <param name="pullRequestUpdate">An <see cref="PullRequestUpdate"/> instance describing the changes to make to the PullRequest
         /// </param>
         [ManualRoute("PATCH", "/repos/{owner}/{repo}/pulls/{pull_number}")]
-        public Task<PullRequest> Update(string owner, string name, int pullRequestNumber, PullRequestUpdate pullRequestUpdate)
+        public Task<PullRequest> Update(string owner, string name, int pullRequestNumber,
+            PullRequestUpdate pullRequestUpdate)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(pullRequestUpdate, nameof(pullRequestUpdate));
 
-            return ApiConnection.Patch<PullRequest>(ApiUrls.PullRequest(owner, name, pullRequestNumber), pullRequestUpdate);
+            return ApiConnection.Patch<PullRequest>(ApiUrls.PullRequest(owner, name, pullRequestNumber),
+                pullRequestUpdate);
         }
 
         /// <summary>
@@ -270,7 +277,8 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(pullRequestUpdate, nameof(pullRequestUpdate));
 
-            return ApiConnection.Patch<PullRequest>(ApiUrls.PullRequest(repositoryId, pullRequestNumber), pullRequestUpdate);
+            return ApiConnection.Patch<PullRequest>(ApiUrls.PullRequest(repositoryId, pullRequestNumber),
+                pullRequestUpdate);
         }
 
         /// <summary>
@@ -282,7 +290,8 @@ namespace Octokit
         /// <param name="pullRequestNumber">The PullRequest number</param>
         /// <param name="mergePullRequest">A <see cref="MergePullRequest"/> instance describing a pull request merge</param>
         [ManualRoute("PUT", "/repos/{owner}/{repo}/pulls/{pull_number}/merge")]
-        public async Task<PullRequestMerge> Merge(string owner, string name, int pullRequestNumber, MergePullRequest mergePullRequest)
+        public async Task<PullRequestMerge> Merge(string owner, string name, int pullRequestNumber,
+            MergePullRequest mergePullRequest)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -317,7 +326,8 @@ namespace Octokit
         /// <param name="pullRequestNumber">The PullRequest number</param>
         /// <param name="mergePullRequest">A <see cref="MergePullRequest"/> instance describing a pull request merge</param>
         [ManualRoute("PUT", "/repositories/{id}/pulls/{number}/merge")]
-        public async Task<PullRequestMerge> Merge(long repositoryId, int pullRequestNumber, MergePullRequest mergePullRequest)
+        public async Task<PullRequestMerge> Merge(long repositoryId, int pullRequestNumber,
+            MergePullRequest mergePullRequest)
         {
             Ensure.ArgumentNotNull(mergePullRequest, nameof(mergePullRequest));
 
@@ -438,12 +448,14 @@ namespace Octokit
         /// <param name="pullRequestNumber">The PullRequest number</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/pulls/{pull_number}/files")]
-        public Task<IReadOnlyList<PullRequestFile>> Files(string owner, string name, int pullRequestNumber, ApiOptions options)
+        public Task<IReadOnlyList<PullRequestFile>> Files(string owner, string name, int pullRequestNumber,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
 
-            return ApiConnection.GetAll<PullRequestFile>(ApiUrls.PullRequestFiles(owner, name, pullRequestNumber), options);
+            return ApiConnection.GetAll<PullRequestFile>(ApiUrls.PullRequestFiles(owner, name, pullRequestNumber),
+                options);
         }
 
         /// <summary>
@@ -468,7 +480,8 @@ namespace Octokit
         [ManualRoute("GET", "/repositories/{id}/pulls/{number}/files")]
         public Task<IReadOnlyList<PullRequestFile>> Files(long repositoryId, int pullRequestNumber, ApiOptions options)
         {
-            return ApiConnection.GetAll<PullRequestFile>(ApiUrls.PullRequestFiles(repositoryId, pullRequestNumber), options);
+            return ApiConnection.GetAll<PullRequestFile>(ApiUrls.PullRequestFiles(repositoryId, pullRequestNumber),
+                options);
         }
     }
 }

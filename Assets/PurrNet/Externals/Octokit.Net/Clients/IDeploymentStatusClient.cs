@@ -71,7 +71,8 @@ namespace Octokit
         /// <param name="name">The name of the repository.</param>
         /// <param name="deploymentId">The id of the deployment.</param>
         /// <param name="newDeploymentStatus">The new deployment status to create.</param>
-        Task<DeploymentStatus> Create(string owner, string name, long deploymentId, NewDeploymentStatus newDeploymentStatus);
+        Task<DeploymentStatus> Create(string owner, string name, long deploymentId,
+            NewDeploymentStatus newDeploymentStatus);
 
         /// <summary>
         /// Creates a new status for the given deployment. Users with push access can create deployment

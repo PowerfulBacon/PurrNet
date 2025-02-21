@@ -12,7 +12,8 @@ namespace Octokit
         {
         }
 
-        public OrganizationMembershipInvitation(long id, string nodeId, string login, string email, OrganizationMembershipRole role, DateTimeOffset createdAt, User inviter, int teamCount)
+        public OrganizationMembershipInvitation(long id, string nodeId, string login, string email,
+            OrganizationMembershipRole role, DateTimeOffset createdAt, User inviter, int teamCount)
         {
             Id = id;
             NodeId = nodeId;
@@ -40,6 +41,7 @@ namespace Octokit
 
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode",
             Justification = "Used by DebuggerDisplayAttribute")]
-        internal string DebuggerDisplay => $"{nameof(OrganizationMembershipInvitation)}: Invitee: {Login ?? "Non-GitHub member"}; Email: {Email}; Inviter: {Inviter.Login}";
+        internal string DebuggerDisplay =>
+            $"{nameof(OrganizationMembershipInvitation)}: Invitee: {Login ?? "Non-GitHub member"}; Email: {Email}; Inviter: {Inviter.Login}";
     }
 }

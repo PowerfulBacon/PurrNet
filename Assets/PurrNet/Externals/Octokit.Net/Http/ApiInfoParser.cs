@@ -14,7 +14,7 @@ namespace Octokit.Internal
 #if HAS_REGEX_COMPILED_OPTIONS
             RegexOptions.Compiled |
 #endif
-             RegexOptions.IgnoreCase;
+            RegexOptions.IgnoreCase;
 
         static readonly Regex _linkRelRegex = new Regex("rel=\"(next|prev|first|last)\"", regexOptions);
         static readonly Regex _linkUriRegex = new Regex("<(.+)>", regexOptions);
@@ -79,13 +79,16 @@ namespace Octokit.Internal
             var receivedTimeKey = LookupHeader(responseHeaders, ReceivedTimeHeaderName);
             var serverTimeKey = LookupHeader(responseHeaders, "Date");
             TimeSpan serverTimeSkew = TimeSpan.Zero;
-            if (DateTimeOffset.TryParse(receivedTimeKey.Value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var receivedTime)
-                && DateTimeOffset.TryParse(serverTimeKey.Value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var serverTime))
+            if (DateTimeOffset.TryParse(receivedTimeKey.Value, CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind, out var receivedTime)
+                && DateTimeOffset.TryParse(serverTimeKey.Value, CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind, out var serverTime))
             {
                 serverTimeSkew = serverTime - receivedTime;
             }
 
-            return new ApiInfo(httpLinks, oauthScopes, acceptedOauthScopes, etag, new RateLimit(responseHeaders), serverTimeSkew);
+            return new ApiInfo(httpLinks, oauthScopes, acceptedOauthScopes, etag, new RateLimit(responseHeaders),
+                serverTimeSkew);
         }
     }
 }

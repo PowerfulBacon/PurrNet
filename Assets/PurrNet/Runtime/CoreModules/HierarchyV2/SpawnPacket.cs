@@ -8,7 +8,7 @@ namespace PurrNet.Modules
         public SceneID sceneId;
         public SpawnID packetIdx;
         public GameObjectPrototype prototype;
-        
+
         public override string ToString()
         {
             return $"SpawnPacket: {{ sceneId: {sceneId}, packetIdx: {packetIdx}, prototype: {prototype} }}";

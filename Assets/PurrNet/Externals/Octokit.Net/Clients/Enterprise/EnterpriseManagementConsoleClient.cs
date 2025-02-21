@@ -12,7 +12,8 @@ namespace Octokit
     {
         public EnterpriseManagementConsoleClient(IApiConnection apiConnection)
             : base(apiConnection)
-        { }
+        {
+        }
 
         /// <summary>
         /// Gets GitHub Enterprise Maintenance Mode Status
@@ -26,7 +27,9 @@ namespace Octokit
         {
             Ensure.ArgumentNotNullOrEmptyString(managementConsolePassword, "managementConsolePassword");
 
-            var endpoint = ApiUrls.EnterpriseManagementConsoleMaintenance(managementConsolePassword, ApiConnection.Connection.BaseAddress);
+            var endpoint =
+                ApiUrls.EnterpriseManagementConsoleMaintenance(managementConsolePassword,
+                    ApiConnection.Connection.BaseAddress);
 
             return ApiConnection.Get<MaintenanceModeResponse>(endpoint);
         }
@@ -39,12 +42,15 @@ namespace Octokit
         /// </remarks>
         /// <returns>The <see cref="MaintenanceModeResponse"/>.</returns>
         [ManualRoute("POST", "/setup/api/maintenance")]
-        public Task<MaintenanceModeResponse> EditMaintenanceMode(UpdateMaintenanceRequest maintenance, string managementConsolePassword)
+        public Task<MaintenanceModeResponse> EditMaintenanceMode(UpdateMaintenanceRequest maintenance,
+            string managementConsolePassword)
         {
             Ensure.ArgumentNotNull(maintenance, "maintenance");
             Ensure.ArgumentNotNullOrEmptyString(managementConsolePassword, "managementConsolePassword");
 
-            var endpoint = ApiUrls.EnterpriseManagementConsoleMaintenance(managementConsolePassword, ApiConnection.Connection.BaseAddress);
+            var endpoint =
+                ApiUrls.EnterpriseManagementConsoleMaintenance(managementConsolePassword,
+                    ApiConnection.Connection.BaseAddress);
 
             return ApiConnection.Post<MaintenanceModeResponse>(endpoint, maintenance.ToFormUrlEncodedParameterString());
         }

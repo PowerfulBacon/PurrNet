@@ -5,7 +5,8 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
 <#
-    var handlers = new (string name, string type)[] {
+    var handlers = new (string name, string type)[]
+    {
         ("ValueChanged", "string"),
         ("EndEdit", "string"),
         ("EndTextSelection", "(string, int, int)"),
@@ -16,7 +17,8 @@
     };
 
     Func<string, bool> shouldConvert = x => x.EndsWith("TextSelection");
-    Func<string, string> eventName = x => shouldConvert(x) ? $"new TextSelectionEventConverter(inputField.on{x})" : $"inputField.on{x}";
+    Func<string, string> eventName =
+        x => shouldConvert(x) ? $"new TextSelectionEventConverter(inputField.on{x})" : $"inputField.on{x}";
 #>
 #if UNITASK_TEXTMESHPRO_SUPPORT
 
@@ -28,7 +30,10 @@ namespace Cysharp.Threading.Tasks
 {
     public static partial class TextMeshProAsyncExtensions
     {
-<# foreach(var (name, type) in handlers) { #>
+<#
+    foreach (var (name, type) in handlers)
+    {
+#>
         public static IAsync<#= (name) #>EventHandler<<#= type #>> GetAsync<#= (name) #>EventHandler(this TMP_InputField inputField)
         {
             return new AsyncUnityEventHandler<<#= type #>>(<#= eventName(name) #>, inputField.GetCancellationTokenOnDestroy(), false);
@@ -59,7 +64,9 @@ namespace Cysharp.Threading.Tasks
             return new UnityEventHandlerAsyncEnumerable<<#= type #>>(<#= eventName(name) #>, cancellationToken);
         }
 
-<# } #>
+<#
+    }
+#>
     }
 }
 

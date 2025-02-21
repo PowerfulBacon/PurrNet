@@ -6,9 +6,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class IssueEventProjectCard
     {
-        public IssueEventProjectCard() { }
+        public IssueEventProjectCard()
+        {
+        }
 
-        public IssueEventProjectCard(long id, string url, long projectId, string projectUrl, string columnName, string previousColumnName)
+        public IssueEventProjectCard(long id, string url, long projectId, string projectUrl, string columnName,
+            string previousColumnName)
         {
             Id = id;
             Url = url;

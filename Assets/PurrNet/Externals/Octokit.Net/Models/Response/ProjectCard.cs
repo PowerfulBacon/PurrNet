@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class ProjectCard
     {
-        public ProjectCard() { }
+        public ProjectCard()
+        {
+        }
 
-        public ProjectCard(string columnUrl, string contentUrl, long id, string nodeId, string note, User creator, DateTimeOffset createdAt, DateTimeOffset updatedAt, bool archived)
+        public ProjectCard(string columnUrl, string contentUrl, long id, string nodeId, string note, User creator,
+            DateTimeOffset createdAt, DateTimeOffset updatedAt, bool archived)
         {
             ColumnUrl = columnUrl;
             ContentUrl = contentUrl;
@@ -69,10 +72,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Note: {0}, Id: {1}", Note, Id);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Note: {0}, Id: {1}", Note, Id); }
         }
     }
 }

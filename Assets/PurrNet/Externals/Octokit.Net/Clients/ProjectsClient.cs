@@ -50,7 +50,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Project>(ApiUrls.RepositoryProjects(owner, name), new Dictionary<string, string>(), options);
+            return ApiConnection.GetAll<Project>(ApiUrls.RepositoryProjects(owner, name),
+                new Dictionary<string, string>(), options);
         }
 
         /// <summary>
@@ -79,14 +80,16 @@ namespace Octokit
         /// <param name="request">Used to filter the list of projects returned</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/projects")]
-        public Task<IReadOnlyList<Project>> GetAllForRepository(string owner, string name, ProjectRequest request, ApiOptions options)
+        public Task<IReadOnlyList<Project>> GetAllForRepository(string owner, string name, ProjectRequest request,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Project>(ApiUrls.RepositoryProjects(owner, name), request.ToParametersDictionary(), options);
+            return ApiConnection.GetAll<Project>(ApiUrls.RepositoryProjects(owner, name),
+                request.ToParametersDictionary(), options);
         }
 
         /// <summary>
@@ -115,7 +118,8 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Project>(ApiUrls.RepositoryProjects(repositoryId), new Dictionary<string, string>(), options);
+            return ApiConnection.GetAll<Project>(ApiUrls.RepositoryProjects(repositoryId),
+                new Dictionary<string, string>(), options);
         }
 
         /// <summary>
@@ -142,12 +146,14 @@ namespace Octokit
         /// <param name="request">Used to filter the list of projects returned</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repositories/{id}/projects")]
-        public Task<IReadOnlyList<Project>> GetAllForRepository(long repositoryId, ProjectRequest request, ApiOptions options)
+        public Task<IReadOnlyList<Project>> GetAllForRepository(long repositoryId, ProjectRequest request,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Project>(ApiUrls.RepositoryProjects(repositoryId), request.ToParametersDictionary(), options);
+            return ApiConnection.GetAll<Project>(ApiUrls.RepositoryProjects(repositoryId),
+                request.ToParametersDictionary(), options);
         }
 
         /// <summary>
@@ -178,7 +184,8 @@ namespace Octokit
             Ensure.ArgumentNotNull(options, nameof(options));
 
 
-            return ApiConnection.GetAll<Project>(ApiUrls.OrganizationProjects(organization), new Dictionary<string, string>(), options);
+            return ApiConnection.GetAll<Project>(ApiUrls.OrganizationProjects(organization),
+                new Dictionary<string, string>(), options);
         }
 
         /// <summary>
@@ -208,13 +215,15 @@ namespace Octokit
         /// <param name="request">Used to filter the list of projects returned</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/orgs/{org}/projects")]
-        public Task<IReadOnlyList<Project>> GetAllForOrganization(string organization, ProjectRequest request, ApiOptions options)
+        public Task<IReadOnlyList<Project>> GetAllForOrganization(string organization, ProjectRequest request,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(organization, nameof(organization));
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Project>(ApiUrls.OrganizationProjects(organization), request.ToParametersDictionary(), options);
+            return ApiConnection.GetAll<Project>(ApiUrls.OrganizationProjects(organization),
+                request.ToParametersDictionary(), options);
         }
 
         /// <summary>

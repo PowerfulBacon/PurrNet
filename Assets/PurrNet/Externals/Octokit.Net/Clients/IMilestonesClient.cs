@@ -20,7 +20,7 @@ namespace Octokit
         /// </remarks>
         /// <returns></returns>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
-             Justification = "Method makes a network request")]
+            Justification = "Method makes a network request")]
         Task<Milestone> Get(string owner, string name, int milestoneNumber);
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Octokit
         /// </remarks>
         /// <returns></returns>
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get",
-             Justification = "Method makes a network request")]
+            Justification = "Method makes a network request")]
         Task<Milestone> Get(long repositoryId, int milestoneNumber);
 
         /// <summary>
@@ -112,7 +112,8 @@ namespace Octokit
         /// <param name="request">Used to filter and sort the list of Milestones returned</param>
         /// <param name="options">Options for changing the API response</param>
         /// <returns></returns>
-        Task<IReadOnlyList<Milestone>> GetAllForRepository(string owner, string name, MilestoneRequest request, ApiOptions options);
+        Task<IReadOnlyList<Milestone>> GetAllForRepository(string owner, string name, MilestoneRequest request,
+            ApiOptions options);
 
         /// <summary>
         /// Gets all open milestones for the repository.
@@ -124,7 +125,8 @@ namespace Octokit
         /// <param name="request">Used to filter and sort the list of Milestones returned</param>
         /// <param name="options">Options for changing the API response</param>
         /// <returns></returns>
-        Task<IReadOnlyList<Milestone>> GetAllForRepository(long repositoryId, MilestoneRequest request, ApiOptions options);
+        Task<IReadOnlyList<Milestone>> GetAllForRepository(long repositoryId, MilestoneRequest request,
+            ApiOptions options);
 
         /// <summary>
         /// Creates a milestone for the specified repository. Any user with pull access to a repository can create an

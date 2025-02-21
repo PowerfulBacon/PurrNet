@@ -59,8 +59,11 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "TagName: {0} PreviousTagName: {1}", TagName, PreviousTagName); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "TagName: {0} PreviousTagName: {1}", TagName,
+                    PreviousTagName);
+            }
         }
-
     }
 }

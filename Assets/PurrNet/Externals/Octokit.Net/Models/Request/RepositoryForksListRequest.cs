@@ -28,10 +28,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Sort: {0}", Sort);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Sort: {0}", Sort); }
         }
     }
 
@@ -43,19 +40,16 @@ namespace Octokit
         /// <summary>
         /// Sort by date and show the newest first.
         /// </summary>
-        [Parameter(Value = "newest")]
-        Newest,
+        [Parameter(Value = "newest")] Newest,
 
         /// <summary>
         /// Sort by date and show the oldest first.
         /// </summary>
-        [Parameter(Value = "oldest")]
-        Oldest,
+        [Parameter(Value = "oldest")] Oldest,
 
         /// <summary>
         /// Sort by the number of stargazers.
         /// </summary>
-        [Parameter(Value = "stargazers")]
-        Stargazers
+        [Parameter(Value = "stargazers")] Stargazers
     }
 }

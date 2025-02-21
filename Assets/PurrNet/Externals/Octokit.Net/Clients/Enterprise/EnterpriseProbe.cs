@@ -27,7 +27,8 @@ namespace Octokit
         /// The name (and optionally version) of the product using this library, the name of your GitHub organization, or your GitHub username (in that order of preference). This is sent to the server as part of
         /// the user agent for analytics purposes, and used by GitHub to contact you if there are problems.
         /// </param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability",
+            "CA2000:Dispose objects before losing scope")]
         public EnterpriseProbe(ProductHeaderValue productInformation)
             : this(productInformation, new HttpClientAdapter(HttpMessageHandlerFactory.CreateDefault))
         {
@@ -70,7 +71,8 @@ namespace Octokit
             // This method should return NotFound if you happen to point it
             if (enterpriseBaseUrl.Host.Equals("github.com", StringComparison.OrdinalIgnoreCase)
                 || enterpriseBaseUrl.Host.Equals("api.github.com", StringComparison.OrdinalIgnoreCase))
-                throw new ArgumentException("This method should not be passed a github.com or api.github.com URL", "enterpriseBaseUrl");
+                throw new ArgumentException("This method should not be passed a github.com or api.github.com URL",
+                    "enterpriseBaseUrl");
 
             var request = new Request
             {
@@ -104,7 +106,8 @@ namespace Octokit
 
         static bool IsEnterpriseResponse(IResponse response)
         {
-            return response.Headers.Any(h => string.Equals(h.Key, "X-GitHub-Request-Id", StringComparison.OrdinalIgnoreCase));
+            return response.Headers.Any(h =>
+                string.Equals(h.Key, "X-GitHub-Request-Id", StringComparison.OrdinalIgnoreCase));
         }
     }
 

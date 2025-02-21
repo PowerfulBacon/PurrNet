@@ -56,6 +56,7 @@ namespace Octokit
         /// http://developer.github.com/v3/search/#search-code
         /// </remarks>
         public CodeSearchSort? SortField { get; set; }
+
         public override string Sort
         {
             get { return SortField.ToParameter(); }
@@ -69,6 +70,7 @@ namespace Octokit
         /// https://help.github.com/articles/searching-code#search-in
         /// </remarks>
         private IEnumerable<CodeInQualifier> _inQualifier;
+
         public IEnumerable<CodeInQualifier> In
         {
             get { return _inQualifier; }
@@ -176,7 +178,8 @@ namespace Octokit
             {
                 // API is expecting 'true', bool.ToString() returns 'True', if there is a better way,
                 // please, oh please let me know...
-                parameters.Add(string.Format(CultureInfo.InvariantCulture, "fork:{0}", Forks.Value.ToString().ToLower()));
+                parameters.Add(
+                    string.Format(CultureInfo.InvariantCulture, "fork:{0}", Forks.Value.ToString().ToLower()));
             }
 
             if (Size != null)
@@ -236,24 +239,18 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Term: {0} Sort: {1}", Term, Sort);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Term: {0} Sort: {1}", Term, Sort); }
         }
     }
 
     public enum CodeSearchSort
     {
-        [Parameter(Value = "indexed")]
-        Indexed
+        [Parameter(Value = "indexed")] Indexed
     }
 
     public enum CodeInQualifier
     {
-        [Parameter(Value = "file")]
-        File,
-        [Parameter(Value = "path")]
-        Path
+        [Parameter(Value = "file")] File,
+        [Parameter(Value = "path")] Path
     }
 }

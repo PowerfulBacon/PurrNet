@@ -9,7 +9,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class NewUser
     {
-        public NewUser() { }
+        public NewUser()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NewUser"/> class.
@@ -37,10 +39,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Login: {0} Email: {1}", Login, Email);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Login: {0} Email: {1}", Login, Email); }
         }
     }
 }

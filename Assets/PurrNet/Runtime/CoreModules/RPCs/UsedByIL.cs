@@ -2,5 +2,7 @@
 
 namespace PurrNet.Modules
 {
-    public class UsedByILAttribute : PreserveAttribute { }
+    public class UsedByILAttribute : PreserveAttribute
+    {
+    }
 }

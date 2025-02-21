@@ -6,13 +6,18 @@ using Octokit.Internal;
 
 namespace Octokit
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Gpg")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly",
+        MessageId = "Gpg")]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class GpgKey
     {
-        public GpgKey() { }
+        public GpgKey()
+        {
+        }
 
-        public GpgKey(long id, long? primaryKeyId, string keyId, string publicKey, IReadOnlyList<EmailAddress> emails, IReadOnlyList<GpgKey> subkeys, bool canSign, bool canEncryptCommunications, bool canEncryptStorage, bool canCertify, DateTimeOffset createdAt, DateTimeOffset? expiresAt)
+        public GpgKey(long id, long? primaryKeyId, string keyId, string publicKey, IReadOnlyList<EmailAddress> emails,
+            IReadOnlyList<GpgKey> subkeys, bool canSign, bool canEncryptCommunications, bool canEncryptStorage,
+            bool canCertify, DateTimeOffset createdAt, DateTimeOffset? expiresAt)
         {
             Id = id;
             PrimaryKeyId = primaryKeyId;
@@ -35,8 +40,7 @@ namespace Octokit
         public IReadOnlyList<EmailAddress> Emails { get; private set; }
         public IReadOnlyList<GpgKey> Subkeys { get; private set; }
         public bool CanSign { get; private set; }
-        [Parameter(Key = "can_encrypt_comms")]
-        public bool CanEncryptCommunications { get; private set; }
+        [Parameter(Key = "can_encrypt_comms")] public bool CanEncryptCommunications { get; private set; }
         public bool CanEncryptStorage { get; private set; }
         public bool CanCertify { get; private set; }
         public DateTimeOffset CreatedAt { get; private set; }

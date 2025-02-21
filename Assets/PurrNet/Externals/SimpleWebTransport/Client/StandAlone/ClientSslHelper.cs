@@ -43,7 +43,8 @@ namespace JamesFrowen.SimpleWeb
             return sslStream;
         }
 
-        bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain,
+            SslPolicyErrors sslPolicyErrors)
         {
             // only accept if no errors
             if (sslPolicyErrors == SslPolicyErrors.None)
@@ -56,7 +57,7 @@ namespace JamesFrowen.SimpleWeb
             }
 
             // Do not allow this client to communicate with unauthenticated servers.
-            return false; 
+            return false;
         }
     }
 }

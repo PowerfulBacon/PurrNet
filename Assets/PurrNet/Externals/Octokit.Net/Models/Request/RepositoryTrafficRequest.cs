@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RepositoryTrafficRequest : RequestParameters
     {
-        public RepositoryTrafficRequest() { }
+        public RepositoryTrafficRequest()
+        {
+        }
 
         public RepositoryTrafficRequest(TrafficDayOrWeek per)
         {

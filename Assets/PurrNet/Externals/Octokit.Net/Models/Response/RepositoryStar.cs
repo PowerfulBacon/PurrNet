@@ -10,7 +10,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RepositoryStar
     {
-        public RepositoryStar() { }
+        public RepositoryStar()
+        {
+        }
 
         public RepositoryStar(DateTimeOffset starredAt, Repository repo)
         {
@@ -30,10 +32,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, Repo.DebuggerDisplay);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, Repo.DebuggerDisplay); }
         }
     }
 }

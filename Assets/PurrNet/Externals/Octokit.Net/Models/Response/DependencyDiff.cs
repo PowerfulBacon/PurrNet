@@ -7,9 +7,13 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class DependencyDiff
     {
-        public DependencyDiff() { }
+        public DependencyDiff()
+        {
+        }
 
-        public DependencyDiff(ChangeType changeType, string manifest, string ecosystem, string name, string version, string packageUrl, string license, string sourceRepositoryUrl, IReadOnlyList<DependencyVulnerability> vulnerabilities, Scope scope)
+        public DependencyDiff(ChangeType changeType, string manifest, string ecosystem, string name, string version,
+            string packageUrl, string license, string sourceRepositoryUrl,
+            IReadOnlyList<DependencyVulnerability> vulnerabilities, Scope scope)
         {
             ChangeType = changeType;
             Manifest = manifest;
@@ -75,19 +79,19 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Name: {0}, Version: {1}", Name, Version);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Name: {0}, Version: {1}", Name, Version); }
         }
     }
 
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class DependencyVulnerability
     {
-        public DependencyVulnerability() { }
+        public DependencyVulnerability()
+        {
+        }
 
-        public DependencyVulnerability(string severity, string advisoryGhsaId, string advisorySummary, string advisoryUrl)
+        public DependencyVulnerability(string severity, string advisoryGhsaId, string advisorySummary,
+            string advisoryUrl)
         {
             Severity = severity;
             AdvisoryGhsaId = advisoryGhsaId;
@@ -117,11 +121,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Advisory URL: {0}", AdvisoryUrl);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Advisory URL: {0}", AdvisoryUrl); }
         }
     }
-
 }

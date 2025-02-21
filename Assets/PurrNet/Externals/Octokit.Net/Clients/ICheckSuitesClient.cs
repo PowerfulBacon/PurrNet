@@ -63,7 +63,8 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="reference">The reference (SHA, branch name or tag name) to list check suites for</param>
         /// <param name="request">Details to filter the request, such as by App Id or Check Name</param>
-        Task<CheckSuitesResponse> GetAllForReference(string owner, string name, string reference, CheckSuiteRequest request);
+        Task<CheckSuitesResponse> GetAllForReference(string owner, string name, string reference,
+            CheckSuiteRequest request);
 
         /// <summary>
         /// Lists Check Suites for a commit reference (SHA, branch name or tag name)
@@ -87,7 +88,8 @@ namespace Octokit
         /// <param name="reference">The reference (SHA, branch name or tag name) to list check suites for</param>
         /// <param name="request">Details to filter the request, such as by App Id or Check Name</param>
         /// <param name="options">Options to change the API response</param>
-        Task<CheckSuitesResponse> GetAllForReference(string owner, string name, string reference, CheckSuiteRequest request, ApiOptions options);
+        Task<CheckSuitesResponse> GetAllForReference(string owner, string name, string reference,
+            CheckSuiteRequest request, ApiOptions options);
 
         /// <summary>
         /// Lists Check Suites for a commit reference (SHA, branch name or tag name)
@@ -99,7 +101,8 @@ namespace Octokit
         /// <param name="reference">The reference (SHA, branch name or tag name) to list check suites for</param>
         /// <param name="request">Details to filter the request, such as by App Id or Check Name</param>
         /// <param name="options">Options to change the API response</param>
-        Task<CheckSuitesResponse> GetAllForReference(long repositoryId, string reference, CheckSuiteRequest request, ApiOptions options);
+        Task<CheckSuitesResponse> GetAllForReference(long repositoryId, string reference, CheckSuiteRequest request,
+            ApiOptions options);
 
         /// <summary>
         /// Updates Check Suites preferences on a repository, such as disabling automatic creation when code is pushed
@@ -110,7 +113,8 @@ namespace Octokit
         /// <param name="owner">The owner of the repository</param>
         /// <param name="name">The name of the repository</param>
         /// <param name="preferences">The check suite preferences</param>
-        Task<CheckSuitePreferencesResponse> UpdatePreferences(string owner, string name, CheckSuitePreferences preferences);
+        Task<CheckSuitePreferencesResponse> UpdatePreferences(string owner, string name,
+            CheckSuitePreferences preferences);
 
         /// <summary>
         /// Updates Check Suites preferences on a repository, such as disabling automatic creation when code is pushed

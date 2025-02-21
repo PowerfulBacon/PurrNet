@@ -126,6 +126,7 @@ namespace Octokit
                 {
                     throw new ApiException("Invalid Status Code returned. Expected a 204 or a 422", statusCode);
                 }
+
                 return statusCode == HttpStatusCode.NoContent;
             }
             catch (ApiException ex)
@@ -173,20 +174,21 @@ namespace Octokit
             catch (ForbiddenException fex)
             {
                 if (string.Equals(
-                    "Cannot convert the last owner to an outside collaborator",
-                    fex.Message,
-                    StringComparison.OrdinalIgnoreCase))
+                        "Cannot convert the last owner to an outside collaborator",
+                        fex.Message,
+                        StringComparison.OrdinalIgnoreCase))
                 {
                     throw new UserIsLastOwnerOfOrganizationException(fex.HttpResponse);
                 }
+
                 throw;
             }
             catch (NotFoundException nfex)
             {
                 if (string.Equals(
-                    $"{user} is not a member of the {org} organization.",
-                    nfex.Message,
-                    StringComparison.OrdinalIgnoreCase))
+                        $"{user} is not a member of the {org} organization.",
+                        nfex.Message,
+                        StringComparison.OrdinalIgnoreCase))
                 {
                     throw new UserIsNotMemberOfOrganizationException(nfex.HttpResponse);
                 }

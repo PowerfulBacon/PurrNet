@@ -41,6 +41,7 @@ namespace Octokit
         /// </summary>
         public bool Private { get; set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "Name: {0} Description: {1}", Name, Description);
+        internal string DebuggerDisplay =>
+            string.Format(CultureInfo.InvariantCulture, "Name: {0} Description: {1}", Name, Description);
     }
 }

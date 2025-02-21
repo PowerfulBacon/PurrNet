@@ -77,7 +77,8 @@ namespace Octokit
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<ProjectCard>(ApiUrls.ProjectCards(columnId), request.ToParametersDictionary(), options);
+            return ApiConnection.GetAll<ProjectCard>(ApiUrls.ProjectCards(columnId), request.ToParametersDictionary(),
+                options);
         }
 
         /// <summary>

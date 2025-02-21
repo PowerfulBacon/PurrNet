@@ -152,7 +152,8 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <returns><see cref="IReadOnlyList{T}"/> of the API resources in the list.</returns>
         /// <exception cref="ApiException">Thrown when an API error occurs.</exception>
-        Task<IReadOnlyList<T>> GetAll<T>(Uri uri, IDictionary<string, string> parameters, string accepts, ApiOptions options);
+        Task<IReadOnlyList<T>> GetAll<T>(Uri uri, IDictionary<string, string> parameters, string accepts,
+            ApiOptions options);
 
         /// <summary>
         /// Gets all API resources in the list at the specified URI.
@@ -165,7 +166,8 @@ namespace Octokit
         /// <param name="preprocessResponseBody">Function to preprocess HTTP response prior to deserialization (can be null)</param>
         /// <returns><see cref="IReadOnlyList{T}"/> of the API resources in the list.</returns>
         /// <exception cref="ApiException">Thrown when an API error occurs.</exception>
-        Task<IReadOnlyList<T>> GetAll<T>(Uri uri, IDictionary<string, string> parameters, string accepts, ApiOptions options, Func<object, object> preprocessResponseBody);
+        Task<IReadOnlyList<T>> GetAll<T>(Uri uri, IDictionary<string, string> parameters, string accepts,
+            ApiOptions options, Func<object, object> preprocessResponseBody);
 
         /// <summary>
         /// Creates a new API resource in the list at the specified URI.
@@ -220,7 +222,8 @@ namespace Octokit
         /// <param name="cancellationToken">An optional token to monitor for cancellation requests</param>
         /// <returns>The created API resource.</returns>
         /// <exception cref="ApiException">Thrown when an API error occurs.</exception>
-        Task<T> Post<T>(Uri uri, object data, string accepts, string contentType, CancellationToken cancellationToken = default);
+        Task<T> Post<T>(Uri uri, object data, string accepts, string contentType,
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Creates a new API resource in the list at the specified URI.
@@ -234,7 +237,8 @@ namespace Octokit
         /// <param name="cancellationToken">An optional token to monitor for cancellation requests</param>
         /// <returns>The created API resource.</returns>
         /// <exception cref="ApiException">Thrown when an API error occurs.</exception>
-        Task<T> Post<T>(Uri uri, object data, string accepts, string contentType, string twoFactorAuthenticationCode, CancellationToken cancellationToken = default);
+        Task<T> Post<T>(Uri uri, object data, string accepts, string contentType, string twoFactorAuthenticationCode,
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Creates a new API resource in the list at the specified URI.
@@ -248,7 +252,8 @@ namespace Octokit
         /// <param name="cancellationToken">An optional token to monitor for cancellation requests</param>
         /// <returns>The created API resource.</returns>
         /// <exception cref="ApiException">Thrown when an API error occurs.</exception>
-        Task<T> Post<T>(Uri uri, object data, string accepts, string contentType, TimeSpan timeout, CancellationToken cancellationToken = default);
+        Task<T> Post<T>(Uri uri, object data, string accepts, string contentType, TimeSpan timeout,
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Creates or replaces the API resource at the specified URI

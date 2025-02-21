@@ -44,13 +44,15 @@ namespace Octokit
         /// <param name="issueNumber">The issue number</param>
         /// <param name="options">Options for changing the API repsonse</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/issues/{issue_number}/timeline")]
-        public Task<IReadOnlyList<TimelineEventInfo>> GetAllForIssue(string owner, string repo, int issueNumber, ApiOptions options)
+        public Task<IReadOnlyList<TimelineEventInfo>> GetAllForIssue(string owner, string repo, int issueNumber,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(repo, nameof(repo));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<TimelineEventInfo>(ApiUrls.IssueTimeline(owner, repo, issueNumber), null, options);
+            return ApiConnection.GetAll<TimelineEventInfo>(ApiUrls.IssueTimeline(owner, repo, issueNumber), null,
+                options);
         }
 
         /// <summary>
@@ -77,11 +79,13 @@ namespace Octokit
         /// <param name="issueNumber">The issue number</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repositories/{id}/issues/{number}/timeline")]
-        public Task<IReadOnlyList<TimelineEventInfo>> GetAllForIssue(long repositoryId, int issueNumber, ApiOptions options)
+        public Task<IReadOnlyList<TimelineEventInfo>> GetAllForIssue(long repositoryId, int issueNumber,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<TimelineEventInfo>(ApiUrls.IssueTimeline(repositoryId, issueNumber), null, options);
+            return ApiConnection.GetAll<TimelineEventInfo>(ApiUrls.IssueTimeline(repositoryId, issueNumber), null,
+                options);
         }
     }
 }

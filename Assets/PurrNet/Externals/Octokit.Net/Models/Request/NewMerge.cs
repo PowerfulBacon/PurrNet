@@ -58,10 +58,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Message: {0}", CommitMessage);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Message: {0}", CommitMessage); }
         }
     }
 }

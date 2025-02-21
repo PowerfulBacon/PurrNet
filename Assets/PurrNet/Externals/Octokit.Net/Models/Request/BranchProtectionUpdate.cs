@@ -76,7 +76,9 @@ namespace Octokit
         /// <param name="requiredPullRequestReviews">Specifies if reviews are required to merge the pull request. Pass null to disable required reviews</param>
         /// <param name="enforceAdmins">Specifies whether the protections applied to this branch also apply to repository admins</param>
         /// <param name="lockBranch">Optionally specfies that the branch should be read-only.</param>
-        public BranchProtectionSettingsUpdate(BranchProtectionRequiredStatusChecksUpdate requiredStatusChecks, BranchProtectionRequiredReviewsUpdate requiredPullRequestReviews, bool enforceAdmins, bool lockBranch = false)
+        public BranchProtectionSettingsUpdate(BranchProtectionRequiredStatusChecksUpdate requiredStatusChecks,
+            BranchProtectionRequiredReviewsUpdate requiredPullRequestReviews, bool enforceAdmins,
+            bool lockBranch = false)
         {
             RequiredStatusChecks = requiredStatusChecks;
             RequiredPullRequestReviews = requiredPullRequestReviews;
@@ -94,10 +96,10 @@ namespace Octokit
         /// <param name="enforceAdmins">Specifies whether the protections applied to this branch also apply to repository admins</param>
         /// <param name="lockBranch">Optionally specfies that the branch should be read-only.</param>
         public BranchProtectionSettingsUpdate(BranchProtectionRequiredStatusChecksUpdate requiredStatusChecks,
-                                              BranchProtectionRequiredReviewsUpdate requiredPullRequestReviews,
-                                              BranchProtectionPushRestrictionsUpdate restrictions,
-                                              bool enforceAdmins,
-                                              bool lockBranch = false)
+            BranchProtectionRequiredReviewsUpdate requiredPullRequestReviews,
+            BranchProtectionPushRestrictionsUpdate restrictions,
+            bool enforceAdmins,
+            bool lockBranch = false)
         {
             RequiredStatusChecks = requiredStatusChecks;
             RequiredPullRequestReviews = requiredPullRequestReviews;
@@ -121,16 +123,16 @@ namespace Octokit
         /// <param name="requiredConversationResolution">Requires all conversations on code to be resolved before a pull request can be merged</param>
         /// <param name="lockBranch">Optionally specfies that the branch should be read-only.</param>
         public BranchProtectionSettingsUpdate(BranchProtectionRequiredStatusChecksUpdate requiredStatusChecks,
-                                              BranchProtectionRequiredReviewsUpdate requiredPullRequestReviews,
-                                              BranchProtectionPushRestrictionsUpdate restrictions,
-                                              bool requiredSignatures,
-                                              bool enforceAdmins,
-                                              bool requiredLinearHistory,
-                                              bool? allowForcePushes,
-                                              bool allowDeletions,
-                                              bool blockCreations,
-                                              bool requiredConversationResolution,
-                                              bool lockBranch = false)
+            BranchProtectionRequiredReviewsUpdate requiredPullRequestReviews,
+            BranchProtectionPushRestrictionsUpdate restrictions,
+            bool requiredSignatures,
+            bool enforceAdmins,
+            bool requiredLinearHistory,
+            bool? allowForcePushes,
+            bool allowDeletions,
+            bool blockCreations,
+            bool requiredConversationResolution,
+            bool lockBranch = false)
         {
             RequiredStatusChecks = requiredStatusChecks;
             RequiredPullRequestReviews = requiredPullRequestReviews;
@@ -162,7 +164,7 @@ namespace Octokit
         /// </summary>
         [SerializeNull]
         public BranchProtectionPushRestrictionsUpdate Restrictions { get; protected set; }
-        
+
         /// <summary>
         /// Specifies whether the signed commits are required for this branch
         /// </summary>
@@ -250,7 +252,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Strict: {0} Contexts: {1}", Strict, Contexts == null ? "" : string.Join(",", Contexts));
+                return string.Format(CultureInfo.InvariantCulture, "Strict: {0} Contexts: {1}", Strict,
+                    Contexts == null ? "" : string.Join(",", Contexts));
             }
         }
     }
@@ -299,7 +302,8 @@ namespace Octokit
         /// </summary>
         /// <param name="teams">List of Team slugs allowed to push to this branch</param>
         /// <param name="users">List of User logins allowed to push to this branch</param>
-        public BranchProtectionPushRestrictionsUpdate(BranchProtectionTeamCollection teams, BranchProtectionUserCollection users)
+        public BranchProtectionPushRestrictionsUpdate(BranchProtectionTeamCollection teams,
+            BranchProtectionUserCollection users)
         {
             Ensure.ArgumentNotNull(teams, nameof(teams));
             Ensure.ArgumentNotNull(users, nameof(users));
@@ -334,17 +338,16 @@ namespace Octokit
     public class BranchProtectionTeamCollection : Collection<string>
     {
         public BranchProtectionTeamCollection()
-        { }
+        {
+        }
 
         public BranchProtectionTeamCollection(IList<string> list) : base(list)
-        { }
+        {
+        }
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, String.Join(", ", this));
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, String.Join(", ", this)); }
         }
     }
 
@@ -352,17 +355,16 @@ namespace Octokit
     public class BranchProtectionUserCollection : Collection<string>
     {
         public BranchProtectionUserCollection()
-        { }
+        {
+        }
 
         public BranchProtectionUserCollection(IList<string> list) : base(list)
-        { }
+        {
+        }
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, String.Join(", ", this));
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, String.Join(", ", this)); }
         }
     }
 
@@ -379,7 +381,8 @@ namespace Octokit
         /// <param name="requireCodeOwnerReviews">Blocks merge until code owners have reviewed.</param>
         /// <param name="requiredApprovingReviewCount">Specify the number of reviewers required to approve pull requests. Use a number between 1 and 6.</param>
         /// <param name="requireLastPushApproval">Whether the most recent push must be approved by someone other than the person who pushed it. Default: false.</param>
-        public BranchProtectionRequiredReviewsUpdate(bool dismissStaleReviews, bool requireCodeOwnerReviews, int requiredApprovingReviewCount, bool requireLastPushApproval = false)
+        public BranchProtectionRequiredReviewsUpdate(bool dismissStaleReviews, bool requireCodeOwnerReviews,
+            int requiredApprovingReviewCount, bool requireLastPushApproval = false)
         {
             DismissStaleReviews = dismissStaleReviews;
             RequireCodeOwnerReviews = requireCodeOwnerReviews;
@@ -395,7 +398,9 @@ namespace Octokit
         /// <param name="requireCodeOwnerReviews">Blocks merge until code owners have reviewed.</param>
         /// <param name="requiredApprovingReviewCount">Specify the number of reviewers required to approve pull requests. Use a number between 1 and 6.</param>
         /// <param name="requireLastPushApproval">Whether the most recent push must be approved by someone other than the person who pushed it. Default: false.</param>
-        public BranchProtectionRequiredReviewsUpdate(BranchProtectionRequiredReviewsDismissalRestrictionsUpdate dismissalRestrictions, bool dismissStaleReviews, bool requireCodeOwnerReviews, int requiredApprovingReviewCount, bool requireLastPushApproval = false)
+        public BranchProtectionRequiredReviewsUpdate(
+            BranchProtectionRequiredReviewsDismissalRestrictionsUpdate dismissalRestrictions, bool dismissStaleReviews,
+            bool requireCodeOwnerReviews, int requiredApprovingReviewCount, bool requireLastPushApproval = false)
         {
             Ensure.ArgumentNotNull(dismissalRestrictions, nameof(dismissalRestrictions));
 
@@ -425,7 +430,7 @@ namespace Octokit
         /// Specify the number of reviewers required to approve pull requests. Use a number between 1 and 6.
         /// </summary>
         public int RequiredApprovingReviewCount { get; protected set; }
-        
+
         /// <summary>
         /// Whether the most recent push must be approved by someone other than the person who pushed it. Default: false
         /// </summary>
@@ -435,7 +440,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "DismissalRestrictions: {0} DismissStaleReviews: {1} RequireCodeOwnerReviews: {2} RequiredApprovingReviewCount: {3} RequireLastPushApproval: {4}",
+                return string.Format(CultureInfo.InvariantCulture,
+                    "DismissalRestrictions: {0} DismissStaleReviews: {1} RequireCodeOwnerReviews: {2} RequiredApprovingReviewCount: {3} RequireLastPushApproval: {4}",
                     DismissalRestrictions?.DebuggerDisplay ?? "disabled",
                     DismissStaleReviews,
                     RequireCodeOwnerReviews,
@@ -500,7 +506,8 @@ namespace Octokit
         /// </summary>
         /// <param name="teams">List of Team slugs allowed to dismiss reviews</param>
         /// <param name="users">List of User logins allowed to dismiss reviews</param>
-        public BranchProtectionRequiredReviewsDismissalRestrictionsUpdate(BranchProtectionTeamCollection teams, BranchProtectionUserCollection users)
+        public BranchProtectionRequiredReviewsDismissalRestrictionsUpdate(BranchProtectionTeamCollection teams,
+            BranchProtectionUserCollection users)
         {
             Ensure.ArgumentNotNull(teams, nameof(teams));
             Ensure.ArgumentNotNull(users, nameof(users));

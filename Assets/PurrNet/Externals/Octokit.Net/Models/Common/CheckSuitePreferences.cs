@@ -29,6 +29,7 @@ namespace Octokit
         /// </summary>
         public IReadOnlyList<CheckSuitePreferenceAutoTrigger> AutoTriggerChecks { get; protected set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "AutoTriggerChecks: {0}", string.Join(", ", AutoTriggerChecks.Select(x => x.DebuggerDisplay)));
+        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "AutoTriggerChecks: {0}",
+            string.Join(", ", AutoTriggerChecks.Select(x => x.DebuggerDisplay)));
     }
 }

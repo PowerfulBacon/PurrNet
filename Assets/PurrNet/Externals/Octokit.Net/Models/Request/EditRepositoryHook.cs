@@ -15,7 +15,8 @@ namespace Octokit
         /// Initializes a new instance of the <see cref="EditRepositoryHook"/> class.
         /// </summary>
         public EditRepositoryHook() : this(null)
-        { }
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EditRepositoryHook"/> class.
@@ -36,8 +37,7 @@ namespace Octokit
         /// </value>
         public IEnumerable<string> Events { get; set; }
 
-        [Parameter(Key = "add_events")]
-        public IEnumerable<string> AddEvents { get; set; }
+        [Parameter(Key = "add_events")] public IEnumerable<string> AddEvents { get; set; }
 
         /// <summary>
         /// Gets or sets the remove events.
@@ -61,7 +61,8 @@ namespace Octokit
             get
             {
                 return string.Format(CultureInfo.InvariantCulture,
-                    "Repository Hook: Replacing Events: {0}, Adding Events: {1}, Removing Events: {2}", Events == null ? "no" : string.Join(", ", Events),
+                    "Repository Hook: Replacing Events: {0}, Adding Events: {1}, Removing Events: {2}",
+                    Events == null ? "no" : string.Join(", ", Events),
                     AddEvents == null ? "no" : string.Join(", ", AddEvents),
                     RemoveEvents == null ? "no" : string.Join(", ", RemoveEvents));
             }

@@ -9,7 +9,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class OauthToken
     {
-        public OauthToken() { }
+        public OauthToken()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OauthToken"/> class.
@@ -21,8 +23,10 @@ namespace Octokit
         /// <param name="error">The error code returned by the GitHub API.</param>
         /// <param name="errorDescription">The error message, if any, returned by the GitHub API.</param>
         /// <param name="errorUri">The GitHub documentation link, detailing the error message.</param>
-        [Obsolete("This constructor is being deprecated and will be removed in the future. Use OauthToken.OauthToken (with refreshToken paramters) instead.")]
-        public OauthToken(string tokenType, string accessToken, IReadOnlyList<string> scope, string error, string errorDescription, string errorUri)
+        [Obsolete(
+            "This constructor is being deprecated and will be removed in the future. Use OauthToken.OauthToken (with refreshToken paramters) instead.")]
+        public OauthToken(string tokenType, string accessToken, IReadOnlyList<string> scope, string error,
+            string errorDescription, string errorUri)
         {
             this.TokenType = tokenType;
             this.AccessToken = accessToken;
@@ -45,7 +49,9 @@ namespace Octokit
         /// <param name="error">The error code returned by the GitHub API.</param>
         /// <param name="errorDescription">The error message, if any, returned by the GitHub API.</param>
         /// <param name="errorUri">The GitHub documentation link, detailing the error message.</param>
-        public OauthToken(string tokenType, string accessToken, int expiresIn, string refreshToken, int refreshTokenExpiresIn, IReadOnlyList<string> scope, string error, string errorDescription, string errorUri)
+        public OauthToken(string tokenType, string accessToken, int expiresIn, string refreshToken,
+            int refreshTokenExpiresIn, IReadOnlyList<string> scope, string error, string errorDescription,
+            string errorUri)
         {
             this.TokenType = tokenType;
             this.AccessToken = accessToken;

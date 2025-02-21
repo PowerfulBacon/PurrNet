@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text;
-using PurrNet.Pooling;
+﻿using System.Text;
 
 namespace PurrNet.Modules
 {
@@ -11,7 +9,7 @@ namespace PurrNet.Modules
         public readonly int childCount;
         public readonly bool isActive;
         public readonly int[] inversedRelativePath;
-        
+
         public GameObjectFrameworkPiece(PrefabPieceID pid, NetworkID id, int childCount, bool isActive,
             int[] path)
         {
@@ -39,6 +37,7 @@ namespace PurrNet.Modules
                 if (i < inversedRelativePath.Length - 1)
                     builder.Append(" <- ");
             }
+
             builder.Append(" }");
             return builder.ToString();
         }

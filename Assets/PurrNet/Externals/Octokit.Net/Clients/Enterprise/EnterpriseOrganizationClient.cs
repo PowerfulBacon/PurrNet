@@ -12,7 +12,8 @@ namespace Octokit
     {
         public EnterpriseOrganizationClient(IApiConnection apiConnection)
             : base(apiConnection)
-        { }
+        {
+        }
 
         /// <summary>
         /// Creates an Organization on a GitHub Enterprise appliance (must be Site Admin user).

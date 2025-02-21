@@ -8,19 +8,15 @@ namespace Octokit
     public enum LockReason
     {
         // The issue or pull request was locked because the conversation was off-topic.
-        [Parameter(Value = "off-topic")]
-        OffTopic,
+        [Parameter(Value = "off-topic")] OffTopic,
 
         // The issue or pull request was locked because the conversation was resolved.
-        [Parameter(Value = "resolved")]
-        Resolved,
+        [Parameter(Value = "resolved")] Resolved,
 
         // The issue or pull request was locked because the conversation was spam.
-        [Parameter(Value = "spam")]
-        Spam,
+        [Parameter(Value = "spam")] Spam,
 
         // The issue or pull request was locked because the conversation was too heated.
-        [Parameter(Value = "too heated")]
-        TooHeated
+        [Parameter(Value = "too heated")] TooHeated
     }
 }

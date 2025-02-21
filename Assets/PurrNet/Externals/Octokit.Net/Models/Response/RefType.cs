@@ -13,19 +13,16 @@ namespace Octokit
         /// <summary>
         /// The object is of type repository
         /// </summary>
-        [Parameter(Value = "repository")]
-        Repository,
+        [Parameter(Value = "repository")] Repository,
 
         /// <summary>
         /// The object is of type branch
         /// </summary>
-        [Parameter(Value = "branch")]
-        Branch,
+        [Parameter(Value = "branch")] Branch,
 
         /// <summary>
         /// The object is of type tag
         /// </summary>
-        [Parameter(Value = "tag")]
-        Tag
+        [Parameter(Value = "tag")] Tag
     }
 }

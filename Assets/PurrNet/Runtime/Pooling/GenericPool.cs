@@ -10,9 +10,8 @@ namespace PurrNet.Pooling
         private readonly Stack<T> _pool = new Stack<T>();
         private readonly Func<T> _factory;
         private readonly Action<T> _reset;
-        
-        [UsedImplicitly]
-        public int count => _pool.Count;
+
+        [UsedImplicitly] public int count => _pool.Count;
 
         public GenericPool(Func<T> factory, Action<T> reset)
         {

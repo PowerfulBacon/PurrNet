@@ -99,7 +99,8 @@ namespace Octokit
         /// <param name="reference">The reference (SHA, branch name or tag name) to list check suites for</param>
         /// <param name="request">Details to filter the request, such as by App Id or Check Name</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/commits/{ref}/check-suites")]
-        public Task<CheckSuitesResponse> GetAllForReference(string owner, string repoName, string reference, CheckSuiteRequest request)
+        public Task<CheckSuitesResponse> GetAllForReference(string owner, string repoName, string reference,
+            CheckSuiteRequest request)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(repoName, nameof(repoName));
@@ -119,7 +120,8 @@ namespace Octokit
         /// <param name="reference">The reference (SHA, branch name or tag name) to list check suites for</param>
         /// <param name="request">Details to filter the request, such as by App Id or Check Name</param>
         [ManualRoute("GET", "/repositories/{id}/commits/{ref}/check-suites")]
-        public Task<CheckSuitesResponse> GetAllForReference(long repositoryId, string reference, CheckSuiteRequest request)
+        public Task<CheckSuitesResponse> GetAllForReference(long repositoryId, string reference,
+            CheckSuiteRequest request)
         {
             Ensure.ArgumentNotNullOrEmptyString(reference, nameof(reference));
             Ensure.ArgumentNotNull(request, nameof(request));
@@ -139,7 +141,8 @@ namespace Octokit
         /// <param name="request">Details to filter the request, such as by App Id or Check Name</param>
         /// <param name="options">Options to change the API response</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/commits/{ref}/check-suites")]
-        public async Task<CheckSuitesResponse> GetAllForReference(string owner, string repoName, string reference, CheckSuiteRequest request, ApiOptions options)
+        public async Task<CheckSuitesResponse> GetAllForReference(string owner, string repoName, string reference,
+            CheckSuiteRequest request, ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(repoName, nameof(repoName));
@@ -147,7 +150,9 @@ namespace Octokit
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            var results = await ApiConnection.GetAll<CheckSuitesResponse>(ApiUrls.CheckSuitesForReference(owner, repoName, reference), request.ToParametersDictionary(), options).ConfigureAwait(false);
+            var results = await ApiConnection
+                .GetAll<CheckSuitesResponse>(ApiUrls.CheckSuitesForReference(owner, repoName, reference),
+                    request.ToParametersDictionary(), options).ConfigureAwait(false);
 
             return new CheckSuitesResponse(
                 results.Count > 0 ? results.Max(x => x.TotalCount) : 0,
@@ -165,13 +170,16 @@ namespace Octokit
         /// <param name="request">Details to filter the request, such as by App Id or Check Name</param>
         /// <param name="options">Options to change the API response</param>
         [ManualRoute("GET", "/repositories/{id}/commits/{ref}/check-suites")]
-        public async Task<CheckSuitesResponse> GetAllForReference(long repositoryId, string reference, CheckSuiteRequest request, ApiOptions options)
+        public async Task<CheckSuitesResponse> GetAllForReference(long repositoryId, string reference,
+            CheckSuiteRequest request, ApiOptions options)
         {
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
             Ensure.ArgumentNotNullOrEmptyString(reference, nameof(reference));
 
-            var results = await ApiConnection.GetAll<CheckSuitesResponse>(ApiUrls.CheckSuitesForReference(repositoryId, reference), request.ToParametersDictionary(), options).ConfigureAwait(false);
+            var results = await ApiConnection
+                .GetAll<CheckSuitesResponse>(ApiUrls.CheckSuitesForReference(repositoryId, reference),
+                    request.ToParametersDictionary(), options).ConfigureAwait(false);
 
             return new CheckSuitesResponse(
                 results.Count > 0 ? results.Max(x => x.TotalCount) : 0,
@@ -188,13 +196,15 @@ namespace Octokit
         /// <param name="repoName">The name of the repository</param>
         /// <param name="preferences">The check suite preferences</param>
         [ManualRoute("PATCH", "/repos/{owner}/{repo}/check-suites/preferences")]
-        public Task<CheckSuitePreferencesResponse> UpdatePreferences(string owner, string repoName, CheckSuitePreferences preferences)
+        public Task<CheckSuitePreferencesResponse> UpdatePreferences(string owner, string repoName,
+            CheckSuitePreferences preferences)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(repoName, nameof(repoName));
             Ensure.ArgumentNotNull(preferences, nameof(preferences));
 
-            return ApiConnection.Patch<CheckSuitePreferencesResponse>(ApiUrls.CheckSuitePreferences(owner, repoName), preferences);
+            return ApiConnection.Patch<CheckSuitePreferencesResponse>(ApiUrls.CheckSuitePreferences(owner, repoName),
+                preferences);
         }
 
         /// <summary>
@@ -206,11 +216,13 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="preferences">The check suite preferences</param>
         [ManualRoute("GET", "/repositories/{id}/check-suites/preferences")]
-        public Task<CheckSuitePreferencesResponse> UpdatePreferences(long repositoryId, CheckSuitePreferences preferences)
+        public Task<CheckSuitePreferencesResponse> UpdatePreferences(long repositoryId,
+            CheckSuitePreferences preferences)
         {
             Ensure.ArgumentNotNull(preferences, nameof(preferences));
 
-            return ApiConnection.Patch<CheckSuitePreferencesResponse>(ApiUrls.CheckSuitePreferences(repositoryId), preferences);
+            return ApiConnection.Patch<CheckSuitePreferencesResponse>(ApiUrls.CheckSuitePreferences(repositoryId),
+                preferences);
         }
 
         /// <summary>
@@ -263,7 +275,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(repoName, nameof(repoName));
 
-            var httpStatusCode = await Connection.Post(ApiUrls.CheckSuiteRerequest(owner, repoName, checkSuiteId)).ConfigureAwait(false);
+            var httpStatusCode = await Connection.Post(ApiUrls.CheckSuiteRerequest(owner, repoName, checkSuiteId))
+                .ConfigureAwait(false);
 
             if (httpStatusCode != HttpStatusCode.Created)
             {
@@ -284,7 +297,8 @@ namespace Octokit
         [ManualRoute("GET", "/repositories/{id}/check-suites/{2}/rerequest")]
         public async Task<bool> Rerequest(long repositoryId, long checkSuiteId)
         {
-            var httpStatusCode = await Connection.Post(ApiUrls.CheckSuiteRerequest(repositoryId, checkSuiteId)).ConfigureAwait(false);
+            var httpStatusCode = await Connection.Post(ApiUrls.CheckSuiteRerequest(repositoryId, checkSuiteId))
+                .ConfigureAwait(false);
 
             if (httpStatusCode != HttpStatusCode.Created)
             {

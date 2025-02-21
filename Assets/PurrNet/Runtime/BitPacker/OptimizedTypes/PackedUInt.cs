@@ -1,4 +1,5 @@
 using System;
+using PurrNet.Logging;
 using PurrNet.Modules;
 using UnityEngine;
 
@@ -8,74 +9,74 @@ namespace PurrNet.Packing
     public struct PackedByte
     {
         public byte value;
-        
+
         public PackedByte(byte value)
         {
             this.value = value;
         }
-        
+
         public static implicit operator PackedByte(byte value) => new PackedByte(value);
-        
+
         public static implicit operator byte(PackedByte value) => value.value;
     }
-    
+
     [Serializable]
     public struct PackedSByte
     {
         public sbyte value;
-        
+
         public PackedSByte(sbyte value)
         {
             this.value = value;
         }
-        
+
         public static implicit operator PackedSByte(sbyte value) => new PackedSByte(value);
-        
+
         public static implicit operator sbyte(PackedSByte value) => value.value;
     }
-    
+
     [Serializable]
     public struct PackedULong
     {
         public ulong value;
-        
+
         public PackedULong(ulong value)
         {
             this.value = value;
         }
-        
+
         public static implicit operator PackedULong(ulong value) => new PackedULong(value);
-        
+
         public static implicit operator ulong(PackedULong value) => value.value;
     }
-    
+
     [Serializable]
     public struct PackedLong
     {
         public long value;
-        
+
         public PackedLong(long value)
         {
             this.value = value;
         }
-        
+
         public static implicit operator PackedLong(long value) => new PackedLong(value);
-        
+
         public static implicit operator long(PackedLong value) => value.value;
     }
-    
+
     [Serializable]
     public struct PackedUInt : IEquatable<PackedUInt>
     {
         public uint value;
-        
+
         public PackedUInt(uint value)
         {
             this.value = value;
         }
-        
+
         public static implicit operator PackedUInt(uint value) => new PackedUInt(value);
-        
+
         public static implicit operator uint(PackedUInt value) => value.value;
 
         public bool Equals(PackedUInt other)
@@ -93,19 +94,19 @@ namespace PurrNet.Packing
             return (int)value;
         }
     }
-    
+
     [Serializable]
     public struct PackedInt
     {
         public int value;
-        
+
         public PackedInt(int value)
         {
             this.value = value;
         }
-        
+
         public static implicit operator PackedInt(int value) => new PackedInt(value);
-        
+
         public static implicit operator int(PackedInt value) => value.value;
     }
 
@@ -113,104 +114,189 @@ namespace PurrNet.Packing
     public struct PackedUShort
     {
         public ushort value;
-        
+
         public PackedUShort(ushort value)
         {
             this.value = value;
         }
-        
+
         public static implicit operator PackedUShort(ushort value) => new PackedUShort(value);
-        
+
         public static implicit operator ushort(PackedUShort value) => value.value;
     }
-    
+
     [Serializable]
     public struct PackedShort
     {
         public short value;
-        
+
         public PackedShort(short value)
         {
             this.value = value;
         }
-        
+
         public static implicit operator PackedShort(short value) => new PackedShort(value);
-        
+
         public static implicit operator short(PackedShort value) => value.value;
     }
 
     public static class PackedUintSerializer
     {
         public static byte ZigzagEncode(sbyte i) => (byte)(((uint)i >> 7) ^ ((uint)i << 1));
-        
+
         public static sbyte ZigzagDecode(byte i) => (sbyte)((i >> 1) ^ -(i & 1));
-        
-        public static ushort ZigzagEncode (short i) => (ushort)(((ulong)i >> 15) ^ ((ulong)i << 1));
-        
-        public static short ZigzagDecode (ushort i) => (short)((i >> 1) ^ -(i & 1));
-        
-        public static uint ZigzagEncode (int i) => (uint)(((ulong)i >> 31) ^ ((ulong)i << 1));
-        
+
+        public static ushort ZigzagEncode(short i) => (ushort)(((ulong)i >> 15) ^ ((ulong)i << 1));
+
+        public static short ZigzagDecode(ushort i) => (short)((i >> 1) ^ -(i & 1));
+
+        public static uint ZigzagEncode(int i) => (uint)(((ulong)i >> 31) ^ ((ulong)i << 1));
+
         public static ulong ZigzagEncode(long i) => (ulong)((i >> 63) ^ (i << 1));
-        
-        public static int ZigzagDecode (uint i) => (int)(((long)i >> 1) ^ -((long)i & 1));
-        
+
+        public static int ZigzagDecode(uint i) => (int)(((long)i >> 1) ^ -((long)i & 1));
+
         public static long ZigzagDecode(ulong i) => ((long)(i >> 1) & 0x7FFFFFFFFFFFFFFFL) ^ ((long)(i << 63) >> 63);
-        
+
         static int CountLeadingZeroBits(uint value)
         {
             if (value == 0) return 32; // Special case for zero
 
             int count = 0;
-            if ((value & 0xFFFF0000) == 0) { count += 16; value <<= 16; }
-            if ((value & 0xFF000000) == 0) { count += 8; value <<= 8; }
-            if ((value & 0xF0000000) == 0) { count += 4; value <<= 4; }
-            if ((value & 0xC0000000) == 0) { count += 2; value <<= 2; }
-            if ((value & 0x80000000) == 0) { count += 1; }
+            if ((value & 0xFFFF0000) == 0)
+            {
+                count += 16;
+                value <<= 16;
+            }
+
+            if ((value & 0xFF000000) == 0)
+            {
+                count += 8;
+                value <<= 8;
+            }
+
+            if ((value & 0xF0000000) == 0)
+            {
+                count += 4;
+                value <<= 4;
+            }
+
+            if ((value & 0xC0000000) == 0)
+            {
+                count += 2;
+                value <<= 2;
+            }
+
+            if ((value & 0x80000000) == 0)
+            {
+                count += 1;
+            }
 
             return count;
         }
-        
+
         static int CountLeadingZeroBits(ulong value)
         {
             if (value == 0) return 64; // Special case for zero
 
             int count = 0;
-            if ((value & 0xFFFFFFFF00000000) == 0) { count += 32; value <<= 32; }
-            if ((value & 0xFFFF000000000000) == 0) { count += 16; value <<= 16; }
-            if ((value & 0xFF00000000000000) == 0) { count += 8; value <<= 8; }
-            if ((value & 0xF000000000000000) == 0) { count += 4; value <<= 4; }
-            if ((value & 0xC000000000000000) == 0) { count += 2; value <<= 2; }
-            if ((value & 0x8000000000000000) == 0) { count += 1; }
+            if ((value & 0xFFFFFFFF00000000) == 0)
+            {
+                count += 32;
+                value <<= 32;
+            }
+
+            if ((value & 0xFFFF000000000000) == 0)
+            {
+                count += 16;
+                value <<= 16;
+            }
+
+            if ((value & 0xFF00000000000000) == 0)
+            {
+                count += 8;
+                value <<= 8;
+            }
+
+            if ((value & 0xF000000000000000) == 0)
+            {
+                count += 4;
+                value <<= 4;
+            }
+
+            if ((value & 0xC000000000000000) == 0)
+            {
+                count += 2;
+                value <<= 2;
+            }
+
+            if ((value & 0x8000000000000000) == 0)
+            {
+                count += 1;
+            }
 
             return count;
         }
-        
-        const int PREFIX_BITS = 4;
+
+        private const int SEGMENTS = 8;
         const int TOTAL_BITS = 32;
-        const int MAX_COUNT = 1 << PREFIX_BITS;
-        const int CHUNK = TOTAL_BITS / MAX_COUNT;
-        
+        const int CHUNK = TOTAL_BITS / SEGMENTS;
+
         [UsedByIL]
         public static void Write(BitPacker packer, PackedUInt value)
         {
             int trailingZeroes = CountLeadingZeroBits(value.value);
             int emptyChunks = trailingZeroes / CHUNK;
-            int fullBytes = Mathf.Clamp(MAX_COUNT - emptyChunks, 1, MAX_COUNT);
-            packer.WriteBits((ulong)(fullBytes - 1), PREFIX_BITS);
-            byte numberBits = (byte)(fullBytes * CHUNK);
-            packer.WriteBits(value.value, numberBits);
+            int segmentCount = SEGMENTS - emptyChunks;
+            int pointer = 0;
+
+            if (segmentCount == 0)
+            {
+                packer.WriteBits(0, 1);
+                return;
+            }
+
+            packer.WriteBits(1, 1);
+
+            const uint mask = (uint.MaxValue >> (TOTAL_BITS - CHUNK));
+
+            while (segmentCount > 0)
+            {
+                uint isolated = (value.value >> pointer) & mask;
+                packer.WriteBits(isolated, CHUNK);
+                pointer += CHUNK;
+
+                --segmentCount;
+                packer.WriteBits(segmentCount == 0 ? 0u : 1u, 1);
+            }
         }
 
         [UsedByIL]
         public static void Read(BitPacker packer, ref PackedUInt value)
         {
-            var fullBytes = packer.ReadBits(PREFIX_BITS) + 1;
-            int emptyChunks = MAX_COUNT - (int)fullBytes;
-            byte numberBits = (byte)(TOTAL_BITS - emptyChunks * CHUNK);
-            value = new PackedUInt((uint)packer.ReadBits(numberBits));
+            // Check initial control bit
+            if (packer.ReadBits(1) == 0)
+            {
+                value.value = 0;
+                return;
+            }
+
+            uint result = 0;
+            int pointer = 0;
+            bool continueReading;
+
+            do
+            {
+                uint chunk = (uint)packer.ReadBits(CHUNK);
+                result |= chunk << pointer;
+                pointer += CHUNK;
+
+                continueReading = packer.ReadBits(1) == 1;
+            } while (continueReading);
+
+            value.value = result;
         }
-        
+
         [UsedByIL]
         public static void Write(BitPacker packer, PackedInt value)
         {
@@ -225,12 +311,12 @@ namespace PurrNet.Packing
             Read(packer, ref packed);
             value = new PackedInt(ZigzagDecode(packed.value));
         }
-        
+
         const int PREFIX_BITS_2 = 3;
         const int TOTAL_BITS_2 = 16;
         const int MAX_COUNT_2 = 1 << PREFIX_BITS_2;
         const int CHUNK_2 = TOTAL_BITS_2 / MAX_COUNT_2;
-        
+
         [UsedByIL]
         public static void Write(BitPacker packer, PackedUShort value)
         {
@@ -250,13 +336,13 @@ namespace PurrNet.Packing
             byte numberBits = (byte)(TOTAL_BITS_2 - emptyChunks * CHUNK_2);
             value = new PackedUShort((ushort)packer.ReadBits(numberBits));
         }
-        
+
         [UsedByIL]
         public static void Write(BitPacker packer, PackedShort value)
         {
             Write(packer, new PackedUShort(ZigzagEncode(value.value)));
         }
-        
+
         [UsedByIL]
         public static void Read(BitPacker packer, ref PackedShort value)
         {
@@ -264,12 +350,12 @@ namespace PurrNet.Packing
             Read(packer, ref packed);
             value = new PackedShort(ZigzagDecode(packed.value));
         }
-        
+
         const int PREFIX_BITS_3 = 5;
         const int TOTAL_BITS_3 = 64;
         const int MAX_COUNT_3 = 1 << PREFIX_BITS_3;
         const int CHUNK_3 = TOTAL_BITS_3 / MAX_COUNT_3;
-        
+
         [UsedByIL]
         public static void Write(BitPacker packer, PackedULong value)
         {
@@ -289,7 +375,7 @@ namespace PurrNet.Packing
             byte numberBits = (byte)(TOTAL_BITS_3 - emptyChunks * CHUNK_3);
             value = new PackedULong(packer.ReadBits(numberBits));
         }
-        
+
         [UsedByIL]
         public static void Write(BitPacker packer, PackedLong value)
         {
@@ -303,12 +389,12 @@ namespace PurrNet.Packing
             Read(packer, ref packed);
             value = new PackedLong(ZigzagDecode(packed.value));
         }
-        
+
         const int PREFIX_BITS_4 = 3;
         const int TOTAL_BITS_4 = 8;
         const int MAX_COUNT_4 = 1 << PREFIX_BITS_4;
         const int CHUNK_4 = TOTAL_BITS_4 / MAX_COUNT_4;
-        
+
         [UsedByIL]
         public static void Write(BitPacker packer, PackedByte value)
         {
@@ -328,7 +414,7 @@ namespace PurrNet.Packing
             byte numberBits = (byte)(TOTAL_BITS_4 - emptyChunks * CHUNK_4);
             value = new PackedByte((byte)packer.ReadBits(numberBits));
         }
-        
+
         [UsedByIL]
         public static void Write(BitPacker packer, PackedSByte value)
         {

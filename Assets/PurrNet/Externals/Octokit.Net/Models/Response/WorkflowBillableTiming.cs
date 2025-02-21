@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class WorkflowBillableTiming
     {
-        public WorkflowBillableTiming() { }
+        public WorkflowBillableTiming()
+        {
+        }
 
         public WorkflowBillableTiming(long totalMs)
         {
@@ -20,10 +22,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "TotalMs: {0}", TotalMs);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "TotalMs: {0}", TotalMs); }
         }
     }
 }

@@ -6,9 +6,15 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Collaborator
     {
-        public Collaborator() { }
+        public Collaborator()
+        {
+        }
 
-        public Collaborator(string login, long id, string email, string name, string nodeId, string avatarUrl, string gravatarUrl, string url, string htmlUrl, string followersUrl, string followingUrl, string gistsUrl, string type, string starredUrl, string subscriptionsUrl, string organizationsUrl, string reposUrl, string eventsUrl, string receivedEventsUrl, bool siteAdmin, CollaboratorPermissions permissions, string roleName)
+        public Collaborator(string login, long id, string email, string name, string nodeId, string avatarUrl,
+            string gravatarUrl, string url, string htmlUrl, string followersUrl, string followingUrl, string gistsUrl,
+            string type, string starredUrl, string subscriptionsUrl, string organizationsUrl, string reposUrl,
+            string eventsUrl, string receivedEventsUrl, bool siteAdmin, CollaboratorPermissions permissions,
+            string roleName)
         {
             Login = login;
             Id = id;
@@ -82,6 +88,6 @@ namespace Octokit
         public string RoleName { get; protected set; }
 
         internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture,
-                    $"Collaborator: Id: {Id} Login: {Login}");
+            $"Collaborator: Id: {Id} Login: {Login}");
     }
 }

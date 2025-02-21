@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class AdminStatsMilestones
     {
-        public AdminStatsMilestones() { }
+        public AdminStatsMilestones()
+        {
+        }
 
         public AdminStatsMilestones(int totalMilestones, int openMilestones, int closedMilestones)
         {
@@ -16,29 +18,19 @@ namespace Octokit
             ClosedMilestones = closedMilestones;
         }
 
-        public int TotalMilestones
-        {
-            get;
-            private set;
-        }
+        public int TotalMilestones { get; private set; }
 
-        public int OpenMilestones
-        {
-            get;
-            private set;
-        }
+        public int OpenMilestones { get; private set; }
 
-        public int ClosedMilestones
-        {
-            get;
-            private set;
-        }
+        public int ClosedMilestones { get; private set; }
 
         internal string DebuggerDisplay
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "TotalMilestones: {0} OpenMilestones: {1} ClosedMilestones: {2}", TotalMilestones, OpenMilestones, ClosedMilestones);
+                return string.Format(CultureInfo.InvariantCulture,
+                    "TotalMilestones: {0} OpenMilestones: {1} ClosedMilestones: {2}", TotalMilestones, OpenMilestones,
+                    ClosedMilestones);
             }
         }
     }

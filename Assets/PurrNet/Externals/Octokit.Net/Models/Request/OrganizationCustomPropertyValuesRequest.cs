@@ -10,14 +10,16 @@ namespace Octokit
         /// Initializes a new instance of the <see cref="OrganizationCustomPropertyValuesRequest"/> class.
         /// </summary>
         public OrganizationCustomPropertyValuesRequest() : base()
-        { }
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OrganizationCustomPropertyValuesRequest"/> class.
         /// </summary>
         public OrganizationCustomPropertyValuesRequest(string term)
             : base(term)
-        { }
+        {
+        }
 
         public override string Sort => null;
 

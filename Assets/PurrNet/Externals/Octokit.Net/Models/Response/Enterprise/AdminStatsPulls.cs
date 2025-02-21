@@ -8,7 +8,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class AdminStatsPulls
     {
-        public AdminStatsPulls() { }
+        public AdminStatsPulls()
+        {
+        }
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "unmergeable")]
         public AdminStatsPulls(int totalPulls, int mergedPulls, int mergeablePulls, int unmergeablePulls)
@@ -19,36 +21,22 @@ namespace Octokit
             UnmergeablePulls = unmergeablePulls;
         }
 
-        public int TotalPulls
-        {
-            get;
-            private set;
-        }
+        public int TotalPulls { get; private set; }
 
-        public int MergedPulls
-        {
-            get;
-            private set;
-        }
+        public int MergedPulls { get; private set; }
 
-        public int MergeablePulls
-        {
-            get;
-            private set;
-        }
+        public int MergeablePulls { get; private set; }
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Unmergeable")]
-        public int UnmergeablePulls
-        {
-            get;
-            private set;
-        }
+        public int UnmergeablePulls { get; private set; }
 
         internal string DebuggerDisplay
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "TotalPulls: {0} MergedPulls: {1} MergeablePulls: {2} UnmergeablePulls: {3}", TotalPulls, MergedPulls, MergeablePulls, UnmergeablePulls);
+                return string.Format(CultureInfo.InvariantCulture,
+                    "TotalPulls: {0} MergedPulls: {1} MergeablePulls: {2} UnmergeablePulls: {3}", TotalPulls,
+                    MergedPulls, MergeablePulls, UnmergeablePulls);
             }
         }
     }

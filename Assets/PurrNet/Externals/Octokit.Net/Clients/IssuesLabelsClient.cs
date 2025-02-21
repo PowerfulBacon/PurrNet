@@ -193,7 +193,8 @@ namespace Octokit
         /// <param name="milestoneNumber">The number of the milestone</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/repos/{owner}/{repo}/milestones/{milestone_number}/labels")]
-        public Task<IReadOnlyList<Label>> GetAllForMilestone(string owner, string name, int milestoneNumber, ApiOptions options)
+        public Task<IReadOnlyList<Label>> GetAllForMilestone(string owner, string name, int milestoneNumber,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -421,7 +422,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNullOrEmptyString(labelName, nameof(labelName));
 
-            return ApiConnection.Delete<IReadOnlyList<Label>>(ApiUrls.IssueLabel(owner, name, issueNumber, labelName), new object());
+            return ApiConnection.Delete<IReadOnlyList<Label>>(ApiUrls.IssueLabel(owner, name, issueNumber, labelName),
+                new object());
         }
 
         /// <summary>
@@ -438,7 +440,8 @@ namespace Octokit
         {
             Ensure.ArgumentNotNullOrEmptyString(labelName, nameof(labelName));
 
-            return ApiConnection.Delete<IReadOnlyList<Label>>(ApiUrls.IssueLabel(repositoryId, issueNumber, labelName), new object());
+            return ApiConnection.Delete<IReadOnlyList<Label>>(ApiUrls.IssueLabel(repositoryId, issueNumber, labelName),
+                new object());
         }
 
         /// <summary>
@@ -452,7 +455,8 @@ namespace Octokit
         /// <param name="issueNumber">The number of the issue</param>
         /// <param name="labels">The names of the labels to set</param>
         [ManualRoute("PUT", "/repos/{owner}/{repo}/issues/{issue_number}/labels")]
-        public Task<IReadOnlyList<Label>> ReplaceAllForIssue(string owner, string name, int issueNumber, string[] labels)
+        public Task<IReadOnlyList<Label>> ReplaceAllForIssue(string owner, string name, int issueNumber,
+            string[] labels)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));

@@ -7,7 +7,8 @@ namespace Octokit
     /// <summary>
     /// Request to trigger the creation of a check suite
     /// </summary>
-    [Obsolete("This request has been deprecated in the GitHub Api, however can still be used on GitHub Enterprise 2.14")]
+    [Obsolete(
+        "This request has been deprecated in the GitHub Api, however can still be used on GitHub Enterprise 2.14")]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class CheckSuiteTriggerRequest
     {

@@ -25,10 +25,7 @@ namespace Octokit
 
         public override string Message
         {
-            get
-            {
-                return message;
-            }
+            get { return message; }
         }
 
         /// <summary>

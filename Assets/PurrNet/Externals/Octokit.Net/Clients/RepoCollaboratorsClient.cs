@@ -100,7 +100,8 @@ namespace Octokit
         /// <param name="request">Used to request and filter a list of repository collaborators</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         [ManualRoute("GET", "/repos/{owner}/{repo}/collaborators")]
-        public Task<IReadOnlyList<Collaborator>> GetAll(string owner, string name, RepositoryCollaboratorListRequest request)
+        public Task<IReadOnlyList<Collaborator>> GetAll(string owner, string name,
+            RepositoryCollaboratorListRequest request)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -138,15 +139,16 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         [ManualRoute("GET", "/repos/{owner}/{repo}/collaborators")]
-        public Task<IReadOnlyList<Collaborator>> GetAll(string owner, string name, RepositoryCollaboratorListRequest request, ApiOptions options)
+        public Task<IReadOnlyList<Collaborator>> GetAll(string owner, string name,
+            RepositoryCollaboratorListRequest request, ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Collaborator>(ApiUrls.RepoCollaborators(owner, name), request.ToParametersDictionary(), options);
-
+            return ApiConnection.GetAll<Collaborator>(ApiUrls.RepoCollaborators(owner, name),
+                request.ToParametersDictionary(), options);
         }
 
         /// <summary>
@@ -160,12 +162,14 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         [ManualRoute("GET", "/repository/{id}/collaborators")]
-        public Task<IReadOnlyList<Collaborator>> GetAll(long repositoryId, RepositoryCollaboratorListRequest request, ApiOptions options)
+        public Task<IReadOnlyList<Collaborator>> GetAll(long repositoryId, RepositoryCollaboratorListRequest request,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNull(request, nameof(request));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<Collaborator>(ApiUrls.RepoCollaborators(repositoryId), request.ToParametersDictionary(), options);
+            return ApiConnection.GetAll<Collaborator>(ApiUrls.RepoCollaborators(repositoryId),
+                request.ToParametersDictionary(), options);
         }
 
         /// <summary>
@@ -187,7 +191,8 @@ namespace Octokit
 
             try
             {
-                var response = await Connection.Get<object>(ApiUrls.RepoCollaborator(owner, name, user), null, null).ConfigureAwait(false);
+                var response = await Connection.Get<object>(ApiUrls.RepoCollaborator(owner, name, user), null, null)
+                    .ConfigureAwait(false);
                 return response.HttpResponse.IsTrue();
             }
             catch (NotFoundException)
@@ -212,7 +217,8 @@ namespace Octokit
 
             try
             {
-                var response = await Connection.Get<object>(ApiUrls.RepoCollaborator(repositoryId, user), null, null).ConfigureAwait(false);
+                var response = await Connection.Get<object>(ApiUrls.RepoCollaborator(repositoryId, user), null, null)
+                    .ConfigureAwait(false);
                 return response.HttpResponse.IsTrue();
             }
             catch (NotFoundException)
@@ -292,13 +298,16 @@ namespace Octokit
         /// <param name="permission">The permission to set. Only valid on organization-owned repositories.</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         [ManualRoute("PUT", "/repos/{owner}/{repo}/collaborators/{username}")]
-        public async Task<RepositoryInvitation> Add(string owner, string name, string user, CollaboratorRequest permission)
+        public async Task<RepositoryInvitation> Add(string owner, string name, string user,
+            CollaboratorRequest permission)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNullOrEmptyString(user, nameof(user));
-            
-            return await ApiConnection.Put<RepositoryInvitation>(ApiUrls.RepoCollaborator(owner, name, user), permission).ConfigureAwait(false);
+
+            return await ApiConnection
+                .Put<RepositoryInvitation>(ApiUrls.RepoCollaborator(owner, name, user), permission)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -333,7 +342,9 @@ namespace Octokit
         {
             Ensure.ArgumentNotNullOrEmptyString(user, nameof(user));
 
-            return await ApiConnection.Put<RepositoryInvitation>(ApiUrls.RepoCollaborator(repositoryId, user), permission).ConfigureAwait(false);
+            return await ApiConnection
+                .Put<RepositoryInvitation>(ApiUrls.RepoCollaborator(repositoryId, user), permission)
+                .ConfigureAwait(false);
         }
 
         /// <summary>

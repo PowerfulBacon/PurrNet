@@ -32,7 +32,7 @@ namespace Octokit
             : base(response, innerException)
         {
             Debug.Assert(response != null && response.StatusCode == HttpStatusCode.MethodNotAllowed,
-            "PullRequestNotMergeableException created with the wrong HTTP status code");
+                "PullRequestNotMergeableException created with the wrong HTTP status code");
         }
 
         public override string Message

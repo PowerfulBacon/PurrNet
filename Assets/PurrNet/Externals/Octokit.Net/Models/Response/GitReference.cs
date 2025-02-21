@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class GitReference
     {
-        public GitReference() { }
+        public GitReference()
+        {
+        }
 
-        public GitReference(string nodeId, string url, string label, string @ref, string sha, User user, Repository repository)
+        public GitReference(string nodeId, string url, string label, string @ref, string sha, User user,
+            Repository repository)
         {
             NodeId = nodeId;
             Url = url;
@@ -58,10 +61,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Sha: {0}", Sha);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Sha: {0}", Sha); }
         }
     }
 }

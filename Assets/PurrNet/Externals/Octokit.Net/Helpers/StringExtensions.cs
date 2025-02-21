@@ -45,6 +45,7 @@ namespace Octokit
         }
 
         static readonly Regex _optionalQueryStringRegex = new Regex("\\{\\?([^}]+)\\}");
+
         public static Uri ExpandUriTemplate(this string template, object values)
         {
             var optionalQueryStringMatch = _optionalQueryStringRegex.Match(template);
@@ -60,11 +61,13 @@ namespace Octokit
                     {
                         expansion += string.IsNullOrWhiteSpace(expansion) ? "?" : "&";
                         expansion += parameter + "=" +
-                            Uri.EscapeDataString("" + parameterProperty.GetValue(values, new object[0]));
+                                     Uri.EscapeDataString("" + parameterProperty.GetValue(values, new object[0]));
                     }
                 }
+
                 template = _optionalQueryStringRegex.Replace(template, expansion);
             }
+
             return new Uri(template);
         }
 
@@ -129,6 +132,7 @@ namespace Octokit
                     yield return new string(letters, wordStartIndex, i - wordStartIndex);
                     wordStartIndex = i;
                 }
+
                 previousChar = letters[i];
             }
 

@@ -13,11 +13,11 @@ namespace PurrNet.Modules
         public readonly int[] path;
         public readonly int? defaultParentSiblingIndex;
         public DisposableList<GameObjectFrameworkPiece> framework;
-        
+
         public GameObjectPrototype(
-            Vector3 position, 
+            Vector3 position,
             Quaternion rotation,
-            NetworkID? parentID, 
+            NetworkID? parentID,
             int[] path,
             DisposableList<GameObjectFrameworkPiece> framework,
             int? defaultParentSiblingIndex)
@@ -45,6 +45,7 @@ namespace PurrNet.Modules
                 if (i < framework.Count - 1)
                     builder.Append("\n    ");
             }
+
             builder.Append("\n}");
             return builder.ToString();
         }

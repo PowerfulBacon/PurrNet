@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class WorkflowRunBillable
     {
-        public WorkflowRunBillable() { }
+        public WorkflowRunBillable()
+        {
+        }
 
-        public WorkflowRunBillable(WorkflowRunBillableTiming ubuntu, WorkflowRunBillableTiming macOS, WorkflowRunBillableTiming windows)
+        public WorkflowRunBillable(WorkflowRunBillableTiming ubuntu, WorkflowRunBillableTiming macOS,
+            WorkflowRunBillableTiming windows)
         {
             Ubuntu = ubuntu;
             MacOS = macOS;
@@ -38,7 +41,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Ubuntu: {0}, macOS: {1}, Windows: {2}", Ubuntu, MacOS, Windows);
+                return string.Format(CultureInfo.InvariantCulture, "Ubuntu: {0}, macOS: {1}, Windows: {2}", Ubuntu,
+                    MacOS, Windows);
             }
         }
     }

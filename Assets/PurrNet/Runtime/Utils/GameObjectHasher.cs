@@ -9,7 +9,7 @@ namespace PurrNet
         public static StringBuilder ComputeStringRecursive(GameObject obj)
         {
             var sb = new StringBuilder();
-            
+
             // Use invariant culture for consistent string formatting
             sb.Append(obj.name);
 
@@ -32,7 +32,7 @@ namespace PurrNet
 
             return sb;
         }
-        
+
         public static uint ComputeHashRecursive(GameObject obj)
         {
             return Hasher.ActualHash(ComputeStringRecursive(obj).ToString());

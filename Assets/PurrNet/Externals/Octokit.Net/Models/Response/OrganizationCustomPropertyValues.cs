@@ -10,9 +10,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class OrganizationCustomPropertyValues
     {
-        public OrganizationCustomPropertyValues() { }
+        public OrganizationCustomPropertyValues()
+        {
+        }
 
-        public OrganizationCustomPropertyValues(long repositoryId, string repositoryName, string repositoryFullName, IReadOnlyList<CustomPropertyValue> properties)
+        public OrganizationCustomPropertyValues(long repositoryId, string repositoryName, string repositoryFullName,
+            IReadOnlyList<CustomPropertyValue> properties)
         {
             RepositoryId = repositoryId;
             RepositoryName = repositoryName;
@@ -40,6 +43,7 @@ namespace Octokit
         /// </summary>
         public IReadOnlyList<CustomPropertyValue> Properties { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "RepositoryFullName: {0}", RepositoryFullName);
+        internal string DebuggerDisplay =>
+            string.Format(CultureInfo.InvariantCulture, "RepositoryFullName: {0}", RepositoryFullName);
     }
 }

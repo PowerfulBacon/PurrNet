@@ -15,12 +15,12 @@ namespace PurrNet.Editor
         private static void OnHierarchyGUI(int instanceid, Rect selectionrect)
         {
             bool isPlaying = Application.isPlaying;
-            
+
             if (!isPlaying)
                 return;
-            
+
             var currentEvent = Event.current;
-            
+
             switch (currentEvent.type)
             {
                 case EventType.ExecuteCommand when currentEvent.commandName == "Paste":
@@ -29,7 +29,7 @@ namespace PurrNet.Editor
                     EditorApplication.delayCall += () =>
                     {
                         foreach (var go in Selection.gameObjects)
-                            NetworkIdentity.Spawn(go);
+                            NetworkIdentity.SpawnInternal(go);
                     };
                     break;
                 }

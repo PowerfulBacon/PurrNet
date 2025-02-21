@@ -6,7 +6,8 @@ namespace Octokit
     /// </summary>
     public static class RequestBody
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2211:NonConstantFieldsShouldNotBeVisible")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage",
+            "CA2211:NonConstantFieldsShouldNotBeVisible")]
         public static object Empty = new object();
     }
 }

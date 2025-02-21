@@ -8,7 +8,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class InstallationPermissions
     {
-        public InstallationPermissions() { }
+        public InstallationPermissions()
+        {
+        }
 
         public InstallationPermissions
         (
@@ -268,6 +270,7 @@ namespace Octokit
         /// </summary>
         public StringEnum<InstallationReadWritePermissionLevel>? TeamDiscussions { get; private set; }
 
-        internal string DebuggerDisplay => $"Actions: {Actions}, Administration: {Administration}, Checks: {Checks}, Contents: {Contents}, Deployments: {Deployments}, Environments: {Environments}, Issues: {Issues}, Metadata: {Metadata}, Packages: {Packages}, Pages: {Pages}, PullRequests: {PullRequests}, RepositoryAnnouncementBanners: {RepositoryAnnouncementBanners}, RepositoryHooks: {RepositoryHooks}, RepositoryProjects: {RepositoryProjects}, SecretScanningAlerts: {SecretScanningAlerts}, Secrets: {Secrets}, SecurityEvents: {SecurityEvents}, SingleFile: {SingleFile}, Statuses: {Statuses}, VulnerabilityAlerts: {VulnerabilityAlerts}, Workflows: {Workflows}, Members: {Members}, OrganizationAdministration: {OrganizationAdministration}, OrganizationCustomRoles: {OrganizationCustomRoles}, OrganizationAnnouncementBanners: {OrganizationAnnouncementBanners}, OrganizationHooks: {OrganizationHooks}, OrganizationPlan: {OrganizationPlan}, OrganizationProjects: {OrganizationProjects}, OrganizationPackages: {OrganizationPackages}, OrganizationSecrets: {OrganizationSecrets}, OrganizationSelfHostedRunners: {OrganizationSelfHostedRunners}, OrganizationUserBlocking: {OrganizationUserBlocking}, TeamDiscussions: {TeamDiscussions}";
+        internal string DebuggerDisplay =>
+            $"Actions: {Actions}, Administration: {Administration}, Checks: {Checks}, Contents: {Contents}, Deployments: {Deployments}, Environments: {Environments}, Issues: {Issues}, Metadata: {Metadata}, Packages: {Packages}, Pages: {Pages}, PullRequests: {PullRequests}, RepositoryAnnouncementBanners: {RepositoryAnnouncementBanners}, RepositoryHooks: {RepositoryHooks}, RepositoryProjects: {RepositoryProjects}, SecretScanningAlerts: {SecretScanningAlerts}, Secrets: {Secrets}, SecurityEvents: {SecurityEvents}, SingleFile: {SingleFile}, Statuses: {Statuses}, VulnerabilityAlerts: {VulnerabilityAlerts}, Workflows: {Workflows}, Members: {Members}, OrganizationAdministration: {OrganizationAdministration}, OrganizationCustomRoles: {OrganizationCustomRoles}, OrganizationAnnouncementBanners: {OrganizationAnnouncementBanners}, OrganizationHooks: {OrganizationHooks}, OrganizationPlan: {OrganizationPlan}, OrganizationProjects: {OrganizationProjects}, OrganizationPackages: {OrganizationPackages}, OrganizationSecrets: {OrganizationSecrets}, OrganizationSelfHostedRunners: {OrganizationSelfHostedRunners}, OrganizationUserBlocking: {OrganizationUserBlocking}, TeamDiscussions: {TeamDiscussions}";
     }
 }

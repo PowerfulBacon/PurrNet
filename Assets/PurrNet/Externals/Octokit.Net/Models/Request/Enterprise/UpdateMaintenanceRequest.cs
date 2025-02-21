@@ -34,7 +34,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Maintenance: {0}", this.Maintenance.DebuggerDisplay);
+                return string.Format(CultureInfo.InvariantCulture, "Maintenance: {0}",
+                    this.Maintenance.DebuggerDisplay);
             }
         }
     }
@@ -46,7 +47,8 @@ namespace Octokit
         /// Maintenance request details with default values (results in Maintenance mode being turned off immediately)
         /// </summary>
         public UpdateMaintenanceRequestDetails()
-        { }
+        {
+        }
 
         /// <summary>
         /// Maintenance request details to enable/disable maintenance mode immediately
@@ -83,7 +85,7 @@ namespace Octokit
         {
             Enabled = enabled;
             When = when.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ",
-                          CultureInfo.InvariantCulture);
+                CultureInfo.InvariantCulture);
         }
 
         /// <summary>

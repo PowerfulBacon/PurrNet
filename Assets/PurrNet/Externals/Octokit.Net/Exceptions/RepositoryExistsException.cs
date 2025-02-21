@@ -38,11 +38,12 @@ namespace Octokit
             RepositoryName = name;
             OwnerIsOrganization = true;
             var webBaseAddress = baseAddress.Host != GitHubClient.GitHubApiUrl.Host
-                        ? baseAddress
-                        : GitHubClient.GitHubDotComUrl;
+                ? baseAddress
+                : GitHubClient.GitHubDotComUrl;
             ExistingRepositoryWebUrl = new Uri(webBaseAddress, new Uri(organization + "/" + name, UriKind.Relative));
 
-            _message = string.Format(CultureInfo.InvariantCulture, "There is already a repository named '{0}' in the organization '{1}'.", name, organization);
+            _message = string.Format(CultureInfo.InvariantCulture,
+                "There is already a repository named '{0}' in the organization '{1}'.", name, organization);
         }
 
         /// <summary>
@@ -59,7 +60,8 @@ namespace Octokit
 
             RepositoryName = name;
 
-            _message = string.Format(CultureInfo.InvariantCulture, "There is already a repository named '{0}' for the current account.", name);
+            _message = string.Format(CultureInfo.InvariantCulture,
+                "There is already a repository named '{0}' for the current account.", name);
         }
 
         /// <summary>
@@ -77,10 +79,7 @@ namespace Octokit
         /// </summary>
         public override string Message
         {
-            get
-            {
-                return _message;
-            }
+            get { return _message; }
         }
 
         /// <summary>

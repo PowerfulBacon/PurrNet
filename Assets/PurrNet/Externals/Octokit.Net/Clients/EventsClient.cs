@@ -401,7 +401,8 @@ namespace Octokit
         /// <param name="organization">The name of the organization</param>
         /// <param name="options">Options for changing the API response</param>
         [ManualRoute("GET", "/users/{username}/events/orgs/{org}")]
-        public Task<IReadOnlyList<Activity>> GetAllForAnOrganization(string user, string organization, ApiOptions options)
+        public Task<IReadOnlyList<Activity>> GetAllForAnOrganization(string user, string organization,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(user, nameof(user));
             Ensure.ArgumentNotNullOrEmptyString(organization, nameof(organization));

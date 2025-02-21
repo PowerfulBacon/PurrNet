@@ -36,7 +36,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "ArchivedState: {0} ", ArchivedState?.ToString() ?? "null");
+                return string.Format(CultureInfo.InvariantCulture, "ArchivedState: {0} ",
+                    ArchivedState?.ToString() ?? "null");
             }
         }
     }
@@ -46,19 +47,16 @@ namespace Octokit
         /// <summary>
         /// Items that are open.
         /// </summary>
-        [Parameter(Value = "not_archived")]
-        NotArchived,
+        [Parameter(Value = "not_archived")] NotArchived,
 
         /// <summary>
         /// Items that are closed.
         /// </summary>
-        [Parameter(Value = "archived")]
-        Archived,
+        [Parameter(Value = "archived")] Archived,
 
         /// <summary>
         /// All the items.
         /// </summary>
-        [Parameter(Value = "all")]
-        All
+        [Parameter(Value = "all")] All
     }
 }

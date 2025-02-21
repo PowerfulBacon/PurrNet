@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class GistComment
     {
-        public GistComment() { }
+        public GistComment()
+        {
+        }
 
-        public GistComment(long id, string nodeId, string url, string body, User user, DateTimeOffset createdAt, DateTimeOffset? updatedAt)
+        public GistComment(long id, string nodeId, string url, string body, User user, DateTimeOffset createdAt,
+            DateTimeOffset? updatedAt)
         {
             Id = id;
             NodeId = nodeId;
@@ -57,10 +60,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Id: {0} CreatedAt: {1}", Id, CreatedAt);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Id: {0} CreatedAt: {1}", Id, CreatedAt); }
         }
     }
 }

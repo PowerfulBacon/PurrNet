@@ -22,27 +22,20 @@ namespace Octokit
         /// </summary>
         public ItemStateFilter State { get; set; }
 
-        [Parameter(Key = "sort")]
-        public MilestoneSort SortProperty { get; set; }
+        [Parameter(Key = "sort")] public MilestoneSort SortProperty { get; set; }
 
-        [Parameter(Key = "direction")]
-        public SortDirection SortDirection { get; set; }
+        [Parameter(Key = "direction")] public SortDirection SortDirection { get; set; }
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "State {0} ", State);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "State {0} ", State); }
         }
     }
 
     public enum MilestoneSort
     {
-        [Parameter(Value = "due_date")]
-        DueDate,
+        [Parameter(Value = "due_date")] DueDate,
 
-        [Parameter(Value = "completeness")]
-        Completeness
+        [Parameter(Value = "completeness")] Completeness
     }
 }

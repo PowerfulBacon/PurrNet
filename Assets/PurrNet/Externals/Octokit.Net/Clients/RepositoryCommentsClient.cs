@@ -145,7 +145,8 @@ namespace Octokit
         /// <param name="options">Options to change the API response</param>
         /// <remarks>http://developer.github.com/v3/repos/comments/#list-comments-for-a-single-commit</remarks>
         [ManualRoute("GET", "/repos/{owner}/{repo}/commits/{commit_sha}/comments")]
-        public Task<IReadOnlyList<CommitComment>> GetAllForCommit(string owner, string name, string sha, ApiOptions options)
+        public Task<IReadOnlyList<CommitComment>> GetAllForCommit(string owner, string name, string sha,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
@@ -215,13 +216,14 @@ namespace Octokit
         /// <param name="commentUpdate">The modified comment</param>
         /// <remarks>http://developer.github.com/v3/repos/comments/#update-a-commit-comment</remarks>
         [ManualRoute("PATCH", "/repos/{owner}/{repo}/comments/{comment_id}")]
-        public Task<CommitComment> Update(string owner, string name, long  commentId, string commentUpdate)
+        public Task<CommitComment> Update(string owner, string name, long commentId, string commentUpdate)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(name, nameof(name));
             Ensure.ArgumentNotNull(commentUpdate, nameof(commentUpdate));
 
-            return ApiConnection.Patch<CommitComment>(ApiUrls.CommitComment(owner, name, commentId), new BodyWrapper(commentUpdate));
+            return ApiConnection.Patch<CommitComment>(ApiUrls.CommitComment(owner, name, commentId),
+                new BodyWrapper(commentUpdate));
         }
 
         /// <summary>
@@ -236,7 +238,8 @@ namespace Octokit
         {
             Ensure.ArgumentNotNull(commentUpdate, nameof(commentUpdate));
 
-            return ApiConnection.Patch<CommitComment>(ApiUrls.CommitComment(repositoryId, commentId), new BodyWrapper(commentUpdate));
+            return ApiConnection.Patch<CommitComment>(ApiUrls.CommitComment(repositoryId, commentId),
+                new BodyWrapper(commentUpdate));
         }
 
         /// <summary>

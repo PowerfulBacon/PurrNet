@@ -8,17 +8,15 @@ namespace Octokit
     /// </summary>
     public enum ContentType
     {
-        [Parameter(Value = "file")]
-        File,
+        [Parameter(Value = "file")] File,
 
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Dir", Justification = "Matches the value returned by the API")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Dir",
+            Justification = "Matches the value returned by the API")]
         [Parameter(Value = "dir")]
         Dir,
 
-        [Parameter(Value = "symlink")]
-        Symlink,
+        [Parameter(Value = "symlink")] Symlink,
 
-        [Parameter(Value = "submodule")]
-        Submodule
+        [Parameter(Value = "submodule")] Submodule
     }
 }

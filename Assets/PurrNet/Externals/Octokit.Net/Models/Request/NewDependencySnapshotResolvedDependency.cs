@@ -36,10 +36,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Package Url: {0}", PackageUrl);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Package Url: {0}", PackageUrl); }
         }
     }
 
@@ -48,14 +45,12 @@ namespace Octokit
         /// <summary>
         /// The dependency is requested directly by the manifest.
         /// </summary>
-        [Parameter(Value = "direct")]
-        Direct,
+        [Parameter(Value = "direct")] Direct,
 
         /// <summary>
         /// The dependency is a dependency of another dependency.
         /// </summary>
-        [Parameter(Value = "indirect")]
-        Indirect,
+        [Parameter(Value = "indirect")] Indirect,
     }
 
     public enum ResolvedPackageKeyScope
@@ -63,13 +58,11 @@ namespace Octokit
         /// <summary>
         /// The dependency is required for the primary build artifact.
         /// </summary>
-        [Parameter(Value = "runtime")]
-        Runtime,
+        [Parameter(Value = "runtime")] Runtime,
 
         /// <summary>
         /// The dependency is only used for development.
         /// </summary>
-        [Parameter(Value = "development")]
-        Development,
+        [Parameter(Value = "development")] Development,
     }
 }

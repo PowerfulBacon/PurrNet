@@ -31,6 +31,7 @@ namespace Octokit
         /// </summary>
         public IReadOnlyList<RepositoryVariable> Variables { get; private set; }
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "RepositoryVariablesCollection: Count: {0}", TotalCount);
+        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture,
+            "RepositoryVariablesCollection: Count: {0}", TotalCount);
     }
 }

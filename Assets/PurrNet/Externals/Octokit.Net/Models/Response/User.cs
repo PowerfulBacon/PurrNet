@@ -12,10 +12,19 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class User : Account
     {
-        public User() { }
+        public User()
+        {
+        }
 
-        public User(string avatarUrl, string bio, string blog, int collaborators, string company, DateTimeOffset createdAt, DateTimeOffset updatedAt, int diskUsage, string email, int followers, int following, bool? hireable, string htmlUrl, int totalPrivateRepos, long id, string location, string login, string name, string nodeId, int ownedPrivateRepos, Plan plan, int privateGists, int publicGists, int publicRepos, string url, RepositoryPermissions permissions, bool siteAdmin, string ldapDistinguishedName, DateTimeOffset? suspendedAt)
-            : base(avatarUrl, bio, blog, collaborators, company, createdAt, diskUsage, email, followers, following, hireable, htmlUrl, totalPrivateRepos, id, location, login, name, nodeId, ownedPrivateRepos, plan, privateGists, publicGists, publicRepos, AccountType.User, url)
+        public User(string avatarUrl, string bio, string blog, int collaborators, string company,
+            DateTimeOffset createdAt, DateTimeOffset updatedAt, int diskUsage, string email, int followers,
+            int following, bool? hireable, string htmlUrl, int totalPrivateRepos, long id, string location,
+            string login, string name, string nodeId, int ownedPrivateRepos, Plan plan, int privateGists,
+            int publicGists, int publicRepos, string url, RepositoryPermissions permissions, bool siteAdmin,
+            string ldapDistinguishedName, DateTimeOffset? suspendedAt)
+            : base(avatarUrl, bio, blog, collaborators, company, createdAt, diskUsage, email, followers, following,
+                hireable, htmlUrl, totalPrivateRepos, id, location, login, name, nodeId, ownedPrivateRepos, plan,
+                privateGists, publicGists, publicRepos, AccountType.User, url)
         {
             Permissions = permissions;
             SiteAdmin = siteAdmin;
@@ -39,7 +48,10 @@ namespace Octokit
         /// <summary>
         /// Whether or not the user is currently suspended
         /// </summary>
-        public bool Suspended { get { return SuspendedAt.HasValue; } }
+        public bool Suspended
+        {
+            get { return SuspendedAt.HasValue; }
+        }
 
         /// <summary>
         /// LDAP Binding (GitHub Enterprise only)

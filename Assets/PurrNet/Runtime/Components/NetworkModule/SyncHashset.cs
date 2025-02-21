@@ -17,7 +17,7 @@ namespace PurrNet
         Removed,
         Cleared
     }
-    
+
     /// <summary>
     /// All the data relevant to the change that happened to the hash set
     /// </summary>
@@ -45,23 +45,24 @@ namespace PurrNet
         [SerializeField] private bool _ownerAuth;
         [SerializeField] private List<T> _serializedSet = new List<T>();
         private HashSet<T> _set = new HashSet<T>();
-        
+
         public delegate void SyncHashSetChanged<Key>(SyncHashSetChange<Key> change);
-        
+
         /// <summary>
         /// Event that is invoked when the hash set is changed
         /// </summary>
         public event SyncHashSetChanged<T> onChanged;
-        
+
         /// <summary>
         /// Whether it is the owner or the server that has the authority to modify the hash set
         /// </summary>
         public bool ownerAuth => _ownerAuth;
-        
+
         /// <summary>
         /// The amount of entries in the hash set
         /// </summary>
         public int Count => _set.Count;
+
         public bool IsReadOnly => false;
 
         public SyncHashSet(bool ownerAuth = false)
@@ -72,7 +73,7 @@ namespace PurrNet
             onChanged += UpdateSerializedSet;
 #endif
         }
-        
+
         protected virtual void OnValidate()
         {
             _set = new HashSet<T>(_serializedSet);
@@ -87,43 +88,43 @@ namespace PurrNet
         public override void OnSpawn()
         {
             if (!IsController(_ownerAuth)) return;
-            
+
             if (isServer)
                 SendInitialStateToAll(_set);
             else SendInitialStateToServer(_set);
         }
-        
+
         public override void OnObserverAdded(PlayerID player)
         {
             HandleInitialStateTarget(player, _serializedSet.ToHashSet());
         }
-        
+
         [TargetRpc(Channel.ReliableOrdered)]
         private void HandleInitialStateTarget(PlayerID player, HashSet<T> initialState)
         {
             HandleInitialState(initialState);
         }
-        
+
         [ObserversRpc(Channel.ReliableOrdered)]
         private void SendInitialStateToAll(HashSet<T> initialState)
         {
             HandleInitialState(initialState);
         }
-        
+
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
         private void SendInitialStateToServer(HashSet<T> initialState)
         {
             if (!_ownerAuth) return;
             SendInitialStateToOthers(initialState);
         }
-        
+
         [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true)]
         private void SendInitialStateToOthers(HashSet<T> initialState)
         {
             if (!isServer || isHost)
             {
                 _set = initialState;
-                
+
                 InvokeChange(new SyncHashSetChange<T>(SyncHashSetOperation.Cleared));
 
                 foreach (var value in _set)
@@ -139,9 +140,9 @@ namespace PurrNet
             {
                 if (initialState == null)
                     return;
-                
+
                 _set = initialState;
-                
+
                 InvokeChange(new SyncHashSetChange<T>(SyncHashSetOperation.Cleared));
 
                 foreach (var value in _set)
@@ -167,13 +168,13 @@ namespace PurrNet
         public bool Add(T item)
         {
             ValidateAuthority();
-            
+
             if (!_set.Add(item))
                 return false;
-                
+
             var change = new SyncHashSetChange<T>(SyncHashSetOperation.Added, item);
             InvokeChange(change);
-            
+
             if (isSpawned)
             {
                 if (isServer)
@@ -181,7 +182,7 @@ namespace PurrNet
                 else
                     SendAddToServer(item);
             }
-            
+
             return true;
         }
 
@@ -196,13 +197,13 @@ namespace PurrNet
         public bool Remove(T item)
         {
             ValidateAuthority();
-            
+
             if (!_set.Remove(item))
                 return false;
-                
+
             var change = new SyncHashSetChange<T>(SyncHashSetOperation.Removed, item);
             InvokeChange(change);
-            
+
             if (isSpawned)
             {
                 if (isServer)
@@ -210,7 +211,7 @@ namespace PurrNet
                 else
                     SendRemoveToServer(item);
             }
-            
+
             return true;
         }
 
@@ -220,11 +221,11 @@ namespace PurrNet
         public void Clear()
         {
             ValidateAuthority();
-            
+
             _set.Clear();
             var change = new SyncHashSetChange<T>(SyncHashSetOperation.Cleared);
             InvokeChange(change);
-            
+
             if (isSpawned)
             {
                 if (isServer)
@@ -236,16 +237,26 @@ namespace PurrNet
 
         public bool Contains(T item) => _set.Contains(item);
         public void CopyTo(T[] array, int arrayIndex) => _set.CopyTo(array, arrayIndex);
-        public void ExceptWith(IEnumerable<T> other) => throw new NotSupportedException("Use individual Add/Remove operations instead");
-        public void IntersectWith(IEnumerable<T> other) => throw new NotSupportedException("Use individual Add/Remove operations instead");
+
+        public void ExceptWith(IEnumerable<T> other) =>
+            throw new NotSupportedException("Use individual Add/Remove operations instead");
+
+        public void IntersectWith(IEnumerable<T> other) =>
+            throw new NotSupportedException("Use individual Add/Remove operations instead");
+
         public bool IsProperSubsetOf(IEnumerable<T> other) => _set.IsProperSubsetOf(other);
         public bool IsProperSupersetOf(IEnumerable<T> other) => _set.IsProperSupersetOf(other);
         public bool IsSubsetOf(IEnumerable<T> other) => _set.IsSubsetOf(other);
         public bool IsSupersetOf(IEnumerable<T> other) => _set.IsSupersetOf(other);
         public bool Overlaps(IEnumerable<T> other) => _set.Overlaps(other);
         public bool SetEquals(IEnumerable<T> other) => _set.SetEquals(other);
-        public void SymmetricExceptWith(IEnumerable<T> other) => throw new NotSupportedException("Use individual Add/Remove operations instead");
-        public void UnionWith(IEnumerable<T> other) => throw new NotSupportedException("Use individual Add/Remove operations instead");
+
+        public void SymmetricExceptWith(IEnumerable<T> other) =>
+            throw new NotSupportedException("Use individual Add/Remove operations instead");
+
+        public void UnionWith(IEnumerable<T> other) =>
+            throw new NotSupportedException("Use individual Add/Remove operations instead");
+
         public IEnumerator<T> GetEnumerator() => _set.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -269,6 +280,7 @@ namespace PurrNet
         }
 
         #region RPCs
+
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
         private void SendAddToServer(T item)
         {
@@ -357,6 +369,7 @@ namespace PurrNet
                 InvokeChange(new SyncHashSetChange<T>(SyncHashSetOperation.Cleared));
             }
         }
+
         #endregion
     }
 }

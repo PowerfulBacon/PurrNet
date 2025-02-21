@@ -12,7 +12,6 @@
         (typeof(float),"float"),
         (typeof(double),"double"),
         (typeof(decimal),"decimal"),
-        
         (typeof(int?),"double?"),
         (typeof(long?),"double?"),
         (typeof(float?),"float?"),
@@ -24,7 +23,13 @@
     Func<Type, Type> ElementType = x => IsNullable(x) ? x.GetGenericArguments()[0] : x;
     Func<Type, string> TypeName = x => IsNullable(x) ? x.GetGenericArguments()[0].Name + "?" : x.Name;
     Func<Type, string> WithSuffix = x => IsNullable(x) ? ".GetValueOrDefault()" : "";
-    Func<Type, string> CalcResult = x => { var e = ElementType(x); return (e == typeof(int) || e == typeof(long)) ? "(double)sum / count" : (e == typeof(float)) ? "(float)(sum / count)" : "sum / count"; };
+    Func<Type, string> CalcResult = x =>
+    {
+        var e = ElementType(x);
+        return (e == typeof(int) || e == typeof(long))
+            ? "(double)sum / count"
+            : (e == typeof(float)) ? "(float)(sum / count)" : "sum / count";
+    };
 #>
 using System;
 using System.Threading;
@@ -34,7 +39,10 @@ namespace Cysharp.Threading.Tasks.Linq
 {
     public static partial class UniTaskAsyncEnumerable
     {
-<# foreach(var (t, ret) in types) { #>
+<#
+    foreach (var (t, ret) in types)
+    {
+#>
         public static UniTask<<#= ret #>> AverageAsync(this IUniTaskAsyncEnumerable<<#= TypeName(t) #>> source, CancellationToken cancellationToken = default)
         {
             Error.ThrowArgumentNullException(source, nameof(source));
@@ -66,12 +74,17 @@ namespace Cysharp.Threading.Tasks.Linq
             return Average.AverageAwaitWithCancellationAsync(source, selector, cancellationToken);
         }
 
-<# } #>
+<#
+    }
+#>
     }
 
     internal static class Average
     {
-<# foreach(var (t, ret) in types) { #>
+<#
+    foreach (var (t, ret) in types)
+    {
+#>
         public static async UniTask<<#= ret #>> AverageAsync(IUniTaskAsyncEnumerable<<#= TypeName(t) #>> source, CancellationToken cancellationToken)
         {
             long count = 0;
@@ -82,7 +95,10 @@ namespace Cysharp.Threading.Tasks.Linq
             {
                 while (await e.MoveNextAsync())
                 {
-<# if (IsNullable(t)) { #>
+<#
+        if (IsNullable(t))
+        {
+#>
                     var v = e.Current;
                     if (v.HasValue)
                     {
@@ -92,13 +108,19 @@ namespace Cysharp.Threading.Tasks.Linq
                             count++;
                         }
                     }
-<# } else { #>
+<#
+        }
+        else
+        {
+#>
                     checked
                     {
                         sum += e.Current;
                         count++;
                     }
-<# } #>
+<#
+        }
+#>
                 }
             }
             finally
@@ -122,7 +144,10 @@ namespace Cysharp.Threading.Tasks.Linq
             {
                 while (await e.MoveNextAsync())
                 {
-<# if (IsNullable(t)) { #>
+<#
+        if (IsNullable(t))
+        {
+#>
                     var v = selector(e.Current);
                     if (v.HasValue)
                     {
@@ -132,13 +157,19 @@ namespace Cysharp.Threading.Tasks.Linq
                             count++;
                         }
                     }
-<# } else { #>
+<#
+        }
+        else
+        {
+#>
                     checked
                     {
                         sum += selector(e.Current);
                         count++;
                     }
-<# } #>
+<#
+        }
+#>
                 }
             }
             finally
@@ -162,7 +193,10 @@ namespace Cysharp.Threading.Tasks.Linq
             {
                 while (await e.MoveNextAsync())
                 {
-<# if (IsNullable(t)) { #>
+<#
+        if (IsNullable(t))
+        {
+#>
                     var v = await selector(e.Current);
                     if (v.HasValue)
                     {
@@ -172,13 +206,19 @@ namespace Cysharp.Threading.Tasks.Linq
                             count++;
                         }
                     }
-<# } else { #>
+<#
+        }
+        else
+        {
+#>
                     checked
                     {
                         sum += await selector(e.Current);
                         count++;
                     }
-<# } #>
+<#
+        }
+#>
                 }
             }
             finally
@@ -202,7 +242,10 @@ namespace Cysharp.Threading.Tasks.Linq
             {
                 while (await e.MoveNextAsync())
                 {
-<# if (IsNullable(t)) { #>
+<#
+        if (IsNullable(t))
+        {
+#>
                     var v = await selector(e.Current, cancellationToken);
                     if (v.HasValue)
                     {
@@ -212,13 +255,19 @@ namespace Cysharp.Threading.Tasks.Linq
                             count++;
                         }
                     }
-<# } else { #>
+<#
+        }
+        else
+        {
+#>
                     checked
                     {
                         sum += await selector(e.Current, cancellationToken);
                         count++;
                     }
-<# } #>
+<#
+        }
+#>
                 }
             }
             finally
@@ -232,6 +281,8 @@ namespace Cysharp.Threading.Tasks.Linq
             return <#= CalcResult(t) #>;
         }
 
-<# } #>
+<#
+    }
+#>
     }
 }

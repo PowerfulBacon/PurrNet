@@ -14,7 +14,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class GeneratedReleaseNotes
     {
-        public GeneratedReleaseNotes() { }
+        public GeneratedReleaseNotes()
+        {
+        }
 
         public GeneratedReleaseNotes(string name, string body)
         {
@@ -42,6 +44,5 @@ namespace Octokit
         {
             get { return string.Format(CultureInfo.InvariantCulture, "Name: {0} Body: {1}", Name, Body); }
         }
-
     }
 }

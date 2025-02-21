@@ -12,7 +12,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class ApiError
     {
-        public ApiError() { }
+        public ApiError()
+        {
+        }
 
         public ApiError(string message)
         {
@@ -43,10 +45,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Message: {0}", Message);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Message: {0}", Message); }
         }
     }
 }

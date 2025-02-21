@@ -21,12 +21,14 @@ namespace Octokit
 
         /// <inheritdoc/>
         [ManualRoute("GET", "/repos/{owner}/{repository}/actions/artifacts")]
-        public Task<ListArtifactsResponse> ListArtifacts(string owner, string repository, ListArtifactsRequest listArtifactsRequest = null)
+        public Task<ListArtifactsResponse> ListArtifacts(string owner, string repository,
+            ListArtifactsRequest listArtifactsRequest = null)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(repository, nameof(repository));
-            
-            return ApiConnection.Get<ListArtifactsResponse>(ApiUrls.ListArtifacts(owner, repository), listArtifactsRequest?.ToParametersDictionary());
+
+            return ApiConnection.Get<ListArtifactsResponse>(ApiUrls.ListArtifacts(owner, repository),
+                listArtifactsRequest?.ToParametersDictionary());
         }
 
         /// <inheritdoc/>
@@ -36,7 +38,7 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(repository, nameof(repository));
             Ensure.ArgumentNotNullOrDefault(artifactId, nameof(artifactId));
-            
+
             return ApiConnection.Get<Artifact>(ApiUrls.Artifact(owner, repository, artifactId), null);
         }
 
@@ -59,19 +61,22 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(repository, nameof(repository));
             Ensure.ArgumentNotNullOrDefault(artifactId, nameof(artifactId));
             Ensure.ArgumentNotNullOrEmptyString(repository, nameof(archiveFormat));
-            
-            return ApiConnection.GetRawStream(ApiUrls.DownloadArtifact(owner, repository, artifactId, archiveFormat), null);
+
+            return ApiConnection.GetRawStream(ApiUrls.DownloadArtifact(owner, repository, artifactId, archiveFormat),
+                null);
         }
 
         /// <inheritdoc/>
         [ManualRoute("GET", "/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts")]
-        public Task<ListArtifactsResponse> ListWorkflowArtifacts(string owner, string repository, long runId, ListArtifactsRequest listArtifactsRequest = null)
+        public Task<ListArtifactsResponse> ListWorkflowArtifacts(string owner, string repository, long runId,
+            ListArtifactsRequest listArtifactsRequest = null)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, nameof(owner));
             Ensure.ArgumentNotNullOrEmptyString(repository, nameof(repository));
             Ensure.ArgumentNotNullOrDefault(runId, nameof(runId));
 
-            return ApiConnection.Get<ListArtifactsResponse>(ApiUrls.ListWorkflowArtifacts(owner, repository, runId), listArtifactsRequest?.ToParametersDictionary());
+            return ApiConnection.Get<ListArtifactsResponse>(ApiUrls.ListWorkflowArtifacts(owner, repository, runId),
+                listArtifactsRequest?.ToParametersDictionary());
         }
     }
 }

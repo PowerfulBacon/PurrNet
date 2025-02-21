@@ -11,12 +11,14 @@ namespace PurrNet.Utils
     {
         private const uint FNV_offset_basis32 = 2166136261;
         private const uint FNV_prime32 = 16777619;
-        
+
         static readonly Dictionary<Type, uint> _hashes = new Dictionary<Type, uint>();
         static readonly Dictionary<uint, Type> _decoder = new Dictionary<uint, Type>();
-        
+
         static uint _hashCounter;
-        
+
+        public static uint hashCounter => _hashCounter;
+
         public static uint ActualHash(string txt)
         {
             unchecked
@@ -32,61 +34,63 @@ namespace PurrNet.Utils
                 return hash;
             }
         }
-        
+
         public static Type ResolveType(uint hash)
         {
             if (_decoder.TryGetValue(hash, out var type))
                 return type;
-            
+
             throw new InvalidOperationException(
                 PurrLogger.FormatMessage($"Type with hash '{hash}' not found.")
             );
         }
-        
+
         public static bool TryGetType(uint hash, out Type type)
         {
             return _decoder.TryGetValue(hash, out type);
         }
-        
+
         public static uint Load(Type type, uint hash)
         {
             _hashes[type] = hash;
             _decoder[hash] = type;
             return hash;
         }
-        
+
         [UsedImplicitly]
         public static uint PrepareType(Type type)
         {
             if (_hashes.TryGetValue(type, out var hash))
                 return hash;
-            
+
             hash = _hashCounter++;
             _hashes[type] = hash;
             _decoder[hash] = type;
-            
+
             return hash;
         }
-        
+
         [UsedByIL]
         public static void PrepareType<T>() => PrepareType(typeof(T));
 
         public static uint GetStableHashU32(Type type)
         {
-            return _hashes.TryGetValue(type, out var hash) ? hash : throw new InvalidOperationException(
-                PurrLogger.FormatMessage($"Type '{type.FullName}' is not registered.")
-            );
+            return _hashes.TryGetValue(type, out var hash)
+                ? hash
+                : throw new InvalidOperationException(
+                    PurrLogger.FormatMessage($"Type '{type.FullName}' is not registered.")
+                );
         }
-        
+
         public static uint GetStableHashU32<T>()
         {
             return GetStableHashU32(typeof(T));
         }
-        
+
         public static string GetAllHashesAsText()
         {
             var builder = new StringBuilder();
-            
+
             foreach (var pair in _hashes)
             {
                 builder.Append(pair.Key.AssemblyQualifiedName);
@@ -94,7 +98,7 @@ namespace PurrNet.Utils
                 builder.Append(pair.Value);
                 builder.Append('\n');
             }
-            
+
             return builder.ToString();
         }
 

@@ -20,7 +20,7 @@ namespace Octokit
         public static bool IsSuccessStatusCode(this IResponse response)
         {
             Ensure.ArgumentNotNull(response, nameof(response));
-            return (int) response.StatusCode >= 200 && (int) response.StatusCode <= 299;
+            return (int)response.StatusCode >= 200 && (int)response.StatusCode <= 299;
         }
     }
 }

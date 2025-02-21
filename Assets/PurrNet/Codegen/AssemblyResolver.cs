@@ -9,10 +9,13 @@ using Unity.CompilationPipeline.Common.ILPostProcessing;
 
 namespace PurrNet.Codegen
 {
-    internal class AssemblyResolver : IAssemblyResolver
+    public class AssemblyResolver : IAssemblyResolver
     {
         private readonly string[] m_AssemblyReferences;
-        private readonly Dictionary<string, AssemblyDefinition> m_AssemblyCache = new Dictionary<string, AssemblyDefinition>();
+
+        private readonly Dictionary<string, AssemblyDefinition> m_AssemblyCache =
+            new Dictionary<string, AssemblyDefinition>();
+
         private readonly ICompiledAssembly m_CompiledAssembly;
         private AssemblyDefinition m_SelfAssembly;
 
@@ -22,9 +25,12 @@ namespace PurrNet.Codegen
             m_AssemblyReferences = compiledAssembly.References;
         }
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+        }
 
-        public AssemblyDefinition Resolve(AssemblyNameReference name) => Resolve(name, new ReaderParameters(ReadingMode.Deferred));
+        public AssemblyDefinition Resolve(AssemblyNameReference name) =>
+            Resolve(name, new ReaderParameters(ReadingMode.Deferred));
 
         public AssemblyDefinition Resolve(AssemblyNameReference name, ReaderParameters parameters)
         {

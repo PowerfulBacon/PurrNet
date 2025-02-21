@@ -10,9 +10,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class GistHistory
     {
-        public GistHistory() { }
+        public GistHistory()
+        {
+        }
 
-        public GistHistory(string url, string version, User user, GistChangeStatus changeStatus, DateTimeOffset committedAt)
+        public GistHistory(string url, string version, User user, GistChangeStatus changeStatus,
+            DateTimeOffset committedAt)
         {
             Url = url;
             Version = version;
@@ -48,7 +51,12 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "User: {0}, Url: {1}, Version: {2}, ChangeStatus: {3}", User.DebuggerDisplay, Url, Version, ChangeStatus); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture,
+                    "User: {0}, Url: {1}, Version: {2}, ChangeStatus: {3}", User.DebuggerDisplay, Url, Version,
+                    ChangeStatus);
+            }
         }
     }
 }

@@ -11,7 +11,8 @@ namespace Octokit
         {
         }
 
-        public CheckRunAnnotation(string path, string blobHref, int startLine, int endLine, int? startColumn, int? endColumn, CheckAnnotationLevel? annotationLevel, string message, string title, string rawDetails)
+        public CheckRunAnnotation(string path, string blobHref, int startLine, int endLine, int? startColumn,
+            int? endColumn, CheckAnnotationLevel? annotationLevel, string message, string title, string rawDetails)
         {
             Path = path;
             BlobHref = blobHref;
@@ -31,8 +32,11 @@ namespace Octokit
 #pragma warning restore CS0618 // Type or member is obsolete
         }
 
-        [Obsolete("This ctor taking Filename, BlobHref and WarningLevel is deprecated but may still be required on GitHub Enterprise 2.14")]
-        public CheckRunAnnotation(string filename, string path, string blobHref, int startLine, int endLine, int? startColumn, int? endColumn, CheckWarningLevel? warningLevel, CheckAnnotationLevel? annotationLevel, string message, string title, string rawDetails)
+        [Obsolete(
+            "This ctor taking Filename, BlobHref and WarningLevel is deprecated but may still be required on GitHub Enterprise 2.14")]
+        public CheckRunAnnotation(string filename, string path, string blobHref, int startLine, int endLine,
+            int? startColumn, int? endColumn, CheckWarningLevel? warningLevel, CheckAnnotationLevel? annotationLevel,
+            string message, string title, string rawDetails)
         {
             Filename = filename;
             Path = path;
@@ -111,7 +115,9 @@ namespace Octokit
         public string RawDetails { get; private set; }
 
 #pragma warning disable CS0618 // Type or member is obsolete
-        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "Path: {0}, StartLine: {1}, WarningLevel: {2}", Path ?? Filename, StartLine, AnnotationLevel?.DebuggerDisplay ?? WarningLevel?.DebuggerDisplay);
+        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture,
+            "Path: {0}, StartLine: {1}, WarningLevel: {2}", Path ?? Filename, StartLine,
+            AnnotationLevel?.DebuggerDisplay ?? WarningLevel?.DebuggerDisplay);
 #pragma warning restore CS0618 // Type or member is obsolete
     }
 }

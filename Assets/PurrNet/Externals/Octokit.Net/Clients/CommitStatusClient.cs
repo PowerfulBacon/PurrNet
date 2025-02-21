@@ -152,7 +152,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(reference, nameof(reference));
             Ensure.ArgumentNotNull(newCommitStatus, nameof(newCommitStatus));
 
-            return ApiConnection.Post<CommitStatus>(ApiUrls.CreateCommitStatus(owner, name, reference), newCommitStatus);
+            return ApiConnection.Post<CommitStatus>(ApiUrls.CreateCommitStatus(owner, name, reference),
+                newCommitStatus);
         }
 
         /// <summary>
@@ -170,7 +171,8 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(reference, nameof(reference));
             Ensure.ArgumentNotNull(newCommitStatus, nameof(newCommitStatus));
 
-            return ApiConnection.Post<CommitStatus>(ApiUrls.CreateCommitStatus(repositoryId, reference), newCommitStatus);
+            return ApiConnection.Post<CommitStatus>(ApiUrls.CreateCommitStatus(repositoryId, reference),
+                newCommitStatus);
         }
     }
 }

@@ -203,8 +203,9 @@ namespace Octokit
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns>A <see cref="IReadOnlyPagedCollection{Repository}"/> of <see cref="Repository"/>.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate",
-             Justification = "Makes a network request")]
-        [ExcludeFromPaginationApiOptionsConventionTest("This API call uses the PublicRepositoryRequest.Since parameter for pagination")]
+            Justification = "Makes a network request")]
+        [ExcludeFromPaginationApiOptionsConventionTest(
+            "This API call uses the PublicRepositoryRequest.Since parameter for pagination")]
         Task<IReadOnlyList<Repository>> GetAllPublic();
 
         /// <summary>
@@ -218,7 +219,8 @@ namespace Octokit
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns>A <see cref="IReadOnlyPagedCollection{Repository}"/> of <see cref="Repository"/>.</returns>
-        [ExcludeFromPaginationApiOptionsConventionTest("This API call uses the PublicRepositoryRequest.Since parameter for pagination")]
+        [ExcludeFromPaginationApiOptionsConventionTest(
+            "This API call uses the PublicRepositoryRequest.Since parameter for pagination")]
         Task<IReadOnlyList<Repository>> GetAllPublic(PublicRepositoryRequest request);
 
         /// <summary>
@@ -232,7 +234,7 @@ namespace Octokit
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns>A <see cref="IReadOnlyPagedCollection{Repository}"/> of <see cref="Repository"/>.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate",
-             Justification = "Makes a network request")]
+            Justification = "Makes a network request")]
         Task<IReadOnlyList<Repository>> GetAllForCurrent();
 
         /// <summary>
@@ -365,7 +367,7 @@ namespace Octokit
         /// <remarks>
         /// See the <a href="https://docs.github.com/en/rest/deployments/environments/">Environments API documentation</a> for more details
         /// </remarks>
-        IRepositoryDeployEnvironmentsClient Environment { get;  }
+        IRepositoryDeployEnvironmentsClient Environment { get; }
 
         /// <summary>
         /// Client for GitHub's Repository Statistics API.
@@ -479,7 +481,8 @@ namespace Octokit
         /// <param name="includeAnonymous">True if anonymous contributors should be included in result; Otherwise false</param>
         /// <param name="options">Options for changing the API response</param>
         /// <returns>All contributors of the repository.</returns>
-        Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(string owner, string name, bool includeAnonymous, ApiOptions options);
+        Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(string owner, string name, bool includeAnonymous,
+            ApiOptions options);
 
         /// <summary>
         /// Gets all contributors for the specified repository. With the option to include anonymous contributors.
@@ -491,7 +494,8 @@ namespace Octokit
         /// <param name="includeAnonymous">True if anonymous contributors should be included in result; Otherwise false</param>
         /// <param name="options">Options for changing the API response</param>
         /// <returns>All contributors of the repository.</returns>
-        Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(long repositoryId, bool includeAnonymous, ApiOptions options);
+        Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(long repositoryId, bool includeAnonymous,
+            ApiOptions options);
 
         /// <summary>
         /// Gets all languages for the specified repository.

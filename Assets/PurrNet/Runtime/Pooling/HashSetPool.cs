@@ -12,8 +12,10 @@ namespace PurrNet.Pooling
 
         static void Reset(HashSet<T> list) => list.Clear();
 
-        public HashSetPool() : base(Factory, Reset) { }
-        
+        public HashSetPool() : base(Factory, Reset)
+        {
+        }
+
         public static int GetCount() => _instance.count;
 
         public static HashSet<T> Instantiate() => _instance.Allocate();

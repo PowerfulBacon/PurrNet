@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class WorkflowReference
     {
-        public WorkflowReference() { }
+        public WorkflowReference()
+        {
+        }
 
         public WorkflowReference(string path, string sha, string @ref)
         {
@@ -32,10 +34,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Path: {0} SHA: {1}", Path, Sha);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Path: {0} SHA: {1}", Path, Sha); }
         }
     }
 }

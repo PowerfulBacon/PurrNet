@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class AuditLogEvent
     {
-        public AuditLogEvent() { }
+        public AuditLogEvent()
+        {
+        }
 
-        public AuditLogEvent(string action, bool? active, bool? activeWas, string actor, long? actorId, string actorIp, object actorLocation,
+        public AuditLogEvent(string action, bool? active, bool? activeWas, string actor, long? actorId, string actorIp,
+            object actorLocation,
             string blockedUser, string business, long? businessId,
             object config, object configWas, string contentType, long createdAt,
             object data, string deployKeyFingerprint, string documentId,
@@ -19,10 +22,12 @@ namespace Octokit
             bool? limitedAvailability,
             string message,
             string name,
-            string oldUser, string opensshPublicKey, string operationType, IReadOnlyList<string> org, IReadOnlyList<long> orgId,
-            string previousVisibility, bool? publicRepo, long? pullRequestId, string pullRequestTitle, string pullRequestUrl,
+            string oldUser, string opensshPublicKey, string operationType, IReadOnlyList<string> org,
+            IReadOnlyList<long> orgId,
+            string previousVisibility, bool? publicRepo, long? pullRequestId, string pullRequestTitle,
+            string pullRequestUrl,
             bool? readOnly, string repo, long? repoId, string repository, bool? repositoryPublic,
-            string targetLogin, string team, long? transportProtocol, string transportProtocolName, long timestamp, 
+            string targetLogin, string team, long? transportProtocol, string transportProtocolName, long timestamp,
             string user, string userAgent, long? userId,
             string visibility)
         {
@@ -129,17 +134,15 @@ namespace Octokit
         public string User { get; private set; }
         public string UserAgent { get; private set; }
         public long? UserId { get; private set; }
-        public string Visibility { get; private set; } 
+        public string Visibility { get; private set; }
 
         internal string DebuggerDisplay
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Action: {0}, Actor: {1}, DocumentID: {2}", Action, Actor, DocumentId);
+                return string.Format(CultureInfo.InvariantCulture, "Action: {0}, Actor: {1}, DocumentID: {2}", Action,
+                    Actor, DocumentId);
             }
         }
     }
 }
-
-
-

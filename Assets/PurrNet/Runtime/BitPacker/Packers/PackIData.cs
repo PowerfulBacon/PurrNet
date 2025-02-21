@@ -19,7 +19,7 @@ namespace PurrNet.Packing
         {
             uint hash = default;
             packer.Read(ref hash);
-            
+
             var type = Hasher.ResolveType(hash);
             object obj = value;
             Packer.Read(packer, type, ref obj);
@@ -28,9 +28,11 @@ namespace PurrNet.Packing
             {
                 value = packed;
             }
-            else throw new InvalidCastException($"Failed to cast object of type '{obj.GetType()}' to '{typeof(IPacked)}'.");
+            else
+                throw new InvalidCastException(
+                    $"Failed to cast object of type '{obj.GetType()}' to '{typeof(IPacked)}'.");
         }
-        
+
         [UsedByIL]
         public static void Write(this BitPacker packer, IPackedSimple value)
         {
@@ -44,18 +46,19 @@ namespace PurrNet.Packing
         {
             uint hash = default;
             packer.Read(ref hash);
-            
+
             var type = Hasher.ResolveType(hash);
-            
+
             object obj = value;
             Packer.Read(packer, type, ref obj);
-            
+
             if (obj is IPackedSimple packed)
             {
                 value = packed;
             }
-            else throw new InvalidCastException($"Failed to cast object of type '{obj.GetType()}' to '{typeof(IPackedSimple)}'.");
-
+            else
+                throw new InvalidCastException(
+                    $"Failed to cast object of type '{obj.GetType()}' to '{typeof(IPackedSimple)}'.");
         }
     }
 }

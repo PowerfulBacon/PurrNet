@@ -14,13 +14,16 @@ namespace Octokit
             Count = count;
         }
 
-        public MachinesCollection() { }
+        public MachinesCollection()
+        {
+        }
 
-        [Parameter(Key = "total_count")]
-        public int Count { get; private set; }
+        [Parameter(Key = "total_count")] public int Count { get; private set; }
+
         [Parameter(Key = "machines")]
         public IReadOnlyList<Machine> Machines { get; private set; } = new List<Machine>();
 
-        internal string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "MachinesCollection: Count: {0}", Count);
+        internal string DebuggerDisplay =>
+            string.Format(CultureInfo.CurrentCulture, "MachinesCollection: Count: {0}", Count);
     }
 }

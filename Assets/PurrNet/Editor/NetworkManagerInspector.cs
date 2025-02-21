@@ -21,7 +21,8 @@ namespace PurrNet.Editor
         private SerializedProperty _transport;
         private SerializedProperty _tickRate;
         private SerializedProperty _visibilityRules;
-        
+        private SerializedProperty _patchLingeringProcessBug;
+
         private bool _showStatusFoldout = true;
         private bool _showPlayersFoldout;
         private readonly Dictionary<object, bool> _playerFoldouts = new Dictionary<object, bool>();
@@ -33,7 +34,7 @@ namespace PurrNet.Editor
         private int _lastPlayerCount;
         private float _nextRepaintTime;
         private const float REPAINT_INTERVAL = 0.5f; // Repaint every 500ms
-        
+
         private void OnEnable()
         {
             _scriptProp = serializedObject.FindProperty("m_Script");
@@ -47,10 +48,11 @@ namespace PurrNet.Editor
             _transport = serializedObject.FindProperty("_transport");
             _tickRate = serializedObject.FindProperty("_tickRate");
             _visibilityRules = serializedObject.FindProperty("_visibilityRules");
+            _patchLingeringProcessBug = serializedObject.FindProperty("_patchLingeringProcessBug");
             _authenticator = serializedObject.FindProperty("_authenticator");
-            
+
             _networkManager = (NetworkManager)target;
-            
+
             // Only update when playing
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
         }
@@ -77,7 +79,7 @@ namespace PurrNet.Editor
             if (_networkManager == null) return;
 
             bool needsRepaint = false;
-            
+
             if (_lastServerState != _networkManager.serverState)
             {
                 _lastServerState = _networkManager.serverState;
@@ -113,20 +115,20 @@ namespace PurrNet.Editor
                 DrawInitialSetup();
                 return;
             }
-                
+
             serializedObject.Update();
-            
+
             DrawHeaderSection();
-            
+
             if (Application.isPlaying)
                 RenderStartStopButtons();
             DrawConfigurationSection();
 
             DrawRuntimeSettings();
-            
+
             if (_showStatusFoldout)
                 DrawStatusFoldout();
-            
+
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -145,16 +147,21 @@ namespace PurrNet.Editor
         {
             bool willStartServer = _networkManager.shouldAutoStartServer;
             bool willStartClient = _networkManager.shouldAutoStartClient;
-            string status = willStartClient && willStartServer ? "HOST" : willStartClient ? "CLIENT" : willStartServer ? "SERVER" : "NONE";
+            string status = willStartClient && willStartServer ? "HOST" :
+                willStartClient ? "CLIENT" :
+                willStartServer ? "SERVER" : "NONE";
 
             GUI.enabled = false;
             EditorGUILayout.PropertyField(_scriptProp, true);
             GUI.enabled = true;
-            
-            GUI.color = willStartClient && willStartServer ? Color.green : willStartClient ? Color.blue : willStartServer ? Color.red : Color.white;
+
+            GUI.color = willStartClient && willStartServer ? Color.green :
+                willStartClient ? Color.blue :
+                willStartServer ? Color.red : Color.white;
             GUILayout.BeginVertical("box");
             GUI.color = Color.white;
-            EditorGUILayout.LabelField($"During play mode this instance will start as a <b>{status}</b>", new GUIStyle(GUI.skin.label) {richText = true});
+            EditorGUILayout.LabelField($"During play mode this instance will start as a <b>{status}</b>",
+                new GUIStyle(GUI.skin.label) { richText = true });
             GUILayout.EndVertical();
         }
 
@@ -166,7 +173,7 @@ namespace PurrNet.Editor
 
             bool isRunning = _networkManager && (_networkManager.isClient || _networkManager.isServer);
             GUI.enabled = !isRunning;
-            
+
             EditorGUILayout.PropertyField(_dontDestroyOnLoad);
             EditorGUILayout.PropertyField(_transport);
             DrawNetworkPrefabs();
@@ -179,25 +186,27 @@ namespace PurrNet.Editor
 
         private void DrawRuntimeSettings()
         {
-            bool isDisconnected = _networkManager.serverState == ConnectionState.Disconnected && 
-                                _networkManager.clientState == ConnectionState.Disconnected;
-            
+            bool isDisconnected = _networkManager.serverState == ConnectionState.Disconnected &&
+                                  _networkManager.clientState == ConnectionState.Disconnected;
+
             GUI.enabled = isDisconnected;
             RenderTickSlider();
             EditorGUILayout.PropertyField(_stopPlayingOnDisconnect);
+            EditorGUILayout.PropertyField(_patchLingeringProcessBug);
             GUI.enabled = true;
-            
-            _showStatusFoldout = EditorGUILayout.Foldout(_showStatusFoldout, "Status");
+
+            if (Application.isPlaying)
+                _showStatusFoldout = EditorGUILayout.Foldout(_showStatusFoldout, "Status");
         }
 
         private void DrawNetworkPrefabs()
         {
             EditorGUILayout.BeginHorizontal();
             Color originalBgColor = GUI.backgroundColor;
-            
+
             if (_networkPrefabs.objectReferenceValue == null)
                 GUI.backgroundColor = Color.yellow;
-                
+
             EditorGUILayout.PropertyField(_networkPrefabs);
             GUI.backgroundColor = originalBgColor;
 
@@ -206,7 +215,7 @@ namespace PurrNet.Editor
                 if (GUILayout.Button("New", GUILayout.Width(50)))
                     CreateNewNetworkPrefabs();
             }
-            
+
             EditorGUILayout.EndHorizontal();
         }
 
@@ -253,6 +262,7 @@ namespace PurrNet.Editor
                 {
                     DrawPlayerDetails(playerId);
                 }
+
                 EditorGUI.indentLevel--;
             }
         }
@@ -260,7 +270,8 @@ namespace PurrNet.Editor
         private void DrawPlayerDetails(PlayerID playerId)
         {
             EditorGUI.indentLevel++;
-            EditorGUILayout.LabelField("Owned Objects:", _networkManager.GetAllPlayerOwnedIds(playerId, _networkManager.isServer).Count.ToString());
+            EditorGUILayout.LabelField("Owned Objects:",
+                _networkManager.GetAllPlayerOwnedIds(playerId, _networkManager.isServer).Count.ToString());
 
             if (!_networkManager.isServer)
             {
@@ -372,11 +383,11 @@ namespace PurrNet.Editor
             string folderPath = "Assets";
             Object prefabsFolder = null;
             string[] prefabsFolders = AssetDatabase.FindAssets("t:Folder Prefabs");
-    
+
             foreach (string guid in prefabsFolders)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
-                if ((path.ToLower().EndsWith("/prefabs") || path.ToLower().EndsWith("/_prefabs")) && 
+                if ((path.ToLower().EndsWith("/prefabs") || path.ToLower().EndsWith("/_prefabs")) &&
                     path.Split('/').Length == 2)
                 {
                     folderPath = path;
@@ -386,21 +397,21 @@ namespace PurrNet.Editor
             }
 
             var networkPrefabs = ScriptableObject.CreateInstance<NetworkPrefabs>();
-    
+
             if (prefabsFolder != null)
             {
                 networkPrefabs.folder = prefabsFolder;
             }
-    
+
             string assetPath = $"{folderPath}/NetworkPrefabs.asset";
             assetPath = AssetDatabase.GenerateUniqueAssetPath(assetPath);
-    
+
             AssetDatabase.CreateAsset(networkPrefabs, assetPath);
             AssetDatabase.SaveAssets();
-    
+
             _networkPrefabs.objectReferenceValue = networkPrefabs;
             serializedObject.ApplyModifiedProperties();
-    
+
             EditorGUIUtility.PingObject(networkPrefabs);
         }
     }

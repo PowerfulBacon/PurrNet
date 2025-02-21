@@ -19,26 +19,22 @@ namespace Octokit.Models.Request.Enterprise
             SortDirection = AuditLogSortDirection.Descending;
         }
 
-        [Parameter(Key = "after")]
-        public string After { get; set; }
+        [Parameter(Key = "after")] public string After { get; set; }
 
-        [Parameter(Key = "before")]
-        public string Before { get; set; }
+        [Parameter(Key = "before")] public string Before { get; set; }
 
-        [Parameter(Key = "include")]
-        public IncludeFilter Filter { get; set; }
+        [Parameter(Key = "include")] public IncludeFilter Filter { get; set; }
 
-        [Parameter(Key = "phrase")]
-        public string Phrase { get; set; }
+        [Parameter(Key = "phrase")] public string Phrase { get; set; }
 
-        [Parameter(Key = "order")]
-        public AuditLogSortDirection SortDirection { get; set; }
+        [Parameter(Key = "order")] public AuditLogSortDirection SortDirection { get; set; }
 
         internal string DebuggerDisplay
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "Filter: {0} SortDirection: {1}", Filter, SortDirection);
+                return string.Format(CultureInfo.InvariantCulture, "Filter: {0} SortDirection: {1}", Filter,
+                    SortDirection);
             }
         }
     }
@@ -52,20 +48,17 @@ namespace Octokit.Models.Request.Enterprise
         /// <summary>
         /// Web (non-git) events. (Default)
         /// </summary>
-        [Parameter(Value = "web")]
-        Web,
+        [Parameter(Value = "web")] Web,
 
         /// <summary>
         /// Git events.
         /// </summary>
-        [Parameter(Value = "git")]
-        Git,
+        [Parameter(Value = "git")] Git,
 
         /// <summary>
         /// Both web and Git events.
         /// </summary>
-        [Parameter(Value = "all")]
-        All
+        [Parameter(Value = "all")] All
     }
 
     /// <summary>
@@ -76,13 +69,11 @@ namespace Octokit.Models.Request.Enterprise
         /// <summary>
         /// Sort ascending
         /// </summary>
-        [Parameter(Value = "asc")]
-        Ascending,
+        [Parameter(Value = "asc")] Ascending,
 
         /// <summary>
         /// Sort descending
         /// </summary>
-        [Parameter(Value = "desc")]
-        Descending
+        [Parameter(Value = "desc")] Descending
     }
 }

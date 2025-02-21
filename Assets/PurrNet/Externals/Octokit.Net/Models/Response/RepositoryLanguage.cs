@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class RepositoryLanguage
     {
-        public RepositoryLanguage() { }
+        public RepositoryLanguage()
+        {
+        }
 
         public RepositoryLanguage(string name, long numberOfBytes)
         {

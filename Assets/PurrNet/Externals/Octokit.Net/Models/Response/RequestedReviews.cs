@@ -22,6 +22,7 @@ namespace Octokit
             Users = users;
             Teams = teams;
         }
+
         public IReadOnlyList<User> Users { get; private set; }
         public IReadOnlyList<Team> Teams { get; private set; }
 
@@ -30,10 +31,10 @@ namespace Octokit
             get
             {
                 return string.Format(
-              CultureInfo.InvariantCulture,
-              "Users: {0}, Teams: {1}",
-              string.Join(", ", Users.Select(u => u.Login)),
-              string.Join(", ", Teams.Select(t => t.Slug)));
+                    CultureInfo.InvariantCulture,
+                    "Users: {0}, Teams: {1}",
+                    string.Join(", ", Users.Select(u => u.Login)),
+                    string.Join(", ", Teams.Select(t => t.Slug)));
             }
         }
     }

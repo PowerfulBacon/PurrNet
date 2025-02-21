@@ -10,16 +10,18 @@ namespace PurrNet.Modules
         /// Nothing is stored once the connection stops
         /// </summary>
         LiveWithConnection,
+
         /// <summary>
         /// Nothing is stored once the game/process stops
         /// </summary>
         LiveWithProcess,
+
         /// <summary>
         /// Cookies are stored in the player prefs of your system
         /// </summary>
         StorePersistently
     }
-    
+
     [System.Serializable]
     internal struct CookiePair
     {
@@ -32,7 +34,7 @@ namespace PurrNet.Modules
     {
         public List<CookiePair> cookies;
     }
-    
+
     public class CookiesModule : INetworkModule
     {
         private const string SAVE_KEY = "rabsi_cookies";
@@ -40,13 +42,13 @@ namespace PurrNet.Modules
         readonly List<CookiePair> _cookies = new List<CookiePair>();
         readonly CookieScope _scope;
         readonly bool _asServer;
-        
+
         public CookiesModule(CookieScope scope, bool asServer)
         {
             _scope = scope;
             _asServer = asServer;
         }
-        
+
         public void Enable(bool asServer)
         {
             Load(asServer);
@@ -56,7 +58,7 @@ namespace PurrNet.Modules
         {
             Save(asServer);
         }
-        
+
         public string GetOrSet(string key, string defaultValue)
         {
             var value = Get(key);
@@ -68,7 +70,7 @@ namespace PurrNet.Modules
 
             return value;
         }
-        
+
         /// <summary>
         /// Unset a cookie by key.
         /// </summary>
@@ -86,7 +88,7 @@ namespace PurrNet.Modules
 
             return false;
         }
-        
+
         /// <summary>
         /// Set a cookie by key.
         /// </summary>
@@ -96,16 +98,16 @@ namespace PurrNet.Modules
             {
                 if (_cookies[i].key == key)
                 {
-                    _cookies[i] = new CookiePair {key = key, value = value};
+                    _cookies[i] = new CookiePair { key = key, value = value };
                     Save(asServer);
                     return;
                 }
             }
-            
-            _cookies.Add(new CookiePair {key = key, value = value});
+
+            _cookies.Add(new CookiePair { key = key, value = value });
             Save(asServer);
         }
-        
+
         /// <summary>
         /// Get a cookie by key.
         /// </summary>
@@ -120,13 +122,13 @@ namespace PurrNet.Modules
 
             return null;
         }
-        
+
         public void Clear(bool asServer)
         {
             _cookies.Clear();
             Save(asServer);
         }
-        
+
         void Load(bool asServer)
         {
             try
@@ -147,7 +149,7 @@ namespace PurrNet.Modules
                 Save(asServer);
             }
         }
-        
+
         string SaveData()
         {
             return JsonUtility.ToJson(new CookieData

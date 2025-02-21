@@ -10,26 +10,22 @@ namespace Octokit
         /// <summary>
         ///  The site has yet to be built
         /// </summary>
-        [Parameter(Value = "null")]
-        Null,
+        [Parameter(Value = "null")] Null,
 
         /// <summary>
         /// The build has been requested but not yet begun
         /// </summary>
-        [Parameter(Value = "queued")]
-        Queued,
+        [Parameter(Value = "queued")] Queued,
 
         /// <summary>
         /// The build is in progress
         /// </summary>
-        [Parameter(Value = "building")]
-        Building,
+        [Parameter(Value = "building")] Building,
 
         /// <summary>
         /// The site has been built
         /// </summary>
-        [Parameter(Value = "built")]
-        Built,
+        [Parameter(Value = "built")] Built,
 
         /// <summary>
         /// An error occurred during the build
@@ -45,7 +41,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Page
     {
-        public Page() { }
+        public Page()
+        {
+        }
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "cname")]
         public Page(string url, string htmlUrl, PagesBuildStatus status, string cname, bool custom404)
@@ -85,7 +83,10 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "CName: {0}, Status: {1}", CName, Status.ToString()); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "CName: {0}, Status: {1}", CName, Status.ToString());
+            }
         }
     }
 }

@@ -18,18 +18,21 @@ namespace LiteNetLib.Utils
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _data.Length;
         }
+
         public byte[] Data
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _data;
         }
+
         public int Length
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _position;
         }
 
-        public static readonly ThreadLocal<UTF8Encoding> uTF8Encoding = new ThreadLocal<UTF8Encoding>(() => new UTF8Encoding(false, true));
+        public static readonly ThreadLocal<UTF8Encoding> uTF8Encoding =
+            new ThreadLocal<UTF8Encoding>(() => new UTF8Encoding(false, true));
 
         public NetDataWriter() : this(true, InitialSize)
         {
@@ -58,7 +61,8 @@ namespace LiteNetLib.Utils
                 netDataWriter.Put(bytes);
                 return netDataWriter;
             }
-            return new NetDataWriter(true, 0) {_data = bytes, _position = bytes.Length};
+
+            return new NetDataWriter(true, 0) { _data = bytes, _position = bytes.Length };
         }
 
         /// <summary>
@@ -277,7 +281,7 @@ namespace LiteNetLib.Utils
 
         public void PutArray(Array arr, int sz)
         {
-            ushort length = arr == null ? (ushort) 0 : (ushort)arr.Length;
+            ushort length = arr == null ? (ushort)0 : (ushort)arr.Length;
             sz *= length;
             if (_autoResize)
                 ResizeIfNeed(_position + sz + 2);
@@ -369,12 +373,14 @@ namespace LiteNetLib.Utils
                 Put(0);
                 return;
             }
+
             int size = uTF8Encoding.Value.GetByteCount(value);
             if (size == 0)
             {
                 Put(0);
                 return;
             }
+
             Put(size);
             if (_autoResize)
                 ResizeIfNeed(_position + size);
@@ -408,6 +414,7 @@ namespace LiteNetLib.Utils
                 Put((ushort)0);
                 return;
             }
+
             Put(checked((ushort)(size + 1)));
             _position += size;
         }

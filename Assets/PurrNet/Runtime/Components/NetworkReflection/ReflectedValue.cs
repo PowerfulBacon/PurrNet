@@ -10,9 +10,9 @@ namespace PurrNet
         readonly Func<object> _getter;
         public readonly Type valueType;
         public readonly string name;
-        
+
         public object lastValue { get; private set; }
-        
+
         public ReflectedValue(UnityEngine.Object target, ReflectionData data)
         {
             var type = target.GetType();
@@ -27,17 +27,17 @@ namespace PurrNet
         {
             return (value == null && lastValue != null) || (value != null && !value.Equals(lastValue));
         }
-        
+
         public bool Update()
         {
             var value = _getter?.Invoke();
-            
+
             if (IsDifferent(value))
             {
                 lastValue = value;
                 return true;
             }
-            
+
             return false;
         }
 

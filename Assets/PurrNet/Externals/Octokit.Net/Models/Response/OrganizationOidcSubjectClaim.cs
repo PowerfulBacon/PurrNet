@@ -8,7 +8,8 @@ namespace Octokit
     public class OrganizationOidcSubjectClaim
     {
         public OrganizationOidcSubjectClaim()
-        { }
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OrganizationOidcSubjectClaim"/> class

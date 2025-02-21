@@ -276,7 +276,8 @@ namespace Octokit
         /// <param name="data">Description of the asset with its data</param>
         /// <param name="cancellationToken">An optional token to monitor for cancellation requests</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
-        Task<ReleaseAsset> UploadAsset(Release release, ReleaseAssetUpload data, CancellationToken cancellationToken = default);
+        Task<ReleaseAsset> UploadAsset(Release release, ReleaseAssetUpload data,
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets the specified <see cref="ReleaseAsset"/> for the specified release of the specified repository.

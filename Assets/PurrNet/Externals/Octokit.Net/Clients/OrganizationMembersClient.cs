@@ -16,33 +16,27 @@ namespace Octokit
         /// <summary>
         ///  All members the authenticated user can see.
         /// </summary>
-        [Parameter(Value = "all")]
-        All,
+        [Parameter(Value = "all")] All,
+
         /// <summary>
         /// Members without two-factor authentication enabled
         /// </summary>
-        [Parameter(Value = "2fa_disabled")]
-        TwoFactorAuthenticationDisabled
+        [Parameter(Value = "2fa_disabled")] TwoFactorAuthenticationDisabled
     }
 
     public enum OrganizationMembersRole
     {
-        [Parameter(Value = "all")]
-        All,
+        [Parameter(Value = "all")] All,
 
-        [Parameter(Value = "admin")]
-        Admin,
+        [Parameter(Value = "admin")] Admin,
 
-        [Parameter(Value = "member")]
-        Member
+        [Parameter(Value = "member")] Member
     }
 
     public enum MembershipRole
     {
-        [Parameter(Value = "admin")]
-        Admin,
-        [Parameter(Value = "member")]
-        Member
+        [Parameter(Value = "admin")] Admin,
+        [Parameter(Value = "member")] Member
     }
 
     /// <summary>
@@ -262,7 +256,8 @@ namespace Octokit
         /// <param name="role">The role filter to use when getting the users, <see cref="OrganizationMembersRole"/></param>
         /// <returns>The users</returns>
         [ManualRoute("GET", "/orgs/{org}/members?filter={1}&role={2}")]
-        public Task<IReadOnlyList<User>> GetAll(string org, OrganizationMembersFilter filter, OrganizationMembersRole role)
+        public Task<IReadOnlyList<User>> GetAll(string org, OrganizationMembersFilter filter,
+            OrganizationMembersRole role)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
 
@@ -293,7 +288,8 @@ namespace Octokit
         /// <param name="options">Options for changing the API response</param>
         /// <returns>The users</returns>
         [ManualRoute("GET", "/orgs/{org}/members?filter={1}&role={2}")]
-        public Task<IReadOnlyList<User>> GetAll(string org, OrganizationMembersFilter filter, OrganizationMembersRole role, ApiOptions options)
+        public Task<IReadOnlyList<User>> GetAll(string org, OrganizationMembersFilter filter,
+            OrganizationMembersRole role, ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNull(options, nameof(options));
@@ -349,7 +345,8 @@ namespace Octokit
 
             try
             {
-                var response = await Connection.Get<object>(ApiUrls.CheckMember(org, user), null, null).ConfigureAwait(false);
+                var response = await Connection.Get<object>(ApiUrls.CheckMember(org, user), null, null)
+                    .ConfigureAwait(false);
                 var statusCode = response.HttpResponse.StatusCode;
                 if (statusCode != HttpStatusCode.NotFound
                     && statusCode != HttpStatusCode.NoContent
@@ -357,6 +354,7 @@ namespace Octokit
                 {
                     throw new ApiException("Invalid Status Code returned. Expected a 204, a 302 or a 404", statusCode);
                 }
+
                 return statusCode == HttpStatusCode.NoContent;
             }
             catch (NotFoundException)
@@ -383,7 +381,8 @@ namespace Octokit
 
             try
             {
-                var response = await Connection.Get<object>(ApiUrls.CheckMemberPublic(org, user), null, null).ConfigureAwait(false);
+                var response = await Connection.Get<object>(ApiUrls.CheckMemberPublic(org, user), null, null)
+                    .ConfigureAwait(false);
                 return response.HttpResponse.IsTrue();
             }
             catch (NotFoundException)
@@ -433,11 +432,14 @@ namespace Octokit
             try
             {
                 var requestData = new { };
-                var response = await Connection.Put<object>(ApiUrls.OrganizationMembership(org, user), requestData).ConfigureAwait(false);
+                var response = await Connection.Put<object>(ApiUrls.OrganizationMembership(org, user), requestData)
+                    .ConfigureAwait(false);
                 if (response.HttpResponse.StatusCode != HttpStatusCode.NoContent)
                 {
-                    throw new ApiException("Invalid Status Code returned. Expected a 204", response.HttpResponse.StatusCode);
+                    throw new ApiException("Invalid Status Code returned. Expected a 204",
+                        response.HttpResponse.StatusCode);
                 }
+
                 return response.HttpResponse.StatusCode == HttpStatusCode.NoContent;
             }
             catch (NotFoundException)
@@ -502,13 +504,15 @@ namespace Octokit
         /// changes to make to the user's organization membership</param>
         /// <returns></returns>
         [ManualRoute("PUT", "/orgs/{org}/memberships/{username}")]
-        public Task<OrganizationMembership> AddOrUpdateOrganizationMembership(string org, string user, OrganizationMembershipUpdate addOrUpdateRequest)
+        public Task<OrganizationMembership> AddOrUpdateOrganizationMembership(string org, string user,
+            OrganizationMembershipUpdate addOrUpdateRequest)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNullOrEmptyString(user, nameof(user));
             Ensure.ArgumentNotNull(addOrUpdateRequest, nameof(addOrUpdateRequest));
 
-            return ApiConnection.Put<OrganizationMembership>(ApiUrls.OrganizationMemberships(org, user), addOrUpdateRequest);
+            return ApiConnection.Put<OrganizationMembership>(ApiUrls.OrganizationMemberships(org, user),
+                addOrUpdateRequest);
         }
 
         /// <summary>
@@ -525,12 +529,14 @@ namespace Octokit
         /// details of the organization invitation</param>
         /// <returns></returns>
         [ManualRoute("POST", "/orgs/{org}/invitations")]
-        public Task<OrganizationMembershipInvitation> CreateOrganizationInvitation(string org, OrganizationInvitationRequest invitationRequest)
+        public Task<OrganizationMembershipInvitation> CreateOrganizationInvitation(string org,
+            OrganizationInvitationRequest invitationRequest)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNull(invitationRequest, nameof(invitationRequest));
 
-            return ApiConnection.Post<OrganizationMembershipInvitation>(ApiUrls.OrganizationInvitations(org), invitationRequest);
+            return ApiConnection.Post<OrganizationMembershipInvitation>(ApiUrls.OrganizationInvitations(org),
+                invitationRequest);
         }
 
         /// <summary>
@@ -582,12 +588,14 @@ namespace Octokit
         /// <param name="options">Options to change API behaviour</param>
         /// <returns></returns>
         [ManualRoute("GET", "/orgs/{org}/invitations")]
-        public Task<IReadOnlyList<OrganizationMembershipInvitation>> GetAllPendingInvitations(string org, ApiOptions options)
+        public Task<IReadOnlyList<OrganizationMembershipInvitation>> GetAllPendingInvitations(string org,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<OrganizationMembershipInvitation>(ApiUrls.OrganizationPendingInvitations(org), null, options);
+            return ApiConnection.GetAll<OrganizationMembershipInvitation>(ApiUrls.OrganizationPendingInvitations(org),
+                null, options);
         }
 
         /// <summary>
@@ -618,12 +626,14 @@ namespace Octokit
         /// <param name="options">Options to change API behaviour</param>
         /// <returns></returns>
         [ManualRoute("GET", "/orgs/{org}/failed_invitations")]
-        public Task<IReadOnlyList<OrganizationMembershipInvitation>> GetAllFailedInvitations(string org, ApiOptions options)
+        public Task<IReadOnlyList<OrganizationMembershipInvitation>> GetAllFailedInvitations(string org,
+            ApiOptions options)
         {
             Ensure.ArgumentNotNullOrEmptyString(org, nameof(org));
             Ensure.ArgumentNotNull(options, nameof(options));
 
-            return ApiConnection.GetAll<OrganizationMembershipInvitation>(ApiUrls.OrganizationFailedInvitations(org), null, options);
+            return ApiConnection.GetAll<OrganizationMembershipInvitation>(ApiUrls.OrganizationFailedInvitations(org),
+                null, options);
         }
 
         /// <summary>
@@ -667,6 +677,5 @@ namespace Octokit
         {
             return ApiConnection.GetAll<OrganizationMembership>(ApiUrls.UserOrganizationMemberships(), options);
         }
-
     }
 }

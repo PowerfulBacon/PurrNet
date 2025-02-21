@@ -88,7 +88,8 @@ namespace Octokit
         /// <param name="enterprise">The enterprise.</param>
         /// <param name="runnerGroupId">The runner group ID.</param>
         /// <param name="options">Options to change the API response.</param>
-        Task<RunnerResponse> ListAllRunnersForEnterpriseRunnerGroup(string enterprise, long runnerGroupId, ApiOptions options);
+        Task<RunnerResponse> ListAllRunnersForEnterpriseRunnerGroup(string enterprise, long runnerGroupId,
+            ApiOptions options);
 
         /// <summary>
         /// List self-hosted runners in a group for an organization
@@ -109,7 +110,8 @@ namespace Octokit
         /// <param name="organization">The organization.</param>
         /// <param name="runnerGroupId">The runner group ID.</param>
         /// <param name="options">Options to change the API response.</param>
-        Task<RunnerResponse> ListAllRunnersForOrganizationRunnerGroup(string organization, long runnerGroupId, ApiOptions options);
+        Task<RunnerResponse> ListAllRunnersForOrganizationRunnerGroup(string organization, long runnerGroupId,
+            ApiOptions options);
 
         /// <summary>
         /// List organization access to a self-hosted runner group in an enterprise
@@ -130,7 +132,8 @@ namespace Octokit
         /// <param name="enterprise">The enterprise name</param>
         /// <param name="runnerGroupId">The runner group id</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<OrganizationsResponse> ListAllRunnerGroupOrganizationsForEnterprise(string enterprise, long runnerGroupId, ApiOptions options);
+        Task<OrganizationsResponse> ListAllRunnerGroupOrganizationsForEnterprise(string enterprise, long runnerGroupId,
+            ApiOptions options);
 
         /// <summary>
         /// List repository access to a self-hosted runner group in an organization
@@ -151,6 +154,7 @@ namespace Octokit
         /// <param name="org">The organization name</param>
         /// <param name="runnerGroupId">The runner group id</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<RepositoriesResponse> ListAllRunnerGroupRepositoriesForOrganization(string org, long runnerGroupId, ApiOptions options);
+        Task<RepositoriesResponse> ListAllRunnerGroupRepositoriesForOrganization(string org, long runnerGroupId,
+            ApiOptions options);
     }
 }

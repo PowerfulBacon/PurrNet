@@ -614,7 +614,6 @@ GameObject:
   m_Component:
   - component: {fileID: 550669885}
   - component: {fileID: 550669886}
-  - component: {fileID: 550669887}
   m_Layer: 0
   m_Name: PlayerSpawn
   m_TagString: Untagged
@@ -638,27 +637,6 @@ Transform:
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &550669886
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 550669884}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5681fe548eb84304ea28a286062791f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _isSetup: 0
-  _prefabId: -2147483648
-  _componentIndex: -2147483648
-  _shouldBePooled: 0
-  _parent: {fileID: 0}
-  _invertedPathToNearestParent: 
-  _directChildren: []
-  _networkRules: {fileID: 0}
-  _visitiblityRules: {fileID: 0}
---- !u!114 &550669887
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1705,6 +1683,7 @@ GameObject:
   - component: {fileID: 1216416903}
   - component: {fileID: 1216416904}
   - component: {fileID: 1216416905}
+  - component: {fileID: 1216416906}
   m_Layer: 0
   m_Name: Network
   m_TagString: Untagged
@@ -1725,16 +1704,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _stopPlayingOnDisconnect: 0
-  _startServerFlags: 1
+  _startServerFlags: 8
   _startClientFlags: 7
   _cookieScope: 1
-  _dontDestroyOnLoad: 1
+  _dontDestroyOnLoad: 0
   _transport: {fileID: 1216416902}
   _networkPrefabs: {fileID: 11400000, guid: 37af97d33ef8d9747b965053a79d21f4, type: 2}
   _networkRules: {fileID: 11400000, guid: 5879a6fa5625f844e9c773a4ca0099dc, type: 2}
   _visibilityRules: {fileID: 11400000, guid: 8f014a5bd8dc68646a2a3c0b18c5bbd8, type: 2}
   _authenticator: {fileID: 1216416905}
   _tickRate: 20
+  _patchLingeringProcessBug: 1
 --- !u!4 &1216416898
 Transform:
   m_ObjectHideFlags: 0
@@ -1780,7 +1760,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _serverPort: 5001
   _maxConnections: 100
-  _address: 127.0.0.1
+  _address: 165.227.170.186
+  _timeoutInSeconds: 5
 --- !u!114 &1216416903
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1835,6 +1816,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _timeout: 5
   _password: PurrNet!
+--- !u!114 &1216416906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1216416895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef882a0e84c58df4885b0e1e59320b49, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  checkInterval: 0.33
+  placement: 1
+  displayType: 2
+  fontSize: 13
+  textColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &1312733901
 PrefabInstance:
   m_ObjectHideFlags: 0

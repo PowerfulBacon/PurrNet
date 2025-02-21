@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Emoji
     {
-        public Emoji() { }
+        public Emoji()
+        {
+        }
 
         public Emoji(string name, string url)
         {
@@ -22,10 +24,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Name {0} ", Name);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Name {0} ", Name); }
         }
     }
 }

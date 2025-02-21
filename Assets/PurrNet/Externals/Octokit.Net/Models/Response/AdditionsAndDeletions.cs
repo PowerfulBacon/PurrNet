@@ -11,7 +11,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class AdditionsAndDeletions
     {
-        public AdditionsAndDeletions() { }
+        public AdditionsAndDeletions()
+        {
+        }
 
         public AdditionsAndDeletions(DateTimeOffset timestamp, int additions, int deletions)
         {
@@ -32,6 +34,7 @@ namespace Octokit
             {
                 throw new ArgumentException("Addition and deletion aggregate must only contain three data points.");
             }
+
             Timestamp = DateTimeOffset.FromUnixTimeSeconds(additionsAndDeletions[0]);
             Additions = Convert.ToInt32(additionsAndDeletions[1]);
             Deletions = Convert.ToInt32(additionsAndDeletions[2]);
@@ -57,7 +60,8 @@ namespace Octokit
             get
             {
                 return string.Format(CultureInfo.InvariantCulture,
-                    "{0}: Additions: {1} Deletions: {2}", Timestamp.ToString("d", CultureInfo.InvariantCulture), Additions, Deletions);
+                    "{0}: Additions: {1} Deletions: {2}", Timestamp.ToString("d", CultureInfo.InvariantCulture),
+                    Additions, Deletions);
             }
         }
     }

@@ -77,9 +77,10 @@ namespace Octokit
         /// <param name="owner">The owner of the repository</param>
         /// <param name="name">The name of the repository</param>
         /// <param name="path">The content path</param>
-        /// <param name="reference">The name of the commit/branch/tag. Default: the repository’s default branch (usually main)</param>
+        /// <param name="reference">The name of the commit/branch/tag. Default: the repositoryï¿½s default branch (usually main)</param>
         [ExcludeFromPaginationApiOptionsConventionTest("Pagination not supported by GitHub API (tested 29/08/2017)")]
-        Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(string owner, string name, string path, string reference);
+        Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(string owner, string name, string path,
+            string reference);
 
         /// <summary>
         /// Returns the raw content of the file at the given <paramref name="path"/> or <c>null</c> if the path is a directory.
@@ -101,7 +102,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="path">The content path</param>
-        /// <param name="reference">The name of the commit/branch/tag. Default: the repository’s default branch (usually main)</param>
+        /// <param name="reference">The name of the commit/branch/tag. Default: the repositoryï¿½s default branch (usually main)</param>
         [ExcludeFromPaginationApiOptionsConventionTest("Pagination not supported by GitHub API (tested 29/08/2017)")]
         Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(long repositoryId, string path, string reference);
 
@@ -114,7 +115,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="owner">The owner of the repository</param>
         /// <param name="name">The name of the repository</param>
-        /// <param name="reference">The name of the commit/branch/tag. Default: the repository’s default branch (usually main)</param>
+        /// <param name="reference">The name of the commit/branch/tag. Default: the repositoryï¿½s default branch (usually main)</param>
         [ExcludeFromPaginationApiOptionsConventionTest("Pagination not supported by GitHub API (tested 29/08/2017)")]
         Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(string owner, string name, string reference);
 
@@ -126,7 +127,7 @@ namespace Octokit
         /// See the <a href="https://developer.github.com/v3/repos/contents/#get-contents">API documentation</a> for more information.
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
-        /// <param name="reference">The name of the commit/branch/tag. Default: the repository’s default branch (usually main)</param>
+        /// <param name="reference">The name of the commit/branch/tag. Default: the repositoryï¿½s default branch (usually main)</param>
         [ExcludeFromPaginationApiOptionsConventionTest("Pagination not supported by GitHub API (tested 29/08/2017)")]
         Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(long repositoryId, string reference);
 
@@ -232,7 +233,8 @@ namespace Octokit
         /// <param name="archiveFormat">The format of the archive. Can be either tarball or zipball</param>
         /// <param name="reference">A valid Git reference.</param>
         /// <param name="timeout"> Time span until timeout </param>
-        Task<byte[]> GetArchive(string owner, string name, ArchiveFormat archiveFormat, string reference, TimeSpan timeout);
+        Task<byte[]> GetArchive(string owner, string name, ArchiveFormat archiveFormat, string reference,
+            TimeSpan timeout);
 
         /// <summary>
         /// Get an archive of a given repository's contents, in a specific format
@@ -304,14 +306,16 @@ namespace Octokit
         /// <summary>
         /// The TAR archive format
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Tarball")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming",
+            "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Tarball")]
         [Parameter(Value = "tarball")]
         Tarball,
 
         /// <summary>
         /// The ZIP archive format
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Zipball")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming",
+            "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Zipball")]
         [Parameter(Value = "zipball")]
         Zipball
     }

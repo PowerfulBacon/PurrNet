@@ -65,7 +65,8 @@ namespace Octokit
         /// <summary>
         /// Optional. Gets or sets the desired language's or platform's .gitignore template to apply. Use the name of the template without the extension; "Haskell", for example. Ignored if <see cref="AutoInit"/> is null or false.
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Gitignore", Justification = "It needs to be this way for proper serialization.")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Gitignore",
+            Justification = "It needs to be this way for proper serialization.")]
         public string GitignoreTemplate { get; set; }
 
         /// <summary>
@@ -127,10 +128,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Name: {0} Description: {1}", Name, Description);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Name: {0} Description: {1}", Name, Description); }
         }
     }
 
@@ -142,19 +140,16 @@ namespace Octokit
         /// <summary>
         /// Sets repository visibility to public
         /// </summary>
-        [Parameter(Value = "public")]
-        Public,
+        [Parameter(Value = "public")] Public,
 
         /// <summary>
         /// Sets repository visibility to private
         /// </summary>
-        [Parameter(Value = "private")]
-        Private,
+        [Parameter(Value = "private")] Private,
 
         /// <summary>
         /// Sets repository visibility to internal
         /// </summary>
-        [Parameter(Value = "internal")]
-        Internal,
+        [Parameter(Value = "internal")] Internal,
     }
 }

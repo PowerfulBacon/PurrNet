@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class OrganizationCredential
     {
-        public OrganizationCredential() { }
+        public OrganizationCredential()
+        {
+        }
 
         public OrganizationCredential(
             string login,
@@ -36,7 +38,6 @@ namespace Octokit
             AuthorizedCredentialNote = authorizedCredentialNote;
             AuthorizedCredentialExpiresAt = authorizedCredentialExpiresAt;
         }
-
 
 
         /// <summary>

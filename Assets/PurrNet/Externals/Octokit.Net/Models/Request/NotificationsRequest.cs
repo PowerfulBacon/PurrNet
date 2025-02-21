@@ -40,7 +40,8 @@ namespace Octokit
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "All: {0}, Participating: {1}, Since: {2}", All, Participating, Since);
+                return string.Format(CultureInfo.InvariantCulture, "All: {0}, Participating: {1}, Since: {2}", All,
+                    Participating, Since);
             }
         }
     }

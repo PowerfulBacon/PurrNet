@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class AdminStatsIssues
     {
-        public AdminStatsIssues() { }
+        public AdminStatsIssues()
+        {
+        }
 
         public AdminStatsIssues(int totalIssues, int openIssues, int closedIssues)
         {
@@ -16,29 +18,18 @@ namespace Octokit
             ClosedIssues = closedIssues;
         }
 
-        public int TotalIssues
-        {
-            get;
-            private set;
-        }
+        public int TotalIssues { get; private set; }
 
-        public int OpenIssues
-        {
-            get;
-            private set;
-        }
+        public int OpenIssues { get; private set; }
 
-        public int ClosedIssues
-        {
-            get;
-            private set;
-        }
+        public int ClosedIssues { get; private set; }
 
         internal string DebuggerDisplay
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "TotalIssues: {0} OpenIssues: {1} ClosedIssues: {2}", TotalIssues, OpenIssues, ClosedIssues);
+                return string.Format(CultureInfo.InvariantCulture, "TotalIssues: {0} OpenIssues: {1} ClosedIssues: {2}",
+                    TotalIssues, OpenIssues, ClosedIssues);
             }
         }
     }

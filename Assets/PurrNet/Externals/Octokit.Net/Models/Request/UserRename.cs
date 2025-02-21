@@ -9,7 +9,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class UserRename
     {
-        public UserRename() { }
+        public UserRename()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserRename"/> class.
@@ -29,10 +31,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Login: {0}", Login);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Login: {0}", Login); }
         }
     }
 }

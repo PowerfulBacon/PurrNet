@@ -6,9 +6,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class DismissedReviewInfo
     {
-        public DismissedReviewInfo() { }
+        public DismissedReviewInfo()
+        {
+        }
 
-        public DismissedReviewInfo(PullRequestReviewState state, string reviewId, string dismissalMessage, string dismissalCommitId)
+        public DismissedReviewInfo(PullRequestReviewState state, string reviewId, string dismissalMessage,
+            string dismissalCommitId)
         {
             State = state;
             ReviewId = reviewId;

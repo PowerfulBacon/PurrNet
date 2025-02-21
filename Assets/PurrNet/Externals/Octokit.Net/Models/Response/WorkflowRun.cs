@@ -8,9 +8,18 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class WorkflowRun
     {
-        public WorkflowRun() { }
+        public WorkflowRun()
+        {
+        }
 
-        public WorkflowRun(long id, string name, string nodeId, long checkSuiteId, string checkSuiteNodeId, string headBranch, string headSha, string path, long runNumber, string @event, string displayTitle, WorkflowRunStatus status, WorkflowRunConclusion? conclusion, long workflowId, string url, string htmlUrl, IReadOnlyList<PullRequest> pullRequests, DateTimeOffset createdAt, DateTimeOffset updatedAt, User actor, long runAttempt, IReadOnlyList<WorkflowReference> referencedWorkflows, DateTimeOffset runStartedAt, User triggeringActor, string jobsUrl, string logsUrl, string checkSuiteUrl, string artifactsUrl, string cancelUrl, string rerunUrl, string previousAttemptUrl, string workflowUrl, Commit headCommit, Repository repository, Repository headRepository, long headRepositoryId)
+        public WorkflowRun(long id, string name, string nodeId, long checkSuiteId, string checkSuiteNodeId,
+            string headBranch, string headSha, string path, long runNumber, string @event, string displayTitle,
+            WorkflowRunStatus status, WorkflowRunConclusion? conclusion, long workflowId, string url, string htmlUrl,
+            IReadOnlyList<PullRequest> pullRequests, DateTimeOffset createdAt, DateTimeOffset updatedAt, User actor,
+            long runAttempt, IReadOnlyList<WorkflowReference> referencedWorkflows, DateTimeOffset runStartedAt,
+            User triggeringActor, string jobsUrl, string logsUrl, string checkSuiteUrl, string artifactsUrl,
+            string cancelUrl, string rerunUrl, string previousAttemptUrl, string workflowUrl, Commit headCommit,
+            Repository repository, Repository headRepository, long headRepositoryId)
         {
             Id = id;
             Name = name;
@@ -232,10 +241,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Id: {0} Name: {1}", Id, Name);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Id: {0} Name: {1}", Id, Name); }
         }
     }
 }

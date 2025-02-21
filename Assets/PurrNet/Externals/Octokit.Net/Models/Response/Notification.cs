@@ -6,9 +6,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Notification
     {
-        public Notification() { }
+        public Notification()
+        {
+        }
 
-        public Notification(string id, Repository repository, NotificationInfo subject, string reason, bool unread, string updatedAt, string lastReadAt, string url)
+        public Notification(string id, Repository repository, NotificationInfo subject, string reason, bool unread,
+            string updatedAt, string lastReadAt, string url)
         {
             Id = id;
             Repository = repository;
@@ -38,7 +41,11 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get { return string.Format(CultureInfo.InvariantCulture, "Repository: {0} UpdatedAt: {1}", Repository, UpdatedAt); }
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "Repository: {0} UpdatedAt: {1}", Repository,
+                    UpdatedAt);
+            }
         }
     }
 }

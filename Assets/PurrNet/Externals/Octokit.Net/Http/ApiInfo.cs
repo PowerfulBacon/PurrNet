@@ -71,11 +71,11 @@ namespace Octokit
         public ApiInfo Clone()
         {
             return new ApiInfo(Links.Clone(),
-                               OauthScopes.Clone(),
-                               AcceptedOauthScopes.Clone(),
-                               Etag != null ? new string(Etag.ToCharArray()) : null,
-                               RateLimit != null ? RateLimit.Clone() : null,
-                               ServerTimeDifference);
+                OauthScopes.Clone(),
+                AcceptedOauthScopes.Clone(),
+                Etag != null ? new string(Etag.ToCharArray()) : null,
+                RateLimit != null ? RateLimit.Clone() : null,
+                ServerTimeDifference);
         }
     }
 }

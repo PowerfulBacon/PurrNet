@@ -15,7 +15,7 @@ namespace PurrNet.Packing
         {
             value = packer.ReadBits(64);
         }
-        
+
         [UsedByIL]
         public static void Write(this BitPacker packer, uint value)
         {
@@ -27,7 +27,7 @@ namespace PurrNet.Packing
         {
             value = (uint)packer.ReadBits(32);
         }
-        
+
         [UsedByIL]
         public static void Write(this BitPacker packer, ushort value)
         {
@@ -39,7 +39,7 @@ namespace PurrNet.Packing
         {
             value = (ushort)packer.ReadBits(16);
         }
-        
+
         [UsedByIL]
         public static void Write(this BitPacker packer, byte value)
         {

@@ -7,16 +7,12 @@ namespace Octokit
     /// </summary>
     public enum PreReceiveEnvironmentDownloadState
     {
-        [Parameter(Value = "not_started")]
-        NotStarted,
+        [Parameter(Value = "not_started")] NotStarted,
 
-        [Parameter(Value = "in_progress")]
-        InProgress,
+        [Parameter(Value = "in_progress")] InProgress,
 
-        [Parameter(Value = "success")]
-        Success,
+        [Parameter(Value = "success")] Success,
 
-        [Parameter(Value = "failed")]
-        Failed
+        [Parameter(Value = "failed")] Failed
     }
 }

@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Branch
     {
-        public Branch() { }
+        public Branch()
+        {
+        }
 
         public Branch(string name, GitReference commit, bool @protected)
         {
@@ -33,10 +35,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Name: {0}", Name);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Name: {0}", Name); }
         }
     }
 }

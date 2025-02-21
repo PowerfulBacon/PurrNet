@@ -16,7 +16,8 @@ namespace Octokit
         /// Constructs an instance of ApiValidationException
         /// </summary>
         public InvalidGitIgnoreTemplateException()
-        { }
+        {
+        }
 
         /// <summary>
         /// Constructs an instance of ApiValidationException
@@ -24,14 +25,12 @@ namespace Octokit
         /// <param name="innerException">The inner validation exception.</param>
         public InvalidGitIgnoreTemplateException(ApiValidationException innerException)
             : base(innerException)
-        { }
+        {
+        }
 
         public override string Message
         {
-            get
-            {
-                return "The Gitignore template provided is not valid.";
-            }
+            get { return "The Gitignore template provided is not valid."; }
         }
 
         /// <summary>
@@ -47,6 +46,7 @@ namespace Octokit
         /// </param>
         protected InvalidGitIgnoreTemplateException(SerializationInfo info, StreamingContext context)
             : base(info, context)
-        { }
+        {
+        }
     }
 }

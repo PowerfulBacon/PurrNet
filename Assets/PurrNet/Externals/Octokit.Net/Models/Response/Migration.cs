@@ -19,7 +19,8 @@ namespace Octokit
         /// Parameter-less constructore needed for SimpleJsonSerializer.
         /// </summary>
         public Migration()
-        { }
+        {
+        }
 
         public Migration(
             long id,
@@ -97,10 +98,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Guid: {0}", Guid);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Guid: {0}", Guid); }
         }
 
         /// <summary>
@@ -114,26 +112,22 @@ namespace Octokit
             /// <summary>
             /// The migration hasn't started yet.
             /// </summary>
-            [Parameter(Value = "pending")]
-            Pending,
+            [Parameter(Value = "pending")] Pending,
 
             /// <summary>
             /// The migration is in progress.
             /// </summary>
-            [Parameter(Value = "exporting")]
-            Exporting,
+            [Parameter(Value = "exporting")] Exporting,
 
             /// <summary>
             /// The migration finished successfully.
             /// </summary>
-            [Parameter(Value = "exported")]
-            Exported,
+            [Parameter(Value = "exported")] Exported,
 
             /// <summary>
             /// The migration failed.
             /// </summary>
-            [Parameter(Value = "failed")]
-            Failed
+            [Parameter(Value = "failed")] Failed
         }
     }
 }

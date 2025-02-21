@@ -7,18 +7,22 @@ namespace PurrNet
     {
         [Header("GameObjects to toggle when owner is set")]
         [Tooltip("GameObjects to activate when the owner is set")]
-        [SerializeField] private GameObject[] _toActivate;
-        [Tooltip("GameObjects to deactivate when the owner is set")]
-        [SerializeField] private GameObject[] _toDeactivate;
-        
+        [SerializeField]
+        private GameObject[] _toActivate;
+
+        [Tooltip("GameObjects to deactivate when the owner is set")] [SerializeField]
+        private GameObject[] _toDeactivate;
+
         [Header("Components to toggle when owner is set")]
         [Tooltip("Components to enable when the owner is set")]
-        [SerializeField] private Behaviour[] _toEnable;
-        [Tooltip("Components to disable when the owner is set")]
-        [SerializeField] private Behaviour[] _toDisable;
+        [SerializeField]
+        private Behaviour[] _toEnable;
+
+        [Tooltip("Components to disable when the owner is set")] [SerializeField]
+        private Behaviour[] _toDisable;
 
         private bool _lastOwner;
-        
+
         private void Awake()
         {
             Setup(false);
@@ -28,18 +32,18 @@ namespace PurrNet
         public void Setup(bool asOwner)
         {
             _lastOwner = asOwner;
-            
+
             for (var i = 0; i < _toActivate.Length; i++)
             {
                 var go = _toActivate[i];
-                if(!go) continue;
+                if (!go) continue;
                 go.SetActive(asOwner);
             }
 
             for (var i = 0; i < _toDeactivate.Length; i++)
             {
                 var go = _toDeactivate[i];
-                if(!go) continue;
+                if (!go) continue;
                 go.SetActive(!asOwner);
             }
 

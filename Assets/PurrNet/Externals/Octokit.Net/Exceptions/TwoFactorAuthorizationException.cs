@@ -46,7 +46,8 @@ namespace Octokit
         /// <param name="response">The HTTP payload from the server</param>
         /// <param name="twoFactorType">Expected 2FA response type</param>
         /// <param name="innerException">The inner exception</param>
-        protected TwoFactorAuthorizationException(IResponse response, TwoFactorType twoFactorType, Exception innerException)
+        protected TwoFactorAuthorizationException(IResponse response, TwoFactorType twoFactorType,
+            Exception innerException)
             : base(response, innerException)
         {
             Debug.Assert(response != null && response.StatusCode == HttpStatusCode.Unauthorized,
@@ -95,15 +96,18 @@ namespace Octokit
         /// No method configured
         /// </summary>
         None,
+
         /// <summary>
         /// Unknown method
         /// </summary>
         Unknown,
+
         /// <summary>
         /// Receive via SMS
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Sms")]
         Sms,
+
         /// <summary>
         /// Receive via application
         /// </summary>

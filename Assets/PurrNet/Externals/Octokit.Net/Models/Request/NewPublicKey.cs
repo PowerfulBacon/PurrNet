@@ -10,7 +10,8 @@ namespace Octokit
     public class NewPublicKey
     {
         public NewPublicKey()
-        { }
+        {
+        }
 
         public NewPublicKey(string title, string key)
         {
@@ -33,10 +34,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Title: {0} Key: {1}", Title, Key);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Title: {0} Key: {1}", Title, Key); }
         }
     }
 }

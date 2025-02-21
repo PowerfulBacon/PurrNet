@@ -16,36 +16,43 @@ namespace LiteNetLib.Utils
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _data;
         }
+
         public int RawDataSize
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _dataSize;
         }
+
         public int UserDataOffset
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _offset;
         }
+
         public int UserDataSize
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _dataSize - _offset;
         }
+
         public bool IsNull
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _data == null;
         }
+
         public int Position
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _position;
         }
+
         public bool EndOfData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _position == _dataSize;
         }
+
         public int AvailableBytes
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,7 +95,6 @@ namespace LiteNetLib.Utils
 
         public NetDataReader()
         {
-
         }
 
         public NetDataReader(NetDataWriter writer)
@@ -194,7 +200,7 @@ namespace LiteNetLib.Utils
         {
             result = GetString(maxLength);
         }
-        
+
         public void Get(out Guid result)
         {
             result = GetGuid();
@@ -241,9 +247,10 @@ namespace LiteNetLib.Utils
                 item.Deserialize(this);
                 result[i] = item;
             }
+
             return result;
         }
-        
+
         public T[] GetArray<T>(Func<T> constructor) where T : class, INetSerializable
         {
             ushort length = BitConverter.ToUInt16(_data, _position);
@@ -253,7 +260,7 @@ namespace LiteNetLib.Utils
                 Get(out result[i], constructor);
             return result;
         }
-        
+
         public bool[] GetBoolArray()
         {
             return GetArray<bool>(1);
@@ -307,6 +314,7 @@ namespace LiteNetLib.Utils
             {
                 arr[i] = GetString();
             }
+
             return arr;
         }
 
@@ -322,6 +330,7 @@ namespace LiteNetLib.Utils
             {
                 arr[i] = GetString(maxStringLength);
             }
+
             return arr;
         }
 
@@ -400,11 +409,12 @@ namespace LiteNetLib.Utils
             ushort size = GetUShort();
             if (size == 0)
                 return string.Empty;
-            
+
             int actualSize = size - 1;
-            string result = maxLength > 0 && NetDataWriter.uTF8Encoding.Value.GetCharCount(_data, _position, actualSize) > maxLength ?
-                string.Empty :
-                NetDataWriter.uTF8Encoding.Value.GetString(_data, _position, actualSize);
+            string result =
+                maxLength > 0 && NetDataWriter.uTF8Encoding.Value.GetCharCount(_data, _position, actualSize) > maxLength
+                    ? string.Empty
+                    : NetDataWriter.uTF8Encoding.Value.GetString(_data, _position, actualSize);
             _position += actualSize;
             return result;
         }
@@ -414,7 +424,7 @@ namespace LiteNetLib.Utils
             ushort size = GetUShort();
             if (size == 0)
                 return string.Empty;
-            
+
             int actualSize = size - 1;
             string result = NetDataWriter.uTF8Encoding.Value.GetString(_data, _position, actualSize);
             _position += actualSize;
@@ -430,11 +440,11 @@ namespace LiteNetLib.Utils
             _position += size;
             return result;
         }
-        
+
         public Guid GetGuid()
         {
 #if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-            var result =  new Guid(_data.AsSpan(_position, 16));
+            var result = new Guid(_data.AsSpan(_position, 16));
             _position += 16;
             return result;
 #else
@@ -507,6 +517,7 @@ namespace LiteNetLib.Utils
         {
             return GetArray<byte>(1);
         }
+
         #endregion
 
         #region PeekMethods
@@ -579,11 +590,12 @@ namespace LiteNetLib.Utils
             ushort size = PeekUShort();
             if (size == 0)
                 return string.Empty;
-            
+
             int actualSize = size - 1;
-            return (maxLength > 0 && NetDataWriter.uTF8Encoding.Value.GetCharCount(_data, _position + 2, actualSize) > maxLength) ?
-                string.Empty :
-                NetDataWriter.uTF8Encoding.Value.GetString(_data, _position + 2, actualSize);
+            return (maxLength > 0 && NetDataWriter.uTF8Encoding.Value.GetCharCount(_data, _position + 2, actualSize) >
+                maxLength)
+                ? string.Empty
+                : NetDataWriter.uTF8Encoding.Value.GetString(_data, _position + 2, actualSize);
         }
 
         public string PeekString()
@@ -595,9 +607,11 @@ namespace LiteNetLib.Utils
             int actualSize = size - 1;
             return NetDataWriter.uTF8Encoding.Value.GetString(_data, _position + 2, actualSize);
         }
+
         #endregion
 
         #region TryGetMethods
+
         public bool TryGetByte(out byte result)
         {
             if (AvailableBytes >= 1)
@@ -605,6 +619,7 @@ namespace LiteNetLib.Utils
                 result = GetByte();
                 return true;
             }
+
             result = 0;
             return false;
         }
@@ -616,6 +631,7 @@ namespace LiteNetLib.Utils
                 result = GetSByte();
                 return true;
             }
+
             result = 0;
             return false;
         }
@@ -627,6 +643,7 @@ namespace LiteNetLib.Utils
                 result = GetBool();
                 return true;
             }
+
             result = false;
             return false;
         }
@@ -638,6 +655,7 @@ namespace LiteNetLib.Utils
                 result = '\0';
                 return false;
             }
+
             result = (char)uShortValue;
             return true;
         }
@@ -649,6 +667,7 @@ namespace LiteNetLib.Utils
                 result = GetShort();
                 return true;
             }
+
             result = 0;
             return false;
         }
@@ -660,6 +679,7 @@ namespace LiteNetLib.Utils
                 result = GetUShort();
                 return true;
             }
+
             result = 0;
             return false;
         }
@@ -671,6 +691,7 @@ namespace LiteNetLib.Utils
                 result = GetInt();
                 return true;
             }
+
             result = 0;
             return false;
         }
@@ -682,6 +703,7 @@ namespace LiteNetLib.Utils
                 result = GetUInt();
                 return true;
             }
+
             result = 0;
             return false;
         }
@@ -693,6 +715,7 @@ namespace LiteNetLib.Utils
                 result = GetLong();
                 return true;
             }
+
             result = 0;
             return false;
         }
@@ -704,6 +727,7 @@ namespace LiteNetLib.Utils
                 result = GetULong();
                 return true;
             }
+
             result = 0;
             return false;
         }
@@ -715,6 +739,7 @@ namespace LiteNetLib.Utils
                 result = GetFloat();
                 return true;
             }
+
             result = 0;
             return false;
         }
@@ -726,6 +751,7 @@ namespace LiteNetLib.Utils
                 result = GetDouble();
                 return true;
             }
+
             result = 0;
             return false;
         }
@@ -741,13 +767,15 @@ namespace LiteNetLib.Utils
                     return true;
                 }
             }
+
             result = null;
             return false;
         }
 
         public bool TryGetStringArray(out string[] result)
         {
-            if (!TryGetUShort(out ushort strArrayLength)) {
+            if (!TryGetUShort(out ushort strArrayLength))
+            {
                 result = null;
                 return false;
             }
@@ -776,9 +804,11 @@ namespace LiteNetLib.Utils
                     return true;
                 }
             }
+
             result = null;
             return false;
         }
+
         #endregion
 
         public void Clear()

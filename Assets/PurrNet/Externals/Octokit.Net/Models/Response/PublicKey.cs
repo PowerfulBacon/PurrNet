@@ -6,7 +6,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class PublicKey
     {
-        public PublicKey() { }
+        public PublicKey()
+        {
+        }
 
         public PublicKey(long id, string key, string url, string title)
         {

@@ -45,10 +45,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "{0}", Name);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "{0}", Name); }
         }
     }
 }

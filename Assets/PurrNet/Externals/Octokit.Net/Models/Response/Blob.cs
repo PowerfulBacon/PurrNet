@@ -7,7 +7,9 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Blob
     {
-        public Blob() { }
+        public Blob()
+        {
+        }
 
         public Blob(string nodeId, string content, EncodingType encoding, string sha, int size)
         {
@@ -45,19 +47,14 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Sha: {0} Size: {1}", Sha, Size);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Sha: {0} Size: {1}", Sha, Size); }
         }
     }
 
     public enum EncodingType
     {
-        [Parameter(Value = "utf-8")]
-        Utf8,
+        [Parameter(Value = "utf-8")] Utf8,
 
-        [Parameter(Value = "base64")]
-        Base64
+        [Parameter(Value = "base64")] Base64
     }
 }

@@ -22,10 +22,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Role {0} ", Role);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Role {0} ", Role); }
         }
     }
 
@@ -37,19 +34,16 @@ namespace Octokit
         /// <summary>
         /// Regular Team Member
         /// </summary>
-        [Parameter(Value = "member")]
-        Member,
+        [Parameter(Value = "member")] Member,
 
         /// <summary>
         ///  Team Maintainer
         /// </summary>
-        [Parameter(Value = "maintainer")]
-        Maintainer,
+        [Parameter(Value = "maintainer")] Maintainer,
 
         /// <summary>
         /// All Roles
         /// </summary>
-        [Parameter(Value = "all")]
-        All
+        [Parameter(Value = "all")] All
     }
 }

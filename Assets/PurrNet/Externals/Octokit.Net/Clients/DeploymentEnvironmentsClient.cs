@@ -18,7 +18,9 @@ namespace Octokit
         /// Instantiates a new GitHub Repository Environments API client.
         /// </summary>
         /// <param name="apiConnection">An API connection</param>
-        public DeploymentEnvironmentsClient(IApiConnection apiConnection) : base(apiConnection) { }
+        public DeploymentEnvironmentsClient(IApiConnection apiConnection) : base(apiConnection)
+        {
+        }
 
 
         /// <summary>
@@ -79,7 +81,8 @@ namespace Octokit
             }
 
             if (prms != null)
-                return ApiConnection.Get<DeploymentEnvironmentsResponse>(ApiUrls.DeploymentEnvironments(owner, name), prms);
+                return ApiConnection.Get<DeploymentEnvironmentsResponse>(ApiUrls.DeploymentEnvironments(owner, name),
+                    prms);
             else
                 return ApiConnection.Get<DeploymentEnvironmentsResponse>(ApiUrls.DeploymentEnvironments(owner, name));
         }
@@ -107,7 +110,8 @@ namespace Octokit
             }
 
             if (prms != null)
-                return ApiConnection.Get<DeploymentEnvironmentsResponse>(ApiUrls.DeploymentEnvironments(repositoryId), prms);
+                return ApiConnection.Get<DeploymentEnvironmentsResponse>(ApiUrls.DeploymentEnvironments(repositoryId),
+                    prms);
             else
                 return ApiConnection.Get<DeploymentEnvironmentsResponse>(ApiUrls.DeploymentEnvironments(repositoryId));
         }

@@ -24,10 +24,10 @@ namespace Octokit
             }
 
             return new Dictionary<string, string> { { key, value.ToString() } };
-
         }
 
-        public static Dictionary<string, string> AddParameter(this Dictionary<string, string> data, string key, string value)
+        public static Dictionary<string, string> AddParameter(this Dictionary<string, string> data, string key,
+            string value)
         {
             Ensure.ArgumentNotNull(data, nameof(data));
             Ensure.ArgumentNotNullOrEmptyString(key, nameof(key));
@@ -37,7 +37,8 @@ namespace Octokit
             return data;
         }
 
-        public static Dictionary<string, string> AddParameter(this Dictionary<string, string> data, string key, Enum value)
+        public static Dictionary<string, string> AddParameter(this Dictionary<string, string> data, string key,
+            Enum value)
         {
             Ensure.ArgumentNotNull(data, nameof(data));
             Ensure.ArgumentNotNullOrEmptyString(key, nameof(key));
@@ -51,12 +52,13 @@ namespace Octokit
             {
                 data.Add(key, value.ToString());
             }
-            
+
             return data;
         }
 
 
-        public static Dictionary<string, string> AddOptionalParameter(this Dictionary<string, string> data, string key, string value)
+        public static Dictionary<string, string> AddOptionalParameter(this Dictionary<string, string> data, string key,
+            string value)
         {
             Ensure.ArgumentNotNull(data, nameof(data));
             Ensure.ArgumentNotNullOrEmptyString(key, nameof(key));
@@ -65,10 +67,12 @@ namespace Octokit
             {
                 data.Add(key, value);
             }
+
             return data;
         }
 
-        public static Dictionary<string, string> AddOptionalParameter(this Dictionary<string, string> data, string key, Enum value)
+        public static Dictionary<string, string> AddOptionalParameter(this Dictionary<string, string> data, string key,
+            Enum value)
         {
             Ensure.ArgumentNotNull(data, nameof(data));
             Ensure.ArgumentNotNullOrEmptyString(key, nameof(key));

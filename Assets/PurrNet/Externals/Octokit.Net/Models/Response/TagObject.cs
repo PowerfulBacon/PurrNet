@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class TagObject : GitReference
     {
-        public TagObject() { }
+        public TagObject()
+        {
+        }
 
-        public TagObject(string nodeId, string url, string label, string @ref, string sha, User user, Repository repository, TaggedType type)
+        public TagObject(string nodeId, string url, string label, string @ref, string sha, User user,
+            Repository repository, TaggedType type)
             : base(nodeId, url, label, @ref, sha, user, repository)
         {
             Type = type;
@@ -25,16 +28,12 @@ namespace Octokit
     /// </summary>
     public enum TaggedType
     {
-        [Parameter(Value = "commit")]
-        Commit,
+        [Parameter(Value = "commit")] Commit,
 
-        [Parameter(Value = "blob")]
-        Blob,
+        [Parameter(Value = "blob")] Blob,
 
-        [Parameter(Value = "tree")]
-        Tree,
+        [Parameter(Value = "tree")] Tree,
 
-        [Parameter(Value = "tag")]
-        Tag
+        [Parameter(Value = "tag")] Tag
     }
 }

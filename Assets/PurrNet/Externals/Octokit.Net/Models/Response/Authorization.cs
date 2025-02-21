@@ -12,9 +12,13 @@ namespace Octokit
     public class Authorization
     {
         // TODO: I'd love to not need this
-        public Authorization() { }
+        public Authorization()
+        {
+        }
 
-        public Authorization(long id, string url, Application application, string tokenLastEight, string hashedToken, string fingerprint, string note, string noteUrl, DateTimeOffset createdAt, DateTimeOffset updateAt, string[] scopes)
+        public Authorization(long id, string url, Application application, string tokenLastEight, string hashedToken,
+            string fingerprint, string note, string noteUrl, DateTimeOffset createdAt, DateTimeOffset updateAt,
+            string[] scopes)
         {
             Id = id;
             Url = url;
@@ -87,7 +91,8 @@ namespace Octokit
         /// <summary>
         /// The scopes that this <see cref="Authorization"/> has. This is the kind of access that the token allows.
         /// </summary>
-        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Special type of model object that only updates none-null fields.")]
+        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays",
+            Justification = "Special type of model object that only updates none-null fields.")]
         public string[] Scopes { get; protected set; }
 
         public string ScopesDelimited
@@ -97,10 +102,7 @@ namespace Octokit
 
         internal string DebuggerDisplay
         {
-            get
-            {
-                return string.Format(CultureInfo.InvariantCulture, "Id: {0} CreatedAt: {1} ", Id, CreatedAt);
-            }
+            get { return string.Format(CultureInfo.InvariantCulture, "Id: {0} CreatedAt: {1} ", Id, CreatedAt); }
         }
     }
 }

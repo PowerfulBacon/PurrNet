@@ -41,7 +41,8 @@ namespace Octokit
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<OauthDeviceFlowResponse> InitiateDeviceFlow(OauthDeviceFlowRequest request, CancellationToken cancellationToken = default);
+        Task<OauthDeviceFlowResponse> InitiateDeviceFlow(OauthDeviceFlowRequest request,
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Makes a request to get an access token using the response from <see cref="InitiateDeviceFlow(OauthDeviceFlowRequest, CancellationToken)"/>.
@@ -53,7 +54,8 @@ namespace Octokit
         /// <param name="deviceFlowResponse">The response you received from <see cref="InitiateDeviceFlow(OauthDeviceFlowRequest, CancellationToken)"/></param>
         /// <param name="concellationToken"></param>
         /// <returns></returns>
-        Task<OauthToken> CreateAccessTokenForDeviceFlow(string clientId, OauthDeviceFlowResponse deviceFlowResponse, CancellationToken concellationToken = default);
+        Task<OauthToken> CreateAccessTokenForDeviceFlow(string clientId, OauthDeviceFlowResponse deviceFlowResponse,
+            CancellationToken concellationToken = default);
 
         /// <summary>
         /// Makes a request to get an access token using the refresh token returned in <see cref="CreateAccessToken(OauthTokenRequest, CancellationToken)"/>.
@@ -61,6 +63,7 @@ namespace Octokit
         /// <param name="request">Token renewal request.</param>
         /// <param name="concellationToken"></param>
         /// <returns><see cref="OauthToken"/> with the new token set.</returns>
-        Task<OauthToken> CreateAccessTokenFromRenewalToken(OauthTokenRenewalRequest request, CancellationToken concellationToken = default);
+        Task<OauthToken> CreateAccessTokenFromRenewalToken(OauthTokenRenewalRequest request,
+            CancellationToken concellationToken = default);
     }
 }

@@ -7,9 +7,12 @@ namespace Octokit
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class AdminStatsComments
     {
-        public AdminStatsComments() { }
+        public AdminStatsComments()
+        {
+        }
 
-        public AdminStatsComments(int totalCommitComments, int totalGistComments, int totalIssueComments, int totalPullRequestComments)
+        public AdminStatsComments(int totalCommitComments, int totalGistComments, int totalIssueComments,
+            int totalPullRequestComments)
         {
             TotalCommitComments = totalCommitComments;
             TotalGistComments = totalGistComments;
@@ -17,35 +20,21 @@ namespace Octokit
             TotalPullRequestComments = totalPullRequestComments;
         }
 
-        public int TotalCommitComments
-        {
-            get;
-            private set;
-        }
+        public int TotalCommitComments { get; private set; }
 
-        public int TotalGistComments
-        {
-            get;
-            private set;
-        }
+        public int TotalGistComments { get; private set; }
 
-        public int TotalIssueComments
-        {
-            get;
-            private set;
-        }
+        public int TotalIssueComments { get; private set; }
 
-        public int TotalPullRequestComments
-        {
-            get;
-            private set;
-        }
+        public int TotalPullRequestComments { get; private set; }
 
         internal string DebuggerDisplay
         {
             get
             {
-                return string.Format(CultureInfo.InvariantCulture, "TotalCommitComments: {0} TotalGistComments: {1} TotalIssueComments: {2} TotalPullRequestComments: {3}", TotalCommitComments, TotalGistComments, TotalIssueComments, TotalPullRequestComments);
+                return string.Format(CultureInfo.InvariantCulture,
+                    "TotalCommitComments: {0} TotalGistComments: {1} TotalIssueComments: {2} TotalPullRequestComments: {3}",
+                    TotalCommitComments, TotalGistComments, TotalIssueComments, TotalPullRequestComments);
             }
         }
     }

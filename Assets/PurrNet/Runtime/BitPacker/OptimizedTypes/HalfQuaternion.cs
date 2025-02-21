@@ -10,7 +10,7 @@ namespace PurrNet
         public Half y;
         public Half z;
         public Half w;
-        
+
         public HalfQuaternion(Half x, Half y, Half z, Half w)
         {
             this.x = x;
@@ -18,7 +18,7 @@ namespace PurrNet
             this.z = z;
             this.w = w;
         }
-        
+
         public HalfQuaternion(Quaternion quaternion)
         {
             x = new Half(quaternion.x);
@@ -26,12 +26,12 @@ namespace PurrNet
             z = new Half(quaternion.z);
             w = new Half(quaternion.w);
         }
-        
+
         public Quaternion ToQuaternion()
         {
             return new Quaternion(x, y, z, w);
         }
-        
+
         public bool Equals(HalfQuaternion other)
         {
             return x.Equals(other.x) && y.Equals(other.y) && z.Equals(other.z) && w.Equals(other.w);
@@ -39,11 +39,23 @@ namespace PurrNet
 
         public void Normalize()
         {
-            var magnitude = (Half)Mathf.Sqrt(x * x + y * y + z * z + w * w);
-            x /= magnitude;
-            y /= magnitude;
-            z /= magnitude;
-            w /= magnitude;
+            Quaternion quaternion = this;
+            quaternion.Normalize();
+
+            x = new Half(quaternion.x);
+            y = new Half(quaternion.y);
+            z = new Half(quaternion.z);
+            w = new Half(quaternion.w);
+        }
+
+        public static implicit operator Quaternion(HalfQuaternion value)
+        {
+            return value.ToQuaternion();
+        }
+
+        public static implicit operator HalfQuaternion(Quaternion value)
+        {
+            return new HalfQuaternion(value);
         }
     }
 }

@@ -32,7 +32,8 @@ namespace Octokit
         /// </summary>
         /// <param name="response">The HTTP payload from the server</param>
         /// <param name="innerException">The inner exception</param>
-        public SecondaryRateLimitExceededException(IResponse response, Exception innerException) : base(response, innerException)
+        public SecondaryRateLimitExceededException(IResponse response, Exception innerException) : base(response,
+            innerException)
         {
             Ensure.ArgumentNotNull(response, nameof(response));
         }
