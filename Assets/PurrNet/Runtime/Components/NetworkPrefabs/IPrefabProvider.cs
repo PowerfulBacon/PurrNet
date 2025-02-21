@@ -18,8 +18,6 @@ namespace PurrNet
         bool TryGetPrefabData(int prefabId, out PrefabData prefabData);
 
         bool TryGetPrefabData(GameObject prefab, out PrefabData prefabData);
-
-        bool TryGetPrefab(int prefabId, int offset, out GameObject prefab);
     }
 
     public abstract class PrefabProviderScriptable : ScriptableObject, IPrefabProvider
@@ -29,7 +27,5 @@ namespace PurrNet
         public abstract bool TryGetPrefabData(int prefabId, out PrefabData prefabData);
 
         public abstract bool TryGetPrefabData(GameObject prefab, out PrefabData prefabData);
-
-        public abstract bool TryGetPrefab(int prefabId, int offset, out GameObject prefab);
     }
 }

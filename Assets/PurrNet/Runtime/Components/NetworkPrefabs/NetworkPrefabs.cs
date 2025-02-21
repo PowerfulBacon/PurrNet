@@ -51,34 +51,6 @@ namespace PurrNet
             return false;
         }
 
-        public override bool TryGetPrefab(int prefabId, int offset, out GameObject prefab)
-        {
-            if (!TryGetPrefabData(prefabId, out var prefabData))
-            {
-                prefab = null;
-                return false;
-            }
-
-            var root = prefabData.prefab;
-            if (offset == 0)
-            {
-                prefab = root;
-                return true;
-            }
-
-            root.GetComponentsInChildren(true, _identities);
-
-            if (offset < 0 || offset >= _identities.Count)
-            {
-                prefab = null;
-                return false;
-            }
-
-            prefab = _identities[offset].gameObject;
-            return true;
-        }
-
-        static readonly List<NetworkIdentity> _identities = new List<NetworkIdentity>();
 #if UNITY_EDITOR
         private bool _generating;
 #endif
@@ -175,6 +147,7 @@ namespace PurrNet
                 EditorUtility.DisplayProgressBar("Getting Network Prefabs", "Finding paths...", 0.1f);
 
                 List<GameObject> foundPrefabs = new List<GameObject>();
+                List<NetworkIdentity> identities = new List<NetworkIdentity>();
                 string[] guids = AssetDatabase.FindAssets("t:prefab", new[] { folderPath });
                 for (var i = 0; i < guids.Length; i++)
                 {
@@ -193,9 +166,9 @@ namespace PurrNet
                             continue;
                         }
 
-                        prefab.GetComponentsInChildren(true, _identities);
+                        prefab.GetComponentsInChildren(true, identities);
 
-                        if (_identities.Count > 0)
+                        if (identities.Count > 0)
                             foundPrefabs.Add(prefab);
                     }
                 }
