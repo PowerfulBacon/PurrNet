@@ -60,7 +60,7 @@ namespace PurrNet
         [UsedImplicitly]
         public static NetworkManager main { get; private set; }
 
-        [Header("Editor Settings")]
+        [Header("Misc Settings")]
         [Tooltip("Whether the client should stop playing when it disconnects from the server.")]
         [SerializeField]
         private bool _stopPlayingOnDisconnect;
@@ -73,7 +73,7 @@ namespace PurrNet
         [Tooltip("The flags to determine when the client should automatically start.")] [SerializeField]
         private StartFlags _startClientFlags = StartFlags.ClientBuild | StartFlags.Editor | StartFlags.Clone;
 
-        [Header("Persistence Settings")] [PurrDocs("systems-and-modules/network-manager")] [SerializeField]
+        [Header("Persistence Settings")] [PurrDocs("systems-and-modules/network-manager"), PurrLock] [SerializeField]
         private CookieScope _cookieScope = CookieScope.LiveWithProcess;
 
         [Header("Network Settings")]
@@ -98,6 +98,9 @@ namespace PurrNet
 
         [Tooltip("Number of target ticks per second.")] [SerializeField]
         private int _tickRate = 20;
+
+        [SerializeField, UsedImplicitly]
+        private bool _patchLingeringProcessBug;
 
         /// <summary>
         /// The local client connection.
@@ -365,6 +368,7 @@ namespace PurrNet
             ListPool<NetworkIdentity>.Destroy(children);
         }
 
+        [UsedImplicitly]
         static void RefreshHashes()
         {
             // ReSharper disable once Unity.UnknownResource
@@ -401,6 +405,14 @@ namespace PurrNet
             Hasher.FinishLoad(lines.Length);
         }
 
+#if !UNITY_EDITOR
+        private void OnApplicationQuit()
+        {
+            if (_patchLingeringProcessBug)
+                Environment.FailFast("Applying patch for lingering process bug.");
+        }
+#endif
+
         private void Awake()
         {
             if (main && main != this)
@@ -430,9 +442,11 @@ namespace PurrNet
             }
 
             main = this;
-            RefreshHashes();
 
-            //Time.fixedDeltaTime = 1f / _tickRate;
+#if !UNITY_EDITOR
+            RefreshHashes();
+#endif
+
             Application.runInBackground = true;
 
             if (_networkPrefabs)

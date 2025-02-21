@@ -92,20 +92,14 @@ namespace PurrNet.Packing
 
         public static void RegisterWriter(WriteFunc<T> a)
         {
-            if (_write != null)
-                return;
-
             Packer.RegisterWriter(typeof(T), a.Method);
-            _write = a;
+            _write ??= a;
         }
 
         public static void RegisterReader(ReadFunc<T> b)
         {
-            if (_read != null)
-                return;
-
             Packer.RegisterReader(typeof(T), b.Method);
-            _read = b;
+            _read ??= b;
         }
 
         public static void Write(BitPacker packer, T value)
@@ -183,20 +177,13 @@ namespace PurrNet.Packing
 
         public static void RegisterWriter(Type type, MethodInfo method)
         {
-            if (!_writeMethods.TryAdd(type, method))
-                PurrLogger.LogError($"Writer for type '{type}' is already registered.");
+            _writeMethods.TryAdd(type, method);
         }
 
         public static void RegisterReader(Type type, MethodInfo method)
         {
-            if (!_readMethods.TryAdd(type, method))
-            {
-                PurrLogger.LogError($"Reader for type '{type}' is already registered.");
-            }
-            else
-            {
-                Hasher.PrepareType(type);
-            }
+            Hasher.PrepareType(type);
+            _readMethods.TryAdd(type, method);
         }
 
         static readonly object[] _args = new object[2];

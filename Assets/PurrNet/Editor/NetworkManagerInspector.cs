@@ -21,6 +21,7 @@ namespace PurrNet.Editor
         private SerializedProperty _transport;
         private SerializedProperty _tickRate;
         private SerializedProperty _visibilityRules;
+        private SerializedProperty _patchLingeringProcessBug;
 
         private bool _showStatusFoldout = true;
         private bool _showPlayersFoldout;
@@ -47,6 +48,7 @@ namespace PurrNet.Editor
             _transport = serializedObject.FindProperty("_transport");
             _tickRate = serializedObject.FindProperty("_tickRate");
             _visibilityRules = serializedObject.FindProperty("_visibilityRules");
+            _patchLingeringProcessBug = serializedObject.FindProperty("_patchLingeringProcessBug");
             _authenticator = serializedObject.FindProperty("_authenticator");
 
             _networkManager = (NetworkManager)target;
@@ -190,9 +192,11 @@ namespace PurrNet.Editor
             GUI.enabled = isDisconnected;
             RenderTickSlider();
             EditorGUILayout.PropertyField(_stopPlayingOnDisconnect);
+            EditorGUILayout.PropertyField(_patchLingeringProcessBug);
             GUI.enabled = true;
 
-            _showStatusFoldout = EditorGUILayout.Foldout(_showStatusFoldout, "Status");
+            if (Application.isPlaying)
+                _showStatusFoldout = EditorGUILayout.Foldout(_showStatusFoldout, "Status");
         }
 
         private void DrawNetworkPrefabs()

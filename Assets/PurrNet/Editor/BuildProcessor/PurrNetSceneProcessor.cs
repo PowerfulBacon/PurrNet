@@ -1,4 +1,5 @@
 using System.IO;
+using PurrNet.Logging;
 using PurrNet.Packing;
 using PurrNet.Utils;
 using UnityEditor;
@@ -81,6 +82,7 @@ namespace PurrNet.Editor
 
         public void OnPreprocessBuild(BuildReport report)
         {
+            Hasher.ClearState();
             CallAllRegisters();
 
             const string PATH = "Assets/Resources/PurrHashes.json";
