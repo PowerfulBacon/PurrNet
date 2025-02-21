@@ -51,33 +51,6 @@ namespace PurrNet
             return false;
         }
 
-        public override bool TryGetPrefab(int prefabId, int offset, out GameObject prefab)
-        {
-            if (!TryGetPrefabData(prefabId, out var prefabData))
-            {
-                prefab = null;
-                return false;
-            }
-
-            var root = prefabData.prefab;
-            if (offset == 0)
-            {
-                prefab = root;
-                return true;
-            }
-
-            root.GetComponentsInChildren(true, _identities);
-
-            if (offset < 0 || offset >= _identities.Count)
-            {
-                prefab = null;
-                return false;
-            }
-
-            prefab = _identities[offset].gameObject;
-            return true;
-        }
-
         static readonly List<NetworkIdentity> _identities = new List<NetworkIdentity>();
 #if UNITY_EDITOR
         private bool _generating;
