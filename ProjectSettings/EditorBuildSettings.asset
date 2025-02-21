@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Examples/Empty.unity
-    guid: 1c8956b4c216a9442be5163af53171e6
+    path: Assets/Examples/Top Down Shooter/TopDownShooter_Scene.unity
+    guid: cd173e214694eb44ebbf6f2619dfbd04
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 2c2e68bebf1c66f46aa9096fabba66a2, type: 2}

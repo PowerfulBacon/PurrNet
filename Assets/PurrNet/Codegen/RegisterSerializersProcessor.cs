@@ -4,7 +4,6 @@ using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using PurrNet.Packing;
-using UnityEngine;
 
 namespace PurrNet.Codegen
 {
@@ -196,24 +195,12 @@ namespace PurrNet.Codegen
 
             var registerMethod = new MethodDefinition("Register_Type_Generated_PurrNet", MethodAttributes.Static,
                 module.TypeSystem.Void);
-            var attributeType = module.GetTypeDefinition<RuntimeInitializeOnLoadMethodAttribute>();
-            var constructor = attributeType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
+
+            var editorType = module.GetTypeDefinition<RegisterPackersAttribute>().Import(module);
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
                 .Import(module);
-            var attribute = new CustomAttribute(constructor);
-
-            if (isEditor)
-            {
-                var editorType = module.GetTypeDefinition<RegisterPackersAttribute>().Import(module);
-                var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
-                    .Import(module);
-                var editorAttribute = new CustomAttribute(editorConstructor);
-                registerMethod.CustomAttributes.Add(editorAttribute);
-            }
-
-            registerMethod.CustomAttributes.Add(attribute);
-            attribute.ConstructorArguments.Add(new CustomAttributeArgument(module.TypeSystem.Int32,
-                (int)RuntimeInitializeLoadType.AfterAssembliesLoaded));
-
+            var editorAttribute = new CustomAttribute(editorConstructor);
+            registerMethod.CustomAttributes.Add(editorAttribute);
             registerMethod.Body.InitLocals = true;
 
             type.Methods.Add(registerMethod);

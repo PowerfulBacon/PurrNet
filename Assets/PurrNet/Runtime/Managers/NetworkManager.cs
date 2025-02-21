@@ -1,7 +1,6 @@
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,6 +8,7 @@ using JetBrains.Annotations;
 using PurrNet.Authentication;
 using PurrNet.Logging;
 using PurrNet.Modules;
+using PurrNet.Packing;
 using PurrNet.Pooling;
 using PurrNet.Transports;
 using PurrNet.Utils;
@@ -368,6 +368,61 @@ namespace PurrNet
             ListPool<NetworkIdentity>.Destroy(children);
         }
 
+        public static void CallAllRegisters()
+        {
+            // call all static functions with RegisterPackersAttribute on static classes
+
+            var allAssemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+
+            foreach (var assembly in allAssemblies)
+            {
+                var types = assembly.GetTypes();
+
+                foreach (var type in types)
+                {
+                    if (!type.IsAbstract || !type.IsSealed)
+                        continue;
+
+                    var methods = type.GetMethods(System.Reflection.BindingFlags.Static |
+                                                  System.Reflection.BindingFlags.Public |
+                                                  System.Reflection.BindingFlags.NonPublic);
+
+                    foreach (var method in methods)
+                    {
+                        if (!method.IsStatic)
+                            continue;
+
+                        var attributes = method.GetCustomAttributes(typeof(RegisterPackersAttribute), false);
+                        if (attributes.Length > 0)
+                        {
+                            try
+                            {
+                                method.Invoke(null, null);
+                            }
+                            catch (System.Exception e)
+                            {
+                                Debug.LogError(e);
+                                Debug.LogError("Failed to call " + method.Name + " in " + type.Name);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static bool _hasGeneratedAlready;
+
+        [UsedImplicitly]
+        static void CalculateHashes()
+        {
+            if (_hasGeneratedAlready)
+                return;
+
+            _hasGeneratedAlready = true;
+            Hasher.ClearState();
+            CallAllRegisters();
+        }
+
         [UsedImplicitly]
         static void RefreshHashes()
         {
@@ -445,6 +500,8 @@ namespace PurrNet
 
 #if !UNITY_EDITOR
             RefreshHashes();
+#else
+            CalculateHashes();
 #endif
 
             Application.runInBackground = true;

@@ -6,7 +6,6 @@ using Mono.Cecil.Cil;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Pooling;
-using Unity.CompilationPipeline.Common.Diagnostics;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -210,28 +209,12 @@ namespace PurrNet.Codegen
             var registerMethod =
                 new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
 
-            var attributeType = assembly.MainModule.GetTypeDefinition<RuntimeInitializeOnLoadMethodAttribute>();
-            var constructor = attributeType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
+            var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>()
                 .Import(assembly.MainModule);
-            var attribute = new CustomAttribute(constructor);
-            registerMethod.CustomAttributes.Add(attribute);
-
-            if (isEditor)
-            {
-                var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>()
-                    .Import(assembly.MainModule);
-                var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
-                    .Import(assembly.MainModule);
-                var editorAttribute = new CustomAttribute(editorConstructor);
-                registerMethod.CustomAttributes.Add(editorAttribute);
-            }
-
-            attribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32,
-                (int)RuntimeInitializeLoadType.AfterAssembliesLoaded));
-            registerMethod.Body = new MethodBody(registerMethod)
-            {
-                InitLocals = true
-            };
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+                .Import(assembly.MainModule);
+            var editorAttribute = new CustomAttribute(editorConstructor);
+            registerMethod.CustomAttributes.Add(editorAttribute);
 
             var il = registerMethod.Body.GetILProcessor();
 
@@ -253,23 +236,12 @@ namespace PurrNet.Codegen
             var registerMethod =
                 new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
 
-            var attributeType = assembly.MainModule.GetTypeDefinition<RuntimeInitializeOnLoadMethodAttribute>();
-            var constructor = attributeType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
+            var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
                 .Import(assembly.MainModule);
-            var attribute = new CustomAttribute(constructor);
-            registerMethod.CustomAttributes.Add(attribute);
+            var editorAttribute = new CustomAttribute(editorConstructor);
+            registerMethod.CustomAttributes.Add(editorAttribute);
 
-            if (isEditor)
-            {
-                var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
-                var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
-                    .Import(assembly.MainModule);
-                var editorAttribute = new CustomAttribute(editorConstructor);
-                registerMethod.CustomAttributes.Add(editorAttribute);
-            }
-
-            attribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32,
-                (int)RuntimeInitializeLoadType.AfterAssembliesLoaded));
             registerMethod.Body = new MethodBody(registerMethod)
             {
                 InitLocals = true
@@ -285,22 +257,13 @@ namespace PurrNet.Codegen
         {
             var registerMethod =
                 new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
-            var attributeType = assembly.MainModule.GetTypeDefinition<RuntimeInitializeOnLoadMethodAttribute>();
-            var constructor = attributeType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
-                .Import(assembly.MainModule);
-            var attribute = new CustomAttribute(constructor);
-            registerMethod.CustomAttributes.Add(attribute);
-            if (isEditor)
-            {
-                var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
-                var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
-                    .Import(assembly.MainModule);
-                var editorAttribute = new CustomAttribute(editorConstructor);
-                registerMethod.CustomAttributes.Add(editorAttribute);
-            }
 
-            attribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32,
-                (int)RuntimeInitializeLoadType.AfterAssembliesLoaded));
+            var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+                .Import(assembly.MainModule);
+            var editorAttribute = new CustomAttribute(editorConstructor);
+
+            registerMethod.CustomAttributes.Add(editorAttribute);
             registerMethod.Body = new MethodBody(registerMethod)
             {
                 InitLocals = true
@@ -317,22 +280,12 @@ namespace PurrNet.Codegen
         {
             var registerMethod =
                 new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
-            var attributeType = assembly.MainModule.GetTypeDefinition<RuntimeInitializeOnLoadMethodAttribute>();
-            var constructor = attributeType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
-                .Import(assembly.MainModule);
-            var attribute = new CustomAttribute(constructor);
-            registerMethod.CustomAttributes.Add(attribute);
-            if (isEditor)
-            {
-                var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
-                var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
-                    .Import(assembly.MainModule);
-                var editorAttribute = new CustomAttribute(editorConstructor);
-                registerMethod.CustomAttributes.Add(editorAttribute);
-            }
 
-            attribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32,
-                (int)RuntimeInitializeLoadType.AfterAssembliesLoaded));
+            var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+                .Import(assembly.MainModule);
+            var editorAttribute = new CustomAttribute(editorConstructor);
+            registerMethod.CustomAttributes.Add(editorAttribute);
             registerMethod.Body = new MethodBody(registerMethod)
             {
                 InitLocals = true
