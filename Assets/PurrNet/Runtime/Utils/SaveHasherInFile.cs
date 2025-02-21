@@ -10,7 +10,10 @@ namespace PurrNet
         {
             var hashes = Resources.Load<TextAsset>($"PurrHashes");
             if (hashes == null)
+            {
+                File.WriteAllText("hashes.txt", "its not here bro");
                 return;
+            }
 
             File.WriteAllText("hashes.txt", hashes.text);
 

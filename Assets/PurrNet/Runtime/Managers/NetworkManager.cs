@@ -372,7 +372,7 @@ namespace PurrNet
         {
             // call all static functions with RegisterPackersAttribute on static classes
 
-            var allAssemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             foreach (var assembly in allAssemblies)
             {
@@ -399,7 +399,7 @@ namespace PurrNet
                             {
                                 method.Invoke(null, null);
                             }
-                            catch (System.Exception e)
+                            catch (Exception e)
                             {
                                 Debug.LogError(e);
                                 Debug.LogError("Failed to call " + method.Name + " in " + type.Name);
@@ -419,6 +419,7 @@ namespace PurrNet
                 return;
 
             _hasGeneratedAlready = true;
+
             Hasher.ClearState();
             CallAllRegisters();
         }
@@ -426,11 +427,22 @@ namespace PurrNet
         [UsedImplicitly]
         static void RefreshHashes()
         {
+            if (_hasGeneratedAlready)
+                return;
+
+            _hasGeneratedAlready = true;
+
+            Hasher.ClearState();
+            CallAllRegisters();
+
             // ReSharper disable once Unity.UnknownResource
             var hashes = Resources.Load<TextAsset>("PurrHashes");
 
             if (hashes == null)
+            {
+                PurrLogger.LogError("Failed to load PurrHashes.");
                 return;
+            }
 
             Hasher.ClearState();
 

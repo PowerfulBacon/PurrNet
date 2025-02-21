@@ -17,6 +17,8 @@ namespace PurrNet.Utils
 
         static uint _hashCounter;
 
+        public static uint hashCounter => _hashCounter;
+
         public static uint ActualHash(string txt)
         {
             unchecked
