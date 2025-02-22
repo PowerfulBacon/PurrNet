@@ -1704,7 +1704,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _stopPlayingOnDisconnect: 0
-  _startServerFlags: 8
+  _startServerFlags: 9
   _startClientFlags: 7
   _cookieScope: 1
   _dontDestroyOnLoad: 0
@@ -1760,7 +1760,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _serverPort: 5001
   _maxConnections: 100
-  _address: 165.227.170.186
+  _address: 127.0.0.1
   _timeoutInSeconds: 5
 --- !u!114 &1216416903
 MonoBehaviour:

@@ -26,11 +26,44 @@ namespace PurrNet.Packing
         }
     }
 
+    public readonly struct BitPackerWrapper : IBufferWriter<byte>, IDisposable
+    {
+        public readonly BitPacker packer;
+
+        public BitPackerWrapper(BitPacker packer)
+        {
+            this.packer = packer;
+        }
+
+        public void Advance(int count)
+        {
+            packer.AdvanceBits(count * 9);
+        }
+
+        public Memory<byte> GetMemory(int sizeHint = 0)
+        {
+            packer.EnsureBitsExist(sizeHint * 8);
+            return new Memory<byte>(packer.buffer, packer.positionInBytes, sizeHint);
+        }
+
+        public Span<byte> GetSpan(int sizeHint = 0)
+        {
+            packer.EnsureBitsExist(sizeHint * 8);
+            return new Span<byte>(packer.buffer, packer.positionInBytes, sizeHint);
+        }
+
+        public void Dispose()
+        {
+            packer?.Dispose();
+        }
+    }
+
     [UsedImplicitly]
-    public partial class BitPacker : IDisposable, IBufferWriter<byte>
+    public partial class BitPacker : IDisposable
     {
         private byte[] _buffer;
         private bool _isReading;
+        public byte[] buffer => _buffer;
 
         public bool isWrapper { get; private set; }
 
@@ -65,7 +98,7 @@ namespace PurrNet.Packing
         /// </summary>
         public void PickleInto(BitPacker packer, LZ4Level level = LZ4Level.L00_FAST)
         {
-            LZ4Pickler.Pickle(ToByteData().span, packer, level);
+            LZ4Pickler.Pickle(ToByteData().span, new BitPackerWrapper(packer), level);
         }
 
         /// <summary>
@@ -73,7 +106,7 @@ namespace PurrNet.Packing
         /// </summary>
         public void UnpickleFrom(ByteData data)
         {
-            LZ4Pickler.Unpickle(data.span, this);
+            LZ4Pickler.Unpickle(data.span, new BitPackerWrapper(this));
         }
 
         /// <summary>
@@ -81,7 +114,7 @@ namespace PurrNet.Packing
         /// </summary>
         public void UnpickleFrom(BitPacker data)
         {
-            LZ4Pickler.Unpickle(data.ToByteData().span, this);
+            LZ4Pickler.Unpickle(data.ToByteData().span, new BitPackerWrapper(this));
         }
 
         /// <summary>
@@ -174,7 +207,7 @@ namespace PurrNet.Packing
             _isReading = readMode;
         }
 
-        private void EnsureBitsExist(int bits)
+        public void EnsureBitsExist(int bits)
         {
             int targetPos = positionInBits + bits;
             var bufferBitSize = _buffer.Length * 8;
