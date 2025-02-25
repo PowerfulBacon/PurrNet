@@ -31,7 +31,16 @@ namespace PurrNet.Transports
 
         public ReadOnlySpan<byte> span => new(data, offset, length);
 
+        public ArraySegment<byte> segment => new(data, offset, length);
+
         public static readonly ByteData empty = new(Array.Empty<byte>(), 0, 0);
+
+        public ByteData(ArraySegment<byte> segment)
+        {
+            data = segment.Array;
+            offset = segment.Offset;
+            length = segment.Count;
+        }
 
         public ByteData(byte[] data, int offset, int length)
         {
@@ -57,12 +66,6 @@ namespace PurrNet.Transports
         ReliableUnordered,
 
         /// <summary>
-        /// It ensures that the data is received but the order is not guaranteed.
-        /// They are batched together at the end of the tick.
-        /// </summary>
-        ReliableBatched,
-
-        /// <summary>
         /// Packets are guaranteed to be in order but not guaranteed to be received.
         /// </summary>
         UnreliableSequenced,
@@ -75,13 +78,7 @@ namespace PurrNet.Transports
         /// <summary>
         /// Packets are not guaranteed to be received nor in order.
         /// </summary>
-        Unreliable,
-
-        /// <summary>
-        /// Packets are not guaranteed to be received nor in order.
-        /// They are batched together at the end of the tick.
-        /// </summary>
-        UnreliableBatched,
+        Unreliable
     }
 
     public interface IConnectable

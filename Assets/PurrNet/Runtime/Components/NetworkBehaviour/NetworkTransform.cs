@@ -47,6 +47,9 @@ namespace PurrNet
         private TransformSyncMode _interpolateSettings =
             TransformSyncMode.Position | TransformSyncMode.Rotation | TransformSyncMode.Scale;
 
+        [Tooltip("The maximum amount of buffered ticks to store.\nThis is used for interpolation.")]
+        [SerializeField, PurrLock] private int _maxBufferSize = 2;
+
         [Header("When to Sync")]
         [FormerlySerializedAs("_clientAuth")]
         [Tooltip(
@@ -205,17 +208,17 @@ namespace PurrNet
             if (syncPosition)
             {
                 _position = new Interpolated<Vector3>(interpolatePosition ? Vector3.Lerp : NoInterpolation, sendDelta,
-                    _syncPosition == SyncMode.World ? _trs.position : _trs.localPosition);
+                    _syncPosition == SyncMode.World ? _trs.position : _trs.localPosition, _maxBufferSize);
             }
 
             if (syncRotation)
                 _rotation = new Interpolated<Quaternion>(interpolateRotation ? Quaternion.Lerp : NoInterpolation,
                     sendDelta,
-                    _syncRotation == SyncMode.World ? _trs.rotation : _trs.localRotation);
+                    _syncRotation == SyncMode.World ? _trs.rotation : _trs.localRotation, _maxBufferSize);
 
             if (syncScale)
                 _scale = new Interpolated<Vector3>(interpolateScale ? Vector3.Lerp : NoInterpolation, sendDelta,
-                    _trs.localScale);
+                    _trs.localScale, _maxBufferSize);
         }
 
         protected override void OnSpawned()
