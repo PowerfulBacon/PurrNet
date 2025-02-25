@@ -26,7 +26,10 @@ namespace PurrNet.Transports
         [SerializeField]
         private string _address = "127.0.0.1";
 
+        [Header("Reliability Settings")]
         [SerializeField, Range(0.1f, 5f), PurrLock]
+        [Tooltip("The factor to multiply the round trip time by to calculate the resend delay.\n" +
+                 "If no ack is received in this time, the packet will be resent.")]
         private float _retryLatencyFactor = 1.8f;
 
         public event OnConnected onConnected;
