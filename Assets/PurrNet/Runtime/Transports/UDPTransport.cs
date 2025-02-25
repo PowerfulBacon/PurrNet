@@ -79,7 +79,7 @@ namespace PurrNet.Transports
 
         private void Awake()
         {
-            Ruffles.Utils.Logging.CurrentLogLevel = LogLevel.Warning;
+            Ruffles.Utils.Logging.CurrentLogLevel = LogLevel.Error;
         }
 
         public void RaiseDataReceived(Connection conn, ByteData data, bool asServer)
