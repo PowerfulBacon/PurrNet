@@ -190,7 +190,9 @@ namespace PurrNet
         private void UpdateSerializedDict(SyncDictionaryChange<TKey, TValue> _)
         {
             if (!UnityEditor.EditorApplication.isPlaying) return;
+            if (_dict == null) return;
             _serializedDict.FromDictionary(_dict);
+            if (!parent) return;
             UnityEditor.EditorUtility.SetDirty(parent);
         }
 #endif
