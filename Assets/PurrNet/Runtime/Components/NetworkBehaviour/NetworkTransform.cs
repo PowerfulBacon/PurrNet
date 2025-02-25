@@ -26,6 +26,12 @@ namespace PurrNet
         [UsedImplicitly] Local
     }
 
+    public enum InterpolationTiming
+    {
+        Update,
+        LateUpdate
+    }
+
     public sealed class NetworkTransform : NetworkIdentity, ITick
     {
         [Header("What to Sync")]
@@ -56,6 +62,9 @@ namespace PurrNet
             "If true, the client can send transform data to the server. If false, the client can't send transform data to the server.")]
         [SerializeField, PurrLock]
         private bool _ownerAuth = true;
+
+        [SerializeField]
+        private InterpolationTiming _interpolationTiming = InterpolationTiming.Update;
 
         [Tooltip(
             "Will enforce the character controller getting enabled and disabled when attempting to sync the transform - CAUTION - Physics events can/will be called multiple times")]
@@ -274,6 +283,18 @@ namespace PurrNet
         }
 
         private void Update()
+        {
+            if (_interpolationTiming == InterpolationTiming.Update)
+                Interpolate();
+        }
+
+        private void LateUpdate()
+        {
+            if (_interpolationTiming == InterpolationTiming.LateUpdate)
+                Interpolate();
+        }
+
+        private void Interpolate()
         {
             if (!isSpawned)
                 return;

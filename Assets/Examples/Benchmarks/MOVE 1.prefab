@@ -167,6 +167,6 @@ MonoBehaviour:
   _syncScale: 1
   _syncParent: 1
   _interpolateSettings: 7
+  _maxBufferSize: 20
   _ownerAuth: 1
-  _sendIntervalInTicks: 0
   _characterControllerPatch: 0

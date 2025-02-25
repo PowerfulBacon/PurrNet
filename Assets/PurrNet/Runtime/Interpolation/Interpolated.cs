@@ -46,10 +46,7 @@ namespace PurrNet
         public void Add(T value)
         {
             if (_buffer.Count >= maxBufferSize)
-            {
                 _buffer.RemoveAt(0);
-            }
-
             _buffer.Add(value);
         }
 
