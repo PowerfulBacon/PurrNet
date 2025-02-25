@@ -49,18 +49,21 @@ namespace PurrNet
         private float _totalDataSent;
         private float _lastDataCheckTime;
 
-        private void Start()
+        private void Awake()
         {
             _networkManager = NetworkManager.main;
+            _networkManager.onServerConnectionState += OnServerConnectionState;
+            _networkManager.onClientConnectionState += OnClientConnectionState;
+        }
+
+        private void Start()
+        {
             if (!_networkManager)
             {
                 PurrLogger.LogError($"StatisticsManager failed to find a NetworkManager in the scene. Disabling...");
                 enabled = false;
                 return;
             }
-
-            _networkManager.onServerConnectionState += OnServerConnectionState;
-            _networkManager.onClientConnectionState += OnClientConnectionState;
 
             _labelStyle = new GUIStyle
             {
@@ -243,7 +246,12 @@ namespace PurrNet
 
         private void SendPingCheck()
         {
-            _playersClientBroadcaster.SendToServer(new PingMessage(), Channel.ReliableUnordered);
+            _playersClientBroadcaster.SendToServer(
+                new PingMessage { 
+                    sendTime = _tickManager.localTick,
+                    realSendTime = Time.time 
+                }, 
+                Channel.ReliableUnordered);
             _lastPingSendTick = _tickManager.localTick;
         }
 
@@ -251,46 +259,94 @@ namespace PurrNet
         {
             if (asServer)
             {
-                _playersServerBroadcaster.Send(sender, new PingMessage(), Channel.ReliableUnordered);
+                _playersServerBroadcaster.Send(sender, 
+                    new PingMessage { 
+                        sendTime = msg.sendTime,
+                        realSendTime = msg.realSendTime 
+                    }, 
+                    Channel.ReliableUnordered);
                 return;
             }
 
-            if (_tickManager.TickToTime((uint)_pingStats.Count) >
-                0.33f) //0.33f is the time for which we take the average
-                _pingStats.Dequeue();
-            _pingStats.Enqueue(Mathf.Max(0,
-                Mathf.FloorToInt((Time.time - _pingHistory.Dequeue()) * 1000) - 1000 / _tickManager.tickRate * 2));
-
-            var oldPing = ping;
-            ping = (int)_pingStats.Average();
-            jitter = Mathf.Abs(ping - oldPing);
+            if (_pingHistory.Count > 0)
+            {
+                float sentTime = msg.realSendTime;
+                int currentPing = Mathf.Max(0, Mathf.FloorToInt((Time.time - sentTime) * 1000));
+                currentPing -= Mathf.Min(currentPing, Mathf.RoundToInt((_tickManager.tickDelta * 3) * 1000));
+        
+                _pingHistory.Dequeue();
+        
+                if (_pingStats.Count >= 10)
+                    _pingStats.Dequeue();
+            
+                _pingStats.Enqueue(currentPing);
+        
+                ping = (int)_pingStats.Average();
+        
+                if (_pingStats.Count > 1)
+                    jitter = Mathf.RoundToInt(_pingStats.Select(p => Mathf.Abs(p - (float)ping)).Average());
+                else
+                    jitter = 0;
+            }
         }
+        
+        private int _suspiciousLowPingCount;
+        private int _previousValidPing;
 
+        private uint _packetSequence;
+        private int _packetsSent = 0;
+        private int _packetsReceived = 0;
+        private float _packetLossCalculationTime = 0f;
+        
         private void HandlePacketCheck()
         {
-            if (_receivedPacketTimes.Count > 0 && _receivedPacketTimes[0] < Time.time - 1)
-                _receivedPacketTimes.RemoveAt(0);
-
+            float currentTime = Time.time;
+    
+            int removeCount = 0;
+            foreach (float packetTime in _receivedPacketTimes)
+            {
+                if (packetTime < currentTime - 1)
+                    removeCount++;
+                else
+                    break;
+            }
+    
+            if (removeCount > 0)
+                _receivedPacketTimes.RemoveRange(0, removeCount);
+    
             if (_lastPacketSendTick + _tickManager.TimeToTick(1f / _packetsToSendPerSec) > _tickManager.localTick)
                 return;
-
+    
             _lastPacketSendTick = _tickManager.localTick;
-            _playersClientBroadcaster.SendToServer(new PacketMessage(), Channel.Unreliable);
+            _packetsSent++;
+            _playersClientBroadcaster.SendToServer(new PacketMessage { sequenceId = _packetSequence++ }, Channel.Unreliable);
+    
+            if (currentTime - _packetLossCalculationTime >= 1f)
+            {
+                if (_packetsSent > 0)
+                {
+                    packetLoss = 100 - Mathf.FloorToInt((_packetsReceived / (float)_packetsSent) * 100);
+            
+                    if (_tickManager.localTick < 5 * _tickManager.tickRate)
+                        packetLoss = 0;
+                }
+        
+                _packetsSent = 0;
+                _packetsReceived = 0;
+                _packetLossCalculationTime = currentTime;
+            }
         }
 
         private void ReceivePacket(PlayerID sender, PacketMessage msg, bool asServer)
         {
             if (asServer)
             {
-                _playersServerBroadcaster.Send(sender, new PacketMessage(), Channel.Unreliable);
+                _playersServerBroadcaster.Send(sender, new PacketMessage { sequenceId = msg.sequenceId }, Channel.Unreliable);
                 return;
             }
 
-            packetLoss = 100 - Mathf.FloorToInt((_receivedPacketTimes.Count / (float)_packetsToSendPerSec) * 100);
-            if (_tickManager.localTick < 10 * _tickManager.tickRate || packetLoss < 0)
-                packetLoss = 0;
-
             _receivedPacketTimes.Add(Time.time);
+            _packetsReceived++;
         }
 
         private void OnDataReceived(Connection conn, ByteData data, bool asServer)
@@ -305,10 +361,13 @@ namespace PurrNet
 
         public struct PingMessage : Packing.IPackedAuto
         {
+            public uint sendTime;
+            public float realSendTime;
         }
 
         public struct PacketMessage : Packing.IPackedAuto
         {
+            public uint sequenceId;
         }
 
         public enum StatisticsPlacement
