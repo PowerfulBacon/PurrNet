@@ -52,9 +52,13 @@ namespace PurrNet
         [Header("How to Sync")] [Tooltip("What to interpolate when syncing the transform.")] [SerializeField, PurrLock]
         private TransformSyncMode _interpolateSettings =
             TransformSyncMode.Position | TransformSyncMode.Rotation | TransformSyncMode.Scale;
-
+        [Tooltip("The minimum amount of buffered ticks to store.\nThis is used for interpolation.")]
+        [SerializeField, PurrLock, Min(1)] private int _minBufferSize = 1;
         [Tooltip("The maximum amount of buffered ticks to store.\nThis is used for interpolation.")]
-        [SerializeField, PurrLock] private int _maxBufferSize = 2;
+        [SerializeField, PurrLock, Min(1)] private int _maxBufferSize = 2;
+        [Tooltip("Will enforce the character controller getting enabled and disabled when attempting to sync the transform - CAUTION - Physics events can/will be called multiple times")]
+        [SerializeField]
+        private bool _characterControllerPatch;
 
         [Header("When to Sync")]
         [FormerlySerializedAs("_clientAuth")]
@@ -65,11 +69,6 @@ namespace PurrNet
 
         [SerializeField]
         private InterpolationTiming _interpolationTiming = InterpolationTiming.Update;
-
-        [Tooltip(
-            "Will enforce the character controller getting enabled and disabled when attempting to sync the transform - CAUTION - Physics events can/will be called multiple times")]
-        [SerializeField]
-        private bool _characterControllerPatch;
 
         /// <summary>
         /// Whether to sync the parent of the transform. Only works if the parent is a NetworkIdentiy.
@@ -217,17 +216,17 @@ namespace PurrNet
             if (syncPosition)
             {
                 _position = new Interpolated<Vector3>(interpolatePosition ? Vector3.Lerp : NoInterpolation, sendDelta,
-                    _syncPosition == SyncMode.World ? _trs.position : _trs.localPosition, _maxBufferSize);
+                    _syncPosition == SyncMode.World ? _trs.position : _trs.localPosition, _maxBufferSize, _minBufferSize);
             }
 
             if (syncRotation)
                 _rotation = new Interpolated<Quaternion>(interpolateRotation ? Quaternion.Lerp : NoInterpolation,
                     sendDelta,
-                    _syncRotation == SyncMode.World ? _trs.rotation : _trs.localRotation, _maxBufferSize);
+                    _syncRotation == SyncMode.World ? _trs.rotation : _trs.localRotation, _maxBufferSize, _minBufferSize);
 
             if (syncScale)
                 _scale = new Interpolated<Vector3>(interpolateScale ? Vector3.Lerp : NoInterpolation, sendDelta,
-                    _trs.localScale, _maxBufferSize);
+                    _trs.localScale, _maxBufferSize, _minBufferSize);
         }
 
         protected override void OnSpawned()

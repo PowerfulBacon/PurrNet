@@ -1,9 +1,21 @@
-using PurrNet.Logging;
 using PurrNet.Modules;
 using UnityEngine;
 
 namespace PurrNet.Packing
 {
+    public struct Angle
+    {
+        public float value;
+
+        public Angle(float value)
+        {
+            this.value = value;
+        }
+
+        public static implicit operator Angle(float value) => new Angle(value);
+        public static implicit operator float(Angle angle) => angle.value;
+    }
+
     public static class DeltaPackFloats
     {
         [UsedByIL]
@@ -18,6 +30,18 @@ namespace PurrNet.Packing
             ushort rawValue = default;
             Packer<ushort>.Read(packer, ref rawValue);
             value = Half.FromRawValue(rawValue);
+        }
+
+        [UsedByIL]
+        private static void WriteHalf(BitPacker packer, Angle value)
+        {
+            Packer<float>.Write(packer, value.value);
+        }
+
+        [UsedByIL]
+        private static void ReadHalf(BitPacker packer, ref Angle value)
+        {
+            Packer<float>.Read(packer, ref value.value);
         }
 
         [UsedByIL]
@@ -123,6 +147,64 @@ namespace PurrNet.Packing
                 else
                 {
                     Packer<float>.Read(packer, ref value);
+                }
+            }
+            else value = oldvalue;
+        }
+
+        public const float ANGLE_PRECISION = 0.0001f;
+
+        [UsedByIL]
+        private static bool WriteAngle(BitPacker packer, Angle oldvalue, Angle newvalue)
+        {
+            float delta = newvalue - oldvalue;
+
+            if (System.Math.Abs(delta) < ANGLE_PRECISION)
+            {
+                Packer<bool>.Write(packer, false);
+                return false;
+            }
+
+            Packer<bool>.Write(packer, true);
+
+            var deltaAsInt = Mathf.RoundToInt(delta / ANGLE_PRECISION);
+            var estimatedNewValue = oldvalue + deltaAsInt * ANGLE_PRECISION;
+            bool isCorrect = Mathf.Abs(newvalue - estimatedNewValue) < ANGLE_PRECISION * 2;
+
+            Packer<bool>.Write(packer, isCorrect);
+
+            if (isCorrect)
+            {
+                Packer<PackedInt>.Write(packer, deltaAsInt);
+            }
+            else
+            {
+                Packer<float>.Write(packer, newvalue.value);
+            }
+
+            return true;
+        }
+
+        [UsedByIL]
+        private static void ReadAngle(BitPacker packer, Angle oldvalue, ref Angle value)
+        {
+            bool hasChanged = default;
+            Packer<bool>.Read(packer, ref hasChanged);
+
+            if (hasChanged)
+            {
+                bool isCorrect = default;
+                Packer<bool>.Read(packer, ref isCorrect);
+
+                if (isCorrect)
+                {
+                    PackedInt packed = default;
+                    Packer<PackedInt>.Read(packer, ref packed);
+                    value.value = oldvalue + packed.value * ANGLE_PRECISION;
+                }
+                else
+                {
+                    Packer<float>.Read(packer, ref value.value);
                 }
             }
             else value = oldvalue;

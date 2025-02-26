@@ -12,6 +12,7 @@ namespace PurrNet
         private T _lastValue;
         private float _timer;
         private float _tickDelta;
+        protected bool _waitForMinBufferSize;
 
         public int bufferSize => _buffer.Count;
 
@@ -28,19 +29,23 @@ namespace PurrNet
 
         public int maxBufferSize { get; set; }
 
-        public Interpolated(LerpFunction<T> lerp, float tickDelta, T initialValue = default, int maxBufferSize = 2)
+        public int minBufferSize { get; set; }
+
+        public Interpolated(LerpFunction<T> lerp, float tickDelta, T initialValue = default, int maxBufferSize = 2, int minBufferSize = 1)
         {
             _lerp = lerp ?? throw new ArgumentNullException(nameof(lerp));
 
             if (tickDelta <= 0f)
                 throw new ArgumentException("tickDelta must be greater than 0", nameof(tickDelta));
-            if (maxBufferSize <= 0)
-                throw new ArgumentException("maxBufferSize must be greater than 0", nameof(maxBufferSize));
+
+            _buffer = new List<T>(maxBufferSize);
+
+            this.maxBufferSize = maxBufferSize;
+            this.minBufferSize = minBufferSize;
 
             _tickDelta = tickDelta;
-            this.maxBufferSize = maxBufferSize;
             _lastValue = initialValue;
-            _buffer = new List<T>(maxBufferSize);
+            _waitForMinBufferSize = true;
         }
 
         public void Add(T value)
@@ -59,9 +64,21 @@ namespace PurrNet
 
         public T Advance(float deltaTime)
         {
+            if (_waitForMinBufferSize)
+            {
+                if (_buffer.Count < minBufferSize)
+                {
+                    _timer = 0f;
+                    return _lastValue;
+                }
+
+                _waitForMinBufferSize = false;
+            }
+
             if (_buffer.Count <= 0)
             {
                 _timer = 0f;
+                _waitForMinBufferSize = true;
                 return _lastValue;
             }
 
@@ -77,6 +94,7 @@ namespace PurrNet
                 if (_buffer.Count <= 0)
                 {
                     _timer = 0f;
+                    _waitForMinBufferSize = true;
                     return _lastValue;
                 }
             }

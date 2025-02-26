@@ -109,9 +109,9 @@ namespace PurrNet.Packing
             int flagPos = packer.AdvanceBits(1);
             bool isEqual;
 
-            isEqual = DeltaPacker<float>.Write(packer, oldvalue.x, newvalue.x);
-            isEqual = DeltaPacker<float>.Write(packer, oldvalue.y, newvalue.y) || isEqual;
-            isEqual = DeltaPacker<float>.Write(packer, oldvalue.z, newvalue.z) || isEqual;
+            isEqual = DeltaPacker<Angle>.Write(packer, oldvalue.x, newvalue.x);
+            isEqual = DeltaPacker<Angle>.Write(packer, oldvalue.y, newvalue.y) || isEqual;
+            isEqual = DeltaPacker<Angle>.Write(packer, oldvalue.z, newvalue.z) || isEqual;
             isEqual = DeltaPacker<bool>.Write(packer, oldvalue.w < 0, newvalue.w < 0) || isEqual;
 
             packer.WriteAt(flagPos, isEqual);
@@ -128,18 +128,20 @@ namespace PurrNet.Packing
 
             if (hasChanged)
             {
-                DeltaPacker<float>.Read(packer, oldvalue.x, ref value.x);
-                DeltaPacker<float>.Read(packer, oldvalue.y, ref value.y);
-                DeltaPacker<float>.Read(packer, oldvalue.z, ref value.z);
+                Angle x = default, y = default, z = default;
+
+                DeltaPacker<Angle>.Read(packer, oldvalue.x, ref x);
+                DeltaPacker<Angle>.Read(packer, oldvalue.y, ref y);
+                DeltaPacker<Angle>.Read(packer, oldvalue.z, ref z);
+
 
                 bool oldW = oldvalue.w < 0;
                 DeltaPacker<bool>.Read(packer, oldW, ref oldW);
 
-                var w = (Half)Mathf.Sqrt(Mathf.Max(0, 1 - value.x * value.x - value.y * value.y - value.z * value.z));
+                var w = Mathf.Sqrt(Mathf.Max(0, 1 - x * x - y * y - z * z));
+                if (oldW) w = -w;
 
-                if (oldW)
-                    value.w = -w;
-                else value.w = w;
+                value = new Quaternion(x, y, z, w);
             }
             else value = oldvalue;
         }
