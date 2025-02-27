@@ -152,7 +152,7 @@ namespace PurrNet.Packing
             else value = oldvalue;
         }
 
-        public const float ANGLE_PRECISION = 0.0001f;
+        public const float ANGLE_PRECISION = 0.0005f;
 
         [UsedByIL]
         private static bool WriteAngle(BitPacker packer, Angle oldvalue, Angle newvalue)

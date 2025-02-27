@@ -249,7 +249,10 @@ namespace PurrNet.Transports
                 ChallengeDifficulty = 20, // Difficulty 20 is fairly hard
                 ChannelTypes = channels,
                 EnableBandwidthTracking = false,
-                ReliabilityResendRoundtripMultiplier = _retryLatencyFactor
+                ReliabilityResendRoundtripMultiplier = _retryLatencyFactor,
+                LogicDelay = 10,
+                EnableSyncronizationEvent = false,
+                EnableSyncronizedCallbacks = false
             });
 
             if (!_client.Start())
@@ -296,7 +299,10 @@ namespace PurrNet.Transports
                 ChallengeDifficulty = 20, // Difficulty 20 is fairly hard
                 ChannelTypes = channels,
                 EnableBandwidthTracking = false,
-                ReliabilityResendRoundtripMultiplier = _retryLatencyFactor
+                ReliabilityResendRoundtripMultiplier = _retryLatencyFactor,
+                LogicDelay = 10,
+                EnableSyncronizationEvent = false,
+                EnableSyncronizedCallbacks = false
             });
 
             if (listenerState is ConnectionState.Disconnected or ConnectionState.Disconnecting)
