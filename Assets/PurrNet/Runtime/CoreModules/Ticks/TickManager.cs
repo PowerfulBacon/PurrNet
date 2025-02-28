@@ -75,6 +75,7 @@ namespace PurrNet.Modules
         public readonly double tickDeltaDouble;
 
         public event Action onPreTick, onTick, onPostTick;
+        public event Action onReliablePreTick, onReliableTick, onReliablePostTick;
 
         private readonly NetworkManager _networkManager;
         private uint _syncedTick;
@@ -116,21 +117,30 @@ namespace PurrNet.Modules
         private void HandleTick()
         {
             int ticksHandled = 0;
-            while (_lastTickTime + tickDelta <= Time.unscaledTime && ticksHandled < MaxTickPerFrame)
+
+            while (_lastTickTime + tickDelta <= Time.unscaledTime)
             {
                 _lastTickTime += tickDelta;
                 localTick++;
                 syncedTick++;
                 floatingPoint = 0;
 
-                onPreTick?.Invoke();
-                onTick?.Invoke();
-                onPostTick?.Invoke();
+                if (ticksHandled < MaxTickPerFrame)
+                {
+                    onPreTick?.Invoke();
+                    onTick?.Invoke();
+                    onPostTick?.Invoke();
+                }
+
+                onReliablePreTick?.Invoke();
+                onReliableTick?.Invoke();
+                onReliablePostTick?.Invoke();
+
                 ticksHandled++;
             }
 
-            if (ticksHandled >= MaxTickPerFrame)
-                _lastTickTime = Time.unscaledTime;
+            /*if (ticksHandled >= MaxTickPerFrame)
+                _lastTickTime = Time.unscaledTime;*/
         }
 
         /// <summary>
