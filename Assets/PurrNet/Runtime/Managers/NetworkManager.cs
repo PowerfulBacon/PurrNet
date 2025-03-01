@@ -80,7 +80,7 @@ namespace PurrNet
         [Tooltip("Whether the network manager should not be destroyed on load. " +
                  "If true, the network manager will be moved to the DontDestroyOnLoad scene.")]
         [SerializeField]
-        private bool _dontDestroyOnLoad = true;
+        private bool _dontDestroyOnLoad;
 
         [PurrDocs("systems-and-modules/network-manager/transports")] [SerializeField]
         private GenericTransport _transport;
