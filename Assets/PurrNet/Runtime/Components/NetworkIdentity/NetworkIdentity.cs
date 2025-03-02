@@ -760,6 +760,20 @@ namespace PurrNet
         private PlayerID? _pendingOwnershipRequest;
 
         /// <summary>
+        /// Evaluates the visibility of this object.
+        /// This will recalculate the observers of this object.
+        /// This is server specific.
+        /// Re-evaulation includes all children.
+        /// </summary>
+        public void EvaluateVisibility()
+        {
+            if (!isServer)
+                return;
+
+            _serverHierarchy.EvaluateVisibility(transform);
+        }
+
+        /// <summary>
         /// Gives ownership of this object to the player.
         /// </summary>
         /// <param name="player">PlayerID to give ownership to</param>

@@ -285,11 +285,9 @@ namespace PurrNet.Transports
             return channel switch
             {
                 Channel.ReliableUnordered => DeliveryMethod.ReliableUnordered,
-                Channel.ReliableBatched => DeliveryMethod.ReliableUnordered,
                 Channel.UnreliableSequenced => DeliveryMethod.Sequenced,
                 Channel.ReliableOrdered => DeliveryMethod.ReliableOrdered,
                 Channel.Unreliable => DeliveryMethod.Unreliable,
-                Channel.UnreliableBatched => DeliveryMethod.Unreliable,
                 _ => DeliveryMethod.Unreliable
             };
         }

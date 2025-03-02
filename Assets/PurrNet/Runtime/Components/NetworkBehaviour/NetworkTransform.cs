@@ -26,6 +26,12 @@ namespace PurrNet
         [UsedImplicitly] Local
     }
 
+    public enum InterpolationTiming
+    {
+        Update,
+        LateUpdate
+    }
+
     public sealed class NetworkTransform : NetworkIdentity, ITick
     {
         [Header("What to Sync")]
@@ -46,6 +52,13 @@ namespace PurrNet
         [Header("How to Sync")] [Tooltip("What to interpolate when syncing the transform.")] [SerializeField, PurrLock]
         private TransformSyncMode _interpolateSettings =
             TransformSyncMode.Position | TransformSyncMode.Rotation | TransformSyncMode.Scale;
+        [Tooltip("The minimum amount of buffered ticks to store.\nThis is used for interpolation.")]
+        [SerializeField, PurrLock, Min(1)] private int _minBufferSize = 1;
+        [Tooltip("The maximum amount of buffered ticks to store.\nThis is used for interpolation.")]
+        [SerializeField, PurrLock, Min(1)] private int _maxBufferSize = 2;
+        [Tooltip("Will enforce the character controller getting enabled and disabled when attempting to sync the transform - CAUTION - Physics events can/will be called multiple times")]
+        [SerializeField]
+        private bool _characterControllerPatch;
 
         [Header("When to Sync")]
         [FormerlySerializedAs("_clientAuth")]
@@ -54,10 +67,8 @@ namespace PurrNet
         [SerializeField, PurrLock]
         private bool _ownerAuth = true;
 
-        [Tooltip(
-            "Will enforce the character controller getting enabled and disabled when attempting to sync the transform - CAUTION - Physics events can/will be called multiple times")]
         [SerializeField]
-        private bool _characterControllerPatch;
+        private InterpolationTiming _interpolationTiming = InterpolationTiming.Update;
 
         /// <summary>
         /// Whether to sync the parent of the transform. Only works if the parent is a NetworkIdentiy.
@@ -205,17 +216,17 @@ namespace PurrNet
             if (syncPosition)
             {
                 _position = new Interpolated<Vector3>(interpolatePosition ? Vector3.Lerp : NoInterpolation, sendDelta,
-                    _syncPosition == SyncMode.World ? _trs.position : _trs.localPosition);
+                    _syncPosition == SyncMode.World ? _trs.position : _trs.localPosition, _maxBufferSize, _minBufferSize);
             }
 
             if (syncRotation)
                 _rotation = new Interpolated<Quaternion>(interpolateRotation ? Quaternion.Lerp : NoInterpolation,
                     sendDelta,
-                    _syncRotation == SyncMode.World ? _trs.rotation : _trs.localRotation);
+                    _syncRotation == SyncMode.World ? _trs.rotation : _trs.localRotation, _maxBufferSize, _minBufferSize);
 
             if (syncScale)
                 _scale = new Interpolated<Vector3>(interpolateScale ? Vector3.Lerp : NoInterpolation, sendDelta,
-                    _trs.localScale);
+                    _trs.localScale, _maxBufferSize, _minBufferSize);
         }
 
         protected override void OnSpawned()
@@ -271,6 +282,18 @@ namespace PurrNet
         }
 
         private void Update()
+        {
+            if (_interpolationTiming == InterpolationTiming.Update)
+                Interpolate();
+        }
+
+        private void LateUpdate()
+        {
+            if (_interpolationTiming == InterpolationTiming.LateUpdate)
+                Interpolate();
+        }
+
+        private void Interpolate()
         {
             if (!isSpawned)
                 return;
