@@ -551,6 +551,21 @@ namespace PurrNet.Modules
             HashSetPool<NetworkIdentity>.Destroy(roots);
         }
 
+        public void EvaluateVisibility(Transform root)
+        {
+            if (_asServer && _scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
+            {
+                foreach (var player in players)
+                    _visibility.RefreshVisibilityForGameObject(player, root);
+            }
+        }
+
+        public void EvaluateVisibility(PlayerID player, Transform root)
+        {
+            if (_asServer && _scenePlayers.IsPlayerLoadedInScene(player, _sceneId))
+                _visibility.RefreshVisibilityForGameObject(player, root);
+        }
+
         private int _nextPacketIdx;
 
         struct PlayerNid
