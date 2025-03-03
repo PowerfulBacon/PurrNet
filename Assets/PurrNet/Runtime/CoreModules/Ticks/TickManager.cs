@@ -125,15 +125,18 @@ namespace PurrNet.Modules
                 syncedTick++;
                 floatingPoint = 0;
 
-                if (ticksHandled < MaxTickPerFrame)
-                {
-                    onPreTick?.Invoke();
-                    onTick?.Invoke();
-                    onPostTick?.Invoke();
-                }
+                bool triggerNormalTicks = ticksHandled < MaxTickPerFrame;
 
+                if (triggerNormalTicks)
+                    onPreTick?.Invoke();
                 onReliablePreTick?.Invoke();
+
+                if (triggerNormalTicks)
+                    onTick?.Invoke();
                 onReliableTick?.Invoke();
+
+                if (triggerNormalTicks)
+                    onPostTick?.Invoke();
                 onReliablePostTick?.Invoke();
 
                 ticksHandled++;
