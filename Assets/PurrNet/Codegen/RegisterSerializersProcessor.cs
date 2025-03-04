@@ -30,7 +30,6 @@ namespace PurrNet.Codegen
             return true;
         }
 
-        // static void ReadHalf(BitPacker packer, Half oldvalue, ref Half value)
         static bool IsDeltaReadMethod(MethodDefinition method, out TypeReference type)
         {
             type = null;
@@ -56,9 +55,6 @@ namespace PurrNet.Codegen
         {
             type = null;
 
-            /*if (method.HasGenericParameters || method.ContainsGenericParameter)
-                return false;*/
-
             if (method.Parameters.Count != 2)
                 return false;
 
@@ -75,9 +71,6 @@ namespace PurrNet.Codegen
         static bool IsReadMethod(MethodDefinition method, out TypeReference type)
         {
             type = null;
-
-            /*if (method.HasGenericParameters || method.ContainsGenericParameter)
-                return false;*/
 
             if (method.Parameters.Count != 2)
                 return false;
@@ -124,7 +117,6 @@ namespace PurrNet.Codegen
                 if (method.HasGenericParameters || method.ContainsGenericParameter)
                     continue;
 
-                // Skip non-static classes
                 if (!method.IsStatic)
                     break;
 
@@ -243,7 +235,6 @@ namespace PurrNet.Codegen
                     delegateConstructorRef.Parameters.Add(new ParameterDefinition(param.Name, param.Attributes,
                         param.ParameterType));
 
-                // Packer.RegisterWriter<int>(Write);
                 il.Emit(OpCodes.Ldnull);
                 il.Emit(OpCodes.Ldftn, writeMethod);
                 il.Emit(OpCodes.Newobj, delegateConstructorRef);
