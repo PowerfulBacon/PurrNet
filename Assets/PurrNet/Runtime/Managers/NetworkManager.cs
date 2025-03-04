@@ -413,7 +413,7 @@ namespace PurrNet
         private static bool _hasGeneratedAlready;
 
         [UsedImplicitly]
-        static void CalculateHashes()
+        public static void CalculateHashes()
         {
             if (_hasGeneratedAlready)
                 return;

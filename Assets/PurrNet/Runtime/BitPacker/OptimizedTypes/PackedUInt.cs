@@ -158,43 +158,6 @@ namespace PurrNet.Packing
 
         public static long ZigzagDecode(ulong i) => ((long)(i >> 1) & 0x7FFFFFFFFFFFFFFFL) ^ ((long)(i << 63) >> 63);
 
-        static int CountLeadingZeroBits(uint value)
-        {
-            if (value == 0) return 32; // Special case for zero
-
-            int count = 0;
-            if ((value & 0xFFFF0000) == 0)
-            {
-                count += 16;
-                value <<= 16;
-            }
-
-            if ((value & 0xFF000000) == 0)
-            {
-                count += 8;
-                value <<= 8;
-            }
-
-            if ((value & 0xF0000000) == 0)
-            {
-                count += 4;
-                value <<= 4;
-            }
-
-            if ((value & 0xC0000000) == 0)
-            {
-                count += 2;
-                value <<= 2;
-            }
-
-            if ((value & 0x80000000) == 0)
-            {
-                count += 1;
-            }
-
-            return count;
-        }
-
         static int CountLeadingZeroBits(ulong value)
         {
             if (value == 0) return 64; // Special case for zero
@@ -238,63 +201,18 @@ namespace PurrNet.Packing
             return count;
         }
 
-        private const int SEGMENTS = 8;
-        const int TOTAL_BITS = 32;
-        const int CHUNK = TOTAL_BITS / SEGMENTS;
-
         [UsedByIL]
         public static void Write(BitPacker packer, PackedUInt value)
         {
-            int trailingZeroes = CountLeadingZeroBits(value.value);
-            int emptyChunks = trailingZeroes / CHUNK;
-            int segmentCount = SEGMENTS - emptyChunks;
-            int pointer = 0;
-
-            if (segmentCount == 0)
-            {
-                packer.WriteBits(0, 1);
-                return;
-            }
-
-            packer.WriteBits(1, 1);
-
-            const uint mask = (uint.MaxValue >> (TOTAL_BITS - CHUNK));
-
-            while (segmentCount > 0)
-            {
-                uint isolated = (value.value >> pointer) & mask;
-                packer.WriteBits(isolated, CHUNK);
-                pointer += CHUNK;
-
-                --segmentCount;
-                packer.WriteBits(segmentCount == 0 ? 0u : 1u, 1);
-            }
+            Write(packer, new PackedULong(value.value));
         }
 
         [UsedByIL]
         public static void Read(BitPacker packer, ref PackedUInt value)
         {
-            // Check initial control bit
-            if (packer.ReadBits(1) == 0)
-            {
-                value.value = 0;
-                return;
-            }
-
-            uint result = 0;
-            int pointer = 0;
-            bool continueReading;
-
-            do
-            {
-                uint chunk = (uint)packer.ReadBits(CHUNK);
-                result |= chunk << pointer;
-                pointer += CHUNK;
-
-                continueReading = packer.ReadBits(1) == 1;
-            } while (continueReading);
-
-            value.value = result;
+            PackedULong packed = default;
+            Read(packer, ref packed);
+            value = new PackedUInt((uint)packed.value);
         }
 
         [UsedByIL]
@@ -312,68 +230,90 @@ namespace PurrNet.Packing
             value = new PackedInt(ZigzagDecode(packed.value));
         }
 
-        const int PREFIX_BITS_2 = 3;
-        const int TOTAL_BITS_2 = 16;
-        const int MAX_COUNT_2 = 1 << PREFIX_BITS_2;
-        const int CHUNK_2 = TOTAL_BITS_2 / MAX_COUNT_2;
-
         [UsedByIL]
         public static void Write(BitPacker packer, PackedUShort value)
         {
-            int trailingZeroes = CountLeadingZeroBits(value.value) - TOTAL_BITS_2;
-            int emptyChunks = trailingZeroes / CHUNK_2;
-            int fullBytes = Mathf.Clamp(MAX_COUNT_2 - emptyChunks, 1, MAX_COUNT_2);
-            packer.WriteBits((ulong)(fullBytes - 1), PREFIX_BITS_2);
-            byte numberBits = (byte)(fullBytes * CHUNK_2);
-            packer.WriteBits(value.value, numberBits);
+            var packed = new PackedULong(value.value);
+            Write(packer, packed);
         }
 
         [UsedByIL]
         public static void Read(BitPacker packer, ref PackedUShort value)
         {
-            var fullBytes = packer.ReadBits(PREFIX_BITS_2) + 1;
-            int emptyChunks = MAX_COUNT_2 - (int)fullBytes;
-            byte numberBits = (byte)(TOTAL_BITS_2 - emptyChunks * CHUNK_2);
-            value = new PackedUShort((ushort)packer.ReadBits(numberBits));
+            PackedULong packed = default;
+            Read(packer, ref packed);
+            value = new PackedUShort((ushort)packed.value);
         }
 
         [UsedByIL]
         public static void Write(BitPacker packer, PackedShort value)
         {
-            Write(packer, new PackedUShort(ZigzagEncode(value.value)));
+            Write(packer, new PackedULong(ZigzagEncode(value.value)));
         }
 
         [UsedByIL]
         public static void Read(BitPacker packer, ref PackedShort value)
         {
-            PackedUShort packed = default;
+            PackedULong packed = default;
             Read(packer, ref packed);
-            value = new PackedShort(ZigzagDecode(packed.value));
+            value = new PackedShort((short)ZigzagDecode(packed.value));
         }
 
-        const int PREFIX_BITS_3 = 5;
-        const int TOTAL_BITS_3 = 64;
-        const int MAX_COUNT_3 = 1 << PREFIX_BITS_3;
-        const int CHUNK_3 = TOTAL_BITS_3 / MAX_COUNT_3;
+        private const int SEGMENTS = 16;
+        const int TOTAL_BITS = 64;
+        const int CHUNK = TOTAL_BITS / SEGMENTS;
 
         [UsedByIL]
         public static void Write(BitPacker packer, PackedULong value)
         {
             int trailingZeroes = CountLeadingZeroBits(value.value);
-            int emptyChunks = trailingZeroes / CHUNK_3;
-            int fullBytes = Mathf.Clamp(MAX_COUNT_3 - emptyChunks, 1, MAX_COUNT_3);
-            packer.WriteBits((ulong)(fullBytes - 1), PREFIX_BITS_3);
-            byte numberBits = (byte)(fullBytes * CHUNK_3);
-            packer.WriteBits(value.value, numberBits);
+            int emptyChunks = trailingZeroes / CHUNK;
+            int segmentCount = SEGMENTS - emptyChunks;
+            int pointer = 0;
+
+            if (segmentCount == 0)
+            {
+                packer.WriteBits(0, 1);
+                return;
+            }
+
+            packer.WriteBits(1, 1);
+
+            const ulong mask = (ulong.MaxValue >> (TOTAL_BITS - CHUNK));
+            while (segmentCount > 0 && pointer < TOTAL_BITS)
+            {
+                ulong isolated = (value.value >> pointer) & mask;
+                packer.WriteBits(isolated, CHUNK);
+                pointer += CHUNK;
+
+                --segmentCount;
+                packer.WriteBits(segmentCount == 0 ? 0u : 1u, 1);
+            }
         }
 
         [UsedByIL]
         public static void Read(BitPacker packer, ref PackedULong value)
         {
-            var fullBytes = packer.ReadBits(PREFIX_BITS_3) + 1;
-            int emptyChunks = MAX_COUNT_3 - (int)fullBytes;
-            byte numberBits = (byte)(TOTAL_BITS_3 - emptyChunks * CHUNK_3);
-            value = new PackedULong(packer.ReadBits(numberBits));
+            if (packer.ReadBits(1) == 0)
+            {
+                value.value = 0;
+                return;
+            }
+
+            ulong result = 0;
+            int pointer = 0;
+            bool continueReading;
+
+            do
+            {
+                ulong chunk = packer.ReadBits(CHUNK);
+                result |= chunk << pointer;
+                pointer += CHUNK;
+
+                continueReading = packer.ReadBits(1) == 1;
+            } while (continueReading && pointer < TOTAL_BITS);
+
+            value.value = result;
         }
 
         [UsedByIL]
@@ -390,29 +330,18 @@ namespace PurrNet.Packing
             value = new PackedLong(ZigzagDecode(packed.value));
         }
 
-        const int PREFIX_BITS_4 = 3;
-        const int TOTAL_BITS_4 = 8;
-        const int MAX_COUNT_4 = 1 << PREFIX_BITS_4;
-        const int CHUNK_4 = TOTAL_BITS_4 / MAX_COUNT_4;
-
         [UsedByIL]
         public static void Write(BitPacker packer, PackedByte value)
         {
-            int trailingZeroes = CountLeadingZeroBits(value.value) - (32 - TOTAL_BITS_4);
-            int emptyChunks = trailingZeroes / CHUNK_4;
-            int fullBytes = Mathf.Clamp(MAX_COUNT_4 - emptyChunks, 1, MAX_COUNT_4);
-            packer.WriteBits((ulong)(fullBytes - 1), PREFIX_BITS_4);
-            byte numberBits = (byte)(fullBytes * CHUNK_4);
-            packer.WriteBits(value.value, numberBits);
+            Write(packer, new PackedULong(value.value));
         }
 
         [UsedByIL]
         public static void Read(BitPacker packer, ref PackedByte value)
         {
-            var fullBytes = packer.ReadBits(PREFIX_BITS_4) + 1;
-            int emptyChunks = MAX_COUNT_4 - (int)fullBytes;
-            byte numberBits = (byte)(TOTAL_BITS_4 - emptyChunks * CHUNK_4);
-            value = new PackedByte((byte)packer.ReadBits(numberBits));
+            PackedULong packed = default;
+            Read(packer, ref packed);
+            value = new PackedByte((byte)packed.value);
         }
 
         [UsedByIL]
