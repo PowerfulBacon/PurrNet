@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace PurrNet.Pooling
 {
     public class HashSetPool<T> : GenericPool<HashSet<T>>
     {
-        private static readonly HashSetPool<T> _instance;
+#if UNITY_EDITOR
+        [ThreadStatic]
+#endif
+        private static HashSetPool<T> _instance;
 
         static HashSetPool() => _instance = new HashSetPool<T>();
 
@@ -18,7 +22,13 @@ namespace PurrNet.Pooling
 
         public static int GetCount() => _instance.count;
 
-        public static HashSet<T> Instantiate() => _instance.Allocate();
+        public static HashSet<T> Instantiate()
+        {
+#if UNITY_EDITOR
+            _instance ??= new HashSetPool<T>();
+#endif
+            return _instance.Allocate();
+        }
 
         public static void Destroy(HashSet<T> list) => _instance.Delete(list);
     }

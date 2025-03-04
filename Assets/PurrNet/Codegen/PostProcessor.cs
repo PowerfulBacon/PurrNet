@@ -262,7 +262,7 @@ namespace PurrNet.Codegen
         }
 
         private static void HandleRPCReceiver(ModuleDefinition module, TypeDefinition type,
-            IReadOnlyList<RPCMethod> originalRpcs, bool isNetworkClass, int offset)
+            DisposableList<RPCMethod> originalRpcs, bool isNetworkClass, int offset)
         {
             for (var i = 0; i < originalRpcs.Count; i++)
             {
@@ -920,7 +920,7 @@ namespace PurrNet.Codegen
         }
 
         private MethodDefinition HandleRPC(ModuleDefinition module, int id, RPCMethod methodRpc, bool isNetworkClass,
-            HashSet<TypeReference> usedTypes, [UsedImplicitly] List<DiagnosticMessage> messages)
+            DisposableHashSet<TypeReference> usedTypes, [UsedImplicitly] List<DiagnosticMessage> messages)
         {
             var method = methodRpc.originalMethod;
             bool isValidReturn = ValidateReturnType(method, out var returnMode);
@@ -1466,8 +1466,7 @@ namespace PurrNet.Codegen
         private static bool UpdateMethodReferences(ModuleDefinition module, MethodReference old, MethodReference @new,
             [UsedImplicitly] List<DiagnosticMessage> messages)
         {
-            List<TypeDefinition> types = new List<TypeDefinition>();
-
+            using var types = new DisposableList<TypeDefinition>(32);
             var startLocalExecutionFlag = module.GetTypeDefinition(typeof(PurrCompilerFlags))
                 .GetMethod("EnterLocalExecution").FullName;
             var exitLocalExecutionFlag = module.GetTypeDefinition(typeof(PurrCompilerFlags))
@@ -1603,9 +1602,9 @@ namespace PurrNet.Codegen
             return newRef;
         }
 
-        public static List<TypeDefinition> GetAllTypes(ModuleDefinition module)
+        static DisposableList<TypeDefinition> GetAllTypes(ModuleDefinition module)
         {
-            List<TypeDefinition> types = new List<TypeDefinition>();
+            var types = new DisposableList<TypeDefinition>(32);
 
             types.AddRange(module.Types);
             foreach (var type in module.Types)
@@ -1632,13 +1631,13 @@ namespace PurrNet.Codegen
                     }
                 }
 
-                var visitedTypes = new HashSet<string>();
-                var typesToGenerateSerializer = new HashSet<TypeReference>();
-                var typesToPrepareHasher = new HashSet<TypeReference>();
-                var typesToIgnoreForDelta = new HashSet<TypeReference>();
-                var typesToIgnoreForSerialization = new HashSet<TypeReference>();
+                var visitedTypes = new HashSet<string>(128);
+                var typesToGenerateSerializer = new HashSet<TypeReference>(128);
+                var typesToPrepareHasher = new HashSet<TypeReference>(128);
+                var typesToIgnoreForDelta = new HashSet<TypeReference>(128);
+                var typesToIgnoreForSerialization = new HashSet<TypeReference>(128);
 
-                var messages = new List<DiagnosticMessage>();
+                var messages = new List<DiagnosticMessage>(32);
 
                 using var peStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PeData);
                 using var pdbStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PdbData);
@@ -1657,7 +1656,7 @@ namespace PurrNet.Codegen
                 for (var m = 0; m < assemblyDefinition.Modules.Count; m++)
                 {
                     var module = assemblyDefinition.Modules[m];
-                    var types = GetAllTypes(module);
+                    using var types = GetAllTypes(module);
 
                     for (var t = 0; t < types.Count; t++)
                     {
@@ -1729,7 +1728,7 @@ namespace PurrNet.Codegen
                         bool inheritsFromNetworkClass =
                             type.FullName == classFullName || InheritsFrom(type, classFullName);
 
-                        var _rpcMethods = new List<RPCMethod>();
+                        using var _rpcMethods = new DisposableList<RPCMethod>(32);
 
                         int idOffset = GetIDOffset(type, messages);
 
@@ -1802,7 +1801,7 @@ namespace PurrNet.Codegen
                         if (inheritsFromNetworkIdentity || inheritsFromNetworkClass)
                             typesToGenerateSerializer.Add(type);
 
-                        HashSet<TypeReference> usedTypes = new HashSet<TypeReference>();
+                        using var usedTypes = new DisposableHashSet<TypeReference>(32);
 
                         for (var index = 0; index < _rpcMethods.Count; index++)
                         {
@@ -2228,8 +2227,8 @@ namespace PurrNet.Codegen
             code.Append(Instruction.Create(OpCodes.Ret));
         }
 
-        private static void FindUsedTypes(ModuleDefinition module, List<TypeDefinition> allTypes,
-            HashSet<TypeReference> types)
+        private static void FindUsedTypes(ModuleDefinition module, DisposableList<TypeDefinition> allTypes,
+            DisposableHashSet<TypeReference> types)
         {
             var playersBroadcasterSubscribe = module.GetTypeDefinition<PlayersBroadcaster>();
             var playersManagerSubscribe = module.GetTypeDefinition<PlayersManager>();
@@ -2285,7 +2284,7 @@ namespace PurrNet.Codegen
             }
         }
 
-        private static void AddAnySyncVarOrGenericNetworkModulesType(HashSet<TypeReference> types, TypeReference type,
+        private static void AddAnySyncVarOrGenericNetworkModulesType(DisposableHashSet<TypeReference> types, TypeReference type,
             TypeDefinition resolved,
             TypeDefinition networkModule)
         {
@@ -2311,7 +2310,7 @@ namespace PurrNet.Codegen
             }
         }
 
-        private static void FindUsedGenericRpcTypes(HashSet<TypeReference> types, GenericInstanceMethod currentMethod)
+        private static void FindUsedGenericRpcTypes(DisposableHashSet<TypeReference> types, GenericInstanceMethod currentMethod)
         {
             foreach (var argument in currentMethod.GenericArguments)
             {

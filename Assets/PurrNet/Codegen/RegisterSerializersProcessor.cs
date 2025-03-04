@@ -4,6 +4,7 @@ using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using PurrNet.Packing;
+using PurrNet.Pooling;
 
 namespace PurrNet.Codegen
 {
@@ -113,11 +114,13 @@ namespace PurrNet.Codegen
             if (!isStatic)
                 return;
 
-            List<PackType> writeTypes = new List<PackType>();
-            List<PackType> readTypes = new List<PackType>();
+            using var writeTypes = new DisposableList<PackType>(32);
+            using var readTypes = new DisposableList<PackType>(32);
 
-            foreach (var method in type.Methods)
+            var mcount = type.Methods.Count;
+            for (var i = 0; i < mcount; i++)
             {
+                var method = type.Methods[i];
                 if (method.HasGenericParameters || method.ContainsGenericParameter)
                     continue;
 
