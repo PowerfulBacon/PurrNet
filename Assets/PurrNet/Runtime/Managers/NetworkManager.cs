@@ -1134,6 +1134,16 @@ namespace PurrNet
         }
 
         /// <summary>
+        /// Starts as both a server and a client.
+        /// isServer and isClient will both be true after connection is established.
+        /// </summary>
+        public void StartHost()
+        {
+            StartServer();
+            StartClient();
+        }
+
+        /// <summary>
         /// Internal method to register the server modules.
         /// Avoid calling this method directly if you're not sure what you're doing.
         /// </summary>
