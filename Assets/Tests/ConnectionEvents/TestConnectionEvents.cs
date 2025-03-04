@@ -1,28 +1,20 @@
 using System.Collections;
 using NUnit.Framework;
-using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-namespace Purrnet.Tests
+public class TestConnectionEvents
 {
-    public class TestConnectionEvents
+    [SetUp]
+    public void Setup()
     {
-        [SetUp]
-        public void Setup()
-        {
-            EditorSceneManager.OpenScene($"Assets/Tests/ConnectionEvents/SimpleNetworkManager.unity");
-        }
+        SceneManager.LoadScene($"SimpleNetworkManager");
+    }
 
-        [TearDown]
-        public void Teardown()
-        {
-            EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
-        }
-
-        [UnityTest]
-        public IEnumerator TestConnectionEventsWithEnumeratorPasses()
-        {
-            yield return null;
-        }
+    [UnityTest]
+    public IEnumerator TestConnectionEventsWithEnumeratorPasses()
+    {
+        yield return null;
     }
 }
