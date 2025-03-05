@@ -1638,10 +1638,10 @@ namespace PurrNet.Codegen
                 }
 
                 var visitedTypes = new HashSet<string>(128);
-                var typesToGenerateSerializer = new HashSet<TypeReference>(128);
-                var typesToPrepareHasher = new HashSet<TypeReference>(128);
-                var typesToIgnoreForDelta = new HashSet<TypeReference>(128);
-                var typesToIgnoreForSerialization = new HashSet<TypeReference>(128);
+                var typesToGenerateSerializer = new HashSet<TypeReference>(128, TypeReferenceEqualityComparer.Default);
+                var typesToPrepareHasher = new HashSet<TypeReference>(128, TypeReferenceEqualityComparer.Default);
+                var typesToIgnoreForDelta = new HashSet<TypeReference>(128, TypeReferenceEqualityComparer.Default);
+                var typesToIgnoreForSerialization = new HashSet<TypeReference>(128, TypeReferenceEqualityComparer.Default);
 
                 var messages = new List<DiagnosticMessage>(32);
 
@@ -1807,6 +1807,7 @@ namespace PurrNet.Codegen
                         if (inheritsFromNetworkIdentity || inheritsFromNetworkClass)
                             typesToGenerateSerializer.Add(type);
 
+                        // Note: not sure how to include equality comparer here
                         using var usedTypes = new DisposableHashSet<TypeReference>(32);
 
                         for (var index = 0; index < _rpcMethods.Count; index++)
@@ -1963,8 +1964,8 @@ namespace PurrNet.Codegen
 
         private static void ExpandNested(AssemblyDefinition assembly, HashSet<TypeReference> typesToHandle)
         {
-            HashSet<TypeReference> visited = new HashSet<TypeReference>();
-            HashSet<TypeReference> visited2 = new HashSet<TypeReference>();
+            HashSet<TypeReference> visited = new HashSet<TypeReference>(TypeReferenceEqualityComparer.Default);
+            HashSet<TypeReference> visited2 = new HashSet<TypeReference>(TypeReferenceEqualityComparer.Default);
             var copy = typesToHandle.ToArray();
 
             for (var i = 0; i < copy.Length; i++)
