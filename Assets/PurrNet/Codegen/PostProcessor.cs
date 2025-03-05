@@ -1491,6 +1491,12 @@ namespace PurrNet.Codegen
 
                     var processor = method.Body.GetILProcessor();
 
+                    bool hasLocalModeAttribute = method.CustomAttributes.Any(a =>
+                        a.AttributeType.FullName == typeof(LocalModeAttribute).FullName);
+
+                    if (hasLocalModeAttribute)
+                        continue;
+
                     for (var i = 0; i < method.Body.Instructions.Count; i++)
                     {
                         var instruction = method.Body.Instructions[i];

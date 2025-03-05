@@ -23,14 +23,10 @@ public class SomeBehaviour : HealthShit
             TriggerDealDamage(10);
     }
 
-    [ObserversRpc]
+    [ObserversRpc, LocalMode]
     public override void DealDamage(int damage)
     {
-        PurrCompilerFlags.EnterLocalExecution();
-
         Debug.Log($"SomeBehaviour");
         base.DealDamage(damage);
-
-        PurrCompilerFlags.ExitLocalExecution();
     }
 }
