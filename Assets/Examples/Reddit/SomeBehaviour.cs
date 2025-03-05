@@ -26,7 +26,7 @@ public class SomeBehaviour : HealthShit
     [ObserversRpc, LocalMode]
     public override void DealDamage(int damage)
     {
-        Debug.Log($"SomeBehaviour");
+        // base.DealDamage is an RPC but due to `LocalMode` it will be called as if it wasn't
         base.DealDamage(damage);
     }
 }
