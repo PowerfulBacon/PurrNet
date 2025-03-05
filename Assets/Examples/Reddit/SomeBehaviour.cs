@@ -1,12 +1,17 @@
-using System;
 using PurrNet;
 using UnityEngine;
 
 public abstract class HealthShit : NetworkBehaviour
 {
+    public void TriggerDealDamage(int damage)
+    {
+        DealDamage(damage);
+    }
+
+    [ObserversRpc]
     public virtual void DealDamage(int damage)
     {
-        Debug.Log($"Dealt {damage} damage from base class.");
+        Debug.Log($"HealthShit");
     }
 }
 
@@ -15,13 +20,17 @@ public class SomeBehaviour : HealthShit
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
-            DealDamage(10);
+            TriggerDealDamage(10);
     }
 
-    [ObserversRpc(runLocally: true)]
+    [ObserversRpc]
     public override void DealDamage(int damage)
     {
-        Debug.Log($"Dealt {damage} damage.");
+        PurrCompilerFlags.EnterLocalExecution();
+
+        Debug.Log($"SomeBehaviour");
         base.DealDamage(damage);
+
+        PurrCompilerFlags.ExitLocalExecution();
     }
 }
