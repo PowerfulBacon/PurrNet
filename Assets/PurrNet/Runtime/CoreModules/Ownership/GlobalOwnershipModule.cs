@@ -258,14 +258,14 @@ namespace PurrNet.Modules
         private void OnPlayerLeft(PlayerID player, bool asServer)
         {
             foreach (var (scene, ownerships) in _sceneOwnerships)
-                OnOwnerDisconnect(player, scene, ownerships);
+                OnOwnerDisconnect(player, scene, ownerships, asServer);
         }
 
         private void OnPlayerUnloadedScene(PlayerID player, SceneID scene, bool asServer)
         {
             if (!_sceneOwnerships.TryGetValue(scene, out var ownerships)) return;
 
-            OnOwnerDisconnect(player, scene, ownerships);
+            OnOwnerDisconnect(player, scene, ownerships, asServer);
 
             var owned = ownerships.TryGetOwnedObjects(player);
             var ownedCache = ListPool<NetworkID>.Instantiate();
@@ -281,8 +281,11 @@ namespace PurrNet.Modules
             ListPool<NetworkID>.Destroy(ownedCache);
         }
 
-        private void OnOwnerDisconnect(PlayerID player, SceneID scene, SceneOwnership ownerships)
+        private void OnOwnerDisconnect(PlayerID player, SceneID scene, SceneOwnership ownerships, bool asServer)
         {
+            if (!asServer)
+                return;
+
             var owned = ownerships.TryGetOwnedObjects(player);
             var toDestroy = HashSetPool<GameObject>.Instantiate();
 
@@ -298,8 +301,12 @@ namespace PurrNet.Modules
             }
 
             foreach (var go in toDestroy)
+            {
                 if (go)
+                {
                     Object.Destroy(go);
+                }
+            }
 
             HashSetPool<GameObject>.Destroy(toDestroy);
         }
@@ -352,6 +359,9 @@ namespace PurrNet.Modules
                     return;
                 }
             }
+
+            if (hadOwnerPreviously)
+                RemoveOwnership(nid);
 
             if (!_sceneOwnerships.TryGetValue(nid.sceneId, out var module))
             {
@@ -767,8 +777,8 @@ namespace PurrNet.Modules
 
         public ICollection<NetworkID> TryGetOwnedObjects(PlayerID player)
         {
-            if (_playerOwnedIds.TryGetValue(player, out _))
-                return _playerOwnedIds[player];
+            if (_playerOwnedIds.TryGetValue(player, out var players))
+                return players;
             return Array.Empty<NetworkID>();
         }
 
@@ -808,7 +818,7 @@ namespace PurrNet.Modules
         {
             if (identity.id.HasValue && _owners.Remove(identity.id.Value, out var oldOwner))
             {
-                if (_playerOwnedIds.TryGetValue(oldOwner, out HashSet<NetworkID> ownedIds))
+                if (_playerOwnedIds.TryGetValue(oldOwner, out var ownedIds))
                 {
                     ownedIds.Remove(identity.id.Value);
 
