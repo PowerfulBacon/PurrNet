@@ -94,6 +94,7 @@ namespace PurrNet
         [PurrDocs("systems-and-modules/network-manager/network-visibility")] [SerializeField]
         private NetworkVisibilityRuleSet _visibilityRules;
 
+        [PurrDocs("systems-and-modules/network-manager/authentication")]
         [SerializeField] private AuthenticationLayer _authenticator;
 
         [Tooltip("Number of target ticks per second.")] [SerializeField]
