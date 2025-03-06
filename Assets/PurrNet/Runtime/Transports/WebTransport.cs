@@ -31,6 +31,10 @@ namespace PurrNet.Transports
         [Header("SSL Settings")] [SerializeField]
         private bool _enableSSL;
 
+        [Tooltip("When enabled, the transport will poll events in the Update method instead of per Tick.")]
+        [SerializeField]
+        private bool _pollEventsInUpdate;
+
         [SerializeField] private string _certPath;
         [SerializeField] private string _certPassword;
         [SerializeField] private SslProtocols _sslProtocols;
@@ -194,14 +198,20 @@ namespace PurrNet.Transports
 
         public void TickUpdate(float delta)
         {
-            _server.ProcessMessageQueue();
-            _client.ProcessMessageQueue();
+            if (!_pollEventsInUpdate)
+            {
+                _server.ProcessMessageQueue();
+                _client.ProcessMessageQueue();
+            }
         }
 
         public void UnityUpdate(float delta)
         {
-            /*_server.ProcessMessageQueue();
-            _client.ProcessMessageQueue();*/
+            if (_pollEventsInUpdate)
+            {
+                _server.ProcessMessageQueue();
+                _client.ProcessMessageQueue();
+            }
         }
 
         public void Listen(ushort port)
