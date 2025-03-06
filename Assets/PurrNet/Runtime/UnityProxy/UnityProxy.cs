@@ -29,10 +29,7 @@ namespace PurrNet
             var prefab = prefabData.prefab;
 
             if (!instantiateData.TryGetHierarchy(out var hierarchy))
-            {
-                PurrLogger.LogError($"Failed to get hierarchy for `{prefab.name}`");
                 return null;
-            }
 
             if (!prefabData.pooled)
             {
