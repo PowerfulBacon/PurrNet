@@ -1,11 +1,32 @@
 using PurrNet;
 using UnityEngine;
 
-public class SomeBehaviour : NetworkBehaviour
+public abstract class HealthShit : NetworkBehaviour
 {
-    [ContextMenu("Send RPC and shit"), ServerRpc]
-    void TestRPC()
+    public void TriggerDealDamage(int damage)
     {
-        Debug.Log("Received TestRPC!");
+        DealDamage(damage);
+    }
+
+    [ObserversRpc]
+    public virtual void DealDamage(int damage)
+    {
+        Debug.Log($"HealthShit");
+    }
+}
+
+public class SomeBehaviour : HealthShit
+{
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+            TriggerDealDamage(10);
+    }
+
+    [ObserversRpc, LocalMode]
+    public override void DealDamage(int damage)
+    {
+        // base.DealDamage is an RPC but due to `LocalMode` it will be called as if it wasn't
+        base.DealDamage(damage);
     }
 }

@@ -25,6 +25,10 @@ namespace PurrNet.Transports
         [SerializeField]
         private float _timeoutInSeconds = 5f;
 
+        [Tooltip("When enabled, the transport will poll events in the Update method instead of per Tick.")]
+        [SerializeField]
+        private bool _pollEventsInUpdate;
+
         public event OnConnected onConnected;
         public event OnDisconnected onDisconnected;
         public event OnDataReceived onDataReceived;
@@ -197,20 +201,25 @@ namespace PurrNet.Transports
             if (_server.IsRunning)
             {
                 _server.ManualUpdate(dInMs);
-                _server.PollEvents();
+                if (!_pollEventsInUpdate)
+                    _server.PollEvents();
             }
 
             if (_client.IsRunning)
             {
                 _client.ManualUpdate(dInMs);
-                _client.PollEvents();
+                if (!_pollEventsInUpdate)
+                    _client.PollEvents();
             }
         }
 
         public void UnityUpdate(float delta)
         {
-            /*if (_server.IsRunning) _server.PollEvents();
-            if (_client.IsRunning) _client.PollEvents();*/
+            if (_pollEventsInUpdate)
+            {
+                if (_server.IsRunning) _server.PollEvents();
+                if (_client.IsRunning) _client.PollEvents();
+            }
         }
 
         public void Connect(string ip, ushort port)
@@ -257,10 +266,18 @@ namespace PurrNet.Transports
                 listenerState = ConnectionState.Connecting;
                 TriggerConnectionStateEvent(true);
 
-                _server.StartInManualMode(port);
-
-                listenerState = ConnectionState.Connected;
-                TriggerConnectionStateEvent(true);
+                if (_server.StartInManualMode(port))
+                {
+                    listenerState = ConnectionState.Connected;
+                    TriggerConnectionStateEvent(true);
+                }
+                else
+                {
+                    listenerState = ConnectionState.Disconnecting;
+                    TriggerConnectionStateEvent(true);
+                    listenerState = ConnectionState.Disconnected;
+                    TriggerConnectionStateEvent(true);
+                }
             }
         }
 

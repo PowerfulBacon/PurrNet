@@ -1,4 +1,5 @@
 ﻿using System;
+using PurrNet.Logging;
 using PurrNet.Modules;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -118,7 +119,7 @@ namespace PurrNet
             instantiateInWorldSpace = parameters.worldSpace;
             this.parameters = parameters;
         }
-        
+
         public InstantiateData(T original, Vector3 pos, Quaternion rot, InstantiateParameters parameters)
         {
             type = InstantiateType.ParametersWithPosRot;
@@ -138,6 +139,8 @@ namespace PurrNet
 
             if (!manager)
             {
+                PurrLogger.LogError($"Can't spawn object because there's no NetworkManager.\n" +
+                                    "You can bypass spawning via `UnityProxy.InstantiateDirectly`.");
                 result = default;
                 return false;
             }
@@ -146,12 +149,18 @@ namespace PurrNet
 
             if (!manager.TryGetModule<HierarchyFactory>(isServer, out var factory))
             {
+                PurrLogger.LogError($"Can't spawn object because NetworkManager doesn't contain a `HierarchyFactory`.\n" +
+                                    "Modules are only registered once the NetworkManager is started.\n" +
+                                    "You can bypass spawning via `UnityProxy.InstantiateDirectly`.");
                 result = default;
                 return false;
             }
 
             if (!manager.TryGetModule<ScenesModule>(isServer, out var scenes))
             {
+                PurrLogger.LogError($"Can't spawn object because NetworkManager doesn't contain a `ScenesModule`.\n" +
+                                    "Modules are only registered once the NetworkManager is started.\n" +
+                                    "You can bypass spawning via `UnityProxy.InstantiateDirectly`.");
                 result = default;
                 return false;
             }
@@ -163,6 +172,9 @@ namespace PurrNet
 
             if (!scenes.TryGetSceneID(sceneCopy, out var sceneID))
             {
+                PurrLogger.LogError($"Can't spawn object in scene `{sceneCopy.name}` because it's not being tracked by the network manager.\n" +
+                                    $"Only the default scene or scenes loaded through the `sceneModule` are tracked.\n" +
+                                    "You can bypass spawning via `UnityProxy.InstantiateDirectly`.");
                 result = default;
                 return false;
             }
@@ -236,7 +248,7 @@ namespace PurrNet
                 case InstantiateType.ParametersWithPosRot:
 #if UNITY_6000_0_35
                     bool usePosRot = type == InstantiateType.ParametersWithPosRot;
-                    
+
                     if (parameters.worldSpace)
                     {
                         trs.SetParent(parameters.parent, true);

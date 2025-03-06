@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System;
+using PurrNet;
 using PurrNet.Packing;
 
 public class PackedNumberTests
@@ -9,6 +10,7 @@ public class PackedNumberTests
     [SetUp]
     public void Setup()
     {
+        NetworkManager.CalculateHashes();
         packer = BitPackerPool.Get();
     }
 
@@ -22,10 +24,11 @@ public class PackedNumberTests
     public void TestUshortZero()
     {
         var value = new PackedUShort(0);
+
+        packer.ResetPositionAndMode(false);
         Packer<PackedUShort>.Write(packer, value);
 
         packer.ResetPositionAndMode(true);
-
         PackedUShort read = default;
         Packer<PackedUShort>.Read(packer, ref read);
 

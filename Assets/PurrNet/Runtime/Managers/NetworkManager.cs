@@ -94,6 +94,7 @@ namespace PurrNet
         [PurrDocs("systems-and-modules/network-manager/network-visibility")] [SerializeField]
         private NetworkVisibilityRuleSet _visibilityRules;
 
+        [PurrDocs("systems-and-modules/network-manager/authentication")]
         [SerializeField] private AuthenticationLayer _authenticator;
 
         [Tooltip("Number of target ticks per second.")] [SerializeField]
@@ -413,7 +414,7 @@ namespace PurrNet
         private static bool _hasGeneratedAlready;
 
         [UsedImplicitly]
-        static void CalculateHashes()
+        public static void CalculateHashes()
         {
             if (_hasGeneratedAlready)
                 return;
@@ -1131,6 +1132,16 @@ namespace PurrNet
             if (!_transport)
                 PurrLogger.Throw<InvalidOperationException>("Transport is not set (null).");
             _transport.StartServer(this);
+        }
+
+        /// <summary>
+        /// Starts as both a server and a client.
+        /// isServer and isClient will both be true after connection is established.
+        /// </summary>
+        public void StartHost()
+        {
+            StartServer();
+            StartClient();
         }
 
         /// <summary>

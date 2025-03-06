@@ -23,14 +23,17 @@ namespace PurrNet.Editor
             if (File.Exists(PATH + ".meta"))
                 File.Delete(PATH + ".meta");
 
-            bool isResourcesFolderEmpty = Directory.GetFiles("Assets/Resources").Length == 0 &&
-                                          Directory.GetDirectories("Assets/Resources").Length == 0;
-
-            if (isResourcesFolderEmpty)
+            if (Directory.Exists("Assets/Resources"))
             {
-                Directory.Delete("Assets/Resources");
-                if (File.Exists("Assets/Resources.meta"))
-                    File.Delete("Assets/Resources.meta");
+                bool isResourcesFolderEmpty = Directory.GetFiles("Assets/Resources").Length == 0 &&
+                                              Directory.GetDirectories("Assets/Resources").Length == 0;
+
+                if (isResourcesFolderEmpty)
+                {
+                    Directory.Delete("Assets/Resources");
+                    if (File.Exists("Assets/Resources.meta"))
+                        File.Delete("Assets/Resources.meta");
+                }
             }
 
             AssetDatabase.Refresh();

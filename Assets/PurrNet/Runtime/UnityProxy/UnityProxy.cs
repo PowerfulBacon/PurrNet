@@ -29,10 +29,7 @@ namespace PurrNet
             var prefab = prefabData.prefab;
 
             if (!instantiateData.TryGetHierarchy(out var hierarchy))
-            {
-                PurrLogger.LogError($"Failed to get hierarchy for `{prefab.name}`");
                 return null;
-            }
 
             if (!prefabData.pooled)
             {
@@ -54,7 +51,8 @@ namespace PurrNet
 
             if (!result)
             {
-                PurrLogger.LogError($"Failed to create prototype for `{prefab.name}`");
+                PurrLogger.LogError($"Failed to create prototype for `{prefab.name}`.\n" +
+                                    "This usually happens when the provided prefab is invalid.");
                 return null;
             }
 
