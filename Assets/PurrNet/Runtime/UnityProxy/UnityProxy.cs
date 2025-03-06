@@ -51,7 +51,8 @@ namespace PurrNet
 
             if (!result)
             {
-                PurrLogger.LogError($"Failed to create prototype for `{prefab.name}`");
+                PurrLogger.LogError($"Failed to create prototype for `{prefab.name}`.\n" +
+                                    "This usually happens when the provided prefab is invalid.");
                 return null;
             }
 
