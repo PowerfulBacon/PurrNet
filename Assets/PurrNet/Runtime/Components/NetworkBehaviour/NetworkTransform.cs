@@ -132,6 +132,7 @@ namespace PurrNet
 
         private Transform _trs;
         private Rigidbody _rb;
+        private Rigidbody2D _rb2d;
         private CharacterController _controller;
 
         private bool _prevWasController;
@@ -144,6 +145,7 @@ namespace PurrNet
         {
             _trs = transform;
             _rb = GetComponent<Rigidbody>();
+            _rb2d = GetComponent<Rigidbody2D>();
             _controller = GetComponent<CharacterController>();
         }
 
@@ -277,8 +279,13 @@ namespace PurrNet
 
         private void FixedUpdate()
         {
-            if (_rb && !IsController(_ownerAuth))
+            bool isNotController = !IsController(_ownerAuth);
+
+            if (_rb && isNotController)
                 _rb.Sleep();
+
+            if (_rb2d && isNotController)
+                _rb2d.Sleep();
         }
 
         private void Update()
@@ -309,6 +316,8 @@ namespace PurrNet
             {
                 if (isLocalController && _rb)
                     _rb.WakeUp();
+                if (isLocalController && _rb2d)
+                    _rb2d.WakeUp();
 
                 _prevWasController = isLocalController;
             }
