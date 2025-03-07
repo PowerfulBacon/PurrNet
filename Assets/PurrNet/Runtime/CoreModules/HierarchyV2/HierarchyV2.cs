@@ -247,7 +247,7 @@ namespace PurrNet.Modules
 
             if (data.newParentId.HasValue && !TryGetIdentity(data.newParentId.Value, out parent))
             {
-                PurrLogger.LogError($"Change parent failed for '{identity.gameObject.name}'. Parent not found.",
+                PurrLogger.LogError($"Change parent failed for '{identity.gameObject.name}'. Parent `{data.newParentId.Value}` not found.",
                     identity.gameObject);
                 return;
             }
@@ -263,7 +263,7 @@ namespace PurrNet.Modules
             var parent = trs;
             while (parent)
             {
-                if (parent.TryGetComponent<NetworkIdentity>(out var nid))
+                if (parent.TryGetComponent<NetworkIdentity>(out var nid) && nid.isSpawned)
                     return nid;
 
                 parent = parent.parent;
