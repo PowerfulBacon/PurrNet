@@ -1051,6 +1051,8 @@ namespace PurrNet
                     _serverModules.UnregisterModules();
                 }
             }
+            
+            InstanceHandler.ClearAll();
         }
 
         /// <summary>
