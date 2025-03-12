@@ -476,6 +476,7 @@ namespace PurrNet.Modules
                     if (nid.TryAddObserver(player))
                     {
                         onObserverAdded?.Invoke(player, nid);
+                        nid.TriggerOnEarlyObserverAdded(player);
                         _triggerLateObserverAdded.Add(new PlayerNid { player = player, nid = nid });
                     }
                 }
@@ -592,6 +593,7 @@ namespace PurrNet.Modules
                         {
                             var nid = children[i];
                             onObserverAdded?.Invoke(player, nid);
+                            nid.TriggerOnEarlyObserverAdded(player);
                             _triggerLateObserverAdded.Add(new PlayerNid { player = player, nid = nid });
                         }
                     }

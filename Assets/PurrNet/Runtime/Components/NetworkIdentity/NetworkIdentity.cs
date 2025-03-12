@@ -598,6 +598,15 @@ namespace PurrNet
         /// Server only.
         /// </summary>
         /// <param name="player">The observer player id</param>
+        protected virtual void OnEarlyObserverAdded(PlayerID player)
+        {
+        }
+
+        /// <summary>
+        /// Called when an observer is added.
+        /// Server only.
+        /// </summary>
+        /// <param name="player">The observer player id</param>
         protected virtual void OnObserverAdded(PlayerID player)
         {
         }
@@ -1042,6 +1051,13 @@ namespace PurrNet
 
             for (int i = 0; i < _externalModulesView.Count; i++)
                 _externalModulesView[i].OnOwnerReconnected(ownerId);
+        }
+
+        public void TriggerOnEarlyObserverAdded(PlayerID target)
+        {
+            OnEarlyObserverAdded(target);
+            for (int i = 0; i < _externalModulesView.Count; i++)
+                _externalModulesView[i].OnEarlyObserverAdded(target);
         }
 
         public void TriggerOnObserverAdded(PlayerID target)
