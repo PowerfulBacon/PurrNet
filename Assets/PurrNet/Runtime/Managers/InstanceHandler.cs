@@ -39,7 +39,6 @@ namespace PurrNet
             NetworkManager = null;
         }
 
-
         /// <summary>
         /// Registers a instance of the given type, in order to use GetInstance later.
         /// </summary>
