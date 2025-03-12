@@ -701,6 +701,7 @@ namespace PurrNet
             _clientTickManager = null;
             _ticker = null;
             isInPool = true;
+            _wasEarlySpawned = false;
         }
 
         private void OnChildDespawned(NetworkIdentity networkIdentity)
@@ -941,6 +942,8 @@ namespace PurrNet
         private int _spawnedCount;
         private bool _wasEarlySpawned;
 
+        private bool wasFullySpawned => _spawnedCount > 0;
+
         internal void TriggerSpawnEvent(bool asServer)
         {
             InternalOnSpawn(asServer);
@@ -1016,6 +1019,9 @@ namespace PurrNet
 
         internal void TriggerOnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
         {
+            if (!wasFullySpawned)
+                return;
+
             OnOwnerChanged(oldOwner, newOwner, asServer);
 
             for (int i = 0; i < _externalModulesView.Count; i++)
