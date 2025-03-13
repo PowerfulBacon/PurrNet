@@ -1,3 +1,4 @@
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -52,6 +53,7 @@ namespace PurrNet.Editor
             base.OnInspectorGUI();
 
             DrawIdentityInspector();
+            DrawPurrButtons(identity);
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -224,6 +226,54 @@ namespace PurrNet.Editor
             }
 
             EditorGUILayout.EndFoldoutHeaderGroup();
+        }
+        
+        protected void DrawPurrButtons(NetworkIdentity targetIdentity)
+        {
+            if (targetIdentity == null)
+                return;
+        
+            GUILayout.Space(5);
+    
+            MethodInfo[] methods = targetIdentity.GetType().GetMethods(
+                BindingFlags.Instance | 
+                BindingFlags.Static | 
+                BindingFlags.Public | 
+                BindingFlags.NonPublic);
+    
+            bool foundAnyButtons = false;
+    
+            foreach (MethodInfo method in methods)
+            {
+                var buttonAttr = method.GetCustomAttribute<PurrButtonAttribute>();
+        
+                if (buttonAttr != null)
+                {
+                    if (!foundAnyButtons)
+                    {
+                        EditorGUILayout.LabelField("PurrButtons", EditorStyles.boldLabel);
+                        foundAnyButtons = true;
+                    }
+            
+                    string buttonName = !string.IsNullOrEmpty(buttonAttr.ButtonName) 
+                        ? buttonAttr.ButtonName 
+                        : ObjectNames.NicifyVariableName(method.Name);
+            
+                    if (GUILayout.Button(buttonName))
+                    {
+                        ParameterInfo[] parameters = method.GetParameters();
+                
+                        if (parameters.Length == 0)
+                        {
+                            method.Invoke(targetIdentity, null);
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Cannot invoke method '{method.Name}' with PurrButton attribute because it has parameters. PurrButton only works with parameterless methods.");
+                        }
+                    }
+                }
+            }
         }
     }
 }
