@@ -951,7 +951,7 @@ namespace PurrNet
         private int _spawnedCount;
         private bool _wasEarlySpawned;
 
-        private bool wasFullySpawned => _spawnedCount > 0;
+        public bool isFullySpawned => _spawnedCount > 0;
 
         internal void TriggerSpawnEvent(bool asServer)
         {
@@ -1028,9 +1028,6 @@ namespace PurrNet
 
         internal void TriggerOnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
         {
-            if (!wasFullySpawned)
-                return;
-
             OnOwnerChanged(oldOwner, newOwner, asServer);
 
             for (int i = 0; i < _externalModulesView.Count; i++)
