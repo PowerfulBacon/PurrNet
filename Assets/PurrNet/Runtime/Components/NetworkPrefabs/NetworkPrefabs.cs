@@ -179,11 +179,9 @@ namespace PurrNet
                 {
                     string pathA = AssetDatabase.GetAssetPath(a);
                     string pathB = AssetDatabase.GetAssetPath(b);
-
-                    var fileInfoA = new FileInfo(pathA);
-                    var fileInfoB = new FileInfo(pathB);
-
-                    return fileInfoA.CreationTime.CompareTo(fileInfoB.CreationTime);
+                    var guidA = AssetDatabase.GUIDFromAssetPath(pathA);
+                    var guidB = AssetDatabase.GUIDFromAssetPath(pathB);
+                    return string.Compare(guidA.ToString(), guidB.ToString(), StringComparison.Ordinal);
                 });
 
                 EditorUtility.DisplayProgressBar("Getting Network Prefabs", "Removing invalid prefabs...", 0.95f);
