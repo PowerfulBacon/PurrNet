@@ -5,21 +5,7 @@ namespace PurrNet
 {
     public sealed class NetworkOwnershipToggle : NetworkIdentity
     {
-        [Header("GameObjects to toggle when owner is set")]
-        [Tooltip("GameObjects to activate when the owner is set")]
-        [SerializeField]
-        private GameObject[] _toActivate;
-
-        [Tooltip("GameObjects to deactivate when the owner is set")] [SerializeField]
-        private GameObject[] _toDeactivate;
-
-        [Header("Components to toggle when owner is set")]
-        [Tooltip("Components to enable when the owner is set")]
-        [SerializeField]
-        private Behaviour[] _toEnable;
-
-        [Tooltip("Components to disable when the owner is set")] [SerializeField]
-        private Behaviour[] _toDisable;
+        [SerializeField] private OwnershipToggleTarget[] _toggleTargets;
 
         private bool _lastOwner;
 
@@ -33,32 +19,37 @@ namespace PurrNet
         {
             _lastOwner = asOwner;
 
-            for (var i = 0; i < _toActivate.Length; i++)
+            for (var i = 0; i < _toggleTargets.Length; i++)
             {
-                var go = _toActivate[i];
-                if (!go) continue;
-                go.SetActive(asOwner);
-            }
+                var target = _toggleTargets[i].target;
+                if (!target) continue;
 
-            for (var i = 0; i < _toDeactivate.Length; i++)
-            {
-                var go = _toDeactivate[i];
-                if (!go) continue;
-                go.SetActive(!asOwner);
+                bool targetState = _toggleTargets[i].activeAsOwner == asOwner;
+                SetComponentState(target, targetState);
             }
+        }
 
-            for (var i = 0; i < _toEnable.Length; i++)
+        private void SetComponentState(Component target, bool targetState)
+        {
+            if (target is Transform go)
             {
-                var comp = _toEnable[i];
-                if (!comp) continue;
-                comp.enabled = asOwner;
+                go.gameObject.SetActive(targetState);
             }
-
-            for (var i = 0; i < _toDisable.Length; i++)
+            else if (target is Behaviour behaviour)
             {
-                var comp = _toDisable[i];
-                if (!comp) continue;
-                comp.enabled = !asOwner;
+                behaviour.enabled = targetState;
+            }
+            else if (target is Collider collider)
+            {
+                collider.enabled = targetState;
+            }
+            else if (target is Collider2D collider2D)
+            {
+                collider2D.enabled = targetState;
+            }
+            else if (target is Renderer renderer)
+            {
+                renderer.enabled = targetState;
             }
         }
 
