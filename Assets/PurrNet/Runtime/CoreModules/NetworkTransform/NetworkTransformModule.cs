@@ -193,10 +193,13 @@ namespace PurrNet.Modules
             _networkTransforms.Remove(networkTransform);
         }
 
-        private void FlushPendingRegistrations()
+        private void FlushPendingRegistrations(PlayerID localPlayer)
         {
             foreach (var (player, toRegister) in _pendingToRegister)
             {
+                if (player == localPlayer)
+                    continue;
+
                 if (toRegister.Count == 0)
                     continue;
 
@@ -209,9 +212,11 @@ namespace PurrNet.Modules
 
         public void FixedUpdate()
         {
-            FlushPendingRegistrations();
-
             var localPlayer = GetLocalPlayer();
+
+            if (_asServer)
+                FlushPendingRegistrations(localPlayer);
+
             int ntCount = _networkTransforms.Count;
 
             for (var i = 0; i < ntCount; i++)
