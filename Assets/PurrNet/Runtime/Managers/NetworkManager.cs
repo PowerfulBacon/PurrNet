@@ -371,8 +371,6 @@ namespace PurrNet
 
         public static void CallAllRegisters()
         {
-            // call all static functions with RegisterPackersAttribute on static classes
-
             var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             foreach (var assembly in allAssemblies)
@@ -393,18 +391,22 @@ namespace PurrNet
                         if (!method.IsStatic)
                             continue;
 
-                        var attributes = method.GetCustomAttributes(typeof(RegisterPackersAttribute), false);
-                        if (attributes.Length > 0)
+                        try
                         {
-                            try
+                            var attributes = method.GetCustomAttributes(false);
+                            for (var i = 0; i < attributes.Length; i++)
                             {
+                                var attribute = attributes[i];
+                                if (attribute.GetType() != typeof(RegisterPackersAttribute))
+                                    continue;
+
                                 method.Invoke(null, null);
+                                break;
                             }
-                            catch (Exception e)
-                            {
-                                Debug.LogError(e);
-                                Debug.LogError("Failed to call " + method.Name + " in " + type.Name);
-                            }
+                        }
+                        catch
+                        {
+                            // ignored
                         }
                     }
                 }
