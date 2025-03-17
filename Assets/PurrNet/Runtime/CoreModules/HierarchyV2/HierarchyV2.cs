@@ -332,6 +332,13 @@ namespace PurrNet.Modules
                     return;
             }
 
+            if (parent && parent.gameObject.scene.handle != _scene.handle)
+            {
+                PurrLogger.LogError($"Change parent failed for '{identity.gameObject.name}'. Parent is not in the same scene.",
+                    identity.gameObject);
+                return;
+            }
+
             var closestNid = ClosestParent(parent);
             var oldParent = identity.parent;
 
