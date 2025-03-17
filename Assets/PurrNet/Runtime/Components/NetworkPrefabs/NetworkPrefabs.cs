@@ -53,13 +53,16 @@ namespace PurrNet
 
 #if UNITY_EDITOR
         private bool _generating;
-#endif
 
         private void OnValidate()
         {
             if (autoGenerate)
-                Generate();
+            {
+                // schedule for next editor update
+                EditorApplication.delayCall += Generate;
+            }
         }
+#endif
 
         private void OnEnable()
         {
