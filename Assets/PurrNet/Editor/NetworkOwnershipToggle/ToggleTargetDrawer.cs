@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace PurrNet.Editor
 {
-    [CustomPropertyDrawer(typeof(OwnershipToggleTarget))]
+    [CustomPropertyDrawer(typeof(OwnershipComponentToggle))]
+    [CustomPropertyDrawer(typeof(OwnershipGameObjectToggle))]
     public class ToggleTargetDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
