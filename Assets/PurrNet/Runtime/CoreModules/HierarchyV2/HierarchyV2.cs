@@ -1005,6 +1005,32 @@ namespace PurrNet.Modules
             actual.Clear();
         }
 
+        static void SetLocalPosAndRot(Transform t, Vector3 pos, Quaternion rot)
+        {
+            var cc = t.GetComponent<CharacterController>();
+            bool wasCCEnabled = cc && cc.enabled;
+
+            if (wasCCEnabled)
+                cc.enabled = false;
+
+            t.SetLocalPositionAndRotation(pos, rot);
+
+            if (t.TryGetComponent<Rigidbody>(out var rb))
+            {
+                rb.position = t.position;
+                rb.rotation = t.rotation;
+            }
+
+            if (t.TryGetComponent<Rigidbody2D>(out var rb2d))
+            {
+                rb2d.position = t.position;
+                rb2d.rotation = t.rotation.eulerAngles.z;
+            }
+
+            if (wasCCEnabled)
+                cc.enabled = true;
+        }
+
         public GameObject CreatePrototype(GameObjectPrototype prototype, List<NetworkIdentity> createdNids)
         {
             var pair = new PoolPair(_scenePool, _prefabsPool);
@@ -1021,7 +1047,7 @@ namespace PurrNet.Modules
                 if (TryGetIdentity(prototype.parentID.Value, out var parent))
                 {
                     result.transform.SetParent(parent.transform, false);
-                    resultTrs.SetLocalPositionAndRotation(prototype.position, prototype.rotation);
+                    SetLocalPosAndRot(resultTrs, prototype.position, prototype.rotation);
 
                     if (result.TryGetComponent<NetworkIdentity>(out var nid))
                         ApplyParentChange(nid, parent, prototype.path, false);
@@ -1037,11 +1063,11 @@ namespace PurrNet.Modules
             {
                 result.transform.SetParent(nid.defaultParent, false);
                 result.transform.SetSiblingIndex(prototype.defaultParentSiblingIndex.Value);
-                resultTrs.SetLocalPositionAndRotation(prototype.position, prototype.rotation);
+                SetLocalPosAndRot(resultTrs, prototype.position, prototype.rotation);
             }
             else
             {
-                resultTrs.SetLocalPositionAndRotation(prototype.position, prototype.rotation);
+                SetLocalPosAndRot(resultTrs, prototype.position, prototype.rotation);
             }
 
             if (shouldActivate && !result.activeSelf)
