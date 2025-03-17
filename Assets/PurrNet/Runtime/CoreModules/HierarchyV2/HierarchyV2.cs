@@ -334,7 +334,10 @@ namespace PurrNet.Modules
 
             if (parent && parent.gameObject.scene.handle != _scene.handle)
             {
-                PurrLogger.LogError($"Change parent failed for '{identity.gameObject.name}'. Parent is not in the same scene.",
+                PurrLogger.LogError($"Change parent failed for '{identity.gameObject.name}'.\n" +
+                                    $"Moving networked objects to a different scene is not supported.\n" +
+                                    $"Original scene: `{parent.gameObject.scene.name}`, new parent's scene: `{_scene.name}`\n" +
+                                    $"Try moving the player spawner to it's own game object in the scene or toggle off `DontDestroyOnLoad` on the `NetworkManager`.",
                     identity.gameObject);
                 return;
             }
