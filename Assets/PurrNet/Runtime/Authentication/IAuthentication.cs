@@ -68,11 +68,13 @@ namespace PurrNet.Authentication
 
         public event Action<Connection, AuthenticationResponse> onAuthenticationComplete;
 
-        public abstract void Subscribe(BroadcastModule broadcastModule);
+        public abstract void Subscribe(BroadcastModule broadcastModule, PlayersManager players);
 
-        public abstract void Unsubscribe(BroadcastModule broadcastModule);
+        public abstract void Unsubscribe(BroadcastModule broadcastModule, PlayersManager players);
 
         public abstract void SendClientPayload(BroadcastModule broadcastModule, CookiesModule cookies);
+
+        protected abstract void UnAuthenticateClient(Connection conn);
 
         protected void TrigerAuthenticationComplete(Connection conn, AuthenticationResponse response)
         {
@@ -89,14 +91,26 @@ namespace PurrNet.Authentication
 
     public abstract class AuthenticationBehaviour<T> : AuthenticationLayer
     {
-        public override void Subscribe(BroadcastModule broadcastModule)
+        private PlayersManager _players;
+
+        public override void Subscribe(BroadcastModule broadcastModule, PlayersManager players)
         {
+            _players = players;
+
             broadcastModule.Subscribe<AuthenticationRequest<T>>(OnPayload);
+            players.onPrePlayerLeft += UnAuthenticatePlayer;
         }
 
-        public override void Unsubscribe(BroadcastModule broadcastModule)
+        public override void Unsubscribe(BroadcastModule broadcastModule, PlayersManager players)
         {
             broadcastModule.Unsubscribe<AuthenticationRequest<T>>(OnPayload);
+            players.onPrePlayerLeft -= UnAuthenticatePlayer;
+        }
+
+        private void UnAuthenticatePlayer(PlayerID player, bool asserver)
+        {
+            if (_players.TryGetConnection(player, out var conn))
+                UnAuthenticateClient(conn);
         }
 
         public override async void SendClientPayload(BroadcastModule broadcastModule, CookiesModule cookies)

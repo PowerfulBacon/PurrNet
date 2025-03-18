@@ -18,17 +18,19 @@ namespace PurrNet.Modules
         private readonly NetworkManager _manager;
         private readonly BroadcastModule _broadcastModule;
         private readonly CookiesModule _cookiesModule;
+        private readonly PlayersManager _playersManager;
 
         private AuthenticationLayer _authenticator;
         private readonly List<WaitingConnectionAuth> _waitingConnections = new List<WaitingConnectionAuth>();
 
         public event Action<Connection, AuthenticationResponse> onConnection;
 
-        public AuthModule(NetworkManager manager, BroadcastModule broadcastModule, CookiesModule cookiesModule)
+        public AuthModule(NetworkManager manager, BroadcastModule broadcastModule, CookiesModule cookiesModule, PlayersManager players)
         {
             _cookiesModule = cookiesModule;
             _manager = manager;
             _broadcastModule = broadcastModule;
+            _playersManager = players;
         }
 
         public void Enable(bool asServer)
@@ -44,7 +46,7 @@ namespace PurrNet.Modules
                 return;
 
             _authenticator.onAuthenticationComplete += OnAuthenticationComplete;
-            _authenticator.Subscribe(_broadcastModule);
+            _authenticator.Subscribe(_broadcastModule, _playersManager);
         }
 
         public void Disable(bool asServer)
@@ -58,7 +60,7 @@ namespace PurrNet.Modules
                 return;
 
             _authenticator.onAuthenticationComplete -= OnAuthenticationComplete;
-            _authenticator.Unsubscribe(_broadcastModule);
+            _authenticator.Unsubscribe(_broadcastModule, _playersManager);
         }
 
         public void OnConnected(Connection conn, bool asServer)

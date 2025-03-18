@@ -815,7 +815,7 @@ namespace PurrNet
 
             var connBroadcaster = new BroadcastModule(this, asServer);
             var networkCookies = new CookiesModule(_cookieScope, asServer);
-            var authModule = new AuthModule(this, connBroadcaster, networkCookies);
+            var authModule = new AuthModule(this, connBroadcaster, networkCookies, playerModule);
             var playersManager = new PlayersManager(this, authModule, connBroadcaster);
 
             if (asServer)

@@ -19,5 +19,7 @@ namespace PurrNet.Authentication
         {
             return Task.FromResult<AuthenticationResponse>(_password == payload);
         }
+
+        protected override void UnAuthenticateClient(Connection conn) { }
     }
 }
