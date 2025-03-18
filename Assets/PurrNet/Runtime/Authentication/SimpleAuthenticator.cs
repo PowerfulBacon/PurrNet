@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace PurrNet.Authentication
 {
-    [RegisterNetworkType(typeof(AuthenticationRequest<string>))]
     public class SimpleAuthenticator : AuthenticationBehaviour<string>
     {
         [Tooltip("The password required to authenticate the client.")] [SerializeField]

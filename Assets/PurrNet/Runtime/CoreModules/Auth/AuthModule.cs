@@ -18,18 +18,22 @@ namespace PurrNet.Modules
         private readonly NetworkManager _manager;
         private readonly BroadcastModule _broadcastModule;
         private readonly CookiesModule _cookiesModule;
-        private readonly PlayersManager _playersManager;
+        private PlayersManager _playersManager;
 
         private AuthenticationLayer _authenticator;
         private readonly List<WaitingConnectionAuth> _waitingConnections = new List<WaitingConnectionAuth>();
 
         public event Action<Connection, AuthenticationResponse> onConnection;
 
-        public AuthModule(NetworkManager manager, BroadcastModule broadcastModule, CookiesModule cookiesModule, PlayersManager players)
+        public AuthModule(NetworkManager manager, BroadcastModule broadcastModule, CookiesModule cookiesModule)
         {
             _cookiesModule = cookiesModule;
             _manager = manager;
             _broadcastModule = broadcastModule;
+        }
+
+        public void SetPlayerModule(PlayersManager players)
+        {
             _playersManager = players;
         }
 

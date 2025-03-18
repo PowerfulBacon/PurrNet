@@ -14,6 +14,19 @@ namespace PurrNet.Authentication
         [CanBeNull] public string cookie;
     }
 
+    public struct AuthenticationRequestData : IPackedAuto
+    {
+        /// <summary>
+        /// This will be used to retrieve the same PlayerID from past sessions if present.
+        /// </summary>
+        [CanBeNull] public string cookie;
+
+        /// <summary>
+        /// The payload to be validated.
+        /// </summary>
+        public ByteData payload;
+    }
+
     public struct AuthenticationRequest<T> : IPackedAuto
     {
         /// <summary>
@@ -97,13 +110,13 @@ namespace PurrNet.Authentication
         {
             _players = players;
 
-            broadcastModule.Subscribe<AuthenticationRequest<T>>(OnPayload);
+            broadcastModule.Subscribe<AuthenticationRequestData>(OnPayload);
             players.onPrePlayerLeft += UnAuthenticatePlayer;
         }
 
         public override void Unsubscribe(BroadcastModule broadcastModule, PlayersManager players)
         {
-            broadcastModule.Unsubscribe<AuthenticationRequest<T>>(OnPayload);
+            broadcastModule.Unsubscribe<AuthenticationRequestData>(OnPayload);
             players.onPrePlayerLeft -= UnAuthenticatePlayer;
         }
 
@@ -119,7 +132,14 @@ namespace PurrNet.Authentication
             {
                 var payload = await GetClientPlayload();
                 payload.cookie ??= cookies.GetOrSet("client_connection_session", Guid.NewGuid().ToString());
-                broadcastModule.SendToServer(payload);
+                using var packer = BitPackerPool.Get();
+                Packer<T>.Write(packer, payload.payload);
+                var data = new AuthenticationRequestData
+                {
+                    cookie = payload.cookie,
+                    payload = packer.ToByteData()
+                };
+                broadcastModule.SendToServer(data);
             }
             catch (Exception e)
             {
@@ -127,11 +147,15 @@ namespace PurrNet.Authentication
             }
         }
 
-        private async void OnPayload(Connection conn, AuthenticationRequest<T> data, bool asServer)
+        private async void OnPayload(Connection conn, AuthenticationRequestData data, bool asServer)
         {
             try
             {
-                var result = await ValidateClientPayload(conn, data.payload);
+                using var packer = BitPackerPool.Get(data.payload);
+                T payload = default;
+                Packer<T>.Read(packer, ref payload);
+
+                var result = await ValidateClientPayload(conn, payload);
                 if (result.cookie == null && data.cookie != null)
                     result.cookie = data.cookie;
                 TrigerAuthenticationComplete(conn, result);
