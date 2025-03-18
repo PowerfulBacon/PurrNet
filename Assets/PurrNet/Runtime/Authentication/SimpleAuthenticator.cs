@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using PurrNet.Transports;
 using UnityEngine;
 
 namespace PurrNet.Authentication
@@ -14,9 +15,11 @@ namespace PurrNet.Authentication
             return Task.FromResult(new AuthenticationRequest<string>(_password));
         }
 
-        protected override Task<AuthenticationResponse> ValidateClientPayload(string payload)
+        protected override Task<AuthenticationResponse> ValidateClientPayload(Connection conn, string payload)
         {
             return Task.FromResult<AuthenticationResponse>(_password == payload);
         }
+
+        protected override void UnAuthenticateClient(Connection conn) { }
     }
 }
