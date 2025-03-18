@@ -117,7 +117,7 @@ namespace PurrNet.Authentication
         {
             try
             {
-                var result = await ValidateClientPayload(data.payload);
+                var result = await ValidateClientPayload(conn, data.payload);
                 if (result.cookie == null && data.cookie != null)
                     result.cookie = data.cookie;
                 TrigerAuthenticationComplete(conn, result);
@@ -140,8 +140,9 @@ namespace PurrNet.Authentication
         /// Once the client payload is received, this method is called to validate the payload.
         /// This only runs on the server.
         /// </summary>
+        /// <param name="conn">The connection of the client.</param>
         /// <param name="payload">The client payload to be validated.</param>
         /// <returns>The result of the validation.</returns>
-        protected abstract Task<AuthenticationResponse> ValidateClientPayload(T payload);
+        protected abstract Task<AuthenticationResponse> ValidateClientPayload(Connection conn, T payload);
     }
 }
