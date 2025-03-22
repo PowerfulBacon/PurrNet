@@ -46,6 +46,7 @@ namespace PurrNet.Modules
         public HierarchyV2(NetworkManager manager, SceneID sceneId, Scene scene,
             ScenePlayersModule players, PlayersManager playersManager, bool asServer)
         {
+            isReadyToSpawn = asServer;
             _manager = manager;
             _sceneId = sceneId;
             _scene = scene;
@@ -58,6 +59,7 @@ namespace PurrNet.Modules
             _prefabsPool = NetworkPoolManager.GetPool(manager);
 
             SetupSceneObjects(scene);
+
         }
 
         readonly List<GameObjectPrototype> _defaultPrototypes = new List<GameObjectPrototype>();
@@ -206,10 +208,19 @@ namespace PurrNet.Modules
             return true;
         }
 
+        public bool isReadyToSpawn { get; private set; }
+
         private void OnNetworkIDReceived(NetworkID nid)
         {
             if (nid.id >= _nextId)
                 _nextId = nid.id + 1;
+
+            isReadyToSpawn = true;
+
+            foreach (var pending in _pendingLocalSpawns)
+                Spawn(pending);
+
+            _pendingLocalSpawns.Clear();
         }
 
         private void OnPlayerReceivedID(PlayerID player)
@@ -695,8 +706,16 @@ namespace PurrNet.Modules
             NetworkManager.SetupPrefabInfo(gameObject, data.prefabId, data.pooled);
         }
 
+        static readonly Queue<GameObject> _pendingLocalSpawns = new Queue<GameObject>(16);
+
         internal void Spawn(GameObject gameObject)
         {
+            if (!isReadyToSpawn)
+            {
+                _pendingLocalSpawns.Enqueue(gameObject);
+                return;
+            }
+
             if (!gameObject)
                 return;
 
@@ -748,19 +767,6 @@ namespace PurrNet.Modules
 
             AutoAssignOwnership(id);
         }
-
-        /*private void TriggerObserverEvents()
-        {
-            if (_triggerObserverAdded.Count > 0)
-            {
-                foreach (var nid in _triggerObserverAdded)
-                {
-                    nid.nid.TriggerOnObserverAdded(nid.player);
-                    onObserverAdded?.Invoke(nid.player, nid.nid);
-                }
-                _triggerObserverAdded.Clear();
-            }
-        }*/
 
         private void AutoAssignOwnership(NetworkIdentity id)
         {
