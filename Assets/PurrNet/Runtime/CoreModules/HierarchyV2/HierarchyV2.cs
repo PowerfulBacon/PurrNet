@@ -136,7 +136,7 @@ namespace PurrNet.Modules
         {
             PurrNetGameObjectUtils.onGameObjectCreated += OnGameObjectCreated;
             _visibility.visibilityChanged += OnVisibilityChanged;
-            _scenePlayers.onPrePlayerloadedScene += OnPlayerLoadedScene;
+            _scenePlayers.onPrePlayerLoadedScene += OnPlayerLoadedScene;
             _scenePlayers.onPlayerUnloadedScene += OnPlayerUnloadedScene;
             _playersManager.onNetworkIDReceived += OnNetworkIDReceived;
 
@@ -155,7 +155,7 @@ namespace PurrNet.Modules
         {
             PurrNetGameObjectUtils.onGameObjectCreated -= OnGameObjectCreated;
             _visibility.visibilityChanged -= OnVisibilityChanged;
-            _scenePlayers.onPrePlayerloadedScene -= OnPlayerLoadedScene;
+            _scenePlayers.onPrePlayerLoadedScene -= OnPlayerLoadedScene;
             _scenePlayers.onPlayerUnloadedScene -= OnPlayerUnloadedScene;
             _playersManager.onLocalPlayerReceivedID -= OnPlayerReceivedID;
             _playersManager.onNetworkIDReceived -= OnNetworkIDReceived;
