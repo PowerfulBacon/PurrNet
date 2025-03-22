@@ -216,11 +216,6 @@ namespace PurrNet.Modules
                 _nextId = nid.id + 1;
 
             isReadyToSpawn = true;
-
-            foreach (var pending in _pendingLocalSpawns)
-                Spawn(pending);
-
-            _pendingLocalSpawns.Clear();
         }
 
         private void OnPlayerReceivedID(PlayerID player)
@@ -706,13 +701,12 @@ namespace PurrNet.Modules
             NetworkManager.SetupPrefabInfo(gameObject, data.prefabId, data.pooled);
         }
 
-        static readonly Queue<GameObject> _pendingLocalSpawns = new Queue<GameObject>(16);
-
         internal void Spawn(GameObject gameObject)
         {
             if (!isReadyToSpawn)
             {
-                _pendingLocalSpawns.Enqueue(gameObject);
+                PurrLogger.LogError("Failed to spawn object. Hierarchy module is not ready.\n" +
+                                    "Use scene events to check when ready before spawning on client.", gameObject);
                 return;
             }
 
