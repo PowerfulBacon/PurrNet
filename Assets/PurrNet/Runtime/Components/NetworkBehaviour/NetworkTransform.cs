@@ -279,7 +279,7 @@ namespace PurrNet
         public void ForceSync()
         {
             if (!isController)
-                return;
+                return; 
 
             _currentData = GetCurrentTransformData();
             ForceSyncServer(_currentData);
