@@ -269,6 +269,7 @@ namespace PurrNet
             if (target == localPlayer)
                 return;
             
+            _currentData = GetCurrentTransformData();
             SendLatestState(target, _currentData);
         }
 
@@ -280,6 +281,7 @@ namespace PurrNet
             if (!isController)
                 return;
 
+            _currentData = GetCurrentTransformData();
             ForceSyncServer(_currentData);
         }
 
