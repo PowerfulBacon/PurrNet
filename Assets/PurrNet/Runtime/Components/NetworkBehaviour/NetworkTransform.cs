@@ -260,6 +260,41 @@ namespace PurrNet
             if (!_ownerAuth || player != owner)
                 SendLatestState(player, _currentData);
         }
+        
+        /// <summary>
+        /// Forces the latest NT state to target player, voiding compression and other optimizations
+        /// </summary>
+        public void ForceSync(PlayerID target)
+        {
+            if (target == localPlayer)
+                return;
+            
+            _currentData = GetCurrentTransformData();
+            SendLatestState(target, _currentData);
+        }
+
+        /// <summary>
+        /// Forces the latest NT state to everyone, voiding compression and other optimizations
+        /// </summary>
+        public void ForceSync()
+        {
+            if (!isController)
+                return; 
+
+            _currentData = GetCurrentTransformData();
+            ForceSyncServer(_currentData);
+        }
+
+        private void ForceSyncServer(NetworkTransformData data)
+        {
+            foreach (var observer in observers)
+            {
+                if (IsController(observer, _ownerAuth, false))
+                    return; //No need to send state to controller
+                
+                SendLatestState(observer, data);
+            }
+        }
 
         [ServerRpc]
         private void SendLatestStateToServer(NetworkTransformData data)
