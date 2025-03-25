@@ -930,6 +930,10 @@ namespace PurrNet
             modules.AddModule(networkTransform);
             modules.AddModule(colliderRollback);
 
+            var deltaMessager = new DeltaMessagerFactory(scenesModule, scenePlayers , playersBroadcast);
+
+            modules.AddModule(deltaMessager);
+
             RenewSubscriptions(asServer);
         }
 

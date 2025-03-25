@@ -281,6 +281,7 @@ namespace PurrNet
         public PlayerID? owner => internalOwnerServer ?? internalOwnerClient;
 
         public NetworkManager networkManager { get; private set; }
+        public DeltaMessagerModule deltaMessager { get; private set; }
 
         private HierarchyV2 _clientHierarchy;
         private HierarchyV2 _serverHierarchy;
@@ -711,6 +712,7 @@ namespace PurrNet
             _ticker = null;
             isInPool = true;
             _wasEarlySpawned = false;
+            deltaMessager = null;
         }
 
         private void OnChildDespawned(NetworkIdentity networkIdentity)
@@ -725,6 +727,12 @@ namespace PurrNet
             layer = gameObject.layer;
             networkManager = manager;
             sceneId = scene;
+
+            if (deltaMessager == null && manager.TryGetModule<DeltaMessagerFactory>(asServer, out var factory) &&
+                factory.TryGetModule(scene, out var dm))
+            {
+                deltaMessager = dm;
+            }
 
             bool wasAlreadySpawned = isSpawned;
 
