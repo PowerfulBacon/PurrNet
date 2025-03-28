@@ -9,11 +9,13 @@ namespace PurrNet.Modules
     {
         public SceneID scene;
         public readonly ByteData packet;
+        public readonly int packerLengthInBits;
 
-        public NetworkTransformDelta(SceneID context, BitPacker packer)
+        public NetworkTransformDelta(SceneID context, BitPacker packer, int packerLengthInBits)
         {
             scene = context;
             packet = packer.ToByteData();
+            this.packerLengthInBits = packerLengthInBits;
         }
     }
 
@@ -128,7 +130,12 @@ namespace PurrNet.Modules
                 {
                     var nt = _networkTransforms[i];
                     if (nt.IsControlling(player, false))
+                    {
                         nt.DeltaRead(packet);
+
+                        if (packet.positionInBits >= data.packerLengthInBits)
+                            break;
+                    }
                 }
             }
             else
@@ -137,12 +144,17 @@ namespace PurrNet.Modules
                 {
                     var nt = _networkTransforms[i];
                     if (!nt.IsControlling(nt.localPlayerForced, false))
+                    {
                         nt.DeltaRead(packet);
+
+                        if (packet.positionInBits >= data.packerLengthInBits)
+                            break;
+                    }
                 }
             }
         }
 
-        public PlayerID GetLocalPlayer()
+        private PlayerID GetLocalPlayer()
         {
             if (_manager.TryGetModule<PlayersManager>(false, out var _players))
                 return _players.localPlayerId.GetValueOrDefault();
@@ -231,7 +243,7 @@ namespace PurrNet.Modules
                 using var packer = BitPackerPool.Get();
 
                 if (PrepareDeltaState(packer, PlayerID.Server) && packer.positionInBits > 0)
-                    _broadcaster.SendToServer(new NetworkTransformDelta(_scene, packer));
+                    _broadcaster.SendToServer(new NetworkTransformDelta(_scene, packer, packer.positionInBits));
             }
             else if (_scenePlayers.TryGetPlayersInScene(_scene, out var players))
             {
@@ -243,7 +255,7 @@ namespace PurrNet.Modules
                     using var packer = BitPackerPool.Get();
 
                     if (PrepareDeltaState(packer, player) && packer.positionInBits > 0)
-                        _broadcaster.Send(player, new NetworkTransformDelta(_scene, packer));
+                        _broadcaster.Send(player, new NetworkTransformDelta(_scene, packer, packer.positionInBits));
                 }
             }
 
