@@ -14,6 +14,12 @@ namespace PurrNet.Packing
 
         public static implicit operator Angle(float value) => new Angle(value);
         public static implicit operator float(Angle angle) => angle.value;
+
+        public void Round()
+        {
+            var rounded = Mathf.RoundToInt(value / DeltaPackFloats.ANGLE_PRECISION);
+            value = rounded * DeltaPackFloats.ANGLE_PRECISION;
+        }
     }
 
     public static class DeltaPackFloats
@@ -152,7 +158,7 @@ namespace PurrNet.Packing
             else value = oldvalue;
         }
 
-        public const float ANGLE_PRECISION = 0.0005f;
+        public const float ANGLE_PRECISION = 0.0001f;
 
         [UsedByIL]
         private static bool WriteAngle(BitPacker packer, Angle oldvalue, Angle newvalue)

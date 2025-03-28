@@ -46,6 +46,7 @@ namespace PurrNet.Modules
         public HierarchyV2(NetworkManager manager, SceneID sceneId, Scene scene,
             ScenePlayersModule players, PlayersManager playersManager, bool asServer)
         {
+            isReadyToSpawn = asServer;
             _manager = manager;
             _sceneId = sceneId;
             _scene = scene;
@@ -58,6 +59,7 @@ namespace PurrNet.Modules
             _prefabsPool = NetworkPoolManager.GetPool(manager);
 
             SetupSceneObjects(scene);
+
         }
 
         readonly List<GameObjectPrototype> _defaultPrototypes = new List<GameObjectPrototype>();
@@ -134,7 +136,7 @@ namespace PurrNet.Modules
         {
             PurrNetGameObjectUtils.onGameObjectCreated += OnGameObjectCreated;
             _visibility.visibilityChanged += OnVisibilityChanged;
-            _scenePlayers.onPrePlayerloadedScene += OnPlayerLoadedScene;
+            _scenePlayers.onPrePlayerLoadedScene += OnPlayerLoadedScene;
             _scenePlayers.onPlayerUnloadedScene += OnPlayerUnloadedScene;
             _playersManager.onNetworkIDReceived += OnNetworkIDReceived;
 
@@ -153,7 +155,7 @@ namespace PurrNet.Modules
         {
             PurrNetGameObjectUtils.onGameObjectCreated -= OnGameObjectCreated;
             _visibility.visibilityChanged -= OnVisibilityChanged;
-            _scenePlayers.onPrePlayerloadedScene -= OnPlayerLoadedScene;
+            _scenePlayers.onPrePlayerLoadedScene -= OnPlayerLoadedScene;
             _scenePlayers.onPlayerUnloadedScene -= OnPlayerUnloadedScene;
             _playersManager.onLocalPlayerReceivedID -= OnPlayerReceivedID;
             _playersManager.onNetworkIDReceived -= OnNetworkIDReceived;
@@ -206,10 +208,14 @@ namespace PurrNet.Modules
             return true;
         }
 
+        public bool isReadyToSpawn { get; private set; }
+
         private void OnNetworkIDReceived(NetworkID nid)
         {
             if (nid.id >= _nextId)
                 _nextId = nid.id + 1;
+
+            isReadyToSpawn = true;
         }
 
         private void OnPlayerReceivedID(PlayerID player)
@@ -697,6 +703,13 @@ namespace PurrNet.Modules
 
         internal void Spawn(GameObject gameObject)
         {
+            if (!isReadyToSpawn)
+            {
+                PurrLogger.LogError("Failed to spawn object. Hierarchy module is not ready.\n" +
+                                    "Use scene events to check when ready before spawning on client.", gameObject);
+                return;
+            }
+
             if (!gameObject)
                 return;
 
@@ -748,19 +761,6 @@ namespace PurrNet.Modules
 
             AutoAssignOwnership(id);
         }
-
-        /*private void TriggerObserverEvents()
-        {
-            if (_triggerObserverAdded.Count > 0)
-            {
-                foreach (var nid in _triggerObserverAdded)
-                {
-                    nid.nid.TriggerOnObserverAdded(nid.player);
-                    onObserverAdded?.Invoke(nid.player, nid.nid);
-                }
-                _triggerObserverAdded.Clear();
-            }
-        }*/
 
         private void AutoAssignOwnership(NetworkIdentity id)
         {

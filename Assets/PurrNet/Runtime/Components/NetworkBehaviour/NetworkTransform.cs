@@ -261,6 +261,55 @@ namespace PurrNet
                 SendLatestState(player, _currentData);
         }
 
+        /// <summary>
+        /// Forces the latest NT state to target player, voiding compression and other optimizations
+        /// </summary>
+        public void ForceSync(PlayerID target)
+        {
+            if (target == localPlayer)
+                return;
+
+            _currentData = GetCurrentTransformData();
+            SendLatestState(target, _currentData);
+        }
+
+        /// <summary>
+        /// Forces the latest NT state to everyone, voiding compression and other optimizations
+        /// </summary>
+        public void ForceSync()
+        {
+            if (!isController)
+                return;
+
+            _currentData = GetCurrentTransformData();
+            ForceSyncServer(_currentData);
+        }
+
+        private void ForceSyncServer(NetworkTransformData data)
+        {
+            foreach (var observer in observers)
+            {
+                if (IsController(observer, _ownerAuth, false))
+                    return; //No need to send state to controller
+
+                SendLatestState(observer, data);
+            }
+        }
+
+        /// <summary>
+        /// Clears interpolation and teleports the transform to the target position, rotation and scale.
+        /// Works on both owner and non-owner clients.
+        /// </summary>
+        public void ClearInterpolation(Vector3 targetPos, Quaternion targetRot, Vector3 targetScale)
+        {
+            if (syncPosition)
+                _position.Teleport(targetPos);
+            if (syncRotation)
+                _rotation.Teleport(targetRot);
+            if (syncScale)
+                _scale.Teleport(targetScale);
+        }
+
         [ServerRpc]
         private void SendLatestStateToServer(NetworkTransformData data)
         {
