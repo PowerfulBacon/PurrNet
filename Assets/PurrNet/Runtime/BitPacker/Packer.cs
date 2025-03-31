@@ -30,6 +30,8 @@ namespace PurrNet.Packing
         {
             if (_write != null)
                 return;
+
+            DeltaPacker.RegisterWriter(typeof(T), a.Method);
             _write = a;
         }
 
@@ -37,6 +39,8 @@ namespace PurrNet.Packing
         {
             if (_read != null)
                 return;
+
+            DeltaPacker.RegisterReader(typeof(T), b.Method);
             _read = b;
         }
 
@@ -82,6 +86,67 @@ namespace PurrNet.Packing
             if (packer.isWriting)
                 Write(packer, oldValue, value);
             else Read(packer, oldValue, ref value);
+        }
+    }
+
+    public static class DeltaPacker
+    {
+        static readonly Dictionary<Type, MethodInfo> _writeMethods = new Dictionary<Type, MethodInfo>();
+        static readonly Dictionary<Type, MethodInfo> _readMethods = new Dictionary<Type, MethodInfo>();
+
+        public static void RegisterWriter(Type type, MethodInfo method)
+        {
+            _writeMethods.TryAdd(type, method);
+        }
+
+        public static void RegisterReader(Type type, MethodInfo method)
+        {
+            _readMethods.TryAdd(type, method);
+        }
+
+        static readonly object[] _args = new object[3];
+
+        public static void Write(BitPacker packer, Type type, object oldValue, object newValue)
+        {
+            if (!_writeMethods.TryGetValue(type, out var method))
+            {
+                PurrLogger.LogError($"No delta writer for type '{type}' is registered.");
+                return;
+            }
+
+            try
+            {
+                _args[0] = packer;
+                _args[1] = oldValue;
+                _args[2] = newValue;
+                method.Invoke(null, _args);
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to delta write value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        public static void Read(BitPacker packer, Type type, object oldValue, ref object newValue)
+        {
+            if (!_readMethods.TryGetValue(type, out var method))
+            {
+                PurrLogger.LogError($"No delta reader for type '{type}' is registered.");
+                return;
+            }
+
+            try
+            {
+                _args[0] = packer;
+                _args[1] = oldValue;
+                _args[2] = newValue;
+                method.Invoke(null, _args);
+                newValue = _args[2];
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to delta read value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
+            }
         }
     }
 
@@ -239,6 +304,26 @@ namespace PurrNet.Packing
             {
                 PurrLogger.LogError(
                     $"Failed to read value of type '{typeof(T)}' when using fallback reader.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        public static void Write(BitPacker packer, Type type, object value)
+        {
+            if (!_writeMethods.TryGetValue(type, out var method))
+            {
+                PurrLogger.LogError($"No writer for type '{type}' is registered.");
+                return;
+            }
+
+            try
+            {
+                _args[0] = packer;
+                _args[1] = value;
+                method.Invoke(null, _args);
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to write value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
             }
         }
 

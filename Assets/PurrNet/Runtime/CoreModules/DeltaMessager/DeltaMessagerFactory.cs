@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using PurrNet.Logging;
 
 namespace PurrNet.Modules
@@ -57,10 +59,10 @@ namespace PurrNet.Modules
                 return;
             }
 
-            var hierarchy = new DeltaMessagerModule(scene, _broadcaster, _scenePlayers, asServer);
-            hierarchy.Enable();
-            _rawModules.Add(hierarchy);
-            _modules.Add(scene, hierarchy);
+            var deltaMessagerModule = new DeltaMessagerModule(scene, _broadcaster, _scenePlayers);
+            deltaMessagerModule.Enable();
+            _rawModules.Add(deltaMessagerModule);
+            _modules.Add(scene, deltaMessagerModule);
         }
 
         private void OnSceneUnloaded(SceneID scene, bool asServer)
