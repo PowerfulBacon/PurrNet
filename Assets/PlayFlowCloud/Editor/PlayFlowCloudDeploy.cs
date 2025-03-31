@@ -31,7 +31,7 @@ public class PlayFlowCloudDeploy : EditorWindow
     private Button getTagsButton;
     private Button ButtonDeleteTag;
     private Button ButtonUpdateServer;
-    
+
     private Coroutine currentCoroutine;
 
 
@@ -47,38 +47,37 @@ public class PlayFlowCloudDeploy : EditorWindow
     private TextField servertag;
 
 
-    private Foldout ConfigFoldout;
     private Foldout UploadFoldout;
     private Foldout LaunchServersFoldout;
     private Foldout ManageFoldout;
     private Foldout LogsFoldout;
     private Foldout TagsFoldout;
 
-    
+
 
 
     private Toggle enableSSL;
     private Toggle devBuild;
-    
+
     private DropdownField location;
     private DropdownField instanceType;
     private DropdownField activeServersField;
     private DropdownField sceneDropDown;
     private DropdownField LaunchTagDropdown;
-    
+
     private DropdownField tagsDropDown;
 
 
     private Toggle buildSettingsToggle;
 
     private ProgressBar progress;
-    
+
     private List<string> sceneList;
 
     private Label uploadedInfo;
-    
+
     private Label ServerStatusLabel;
-    
+
     private TextField uploadInfoHidden;
 
     private TextField lastRefreshedKey;
@@ -149,21 +148,21 @@ public class PlayFlowCloudDeploy : EditorWindow
         ButtonUpdateServer = rootVisualElement.Q<Button>("ButtonUpdateServer");
         ButtonCopyServerUrl = rootVisualElement.Q<Button>("ButtonCopyServerUrl");
         ButtonViewDashboard = rootVisualElement.Q<Button>("ButtonViewDashboard");
-        
+
         ServerStatusLabel = rootVisualElement.Q<Label>("ServerStatusLabel");
         OnlineIcon = rootVisualElement.Q<VisualElement>("OnlineIcon");
         LaunchingIcon = rootVisualElement.Q<VisualElement>("LaunchingIcon");
-        
+
         lastRefreshedKey = rootVisualElement.Q<TextField>("lastRefreshedKey");
-        
-        ConfigFoldout = rootVisualElement.Q<Foldout>("ConfigFoldout");
+
+        rootVisualElement.Q<Foldout>("ConfigFoldout");
         UploadFoldout = rootVisualElement.Q<Foldout>("UploadFoldout");
         LaunchServersFoldout = rootVisualElement.Q<Foldout>("LaunchServersFoldout");
         ManageFoldout = rootVisualElement.Q<Foldout>("ManageFoldout");
         LogsFoldout = rootVisualElement.Q<Foldout>("LogsFoldout");
         TagsFoldout = rootVisualElement.Q<Foldout>("TagsFoldout");
 
-        
+
         logs = rootVisualElement.Q<TextField>("logs");
         progress = rootVisualElement.Q<ProgressBar>("progress");
 
@@ -175,21 +174,21 @@ public class PlayFlowCloudDeploy : EditorWindow
         argumentsField = rootVisualElement.Q<TextField>("TextArgs");
         sslValue = rootVisualElement.Q<TextField>("sslValue");
         servertag = rootVisualElement.Q<TextField>("servertag");
-        
+
         uploadInfoHidden = rootVisualElement.Q<TextField>("uploadedInfoValue");
 
         devBuild = rootVisualElement.Q<Toggle>("DevelopmentBuild");
-        
+
         buildSettingsToggle = rootVisualElement.Q<Toggle>("UseBuildSettings");
-        
-        
-        
+
+
+
         sceneDropDown = rootVisualElement.Q<DropdownField>("sceneDropDown");
         enableSSL = rootVisualElement.Q<Toggle>("enableSSL");
         sslValue.style.display = enableSSL.value ? DisplayStyle.Flex : DisplayStyle.None;
 
-        
-        
+
+
         location = rootVisualElement.Q<DropdownField>("locationDropdown");
         location.choices = productionRegionOptions.Keys.ToList();
 
@@ -197,7 +196,7 @@ public class PlayFlowCloudDeploy : EditorWindow
         {
             location.index = 0;
         }
-        
+
         foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
         {
             sceneList.Add(scene.path);
@@ -216,12 +215,12 @@ public class PlayFlowCloudDeploy : EditorWindow
         activeServersField.choices = new List<string>();
 
         sceneDropDown.RegisterCallback<MouseDownEvent>(OnSceneDropDown);
-        
+
         //When the user clicks the dropdown first time, we populate the list
         LaunchTagDropdown.RegisterCallback<MouseDownEvent>(OnLaunchTagDropDown);
         tagsDropDown.RegisterCallback<MouseDownEvent>(OnLaunchTagDropDown);
 
-        
+
         documentationButton.clicked += OnDocumentationPressed;
         discordButton.clicked += OnDiscordPressed;
         pricingButton.clicked += OnPricingPressed;
@@ -245,22 +244,22 @@ public class PlayFlowCloudDeploy : EditorWindow
         resetStatusButton.clicked += OnResetStatusPressed;
         getTagsButton.clicked += OnGetTagsPressed;
         ButtonDeleteTag.clicked += OnDeleteTagPressed;
-        
-        
-        
+
+
+
         ButtonCopyIP.clicked += OnCopyIPPressed;
         ButtonCopyMatchId.clicked += OnCopyMatchIdPressed;
         ButtonCopyServerUrl.clicked += OnCopyServerUrlPressed;
-        
+
         ButtonViewDashboard.clicked += OnViewDashboardPressed;
 
         enableManagementButtons(false);
         // Start the timer
         startTime = EditorApplication.timeSinceStartup;
-        
+
         // Add the update function to EditorApplication.update
         EditorApplication.update += CheckTokenAfterDelay;
-        
+
         activeServersField.RegisterValueChangedCallback(evt =>
         {
             // Debug.Log("Active Server Changed");
@@ -289,12 +288,12 @@ public class PlayFlowCloudDeploy : EditorWindow
             {
                 validateToken();
                 OnUploadStatusPressed();
-                
+
                 OnRefreshPressed();
             }
         }
     }
-    
+
 private bool isCheckingServerStatus = false;
 private double lastCheckTime;
 private double checkInterval = 10; // 10
@@ -369,7 +368,7 @@ private void UpdateServerStatus(MatchInfo matchInfo)
             StopCheckingServerStatus();
             break;
     }
-    
+
 
 }
 
@@ -417,20 +416,20 @@ private async void checkIfCurrentSelectedServerIsRunning()
         string response = await PlayFlowAPI.Delete_Tag(tokenField.value, tagsDropDown.value);
         outputLogs(response);
         hideProgress();
-        
+
         //Change dropdown to index 0
         tagsDropDown.index = 0;
-        
+
         OnGetTagsPressed();
     }
-    
+
     private void OnLaunchTagDropDown(MouseDownEvent evt)
     {
         OnGetTagsPressed();
     }
     private async void OnGetTagsPressed()
     {
-        
+
         validateToken();
         showProgress();
         string response = await PlayFlowAPI.Get_Tags(tokenField.value);
@@ -441,7 +440,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
         TagsResponse tagsResponse = JsonUtility.FromJson<TagsResponse>(response);
         tagsDropDown.choices = tagsResponse.tags.ToList();
         LaunchTagDropdown.choices = tagsResponse.tags.ToList();
-        
+
         // Check if there is a value currently in the dropdown, if not set the value to the first element
         if (string.IsNullOrEmpty(tagsDropDown.value))
         {
@@ -451,12 +450,12 @@ private async void checkIfCurrentSelectedServerIsRunning()
         {
             LaunchTagDropdown.index = 0;
         }
-        
+
         tagsDropDown.value = currentTag;
         LaunchTagDropdown.value = currentLaunchTag;
         hideProgress();
     }
-    
+
 
     private void OnSceneDropDown(MouseDownEvent clickEvent)
     {
@@ -466,7 +465,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
         }
         sceneDropDown.choices = sceneList;
     }
-    
+
     private void HandleBuildSettings(ChangeEvent<bool> value)
     {
         if (value.newValue)
@@ -501,7 +500,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
     {
         //Check if token is valid and has > or = 32 characters before we validate
         await validate(value.newValue);
-        
+
     }
 
     // private int api_version = 8;
@@ -520,7 +519,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
             tagsDropDown.choices = new List<string>();
             LaunchTagDropdown.choices = new List<string>();
             activeServersField.choices = new List<string>();
-            
+
             //And clear the values
             tagsDropDown.value = "default";
             LaunchTagDropdown.value = "default";
@@ -534,12 +533,12 @@ private async void checkIfCurrentSelectedServerIsRunning()
             OnRefreshPressed();
             OnGetTagsPressed();
             OnUploadStatusPressed();
-            
+
             if (validationResponse.api_version == "9")
             {
                 enableSSL.style.display = DisplayStyle.None;
                 sslValue.style.display = DisplayStyle.None;
-                
+
                 //Build Tag Enable
                 LaunchTagDropdown.style.display = DisplayStyle.Flex;
                 tagsDropDown.style.display = DisplayStyle.Flex;
@@ -547,7 +546,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
                 getTagsButton.style.display = DisplayStyle.Flex;
                 servertag.style.display = DisplayStyle.Flex;
                 TagsFoldout.style.display = DisplayStyle.Flex;
-                
+
                 // api_version = 9;
 
             }
@@ -555,17 +554,17 @@ private async void checkIfCurrentSelectedServerIsRunning()
             {
                 enableSSL.style.display = DisplayStyle.Flex;
                 sslValue.style.display = DisplayStyle.Flex;
-                
+
                 LaunchTagDropdown.style.display = DisplayStyle.Flex;
                 tagsDropDown.style.display = DisplayStyle.Flex;
                 ButtonDeleteTag.style.display = DisplayStyle.Flex;
                 getTagsButton.style.display = DisplayStyle.Flex;
                 servertag.style.display = DisplayStyle.Flex;
                 TagsFoldout.style.display = DisplayStyle.Flex;
-                
+
                 // api_version = 8;
-                
-                
+
+
             }
         }
     }
@@ -591,7 +590,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
     {
         System.Diagnostics.Process.Start("https://docs.playflowcloud.com");
     }
-    
+
     private void OnQuickStartPressed()
     {
         System.Diagnostics.Process.Start("https://docs.playflowcloud.com/guides/creating-your-first-server-deployment");
@@ -661,7 +660,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
             string serverInfo = server.match_id;
             string portsJson = PlayFlowBackend.ExtractPortsJson(response, server.match_id);
             server.ports = PlayFlowBackend.ParsePorts(portsJson);
-            
+
             outputLogs(serverInfo);
             if (server.ssl_enabled)
             {
@@ -677,7 +676,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
             activeServersField.value = "";
             activeServersField.index = 0;
         }
-        
+
         if (activeServersField.value == null || activeServersField.value.Equals(""))
         {
             activeServersField.index = 0;
@@ -698,7 +697,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
             return;
         }
         string response = await PlayFlowAPI.GetServerStatus(tokenField.value, activeServersField.value);
-        
+
         MatchInfo matchInfo = JsonUtility.FromJson<MatchInfo>(response);
         StartCheckingServerStatus(matchInfo.match_id);
         outputLogs(response);
@@ -716,10 +715,10 @@ private async void checkIfCurrentSelectedServerIsRunning()
         playflow_logs = "";
         foreach (string s in split)
             playflow_logs += s + "\n";
-        
+
         outputLogs(playflow_logs);
     }
-    
+
     private async Task restart_server(bool update)
     {
         if (activeServersField.value == null || activeServersField.value.Equals(""))
@@ -727,18 +726,18 @@ private async void checkIfCurrentSelectedServerIsRunning()
             outputLogs("No server selected");
             return;
         }
-        
+
         if (LaunchTagDropdown.value == null || LaunchTagDropdown.value.Equals(""))
         {
             LaunchTagDropdown.value = "default";
         }
-        
+
         string response =
             await PlayFlowAPI.RestartServer(tokenField.value, productionRegionOptions[location.value],  argumentsField.value, enableSSL.value.ToString(), activeServersField.value, update, LaunchTagDropdown.value);
         outputLogs(response);
-        
+
     }
-    
+
     private async Task stop_server()
     {
         if (activeServersField.value == null || activeServersField.value.Equals(""))
@@ -759,7 +758,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
     private void outputLogs(string s, bool shouldDebug = false)
     {
         string formatted = PrettyPrintJson(s);
-        
+
         if (shouldDebug)
         {
             Debug.Log(DateTime.Now.ToString() + " PlayFlow Logs: " + s);
@@ -768,8 +767,8 @@ private async void checkIfCurrentSelectedServerIsRunning()
 
         logs.value = formatted;
     }
-    
-    
+
+
     public static string PrettyPrintJson(string json)
 {
     try
@@ -859,13 +858,13 @@ private async void checkIfCurrentSelectedServerIsRunning()
             hideProgress();
             refreshButton.SetEnabled(true);
         }
-        
+
     }
-    
+
     private string currentIp = "";
     private string currentMatchId = "";
     private string currentServerUrl = "";
-    
+
     private void OnCopyIPPressed()
     {
         if (currentIp != null && !currentIp.Equals(""))
@@ -874,8 +873,8 @@ private async void checkIfCurrentSelectedServerIsRunning()
             outputLogs("Copied IP to clipboard: " + currentIp);
         }
     }
-    
-    
+
+
     private void OnCopyServerUrlPressed()
     {
         if (currentServerUrl != null && !currentServerUrl.Equals(""))
@@ -884,7 +883,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
             outputLogs("Copied Server URL to clipboard: " + currentServerUrl);
         }
     }
-    
+
     private void OnViewDashboardPressed()
     {
         if (!string.IsNullOrEmpty(currentIp))
@@ -901,7 +900,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
     {
         Application.OpenURL(url);
     }
-    
+
     private void OnCopyMatchIdPressed()
     {
         if (currentMatchId != null && !currentMatchId.Equals(""))
@@ -989,7 +988,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
             restartButton.SetEnabled(true);
         }
     }
-    
+
     private async void OnUpdatePressed()
     {
         //
@@ -999,14 +998,14 @@ private async void checkIfCurrentSelectedServerIsRunning()
             showProgress();
             ButtonUpdateServer.SetEnabled(false);
             await restart_server(true);
-            
-            
-            
+
+
+
 
             checkInterval = 2; // 5 seconds
             maxCheckDuration = 24; // 60 seconds
-            
-            
+
+
             OnGetStatusPressed();
         }
         finally
@@ -1033,7 +1032,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
         }
 
     }
-    
+
 
 
     public static bool CheckLinuxServerModule()
@@ -1064,30 +1063,30 @@ private async void checkIfCurrentSelectedServerIsRunning()
 
     private void OnUploadPressed()
     {
-                
+
         if (servertag.value == null || servertag.value.Equals(""))
         {
             Debug.LogError("Server tag cannot be empty. Please enter a server tag or use `default` as the server tag");
             return;
         }
-        
+
         BuildTarget standaloneTarget = EditorUserBuildSettings.selectedStandaloneTarget;
         BuildTargetGroup currentBuildTargetGroup = BuildPipeline.GetBuildTargetGroup(standaloneTarget);
 #if UNITY_2021_2_OR_NEWER
         StandaloneBuildSubtarget currentSubTarget = EditorUserBuildSettings.standaloneBuildSubtarget;
 #endif
-        
+
 #if UNITY_2021_2_OR_NEWER
         if (CheckLinuxServerModule() == false)
         {
             return;
         }
 #endif
-        
+
         validateToken();
         showProgress(25);
 
-        
+
 
         //Check if build target is installed in the editor
         if (!BuildPipeline.IsBuildTargetSupported(currentBuildTargetGroup, standaloneTarget))
@@ -1118,7 +1117,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
                 }
                 scenesToUpload.Add(sceneDropDown.value);
             }
-            
+
 
             bool success = PlayFlowBuilder.BuildServer(devBuild.value, scenesToUpload);
             if (!success)
@@ -1133,7 +1132,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
             showProgress(75);
             string playflow_logs = PlayFlowAPI.Upload(targetfile, tokenField.value, productionRegionOptions[location.value], servertag.value);
             outputLogs(playflow_logs);
-            
+
         }
         finally
         {
@@ -1162,7 +1161,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
         //
     }
 
-    
+
     private async Task<MatchInfo> GetServerStatusAsync(string token, string matchId)
     {
         string response = await PlayFlowAPI.GetServerStatus(token, matchId);
@@ -1200,8 +1199,8 @@ private async void checkIfCurrentSelectedServerIsRunning()
                 argumentsField.value, enableSSL.value.ToString(), sslValue.value.ToString(),
                 instance_types[instanceType.value], isProductionToken(tokenField.value), LaunchTagDropdown.value);
             MatchInfo matchInfo = JsonUtility.FromJson<MatchInfo>(response);
-            
-            if (matchInfo != null && matchInfo.playflow_api_version != null && matchInfo.playflow_api_version == 8)
+
+            if (matchInfo is { playflow_api_version: 8 })
             {
 
                 checkInterval = 30; // 30 seconds if MMO type server
@@ -1226,7 +1225,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
 
         }
 
-      
+
     }
 #pragma warning disable 0168
 
@@ -1242,7 +1241,7 @@ private async void checkIfCurrentSelectedServerIsRunning()
             Debug.Log("Progress Bar UI Not found. ProgressBar will be hidden. Loading in progress");
         }
     }
-    
+
     private void showProgress(float value)
     {
         try
@@ -1257,8 +1256,8 @@ private async void checkIfCurrentSelectedServerIsRunning()
         }
 
     }
-    
-    
+
+
     private void hideProgress()
     {
         try
