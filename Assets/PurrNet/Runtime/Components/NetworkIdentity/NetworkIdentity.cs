@@ -634,17 +634,27 @@ namespace PurrNet
             return player != owner;
         }
 
+
+        List<MethodInfo> _initializeMethods;
+
         private void CallInitMethods()
         {
-            var type = GetType();
-            var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
-
-            for (int i = 0; i < methods.Length; i++)
+            if (_initializeMethods == null)
             {
-                var m = methods[i];
-                if (m.Name.EndsWith("_CodeGen_Initialize"))
-                    m.Invoke(this, Array.Empty<object>());
+                var type = GetType();
+                var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+                _initializeMethods = new List<MethodInfo>(methods.Length);
+
+                for (int i = 0; i < methods.Length; i++)
+                {
+                    var m = methods[i];
+                    if (m.Name.EndsWith("_CodeGen_Initialize"))
+                        _initializeMethods.Add(m);
+                }
             }
+
+            for (var i = 0; i < _initializeMethods.Count; i++)
+                _initializeMethods[i].Invoke(this, Array.Empty<object>());
         }
 
         /// <summary>
