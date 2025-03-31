@@ -1005,7 +1005,7 @@ namespace PurrNet.Modules
             actual.Clear();
         }
 
-        static void SetLocalPosAndRot(Transform t, Vector3 pos, Quaternion rot)
+        static void SetLocalPosAndRot(Transform t, Vector3 pos, Quaternion rot, Vector3 scale)
         {
             var cc = t.GetComponent<CharacterController>();
             bool wasCCEnabled = cc && cc.enabled;
@@ -1014,6 +1014,7 @@ namespace PurrNet.Modules
                 cc.enabled = false;
 
             t.SetLocalPositionAndRotation(pos, rot);
+            t.localScale = scale;
 
             if (t.TryGetComponent<Rigidbody>(out var rb))
             {
@@ -1047,7 +1048,7 @@ namespace PurrNet.Modules
                 if (TryGetIdentity(prototype.parentID.Value, out var parent))
                 {
                     result.transform.SetParent(parent.transform, false);
-                    SetLocalPosAndRot(resultTrs, prototype.position, prototype.rotation);
+                    SetLocalPosAndRot(resultTrs, prototype.position, prototype.rotation, prototype.scale);
 
                     if (result.TryGetComponent<NetworkIdentity>(out var nid))
                         ApplyParentChange(nid, parent, prototype.path, false);
@@ -1063,11 +1064,11 @@ namespace PurrNet.Modules
             {
                 result.transform.SetParent(nid.defaultParent, false);
                 result.transform.SetSiblingIndex(prototype.defaultParentSiblingIndex.Value);
-                SetLocalPosAndRot(resultTrs, prototype.position, prototype.rotation);
+                SetLocalPosAndRot(resultTrs, prototype.position, prototype.rotation, prototype.scale);
             }
             else
             {
-                SetLocalPosAndRot(resultTrs, prototype.position, prototype.rotation);
+                SetLocalPosAndRot(resultTrs, prototype.position, prototype.rotation, prototype.scale);
             }
 
             if (shouldActivate && !result.activeSelf)

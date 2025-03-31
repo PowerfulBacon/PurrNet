@@ -9,6 +9,7 @@ namespace PurrNet.Modules
     {
         public Vector3 position;
         public Quaternion rotation;
+        public Vector3 scale;
         public NetworkID? parentID;
         public readonly int[] path;
         public readonly int? defaultParentSiblingIndex;
@@ -17,6 +18,7 @@ namespace PurrNet.Modules
         public GameObjectPrototype(
             Vector3 position,
             Quaternion rotation,
+            Vector3 scale,
             NetworkID? parentID,
             int[] path,
             DisposableList<GameObjectFrameworkPiece> framework,
@@ -24,6 +26,7 @@ namespace PurrNet.Modules
         {
             this.position = position;
             this.rotation = rotation;
+            this.scale = scale;
             this.framework = framework;
             this.parentID = parentID;
             this.path = path;
