@@ -300,14 +300,14 @@ namespace PurrNet
         /// Clears interpolation and teleports the transform to the target position, rotation and scale.
         /// Works on both owner and non-owner clients.
         /// </summary>
-        public void ClearInterpolation(Vector3 targetPos, Quaternion targetRot, Vector3 targetScale)
+        public void ClearInterpolation(Vector3? targetPos, Quaternion? targetRot, Vector3? targetScale)
         {
-            if (syncPosition)
-                _position.Teleport(targetPos);
-            if (syncRotation)
-                _rotation.Teleport(targetRot);
-            if (syncScale)
-                _scale.Teleport(targetScale);
+            if (syncPosition && targetPos.HasValue)
+                _position.Teleport(targetPos.Value);
+            if (syncRotation && targetRot.HasValue)
+                _rotation.Teleport(targetRot.Value);
+            if (syncScale && targetScale.HasValue)
+                _scale.Teleport(targetScale.Value);
         }
 
         [ServerRpc]
