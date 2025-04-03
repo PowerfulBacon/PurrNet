@@ -55,6 +55,7 @@ namespace PurrNet.Editor
             base.OnInspectorGUI();
 
             DrawIdentityInspector();
+            GUI.enabled = true;
             DrawPurrButtons(identity);
 
             serializedObject.ApplyModifiedProperties();
@@ -237,7 +238,7 @@ namespace PurrNet.Editor
 
             GUILayout.Space(5);
 
-            MethodInfo[] methods = targetIdentity.GetType().GetMethods(
+            var methods = targetIdentity.GetType().GetMethods(
                 BindingFlags.Instance |
                 BindingFlags.Static |
                 BindingFlags.Public |
@@ -245,7 +246,7 @@ namespace PurrNet.Editor
 
             bool foundAnyButtons = false;
 
-            foreach (MethodInfo method in methods)
+            foreach (var method in methods)
             {
                 var buttonAttr = method.GetCustomAttribute<PurrButtonAttribute>();
 
@@ -263,7 +264,7 @@ namespace PurrNet.Editor
 
                     if (GUILayout.Button(buttonName))
                     {
-                        ParameterInfo[] parameters = method.GetParameters();
+                        var parameters = method.GetParameters();
 
                         if (parameters.Length == 0)
                         {
