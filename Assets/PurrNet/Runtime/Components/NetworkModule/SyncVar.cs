@@ -3,6 +3,7 @@ using PurrNet.Logging;
 using PurrNet.Modules;
 using System;
 using JetBrains.Annotations;
+using PurrNet.Packing;
 using PurrNet.Transports;
 using PurrNet.Utils;
 
@@ -137,7 +138,7 @@ namespace PurrNet
             }
         }
 
-        private ushort _id;
+        private ulong _id;
         private bool _wasLastDirty;
 
         public SyncVar(T initialValue = default, float sendIntervalInSeconds = 0f, bool ownerAuth = false)
@@ -148,7 +149,7 @@ namespace PurrNet
         }
 
         [ObserversRpc, UsedImplicitly]
-        private void SendLatestStateToAll(ushort packetId, T newValue)
+        private void SendLatestStateToAll(PackedULong packetId, T newValue)
         {
             if (isServer) return;
 
@@ -165,7 +166,7 @@ namespace PurrNet
         }
 
         [TargetRpc, UsedImplicitly]
-        private void SendLatestState(PlayerID player, ushort packetId, T newValue)
+        private void SendLatestState(PlayerID player, PackedULong packetId, T newValue)
         {
             if (isServer) return;
 
@@ -182,7 +183,7 @@ namespace PurrNet
         }
 
         [ServerRpc(Channel.Unreliable, requireOwnership: true)]
-        private void SendToServer(ushort packetId, T newValue)
+        private void SendToServer(PackedULong packetId, T newValue)
         {
             if (!_ownerAuth) return;
 
@@ -191,7 +192,7 @@ namespace PurrNet
         }
 
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
-        private void SendToServerReliably(ushort packetId, T newValue)
+        private void SendToServerReliably(PackedULong packetId, T newValue)
         {
             if (!_ownerAuth) return;
 
@@ -200,30 +201,30 @@ namespace PurrNet
         }
 
         [ObserversRpc(Channel.Unreliable, excludeOwner: true)]
-        private void SendToOthers(ushort packetId, T newValue)
+        private void SendToOthers(PackedULong packetId, T newValue)
         {
             if (!isServer) OnReceivedValue(packetId, newValue);
         }
 
         [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true)]
-        private void SendToOthersReliably(ushort packetId, T newValue)
+        private void SendToOthersReliably(PackedULong packetId, T newValue)
         {
             if (!isHost) OnReceivedValue(packetId, newValue);
         }
 
         [ObserversRpc(Channel.Unreliable)]
-        private void SendToAll(ushort packetId, T newValue)
+        private void SendToAll(PackedULong packetId, T newValue)
         {
             if (!isHost) OnReceivedValue(packetId, newValue);
         }
 
         [ObserversRpc(Channel.ReliableOrdered)]
-        private void SendToAllReliably(ushort packetId, T newValue)
+        private void SendToAllReliably(PackedULong packetId, T newValue)
         {
             if (!isHost) OnReceivedValue(packetId, newValue);
         }
 
-        private void OnReceivedValue(ushort packetId, T newValue)
+        private void OnReceivedValue(PackedULong packetId, T newValue)
         {
             bool isControlling = parent.IsController(_ownerAuth);
 
