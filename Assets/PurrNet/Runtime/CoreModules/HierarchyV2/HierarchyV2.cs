@@ -426,7 +426,7 @@ namespace PurrNet.Modules
                         if (!nid || !nid.isSpawned) continue;
 
                         nid.TriggerSpawnEvent(_asServer);
-                        if (isHost)
+                        if (_asServer && isHost)
                             nid.TriggerSpawnEvent(false);
                         onIdentityAdded?.Invoke(nid);
                     }
@@ -996,7 +996,7 @@ namespace PurrNet.Modules
 
                 toSpawn.TriggerSpawnEvent(_asServer);
 
-                if (isHost)
+                if (_asServer && isHost)
                     toSpawn.TriggerSpawnEvent(false);
 
                 onIdentityAdded?.Invoke(toSpawn);

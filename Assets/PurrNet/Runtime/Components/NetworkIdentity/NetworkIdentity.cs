@@ -960,8 +960,8 @@ namespace PurrNet
             if (ApplicationContext.isQuitting)
                 return;
 
-            TriggerDespawnEvent(true);
             TriggerDespawnEvent(false);
+            TriggerDespawnEvent(true);
 
             _ticker = null;
         }
