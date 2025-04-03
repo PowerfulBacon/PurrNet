@@ -53,5 +53,19 @@ namespace PurrNet
         {
             return !a.Equals(b);
         }
+
+        public static bool operator <(NetworkID a, NetworkID b)
+        {
+            if (a._scope == b._scope)
+                return a._id < b._id;
+            return a._scope.id < b._scope.id;
+        }
+
+        public static bool operator >(NetworkID a, NetworkID b)
+        {
+            if (a._scope == b._scope)
+                return a._id > b._id;
+            return a._scope.id > b._scope.id;
+        }
     }
 }

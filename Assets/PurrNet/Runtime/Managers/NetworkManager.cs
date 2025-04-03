@@ -924,7 +924,7 @@ namespace PurrNet
             modules.AddModule(hierarchyV2);
 
             var networkTransform =
-                new NetworkTransformFactory(scenesModule, scenePlayers, playersBroadcast, this, hierarchyV2);
+                new NetworkTransformFactory(scenesModule, scenePlayers, playersManager, playersBroadcast, this, hierarchyV2);
             var colliderRollback = new ColliderRollbackFactory(tickManager, scenesModule);
 
             modules.AddModule(networkTransform);

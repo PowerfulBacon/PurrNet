@@ -421,6 +421,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afdd58584995991448806f747b17efbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
 --- !u!1 &1216416895
 GameObject:
   m_ObjectHideFlags: 0

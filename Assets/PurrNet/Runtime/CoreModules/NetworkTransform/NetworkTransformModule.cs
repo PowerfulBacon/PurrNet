@@ -36,17 +36,19 @@ namespace PurrNet.Modules
         private readonly List<NetworkTransform> _networkTransforms = new();
         private readonly ScenePlayersModule _scenePlayers;
         private readonly PlayersBroadcaster _broadcaster;
+        private readonly PlayersManager _playersManager;
         private readonly NetworkManager _manager;
         private readonly SceneID _scene;
         private readonly HierarchyFactory _factory;
         private bool _asServer;
 
-        public NetworkTransformModule(NetworkManager manager, PlayersBroadcaster broadcaster,
+        public NetworkTransformModule(NetworkManager manager, PlayersBroadcaster broadcaster, PlayersManager players,
             ScenePlayersModule scenePlayers, SceneID scene, HierarchyFactory factory)
         {
             _manager = manager;
             _scenePlayers = scenePlayers;
             _broadcaster = broadcaster;
+            _playersManager = players;
             _scene = scene;
             _factory = factory;
         }
@@ -108,7 +110,7 @@ namespace PurrNet.Modules
                 if (_factory.TryGetIdentity(_scene, id, out var identity) &&
                     identity is NetworkTransform nt)
                 {
-                    _networkTransforms.Add(nt);
+                    AddTrs(nt);
                 }
             }
         }
@@ -191,11 +193,29 @@ namespace PurrNet.Modules
 
         public void Register(NetworkTransform networkTransform)
         {
-            if (!_asServer)
-                return;
-
             if (!networkTransform.id.HasValue)
                 return;
+
+            bool isSpawnedByLocalPlayer = _playersManager.localPlayerId.HasValue &&
+                                          networkTransform.id.Value.scope == _playersManager.localPlayerId;
+
+            if (!isSpawnedByLocalPlayer && !_asServer)
+                return;
+
+            AddTrs(networkTransform);
+        }
+
+        private void AddTrs(NetworkTransform networkTransform)
+        {
+            for (int i = 0; i < _networkTransforms.Count; i++)
+            {
+                var networkID = _networkTransforms[i].id;
+                if (networkID != null && networkID.Value > networkTransform.id.Value)
+                {
+                    _networkTransforms.Insert(i, networkTransform);
+                    return;
+                }
+            }
 
             _networkTransforms.Add(networkTransform);
         }
