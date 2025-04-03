@@ -110,7 +110,8 @@ namespace PurrNet.Modules
                 if (_factory.TryGetIdentity(_scene, id, out var identity) &&
                     identity is NetworkTransform nt)
                 {
-                    AddTrs(nt);
+                    if (!_networkTransforms.Contains(nt))
+                        AddTrs(nt);
                 }
             }
         }
@@ -196,13 +197,17 @@ namespace PurrNet.Modules
             if (!networkTransform.id.HasValue)
                 return;
 
+            if (_asServer)
+            {
+                AddTrs(networkTransform);
+                return;
+            }
+
             bool isSpawnedByLocalPlayer = _playersManager.localPlayerId.HasValue &&
                                           networkTransform.id.Value.scope == _playersManager.localPlayerId;
 
-            if (!isSpawnedByLocalPlayer && !_asServer)
-                return;
-
-            AddTrs(networkTransform);
+            if (isSpawnedByLocalPlayer)
+                AddTrs(networkTransform);
         }
 
         private void AddTrs(NetworkTransform networkTransform)
@@ -210,7 +215,8 @@ namespace PurrNet.Modules
             for (int i = 0; i < _networkTransforms.Count; i++)
             {
                 var networkID = _networkTransforms[i].id;
-                if (networkID != null && networkID.Value > networkTransform.id.Value)
+                if (networkID != null && networkTransform.id != null &&
+                    networkID.Value > networkTransform.id.Value)
                 {
                     _networkTransforms.Insert(i, networkTransform);
                     return;
