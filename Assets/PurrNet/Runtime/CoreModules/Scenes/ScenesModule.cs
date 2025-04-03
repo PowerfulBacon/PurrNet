@@ -784,6 +784,11 @@ namespace PurrNet.Modules
 
         public bool Cleanup()
         {
+            var rules = _networkManager.networkRules;
+
+            if (rules && !rules.ShouldCleanupScenesOnDisconnect())
+                return true;
+
             if (ApplicationContext.isQuitting)
                 return true;
 

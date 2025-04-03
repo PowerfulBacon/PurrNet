@@ -60,6 +60,7 @@ namespace PurrNet
     public struct NetworkSceneRules
     {
         public bool removePlayerFromSceneOnDisconnect;
+        public bool cleanupScenesOnDisconnect;
     }
 
     [Serializable]
@@ -113,7 +114,8 @@ namespace PurrNet
 
         [SerializeField] private NetworkSceneRules _defaultSceneRules = new NetworkSceneRules()
         {
-            removePlayerFromSceneOnDisconnect = false
+            removePlayerFromSceneOnDisconnect = false,
+            cleanupScenesOnDisconnect = true
         };
 
         [SerializeField] private NetworkIdentityRules _defaultIdentityRules = new NetworkIdentityRules()
@@ -227,6 +229,11 @@ namespace PurrNet
         public float GetSyncedTickUpdateInterval()
         {
             return _defaultMiscRules.syncedTickUpdateInterval;
+        }
+
+        public bool ShouldCleanupScenesOnDisconnect()
+        {
+            return _defaultSceneRules.cleanupScenesOnDisconnect;
         }
     }
 }
