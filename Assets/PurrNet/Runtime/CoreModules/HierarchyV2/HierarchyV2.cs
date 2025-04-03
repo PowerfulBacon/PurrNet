@@ -170,6 +170,10 @@ namespace PurrNet.Modules
 
         public bool Cleanup()
         {
+            var rules = _manager.networkRules;
+            if (rules && !rules.ShouldCleanupSpawnedObjectsOnDisconnect())
+                return true;
+
             if (_isDisposed)
                 return true;
 
