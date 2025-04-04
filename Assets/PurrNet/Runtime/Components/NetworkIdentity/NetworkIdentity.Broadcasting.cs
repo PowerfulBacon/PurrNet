@@ -275,10 +275,13 @@ namespace PurrNet
                     break;
                 case RPCType.ObserversRPC:
                 {
-                    Statistics.SentRPC(_myType, signature.rpcName, packet.data.length, this);
                     if (isServer)
                         SendToObservers(packet, ShouldSend, signature.channel);
-                    else SendToServer(packet, signature.channel);
+                    else
+                    {
+                        Statistics.SentRPC(_myType, signature.rpcName, packet.data.length, this);
+                        SendToServer(packet, signature.channel);
+                    }
                     break;
                 }
                 case RPCType.TargetRPC:
@@ -302,7 +305,13 @@ namespace PurrNet
                 if (signature.excludeSender && isLocalPlayer)
                     return false;
 
-                return !signature.excludeOwner || IsNotOwnerPredicate(player);
+                if (!signature.excludeOwner || IsNotOwnerPredicate(player))
+                {
+                    Statistics.SentRPC(_myType, signature.rpcName, packet.data.length, this);
+                    return true;
+                }
+
+                return false;
             }
         }
 
