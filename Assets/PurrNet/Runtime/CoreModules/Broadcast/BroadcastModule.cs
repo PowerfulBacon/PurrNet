@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using PurrNet.Logging;
 using PurrNet.Packing;
+using PurrNet.Profiler;
 using PurrNet.Transports;
 using PurrNet.Utils;
 
@@ -92,17 +93,19 @@ namespace PurrNet.Modules
             AssertIsServer("Cannot send data to all clients from client.");
 
             var byteData = GetData(data);
-
-            for (int i = 0; i < _transport.connections.Count; i++)
+            var type = typeof(T);
+            int connCount = _transport.connections.Count;
+            for (int i = 0; i < connCount; i++)
             {
-                var conn = _transport.connections[i];
-                _transport.SendToClient(conn, byteData, method);
+                Statistics.SentBroadcast(type, byteData.length);
+                _transport.SendToClient(_transport.connections[i], byteData, method);
             }
         }
 
         public void SendRaw(Connection conn, ByteData data, Channel method = Channel.ReliableOrdered)
         {
             AssertIsServer("Cannot send data to player from client.");
+            Statistics.ForwardedBytes(data.length);
             _transport.SendToClient(conn, data, method);
         }
 
@@ -111,6 +114,7 @@ namespace PurrNet.Modules
             AssertIsServer("Cannot send data to player from client.");
 
             var byteData = GetData(data);
+            Statistics.SentBroadcast(typeof(T), byteData.length);
             _transport.SendToClient(conn, byteData, method);
         }
 
@@ -119,9 +123,13 @@ namespace PurrNet.Modules
             AssertIsServer("Cannot send data to player from client.");
 
             var byteData = GetData(data);
+            var type = typeof(T);
 
             foreach (var connection in conn)
+            {
+                Statistics.SentBroadcast(type, byteData.length);
                 _transport.SendToClient(connection, byteData, method);
+            }
         }
 
         public void Send(IEnumerable<Connection> conn, ByteData byteData, Channel method = Channel.ReliableOrdered)
@@ -129,19 +137,20 @@ namespace PurrNet.Modules
             AssertIsServer("Cannot send data to player from client.");
 
             foreach (var connection in conn)
+            {
+                Statistics.ForwardedBytes(byteData.length);
                 _transport.SendToClient(connection, byteData, method);
+            }
         }
 
         public void SendToServer<T>(T data, Channel method = Channel.ReliableOrdered)
         {
+            if (_asServer)
+                return;
+
             var byteData = GetData(data);
 
-            if (_asServer)
-            {
-                _transport.RaiseDataReceived(default, byteData, true);
-                return;
-            }
-
+            Statistics.SentBroadcast(typeof(T), byteData.length);
             _transport.SendToServer(byteData, method);
         }
 
@@ -166,6 +175,8 @@ namespace PurrNet.Modules
             object instance = null;
             Packer.Read(stream, typeInfo, ref instance);
             TriggerCallback(conn, typeId, instance);
+
+            Statistics.ReceivedBroadcast(typeInfo, data.length);
         }
 
         public void Subscribe<T>(BroadcastDelegate<T> callback)
@@ -212,9 +223,5 @@ namespace PurrNet.Modules
 
             onRawDataReceived?.Invoke(conn, hash, instance);
         }
-    }
-
-    public struct KeepAlivePacket : IPackedAuto
-    {
     }
 }

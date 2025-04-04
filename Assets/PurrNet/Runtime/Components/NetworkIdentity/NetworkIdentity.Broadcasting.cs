@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
+using PurrNet.Profiler;
 using PurrNet.Transports;
 using PurrNet.Utils;
 using UnityEngine.Scripting;
@@ -216,13 +217,17 @@ namespace PurrNet
             return module.GetNextId(target, timeout, out request);
         }
 
+        private Type _myType;
+
         [UsedByIL]
         protected void SendRPC(RPCPacket packet, RPCSignature signature)
         {
+            _myType ??= GetType();
+
             if (!isSpawned)
             {
                 if (signature is { runLocally: false, channel: Channel.ReliableOrdered or Channel.ReliableUnordered })
-                    PurrLogger.LogError($"Trying to send RPC from '{GetType().Name}' which is not spawned.", this);
+                    PurrLogger.LogError($"Trying to send RPC from '{_myType.Name}' which is not spawned.", this);
                 return;
             }
 
@@ -240,7 +245,7 @@ namespace PurrNet
             {
                 if (signature is { runLocally: false, channel: Channel.ReliableOrdered or Channel.ReliableUnordered })
                     PurrLogger.LogError(
-                        $"Trying to send RPC '{signature.rpcName}' from '{GetType().Name}' without ownership.", this);
+                        $"Trying to send RPC '{signature.rpcName}' from '{_myType.Name}' without ownership.", this);
                 return;
             }
 
@@ -250,7 +255,7 @@ namespace PurrNet
             {
                 if (signature is { runLocally: false, channel: Channel.ReliableOrdered or Channel.ReliableUnordered })
                     PurrLogger.LogError(
-                        $"Trying to send RPC '{signature.rpcName}' from '{GetType().Name}' without server.", this);
+                        $"Trying to send RPC '{signature.rpcName}' from '{_myType.Name}' without server.", this);
                 return;
             }
 
@@ -265,16 +270,19 @@ namespace PurrNet
                     if (signature.runLocally && isServer)
                         break;
 
+                    Statistics.SentRPC(_myType, signature.rpcName, packet.data.length, this);
                     SendToServer(packet, signature.channel);
                     break;
                 case RPCType.ObserversRPC:
                 {
+                    Statistics.SentRPC(_myType, signature.rpcName, packet.data.length, this);
                     if (isServer)
                         SendToObservers(packet, ShouldSend, signature.channel);
                     else SendToServer(packet, signature.channel);
                     break;
                 }
                 case RPCType.TargetRPC:
+                    Statistics.SentRPC(_myType, signature.rpcName, packet.data.length, this);
                     if (isServer)
                         SendToTarget(signature.targetPlayer!.Value, packet, signature.channel);
                     else SendToServer(packet, signature.channel);
@@ -301,6 +309,10 @@ namespace PurrNet
         [UsedByIL]
         public bool ValidateReceivingRPC(RPCInfo info, RPCSignature signature, IRpc data, bool asServer)
         {
+            _myType ??= GetType();
+
+            Statistics.ReceivedRPC(_myType, signature.rpcName, data.rpcData.length, this);
+
             var rules = networkManager.networkRules;
             bool shouldIgnoreOwnership = rules && rules.ShouldIgnoreRequireOwner();
 

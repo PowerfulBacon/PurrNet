@@ -1,0 +1,16 @@
+{
+    "name": "PurrNet.Profiler.Editor",
+    "rootNamespace": "PurrNet.Profiler.Editor",
+    "references": [
+        "GUID:00687f3485071f442bbe5c9dc860fe98"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

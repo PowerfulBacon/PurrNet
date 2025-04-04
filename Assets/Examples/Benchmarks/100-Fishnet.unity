@@ -861,7 +861,7 @@ MonoBehaviour:
   _networkRules: {fileID: 11400000, guid: 5879a6fa5625f844e9c773a4ca0099dc, type: 2}
   _visibilityRules: {fileID: 11400000, guid: 8f014a5bd8dc68646a2a3c0b18c5bbd8, type: 2}
   _authenticator: {fileID: 1216416905}
-  _tickRate: 60
+  _tickRate: 20
   _patchLingeringProcessBug: 0
 --- !u!4 &1216416898
 Transform:
@@ -892,8 +892,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _masterServer: https://purrbalancer.riten.dev:8080/
   _roomName: PurrNet
-  _region: eu-central
-  _host: eu1.purrlay.riten.dev
+  _region: eu-france
+  _host: fr.purrlay.riten.dev
   _pollEventsInUpdate: 0
 --- !u!114 &1216416902
 MonoBehaviour:

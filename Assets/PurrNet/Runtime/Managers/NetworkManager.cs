@@ -10,6 +10,7 @@ using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Pooling;
+using PurrNet.Profiler;
 using PurrNet.Transports;
 using PurrNet.Utils;
 using UnityEngine;
@@ -1040,6 +1041,8 @@ namespace PurrNet
                 _serverModules.UnregisterModules();
                 _isCleaningServer = false;
             }
+
+            Statistics.MarkEndOfSampling();
         }
 
         private void OnDestroy()
