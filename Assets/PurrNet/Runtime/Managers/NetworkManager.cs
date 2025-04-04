@@ -918,10 +918,10 @@ namespace PurrNet
             var ownershipModule = new GlobalOwnershipModule(hierarchyV2, playersManager, scenePlayers, scenesModule);
             var rpcModule = new RPCModule(this, playersManager, hierarchyV2, ownershipModule, scenesModule);
 
+            modules.AddModule(hierarchyV2);
             modules.AddModule(ownershipModule);
             modules.AddModule(rpcModule);
             modules.AddModule(new RpcRequestResponseModule(playersManager));
-            modules.AddModule(hierarchyV2);
 
             var networkTransform =
                 new NetworkTransformFactory(scenesModule, scenePlayers, playersManager, playersBroadcast, this, hierarchyV2);

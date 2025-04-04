@@ -194,7 +194,7 @@ namespace PurrNet
         /// <summary>
         /// Unique ObjectId of this object
         /// </summary>
-        public uint objectId => id?.id ?? 0;
+        public ulong objectId => id?.id.value ?? 0;
 
         /// <summary>
         /// Scene id of this object.

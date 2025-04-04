@@ -27,7 +27,7 @@ namespace PurrNet.Modules
         private readonly List<NetworkIdentity> _spawnedIdentities = new();
         private readonly Dictionary<NetworkID, NetworkIdentity> _spawnedIdentitiesMap = new();
 
-        private uint _nextId;
+        private ulong _nextId;
 
         private bool _areSceneObjectsReady;
 
@@ -225,7 +225,7 @@ namespace PurrNet.Modules
         private void OnNetworkIDReceived(NetworkID nid)
         {
             if (nid.id >= _nextId)
-                _nextId = nid.id + 1;
+                _nextId = nid.id.value + 1;
 
             isReadyToSpawn = true;
         }
