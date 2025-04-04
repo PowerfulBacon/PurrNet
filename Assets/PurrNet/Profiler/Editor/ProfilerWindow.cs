@@ -412,14 +412,12 @@ namespace PurrNet.Profiler.Editor
                             foreach (var rpc in rpcGroup.Items)
                             {
                                 EditorGUILayout.BeginHorizontal();
-                                EditorGUILayout.LabelField($"{FormatBytes(rpc.data)} bytes");
-
+                                
                                 // Add a button to ping the context object if it exists
                                 if (rpc.context != null)
-                                {
-                                    if (rpc.context != null)
-                                        EditorGUILayout.ObjectField(rpc.context, typeof(UnityEngine.Object), true, GUILayout.Width(150));
-                                }
+                                    EditorGUILayout.ObjectField(rpc.context, typeof(UnityEngine.Object), true);
+                                
+                                EditorGUILayout.LabelField($"{FormatBytes(rpc.data)} bytes");
                                 EditorGUILayout.EndHorizontal();
                             }
                             EditorGUI.indentLevel--;
@@ -460,17 +458,12 @@ namespace PurrNet.Profiler.Editor
                             foreach (var rpc in rpcGroup.Items)
                             {
                                 EditorGUILayout.BeginHorizontal();
-                                EditorGUILayout.LabelField($"{FormatBytes(rpc.data)} bytes");
-
+                                
                                 // Add a button to ping the context object if it exists
                                 if (rpc.context != null)
-                                {
-                                    if (rpc.context != null)
-                                    {
-                                        // Display the object reference field
-                                        EditorGUILayout.ObjectField(rpc.context, typeof(UnityEngine.Object), true, GUILayout.Width(150));
-                                    }
-                                }
+                                    EditorGUILayout.ObjectField(rpc.context, typeof(UnityEngine.Object), true);
+                                
+                                EditorGUILayout.LabelField($"{FormatBytes(rpc.data)} bytes");
                                 EditorGUILayout.EndHorizontal();
                             }
                             EditorGUI.indentLevel--;
