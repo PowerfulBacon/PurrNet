@@ -848,10 +848,20 @@ namespace PurrNet.Modules
                 return;
             }
 
-            for (int i = 0; i < children.Count; i++)
+            int c = children.Count;
+            for (int i = 0; i < c; i++)
             {
                 if (!children[i].isSpawned)
+                {
                     children.RemoveAt(i--);
+                    --c;
+                }
+            }
+
+            if (c == 0)
+            {
+                ListPool<NetworkIdentity>.Destroy(children);
+                return;
             }
 
             using var directChildren = new DisposableList<TransformIdentityPair>(16);
@@ -871,7 +881,7 @@ namespace PurrNet.Modules
                 return;
             }
 
-            for (var i = 0; i < children.Count; i++)
+            for (var i = 0; i < c; i++)
                 TriggerDespawnEvent(children[i]);
 
             if (_asServer)
@@ -882,7 +892,7 @@ namespace PurrNet.Modules
             else if (!bypassBroadcast)
                 SendDespawnPacket(default, children[0]);
 
-            for (var i = 0; i < children.Count; i++)
+            for (var i = 0; i < c; i++)
             {
                 var child = children[i];
 

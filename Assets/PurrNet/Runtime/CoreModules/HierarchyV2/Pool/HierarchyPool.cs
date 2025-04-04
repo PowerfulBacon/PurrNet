@@ -147,7 +147,10 @@ namespace PurrNet.Modules
 
             // save the objects that should not be despawned
             foreach (var real in realNodes)
-                real.transform.SetParent(safeParent, true);
+            {
+                if (real.isSpawned)
+                    real.transform.SetParent(safeParent, true);
+            }
 
             foreach (var child in virtualNodes)
             {
