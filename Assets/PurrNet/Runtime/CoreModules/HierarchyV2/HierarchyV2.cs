@@ -334,6 +334,7 @@ namespace PurrNet.Modules
             {
                 foreach (var player in players)
                     _visibility.RefreshVisibilityForGameObject(player, idTrs, parent);
+                FlushSpawnPackets();
             }
         }
 
@@ -405,6 +406,7 @@ namespace PurrNet.Modules
                 var trs = identity.transform;
                 foreach (var player in players)
                     _visibility.RefreshVisibilityForGameObject(player, trs, closestNid);
+                FlushSpawnPackets();
             }
         }
 
@@ -427,6 +429,7 @@ namespace PurrNet.Modules
                     {
                         foreach (var playerInScene in players)
                             _visibility.RefreshVisibilityForGameObject(playerInScene, list[0].transform);
+                        FlushSpawnPackets();
                     }
 
                     bool isHost = IsServerHost();
@@ -470,7 +473,7 @@ namespace PurrNet.Modules
 
                 _visibility.ClearVisibilityForGameObject(root.transform, player);
             }
-
+            FlushSpawnPackets();
             HashSetPool<NetworkIdentity>.Destroy(roots);
         }
 
@@ -549,6 +552,7 @@ namespace PurrNet.Modules
         {
             if (_asServer && _scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
                 _visibility.EvaluateAll(players, _spawnedIdentities);
+            FlushSpawnPackets();
         }
 
         private void OnPlayerLoadedScene(PlayerID player, SceneID scene, bool asserver)
@@ -576,6 +580,7 @@ namespace PurrNet.Modules
                 _visibility.RefreshVisibilityForGameObject(player, root.transform);
             }
 
+            FlushSpawnPackets();
             HashSetPool<NetworkIdentity>.Destroy(roots);
         }
 
@@ -585,6 +590,7 @@ namespace PurrNet.Modules
             {
                 foreach (var player in players)
                     _visibility.RefreshVisibilityForGameObject(player, root);
+                FlushSpawnPackets();
             }
         }
 
@@ -592,6 +598,7 @@ namespace PurrNet.Modules
         {
             if (_asServer && _scenePlayers.IsPlayerLoadedInScene(player, _sceneId))
                 _visibility.RefreshVisibilityForGameObject(player, root);
+            FlushSpawnPackets();
         }
 
         private ulong _nextPacketIdx;
@@ -781,6 +788,7 @@ namespace PurrNet.Modules
             {
                 foreach (var player in players)
                     _visibility.RefreshVisibilityForGameObject(player, gameObject.transform);
+                FlushSpawnPackets();
             }
 
             AutoAssignOwnership(id);
@@ -861,7 +869,10 @@ namespace PurrNet.Modules
                 TriggerDespawnEvent(children[i]);
 
             if (_asServer)
+            {
                 _visibility.ClearVisibilityForGameObject(gameObject.transform);
+                FlushSpawnPackets();
+            }
             else if (!bypassBroadcast)
                 SendDespawnPacket(default, children[0]);
 
@@ -931,7 +942,7 @@ namespace PurrNet.Modules
             }
         }
 
-        private void SendSpawnEvents()
+        private void FlushSpawnPackets()
         {
             foreach (var (player, batch) in _spawnPackets)
             {
@@ -956,7 +967,7 @@ namespace PurrNet.Modules
 
         public void PostNetworkMessages()
         {
-            SendSpawnEvents();
+            FlushSpawnPackets();
             SpawnDelayedIdentities();
         }
 
