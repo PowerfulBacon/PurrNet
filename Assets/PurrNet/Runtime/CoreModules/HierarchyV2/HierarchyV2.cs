@@ -848,6 +848,12 @@ namespace PurrNet.Modules
                 return;
             }
 
+            for (int i = 0; i < children.Count; i++)
+            {
+                if (!children[i].isSpawned)
+                    children.RemoveAt(i--);
+            }
+
             using var directChildren = new DisposableList<TransformIdentityPair>(16);
             HierarchyPool.GetDirectChildrenWithRoot(gameObject.transform, directChildren);
 
