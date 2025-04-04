@@ -613,6 +613,8 @@ namespace PurrNet.Modules
 
             foreach (var (player, changes) in _pendingOwnershipChanges)
             {
+                // TODO: ACTUAL RLE HERE
+
                 _playersManager.Send(player.player, new OwnershipChangeBatch
                 {
                     scene = player.scene,

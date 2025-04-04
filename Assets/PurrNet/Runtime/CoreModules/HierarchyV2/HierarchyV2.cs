@@ -144,7 +144,7 @@ namespace PurrNet.Modules
                 _isPlayerReady = true;
             else _playersManager.onLocalPlayerReceivedID += OnPlayerReceivedID;
 
-
+            _playersManager.Subscribe<SpawnPacketBatch>(OnSpawnPacketBatch);
             _playersManager.Subscribe<SpawnPacket>(OnSpawnPacket);
             _playersManager.Subscribe<DespawnPacket>(OnDespawnPacket);
             _playersManager.Subscribe<FinishSpawnPacket>(OnFinishSpawnPacket);
@@ -160,10 +160,18 @@ namespace PurrNet.Modules
             _playersManager.onLocalPlayerReceivedID -= OnPlayerReceivedID;
             _playersManager.onNetworkIDReceived -= OnNetworkIDReceived;
 
+            _playersManager.Unsubscribe<SpawnPacketBatch>(OnSpawnPacketBatch);
             _playersManager.Unsubscribe<SpawnPacket>(OnSpawnPacket);
             _playersManager.Unsubscribe<DespawnPacket>(OnDespawnPacket);
             _playersManager.Unsubscribe<FinishSpawnPacket>(OnFinishSpawnPacket);
             _playersManager.Unsubscribe<ChangeParentPacket>(OnParentChangedPacket);
+        }
+
+        private void OnSpawnPacketBatch(PlayerID player, SpawnPacketBatch data, bool asServer)
+        {
+            int count = data.spawnPackets.Count;
+            for (var i = 0; i < count; ++i)
+                OnSpawnPacket(player, data.spawnPackets[i], asServer);
         }
 
         bool _isDisposed;
@@ -484,7 +492,6 @@ namespace PurrNet.Modules
             var createdNids = new DisposableList<NetworkIdentity>(16);
             CreatePrototype(data.prototype, createdNids.list);
 
-
             if (_asServer)
             {
                 bool isHost = IsServerHost();
@@ -496,7 +503,7 @@ namespace PurrNet.Modules
                     if (nid.TryAddObserver(player))
                     {
                         onObserverAdded?.Invoke(player, nid);
-                        nid.TriggerOnEarlyObserverAdded(player);
+                        nid.TriggerOnPreObserverAdded(player);
                         _triggerLateObserverAdded.Add(new PlayerNid { player = player, nid = nid });
                     }
                 }
@@ -587,7 +594,7 @@ namespace PurrNet.Modules
                 _visibility.RefreshVisibilityForGameObject(player, root);
         }
 
-        private int _nextPacketIdx;
+        private ulong _nextPacketIdx;
 
         struct PlayerNid
         {
@@ -596,6 +603,7 @@ namespace PurrNet.Modules
         }
 
         private readonly List<PlayerNid> _triggerLateObserverAdded = new List<PlayerNid>();
+        private readonly Dictionary<PlayerID, SpawnPacketBatch> _spawnPackets = new();
 
         private void OnVisibilityChanged(PlayerID player, Transform scope, bool isVisible)
         {
@@ -604,18 +612,15 @@ namespace PurrNet.Modules
                 var children = ListPool<NetworkIdentity>.Instantiate();
                 if (HierarchyPool.TryGetPrototype(scope, player, children, out var prototype))
                 {
-                    using (prototype)
-                    {
-                        if (_scenePlayers.IsPlayerLoadedInScene(player, _sceneId))
-                            SendSpawnPacket(player, prototype);
+                    if (_scenePlayers.IsPlayerLoadedInScene(player, _sceneId))
+                        SendSpawnPacket(player, prototype, true);
 
-                        for (var i = 0; i < children.Count; i++)
-                        {
-                            var nid = children[i];
-                            onObserverAdded?.Invoke(player, nid);
-                            nid.TriggerOnEarlyObserverAdded(player);
-                            _triggerLateObserverAdded.Add(new PlayerNid { player = player, nid = nid });
-                        }
+                    for (var i = 0; i < children.Count; i++)
+                    {
+                        var nid = children[i];
+                        onObserverAdded?.Invoke(player, nid);
+                        nid.TriggerOnPreObserverAdded(player);
+                        _triggerLateObserverAdded.Add(new PlayerNid { player = player, nid = nid });
                     }
                 }
                 else PurrLogger.LogError($"Failed to get prototype for '{scope.name}'.", scope);
@@ -658,7 +663,7 @@ namespace PurrNet.Modules
             else _playersManager.Send(player, packet);
         }
 
-        private void SendSpawnPacket(PlayerID player, GameObjectPrototype prototype)
+        private void SendSpawnPacket(PlayerID player, GameObjectPrototype prototype, bool batched)
         {
             var spawnId = new SpawnID(_nextPacketIdx++, player);
             var packet = new SpawnPacket
@@ -668,11 +673,26 @@ namespace PurrNet.Modules
                 prototype = prototype
             };
 
-            if (player.isServer)
-                _playersManager.SendToServer(packet);
-            else _playersManager.Send(player, packet);
-
-            _toCompleteNextFrame.Add(spawnId);
+            if (batched)
+            {
+                if (!_spawnPackets.TryGetValue(player, out var batch))
+                {
+                    batch = new SpawnPacketBatch(ListPool<SpawnPacket>.Instantiate());
+                    batch.spawnPackets.Add(packet);
+                    _spawnPackets.Add(player, batch);
+                }
+                else
+                {
+                    batch.spawnPackets.Add(packet);
+                }
+            }
+            else
+            {
+                if (player.isServer)
+                    _playersManager.SendToServer(packet);
+                else _playersManager.Send(player, packet);
+                _toCompleteNextFrame.Add(spawnId);
+            }
         }
 
         public void OnGameObjectCreated(GameObject obj, GameObject prefab)
@@ -755,7 +775,7 @@ namespace PurrNet.Modules
 
             if (!_asServer)
             {
-                SendSpawnPacket(default, HierarchyPool.GetFullPrototype(gameObject.transform));
+                SendSpawnPacket(default, HierarchyPool.GetFullPrototype(gameObject.transform), false);
             }
             else if (_scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
             {
@@ -911,6 +931,23 @@ namespace PurrNet.Modules
             }
         }
 
+        private void SendSpawnEvents()
+        {
+            foreach (var (player, batch) in _spawnPackets)
+            {
+                if (player.isServer)
+                     _playersManager.SendToServer(batch);
+                else _playersManager.Send(player, batch);
+
+                foreach (var packet in batch.spawnPackets)
+                    _toCompleteNextFrame.Add(packet.packetIdx);
+
+                batch.Dispose();
+            }
+
+            _spawnPackets.Clear();
+        }
+
         public void PreNetworkMessages()
         {
             SendDelayedObserverEvents();
@@ -919,6 +956,7 @@ namespace PurrNet.Modules
 
         public void PostNetworkMessages()
         {
+            SendSpawnEvents();
             SpawnDelayedIdentities();
         }
 

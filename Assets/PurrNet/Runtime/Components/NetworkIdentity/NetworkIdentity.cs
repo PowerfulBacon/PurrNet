@@ -599,7 +599,7 @@ namespace PurrNet
         /// Server only.
         /// </summary>
         /// <param name="player">The observer player id</param>
-        protected virtual void OnEarlyObserverAdded(PlayerID player)
+        protected virtual void OnPreObserverAdded(PlayerID player)
         {
         }
 
@@ -1068,11 +1068,11 @@ namespace PurrNet
                 _externalModulesView[i].OnOwnerReconnected(ownerId);
         }
 
-        public void TriggerOnEarlyObserverAdded(PlayerID target)
+        public void TriggerOnPreObserverAdded(PlayerID target)
         {
-            OnEarlyObserverAdded(target);
+            OnPreObserverAdded(target);
             for (int i = 0; i < _externalModulesView.Count; i++)
-                _externalModulesView[i].OnEarlyObserverAdded(target);
+                _externalModulesView[i].OnPreObserverAdded(target);
         }
 
         public void TriggerOnObserverAdded(PlayerID target)

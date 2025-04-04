@@ -221,14 +221,14 @@ namespace PurrNet
         {
             if (!isSpawned)
             {
-                if (!signature.runLocally)
+                if (signature is { runLocally: false, channel: Channel.ReliableOrdered or Channel.ReliableUnordered })
                     PurrLogger.LogError($"Trying to send RPC from '{GetType().Name}' which is not spawned.", this);
                 return;
             }
 
             if (!networkManager.TryGetModule<RPCModule>(networkManager.isServer, out var module))
             {
-                if (!signature.runLocally)
+                if (signature is { runLocally: false, channel: Channel.ReliableOrdered or Channel.ReliableUnordered })
                     PurrLogger.LogError("Failed to get RPC module.", this);
                 return;
             }
@@ -238,7 +238,7 @@ namespace PurrNet
 
             if (!shouldIgnoreOwnership && signature.requireOwnership && !isOwner)
             {
-                if (!signature.runLocally)
+                if (signature is { runLocally: false, channel: Channel.ReliableOrdered or Channel.ReliableUnordered })
                     PurrLogger.LogError(
                         $"Trying to send RPC '{signature.rpcName}' from '{GetType().Name}' without ownership.", this);
                 return;
@@ -248,7 +248,7 @@ namespace PurrNet
 
             if (!shouldIgnore && signature.requireServer && !networkManager.isServer)
             {
-                if (!signature.runLocally)
+                if (signature is { runLocally: false, channel: Channel.ReliableOrdered or Channel.ReliableUnordered })
                     PurrLogger.LogError(
                         $"Trying to send RPC '{signature.rpcName}' from '{GetType().Name}' without server.", this);
                 return;

@@ -88,7 +88,7 @@ namespace PurrNet
         /// Server only.
         /// </summary>
         /// <param name="player"></param>
-        public virtual void OnEarlyObserverAdded(PlayerID player) { }
+        public virtual void OnPreObserverAdded(PlayerID player) { }
 
         /// <summary>
         /// Called when an observer is removed.
@@ -133,14 +133,14 @@ namespace PurrNet
         {
             if (!parent)
             {
-                if (signature.channel is Channel.ReliableOrdered)
+                if (signature.channel is Channel.ReliableOrdered or Channel.ReliableUnordered)
                     PurrLogger.LogError($"Trying to send RPC from '{GetType().Name}' which is not initialized.");
                 return;
             }
 
             if (!parent.isSpawned)
             {
-                if (signature.channel is Channel.ReliableOrdered)
+                if (signature.channel is Channel.ReliableOrdered or Channel.ReliableUnordered)
                     PurrLogger.LogError($"Trying to send RPC from '{parent.name}' which is not spawned.", parent);
                 return;
             }

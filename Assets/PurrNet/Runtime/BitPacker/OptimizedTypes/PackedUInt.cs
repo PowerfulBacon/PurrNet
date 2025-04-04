@@ -36,7 +36,7 @@ namespace PurrNet.Packing
     }
 
     [Serializable]
-    public struct PackedULong
+    public struct PackedULong : IEquatable<PackedULong>
     {
         public ulong value;
 
@@ -48,6 +48,26 @@ namespace PurrNet.Packing
         public static implicit operator PackedULong(ulong value) => new PackedULong(value);
 
         public static implicit operator ulong(PackedULong value) => value.value;
+
+        public bool Equals(PackedULong other)
+        {
+            return value == other.value;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is PackedULong other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return value.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return $"{value}";
+        }
     }
 
     [Serializable]
