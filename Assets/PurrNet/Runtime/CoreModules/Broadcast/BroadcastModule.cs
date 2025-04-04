@@ -88,16 +88,23 @@ namespace PurrNet.Modules
             return stream.ToByteData();
         }
 
+        static bool ShouldTrackType(Type type)
+        {
+            return type != typeof(RPCPacket) && type != typeof(ChildRPCPacket) && type != typeof(StaticRPCPacket);
+        }
+
         public void SendToAll<T>(T data, Channel method = Channel.ReliableOrdered)
         {
             AssertIsServer("Cannot send data to all clients from client.");
 
             var byteData = GetData(data);
             var type = typeof(T);
+            bool shouldTrack = ShouldTrackType(type);
             int connCount = _transport.connections.Count;
             for (int i = 0; i < connCount; i++)
             {
-                Statistics.SentBroadcast(type, byteData.length);
+                if (shouldTrack)
+                    Statistics.SentBroadcast(type, byteData.length);
                 _transport.SendToClient(_transport.connections[i], byteData, method);
             }
         }
@@ -114,7 +121,9 @@ namespace PurrNet.Modules
             AssertIsServer("Cannot send data to player from client.");
 
             var byteData = GetData(data);
-            Statistics.SentBroadcast(typeof(T), byteData.length);
+            var type = typeof(T);
+            if (ShouldTrackType(type))
+                Statistics.SentBroadcast(type, byteData.length);
             _transport.SendToClient(conn, byteData, method);
         }
 
@@ -124,10 +133,12 @@ namespace PurrNet.Modules
 
             var byteData = GetData(data);
             var type = typeof(T);
+            var shouldTrack = ShouldTrackType(type);
 
             foreach (var connection in conn)
             {
-                Statistics.SentBroadcast(type, byteData.length);
+                if (shouldTrack)
+                    Statistics.SentBroadcast(type, byteData.length);
                 _transport.SendToClient(connection, byteData, method);
             }
         }
@@ -149,8 +160,9 @@ namespace PurrNet.Modules
                 return;
 
             var byteData = GetData(data);
-
-            Statistics.SentBroadcast(typeof(T), byteData.length);
+            var type = typeof(T);
+            if (ShouldTrackType(type))
+                Statistics.SentBroadcast(type, byteData.length);
             _transport.SendToServer(byteData, method);
         }
 
@@ -176,7 +188,8 @@ namespace PurrNet.Modules
             Packer.Read(stream, typeInfo, ref instance);
             TriggerCallback(conn, typeId, instance);
 
-            Statistics.ReceivedBroadcast(typeInfo, data.length);
+            if (ShouldTrackType(typeInfo))
+                Statistics.ReceivedBroadcast(typeInfo, data.length);
         }
 
         public void Subscribe<T>(BroadcastDelegate<T> callback)
