@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
+using PurrNet.Profiler;
 using PurrNet.Transports;
 
 namespace PurrNet
@@ -210,10 +211,14 @@ namespace PurrNet
             }
         }
 
+        private Type _myType;
+
         [UsedByIL]
         protected bool ValidateReceivingRPC(RPCInfo info, RPCSignature signature, IRpc data, bool asServer)
         {
-            return parent && parent.ValidateReceivingRPC(info, signature, data, asServer);
+            _myType ??= GetType();
+            Statistics.ReceivedRPC(_myType, signature.rpcName, data.rpcData.length, parent);
+            return parent && parent.ValidateIncomingRPC(info, signature, data, asServer);
         }
 
         [UsedByIL]

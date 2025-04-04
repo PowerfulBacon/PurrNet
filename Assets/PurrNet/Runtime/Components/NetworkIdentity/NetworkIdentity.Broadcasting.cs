@@ -310,9 +310,12 @@ namespace PurrNet
         public bool ValidateReceivingRPC(RPCInfo info, RPCSignature signature, IRpc data, bool asServer)
         {
             _myType ??= GetType();
-
             Statistics.ReceivedRPC(_myType, signature.rpcName, data.rpcData.length, this);
+            return ValidateIncomingRPC(info, signature, data, asServer);
+        }
 
+        internal bool ValidateIncomingRPC(RPCInfo info, RPCSignature signature, IRpc data, bool asServer)
+        {
             var rules = networkManager.networkRules;
             bool shouldIgnoreOwnership = rules && rules.ShouldIgnoreRequireOwner();
 
