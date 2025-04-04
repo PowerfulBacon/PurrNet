@@ -132,11 +132,16 @@ namespace PurrNet.Profiler.Editor
             float maxValue = 1f; // Avoid division by zero
             if (receivedRpcData.Count > 0)
             {
-                maxValue = Math.Max(maxValue, receivedRpcData.Max());
-                maxValue = Math.Max(maxValue, sentRpcData.Max());
-                maxValue = Math.Max(maxValue, receivedBroadcastData.Max());
-                maxValue = Math.Max(maxValue, sentBroadcastData.Max());
-                maxValue = Math.Max(maxValue, forwardedBytesData.Max());
+                // Calculate the maximum total height for each bar
+                for (int i = 0; i < receivedRpcData.Count; i++)
+                {
+                    float totalBarHeight = receivedRpcData[i] + 
+                                          sentRpcData[i] + 
+                                          receivedBroadcastData[i] + 
+                                          sentBroadcastData[i] + 
+                                          forwardedBytesData[i];
+                    maxValue = Math.Max(maxValue, totalBarHeight);
+                }
             }
 
             // Calculate the total width needed for all bars
