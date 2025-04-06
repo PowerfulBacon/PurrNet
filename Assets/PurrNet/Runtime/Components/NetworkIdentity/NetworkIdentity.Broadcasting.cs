@@ -217,17 +217,20 @@ namespace PurrNet
             return module.GetNextId(target, timeout, out request);
         }
 
+#if UNITY_EDITOR
         private Type _myType;
+#endif
 
         [UsedByIL]
         protected void SendRPC(RPCPacket packet, RPCSignature signature)
         {
+#if UNITY_EDITOR
             _myType ??= GetType();
-
+#endif
             if (!isSpawned)
             {
                 if (signature is { runLocally: false, channel: Channel.ReliableOrdered or Channel.ReliableUnordered })
-                    PurrLogger.LogError($"Trying to send RPC from '{_myType.Name}' which is not spawned.", this);
+                    PurrLogger.LogError($"Trying to send RPC from '{GetType().Name}' which is not spawned.", this);
                 return;
             }
 
@@ -245,7 +248,7 @@ namespace PurrNet
             {
                 if (signature is { runLocally: false, channel: Channel.ReliableOrdered or Channel.ReliableUnordered })
                     PurrLogger.LogError(
-                        $"Trying to send RPC '{signature.rpcName}' from '{_myType.Name}' without ownership.", this);
+                        $"Trying to send RPC '{signature.rpcName}' from '{GetType().Name}' without ownership.", this);
                 return;
             }
 
@@ -255,7 +258,7 @@ namespace PurrNet
             {
                 if (signature is { runLocally: false, channel: Channel.ReliableOrdered or Channel.ReliableUnordered })
                     PurrLogger.LogError(
-                        $"Trying to send RPC '{signature.rpcName}' from '{_myType.Name}' without server.", this);
+                        $"Trying to send RPC '{signature.rpcName}' from '{GetType().Name}' without server.", this);
                 return;
             }
 
@@ -270,7 +273,9 @@ namespace PurrNet
                     if (signature.runLocally && isServer)
                         break;
 
-                    Statistics.SentRPC(_myType, signature.rpcName, packet.data.length, this);
+#if UNITY_EDITOR
+                    Statistics.SentRPC(_myType, signature.rpcName, packet.data.segment, this);
+#endif
                     SendToServer(packet, signature.channel);
                     break;
                 case RPCType.ObserversRPC:
@@ -279,13 +284,17 @@ namespace PurrNet
                         SendToObservers(packet, ShouldSend, signature.channel);
                     else
                     {
-                        Statistics.SentRPC(_myType, signature.rpcName, packet.data.length, this);
+#if UNITY_EDITOR
+                        Statistics.SentRPC(_myType, signature.rpcName, packet.data.segment, this);
+#endif
                         SendToServer(packet, signature.channel);
                     }
                     break;
                 }
                 case RPCType.TargetRPC:
-                    Statistics.SentRPC(_myType, signature.rpcName, packet.data.length, this);
+#if UNITY_EDITOR
+                    Statistics.SentRPC(_myType, signature.rpcName, packet.data.segment, this);
+#endif
                     if (isServer)
                         SendToTarget(signature.targetPlayer!.Value, packet, signature.channel);
                     else SendToServer(packet, signature.channel);
@@ -307,7 +316,9 @@ namespace PurrNet
 
                 if (!signature.excludeOwner || IsNotOwnerPredicate(player))
                 {
-                    Statistics.SentRPC(_myType, signature.rpcName, packet.data.length, this);
+#if UNITY_EDITOR
+                    Statistics.SentRPC(_myType, signature.rpcName, packet.data.segment, this);
+#endif
                     return true;
                 }
 
@@ -318,8 +329,10 @@ namespace PurrNet
         [UsedByIL]
         public bool ValidateReceivingRPC(RPCInfo info, RPCSignature signature, IRpc data, bool asServer)
         {
+#if UNITY_EDITOR
             _myType ??= GetType();
-            Statistics.ReceivedRPC(_myType, signature.rpcName, data.rpcData.length, this);
+            Statistics.ReceivedRPC(_myType, signature.rpcName, data.rpcData.segment, this);
+#endif
             return ValidateIncomingRPC(info, signature, data, asServer);
         }
 

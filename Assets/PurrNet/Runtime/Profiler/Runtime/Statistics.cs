@@ -14,16 +14,16 @@ namespace PurrNet.Profiler
 
         public static bool paused;
 
-        public static void ReceivedBroadcast(Type type, int bytesReceived)
+        public static void ReceivedBroadcast(Type type, ArraySegment<byte> data)
         {
             if (paused) return;
-            _currentSample.receivedBroadcasts.Add(new BroadcastSample(type, bytesReceived));
+            _currentSample.receivedBroadcasts.Add(new BroadcastSample(type, data));
         }
 
-        public static void SentBroadcast(Type type, int bytesSent)
+        public static void SentBroadcast(Type type, ArraySegment<byte> data)
         {
             if (paused) return;
-            _currentSample.sentBroadcasts.Add(new BroadcastSample(type, bytesSent));
+            _currentSample.sentBroadcasts.Add(new BroadcastSample(type, data));
         }
 
         public static void ForwardedBytes(int bytesSent)
@@ -32,16 +32,16 @@ namespace PurrNet.Profiler
             _currentSample.forwardedBytes.Add(bytesSent);
         }
 
-        public static void ReceivedRPC(Type type, string method, int bytesReceived, UnityEngine.Object context)
+        public static void ReceivedRPC(Type type, string method, ArraySegment<byte> data, UnityEngine.Object context)
         {
             if (paused) return;
-            _currentSample.receivedRpcs.Add(new RpcsSample(type, method, bytesReceived, context));
+            _currentSample.receivedRpcs.Add(new RpcsSample(type, method, data, context));
         }
 
-        public static void SentRPC(Type type, string method, int bytesSent, UnityEngine.Object context)
+        public static void SentRPC(Type type, string method, ArraySegment<byte> data, UnityEngine.Object context)
         {
             if (paused) return;
-            _currentSample.sentRpcs.Add(new RpcsSample(type, method, bytesSent, context));
+            _currentSample.sentRpcs.Add(new RpcsSample(type, method, data, context));
         }
 
         public static void MarkEndOfSampling()
@@ -49,7 +49,10 @@ namespace PurrNet.Profiler
             if (paused) return;
 
             if (samples.Count >= MAX_SAMPLES)
+            {
+                samples[0].Dispose();
                 samples.RemoveAt(0);
+            }
 
             samples.Add(_currentSample);
             _currentSample = new TickSample();

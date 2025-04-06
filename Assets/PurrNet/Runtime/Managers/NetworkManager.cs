@@ -1042,7 +1042,9 @@ namespace PurrNet
                 _isCleaningServer = false;
             }
 
+#if UNITY_EDITOR
             Statistics.MarkEndOfSampling();
+#endif
         }
 
         private void OnDestroy()

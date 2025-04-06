@@ -211,13 +211,17 @@ namespace PurrNet
             }
         }
 
+#if UNITY_EDITOR
         private Type _myType;
+#endif
 
         [UsedByIL]
         protected bool ValidateReceivingRPC(RPCInfo info, RPCSignature signature, IRpc data, bool asServer)
         {
+#if UNITY_EDITOR
             _myType ??= GetType();
-            Statistics.ReceivedRPC(_myType, signature.rpcName, data.rpcData.length, parent);
+            Statistics.ReceivedRPC(_myType, signature.rpcName, data.rpcData.segment, parent);
+#endif
             return parent && parent.ValidateIncomingRPC(info, signature, data, asServer);
         }
 

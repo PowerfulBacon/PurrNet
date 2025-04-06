@@ -106,10 +106,10 @@ namespace PurrNet.Profiler.Editor
             // Add data from each sample
             foreach (var sample in Statistics.samples)
             {
-                receivedRpcData.Add(sample.receivedRpcs.Sum(rpc => rpc.data));
-                sentRpcData.Add(sample.sentRpcs.Sum(rpc => rpc.data));
-                receivedBroadcastData.Add(sample.receivedBroadcasts.Sum(b => b.data));
-                sentBroadcastData.Add(sample.sentBroadcasts.Sum(b => b.data));
+                receivedRpcData.Add(sample.receivedRpcs.Sum(rpc => rpc.data.Length));
+                sentRpcData.Add(sample.sentRpcs.Sum(rpc => rpc.data.Length));
+                receivedBroadcastData.Add(sample.receivedBroadcasts.Sum(b => b.data.Length));
+                sentBroadcastData.Add(sample.sentBroadcasts.Sum(b => b.data.Length));
                 forwardedBytesData.Add(sample.forwardedBytes.Sum());
             }
 
@@ -135,10 +135,10 @@ namespace PurrNet.Profiler.Editor
                 // Calculate the maximum total height for each bar
                 for (int i = 0; i < receivedRpcData.Count; i++)
                 {
-                    float totalBarHeight = receivedRpcData[i] + 
-                                          sentRpcData[i] + 
-                                          receivedBroadcastData[i] + 
-                                          sentBroadcastData[i] + 
+                    float totalBarHeight = receivedRpcData[i] +
+                                          sentRpcData[i] +
+                                          receivedBroadcastData[i] +
+                                          sentBroadcastData[i] +
                                           forwardedBytesData[i];
                     maxValue = Math.Max(maxValue, totalBarHeight);
                 }
@@ -209,10 +209,10 @@ namespace PurrNet.Profiler.Editor
                         {
                             var sample = Statistics.samples[i];
                             string tooltip = $"Frame {i}\n" +
-                                            $"Received RPCs: {FormatBytes(sample.receivedRpcs.Sum(rpc => rpc.data))}\n" +
-                                            $"Sent RPCs: {FormatBytes(sample.sentRpcs.Sum(rpc => rpc.data))}\n" +
-                                            $"Received Broadcasts: {FormatBytes(sample.receivedBroadcasts.Sum(b => b.data))}\n" +
-                                            $"Sent Broadcasts: {FormatBytes(sample.sentBroadcasts.Sum(b => b.data))}\n" +
+                                            $"Received RPCs: {FormatBytes(sample.receivedRpcs.Sum(rpc => rpc.data.Length))}\n" +
+                                            $"Sent RPCs: {FormatBytes(sample.sentRpcs.Sum(rpc => rpc.data.Length))}\n" +
+                                            $"Received Broadcasts: {FormatBytes(sample.receivedBroadcasts.Sum(b => b.data.Length))}\n" +
+                                            $"Sent Broadcasts: {FormatBytes(sample.sentBroadcasts.Sum(b => b.data.Length))}\n" +
                                             $"Forwarded: {FormatBytes(sample.forwardedBytes.Sum())}";
 
                             GUI.tooltip = tooltip;
@@ -394,7 +394,7 @@ namespace PurrNet.Profiler.Editor
                             Type = group.Key.type,
                             Method = group.Key.method,
                             Count = group.Count(),
-                            TotalBytes = group.Sum(rpc => rpc.data),
+                            TotalBytes = group.Sum(rpc => rpc.data.Length),
                             Items = group.ToList()
                         })
                         .OrderByDescending(rpc => rpc.TotalBytes);
@@ -412,12 +412,12 @@ namespace PurrNet.Profiler.Editor
                             foreach (var rpc in rpcGroup.Items)
                             {
                                 EditorGUILayout.BeginHorizontal();
-                                
+
                                 // Add a button to ping the context object if it exists
                                 if (rpc.context != null)
                                     EditorGUILayout.ObjectField(rpc.context, typeof(UnityEngine.Object), true);
-                                
-                                EditorGUILayout.LabelField($"{FormatBytes(rpc.data)} bytes");
+
+                                EditorGUILayout.LabelField($"{FormatBytes(rpc.data.Length)} bytes");
                                 EditorGUILayout.EndHorizontal();
                             }
                             EditorGUI.indentLevel--;
@@ -440,7 +440,7 @@ namespace PurrNet.Profiler.Editor
                             Type = group.Key.type,
                             Method = group.Key.method,
                             Count = group.Count(),
-                            TotalBytes = group.Sum(rpc => rpc.data),
+                            TotalBytes = group.Sum(rpc => rpc.data.Length),
                             Items = group.ToList()
                         })
                         .OrderByDescending(rpc => rpc.TotalBytes);
@@ -458,12 +458,12 @@ namespace PurrNet.Profiler.Editor
                             foreach (var rpc in rpcGroup.Items)
                             {
                                 EditorGUILayout.BeginHorizontal();
-                                
+
                                 // Add a button to ping the context object if it exists
                                 if (rpc.context != null)
                                     EditorGUILayout.ObjectField(rpc.context, typeof(UnityEngine.Object), true);
-                                
-                                EditorGUILayout.LabelField($"{FormatBytes(rpc.data)} bytes");
+
+                                EditorGUILayout.LabelField($"{FormatBytes(rpc.data.Length)} bytes");
                                 EditorGUILayout.EndHorizontal();
                             }
                             EditorGUI.indentLevel--;
@@ -485,7 +485,7 @@ namespace PurrNet.Profiler.Editor
                         {
                             Type = group.Key,
                             Count = group.Count(),
-                            TotalBytes = group.Sum(broadcast => broadcast.data),
+                            TotalBytes = group.Sum(broadcast => broadcast.data.Length),
                             Items = group.ToList()
                         })
                         .OrderByDescending(broadcast => broadcast.TotalBytes);
@@ -503,7 +503,7 @@ namespace PurrNet.Profiler.Editor
                             foreach (var broadcast in broadcastGroup.Items)
                             {
                                 EditorGUILayout.BeginHorizontal();
-                                EditorGUILayout.LabelField($"{FormatBytes(broadcast.data)} bytes");
+                                EditorGUILayout.LabelField($"{FormatBytes(broadcast.data.Length)} bytes");
                                 EditorGUILayout.EndHorizontal();
                             }
                             EditorGUI.indentLevel--;
@@ -525,7 +525,7 @@ namespace PurrNet.Profiler.Editor
                         {
                             Type = group.Key,
                             Count = group.Count(),
-                            TotalBytes = group.Sum(broadcast => broadcast.data),
+                            TotalBytes = group.Sum(broadcast => broadcast.data.Length),
                             Items = group.ToList()
                         })
                         .OrderByDescending(broadcast => broadcast.TotalBytes);
@@ -543,7 +543,7 @@ namespace PurrNet.Profiler.Editor
                             foreach (var broadcast in broadcastGroup.Items)
                             {
                                 EditorGUILayout.BeginHorizontal();
-                                EditorGUILayout.LabelField($"{FormatBytes(broadcast.data)} bytes");
+                                EditorGUILayout.LabelField($"{FormatBytes(broadcast.data.Length)} bytes");
                                 EditorGUILayout.EndHorizontal();
                             }
                             EditorGUI.indentLevel--;

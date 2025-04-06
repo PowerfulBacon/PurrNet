@@ -93,6 +93,8 @@ namespace PurrNet.Packing
 
         public bool isWriting => !_isReading;
 
+        public int Length => length;
+
         /// <summary>
         /// Pickles the current buffer into the provided BitPacker.
         /// </summary>
