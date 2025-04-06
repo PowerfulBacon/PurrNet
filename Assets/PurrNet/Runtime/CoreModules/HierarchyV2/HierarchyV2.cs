@@ -11,6 +11,8 @@ namespace PurrNet.Modules
 
     public delegate void ObserverAction(PlayerID player, NetworkIdentity identity);
 
+    public delegate void SpawnedAction(PlayerID player, SceneID scene, NetworkID identity);
+
     public class HierarchyV2
     {
         private readonly NetworkManager _manager;
@@ -42,6 +44,8 @@ namespace PurrNet.Modules
         public event ObserverAction onLateObserverAdded;
 
         public event ObserverAction onObserverRemoved;
+
+        public event SpawnedAction onSentSpawnPacket;
 
         private bool _isPlayerReady;
 
@@ -964,12 +968,23 @@ namespace PurrNet.Modules
         {
             foreach (var (player, batch) in _spawnPackets)
             {
+                int count = batch.spawnPackets.Count;
                 if (player.isServer)
                      _playersManager.SendToServer(batch);
-                else _playersManager.Send(player, batch);
+                else
+                {
+                    _playersManager.Send(player, batch);
 
-                foreach (var packet in batch.spawnPackets)
-                    _toCompleteNextFrame.Add(packet.packetIdx);
+                    for (var i = 0; i < count; i++)
+                    {
+                        var packet = batch.spawnPackets[i];
+                        if (packet.prototype.framework.Count > 0)
+                            onSentSpawnPacket?.Invoke(player, _sceneId, packet.prototype.framework[0].id);
+                    }
+                }
+
+                for (var i = 0; i < count; i++)
+                    _toCompleteNextFrame.Add(batch.spawnPackets[i].packetIdx);
 
                 batch.Dispose();
             }

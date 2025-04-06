@@ -37,7 +37,7 @@ namespace PurrNet.Modules
             _playersManager.onPlayerJoined += OnPlayerJoined;
             _scenes.onSceneUnloaded += OnSceneUnloaded;
 
-            _hierarchyModule.onLateObserverAdded += OnObserverAdded;
+            _hierarchyModule.onSentSpawnPacket += OnObserverAdded;
             _hierarchyModule.onIdentityRemoved += OnIdentityRemoved;
         }
 
@@ -50,12 +50,15 @@ namespace PurrNet.Modules
             _playersManager.onPlayerJoined -= OnPlayerJoined;
             _scenes.onSceneUnloaded -= OnSceneUnloaded;
 
-            _hierarchyModule.onLateObserverAdded -= OnObserverAdded;
+            _hierarchyModule.onSentSpawnPacket -= OnObserverAdded;
             _hierarchyModule.onIdentityRemoved -= OnIdentityRemoved;
         }
 
-        private void OnObserverAdded(PlayerID player, NetworkIdentity identity)
+        private void OnObserverAdded(PlayerID player, SceneID scene, NetworkID id)
         {
+            if (!_hierarchyModule.TryGetIdentity(scene, id, out var identity))
+                return;
+
             SendAnyInstanceRPCs(player, identity);
             SendAnyChildRPCs(player, identity);
         }
