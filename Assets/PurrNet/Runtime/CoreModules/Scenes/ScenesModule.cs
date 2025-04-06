@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Utils;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace PurrNet.Modules
         public int buildIndex;
         public SceneID idToAssign;
         public PurrSceneSettings settings;
+        [UsedImplicitly]
         public AsyncOperation operation;
     }
 

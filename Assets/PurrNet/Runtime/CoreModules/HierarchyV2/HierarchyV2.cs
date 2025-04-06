@@ -39,6 +39,8 @@ namespace PurrNet.Modules
 
         public event ObserverAction onObserverAdded;
 
+        public event ObserverAction onLateObserverAdded;
+
         public event ObserverAction onObserverRemoved;
 
         private bool _isPlayerReady;
@@ -993,6 +995,7 @@ namespace PurrNet.Modules
             {
                 var nid = _triggerLateObserverAdded[i];
                 nid.nid.TriggerOnObserverAdded(nid.player);
+                onLateObserverAdded?.Invoke(nid.player, nid.nid);
             }
 
             _triggerLateObserverAdded.Clear();

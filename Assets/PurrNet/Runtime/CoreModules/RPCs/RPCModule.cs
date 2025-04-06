@@ -37,7 +37,7 @@ namespace PurrNet.Modules
             _playersManager.onPlayerJoined += OnPlayerJoined;
             _scenes.onSceneUnloaded += OnSceneUnloaded;
 
-            _hierarchyModule.onObserverAdded += OnObserverAdded;
+            _hierarchyModule.onLateObserverAdded += OnObserverAdded;
             _hierarchyModule.onIdentityRemoved += OnIdentityRemoved;
         }
 
@@ -50,7 +50,7 @@ namespace PurrNet.Modules
             _playersManager.onPlayerJoined -= OnPlayerJoined;
             _scenes.onSceneUnloaded -= OnSceneUnloaded;
 
-            _hierarchyModule.onObserverAdded -= OnObserverAdded;
+            _hierarchyModule.onLateObserverAdded -= OnObserverAdded;
             _hierarchyModule.onIdentityRemoved -= OnIdentityRemoved;
         }
 
