@@ -1,8 +1,10 @@
 using JetBrains.Annotations;
+using PurrNet.Contributors;
 using UnityEngine;
 
 namespace PurrNet
 {
+    [Contributor("RoxDevvv", "https://github.com/RoxDevvv")]
     public sealed class NetworkOwnershipToggle : NetworkIdentity
     {
         [Tooltip("Components to toggle from the owner's perspective")]
