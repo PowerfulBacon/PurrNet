@@ -635,26 +635,29 @@ namespace PurrNet
         }
 
 
-        List<MethodInfo> _initializeMethods;
+        static readonly Dictionary<Type, List<MethodInfo>> _methodCache = new ();
 
         private void CallInitMethods()
         {
-            if (_initializeMethods == null)
+            if (!_methodCache.TryGetValue(GetType(), out var cached))
             {
                 var type = GetType();
                 var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
-                _initializeMethods = new List<MethodInfo>(methods.Length);
+                cached = new List<MethodInfo>(methods.Length);
 
                 for (int i = 0; i < methods.Length; i++)
                 {
                     var m = methods[i];
                     if (m.Name.EndsWith("_CodeGen_Initialize"))
-                        _initializeMethods.Add(m);
+                        cached.Add(m);
                 }
+
+                _methodCache[type] = cached;
             }
 
-            for (var i = 0; i < _initializeMethods.Count; i++)
-                _initializeMethods[i].Invoke(this, Array.Empty<object>());
+            int count = cached.Count;
+            for (var i = 0; i < count; i++)
+                cached[i].Invoke(this, Array.Empty<object>());
         }
 
         /// <summary>
