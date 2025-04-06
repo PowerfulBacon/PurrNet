@@ -25,7 +25,7 @@ namespace PurrNet.Editor
     {
         private SerializedProperty _networkRules;
         private SerializedProperty _visitiblityRules;
-        private List<Contributor> _contributors = new ();
+        private readonly List<Contributor> _contributors = new ();
 
 #if TRI_INSPECTOR_PACKAGE || ODIN_INSPECTOR
         protected override void OnEnable()

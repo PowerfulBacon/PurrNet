@@ -136,8 +136,7 @@ namespace PurrNet
         {
             if (_ownerAuth)
             {
-                if (!isClient)
-                    ExecuteBatch(actions);
+                ExecuteBatch(actions);
                 ApplyActionsOnObservers(actions);
             }
         }
