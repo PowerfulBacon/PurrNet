@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
+#if UNITY_EDITOR
 namespace PurrNet.Profiler.Editor
 {
     public class ProfilerWindow : EditorWindow
@@ -607,3 +608,4 @@ namespace PurrNet.Profiler.Editor
         }
     }
 }
+#endif
