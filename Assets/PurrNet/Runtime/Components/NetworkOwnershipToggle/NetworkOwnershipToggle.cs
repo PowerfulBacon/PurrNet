@@ -10,11 +10,78 @@ namespace PurrNet
         [Tooltip("GameObjects to toggle from the owner's perspective")]
         [SerializeField] private OwnershipGameObjectToggle[] _gameObjects;
 
+        [SerializeField, HideInInspector] private GameObject[] _toActivate;
+        [SerializeField, HideInInspector] private GameObject[] _toDeactivate;
+        [SerializeField, HideInInspector] private Behaviour[] _toEnable;
+        [SerializeField, HideInInspector] private Behaviour[] _toDisable;
+
         private bool _lastOwner;
 
         private void Awake()
         {
             Setup(false);
+        }
+
+        // migrate old data to _components and _gameObjects
+        private void OnValidate()
+        {
+            if (_toActivate is { Length: > 0 } || _toDeactivate is { Length: > 0 })
+            {
+                int totalLength = _toActivate?.Length ?? 0 + _toDeactivate?.Length ?? 0;
+                int offset = _toActivate?.Length ?? 0;
+
+                _gameObjects = new OwnershipGameObjectToggle[totalLength];
+
+                if (_toActivate is { Length: > 0 })
+                {
+                    for (var i = 0; i < _toActivate.Length; i++)
+                    {
+                        _gameObjects[i].target = _toActivate[i];
+                        _gameObjects[i].activeAsOwner = true;
+                    }
+                }
+
+                if (_toDeactivate is { Length: > 0 })
+                {
+                    for (var i = 0; i < _toDeactivate.Length; i++)
+                    {
+                        _gameObjects[i + offset].target = _toDeactivate[i];
+                        _gameObjects[i + offset].activeAsOwner = false;
+                    }
+                }
+
+                _toActivate = null;
+                _toDeactivate = null;
+            }
+
+            if (_toEnable is { Length: > 0 } || _toDisable is { Length: > 0 })
+            {
+                int totalLength = _toEnable?.Length ?? 0 + _toDisable?.Length ?? 0;
+                int offset = _toEnable?.Length ?? 0;
+
+                _components = new OwnershipComponentToggle[totalLength];
+
+                if (_toEnable is { Length: > 0 })
+                {
+                    for (var i = 0; i < _toEnable.Length; i++)
+                    {
+                        _components[i].target = _toEnable[i];
+                        _components[i].activeAsOwner = true;
+                    }
+                }
+
+                if (_toDisable is { Length: > 0 })
+                {
+                    for (var i = 0; i < _toDisable.Length; i++)
+                    {
+                        _components[i + offset].target = _toDisable[i];
+                        _components[i + offset].activeAsOwner = false;
+                    }
+                }
+
+                _toEnable = null;
+                _toDisable = null;
+            }
         }
 
         [UsedImplicitly]

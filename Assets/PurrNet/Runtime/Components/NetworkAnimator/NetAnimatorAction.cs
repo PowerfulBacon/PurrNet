@@ -1,14 +1,8 @@
-﻿using PurrNet.Logging;
-using PurrNet.Packing;
+﻿using PurrNet.Packing;
 using UnityEngine;
 
 namespace PurrNet
 {
-    internal interface IApplyOnAnimator
-    {
-        void Apply(Animator anim);
-    }
-
     public enum NetAnimatorAction : byte
     {
         SetBool,
@@ -60,7 +54,7 @@ namespace PurrNet
         SetIKHintPositionWeight
     }
 
-    internal struct SetIKHintPosition : IPackedAuto, IApplyOnAnimator
+    internal struct SetIKHintPosition : IPackedAuto
     {
         public AvatarIKHint hint;
         public Vector3 position;
@@ -71,7 +65,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetIKPositionWeight : IPackedAuto, IApplyOnAnimator
+    internal struct SetIKPositionWeight : IPackedAuto
     {
         public AvatarIKGoal goal;
         public float value;
@@ -82,7 +76,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetIKRotationWeight : IPackedAuto, IApplyOnAnimator
+    internal struct SetIKRotationWeight : IPackedAuto
     {
         public AvatarIKGoal goal;
         public float value;
@@ -93,7 +87,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetIKHintPositionWeight : IPackedAuto, IApplyOnAnimator
+    internal struct SetIKHintPositionWeight : IPackedAuto
     {
         public AvatarIKHint hint;
         public float value;
@@ -104,7 +98,7 @@ namespace PurrNet
         }
     }
 
-    internal struct CrossFadeInFixedTime : IPackedAuto, IApplyOnAnimator
+    internal struct CrossFadeInFixedTime : IPackedAuto
     {
         public int stateHash;
         public float fixedTime;
@@ -118,7 +112,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetLookAtPosition : IPackedAuto, IApplyOnAnimator
+    internal struct SetLookAtPosition : IPackedAuto
     {
         public Vector3 position;
 
@@ -128,7 +122,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetLookAtWeight : IPackedAuto, IApplyOnAnimator
+    internal struct SetLookAtWeight : IPackedAuto
     {
         public float weight, bodyWeight, headWeight, eyesWeight, clampWeight;
 
@@ -138,7 +132,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetIKPosition : IPackedAuto, IApplyOnAnimator
+    internal struct SetIKPosition : IPackedAuto
     {
         public AvatarIKGoal goal;
         public Vector3 position;
@@ -149,7 +143,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetIKRotation : IPackedAuto, IApplyOnAnimator
+    internal struct SetIKRotation : IPackedAuto
     {
         public AvatarIKGoal goal;
         public Quaternion rotation;
@@ -160,7 +154,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetBoneLocalRotation : IPackedAuto, IApplyOnAnimator
+    internal struct SetBoneLocalRotation : IPackedAuto
     {
         public HumanBodyBones bone;
         public Quaternion rotation;
@@ -171,7 +165,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetBool : IPackedAuto, IApplyOnAnimator
+    internal struct SetBool : IPackedAuto
     {
         public int nameHash;
         public bool value;
@@ -182,7 +176,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetFloat : IPackedAuto, IApplyOnAnimator
+    internal struct SetFloat : IPackedAuto
     {
         public int nameHash;
         public float value;
@@ -193,7 +187,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetInt : IPackedAuto, IApplyOnAnimator
+    internal struct SetInt : IPackedAuto
     {
         public int nameHash;
         public int value;
@@ -204,7 +198,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetTrigger : IPackedAuto, IApplyOnAnimator
+    internal struct SetTrigger : IPackedAuto
     {
         public int nameHash;
 
@@ -214,7 +208,7 @@ namespace PurrNet
         }
     }
 
-    internal struct ResetTrigger : IPackedAuto, IApplyOnAnimator
+    internal struct ResetTrigger : IPackedAuto
     {
         public int nameHash;
 
@@ -224,7 +218,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetSpeed : IPackedAuto, IApplyOnAnimator
+    internal struct SetSpeed : IPackedAuto
     {
         public float speed;
 
@@ -234,7 +228,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetAnimatePhysics : IApplyOnAnimator
+    internal struct SetAnimatePhysics
     {
         public bool value;
 
@@ -244,7 +238,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetBodyPosition : IPackedAuto, IApplyOnAnimator
+    internal struct SetBodyPosition : IPackedAuto
     {
         public Vector3 value;
 
@@ -254,7 +248,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetBodyRotation : IPackedAuto, IApplyOnAnimator
+    internal struct SetBodyRotation : IPackedAuto
     {
         public Quaternion value;
 
@@ -264,7 +258,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetCullingMode : IPackedAuto, IApplyOnAnimator
+    internal struct SetCullingMode : IPackedAuto
     {
         public AnimatorCullingMode value;
 
@@ -274,7 +268,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetFireEvents : IPackedAuto, IApplyOnAnimator
+    internal struct SetFireEvents : IPackedAuto
     {
         public bool value;
 
@@ -284,7 +278,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetPlaybackTime : IPackedAuto, IApplyOnAnimator
+    internal struct SetPlaybackTime : IPackedAuto
     {
         public float value;
 
@@ -294,7 +288,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetRootPosition : IPackedAuto, IApplyOnAnimator
+    internal struct SetRootPosition : IPackedAuto
     {
         public Vector3 value;
 
@@ -304,7 +298,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetRootRotation : IPackedAuto, IApplyOnAnimator
+    internal struct SetRootRotation : IPackedAuto
     {
         public Quaternion value;
 
@@ -314,7 +308,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetStabilizeFeet : IPackedAuto, IApplyOnAnimator
+    internal struct SetStabilizeFeet : IPackedAuto
     {
         public bool value;
 
@@ -324,7 +318,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetUpdateMode : IPackedAuto, IApplyOnAnimator
+    internal struct SetUpdateMode : IPackedAuto
     {
         public AnimatorUpdateMode value;
 
@@ -334,7 +328,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetApplyRootMotion : IPackedAuto, IApplyOnAnimator
+    internal struct SetApplyRootMotion : IPackedAuto
     {
         public bool value;
 
@@ -344,7 +338,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetFeetPivotActive : IPackedAuto, IApplyOnAnimator
+    internal struct SetFeetPivotActive : IPackedAuto
     {
         public float value;
 
@@ -354,7 +348,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetKeepAnimatorStateOnDisable : IPackedAuto, IApplyOnAnimator
+    internal struct SetKeepAnimatorStateOnDisable : IPackedAuto
     {
         public bool value;
 
@@ -364,7 +358,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetWriteDefaultValuesOnDisable : IPackedAuto, IApplyOnAnimator
+    internal struct SetWriteDefaultValuesOnDisable : IPackedAuto
     {
         public bool value;
 
@@ -374,7 +368,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetLogWarnings : IPackedAuto, IApplyOnAnimator
+    internal struct SetLogWarnings : IPackedAuto
     {
         public bool value;
 
@@ -384,7 +378,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetLayersAffectMassCenter : IPackedAuto, IApplyOnAnimator
+    internal struct SetLayersAffectMassCenter : IPackedAuto
     {
         public bool value;
 
@@ -394,7 +388,7 @@ namespace PurrNet
         }
     }
 
-    internal struct Play_STATEHASH_LAYER_NORMALIZEDTIME : IPackedAuto, IApplyOnAnimator
+    internal struct Play_STATEHASH_LAYER_NORMALIZEDTIME : IPackedAuto
     {
         public int stateHash;
         public int layer;
@@ -406,7 +400,7 @@ namespace PurrNet
         }
     }
 
-    internal struct Play_STATEHASH_LAYER : IPackedAuto, IApplyOnAnimator
+    internal struct Play_STATEHASH_LAYER : IPackedAuto
     {
         public int stateHash;
         public int layer;
@@ -417,7 +411,7 @@ namespace PurrNet
         }
     }
 
-    internal struct PLAY_STATEHASH : IPackedAuto, IApplyOnAnimator
+    internal struct PLAY_STATEHASH : IPackedAuto
     {
         public int stateHash;
 
@@ -427,7 +421,7 @@ namespace PurrNet
         }
     }
 
-    internal struct Rebind : IPackedAuto, IApplyOnAnimator
+    internal struct Rebind : IPackedAuto
     {
         public void Apply(Animator anim)
         {
@@ -435,7 +429,7 @@ namespace PurrNet
         }
     }
 
-    internal struct UpdateWithDelta : IPackedAuto, IApplyOnAnimator
+    internal struct UpdateWithDelta : IPackedAuto
     {
         public float delta;
 
@@ -445,7 +439,7 @@ namespace PurrNet
         }
     }
 
-    internal struct CrossFade_5 : IPackedAuto, IApplyOnAnimator
+    internal struct CrossFade_5 : IPackedAuto
     {
         public int stateHash;
         public float normalizedTime;
@@ -459,7 +453,7 @@ namespace PurrNet
         }
     }
 
-    internal struct CrossFade_4 : IPackedAuto, IApplyOnAnimator
+    internal struct CrossFade_4 : IPackedAuto
     {
         public int stateHash;
         public float normalizedTime;
@@ -472,7 +466,7 @@ namespace PurrNet
         }
     }
 
-    internal struct CrossFade_3 : IPackedAuto, IApplyOnAnimator
+    internal struct CrossFade_3 : IPackedAuto
     {
         public int stateHash;
         public float normalizedTime;
@@ -484,7 +478,7 @@ namespace PurrNet
         }
     }
 
-    internal struct CrossFade_2 : IPackedAuto, IApplyOnAnimator
+    internal struct CrossFade_2 : IPackedAuto
     {
         public int stateHash;
         public float normalizedTime;
@@ -495,7 +489,7 @@ namespace PurrNet
         }
     }
 
-    internal struct MatchTarget : IPackedAuto, IApplyOnAnimator
+    internal struct MatchTarget : IPackedAuto
     {
         public Vector3 matchPosition;
         public Quaternion matchRotation;
@@ -512,7 +506,7 @@ namespace PurrNet
         }
     }
 
-    internal struct InterruptMatchTarget : IPackedAuto, IApplyOnAnimator
+    internal struct InterruptMatchTarget : IPackedAuto
     {
         public bool completeMatch;
 
@@ -522,7 +516,7 @@ namespace PurrNet
         }
     }
 
-    internal struct SetLayerWeight : IPackedAuto, IApplyOnAnimator
+    internal struct SetLayerWeight : IPackedAuto
     {
         public int layerIndex;
         public float weight;
@@ -533,7 +527,7 @@ namespace PurrNet
         }
     }
 
-    internal struct WriteDefaultValues : IPackedAuto, IApplyOnAnimator
+    internal struct WriteDefaultValues : IPackedAuto
     {
         public void Apply(Animator anim)
         {
@@ -541,7 +535,7 @@ namespace PurrNet
         }
     }
 
-    internal struct ApplyBuiltinRootMotion : IPackedAuto, IApplyOnAnimator
+    internal struct ApplyBuiltinRootMotion : IPackedAuto
     {
         public void Apply(Animator anim)
         {
@@ -549,7 +543,7 @@ namespace PurrNet
         }
     }
 
-    internal struct PlayInFixedTime : IPackedAuto, IApplyOnAnimator
+    internal struct PlayInFixedTime : IPackedAuto
     {
         public int stateHash;
         public int layer;
@@ -569,45 +563,45 @@ namespace PurrNet
         internal SetFloat _float;
         internal SetInt _int;
         internal SetTrigger _trigger;
-        internal SetSpeed _speed;
-        internal SetAnimatePhysics _animatePhysics;
-        internal SetBodyPosition _bodyPosition;
-        internal SetBodyRotation _bodyRotation;
-        internal SetCullingMode _cullingMode;
-        internal SetFireEvents _fireEvents;
-        internal SetPlaybackTime _playbackTime;
-        internal SetRootPosition _rootPosition;
-        internal SetRootRotation _rootRotation;
-        internal SetStabilizeFeet _stabilizeFeet;
-        internal SetUpdateMode _updateMode;
-        internal SetApplyRootMotion _applyRootMotion;
-        internal SetFeetPivotActive _feetPivotActive;
-        internal SetKeepAnimatorStateOnDisable _keepAnimatorStateOnDisable;
-        internal SetWriteDefaultValuesOnDisable _writeDefaultValuesOnDisable;
-        internal SetLogWarnings _logWarnings;
-        internal SetLayersAffectMassCenter _layersAffectMassCenter;
-        internal ResetTrigger _resetTrigger;
-        internal Play_STATEHASH_LAYER_NORMALIZEDTIME _play_STATEHASH_LAYER_NORMALIZEDTIME;
-        internal Play_STATEHASH_LAYER _play_STATEHASH_LAYER;
-        internal PLAY_STATEHASH _PLAY_STATEHASH;
-        internal Rebind _rebind;
-        internal UpdateWithDelta _updateWithDelta;
-        internal CrossFade_5 _crossFade_5;
-        internal CrossFade_4 _crossFade_4;
-        internal CrossFade_3 _crossFade_3;
-        internal CrossFade_2 _crossFade_2;
-        internal MatchTarget _matchTarget;
-        internal InterruptMatchTarget _interruptMatchTarget;
+        private SetSpeed _speed;
+        private SetAnimatePhysics _animatePhysics;
+        private SetBodyPosition _bodyPosition;
+        private SetBodyRotation _bodyRotation;
+        private SetCullingMode _cullingMode;
+        private SetFireEvents _fireEvents;
+        private SetPlaybackTime _playbackTime;
+        private SetRootPosition _rootPosition;
+        private SetRootRotation _rootRotation;
+        private SetStabilizeFeet _stabilizeFeet;
+        private SetUpdateMode _updateMode;
+        private SetApplyRootMotion _applyRootMotion;
+        private SetFeetPivotActive _feetPivotActive;
+        private SetKeepAnimatorStateOnDisable _keepAnimatorStateOnDisable;
+        private SetWriteDefaultValuesOnDisable _writeDefaultValuesOnDisable;
+        private SetLogWarnings _logWarnings;
+        private SetLayersAffectMassCenter _layersAffectMassCenter;
+        private ResetTrigger _resetTrigger;
+        private Play_STATEHASH_LAYER_NORMALIZEDTIME _play_STATEHASH_LAYER_NORMALIZEDTIME;
+        private Play_STATEHASH_LAYER _play_STATEHASH_LAYER;
+        private PLAY_STATEHASH _PLAY_STATEHASH;
+        private Rebind _rebind;
+        private UpdateWithDelta _updateWithDelta;
+        private CrossFade_5 _crossFade_5;
+        private CrossFade_4 _crossFade_4;
+        private CrossFade_3 _crossFade_3;
+        private CrossFade_2 _crossFade_2;
+        private MatchTarget _matchTarget;
+        private InterruptMatchTarget _interruptMatchTarget;
         internal SetLayerWeight _setLayerWeight;
-        internal WriteDefaultValues _writeDefaultValues;
-        internal ApplyBuiltinRootMotion _applyBuiltinRootMotion;
-        internal PlayInFixedTime _playInFixedTime;
+        private WriteDefaultValues _writeDefaultValues;
+        private ApplyBuiltinRootMotion _applyBuiltinRootMotion;
+        private PlayInFixedTime _playInFixedTime;
         internal SetBoneLocalRotation _setBoneLocalRotation;
         internal SetIKPosition _setIKPosition;
         internal SetIKRotation _setIKRotation;
-        internal SetLookAtPosition _setLookAtPosition;
-        internal SetLookAtWeight _setLookAtWeight;
-        internal CrossFadeInFixedTime _crossFadeInFixedTime;
+        private SetLookAtPosition _setLookAtPosition;
+        private SetLookAtWeight _setLookAtWeight;
+        private CrossFadeInFixedTime _crossFadeInFixedTime;
         internal SetIKHintPosition _setIKHintPosition;
         internal SetIKPositionWeight _setIKPositionWeight;
         internal SetIKRotationWeight _setIKRotationWeight;
