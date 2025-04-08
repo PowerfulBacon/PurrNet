@@ -786,8 +786,9 @@ namespace PurrNet.Profiler.Editor
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.EndScrollView();
             }
-            catch
+            catch (Exception e)
             {
+                Debug.LogException(e);
                 // Make sure to close all layout groups in case of exception
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.EndScrollView();
@@ -839,8 +840,7 @@ namespace PurrNet.Profiler.Editor
         // Helper method to get foldout state
         private bool GetFoldoutState(string key, bool defaultValue = false)
         {
-            if (!foldoutStates.ContainsKey(key))
-                foldoutStates[key] = defaultValue;
+            foldoutStates.TryAdd(key, defaultValue);
             return foldoutStates[key];
         }
 
@@ -934,6 +934,12 @@ namespace PurrNet.Profiler.Editor
             return resutl.ToString(Formatting.Indented);
         }
 
+        static readonly JsonSerializerSettings settings = new JsonSerializerSettings
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            NullValueHandling = NullValueHandling.Include
+        };
+
         private static string PrintBroadcast(Type type, BitPacker tempPacker)
         {
             var typeIdx = default(PackedUInt);
@@ -941,7 +947,7 @@ namespace PurrNet.Profiler.Editor
             Packer<PackedUInt>.Read(tempPacker, ref typeIdx);
             Packer.Read(tempPacker, type, ref obj);
             _deserializedObjects[type] = obj;
-            return JsonConvert.SerializeObject(obj, Formatting.Indented);
+            return JsonConvert.SerializeObject(obj, Formatting.Indented, settings);
         }
 
         #endregion
