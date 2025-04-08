@@ -790,7 +790,7 @@ namespace PurrNet.Profiler.Editor
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.EndScrollView();
             }
-            catch (Exception e)
+            catch
             {
                 // Make sure to close all layout groups in case of exception
                 EditorGUILayout.EndVertical();
