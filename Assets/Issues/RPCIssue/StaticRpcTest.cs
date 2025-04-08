@@ -1,19 +1,12 @@
-using JetBrains.Annotations;
 using PurrNet;
 using TriInspector;
 using UnityEngine;
 
-public class StaticRpcTest : MonoBehaviour
+public class StaticRpcTest : NetworkIdentity
 {
-    [ObserversRpc]
-    public static void TestStaticRpc()
+    [ObserversRpc(runLocally: true), Button("SendObserverRpc")]
+    public void SendObserverRpc()
     {
-        Debug.Log($"TestStaticRpc");
-    }
-
-    [Button("Trigger Static Rpc"), UsedImplicitly]
-    public void TriggerTestStaticRpc()
-    {
-        TestStaticRpc();
+        Debug.Log("SendObserverRpc");
     }
 }
