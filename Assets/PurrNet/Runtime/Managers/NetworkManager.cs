@@ -605,7 +605,15 @@ namespace PurrNet
         /// Gets the current player list.
         /// This will be update every time a player joins or leaves.
         /// </summary>
-        public IReadOnlyList<PlayerID> players => GetModule<PlayersManager>(isServer).players;
+        public IReadOnlyList<PlayerID> players
+        {
+            get
+            {
+                if (TryGetModule<PlayersManager>(isServer, out var playersManager))
+                    return playersManager.players;
+                return Array.Empty<PlayerID>();
+            }
+        }
 
         /// <summary>
         /// Enumerates all the objects owned by the given player.
@@ -615,7 +623,8 @@ namespace PurrNet
         /// <returns>An enumerable of all the objects owned by the given player.</returns>
         public IEnumerable<NetworkIdentity> EnumerateAllPlayerOwnedIds(PlayerID player, bool asServer)
         {
-            var ownershipModule = GetModule<GlobalOwnershipModule>(asServer);
+            if (!TryGetModule<GlobalOwnershipModule>(out var ownershipModule, asServer))
+                return Array.Empty<NetworkIdentity>();
             return ownershipModule.EnumerateAllPlayerOwnedIds(player);
         }
 
