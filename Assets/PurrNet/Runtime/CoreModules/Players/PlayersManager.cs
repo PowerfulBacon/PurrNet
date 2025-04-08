@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using PurrNet.Authentication;
 using PurrNet.Logging;
 using PurrNet.Packing;
@@ -7,9 +8,13 @@ using PurrNet.Transports;
 
 namespace PurrNet.Modules
 {
+    [Serializable]
     public struct ServerLoginResponse : IPackedAuto
     {
+        [JsonProperty]
         public PlayerID playerId { get; }
+
+        [JsonProperty]
         public NetworkID lastNidId { get; }
 
         public ServerLoginResponse(PlayerID playerId, NetworkID lastNidId)
@@ -19,9 +24,13 @@ namespace PurrNet.Modules
         }
     }
 
+    [Serializable]
     public struct PlayerJoinedEvent : IPackedAuto
     {
+        [JsonProperty]
         public PlayerID playerId { get; }
+
+        [JsonProperty]
         public Connection connection { get; }
 
         public PlayerJoinedEvent(PlayerID playerId, Connection connection)
@@ -31,8 +40,10 @@ namespace PurrNet.Modules
         }
     }
 
+    [Serializable]
     public struct PlayerLeftEvent : IPackedAuto
     {
+        [JsonProperty]
         public PlayerID playerId { get; }
 
         public PlayerLeftEvent(PlayerID playerId)
@@ -41,8 +52,10 @@ namespace PurrNet.Modules
         }
     }
 
+    [Serializable]
     public struct PlayerSnapshotEvent : IPackedAuto
     {
+        [JsonProperty]
         public Dictionary<Connection, PlayerID> connectionToPlayerId { get; }
 
         public PlayerSnapshotEvent(Dictionary<Connection, PlayerID> connectionToPlayerId)

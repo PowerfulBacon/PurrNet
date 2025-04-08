@@ -3,21 +3,37 @@ using UnityEditor;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using PurrNet.Packing;
 
-#if UNITY_EDITOR
 namespace PurrNet.Profiler.Editor
 {
+    /// <summary>
+    /// Editor window for the PurrNet Profiler, allowing visualization and analysis of network traffic.
+    /// </summary>
     public class ProfilerWindow : EditorWindow
     {
+        #region Fields
+
+        // Scroll positions
         private Vector2 scrollPosition;
         private Vector2 graphScrollPosition;
+        private Vector2 detailsScrollPosition;
 
         // Graph settings
         private int selectedSampleIndex = -1;
-        private int hoveredSampleIndex = -1; // Track which sample is being hovered
-        private const float graphHeight = 200f;
-        private const float barWidth = 20f; // Constant width for each bar
-        private const float labelWidth = 50f; // Width for the labels on the left side
+        private int hoveredSampleIndex = -1;
+        private float graphHeight = 200f;
+        private const float minGraphHeight = 100f;
+        private const float maxGraphHeight = 500f;
+        private const float defaultGraphHeight = 200f;
+        private const string graphHeightPrefKey = "PurrNet_Profiler_GraphHeight";
+        private const float barWidth = 20f;
+        private const float labelWidth = 50f;
+        private bool isResizingGraph;
+        private float resizeStartY;
+        private float resizeStartHeight;
 
         // Graph data
         private readonly List<float> receivedRpcData = new List<float>();
@@ -26,10 +42,20 @@ namespace PurrNet.Profiler.Editor
         private readonly List<float> sentBroadcastData = new List<float>();
         private readonly List<float> forwardedBytesData = new List<float>();
 
+        // UI state
+        private readonly Dictionary<string, bool> foldoutStates = new Dictionary<string, bool>();
+        private readonly Dictionary<string, bool> expandedPacketStates = new Dictionary<string, bool>();
+
+        #endregion
+
+        #region Unity Editor Integration
+
         [MenuItem("Tools/PurrNet/Profiler")]
         public static void ShowWindow()
         {
             var window = GetWindow<ProfilerWindow>("PurrNet Profiler");
+            var purrnetLogo = Resources.Load("purricon") as Texture2D;
+            window.titleContent = new GUIContent("PurrNet Profiler", purrnetLogo, "PurrNet Profiler");
             window.Show();
         }
 
@@ -37,12 +63,18 @@ namespace PurrNet.Profiler.Editor
         {
             // Subscribe to the onSampleEnded event to refresh the GUI
             Statistics.onSampleEnded += OnSampleEnded;
+
+            // Load saved graph height from EditorPrefs
+            graphHeight = EditorPrefs.GetFloat(graphHeightPrefKey, defaultGraphHeight);
         }
 
         void OnDisable()
         {
             // Unsubscribe from the event when the window is closed
             Statistics.onSampleEnded -= OnSampleEnded;
+
+            // Save graph height to EditorPrefs
+            EditorPrefs.SetFloat(graphHeightPrefKey, graphHeight);
         }
 
         private void OnSampleEnded()
@@ -51,12 +83,16 @@ namespace PurrNet.Profiler.Editor
             Repaint();
         }
 
+        #endregion
+
+        #region GUI Rendering
+
         void OnGUI()
         {
             GUILayout.Label("PurrNet Profiler", EditorStyles.boldLabel);
 
             // Add button row
-            EditorGUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal();
 
             // Add record/stop button
             if (GUILayout.Button(Statistics.paused ? "Start Recording" : "Stop Recording"))
@@ -73,7 +109,7 @@ namespace PurrNet.Profiler.Editor
                 Repaint();
             }
 
-            EditorGUILayout.EndHorizontal();
+            GUILayout.EndHorizontal();
 
             var samples = Statistics.samples;
 
@@ -94,6 +130,10 @@ namespace PurrNet.Profiler.Editor
                 DrawSample(samples[idx], idx);
             }
         }
+
+        #endregion
+
+        #region Graph Management
 
         private void UpdateGraphData()
         {
@@ -300,275 +340,456 @@ namespace PurrNet.Profiler.Editor
 
             EditorGUILayout.EndScrollView();
             EditorGUILayout.EndHorizontal();
-
             GUILayout.Space(10);
 
-            // Draw legend at the bottom of the graph
-            EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(false));
+            // Add a more visible resize handle at the bottom of the graph
+            Rect resizeHandleRect = GUILayoutUtility.GetRect(0, 10);
 
-            GUILayout.FlexibleSpace();
+            // Draw a visual indicator for the resize handle
+            Color originalColor = GUI.color;
+            GUI.color = new Color(0.7f, 0.7f, 0.7f, 1f);
+            EditorGUI.DrawRect(resizeHandleRect, new Color(0.5f, 0.5f, 0.5f, 1f));
 
-            // Draw each legend item
-            DrawLegendItem("Received RPCs", new Color(0.2f, 0.8f, 0.2f, 0.8f));
-            DrawLegendItem("Sent RPCs", new Color(0.8f, 0.2f, 0.2f, 0.8f));
-            DrawLegendItem("Received Broadcasts", new Color(0.2f, 0.2f, 0.8f, 0.8f));
-            DrawLegendItem("Sent Broadcasts", new Color(0.8f, 0.8f, 0.2f, 0.8f));
-            DrawLegendItem("Forwarded Bytes", new Color(0.8f, 0.2f, 0.8f, 0.8f));
+            // Draw a grip texture to indicate draggability
+            Rect gripRect = new Rect(resizeHandleRect.x + resizeHandleRect.width / 2 - 20,
+                                    resizeHandleRect.y + resizeHandleRect.height / 2 - 2,
+                                    40, 4);
+            EditorGUI.DrawRect(new Rect(gripRect.x, gripRect.y, gripRect.width, 1), Color.white);
+            EditorGUI.DrawRect(new Rect(gripRect.x, gripRect.y + 3, gripRect.width, 1), Color.white);
 
-            GUILayout.FlexibleSpace();
+            GUI.color = originalColor;
 
-            EditorGUILayout.EndHorizontal();
-            GUILayout.Space(10);
+            // Add cursor feedback
+            EditorGUIUtility.AddCursorRect(resizeHandleRect, MouseCursor.ResizeVertical);
+
+            // Handle resize events
+            if (Event.current.type == EventType.MouseDown && resizeHandleRect.Contains(Event.current.mousePosition))
+            {
+                isResizingGraph = true;
+                resizeStartY = Event.current.mousePosition.y;
+                resizeStartHeight = graphHeight;
+                Event.current.Use();
+            }
+            else if (Event.current.type == EventType.MouseUp && isResizingGraph)
+            {
+                isResizingGraph = false;
+                // Save the graph height to EditorPrefs when resizing is complete
+                EditorPrefs.SetFloat(graphHeightPrefKey, graphHeight);
+                Event.current.Use();
+            }
+            else if (Event.current.type == EventType.MouseDrag && isResizingGraph)
+            {
+                float deltaY = Event.current.mousePosition.y - resizeStartY;
+                graphHeight = Mathf.Clamp(resizeStartHeight + deltaY, minGraphHeight, maxGraphHeight);
+                Repaint();
+                Event.current.Use();
+            }
 
             EditorGUILayout.EndVertical();
-            EditorGUILayout.Space();
         }
 
-        private string FormatBytes(float bytes)
-        {
-            if (bytes < 1024)
-                return $"{bytes:F0}B";
-            else if (bytes < 1024 * 1024)
-                return $"{bytes / 1024:F1}KB";
-            else if (bytes < 1024 * 1024 * 1024)
-                return $"{bytes / (1024 * 1024):F1}MB";
-            else
-                return $"{bytes / (1024 * 1024 * 1024):F1}GB";
-        }
+        #endregion
 
-        private void DrawLegendItem(string label, Color color)
-        {
-            var colorRect = GUILayoutUtility.GetRect(15, 15, GUILayout.ExpandWidth(false));
-            GUILayout.Space(5);
-            EditorGUI.DrawRect(colorRect, color);
-            GUILayout.Label(label, GUILayout.ExpandWidth(false));
-            GUILayout.Space(5);
-        }
-
-        private Vector2 detailsScrollPosition;
-
-        // Dictionary to store foldout states
-        private readonly Dictionary<string, bool> foldoutStates = new Dictionary<string, bool>();
-
-        // Helper method to get foldout state
-        private bool GetFoldoutState(string key)
-        {
-            if (foldoutStates.TryAdd(key, false))
-                return false;
-            return foldoutStates[key];
-        }
-
-        // Helper method to set foldout state
-        private void SetFoldoutState(string key, bool value)
-        {
-            foldoutStates[key] = value;
-        }
+        #region Sample Management
 
         private void DrawSampleDetails(TickSample sample)
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-
-            EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Sample Details", EditorStyles.boldLabel);
-            if (GUILayout.Button("Back to List", GUILayout.Width(100)))
-            {
-                selectedSampleIndex = -1;
-                Repaint();
-            }
-            EditorGUILayout.EndHorizontal();
 
             // Create a scroll view for the sample details
             try
             {
-                detailsScrollPosition = EditorGUILayout.BeginScrollView(detailsScrollPosition, false, true);
+                // Use GUILayout.ExpandWidth(false) to prevent horizontal expansion
+                detailsScrollPosition = EditorGUILayout.BeginScrollView(detailsScrollPosition, GUILayout.ExpandWidth(false));
+
+                // Wrap content in a vertical layout that expands to fill available width
+                EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
 
                 if (sample.receivedRpcs.Count > 0)
                 {
-                    EditorGUILayout.LabelField("Received RPCs", EditorStyles.boldLabel);
-                    EditorGUI.indentLevel++;
+                    Color originalBgColor = GUI.backgroundColor;
+                    GUI.backgroundColor = new Color(0.3f, 0.9f, 0.3f, 0.2f);
+                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                    GUI.backgroundColor = originalBgColor;
 
-                    // Aggregate received RPCs by type and method
-                    var aggregatedReceivedRpcs = sample.receivedRpcs
-                        .GroupBy(rpc => new { rpc.type, rpc.method })
-                        .Select(group => new
-                        {
-                            Type = group.Key.type,
-                            Method = group.Key.method,
-                            Count = group.Count(),
-                            TotalBytes = group.Sum(rpc => rpc.data.Length),
-                            Items = group.ToList()
-                        })
-                        .OrderByDescending(rpc => rpc.TotalBytes);
+                    var headerStyle = new GUIStyle(EditorStyles.foldout);
+                    Color headerColor = new Color(0.2f, 0.8f, 0.2f, 1f);
+                    headerStyle.normal.textColor = headerColor;
+                    headerStyle.onNormal.textColor = headerColor;
+                    headerStyle.focused.textColor = headerColor;
+                    headerStyle.onFocused.textColor = headerColor;
+                    headerStyle.active.textColor = headerColor;
+                    headerStyle.onActive.textColor = headerColor;
+                    headerStyle.fontStyle = FontStyle.Bold;
+                    bool sectionExpanded = EditorGUILayout.Foldout(GetFoldoutState("section_received_rpcs", true), "Received RPCs", true, headerStyle);
+                    SetFoldoutState("section_received_rpcs", sectionExpanded);
 
-                    foreach (var rpcGroup in aggregatedReceivedRpcs)
+                    if (sectionExpanded)
                     {
-                        // Create a foldout for each RPC group
-                        string label = $"{rpcGroup.Type.Name}.{rpcGroup.Method} ({FormatBytes(rpcGroup.TotalBytes)}) - {rpcGroup.Count} calls";
-                        bool expanded = EditorGUILayout.Foldout(GetFoldoutState($"received_{rpcGroup.Type.Name}_{rpcGroup.Method}"), label);
-                        SetFoldoutState($"received_{rpcGroup.Type.Name}_{rpcGroup.Method}", expanded);
-
-                        if (expanded)
-                        {
-                            EditorGUI.indentLevel++;
-                            foreach (var rpc in rpcGroup.Items)
+                        EditorGUI.indentLevel++;
+                        // Aggregate received RPCs by type and method
+                        var aggregatedReceivedRpcs = sample.receivedRpcs
+                            .GroupBy(rpc => new { rpc.type, rpc.method })
+                            .Select(group => new
                             {
-                                EditorGUILayout.BeginHorizontal();
+                                Type = group.Key.type,
+                                Method = group.Key.method,
+                                Count = group.Count(),
+                                TotalBytes = group.Sum(rpc => rpc.data.length),
+                                Items = group.ToList()
+                            })
+                            .OrderByDescending(rpc => rpc.TotalBytes);
 
-                                // Add a button to ping the context object if it exists
-                                if (rpc.context != null)
-                                    EditorGUILayout.ObjectField(rpc.context, typeof(UnityEngine.Object), true);
+                        foreach (var rpcGroup in aggregatedReceivedRpcs)
+                        {
+                            // Create a foldout for each RPC group
+                            string label = $"{rpcGroup.Type.GetFriendlyTypeName()}.{rpcGroup.Method} ({FormatBytes(rpcGroup.TotalBytes)}) - {rpcGroup.Count} calls";
+                            bool expanded = EditorGUILayout.Foldout(GetFoldoutState($"received_{rpcGroup.Type.Name}_{rpcGroup.Method}", false), label, true);
+                            SetFoldoutState($"received_{rpcGroup.Type.Name}_{rpcGroup.Method}", expanded);
 
-                                EditorGUILayout.LabelField($"{FormatBytes(rpc.data.Length)} bytes");
-                                EditorGUILayout.EndHorizontal();
+                            if (expanded)
+                            {
+                                EditorGUI.indentLevel++;
+                                foreach (var rpc in rpcGroup.Items)
+                                {
+                                    string packetKey = $"received_rpc_{rpc.type.Name}_{rpc.method}_{rpc.GetHashCode()}";
+                                    bool isExpanded = GetExpandedPacketState(packetKey);
+
+                                    EditorGUILayout.BeginHorizontal();
+                                    GUILayout.Space(30); // Increased indentation space
+
+                                    EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+
+                                    // Temporarily decrease indent level for the foldout
+                                    EditorGUI.indentLevel--;
+                                    GUILayout.BeginHorizontal();
+                                    bool newExpanded = EditorGUILayout.Foldout(isExpanded, $"{FormatBytes(rpc.data.length)} bytes", true);
+                                    if (rpc.context != null)
+                                        EditorGUILayout.ObjectField(rpc.context, typeof(UnityEngine.Object), true);
+                                    GUILayout.EndHorizontal();
+                                    EditorGUI.indentLevel++;
+
+                                    if (newExpanded != isExpanded)
+                                    {
+                                        SetExpandedPacketState(packetKey, newExpanded);
+                                        Repaint();
+                                    }
+
+                                    // Show packet data if expanded
+                                    if (isExpanded)
+                                    {
+                                        EditorGUILayout.BeginVertical();
+                                        EditorGUILayout.TextArea(GetRpcOrBroadcastDataString(rpc.data, rpc.type, rpc.rpcType, rpc.method));
+                                        EditorGUILayout.EndVertical();
+                                    }
+
+                                    EditorGUILayout.EndVertical();
+                                    EditorGUILayout.EndHorizontal();
+                                }
+                                EditorGUI.indentLevel--;
                             }
-                            EditorGUI.indentLevel--;
                         }
+                        EditorGUI.indentLevel--;
                     }
-
-                    EditorGUI.indentLevel--;
+                    EditorGUILayout.EndVertical();
                 }
 
                 if (sample.sentRpcs.Count > 0)
                 {
-                    EditorGUILayout.LabelField("Sent RPCs", EditorStyles.boldLabel);
-                    EditorGUI.indentLevel++;
+                    Color originalBgColor = GUI.backgroundColor;
+                    GUI.backgroundColor = new Color(0.9f, 0.3f, 0.3f, 0.2f);
+                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                    GUI.backgroundColor = originalBgColor;
 
-                    // Aggregate sent RPCs by type and method
-                    var aggregatedSentRpcs = sample.sentRpcs
-                        .GroupBy(rpc => new { rpc.type, rpc.method })
-                        .Select(group => new
-                        {
-                            Type = group.Key.type,
-                            Method = group.Key.method,
-                            Count = group.Count(),
-                            TotalBytes = group.Sum(rpc => rpc.data.Length),
-                            Items = group.ToList()
-                        })
-                        .OrderByDescending(rpc => rpc.TotalBytes);
+                    var headerStyle = new GUIStyle(EditorStyles.foldout);
+                    Color headerColor = new Color(0.8f, 0.2f, 0.2f, 1f);
+                    headerStyle.normal.textColor = headerColor;
+                    headerStyle.onNormal.textColor = headerColor;
+                    headerStyle.focused.textColor = headerColor;
+                    headerStyle.onFocused.textColor = headerColor;
+                    headerStyle.active.textColor = headerColor;
+                    headerStyle.onActive.textColor = headerColor;
+                    headerStyle.fontStyle = FontStyle.Bold;
+                    bool sectionExpanded = EditorGUILayout.Foldout(GetFoldoutState("section_sent_rpcs", true), "Sent RPCs", true, headerStyle);
+                    SetFoldoutState("section_sent_rpcs", sectionExpanded);
 
-                    foreach (var rpcGroup in aggregatedSentRpcs)
+                    if (sectionExpanded)
                     {
-                        // Create a foldout for each RPC group
-                        string label = $"{rpcGroup.Type.Name}.{rpcGroup.Method} ({FormatBytes(rpcGroup.TotalBytes)}) - {rpcGroup.Count} calls";
-                        bool expanded = EditorGUILayout.Foldout(GetFoldoutState($"sent_{rpcGroup.Type.Name}_{rpcGroup.Method}"), label);
-                        SetFoldoutState($"sent_{rpcGroup.Type.Name}_{rpcGroup.Method}", expanded);
-
-                        if (expanded)
-                        {
-                            EditorGUI.indentLevel++;
-                            foreach (var rpc in rpcGroup.Items)
+                        EditorGUI.indentLevel++;
+                        // Aggregate sent RPCs by type and method
+                        var aggregatedSentRpcs = sample.sentRpcs
+                            .GroupBy(rpc => new { rpc.type, rpc.method })
+                            .Select(group => new
                             {
-                                EditorGUILayout.BeginHorizontal();
+                                Type = group.Key.type,
+                                Method = group.Key.method,
+                                Count = group.Count(),
+                                TotalBytes = group.Sum(rpc => rpc.data.length),
+                                Items = group.ToList()
+                            })
+                            .OrderByDescending(rpc => rpc.TotalBytes);
 
-                                // Add a button to ping the context object if it exists
-                                if (rpc.context != null)
-                                    EditorGUILayout.ObjectField(rpc.context, typeof(UnityEngine.Object), true);
+                        foreach (var rpcGroup in aggregatedSentRpcs)
+                        {
+                            // Create a foldout for each RPC group
+                            string label = $"{rpcGroup.Type.GetFriendlyTypeName()}.{rpcGroup.Method} ({FormatBytes(rpcGroup.TotalBytes)}) - {rpcGroup.Count} calls";
+                            bool expanded = EditorGUILayout.Foldout(GetFoldoutState($"sent_{rpcGroup.Type.Name}_{rpcGroup.Method}", false), label, true);
+                            SetFoldoutState($"sent_{rpcGroup.Type.Name}_{rpcGroup.Method}", expanded);
 
-                                EditorGUILayout.LabelField($"{FormatBytes(rpc.data.Length)} bytes");
-                                EditorGUILayout.EndHorizontal();
+                            if (expanded)
+                            {
+                                EditorGUI.indentLevel++;
+                                foreach (var rpc in rpcGroup.Items)
+                                {
+                                    string packetKey = $"sent_rpc_{rpc.type.Name}_{rpc.method}_{rpc.GetHashCode()}";
+                                    bool isExpanded = GetExpandedPacketState(packetKey);
+
+                                    EditorGUILayout.BeginHorizontal();
+                                    GUILayout.Space(30); // Increased indentation space
+
+                                    EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+
+                                    // Temporarily decrease indent level for the foldout
+                                    EditorGUI.indentLevel--;
+                                    GUILayout.BeginHorizontal();
+                                    bool newExpanded = EditorGUILayout.Foldout(isExpanded, $"{FormatBytes(rpc.data.length)} bytes", true);
+                                    if (rpc.context != null)
+                                        EditorGUILayout.ObjectField(rpc.context, typeof(UnityEngine.Object), true);
+                                    GUILayout.EndHorizontal();
+                                    EditorGUI.indentLevel++;
+
+                                    if (newExpanded != isExpanded)
+                                    {
+                                        SetExpandedPacketState(packetKey, newExpanded);
+                                        Repaint();
+                                    }
+
+                                    // Show packet data if expanded
+                                    if (isExpanded)
+                                    {
+                                        EditorGUILayout.BeginVertical();
+                                        EditorGUILayout.TextArea(GetRpcOrBroadcastDataString(rpc.data, rpc.type, rpc.rpcType, rpc.method));
+                                        EditorGUILayout.EndVertical();
+                                    }
+
+                                    EditorGUILayout.EndVertical();
+                                    EditorGUILayout.EndHorizontal();
+                                }
+                                EditorGUI.indentLevel--;
                             }
-                            EditorGUI.indentLevel--;
                         }
+                        EditorGUI.indentLevel--;
                     }
-
-                    EditorGUI.indentLevel--;
+                    EditorGUILayout.EndVertical();
                 }
 
                 if (sample.receivedBroadcasts.Count > 0)
                 {
-                    EditorGUILayout.LabelField("Received Broadcasts", EditorStyles.boldLabel);
-                    EditorGUI.indentLevel++;
+                    Color originalBgColor = GUI.backgroundColor;
+                    GUI.backgroundColor = new Color(0.3f, 0.3f, 0.9f, 0.2f);
+                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                    GUI.backgroundColor = originalBgColor;
 
-                    // Aggregate received broadcasts by type
-                    var aggregatedReceivedBroadcasts = sample.receivedBroadcasts
-                        .GroupBy(broadcast => broadcast.type)
-                        .Select(group => new
-                        {
-                            Type = group.Key,
-                            Count = group.Count(),
-                            TotalBytes = group.Sum(broadcast => broadcast.data.Length),
-                            Items = group.ToList()
-                        })
-                        .OrderByDescending(broadcast => broadcast.TotalBytes);
+                    var headerStyle = new GUIStyle(EditorStyles.foldout);
+                    Color headerColor = new Color(0.4f, 0.6f, 1.0f, 1f);
+                    headerStyle.normal.textColor = headerColor;
+                    headerStyle.onNormal.textColor = headerColor;
+                    headerStyle.focused.textColor = headerColor;
+                    headerStyle.onFocused.textColor = headerColor;
+                    headerStyle.active.textColor = headerColor;
+                    headerStyle.onActive.textColor = headerColor;
+                    headerStyle.fontStyle = FontStyle.Bold;
+                    bool sectionExpanded = EditorGUILayout.Foldout(GetFoldoutState("section_received_broadcasts", true), "Received Broadcasts", true, headerStyle);
+                    SetFoldoutState("section_received_broadcasts", sectionExpanded);
 
-                    foreach (var broadcastGroup in aggregatedReceivedBroadcasts)
+                    if (sectionExpanded)
                     {
-                        // Create a foldout for each broadcast group
-                        string label = $"{broadcastGroup.Type.Name} ({FormatBytes(broadcastGroup.TotalBytes)}) - {broadcastGroup.Count} broadcasts";
-                        bool expanded = EditorGUILayout.Foldout(GetFoldoutState($"received_broadcast_{broadcastGroup.Type.Name}"), label);
-                        SetFoldoutState($"received_broadcast_{broadcastGroup.Type.Name}", expanded);
-
-                        if (expanded)
-                        {
-                            EditorGUI.indentLevel++;
-                            foreach (var broadcast in broadcastGroup.Items)
+                        EditorGUI.indentLevel++;
+                        // Aggregate received broadcasts by type
+                        var aggregatedReceivedBroadcasts = sample.receivedBroadcasts
+                            .GroupBy(broadcast => broadcast.type)
+                            .Select(group => new
                             {
-                                EditorGUILayout.BeginHorizontal();
-                                EditorGUILayout.LabelField($"{FormatBytes(broadcast.data.Length)} bytes");
-                                EditorGUILayout.EndHorizontal();
-                            }
-                            EditorGUI.indentLevel--;
-                        }
-                    }
+                                Type = group.Key,
+                                Count = group.Count(),
+                                TotalBytes = group.Sum(broadcast => broadcast.data.length),
+                                Items = group.ToList()
+                            })
+                            .OrderByDescending(broadcast => broadcast.TotalBytes);
 
-                    EditorGUI.indentLevel--;
+                        foreach (var broadcastGroup in aggregatedReceivedBroadcasts)
+                        {
+                            // Create a foldout for each broadcast group
+                            string label = $"{broadcastGroup.Type.GetFriendlyTypeName()} ({FormatBytes(broadcastGroup.TotalBytes)}) - {broadcastGroup.Count} broadcasts";
+                            bool expanded = EditorGUILayout.Foldout(GetFoldoutState($"received_broadcast_{broadcastGroup.Type.Name}", false), label, true);
+                            SetFoldoutState($"received_broadcast_{broadcastGroup.Type.Name}", expanded);
+
+                            if (expanded)
+                            {
+                                EditorGUI.indentLevel++;
+                                foreach (var broadcast in broadcastGroup.Items)
+                                {
+                                    string packetKey = $"received_broadcast_{broadcast.type.Name}_{broadcast.GetHashCode()}";
+                                    bool isExpanded = GetExpandedPacketState(packetKey);
+
+                                    EditorGUILayout.BeginHorizontal();
+                                    GUILayout.Space(30); // Increased indentation space
+
+                                    EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+
+                                    // Temporarily decrease indent level for the foldout
+                                    EditorGUI.indentLevel--;
+                                    bool newExpanded = EditorGUILayout.Foldout(isExpanded, $"{FormatBytes(broadcast.data.length)} bytes", true);
+                                    EditorGUI.indentLevel++;
+
+                                    if (newExpanded != isExpanded)
+                                    {
+                                        SetExpandedPacketState(packetKey, newExpanded);
+                                        Repaint();
+                                    }
+
+                                    // Show packet data if expanded
+                                    if (isExpanded)
+                                    {
+                                        EditorGUILayout.BeginVertical();
+                                        EditorGUILayout.TextArea(GetRpcOrBroadcastDataString(broadcast.data, broadcast.type, default));
+                                        EditorGUILayout.EndVertical();
+                                    }
+
+                                    EditorGUILayout.EndVertical();
+                                    EditorGUILayout.EndHorizontal();
+                                }
+                                EditorGUI.indentLevel--;
+                            }
+                        }
+                        EditorGUI.indentLevel--;
+                    }
+                    EditorGUILayout.EndVertical();
                 }
 
                 if (sample.sentBroadcasts.Count > 0)
                 {
-                    EditorGUILayout.LabelField("Sent Broadcasts", EditorStyles.boldLabel);
-                    EditorGUI.indentLevel++;
+                    Color originalBgColor = GUI.backgroundColor;
+                    GUI.backgroundColor = new Color(0.9f, 0.9f, 0.3f, 0.2f);
+                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                    GUI.backgroundColor = originalBgColor;
 
-                    // Aggregate sent broadcasts by type
-                    var aggregatedSentBroadcasts = sample.sentBroadcasts
-                        .GroupBy(broadcast => broadcast.type)
-                        .Select(group => new
-                        {
-                            Type = group.Key,
-                            Count = group.Count(),
-                            TotalBytes = group.Sum(broadcast => broadcast.data.Length),
-                            Items = group.ToList()
-                        })
-                        .OrderByDescending(broadcast => broadcast.TotalBytes);
+                    var headerStyle = new GUIStyle(EditorStyles.foldout);
+                    Color headerColor = new Color(0.8f, 0.8f, 0.2f, 1f);
+                    headerStyle.normal.textColor = headerColor;
+                    headerStyle.onNormal.textColor = headerColor;
+                    headerStyle.focused.textColor = headerColor;
+                    headerStyle.onFocused.textColor = headerColor;
+                    headerStyle.active.textColor = headerColor;
+                    headerStyle.onActive.textColor = headerColor;
+                    headerStyle.fontStyle = FontStyle.Bold;
+                    bool sectionExpanded = EditorGUILayout.Foldout(GetFoldoutState("section_sent_broadcasts", true), "Sent Broadcasts", true, headerStyle);
+                    SetFoldoutState("section_sent_broadcasts", sectionExpanded);
 
-                    foreach (var broadcastGroup in aggregatedSentBroadcasts)
+                    if (sectionExpanded)
                     {
-                        // Create a foldout for each broadcast group
-                        string label = $"{broadcastGroup.Type.Name} ({FormatBytes(broadcastGroup.TotalBytes)}) - {broadcastGroup.Count} broadcasts";
-                        bool expanded = EditorGUILayout.Foldout(GetFoldoutState($"sent_broadcast_{broadcastGroup.Type.Name}"), label);
-                        SetFoldoutState($"sent_broadcast_{broadcastGroup.Type.Name}", expanded);
-
-                        if (expanded)
-                        {
-                            EditorGUI.indentLevel++;
-                            foreach (var broadcast in broadcastGroup.Items)
+                        EditorGUI.indentLevel++;
+                        // Aggregate sent broadcasts by type
+                        var aggregatedSentBroadcasts = sample.sentBroadcasts
+                            .GroupBy(broadcast => broadcast.type)
+                            .Select(group => new
                             {
-                                EditorGUILayout.BeginHorizontal();
-                                EditorGUILayout.LabelField($"{FormatBytes(broadcast.data.Length)} bytes");
-                                EditorGUILayout.EndHorizontal();
-                            }
-                            EditorGUI.indentLevel--;
-                        }
-                    }
+                                Type = group.Key,
+                                Count = group.Count(),
+                                TotalBytes = group.Sum(broadcast => broadcast.data.length),
+                                Items = group.ToList()
+                            })
+                            .OrderByDescending(broadcast => broadcast.TotalBytes);
 
-                    EditorGUI.indentLevel--;
+                        foreach (var broadcastGroup in aggregatedSentBroadcasts)
+                        {
+                            // Create a foldout for each broadcast group
+                            string label = $"{broadcastGroup.Type.GetFriendlyTypeName()} ({FormatBytes(broadcastGroup.TotalBytes)}) - {broadcastGroup.Count} broadcasts";
+                            bool expanded = EditorGUILayout.Foldout(GetFoldoutState($"sent_broadcast_{broadcastGroup.Type.Name}", false), label, true);
+                            SetFoldoutState($"sent_broadcast_{broadcastGroup.Type.Name}", expanded);
+
+                            if (expanded)
+                            {
+                                EditorGUI.indentLevel++;
+                                foreach (var broadcast in broadcastGroup.Items)
+                                {
+                                    string packetKey = $"sent_broadcast_{broadcast.type.Name}_{broadcast.GetHashCode()}";
+                                    bool isExpanded = GetExpandedPacketState(packetKey);
+
+                                    EditorGUILayout.BeginHorizontal();
+                                    GUILayout.Space(30); // Increased indentation space
+
+                                    EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+
+                                    // Temporarily decrease indent level for the foldout
+                                    EditorGUI.indentLevel--;
+                                    bool newExpanded = EditorGUILayout.Foldout(isExpanded, $"{FormatBytes(broadcast.data.length)} bytes", true);
+                                    EditorGUI.indentLevel++;
+
+                                    if (newExpanded != isExpanded)
+                                    {
+                                        SetExpandedPacketState(packetKey, newExpanded);
+                                        Repaint();
+                                    }
+
+                                    // Show packet data if expanded
+                                    if (isExpanded)
+                                    {
+                                        EditorGUILayout.BeginVertical();
+                                        EditorGUILayout.TextArea(GetRpcOrBroadcastDataString(broadcast.data, broadcast.type, default));
+                                        EditorGUILayout.EndVertical();
+                                    }
+
+                                    EditorGUILayout.EndVertical();
+                                    EditorGUILayout.EndHorizontal();
+                                }
+                                EditorGUI.indentLevel--;
+                            }
+                        }
+                        EditorGUI.indentLevel--;
+                    }
+                    EditorGUILayout.EndVertical();
                 }
 
                 // Draw Forwarded Bytes
                 if (sample.forwardedBytes.Count > 0)
                 {
-                    EditorGUILayout.LabelField("Forwarded Bytes", EditorStyles.boldLabel);
-                    EditorGUI.indentLevel++;
-                    int totalBytes = sample.forwardedBytes.Sum();
-                    EditorGUILayout.LabelField($"Total: {FormatBytes(totalBytes)}");
-                    EditorGUILayout.LabelField($"Count: {sample.forwardedBytes.Count} packets");
-                    EditorGUI.indentLevel--;
+                    Color originalBgColor = GUI.backgroundColor;
+                    GUI.backgroundColor = new Color(0.9f, 0.3f, 0.9f, 0.2f);
+                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                    GUI.backgroundColor = originalBgColor;
+
+                    var headerStyle = new GUIStyle(EditorStyles.foldout);
+                    Color headerColor = new Color(0.8f, 0.2f, 0.8f, 1f);
+                    headerStyle.normal.textColor = headerColor;
+                    headerStyle.onNormal.textColor = headerColor;
+                    headerStyle.focused.textColor = headerColor;
+                    headerStyle.onFocused.textColor = headerColor;
+                    headerStyle.active.textColor = headerColor;
+                    headerStyle.onActive.textColor = headerColor;
+                    headerStyle.fontStyle = FontStyle.Bold;
+                    bool sectionExpanded = EditorGUILayout.Foldout(GetFoldoutState("section_forwarded_bytes", true), "Forwarded Bytes", true, headerStyle);
+                    SetFoldoutState("section_forwarded_bytes", sectionExpanded);
+
+                    if (sectionExpanded)
+                    {
+                        EditorGUI.indentLevel++;
+                        int totalBytes = sample.forwardedBytes.Sum();
+                        EditorGUILayout.LabelField($"Total: {FormatBytes(totalBytes)}");
+                        EditorGUILayout.LabelField($"Count: {sample.forwardedBytes.Count} packets");
+                        EditorGUI.indentLevel--;
+                    }
+                    EditorGUILayout.EndVertical();
                 }
 
+                EditorGUILayout.EndVertical();
                 EditorGUILayout.EndScrollView();
             }
             catch
             {
+                // Make sure to close all layout groups in case of exception
+                EditorGUILayout.EndVertical();
                 EditorGUILayout.EndScrollView();
             }
 
@@ -586,15 +807,7 @@ namespace PurrNet.Profiler.Editor
                 EditorStyles.helpBox;
 
             EditorGUILayout.BeginVertical(boxStyle);
-
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Sample", EditorStyles.boldLabel);
-            if (GUILayout.Button("View Details", GUILayout.Width(100)))
-            {
-                selectedSampleIndex = index;
-                Repaint();
-            }
-            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.LabelField("Overview", EditorStyles.boldLabel);
 
             // Draw summary
             EditorGUILayout.BeginHorizontal();
@@ -606,6 +819,131 @@ namespace PurrNet.Profiler.Editor
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
         }
+
+        #endregion
+
+        #region Helper Methods
+
+        private string FormatBytes(float bytes)
+        {
+            if (bytes < 1024)
+                return $"{bytes:F0}B";
+            else if (bytes < 1024 * 1024)
+                return $"{bytes / 1024:F1}KB";
+            else if (bytes < 1024 * 1024 * 1024)
+                return $"{bytes / (1024 * 1024):F1}MB";
+            else
+                return $"{bytes / (1024 * 1024 * 1024):F1}GB";
+        }
+
+        // Helper method to get foldout state
+        private bool GetFoldoutState(string key, bool defaultValue = false)
+        {
+            if (!foldoutStates.ContainsKey(key))
+                foldoutStates[key] = defaultValue;
+            return foldoutStates[key];
+        }
+
+        // Helper method to set foldout state
+        private void SetFoldoutState(string key, bool value)
+        {
+            foldoutStates[key] = value;
+        }
+
+        // Helper method to get expanded packet state
+        private bool GetExpandedPacketState(string key)
+        {
+            if (expandedPacketStates.TryAdd(key, false))
+                return false;
+            return expandedPacketStates[key];
+        }
+
+        // Helper method to set expanded packet state
+        private void SetExpandedPacketState(string key, bool value)
+        {
+            expandedPacketStates[key] = value;
+        }
+
+        /// <summary>
+        /// Provides detailed information about RPC or broadcast packet data
+        /// </summary>
+        /// <param name="packer">The BitPacker containing the packet data</param>
+        /// <param name="type">The type of the RPC or broadcast</param>
+        /// <param name="rpcType">The type of RPC (e.g., TargetRPC)</param>
+        /// <param name="method">The method name (for RPCs)</param>
+        /// <returns>A detailed string representation of the packet data</returns>
+        private static string GetRpcOrBroadcastDataString(BitPacker packer, Type type, RPCType rpcType, string method = null)
+        {
+            if (packer == null || packer.length == 0)
+                return "Empty packet";
+
+            int oldPos = packer.positionInBits;
+            packer.ResetPositionAndMode(true);
+
+            if (!string.IsNullOrEmpty(method))
+            {
+                var rpc = PrintRPC(type, packer, method, rpcType);
+                packer.SetBitPosition(oldPos);
+                return rpc;
+            }
+
+            var brod = PrintBroadcast(type, packer);
+            packer.SetBitPosition(oldPos);
+            return brod;
+        }
+
+        static readonly Dictionary<Type, object> _deserializedObjects = new Dictionary<Type, object>();
+
+        static bool ShouldIgnore(RPCType rpcType, Type paramType, int index, int count)
+        {
+            if (index == count - 1 && paramType == typeof(RPCInfo))
+                return true;
+
+            if (index == 0 && rpcType == RPCType.TargetRPC && paramType == typeof(PlayerID))
+                return true;
+
+            return false;
+        }
+
+        private static string PrintRPC(Type type, BitPacker tempPacker, string methodName, RPCType rpcType)
+        {
+            var method = type.GetMethod(methodName);
+
+            if (method == null)
+                return $"Failed to find method {methodName} in type {type.Name}";
+
+            var resutl = new JObject();
+            var parameters = method.GetParameters();
+
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                var param = parameters[i];
+                var paramType = param.ParameterType;
+                var paramName = param.Name;
+
+                if (ShouldIgnore(rpcType, paramType, i, parameters.Length))
+                    continue;
+
+                object obj = _deserializedObjects.GetValueOrDefault(paramType);
+                Packer.Read(tempPacker, paramType, ref obj);
+                _deserializedObjects[paramType] = obj;
+
+                resutl.Add(paramName, JToken.FromObject(obj));
+            }
+
+            return resutl.ToString(Formatting.Indented);
+        }
+
+        private static string PrintBroadcast(Type type, BitPacker tempPacker)
+        {
+            var typeIdx = default(PackedUInt);
+            object obj = _deserializedObjects.GetValueOrDefault(type);
+            Packer<PackedUInt>.Read(tempPacker, ref typeIdx);
+            Packer.Read(tempPacker, type, ref obj);
+            _deserializedObjects[type] = obj;
+            return JsonConvert.SerializeObject(obj, Formatting.Indented);
+        }
+
+        #endregion
     }
 }
-#endif

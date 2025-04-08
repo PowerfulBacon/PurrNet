@@ -274,7 +274,7 @@ namespace PurrNet
                         break;
 
 #if UNITY_EDITOR
-                    Statistics.SentRPC(_myType, signature.rpcName, packet.data.segment, this);
+                    Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
 #endif
                     SendToServer(packet, signature.channel);
                     break;
@@ -285,7 +285,7 @@ namespace PurrNet
                     else
                     {
 #if UNITY_EDITOR
-                        Statistics.SentRPC(_myType, signature.rpcName, packet.data.segment, this);
+                        Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
 #endif
                         SendToServer(packet, signature.channel);
                     }
@@ -293,7 +293,7 @@ namespace PurrNet
                 }
                 case RPCType.TargetRPC:
 #if UNITY_EDITOR
-                    Statistics.SentRPC(_myType, signature.rpcName, packet.data.segment, this);
+                    Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
 #endif
                     if (isServer)
                         SendToTarget(signature.targetPlayer!.Value, packet, signature.channel);
@@ -317,7 +317,7 @@ namespace PurrNet
                 if (!signature.excludeOwner || IsNotOwnerPredicate(player))
                 {
 #if UNITY_EDITOR
-                    Statistics.SentRPC(_myType, signature.rpcName, packet.data.segment, this);
+                    Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
 #endif
                     return true;
                 }
@@ -331,7 +331,7 @@ namespace PurrNet
         {
 #if UNITY_EDITOR
             _myType ??= GetType();
-            Statistics.ReceivedRPC(_myType, signature.rpcName, data.rpcData.segment, this);
+            Statistics.ReceivedRPC(_myType, signature.type, signature.rpcName, data.rpcData.segment, this);
 #endif
             return ValidateIncomingRPC(info, signature, data, asServer);
         }

@@ -22,6 +22,7 @@ namespace PurrNet.Transports
         Disconnecting
     }
 
+    [Serializable]
     public readonly struct ByteData : IEquatable<ByteData>
     {
         public readonly byte[] data;

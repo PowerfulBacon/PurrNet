@@ -3,7 +3,7 @@ using PurrNet.Packing;
 
 namespace PurrNet.Profiler
 {
-    public readonly struct BroadcastSample : IDisposable
+    public readonly struct BroadcastSample : IDisposable, IEquatable<BroadcastSample>
     {
         public readonly Type type;
         public readonly BitPacker data;
@@ -18,6 +18,21 @@ namespace PurrNet.Profiler
         public void Dispose()
         {
             data?.Dispose();
+        }
+
+        public bool Equals(BroadcastSample other)
+        {
+            return type == other.type && Equals(data, other.data);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is BroadcastSample other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(type, data);
         }
     }
 }

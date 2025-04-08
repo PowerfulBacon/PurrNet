@@ -72,7 +72,7 @@ namespace PurrNet.Modules
         public static ByteData GetImmediateData(object data)
         {
             using var stream = BitPackerPool.Get();
-            Packer<uint>.Write(stream, Hasher.GetStableHashU32(data.GetType()));
+            Packer<PackedUInt>.Write(stream, Hasher.GetStableHashU32(data.GetType()));
             Packer.Write(stream, data);
             return stream.ToByteData();
         }
@@ -82,7 +82,7 @@ namespace PurrNet.Modules
             using var stream = BitPackerPool.Get();
             var typeId = Hasher.GetStableHashU32<T>();
 
-            Packer<uint>.Write(stream, typeId);
+            Packer<PackedUInt>.Write(stream, typeId);
             Packer<T>.Write(stream, data);
 
             return stream.ToByteData();
@@ -189,9 +189,9 @@ namespace PurrNet.Modules
 
             using var stream = BitPackerPool.Get(data);
 
-            uint typeId = default;
+            PackedUInt typeId = default;
 
-            Packer<uint>.Read(stream, ref typeId);
+            Packer<PackedUInt>.Read(stream, ref typeId);
 
             if (!Hasher.TryGetType(typeId, out var typeInfo))
             {

@@ -3,6 +3,7 @@ using PurrNet.Packing;
 
 namespace PurrNet
 {
+    [Serializable]
     public readonly struct PlayerID : IPackedAuto, IEquatable<PlayerID>
     {
         private ushort _id { get; }

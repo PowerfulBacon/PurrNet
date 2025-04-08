@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PurrNet.Profiler
 {
@@ -13,6 +14,25 @@ namespace PurrNet.Profiler
         public static event Action onSampleEnded;
 
         public static bool paused;
+
+        public static string GetFriendlyTypeName(this Type type)
+        {
+            if (!type.IsGenericType)
+                return type.Name;
+
+            var genericArguments = type.GetGenericArguments();
+            var genericTypeName = type.Name;
+
+            // Remove the `n from the generic type name
+            int backtickIndex = genericTypeName.IndexOf('`');
+            if (backtickIndex > 0)
+                genericTypeName = genericTypeName.Substring(0, backtickIndex);
+
+            // Build the generic type name with parameters
+            return genericTypeName + "<" +
+                   string.Join(", ", genericArguments.Select(GetFriendlyTypeName)) +
+                   ">";
+        }
 
         public static void ReceivedBroadcast(Type type, ArraySegment<byte> data)
         {
@@ -32,16 +52,16 @@ namespace PurrNet.Profiler
             _currentSample.forwardedBytes.Add(bytesSent);
         }
 
-        public static void ReceivedRPC(Type type, string method, ArraySegment<byte> data, UnityEngine.Object context)
+        public static void ReceivedRPC(Type type, RPCType rpcType, string method, ArraySegment<byte> data, UnityEngine.Object context)
         {
             if (paused) return;
-            _currentSample.receivedRpcs.Add(new RpcsSample(type, method, data, context));
+            _currentSample.receivedRpcs.Add(new RpcsSample(type, rpcType, method, data, context));
         }
 
-        public static void SentRPC(Type type, string method, ArraySegment<byte> data, UnityEngine.Object context)
+        public static void SentRPC(Type type, RPCType rpcType, string method, ArraySegment<byte> data, UnityEngine.Object context)
         {
             if (paused) return;
-            _currentSample.sentRpcs.Add(new RpcsSample(type, method, data, context));
+            _currentSample.sentRpcs.Add(new RpcsSample(type, rpcType, method, data, context));
         }
 
         public static void MarkEndOfSampling()

@@ -220,7 +220,7 @@ namespace PurrNet
         {
 #if UNITY_EDITOR
             _myType ??= GetType();
-            Statistics.ReceivedRPC(_myType, signature.rpcName, data.rpcData.segment, parent);
+            Statistics.ReceivedRPC(_myType, signature.type, signature.rpcName, data.rpcData.segment, parent);
 #endif
             return parent && parent.ValidateIncomingRPC(info, signature, data, asServer);
         }
