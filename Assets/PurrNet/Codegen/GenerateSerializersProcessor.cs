@@ -114,9 +114,23 @@ namespace PurrNet.Codegen
             if (resolvedType.IsInterface)
                 return;
 
+            var bitStreamType = assembly.MainModule.GetTypeDefinition(typeof(BitPacker)).Import(assembly.MainModule);
+            var mainmodule = assembly.MainModule;
+
+
+            if (hashOnly)
+            {
+                assembly.MainModule.Types.Add(serializerClass);
+                HandleHashOnly(assembly, type, serializerClass, isEditor);
+                return;
+            }
+
             bool isNetworkIdentity = PostProcessor.InheritsFrom(resolvedType, typeof(NetworkIdentity).FullName);
             bool isNetworkModule = PostProcessor.InheritsFrom(resolvedType, typeof(NetworkModule).FullName);
             bool hasINetworkModule = HasInterface(resolvedType, typeof(INetworkModule));
+
+            if (hasINetworkModule)
+                return;
 
             if (!isNetworkIdentity && !isNetworkModule &&
                 PostProcessor.InheritsFrom(resolvedType, typeof(Object).FullName) &&
@@ -125,19 +139,7 @@ namespace PurrNet.Codegen
                 !HasInterface(resolvedType, typeof(IPackedSimple)))
                 return;
 
-            if (hasINetworkModule)
-                return;
-
-            var bitStreamType = assembly.MainModule.GetTypeDefinition(typeof(BitPacker)).Import(assembly.MainModule);
-            var mainmodule = assembly.MainModule;
-
             assembly.MainModule.Types.Add(serializerClass);
-
-            if (hashOnly)
-            {
-                HandleHashOnly(assembly, type, serializerClass, isEditor);
-                return;
-            }
 
             if (IsGeneric(type, out var genericT))
             {
