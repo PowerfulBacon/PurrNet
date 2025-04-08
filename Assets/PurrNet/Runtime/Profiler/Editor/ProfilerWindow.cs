@@ -788,7 +788,6 @@ namespace PurrNet.Profiler.Editor
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
                 // Make sure to close all layout groups in case of exception
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.EndScrollView();
@@ -947,7 +946,8 @@ namespace PurrNet.Profiler.Editor
             Packer<PackedUInt>.Read(tempPacker, ref typeIdx);
             Packer.Read(tempPacker, type, ref obj);
             _deserializedObjects[type] = obj;
-            return JsonConvert.SerializeObject(obj, Formatting.Indented, settings);
+            var res = JsonConvert.SerializeObject(obj, Formatting.Indented, settings);
+            return $"{obj}\n\n{res}";
         }
 
         #endregion

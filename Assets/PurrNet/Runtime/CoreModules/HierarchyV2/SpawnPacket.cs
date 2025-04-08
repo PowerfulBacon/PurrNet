@@ -22,6 +22,11 @@ namespace PurrNet.Modules
 
             ListPool<SpawnPacket>.Destroy(spawnPackets);
         }
+
+        public override string ToString()
+        {
+            return $"SpawnPacketBatch: {{ spawnPackets: {spawnPackets.Count} }}";
+        }
     }
 
     public struct SpawnPacket : IPackedAuto, IDisposable
