@@ -61,6 +61,8 @@ namespace PurrNet.Profiler.Editor
 
         void OnEnable()
         {
+            Statistics.inspecting += 1;
+
             // Subscribe to the onSampleEnded event to refresh the GUI
             Statistics.onSampleEnded += OnSampleEnded;
 
@@ -70,6 +72,8 @@ namespace PurrNet.Profiler.Editor
 
         void OnDisable()
         {
+            Statistics.inspecting -= 1;
+
             // Unsubscribe from the event when the window is closed
             Statistics.onSampleEnded -= OnSampleEnded;
 

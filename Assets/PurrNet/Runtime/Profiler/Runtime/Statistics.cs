@@ -15,6 +15,10 @@ namespace PurrNet.Profiler
 
         public static bool paused;
 
+        public static int inspecting;
+
+        static bool _shouldTrack => !paused && inspecting >= 0;
+
         public static string GetFriendlyTypeName(this Type type)
         {
             if (!type.IsGenericType)
@@ -36,37 +40,37 @@ namespace PurrNet.Profiler
 
         public static void ReceivedBroadcast(Type type, ArraySegment<byte> data)
         {
-            if (paused) return;
+            if (!_shouldTrack) return;
             _currentSample.receivedBroadcasts.Add(new BroadcastSample(type, data));
         }
 
         public static void SentBroadcast(Type type, ArraySegment<byte> data)
         {
-            if (paused) return;
+            if (!_shouldTrack) return;
             _currentSample.sentBroadcasts.Add(new BroadcastSample(type, data));
         }
 
         public static void ForwardedBytes(int bytesSent)
         {
-            if (paused) return;
+            if (!_shouldTrack) return;
             _currentSample.forwardedBytes.Add(bytesSent);
         }
 
         public static void ReceivedRPC(Type type, RPCType rpcType, string method, ArraySegment<byte> data, UnityEngine.Object context)
         {
-            if (paused) return;
+            if (!_shouldTrack) return;
             _currentSample.receivedRpcs.Add(new RpcsSample(type, rpcType, method, data, context));
         }
 
         public static void SentRPC(Type type, RPCType rpcType, string method, ArraySegment<byte> data, UnityEngine.Object context)
         {
-            if (paused) return;
+            if (!_shouldTrack) return;
             _currentSample.sentRpcs.Add(new RpcsSample(type, rpcType, method, data, context));
         }
 
         public static void MarkEndOfSampling()
         {
-            if (paused) return;
+            if (!_shouldTrack) return;
 
             if (samples.Count >= MAX_SAMPLES)
             {
