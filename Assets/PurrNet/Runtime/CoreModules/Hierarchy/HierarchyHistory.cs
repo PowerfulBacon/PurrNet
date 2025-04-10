@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using PurrNet.Logging;
 using PurrNet.Pooling;
 
 namespace PurrNet.Modules

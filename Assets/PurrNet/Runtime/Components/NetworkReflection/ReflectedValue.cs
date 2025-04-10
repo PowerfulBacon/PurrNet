@@ -1,6 +1,5 @@
 ﻿using System;
 using PurrNet.Logging;
-using UnityEngine;
 
 namespace PurrNet
 {

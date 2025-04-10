@@ -267,8 +267,8 @@ namespace PurrNet.Profiler.Editor
                     }
 
                     // Determine if this bar is selected or hovered
-                    bool isSelected = (i == selectedSampleIndex);
-                    bool isHovered = (i == hoveredSampleIndex);
+                    bool isSelected = i == selectedSampleIndex;
+                    bool isHovered = i == hoveredSampleIndex;
 
                     // Draw a highlight for selected or hovered bars
                     if (isSelected || isHovered)
@@ -281,7 +281,7 @@ namespace PurrNet.Profiler.Editor
                     }
 
                     // Draw received RPCs
-                    float height = (receivedRpcData[i] / maxValue) * graphRect.height;
+                    float height = receivedRpcData[i] / maxValue * graphRect.height;
                     EditorGUI.DrawRect(
                         new Rect(x, currentY - height, barWidth, height),
                         new Color(0.2f, 0.8f, 0.2f, 0.8f)
@@ -289,7 +289,7 @@ namespace PurrNet.Profiler.Editor
                     currentY -= height;
 
                     // Draw sent RPCs
-                    height = (sentRpcData[i] / maxValue) * graphRect.height;
+                    height = sentRpcData[i] / maxValue * graphRect.height;
                     EditorGUI.DrawRect(
                         new Rect(x, currentY - height, barWidth, height),
                         new Color(0.8f, 0.2f, 0.2f, 0.8f)
@@ -297,7 +297,7 @@ namespace PurrNet.Profiler.Editor
                     currentY -= height;
 
                     // Draw received broadcasts
-                    height = (receivedBroadcastData[i] / maxValue) * graphRect.height;
+                    height = receivedBroadcastData[i] / maxValue * graphRect.height;
                     EditorGUI.DrawRect(
                         new Rect(x, currentY - height, barWidth, height),
                         new Color(0.2f, 0.2f, 0.8f, 0.8f)
@@ -305,7 +305,7 @@ namespace PurrNet.Profiler.Editor
                     currentY -= height;
 
                     // Draw sent broadcasts
-                    height = (sentBroadcastData[i] / maxValue) * graphRect.height;
+                    height = sentBroadcastData[i] / maxValue * graphRect.height;
                     EditorGUI.DrawRect(
                         new Rect(x, currentY - height, barWidth, height),
                         new Color(0.8f, 0.8f, 0.2f, 0.8f)
@@ -313,7 +313,7 @@ namespace PurrNet.Profiler.Editor
                     currentY -= height;
 
                     // Draw forwarded bytes
-                    height = (forwardedBytesData[i] / maxValue) * graphRect.height;
+                    height = forwardedBytesData[i] / maxValue * graphRect.height;
                     EditorGUI.DrawRect(
                         new Rect(x, currentY - height, barWidth, height),
                         new Color(0.8f, 0.2f, 0.8f, 0.8f)
@@ -803,7 +803,7 @@ namespace PurrNet.Profiler.Editor
         private void DrawSample(TickSample sample, int index)
         {
             // Determine if this sample is selected
-            bool isSelected = (index == selectedSampleIndex);
+            bool isSelected = index == selectedSampleIndex;
 
             // Use a different style for the selected sample
             var boxStyle = isSelected ?

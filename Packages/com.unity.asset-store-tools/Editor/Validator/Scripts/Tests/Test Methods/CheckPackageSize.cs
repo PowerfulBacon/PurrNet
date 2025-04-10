@@ -1,8 +1,6 @@
 using AssetStoreTools.Uploader;
 using AssetStoreTools.Validator.Data;
 using AssetStoreTools.Validator.TestDefinitions;
-using AssetStoreTools.Validator.TestMethods.Utility;
-using System.Diagnostics;
 using System.IO;
 
 namespace AssetStoreTools.Validator.TestMethods

@@ -2,7 +2,6 @@ using AssetStoreTools.Validator.Data;
 using AssetStoreTools.Validator.TestDefinitions;
 using AssetStoreTools.Validator.TestMethods.Utility;
 using System.Collections.Generic;
-using System.Text;
 using UnityEditor;
 using UnityEngine;
 

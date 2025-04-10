@@ -1,6 +1,5 @@
 ﻿using AssetStoreTools.Validator.Data;
 using AssetStoreTools.Validator.TestDefinitions;
-using System;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;

@@ -1,5 +1,4 @@
 using PurrNet;
-using PurrNet.Modules;
 using UnityEngine;
 
 public class SpawnOnServerLoadScene : PurrMonoBehaviour

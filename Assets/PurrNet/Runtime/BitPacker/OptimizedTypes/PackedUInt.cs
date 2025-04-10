@@ -1,7 +1,5 @@
 using System;
-using PurrNet.Logging;
 using PurrNet.Modules;
-using UnityEngine;
 
 namespace PurrNet.Packing
 {
