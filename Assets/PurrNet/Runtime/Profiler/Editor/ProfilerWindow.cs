@@ -17,7 +17,6 @@ namespace PurrNet.Profiler.Editor
         #region Fields
 
         // Scroll positions
-        private Vector2 scrollPosition;
         private Vector2 graphScrollPosition;
         private Vector2 detailsScrollPosition;
 
@@ -36,15 +35,22 @@ namespace PurrNet.Profiler.Editor
         private float resizeStartHeight;
 
         // Graph data
-        private readonly List<float> receivedRpcData = new List<float>();
-        private readonly List<float> sentRpcData = new List<float>();
-        private readonly List<float> receivedBroadcastData = new List<float>();
-        private readonly List<float> sentBroadcastData = new List<float>();
-        private readonly List<float> forwardedBytesData = new List<float>();
+        private readonly List<float> receivedRpcData = new List<float>(100);
+        private readonly List<float> sentRpcData = new List<float>(100);
+        private readonly List<float> receivedBroadcastData = new List<float>(100);
+        private readonly List<float> sentBroadcastData = new List<float>(100);
+        private readonly List<float> forwardedBytesData = new List<float>(100);
 
         // UI state
-        private readonly Dictionary<string, bool> foldoutStates = new Dictionary<string, bool>();
-        private readonly Dictionary<string, bool> expandedPacketStates = new Dictionary<string, bool>();
+        private readonly Dictionary<string, bool> foldoutStates = new Dictionary<string, bool>(32);
+        private readonly Dictionary<string, bool> expandedPacketStates = new Dictionary<string, bool>(32);
+
+        // Cache for the most recently used RPC data
+        private string lastRpcDataString;
+        private Type lastRpcType;
+        private string lastRpcMethod;
+        private RPCType lastRpcRpcType;
+        private BitPacker lastRpcPacker;
 
         #endregion
 
@@ -384,8 +390,15 @@ namespace PurrNet.Profiler.Editor
             else if (Event.current.type == EventType.MouseDrag && isResizingGraph)
             {
                 float deltaY = Event.current.mousePosition.y - resizeStartY;
-                graphHeight = Mathf.Clamp(resizeStartHeight + deltaY, minGraphHeight, maxGraphHeight);
-                Repaint();
+                float newHeight = Mathf.Clamp(resizeStartHeight + deltaY, minGraphHeight, maxGraphHeight);
+                
+                // Only repaint if the height actually changed
+                if (newHeight != graphHeight)
+                {
+                    graphHeight = newHeight;
+                    Repaint();
+                }
+                
                 Event.current.Use();
             }
 
@@ -875,24 +888,39 @@ namespace PurrNet.Profiler.Editor
         /// <param name="rpcType">The type of RPC (e.g., TargetRPC)</param>
         /// <param name="method">The method name (for RPCs)</param>
         /// <returns>A detailed string representation of the packet data</returns>
-        private static string GetRpcOrBroadcastDataString(BitPacker packer, Type type, RPCType rpcType, string method = null)
+        private string GetRpcOrBroadcastDataString(BitPacker packer, Type type, RPCType rpcType, string method = null)
         {
             if (packer == null || packer.length == 0)
                 return "Empty packet";
 
+            // Check if we can use cached result
+            if (lastRpcPacker == packer && lastRpcType == type && lastRpcMethod == method && lastRpcRpcType == rpcType)
+            {
+                return lastRpcDataString;
+            }
+
             int oldPos = packer.positionInBits;
             packer.ResetPositionAndMode(true);
 
+            string result;
             if (!string.IsNullOrEmpty(method))
             {
-                var rpc = PrintRPC(type, packer, method, rpcType);
-                packer.SetBitPosition(oldPos);
-                return rpc;
+                result = PrintRPC(type, packer, method, rpcType);
+            }
+            else
+            {
+                result = PrintBroadcast(type, packer);
             }
 
-            var brod = PrintBroadcast(type, packer);
+            // Cache the result
+            lastRpcPacker = packer;
+            lastRpcType = type;
+            lastRpcMethod = method;
+            lastRpcRpcType = rpcType;
+            lastRpcDataString = result;
+
             packer.SetBitPosition(oldPos);
-            return brod;
+            return result;
         }
 
         static readonly Dictionary<Type, object> _deserializedObjects = new Dictionary<Type, object>();
