@@ -136,7 +136,9 @@ namespace PurrNet.Codegen
                 !HasInterface(resolvedType, typeof(IPacked)) &&
                 !HasInterface(resolvedType, typeof(IPackedAuto)) &&
                 !HasInterface(resolvedType, typeof(IPackedSimple)))
+            {
                 return;
+            }
 
             assembly.MainModule.Types.Add(serializerClass);
 
@@ -551,18 +553,21 @@ namespace PurrNet.Codegen
             if (type.IsEnum)
             {
                 HandleEnums(isWriting, method, serialize, type, il, packerType, mainmodule);
+                il.Append(ret);
                 return;
             }
 
             if (HasInterface(type, typeof(IPacked)))
             {
                 HandleIData(isWriting, type, il, mainmodule, valueArg);
+                il.Append(ret);
                 return;
             }
 
             if (HasInterface(type, typeof(IPackedSimple)))
             {
                 HandleIDataSimple(isWriting, type, il, mainmodule, valueArg);
+                il.Append(ret);
                 return;
             }
 
