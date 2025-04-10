@@ -339,6 +339,9 @@ namespace PurrNet
 
         private void FixedUpdate()
         {
+            if (!isSpawned)
+                return;
+            
             bool isNotController = !IsController(_ownerAuth);
 
             if (_rb && isNotController)
