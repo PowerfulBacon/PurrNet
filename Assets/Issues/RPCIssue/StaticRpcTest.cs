@@ -1,12 +1,20 @@
+using JetBrains.Annotations;
 using PurrNet;
 using TriInspector;
 using UnityEngine;
+using CompressionLevel = PurrNet.CompressionLevel;
 
 public class StaticRpcTest : NetworkIdentity
 {
-    [ObserversRpc(runLocally: true), Button("SendObserverRpc")]
-    public void SendObserverRpc()
+    [Button("SendObserverRpc"), UsedImplicitly]
+    public void SendRpc()
     {
-        Debug.Log("SendObserverRpc");
+        SendObserverRpc("Test with a bunch of data, this is a test, for testing and testing purposes and testing only");
+    }
+
+    [ObserversRpc(runLocally: true, compressionLevel: CompressionLevel.Best)]
+    public void SendObserverRpc(string someData)
+    {
+        Debug.Log("SendObserverRpc "+ someData);
     }
 }
