@@ -1,10 +1,18 @@
+using System.Collections.Generic;
 using System.Reflection;
+using PurrNet.Contributors;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace PurrNet.Editor
 {
+    struct Contributor
+    {
+        public string name;
+        public string url;
+    }
+
     [CustomEditor(typeof(NetworkIdentity), true)]
     [CanEditMultipleObjects]
 #if TRI_INSPECTOR_PACKAGE
@@ -17,6 +25,7 @@ namespace PurrNet.Editor
     {
         private SerializedProperty _networkRules;
         private SerializedProperty _visitiblityRules;
+        private readonly List<Contributor> _contributors = new ();
 
 #if TRI_INSPECTOR_PACKAGE || ODIN_INSPECTOR
         protected override void OnEnable()
@@ -35,6 +44,26 @@ namespace PurrNet.Editor
             catch
             {
                 // ignored
+            }
+
+            if (target)
+            {
+                var targetType = target.GetType();
+                var attributes = targetType.GetCustomAttributes(typeof(ContributorAttribute), true);
+
+                for (var i = 0; i < attributes.Length; i++)
+                {
+                    var attr = (ContributorAttribute)attributes[i];
+
+                    if (attr == null)
+                        continue;
+
+                    _contributors.Add(new Contributor
+                    {
+                        name = attr.name,
+                        url = attr.url
+                    });
+                }
             }
         }
 
@@ -55,9 +84,32 @@ namespace PurrNet.Editor
             base.OnInspectorGUI();
 
             DrawIdentityInspector();
+            GUI.enabled = true;
             DrawPurrButtons(identity);
+            DrawContributors();
 
             serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawContributors()
+        {
+            if (_contributors.Count == 0)
+                return;
+
+            GUILayout.Space(5);
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Contributors");
+            GUILayout.FlexibleSpace();
+            foreach (var contributor in _contributors)
+            {
+                if (string.IsNullOrEmpty(contributor.url))
+                    continue;
+
+                GUILayout.Label("@", GUILayout.ExpandWidth(false));
+                if (GUILayout.Button(contributor.name, EditorStyles.linkLabel, GUILayout.ExpandWidth(false)))
+                    Application.OpenURL(contributor.url);
+            }
+            EditorGUILayout.EndHorizontal();
         }
 
         protected void DrawIdentityInspector()
@@ -237,7 +289,7 @@ namespace PurrNet.Editor
 
             GUILayout.Space(5);
 
-            MethodInfo[] methods = targetIdentity.GetType().GetMethods(
+            var methods = targetIdentity.GetType().GetMethods(
                 BindingFlags.Instance |
                 BindingFlags.Static |
                 BindingFlags.Public |
@@ -245,7 +297,7 @@ namespace PurrNet.Editor
 
             bool foundAnyButtons = false;
 
-            foreach (MethodInfo method in methods)
+            foreach (var method in methods)
             {
                 var buttonAttr = method.GetCustomAttribute<PurrButtonAttribute>();
 
@@ -263,7 +315,7 @@ namespace PurrNet.Editor
 
                     if (GUILayout.Button(buttonName))
                     {
-                        ParameterInfo[] parameters = method.GetParameters();
+                        var parameters = method.GetParameters();
 
                         if (parameters.Length == 0)
                         {

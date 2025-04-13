@@ -38,6 +38,8 @@ namespace PurrNet
 
         [Tooltip("If owner disconnects, should the object despawn or stay in the scene?")]
         public bool despawnIfOwnerDisconnects;
+        [Tooltip("On disconnect, despawn all objects that were spawned during the session")]
+        public bool cleanupSpawnedObjects;
     }
 
     [Serializable]
@@ -60,6 +62,8 @@ namespace PurrNet
     public struct NetworkSceneRules
     {
         public bool removePlayerFromSceneOnDisconnect;
+        [Tooltip("On disconnect, unload all scenes that were loaded during the session and reload the starting scene")]
+        public bool cleanupScenesOnDisconnect;
     }
 
     [Serializable]
@@ -89,7 +93,8 @@ namespace PurrNet
             spawnAuth = ConnectionAuth.Server,
             defaultOwner = DefaultOwner.SpawnerIfClientOnly,
             propagateOwnershipByDefault = true,
-            despawnIfOwnerDisconnects = true
+            despawnIfOwnerDisconnects = true,
+            cleanupSpawnedObjects = true
         };
 
         [SerializeField] private RpcRules _defaultRpcRules = new RpcRules()
@@ -113,7 +118,8 @@ namespace PurrNet
 
         [SerializeField] private NetworkSceneRules _defaultSceneRules = new NetworkSceneRules()
         {
-            removePlayerFromSceneOnDisconnect = false
+            removePlayerFromSceneOnDisconnect = false,
+            cleanupScenesOnDisconnect = true
         };
 
         [SerializeField] private NetworkIdentityRules _defaultIdentityRules = new NetworkIdentityRules()
@@ -227,6 +233,16 @@ namespace PurrNet
         public float GetSyncedTickUpdateInterval()
         {
             return _defaultMiscRules.syncedTickUpdateInterval;
+        }
+
+        public bool ShouldCleanupSpawnedObjectsOnDisconnect()
+        {
+            return _defaultSpawnRules.cleanupSpawnedObjects;
+        }
+
+        public bool ShouldCleanupScenesOnDisconnect()
+        {
+            return _defaultSceneRules.cleanupScenesOnDisconnect;
         }
     }
 }

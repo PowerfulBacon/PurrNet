@@ -37,7 +37,7 @@ namespace PurrNet.Packing
 
         public void Advance(int count)
         {
-            packer.AdvanceBits(count * 9);
+            packer.AdvanceBits(count * 8);
         }
 
         public Memory<byte> GetMemory(int sizeHint = 0)
@@ -92,6 +92,8 @@ namespace PurrNet.Packing
         public bool isReading => _isReading;
 
         public bool isWriting => !_isReading;
+
+        public int Length => length;
 
         /// <summary>
         /// Pickles the current buffer into the provided BitPacker.

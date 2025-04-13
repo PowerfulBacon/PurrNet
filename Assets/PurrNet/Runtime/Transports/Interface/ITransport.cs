@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using PurrNet.Packing;
 
 namespace PurrNet.Transports
 {
@@ -23,7 +22,8 @@ namespace PurrNet.Transports
         Disconnecting
     }
 
-    public readonly struct ByteData
+    [Serializable]
+    public readonly struct ByteData : IEquatable<ByteData>
     {
         public readonly byte[] data;
         public readonly int length;
@@ -49,12 +49,51 @@ namespace PurrNet.Transports
             this.length = length;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj is not ByteData other)
+                return false;
+
+            if (length != other.length)
+                return false;
+
+            for (int i = 0; i < length; i++)
+            {
+                if (data[i + offset] != other.data[i + other.offset])
+                    return false;
+            }
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 17;
+            for (int i = 0; i < length; i++)
+                hash = hash * 31 + data[i + offset];
+            return hash;
+        }
+
         public override string ToString()
         {
             string str = $"LENGTH: {length} DATA: ";
             for (int i = 0; i < length; i++)
                 str += data[i + offset].ToString("X2") + " ";
             return str;
+        }
+
+        public bool Equals(ByteData other)
+        {
+            if (length != other.length)
+                return false;
+
+            for (int i = 0; i < length; i++)
+            {
+                if (data[i + offset] != other.data[i + other.offset])
+                    return false;
+            }
+
+            return true;
         }
     }
 

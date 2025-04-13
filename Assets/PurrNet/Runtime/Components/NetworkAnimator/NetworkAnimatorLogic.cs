@@ -136,13 +136,12 @@ namespace PurrNet
         {
             if (_ownerAuth)
             {
-                if (!isClient)
-                    ExecuteBatch(actions);
+                ExecuteBatch(actions);
                 ApplyActionsOnObservers(actions);
             }
         }
 
-        [ObserversRpc]
+        [ObserversRpc(excludeSender: true)]
         private void ApplyActionsOnObservers(NetAnimatorActionBatch actions)
         {
             if (IsController(_ownerAuth))

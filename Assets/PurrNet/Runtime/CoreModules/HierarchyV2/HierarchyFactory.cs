@@ -35,7 +35,9 @@ namespace PurrNet.Modules
 
         public event ObserverAction onObserverAdded;
 
-        // public event ObserverAction onObserverAdded;
+        public event ObserverAction onLateObserverAdded;
+
+        public event SpawnedAction onSentSpawnPacket;
 
         public void Enable(bool asServer)
         {
@@ -80,8 +82,10 @@ namespace PurrNet.Modules
 
             hierarchy.onEarlyIdentityAdded += OnEarlyIdentityAdded;
             hierarchy.onObserverAdded += OnObserverAdded;
+            hierarchy.onLateObserverAdded += OnLateObserverAdded;
             hierarchy.onIdentityAdded += OnIdentityAdded;
             hierarchy.onIdentityRemoved += OnIdentityRemoved;
+            hierarchy.onSentSpawnPacket += OnSentSpawnPacket;
 
             hierarchy.Enable();
 
@@ -89,14 +93,23 @@ namespace PurrNet.Modules
             _hierarchies.Add(scene, hierarchy);
         }
 
-        private void OnEarlyIdentityAdded(NetworkIdentity identity) => onEarlyIdentityAdded?.Invoke(identity);
+        private void OnSentSpawnPacket(PlayerID player, SceneID scene, NetworkID identity) =>
+            onSentSpawnPacket?.Invoke(player, scene, identity);
+
+        private void OnLateObserverAdded(PlayerID player, NetworkIdentity identity) =>
+            onLateObserverAdded?.Invoke(player, identity);
+
+        private void OnEarlyIdentityAdded(NetworkIdentity identity) =>
+            onEarlyIdentityAdded?.Invoke(identity);
 
         private void OnObserverAdded(PlayerID player, NetworkIdentity identity) =>
             onObserverAdded?.Invoke(player, identity);
 
-        private void OnIdentityAdded(NetworkIdentity identity) => onIdentityAdded?.Invoke(identity);
+        private void OnIdentityAdded(NetworkIdentity identity) =>
+            onIdentityAdded?.Invoke(identity);
 
-        private void OnIdentityRemoved(NetworkIdentity identity) => onIdentityRemoved?.Invoke(identity);
+        private void OnIdentityRemoved(NetworkIdentity identity) =>
+            onIdentityRemoved?.Invoke(identity);
 
         private void OnSceneUnloaded(SceneID scene, bool asserver)
         {
@@ -110,8 +123,10 @@ namespace PurrNet.Modules
 
             hierarchy.onEarlyIdentityAdded -= OnEarlyIdentityAdded;
             hierarchy.onObserverAdded -= OnObserverAdded;
+            hierarchy.onLateObserverAdded -= OnLateObserverAdded;
             hierarchy.onIdentityAdded -= OnIdentityAdded;
             hierarchy.onIdentityRemoved -= OnIdentityRemoved;
+            hierarchy.onSentSpawnPacket -= OnSentSpawnPacket;
 
             _rawHierarchies.Remove(hierarchy);
             _hierarchies.Remove(scene);

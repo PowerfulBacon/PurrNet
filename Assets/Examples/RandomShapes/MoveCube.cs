@@ -1,4 +1,3 @@
-using System;
 using PurrNet;
 using PurrNet.Logging;
 using UnityEngine;

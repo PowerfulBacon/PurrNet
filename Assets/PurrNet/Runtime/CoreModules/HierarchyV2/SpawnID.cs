@@ -1,13 +1,14 @@
 ﻿using System;
+using PurrNet.Packing;
 
 namespace PurrNet.Modules
 {
     public readonly struct SpawnID : IEquatable<SpawnID>
     {
-        readonly int packetIdx;
+        readonly PackedULong packetIdx;
         public readonly PlayerID player;
 
-        public SpawnID(int packetIdx, PlayerID player)
+        public SpawnID(PackedULong packetIdx, PlayerID player)
         {
             this.packetIdx = packetIdx;
             this.player = player;
@@ -26,6 +27,11 @@ namespace PurrNet.Modules
         public override int GetHashCode()
         {
             return HashCode.Combine(packetIdx, player);
+        }
+
+        public override string ToString()
+        {
+            return $"SpawnID: {{ packetIdx: {packetIdx}, player: {player} }}";
         }
     }
 }

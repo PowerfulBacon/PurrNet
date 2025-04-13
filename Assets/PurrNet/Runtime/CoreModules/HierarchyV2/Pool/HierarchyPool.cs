@@ -133,6 +133,7 @@ namespace PurrNet.Modules
         }
 
         static void PutBackInPoolFromNid(PoolPair pool, NetworkIdentity root, Transform safeParent,
+            // ReSharper disable once UnusedParameter.Local
             bool tagName = false)
         {
             var toDestroy = ListPool<GameObject>.Instantiate();
@@ -146,7 +147,10 @@ namespace PurrNet.Modules
 
             // save the objects that should not be despawned
             foreach (var real in realNodes)
-                real.transform.SetParent(safeParent, true);
+            {
+                if (real.isSpawned)
+                    real.transform.SetParent(safeParent, true);
+            }
 
             foreach (var child in virtualNodes)
             {
@@ -404,7 +408,7 @@ namespace PurrNet.Modules
             if (parentNid)
                 path = GetInvPath(parentNid.transform, transform).list.ToArray();
 
-            prototype = new GameObjectPrototype(transform.localPosition, transform.localRotation, parentID, path,
+            prototype = new GameObjectPrototype(transform.localPosition, transform.localRotation, transform.localScale, parentID, path,
                 framework, isDefaultParent ? transform.GetSiblingIndex() : null);
             return true;
         }
@@ -413,7 +417,7 @@ namespace PurrNet.Modules
         {
             var framework = new DisposableList<GameObjectFrameworkPiece>(16);
             if (!transform.TryGetComponent<NetworkIdentity>(out var rootId))
-                return new GameObjectPrototype(transform.localPosition, transform.localRotation, null, null, framework,
+                return new GameObjectPrototype(transform.localPosition, transform.localRotation, transform.localScale, null, null, framework,
                     null);
 
             bool isDefaultParent = transform.parent == rootId.defaultParent;
@@ -454,7 +458,7 @@ namespace PurrNet.Modules
             if (parentNid)
                 path = GetInvPath(parentNid.transform, transform).list.ToArray();
 
-            return new GameObjectPrototype(transform.localPosition, transform.localRotation, parentID, path, framework,
+            return new GameObjectPrototype(transform.localPosition, transform.localRotation, transform.localScale, parentID, path, framework,
                 isDefaultParent ? transform.GetSiblingIndex() : null);
         }
 

@@ -37,7 +37,7 @@ namespace PurrNet.Modules
             _playersManager.onPlayerJoined += OnPlayerJoined;
             _scenes.onSceneUnloaded += OnSceneUnloaded;
 
-            _hierarchyModule.onObserverAdded += OnObserverAdded;
+            _hierarchyModule.onSentSpawnPacket += OnObserverAdded;
             _hierarchyModule.onIdentityRemoved += OnIdentityRemoved;
         }
 
@@ -50,12 +50,15 @@ namespace PurrNet.Modules
             _playersManager.onPlayerJoined -= OnPlayerJoined;
             _scenes.onSceneUnloaded -= OnSceneUnloaded;
 
-            _hierarchyModule.onObserverAdded -= OnObserverAdded;
+            _hierarchyModule.onSentSpawnPacket -= OnObserverAdded;
             _hierarchyModule.onIdentityRemoved -= OnIdentityRemoved;
         }
 
-        private void OnObserverAdded(PlayerID player, NetworkIdentity identity)
+        private void OnObserverAdded(PlayerID player, SceneID scene, NetworkID id)
         {
+            if (!_hierarchyModule.TryGetIdentity(scene, id, out var identity))
+                return;
+
             SendAnyInstanceRPCs(player, identity);
             SendAnyChildRPCs(player, identity);
         }
@@ -769,13 +772,6 @@ namespace PurrNet.Modules
             // else PurrLogger.LogError($"Can't find identity with id {packet.networkId} in scene {packet.sceneId}.");
         }
 
-        static void Test()
-        {
-            var packer = BitPackerPool.Get();
-            var packet = new RPCPacket();
-            PreProcessRpc(ref packet.data, default, ref packer);
-        }
-
         [UsedByIL]
         public static void PreProcessRpc(ref ByteData rpcData, RPCSignature signature, ref BitPacker packer)
         {
@@ -784,7 +780,7 @@ namespace PurrNet.Modules
 
             var level = signature.compressionLevel switch
             {
-                CompressionLevel.None => LZ4Level.L00_FAST,
+                CompressionLevel.None => default,
                 CompressionLevel.Fast => LZ4Level.L00_FAST,
                 CompressionLevel.Balanced => LZ4Level.L06_HC,
                 CompressionLevel.Best => LZ4Level.L12_MAX,
@@ -793,7 +789,6 @@ namespace PurrNet.Modules
 
             var newPacker = packer.Pickle(level);
             rpcData = newPacker.ToByteData();
-
             packer.Dispose();
             packer = newPacker;
         }

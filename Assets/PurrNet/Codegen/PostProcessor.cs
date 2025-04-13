@@ -1718,7 +1718,9 @@ namespace PurrNet.Codegen
                             }
                         }
 
-                        if (GenerateSerializersProcessor.HasInterface(type, typeof(IPackedAuto)))
+                        if (GenerateSerializersProcessor.HasInterface(type, typeof(IPackedAuto)) ||
+                            GenerateSerializersProcessor.HasInterface(type, typeof(IPacked)) ||
+                            GenerateSerializersProcessor.HasInterface(type, typeof(IPackedSimple)))
                         {
                             typesToGenerateSerializer.Add(type);
                         }

@@ -300,14 +300,14 @@ namespace PurrNet
         /// Clears interpolation and teleports the transform to the target position, rotation and scale.
         /// Works on both owner and non-owner clients.
         /// </summary>
-        public void ClearInterpolation(Vector3 targetPos, Quaternion targetRot, Vector3 targetScale)
+        public void ClearInterpolation(Vector3? targetPos, Quaternion? targetRot, Vector3? targetScale)
         {
-            if (syncPosition)
-                _position.Teleport(targetPos);
-            if (syncRotation)
-                _rotation.Teleport(targetRot);
-            if (syncScale)
-                _scale.Teleport(targetScale);
+            if (syncPosition && targetPos.HasValue)
+                _position.Teleport(targetPos.Value);
+            if (syncRotation && targetRot.HasValue)
+                _rotation.Teleport(targetRot.Value);
+            if (syncScale && targetScale.HasValue)
+                _scale.Teleport(targetScale.Value);
         }
 
         [ServerRpc]
@@ -339,6 +339,9 @@ namespace PurrNet
 
         private void FixedUpdate()
         {
+            if (!isSpawned)
+                return;
+            
             bool isNotController = !IsController(_ownerAuth);
 
             if (_rb && isNotController)
@@ -532,14 +535,14 @@ namespace PurrNet
             bool hasChanged = false;
 
             if (syncPosition)
-                hasChanged = DeltaPacker<Vector3>.Write(packer, _lastSentDelta.position, _currentData.position);
+                hasChanged = DeltaPacker<CompressedVector3>.Write(packer, _lastSentDelta.position, _currentData.position);
 
             if (syncRotation)
-                hasChanged = DeltaPacker<Quaternion>.Write(packer, _lastSentDelta.rotation, _currentData.rotation) ||
+                hasChanged = DeltaPacker<CompressedQuaternion>.Write(packer, _lastSentDelta.rotation, _currentData.rotation) ||
                              hasChanged;
 
             if (syncScale)
-                hasChanged = DeltaPacker<Vector3>.Write(packer, _lastSentDelta.scale, _currentData.scale) || hasChanged;
+                hasChanged = DeltaPacker<CompressedVector3>.Write(packer, _lastSentDelta.scale, _currentData.scale) || hasChanged;
 
             packer.WriteAt(flagPos, hasChanged);
 
@@ -568,13 +571,13 @@ namespace PurrNet
                 var scale = oldValue.scale;
 
                 if (syncPosition)
-                    DeltaPacker<Vector3>.Read(packet, pos, ref oldValue.position);
+                    DeltaPacker<CompressedVector3>.Read(packet, pos, ref oldValue.position);
 
                 if (syncRotation)
-                    DeltaPacker<Quaternion>.Read(packet, rot, ref oldValue.rotation);
+                    DeltaPacker<CompressedQuaternion>.Read(packet, rot, ref oldValue.rotation);
 
                 if (syncScale)
-                    DeltaPacker<Vector3>.Read(packet, scale, ref oldValue.scale);
+                    DeltaPacker<CompressedVector3>.Read(packet, scale, ref oldValue.scale);
             }
 
             return oldValue;

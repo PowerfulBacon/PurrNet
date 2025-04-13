@@ -56,5 +56,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "PurrNet.sln"
+    "dotnet.defaultSolution": "PurrNet.sln",
+    "dotnet.preferCSharpExtension": true
 }

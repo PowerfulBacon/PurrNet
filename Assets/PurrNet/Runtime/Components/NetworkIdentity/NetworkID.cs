@@ -1,24 +1,25 @@
 ﻿using System;
 using JetBrains.Annotations;
+using PurrNet.Packing;
 
 namespace PurrNet
 {
     public struct NetworkID : IEquatable<NetworkID>
     {
         [UsedImplicitly] private PlayerID _scope;
-        [UsedImplicitly] private uint _id;
+        [UsedImplicitly] private PackedULong _id;
 
-        public uint id => _id;
+        public PackedULong id => _id;
 
         public PlayerID scope => _scope;
 
-        public NetworkID(NetworkID baseId, uint offset)
+        public NetworkID(NetworkID baseId, ulong offset)
         {
             _id = baseId._id + offset;
             _scope = baseId._scope;
         }
 
-        public NetworkID(uint id, PlayerID scope = default)
+        public NetworkID(ulong id, PlayerID scope = default)
         {
             _id = id;
             _scope = scope;
@@ -52,6 +53,20 @@ namespace PurrNet
         public static bool operator !=(NetworkID a, NetworkID b)
         {
             return !a.Equals(b);
+        }
+
+        public static bool operator <(NetworkID a, NetworkID b)
+        {
+            if (a._scope == b._scope)
+                return a._id < b._id;
+            return a._scope.id < b._scope.id;
+        }
+
+        public static bool operator >(NetworkID a, NetworkID b)
+        {
+            if (a._scope == b._scope)
+                return a._id > b._id;
+            return a._scope.id > b._scope.id;
         }
     }
 }

@@ -1,7 +1,3 @@
-using System.IO;
-using System.Threading.Tasks;
-using PurrNet.Logging;
-
 namespace PurrNet.Examples
 {
     public class ReturnableRpcsInModules : NetworkModule

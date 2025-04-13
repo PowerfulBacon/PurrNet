@@ -194,7 +194,7 @@ namespace PurrNet
         /// <summary>
         /// Unique ObjectId of this object
         /// </summary>
-        public uint objectId => id?.id ?? 0;
+        public ulong objectId => id?.id.value ?? 0;
 
         /// <summary>
         /// Scene id of this object.
@@ -281,6 +281,7 @@ namespace PurrNet
         public PlayerID? owner => internalOwnerServer ?? internalOwnerClient;
 
         public NetworkManager networkManager { get; private set; }
+        public DeltaMessagerModule deltaMessager { get; private set; }
 
         private HierarchyV2 _clientHierarchy;
         private HierarchyV2 _serverHierarchy;
@@ -598,7 +599,7 @@ namespace PurrNet
         /// Server only.
         /// </summary>
         /// <param name="player">The observer player id</param>
-        protected virtual void OnEarlyObserverAdded(PlayerID player)
+        protected virtual void OnPreObserverAdded(PlayerID player)
         {
         }
 
@@ -634,26 +635,29 @@ namespace PurrNet
         }
 
 
-        List<MethodInfo> _initializeMethods;
+        static readonly Dictionary<Type, List<MethodInfo>> _methodCache = new ();
 
         private void CallInitMethods()
         {
-            if (_initializeMethods == null)
+            if (!_methodCache.TryGetValue(GetType(), out var cached))
             {
                 var type = GetType();
                 var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
-                _initializeMethods = new List<MethodInfo>(methods.Length);
+                cached = new List<MethodInfo>(methods.Length);
 
                 for (int i = 0; i < methods.Length; i++)
                 {
                     var m = methods[i];
                     if (m.Name.EndsWith("_CodeGen_Initialize"))
-                        _initializeMethods.Add(m);
+                        cached.Add(m);
                 }
+
+                _methodCache[type] = cached;
             }
 
-            for (var i = 0; i < _initializeMethods.Count; i++)
-                _initializeMethods[i].Invoke(this, Array.Empty<object>());
+            int count = cached.Count;
+            for (var i = 0; i < count; i++)
+                cached[i].Invoke(this, Array.Empty<object>());
         }
 
         /// <summary>
@@ -721,6 +725,7 @@ namespace PurrNet
             _ticker = null;
             isInPool = true;
             _wasEarlySpawned = false;
+            deltaMessager = null;
         }
 
         private void OnChildDespawned(NetworkIdentity networkIdentity)
@@ -735,6 +740,12 @@ namespace PurrNet
             layer = gameObject.layer;
             networkManager = manager;
             sceneId = scene;
+
+            if (deltaMessager == null && manager.TryGetModule<DeltaMessagerFactory>(asServer, out var factory) &&
+                factory.TryGetModule(scene, out var dm))
+            {
+                deltaMessager = dm;
+            }
 
             bool wasAlreadySpawned = isSpawned;
 
@@ -952,8 +963,8 @@ namespace PurrNet
             if (ApplicationContext.isQuitting)
                 return;
 
-            TriggerDespawnEvent(true);
             TriggerDespawnEvent(false);
+            TriggerDespawnEvent(true);
 
             _ticker = null;
         }
@@ -1060,11 +1071,11 @@ namespace PurrNet
                 _externalModulesView[i].OnOwnerReconnected(ownerId);
         }
 
-        public void TriggerOnEarlyObserverAdded(PlayerID target)
+        public void TriggerOnPreObserverAdded(PlayerID target)
         {
-            OnEarlyObserverAdded(target);
+            OnPreObserverAdded(target);
             for (int i = 0; i < _externalModulesView.Count; i++)
-                _externalModulesView[i].OnEarlyObserverAdded(target);
+                _externalModulesView[i].OnPreObserverAdded(target);
         }
 
         public void TriggerOnObserverAdded(PlayerID target)

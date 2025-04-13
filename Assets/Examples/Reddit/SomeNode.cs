@@ -1,6 +1,4 @@
-using System.Threading.Tasks;
 using PurrNet;
-using PurrNet.Modules;
 using UnityEngine;
 
 public class SomeNode : NetworkIdentity

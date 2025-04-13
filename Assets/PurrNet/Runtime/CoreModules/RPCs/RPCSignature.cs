@@ -1,5 +1,4 @@
 ﻿using JetBrains.Annotations;
-using K4os.Compression.LZ4;
 using PurrNet.Modules;
 using PurrNet.Transports;
 

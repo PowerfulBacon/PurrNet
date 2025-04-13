@@ -1,5 +1,4 @@
-﻿using PurrNet.Logging;
-using PurrNet.Pooling;
+﻿using PurrNet.Pooling;
 using UnityEngine;
 
 namespace PurrNet.Modules

@@ -1,5 +1,4 @@
 using PurrNet;
-using PurrNet.Logging;
 using UnityEngine;
 
 public class DenisTest : NetworkIdentity

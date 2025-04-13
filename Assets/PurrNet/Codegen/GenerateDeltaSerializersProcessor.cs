@@ -80,6 +80,7 @@ namespace PurrNet.Codegen
 
             if (type.IsEnum)
             {
+                il.Append(endOfFunction);
                 return;
             }
 
@@ -149,6 +150,7 @@ namespace PurrNet.Codegen
                 il.Emit(OpCodes.Ldfld, fieldRef);
 
                 il.Emit(OpCodes.Ldarg_2);
+                if (isClass) il.Emit(OpCodes.Ldind_Ref);
                 il.Emit(OpCodes.Ldflda, fieldRef);
 
                 il.Emit(OpCodes.Call, packer);

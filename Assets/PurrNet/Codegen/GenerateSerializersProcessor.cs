@@ -6,7 +6,6 @@ using Mono.Cecil.Cil;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Pooling;
-using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace PurrNet.Codegen
@@ -114,47 +113,51 @@ namespace PurrNet.Codegen
             if (resolvedType.IsInterface)
                 return;
 
+            var bitStreamType = assembly.MainModule.GetTypeDefinition(typeof(BitPacker)).Import(assembly.MainModule);
+            var mainmodule = assembly.MainModule;
+
+
+            if (hashOnly)
+            {
+                assembly.MainModule.Types.Add(serializerClass);
+                HandleHashOnly(assembly, type, serializerClass);
+                return;
+            }
+
             bool isNetworkIdentity = PostProcessor.InheritsFrom(resolvedType, typeof(NetworkIdentity).FullName);
             bool isNetworkModule = PostProcessor.InheritsFrom(resolvedType, typeof(NetworkModule).FullName);
             bool hasINetworkModule = HasInterface(resolvedType, typeof(INetworkModule));
+
+            if (hasINetworkModule)
+                return;
 
             if (!isNetworkIdentity && !isNetworkModule &&
                 PostProcessor.InheritsFrom(resolvedType, typeof(Object).FullName) &&
                 !HasInterface(resolvedType, typeof(IPacked)) &&
                 !HasInterface(resolvedType, typeof(IPackedAuto)) &&
                 !HasInterface(resolvedType, typeof(IPackedSimple)))
-                return;
-
-            if (hasINetworkModule)
-                return;
-
-            var bitStreamType = assembly.MainModule.GetTypeDefinition(typeof(BitPacker)).Import(assembly.MainModule);
-            var mainmodule = assembly.MainModule;
-
-            assembly.MainModule.Types.Add(serializerClass);
-
-            if (hashOnly)
             {
-                HandleHashOnly(assembly, type, serializerClass, isEditor);
                 return;
             }
+
+            assembly.MainModule.Types.Add(serializerClass);
 
             if (IsGeneric(type, out var genericT))
             {
                 GenerateDeltaSerializersProcessor.HandleGenericType(assembly, type, genericT);
-                HandleGenerics(assembly, type, genericT, serializerClass, isEditor);
+                HandleGenerics(assembly, type, genericT, serializerClass);
                 return;
             }
 
             if (isNetworkIdentity)
             {
-                HandleNetworkIdentity(assembly, type, serializerClass, isEditor);
+                HandleNetworkIdentity(assembly, type, serializerClass);
                 return;
             }
 
             if (isNetworkModule)
             {
-                HandleNetworkModule(assembly, type, serializerClass, isEditor);
+                HandleNetworkModule(assembly, type, serializerClass);
                 return;
             }
 
@@ -204,7 +207,7 @@ namespace PurrNet.Codegen
         }
 
         private static void HandleHashOnly(AssemblyDefinition assembly, TypeReference type,
-            TypeDefinition serializerClass, bool isEditor)
+            TypeDefinition serializerClass)
         {
             var registerMethod =
                 new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
@@ -231,7 +234,7 @@ namespace PurrNet.Codegen
         }
 
         private static void HandleNetworkIdentity(AssemblyDefinition assembly, TypeReference type,
-            TypeDefinition serializerClass, bool isEditor)
+            TypeDefinition serializerClass)
         {
             var registerMethod =
                 new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
@@ -253,7 +256,7 @@ namespace PurrNet.Codegen
         }
 
         private static void HandleNetworkModule(AssemblyDefinition assembly, TypeReference type,
-            TypeDefinition serializerClass, bool isEditor)
+            TypeDefinition serializerClass)
         {
             var registerMethod =
                 new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
@@ -276,7 +279,7 @@ namespace PurrNet.Codegen
 
         private static void HandleGenerics(AssemblyDefinition assembly, TypeReference type,
             HandledGenericTypes genericT,
-            TypeDefinition serializerClass, bool isEditor)
+            TypeDefinition serializerClass)
         {
             var registerMethod =
                 new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
@@ -550,18 +553,21 @@ namespace PurrNet.Codegen
             if (type.IsEnum)
             {
                 HandleEnums(isWriting, method, serialize, type, il, packerType, mainmodule);
+                il.Append(ret);
                 return;
             }
 
             if (HasInterface(type, typeof(IPacked)))
             {
                 HandleIData(isWriting, type, il, mainmodule, valueArg);
+                il.Append(ret);
                 return;
             }
 
             if (HasInterface(type, typeof(IPackedSimple)))
             {
                 HandleIDataSimple(isWriting, type, il, mainmodule, valueArg);
+                il.Append(ret);
                 return;
             }
 

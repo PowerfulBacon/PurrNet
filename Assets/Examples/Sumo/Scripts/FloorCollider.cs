@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using PurrNet.Examples.Sumo;
 using UnityEngine;

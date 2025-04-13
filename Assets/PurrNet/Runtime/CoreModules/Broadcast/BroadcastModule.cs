@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using PurrNet.Logging;
 using PurrNet.Packing;
+using PurrNet.Profiler;
 using PurrNet.Transports;
 using PurrNet.Utils;
 
@@ -71,7 +72,7 @@ namespace PurrNet.Modules
         public static ByteData GetImmediateData(object data)
         {
             using var stream = BitPackerPool.Get();
-            Packer<uint>.Write(stream, Hasher.GetStableHashU32(data.GetType()));
+            Packer<PackedUInt>.Write(stream, Hasher.GetStableHashU32(data.GetType()));
             Packer.Write(stream, data);
             return stream.ToByteData();
         }
@@ -81,10 +82,15 @@ namespace PurrNet.Modules
             using var stream = BitPackerPool.Get();
             var typeId = Hasher.GetStableHashU32<T>();
 
-            Packer<uint>.Write(stream, typeId);
+            Packer<PackedUInt>.Write(stream, typeId);
             Packer<T>.Write(stream, data);
 
             return stream.ToByteData();
+        }
+
+        static bool ShouldTrackType(Type type)
+        {
+            return type != typeof(RPCPacket) && type != typeof(ChildRPCPacket) && type != typeof(StaticRPCPacket);
         }
 
         public void SendToAll<T>(T data, Channel method = Channel.ReliableOrdered)
@@ -92,17 +98,27 @@ namespace PurrNet.Modules
             AssertIsServer("Cannot send data to all clients from client.");
 
             var byteData = GetData(data);
-
-            for (int i = 0; i < _transport.connections.Count; i++)
+#if UNITY_EDITOR
+            var type = typeof(T);
+            bool shouldTrack = ShouldTrackType(type);
+#endif
+            int connCount = _transport.connections.Count;
+            for (int i = 0; i < connCount; i++)
             {
-                var conn = _transport.connections[i];
-                _transport.SendToClient(conn, byteData, method);
+#if UNITY_EDITOR
+                if (shouldTrack)
+                    Statistics.SentBroadcast(type, byteData.segment);
+#endif
+                _transport.SendToClient(_transport.connections[i], byteData, method);
             }
         }
 
         public void SendRaw(Connection conn, ByteData data, Channel method = Channel.ReliableOrdered)
         {
             AssertIsServer("Cannot send data to player from client.");
+#if UNITY_EDITOR
+            Statistics.ForwardedBytes(data.length);
+#endif
             _transport.SendToClient(conn, data, method);
         }
 
@@ -111,6 +127,11 @@ namespace PurrNet.Modules
             AssertIsServer("Cannot send data to player from client.");
 
             var byteData = GetData(data);
+#if UNITY_EDITOR
+            var type = typeof(T);
+            if (ShouldTrackType(type))
+                Statistics.SentBroadcast(type, byteData.segment);
+#endif
             _transport.SendToClient(conn, byteData, method);
         }
 
@@ -119,9 +140,19 @@ namespace PurrNet.Modules
             AssertIsServer("Cannot send data to player from client.");
 
             var byteData = GetData(data);
+#if UNITY_EDITOR
+            var type = typeof(T);
+            var shouldTrack = ShouldTrackType(type);
+#endif
 
             foreach (var connection in conn)
+            {
+#if UNITY_EDITOR
+                if (shouldTrack)
+                    Statistics.SentBroadcast(type, byteData.segment);
+#endif
                 _transport.SendToClient(connection, byteData, method);
+            }
         }
 
         public void Send(IEnumerable<Connection> conn, ByteData byteData, Channel method = Channel.ReliableOrdered)
@@ -129,19 +160,25 @@ namespace PurrNet.Modules
             AssertIsServer("Cannot send data to player from client.");
 
             foreach (var connection in conn)
+            {
+#if UNITY_EDITOR
+                Statistics.ForwardedBytes(byteData.length);
+#endif
                 _transport.SendToClient(connection, byteData, method);
+            }
         }
 
         public void SendToServer<T>(T data, Channel method = Channel.ReliableOrdered)
         {
-            var byteData = GetData(data);
-
             if (_asServer)
-            {
-                _transport.RaiseDataReceived(default, byteData, true);
                 return;
-            }
 
+            var byteData = GetData(data);
+#if UNITY_EDITOR
+            var type = typeof(T);
+            if (ShouldTrackType(type))
+                Statistics.SentBroadcast(type, byteData.segment);
+#endif
             _transport.SendToServer(byteData, method);
         }
 
@@ -152,9 +189,9 @@ namespace PurrNet.Modules
 
             using var stream = BitPackerPool.Get(data);
 
-            uint typeId = default;
+            PackedUInt typeId = default;
 
-            Packer<uint>.Read(stream, ref typeId);
+            Packer<PackedUInt>.Read(stream, ref typeId);
 
             if (!Hasher.TryGetType(typeId, out var typeInfo))
             {
@@ -166,6 +203,11 @@ namespace PurrNet.Modules
             object instance = null;
             Packer.Read(stream, typeInfo, ref instance);
             TriggerCallback(conn, typeId, instance);
+
+#if UNITY_EDITOR
+            if (ShouldTrackType(typeInfo))
+                Statistics.ReceivedBroadcast(typeInfo, data.segment);
+#endif
         }
 
         public void Subscribe<T>(BroadcastDelegate<T> callback)
@@ -212,9 +254,5 @@ namespace PurrNet.Modules
 
             onRawDataReceived?.Invoke(conn, hash, instance);
         }
-    }
-
-    public struct KeepAlivePacket : IPackedAuto
-    {
     }
 }

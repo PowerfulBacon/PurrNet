@@ -510,7 +510,7 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   _fishPrefab: {fileID: 5999752480146570505, guid: ce611468ecbf48540a5a5c8dc5bc09f0, type: 3}
-  _fishCount: 100
+  _fishCount: 500
 --- !u!1 &682580130
 GameObject:
   m_ObjectHideFlags: 0
@@ -853,7 +853,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _stopPlayingOnDisconnect: 1
   _startServerFlags: 1
-  _startClientFlags: 6
+  _startClientFlags: 7
   _cookieScope: 1
   _dontDestroyOnLoad: 0
   _transport: {fileID: 1216416902}
@@ -861,7 +861,7 @@ MonoBehaviour:
   _networkRules: {fileID: 11400000, guid: 5879a6fa5625f844e9c773a4ca0099dc, type: 2}
   _visibilityRules: {fileID: 11400000, guid: 8f014a5bd8dc68646a2a3c0b18c5bbd8, type: 2}
   _authenticator: {fileID: 1216416905}
-  _tickRate: 60
+  _tickRate: 20
   _patchLingeringProcessBug: 0
 --- !u!4 &1216416898
 Transform:
@@ -892,8 +892,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _masterServer: https://purrbalancer.riten.dev:8080/
   _roomName: PurrNet
-  _region: eu-central
-  _host: eu1.purrlay.riten.dev
+  _region: eu-france
+  _host: fr.purrlay.riten.dev
+  _pollEventsInUpdate: 0
 --- !u!114 &1216416902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -909,7 +910,8 @@ MonoBehaviour:
   _serverPort: 5001
   _maxConnections: 100
   _address: 127.0.0.1
-  _retryLatencyFactor: 1.8
+  _timeoutInSeconds: 5
+  _pollEventsInUpdate: 0
 --- !u!114 &1216416903
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -927,6 +929,7 @@ MonoBehaviour:
   _address: 127.0.0.1
   _query: 
   _path: 
+  _pollEventsInUpdate: 0
   _enableSSL: 0
   _certPath: 
   _certPassword: 

@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
+using PurrNet.Profiler;
 using PurrNet.Transports;
 
 namespace PurrNet
@@ -88,7 +89,7 @@ namespace PurrNet
         /// Server only.
         /// </summary>
         /// <param name="player"></param>
-        public virtual void OnEarlyObserverAdded(PlayerID player) { }
+        public virtual void OnPreObserverAdded(PlayerID player) { }
 
         /// <summary>
         /// Called when an observer is removed.
@@ -133,14 +134,14 @@ namespace PurrNet
         {
             if (!parent)
             {
-                if (signature.channel is Channel.ReliableOrdered)
+                if (signature.channel is Channel.ReliableOrdered or Channel.ReliableUnordered)
                     PurrLogger.LogError($"Trying to send RPC from '{GetType().Name}' which is not initialized.");
                 return;
             }
 
             if (!parent.isSpawned)
             {
-                if (signature.channel is Channel.ReliableOrdered)
+                if (signature.channel is Channel.ReliableOrdered or Channel.ReliableUnordered)
                     PurrLogger.LogError($"Trying to send RPC from '{parent.name}' which is not spawned.", parent);
                 return;
             }
@@ -210,10 +211,18 @@ namespace PurrNet
             }
         }
 
+#if UNITY_EDITOR
+        private Type _myType;
+#endif
+
         [UsedByIL]
         protected bool ValidateReceivingRPC(RPCInfo info, RPCSignature signature, IRpc data, bool asServer)
         {
-            return parent && parent.ValidateReceivingRPC(info, signature, data, asServer);
+#if UNITY_EDITOR
+            _myType ??= GetType();
+            Statistics.ReceivedRPC(_myType, signature.type, signature.rpcName, data.rpcData.segment, parent);
+#endif
+            return parent && parent.ValidateIncomingRPC(info, signature, data, asServer);
         }
 
         [UsedByIL]

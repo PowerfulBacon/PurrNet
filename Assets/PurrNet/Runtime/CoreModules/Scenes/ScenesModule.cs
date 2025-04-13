@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Utils;
 using UnityEngine;
@@ -6,11 +7,13 @@ using UnityEngine.SceneManagement;
 
 namespace PurrNet.Modules
 {
-    internal struct PendingOperation
+    public struct PendingSceneOperation
     {
         public int buildIndex;
         public SceneID idToAssign;
         public PurrSceneSettings settings;
+        [UsedImplicitly]
+        public AsyncOperation operation;
     }
 
     public struct SceneState
@@ -52,7 +55,7 @@ namespace PurrNet.Modules
         private readonly SceneHistory _history;
         private bool _asServer;
 
-        private readonly List<PendingOperation> _pendingOperations = new List<PendingOperation>();
+        private readonly List<PendingSceneOperation> _pendingOperations = new List<PendingSceneOperation>();
         private readonly Queue<SceneAction> _actionsQueue = new Queue<SceneAction>();
 
         private readonly Dictionary<SceneID, SceneState> _scenes = new Dictionary<SceneID, SceneState>();
@@ -289,6 +292,16 @@ namespace PurrNet.Modules
                 _players.Send(player, new SceneActionsBatch { actions = _playerFilteredActions });
         }
 
+        /// <summary>
+        /// Returns the pending operations for this module.
+        /// This allows you to check if a scene is still loading or unloading and the progress of the operation.
+        /// </summary>
+        /// <returns>List of pending operations</returns>
+        public IReadOnlyList<PendingSceneOperation> GetPendingOperations()
+        {
+            return _pendingOperations;
+        }
+
         private void SceneManagerOnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             for (int i = 0; i < _pendingOperations.Count; i++)
@@ -331,10 +344,11 @@ namespace PurrNet.Modules
                     }
 
                     var loadAction = action.loadSceneAction;
+                    AsyncOperation operation;
 
                     try
                     {
-                        SceneManager.LoadSceneAsync(loadAction.buildIndex, loadAction.GetLoadSceneParameters());
+                        operation = SceneManager.LoadSceneAsync(loadAction.buildIndex, loadAction.GetLoadSceneParameters());
                     }
                     catch (System.Exception e)
                     {
@@ -352,11 +366,12 @@ namespace PurrNet.Modules
                         }
                     }
 
-                    _pendingOperations.Add(new PendingOperation
+                    _pendingOperations.Add(new PendingSceneOperation
                     {
                         buildIndex = loadAction.buildIndex,
                         settings = loadAction.parameters,
-                        idToAssign = loadAction.sceneID
+                        idToAssign = loadAction.sceneID,
+                        operation = operation
                     });
 
                     _actionsQueue.Dequeue();
@@ -595,11 +610,12 @@ namespace PurrNet.Modules
             });
 
             var op = SceneManager.LoadSceneAsync(sceneIndex, parameters);
-            var operation = new PendingOperation
+            var operation = new PendingSceneOperation
             {
                 buildIndex = sceneIndex,
                 settings = settings,
-                idToAssign = idToAssign
+                idToAssign = idToAssign,
+                operation = op
             };
 
             _pendingOperations.Add(operation);
@@ -784,6 +800,11 @@ namespace PurrNet.Modules
 
         public bool Cleanup()
         {
+            var rules = _networkManager.networkRules;
+
+            if (rules && !rules.ShouldCleanupScenesOnDisconnect())
+                return true;
+
             if (ApplicationContext.isQuitting)
                 return true;
 

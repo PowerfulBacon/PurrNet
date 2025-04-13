@@ -1,5 +1,4 @@
 using PurrNet.Logging;
-using PurrNet.Modules;
 using UnityEngine;
 
 namespace PurrNet.Examples.Template

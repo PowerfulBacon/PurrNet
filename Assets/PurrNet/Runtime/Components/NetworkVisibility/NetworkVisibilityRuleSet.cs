@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using PurrNet.Logging;
-using PurrNet.Pooling;
 using UnityEngine;
 
 namespace PurrNet

@@ -301,7 +301,7 @@ namespace PurrNet.Transports
             }
         }
 
-        DeliveryMethod ToDeliveryMethod(Channel channel)
+        static DeliveryMethod ToDeliveryMethod(Channel channel)
         {
             return channel switch
             {
