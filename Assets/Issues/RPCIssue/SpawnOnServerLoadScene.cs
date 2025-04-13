@@ -7,11 +7,12 @@ public class SpawnOnServerLoadScene : PurrMonoBehaviour
 
     public override void Subscribe(NetworkManager manager, bool asServer)
     {
-        OnSceneLoaded(default, asServer);
+        manager.sceneModule.onSceneLoaded += OnSceneLoaded;
     }
 
     public override void Unsubscribe(NetworkManager manager, bool asServer)
     {
+        manager.sceneModule.onSceneLoaded -= OnSceneLoaded;
     }
 
     private void OnSceneLoaded(SceneID scene, bool asserver)

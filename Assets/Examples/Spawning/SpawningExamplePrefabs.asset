@@ -14,9 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   autoGenerate: 0
   networkOnly: 0
+  poolByDefault: 0
   folder: {fileID: 102900000, guid: b0ab51c611f611344ab59e2fb6be9aa8, type: 3}
   prefabs:
-  - {fileID: 1560444519250819605, guid: db03de8c3e30c094fbaad7cd57f45a01, type: 3}
-  - {fileID: 1560444519250819605, guid: 9c94830e4fb1f9a449c584760ebb1ead, type: 3}
-  - {fileID: 1560444519250819605, guid: 8d9dd4ad21bbc8645870af3c8e610eee, type: 3}
-  - {fileID: 9215212990901263956, guid: 5d40592c4c7ad1d4cacbc2566944e5c2, type: 3}
+  - prefab: {fileID: 9215212990901263956, guid: 5d40592c4c7ad1d4cacbc2566944e5c2, type: 3}
+    pooled: 0
+    warmupCount: 5
+  - prefab: {fileID: 1560444519250819605, guid: 8d9dd4ad21bbc8645870af3c8e610eee, type: 3}
+    pooled: 0
+    warmupCount: 5
+  - prefab: {fileID: 1560444519250819605, guid: 9c94830e4fb1f9a449c584760ebb1ead, type: 3}
+    pooled: 0
+    warmupCount: 5
+  - prefab: {fileID: 1560444519250819605, guid: db03de8c3e30c094fbaad7cd57f45a01, type: 3}
+    pooled: 0
+    warmupCount: 5
