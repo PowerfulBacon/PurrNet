@@ -1009,6 +1009,9 @@ namespace PurrNet.Modules
             for (var i = 0; i < _triggerLateObserverAdded.Count; i++)
             {
                 var nid = _triggerLateObserverAdded[i];
+                if (!nid.nid || !nid.nid.isSpawned)
+                    continue;
+
                 nid.nid.TriggerOnObserverAdded(nid.player);
                 onLateObserverAdded?.Invoke(nid.player, nid.nid);
             }
