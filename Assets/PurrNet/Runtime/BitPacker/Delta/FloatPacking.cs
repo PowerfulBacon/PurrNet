@@ -33,10 +33,10 @@ namespace PurrNet.Packing
             Packer<bool>.Write(packer, true);
 
             bool newSign = (newbits & 0x80000000) != 0;
-            long newExp = ((newbits & 0x7F800000) >> 23) - 127;
+            long newExp = (newbits & 0x7F800000) >> 23;
             long newMantissa = newbits & 0x007FFFFF;
 
-            long oldExp = ((oldbits & 0x7F800000) >> 23) - 127;
+            long oldExp = (oldbits & 0x7F800000) >> 23;
             long oldMantissa = oldbits & 0x007FFFFF;
 
             long expDiff = newExp - oldExp;
@@ -50,20 +50,34 @@ namespace PurrNet.Packing
         }
 
         [UsedByIL]
-        private static unsafe void ReadSingle(BitPacker packer, float oldvalue, ref float value)
+        private static void ReadSingle(BitPacker packer, float oldvalue, ref float value)
         {
             bool hasChanged = default;
             Packer<bool>.Read(packer, ref hasChanged);
 
-            if (hasChanged)
+            if (!hasChanged)
             {
-                PackedLong packed = default;
-                Packer<PackedLong>.Read(packer, ref packed);
-                uint oldBits = *(uint*)&oldvalue;
-                uint newBits = (uint)(oldBits + packed.value);
-                value = *(float*)&newBits;
+                value = oldvalue;
+                return;
             }
-            else value = oldvalue;
+
+            var oldbits = BitConverter.SingleToInt32Bits(oldvalue);
+            long oldExp = (oldbits & 0x7F800000) >> 23;
+            long oldMantissa = oldbits & 0x007FFFFF;
+
+            bool newSign = default;
+            long newExp = default;
+            long newMantissa = default;
+
+            Packer<bool>.Read(packer, ref newSign);
+            PackingIntegers.ReadSegmented(packer, ref newExp, 2, 8);
+            PackingIntegers.ReadSegmented(packer, ref newMantissa, 9, 23);
+
+            newExp += oldExp;
+            newMantissa += oldMantissa;
+
+            int bits = (int)(newSign ? 0x80000000 : 0) | ((int)newExp << 23) | (int)newMantissa;
+            value = BitConverter.Int32BitsToSingle(bits);
         }
     }
 }
