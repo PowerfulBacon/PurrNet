@@ -1,4 +1,5 @@
 ﻿using System;
+using PurrNet.Logging;
 using PurrNet.Packing;
 using UnityEngine;
 

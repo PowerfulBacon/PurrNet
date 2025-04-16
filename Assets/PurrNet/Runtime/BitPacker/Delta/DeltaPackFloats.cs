@@ -1,3 +1,4 @@
+using System;
 using PurrNet.Modules;
 using UnityEngine;
 
@@ -31,18 +32,6 @@ namespace PurrNet.Packing
             PackedInt val = default;
             Packer<PackedInt>.Read(packer, ref val);
             value = new CompressedFloat(val.value * CompressedFloat.PRECISION);
-        }
-
-        [UsedByIL]
-        private static void WriteHalf(BitPacker packer, CompressedAngle value)
-        {
-            Packer<float>.Write(packer, value.value);
-        }
-
-        [UsedByIL]
-        private static void ReadHalf(BitPacker packer, ref CompressedAngle value)
-        {
-            Packer<float>.Read(packer, ref value.value);
         }
 
         [UsedByIL]
@@ -100,7 +89,7 @@ namespace PurrNet.Packing
         {
             float delta = newvalue - oldvalue;
 
-            if (System.Math.Abs(delta) <CompressedFloat. PRECISION)
+            if (Math.Abs(delta) <CompressedFloat. PRECISION)
             {
                 Packer<bool>.Write(packer, false);
                 return false;
@@ -152,62 +141,6 @@ namespace PurrNet.Packing
         }
 
         [UsedByIL]
-        private static bool WriteAngle(BitPacker packer, CompressedAngle oldvalue, CompressedAngle newvalue)
-        {
-            float delta = newvalue - oldvalue;
-
-            if (System.Math.Abs(delta) < CompressedAngle.PRECISION)
-            {
-                Packer<bool>.Write(packer, false);
-                return false;
-            }
-
-            Packer<bool>.Write(packer, true);
-
-            var deltaAsInt = Mathf.RoundToInt(delta / CompressedAngle.PRECISION);
-            var estimatedNewValue = oldvalue + deltaAsInt * CompressedAngle.PRECISION;
-            bool isCorrect = Mathf.Abs(newvalue - estimatedNewValue) < CompressedAngle.PRECISION * 2;
-
-            Packer<bool>.Write(packer, isCorrect);
-
-            if (isCorrect)
-            {
-                Packer<PackedInt>.Write(packer, deltaAsInt);
-            }
-            else
-            {
-                Packer<float>.Write(packer, newvalue.value);
-            }
-
-            return true;
-        }
-
-        [UsedByIL]
-        private static void ReadAngle(BitPacker packer, CompressedAngle oldvalue, ref CompressedAngle value)
-        {
-            bool hasChanged = default;
-            Packer<bool>.Read(packer, ref hasChanged);
-
-            if (hasChanged)
-            {
-                bool isCorrect = default;
-                Packer<bool>.Read(packer, ref isCorrect);
-
-                if (isCorrect)
-                {
-                    PackedInt packed = default;
-                    Packer<PackedInt>.Read(packer, ref packed);
-                    value.value = oldvalue + packed.value * CompressedAngle.PRECISION;
-                }
-                else
-                {
-                    Packer<float>.Read(packer, ref value.value);
-                }
-            }
-            else value = oldvalue;
-        }
-
-        /*[UsedByIL]
         private static unsafe void WriteSingle(BitPacker packer, float oldvalue, float newvalue)
         {
             bool hasChanged = !Mathf.Approximately(oldvalue, newvalue);
@@ -237,6 +170,6 @@ namespace PurrNet.Packing
                 value = *(float*)&newBits;
             }
             else value = oldvalue;
-        }*/
+        }
     }
 }
