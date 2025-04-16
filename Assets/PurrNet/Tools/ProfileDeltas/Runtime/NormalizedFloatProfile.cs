@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
 using PurrNet.Packing;
-using UnityEditor;
 using UnityEngine;
 
 namespace PurrNet.Profiler.Deltas
@@ -15,7 +14,7 @@ namespace PurrNet.Profiler.Deltas
                 float lerp = (float)index / (MAX_ITERATIONS - 1);
                 NormalizedFloat value = mode switch
                 {
-                    EvaluationMode.PerlinNoise => Mathf.PerlinNoise(index * 0.01f, (float)EditorApplication.timeSinceStartup * 0.5f),
+                    EvaluationMode.PerlinNoise => Mathf.PerlinNoise(index * 0.01f, 0),
                     EvaluationMode.Linear => lerp * 2f - 1f,
                     EvaluationMode.Quadratic => index * index * 0.01f,
                     EvaluationMode.Cubic => index * index * index * 0.001f,

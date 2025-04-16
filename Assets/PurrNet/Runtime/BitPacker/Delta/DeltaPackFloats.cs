@@ -139,37 +139,5 @@ namespace PurrNet.Packing
             }
             else value = oldvalue;
         }
-
-        [UsedByIL]
-        private static unsafe void WriteSingle(BitPacker packer, float oldvalue, float newvalue)
-        {
-            bool hasChanged = !Mathf.Approximately(oldvalue, newvalue);
-            Packer<bool>.Write(packer, hasChanged);
-
-            if (hasChanged)
-            {
-                uint oldBits = *(uint*)&oldvalue;
-                uint newBits = *(uint*)&newvalue;
-                long diff = checked((long)newBits - oldBits);
-                Packer<PackedLong>.Write(packer, diff);
-            }
-        }
-
-        [UsedByIL]
-        private static unsafe void ReadSingle(BitPacker packer, float oldvalue, ref float value)
-        {
-            bool hasChanged = default;
-            Packer<bool>.Read(packer, ref hasChanged);
-
-            if (hasChanged)
-            {
-                PackedLong packed = default;
-                Packer<PackedLong>.Read(packer, ref packed);
-                uint oldBits = *(uint*)&oldvalue;
-                uint newBits = (uint)(oldBits + packed.value);
-                value = *(float*)&newBits;
-            }
-            else value = oldvalue;
-        }
     }
 }

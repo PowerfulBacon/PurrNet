@@ -28,8 +28,8 @@ namespace PurrNet.Profiler.Deltas
         {
             using var delta = BitPackerPool.Get();
 
-            T aValue = Evaluate(a, mode);
-            T bValue = Evaluate(b, mode);
+            var aValue = Evaluate(a, mode);
+            var bValue = Evaluate(b, mode);
 
             DeltaPacker<T>.Write(delta, aValue, bValue);
 

@@ -4,7 +4,6 @@ namespace PurrNet.Packing
 {
     public static class NormalizedFloatPacking
     {
-
         [UsedByIL]
         private static void WriteHalf(BitPacker packer, NormalizedFloat value)
         {
@@ -16,8 +15,6 @@ namespace PurrNet.Packing
         {
             PackingIntegers.ReadPrefixed(packer, ref value.value, NormalizedFloat.BIT_RESOLUTION);
         }
-
-        const int MAX_SEGMENTED = 3;
 
         [UsedByIL]
         private static bool WriteAngle(BitPacker packer, NormalizedFloat oldvalue, NormalizedFloat newvalue)

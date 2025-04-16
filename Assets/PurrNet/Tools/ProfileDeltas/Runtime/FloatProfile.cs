@@ -11,12 +11,10 @@ namespace PurrNet.Profiler.Deltas
         {
             using (new ScopedRandom(index * 1000))
             {
-                float lerp = (float)index / (MAX_ITERATIONS - 1);
-
                 float value = mode switch
                 {
-                    EvaluationMode.PerlinNoise => Mathf.PerlinNoise(lerp, 0.0f) * 0.5f,
-                    EvaluationMode.Linear => index * 0.1f,
+                    EvaluationMode.PerlinNoise => Mathf.PerlinNoise(index * 0.01f, 0) * 10f,
+                    EvaluationMode.Linear => index * 0.5f,
                     EvaluationMode.Quadratic => index * index * 0.01f,
                     EvaluationMode.Cubic => index * index * index * 0.001f,
                     EvaluationMode.Exponential => Mathf.Pow(2, index) * 0.01f,
