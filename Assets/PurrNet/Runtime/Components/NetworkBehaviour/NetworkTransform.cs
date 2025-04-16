@@ -538,7 +538,7 @@ namespace PurrNet
                 hasChanged = DeltaPacker<CompressedVector3>.Write(packer, _lastSentDelta.position, _currentData.position);
 
             if (syncRotation)
-                hasChanged = DeltaPacker<CompressedQuaternion>.Write(packer, _lastSentDelta.rotation, _currentData.rotation) ||
+                hasChanged = DeltaPacker<PackedQuaternion>.Write(packer, _lastSentDelta.rotation, _currentData.rotation) ||
                              hasChanged;
 
             if (syncScale)
@@ -574,7 +574,7 @@ namespace PurrNet
                     DeltaPacker<CompressedVector3>.Read(packet, pos, ref oldValue.position);
 
                 if (syncRotation)
-                    DeltaPacker<CompressedQuaternion>.Read(packet, rot, ref oldValue.rotation);
+                    DeltaPacker<PackedQuaternion>.Read(packet, rot, ref oldValue.rotation);
 
                 if (syncScale)
                     DeltaPacker<CompressedVector3>.Read(packet, scale, ref oldValue.scale);
