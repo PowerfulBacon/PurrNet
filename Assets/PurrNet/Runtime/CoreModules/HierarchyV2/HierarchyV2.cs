@@ -505,20 +505,27 @@ namespace PurrNet.Modules
             {
                 bool isHost = IsServerHost();
 
-                foreach (var nid in createdNids)
+                for (var i = 0; i < createdNids.Count; i++)
                 {
+                    var nid = createdNids[i];
                     nid.SetIdentity(_manager, this, _sceneId, _asServer, isHost);
                     RegisterIdentity(nid, false);
-                    if (nid.TryAddObserver(player))
+                    /*if (nid.TryAddObserver(player))
                     {
                         onObserverAdded?.Invoke(player, nid);
                         nid.TriggerOnPreObserverAdded(player);
                         _triggerLateObserverAdded.Add(new PlayerNid { player = player, nid = nid });
-                    }
+                    }*/
                 }
 
                 if (createdNids.Count > 0)
                 {
+                    if (_scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
+                    {
+                        foreach (var playerInScene in players)
+                            _visibility.RefreshVisibilityForGameObject(playerInScene, createdNids[0].transform);
+                    }
+
                     var lastNid = createdNids[^1];
                     if (lastNid.id.HasValue)
                         _playersManager.RegisterClientLastId(player, lastNid.id.Value);
