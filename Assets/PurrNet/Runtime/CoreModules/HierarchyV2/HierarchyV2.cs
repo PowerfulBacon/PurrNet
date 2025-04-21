@@ -510,12 +510,13 @@ namespace PurrNet.Modules
                     var nid = createdNids[i];
                     nid.SetIdentity(_manager, this, _sceneId, _asServer, isHost);
                     RegisterIdentity(nid, false);
-                    /*if (nid.TryAddObserver(player))
+
+                    if (nid.TryAddObserver(player))
                     {
                         onObserverAdded?.Invoke(player, nid);
                         nid.TriggerOnPreObserverAdded(player);
                         _triggerLateObserverAdded.Add(new PlayerNid { player = player, nid = nid });
-                    }*/
+                    }
                 }
 
                 if (createdNids.Count > 0)
