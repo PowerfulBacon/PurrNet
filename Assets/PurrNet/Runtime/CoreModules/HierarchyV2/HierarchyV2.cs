@@ -987,7 +987,10 @@ namespace PurrNet.Modules
                     {
                         var packet = batch.spawnPackets[i];
                         if (packet.prototype.framework.Count > 0)
-                            onSentSpawnPacket?.Invoke(player, _sceneId, packet.prototype.framework[0].id);
+                        {
+                            foreach (var piece in packet.prototype.framework)
+                                onSentSpawnPacket?.Invoke(player, _sceneId, piece.id);
+                        }
                     }
                 }
 
