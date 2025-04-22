@@ -543,8 +543,12 @@ namespace PurrNet.Modules
             if (nid)
                 nid.ClearDirectChildren();
 
+            int childScopeStart = 0;
+
+            for (int i = 0; i < currentIdx; ++i)
+                childScopeStart += framework[i].childCount;
+
             // Process each child in sequence - children start after all siblings
-            int firstChildIdx = childScopeBegin;  // Where this node's children begin
             for (var j = 0; j < childCount; j++)
             {
                 TryBuildPrototypeHelper(
@@ -552,8 +556,8 @@ namespace PurrNet.Modules
                     prototype,
                     createdNids,
                     trs,
-                    firstChildIdx + j,  // Process siblings in sequence
-                    firstChildIdx + childCount,  // Next level's children start after all current siblings
+                    childScopeBegin + j,
+                    childScopeStart + childCount,  // Next level's children start after all current siblings
                     out var childGo,
                     out _);
 
