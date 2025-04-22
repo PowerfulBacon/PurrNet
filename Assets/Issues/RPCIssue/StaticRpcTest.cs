@@ -12,9 +12,10 @@ public class StaticRpcTest : NetworkIdentity
         SendObserverRpc("Test with a bunch of data, this is a test, for testing and testing purposes and testing only");
     }
 
-    [ObserversRpc(runLocally: true, bufferLast: true, compressionLevel: CompressionLevel.Best)]
+    [ObserversRpc(bufferLast: true, compressionLevel: CompressionLevel.Best)]
     public void SendObserverRpc(string someData)
     {
+        throw new System.NotImplementedException();
         Debug.Log("SendObserverRpc "+ someData);
     }
 }

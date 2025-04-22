@@ -497,7 +497,7 @@ namespace PurrNet.Modules
 
         private static bool TryBuildPrototypeHelper(PoolPair pair, GameObjectPrototype prototype,
             List<NetworkIdentity> createdNids, Transform parent, int currentIdx,
-            int childrenStartIdx, out GameObject result, out bool shouldBeActive)
+            int childScopeBegin, out GameObject result, out bool shouldBeActive)
         {
             var framework = prototype.framework;
             var current = framework[currentIdx];
@@ -511,10 +511,8 @@ namespace PurrNet.Modules
             }
 
             var trs = instance.transform;
-
             var siblings = ListPool<NetworkIdentity>.Instantiate();
             instance.GetComponents(siblings);
-
             var nid = siblings.Count > 0 ? siblings[0] : null;
 
             shouldBeActive = current.isActive;
@@ -542,34 +540,47 @@ namespace PurrNet.Modules
                 }
             }
 
-            var nextChildIdx = childrenStartIdx + childCount;
-
             if (nid)
                 nid.ClearDirectChildren();
 
+            // Start with the first child's index
+            int nextChildIdx = childScopeBegin;
+            
             for (var j = 0; j < childCount; j++)
             {
-                var childIdx = childrenStartIdx + j;
-                var child = framework[childIdx];
-
                 TryBuildPrototypeHelper(
                     pair,
                     prototype,
                     createdNids,
                     trs,
-                    childIdx,
                     nextChildIdx,
+                    nextChildIdx + 1,  // Next scope starts right after this child
                     out var childGo,
                     out _);
 
                 if (nid && childGo && childGo.TryGetComponent<NetworkIdentity>(out var childNid))
                     nid.AddDirectChild(childNid);
 
-                nextChildIdx += child.childCount;
+                // Move to the next child by adding the current child's subtree size
+                nextChildIdx += GetSubtreeSize(framework, nextChildIdx);
             }
 
             result = instance;
             return true;
+        }
+
+        private static int GetSubtreeSize(DisposableList<GameObjectFrameworkPiece> framework, int startIdx)
+        {
+            int size = 1; // Count the current node
+            var current = framework[startIdx];
+            
+            // Add the size of all children's subtrees
+            for (int i = 0; i < current.childCount; i++)
+            {
+                size += GetSubtreeSize(framework, startIdx + size);
+            }
+            
+            return size;
         }
 
         public static void WalkThePath(Transform parent, Transform instance, int[] inversedPath,
