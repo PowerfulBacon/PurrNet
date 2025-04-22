@@ -548,21 +548,23 @@ namespace PurrNet.Modules
             
             for (var j = 0; j < childCount; j++)
             {
+                int childSubtreeSize = GetSubtreeSize(framework, nextChildIdx);
+                
                 TryBuildPrototypeHelper(
                     pair,
                     prototype,
                     createdNids,
                     trs,
                     nextChildIdx,
-                    nextChildIdx + 1,  // Next scope starts right after this child
+                    nextChildIdx + 1,  // Next child's scope starts right after this child
                     out var childGo,
                     out _);
 
                 if (nid && childGo && childGo.TryGetComponent<NetworkIdentity>(out var childNid))
                     nid.AddDirectChild(childNid);
 
-                // Move to the next child by adding the current child's subtree size
-                nextChildIdx += GetSubtreeSize(framework, nextChildIdx);
+                // Move to the next sibling by adding the current child's subtree size
+                nextChildIdx += childSubtreeSize;
             }
 
             result = instance;
