@@ -555,7 +555,7 @@ namespace PurrNet.Modules
                     prototype,
                     createdNids,
                     trs,
-                    childScopeStart,
+                    childScopeStart + j,
                     out var childGo,
                     out _);
 
