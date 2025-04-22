@@ -557,7 +557,7 @@ namespace PurrNet.Modules
                     createdNids,
                     trs,
                     childScopeBegin + j,
-                    childScopeStart + childCount,  // Next level's children start after all current siblings
+                    childScopeStart + j,
                     out var childGo,
                     out _);
 
