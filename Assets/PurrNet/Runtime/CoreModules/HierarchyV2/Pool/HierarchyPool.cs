@@ -543,50 +543,26 @@ namespace PurrNet.Modules
             if (nid)
                 nid.ClearDirectChildren();
 
-            // Start with the first child's index
-            int nextChildIdx = childScopeBegin;
-            
+            // Process each child in sequence - children start after all siblings
+            int firstChildIdx = childScopeBegin;  // Where this node's children begin
             for (var j = 0; j < childCount; j++)
             {
-                // Calculate the size of this child's subtree
-                int childSubtreeSize = GetSubtreeSize(framework, nextChildIdx);
-                
-                // Process this child
                 TryBuildPrototypeHelper(
                     pair,
                     prototype,
                     createdNids,
                     trs,
-                    nextChildIdx,
-                    nextChildIdx + 1,  // This child's children start right after it
+                    firstChildIdx + j,  // Process siblings in sequence
+                    firstChildIdx + childCount,  // Next level's children start after all current siblings
                     out var childGo,
                     out _);
 
                 if (nid && childGo && childGo.TryGetComponent<NetworkIdentity>(out var childNid))
                     nid.AddDirectChild(childNid);
-
-                // Move to the next sibling
-                nextChildIdx += childSubtreeSize;
             }
 
             result = instance;
             return true;
-        }
-
-        private static int GetSubtreeSize(DisposableList<GameObjectFrameworkPiece> framework, int startIdx)
-        {
-            int size = 1; // Count the current node
-            var current = framework[startIdx];
-            
-            // Add the size of all children's subtrees
-            int childStartIdx = startIdx + 1;
-            for (int i = 0; i < current.childCount; i++)
-            {
-                size += GetSubtreeSize(framework, childStartIdx);
-                childStartIdx += GetSubtreeSize(framework, childStartIdx);
-            }
-            
-            return size;
         }
 
         public static void WalkThePath(Transform parent, Transform instance, int[] inversedPath,
