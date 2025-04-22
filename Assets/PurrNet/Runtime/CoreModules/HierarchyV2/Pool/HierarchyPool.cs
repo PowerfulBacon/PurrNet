@@ -474,7 +474,7 @@ namespace PurrNet.Modules
                     return false;
                 }
 
-                return TryBuildPrototypeHelper(pair, prototype, createdNids, null, 0, 1, out result,
+                return TryBuildPrototypeHelper(pair, prototype, createdNids, null, 0, out result,
                     out shouldBeActive);
             }
             catch
@@ -496,7 +496,7 @@ namespace PurrNet.Modules
         }
 
         private static bool TryBuildPrototypeHelper(PoolPair pair, GameObjectPrototype prototype,
-            List<NetworkIdentity> createdNids, Transform parent, int currentIdx, int total, out GameObject result, out bool shouldBeActive)
+            List<NetworkIdentity> createdNids, Transform parent, int currentIdx, out GameObject result, out bool shouldBeActive)
         {
             var framework = prototype.framework;
             var current = framework[currentIdx];
@@ -542,6 +542,11 @@ namespace PurrNet.Modules
             if (nid)
                 nid.ClearDirectChildren();
 
+            int childScopeStart = 1;
+
+            for (int i = 0; i < currentIdx; ++i)
+                childScopeStart += framework[i].childCount;
+
             // Process each child in sequence - children start after all siblings
             for (var j = 0; j < childCount; j++)
             {
@@ -550,8 +555,7 @@ namespace PurrNet.Modules
                     prototype,
                     createdNids,
                     trs,
-                    total + j,
-                    total + childCount,
+                    childScopeStart,
                     out var childGo,
                     out _);
 
