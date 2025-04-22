@@ -548,22 +548,24 @@ namespace PurrNet.Modules
             
             for (var j = 0; j < childCount; j++)
             {
+                // Calculate the size of this child's subtree
                 int childSubtreeSize = GetSubtreeSize(framework, nextChildIdx);
                 
+                // Process this child
                 TryBuildPrototypeHelper(
                     pair,
                     prototype,
                     createdNids,
                     trs,
                     nextChildIdx,
-                    nextChildIdx + 1,  // Next child's scope starts right after this child
+                    nextChildIdx + 1,  // This child's children start right after it
                     out var childGo,
                     out _);
 
                 if (nid && childGo && childGo.TryGetComponent<NetworkIdentity>(out var childNid))
                     nid.AddDirectChild(childNid);
 
-                // Move to the next sibling by adding the current child's subtree size
+                // Move to the next sibling
                 nextChildIdx += childSubtreeSize;
             }
 
@@ -577,9 +579,11 @@ namespace PurrNet.Modules
             var current = framework[startIdx];
             
             // Add the size of all children's subtrees
+            int childStartIdx = startIdx + 1;
             for (int i = 0; i < current.childCount; i++)
             {
-                size += GetSubtreeSize(framework, startIdx + size);
+                size += GetSubtreeSize(framework, childStartIdx);
+                childStartIdx += GetSubtreeSize(framework, childStartIdx);
             }
             
             return size;
