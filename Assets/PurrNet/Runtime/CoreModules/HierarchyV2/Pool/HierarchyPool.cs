@@ -474,7 +474,7 @@ namespace PurrNet.Modules
                     return false;
                 }
 
-                return TryBuildPrototypeHelper(pair, prototype, createdNids, null, 0, 1, out result,
+                return TryBuildPrototypeHelper(pair, prototype, createdNids, null, 0, out result,
                     out shouldBeActive);
             }
             catch
@@ -496,8 +496,7 @@ namespace PurrNet.Modules
         }
 
         private static bool TryBuildPrototypeHelper(PoolPair pair, GameObjectPrototype prototype,
-            List<NetworkIdentity> createdNids, Transform parent, int currentIdx,
-            int childScopeBegin, out GameObject result, out bool shouldBeActive)
+            List<NetworkIdentity> createdNids, Transform parent, int currentIdx, out GameObject result, out bool shouldBeActive)
         {
             var framework = prototype.framework;
             var current = framework[currentIdx];
@@ -556,7 +555,6 @@ namespace PurrNet.Modules
                     prototype,
                     createdNids,
                     trs,
-                    childScopeBegin + j,
                     childScopeStart + j,
                     out var childGo,
                     out _);
