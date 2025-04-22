@@ -543,7 +543,7 @@ namespace PurrNet.Modules
             if (nid)
                 nid.ClearDirectChildren();
 
-            int childScopeStart = 0;
+            int childScopeStart = 1;
 
             for (int i = 0; i < currentIdx; ++i)
                 childScopeStart += framework[i].childCount;
