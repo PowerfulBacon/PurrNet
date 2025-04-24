@@ -127,69 +127,85 @@ namespace PurrNet
             if (!IsController(_ownerAuth)) return;
             
             if (isServer)
-                SendInitialStateToAll(_array, _length);
+                SendInitialSizeToAll(_length);
             else 
-                SendInitialStateToServer(_array, _length);
+                SendInitialSizeToServer(_length);
+                
+            for (int i = 0; i < _length; i++)
+            {
+                if (isServer)
+                    SendSetToAll(i, _array[i]);
+                else
+                    SendSetToServer(i, _array[i]);
+            }
         }
 
         public override void OnObserverAdded(PlayerID player)
         {
-            SendInitialToTarget(player, _array, _length);
+            SendInitialSizeToTarget(player, _length);
+            
+            for (int i = 0; i < _length; i++)
+            {
+                SendSetToTarget(player, i, _array[i]);
+            }
         }
 
         [TargetRpc(Channel.ReliableOrdered)]
-        private void SendInitialToTarget(PlayerID player, T[] initialArray, int length)
+        private void SendInitialSizeToTarget(PlayerID player, int length)
         {
-            HandleInitialState(initialArray, length);
+            HandleInitialSize(length);
+        }
+        
+        [TargetRpc(Channel.ReliableOrdered)]
+        private void SendSetToTarget(PlayerID player, int index, T value)
+        {
+            if (index >= 0 && index < _length)
+            {
+                _array[index] = value;
+                InvokeChange(new SyncArrayChange<T>(SyncArrayOperation.Set, value, index));
+            }
         }
 
         [ObserversRpc(Channel.ReliableOrdered)]
-        private void SendInitialStateToAll(T[] initialArray, int length)
+        private void SendInitialSizeToAll(int length)
         {
-            HandleInitialState(initialArray, length);
+            HandleInitialSize(length);
         }
 
-        private void HandleInitialState(T[] initialArray, int length)
+        private void HandleInitialSize(int length)
         {
             if (!isHost)
             {
-                if (initialArray == null)
-                    return;
-                
-                _array = new T[initialArray.Length];
-                Array.Copy(initialArray, _array, Math.Min(initialArray.Length, length));
-                _length = length;
-                
-                InvokeChange(new SyncArrayChange<T>(SyncArrayOperation.Cleared));
-                
-                for (int i = 0; i < _length; i++)
+                if (_length != length)
                 {
-                    InvokeChange(new SyncArrayChange<T>(SyncArrayOperation.Set, _array[i], i));
+                    Array.Resize(ref _array, length);
+                    _length = length;
+                    
+                    InvokeChange(new SyncArrayChange<T>(SyncArrayOperation.Resized));
+                    InvokeChange(new SyncArrayChange<T>(SyncArrayOperation.Cleared));
                 }
             }
         }
 
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
-        private void SendInitialStateToServer(T[] initialArray, int length)
+        private void SendInitialSizeToServer(int length)
         {
             if (!_ownerAuth) return;
-            SendInitialStateToOthers(initialArray, length);
+            SendInitialSizeToOthers(length);
         }
 
         [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true)]
-        private void SendInitialStateToOthers(T[] initialArray, int length)
+        private void SendInitialSizeToOthers(int length)
         {
             if (!isServer || isHost)
             {
-                _array = new T[initialArray.Length];
-                Array.Copy(initialArray, _array, Math.Min(initialArray.Length, length));
-                _length = length;
-                
-                InvokeChange(new SyncArrayChange<T>(SyncArrayOperation.Cleared));
-                
-                for (int i = 0; i < _length; i++)
+                if (_length != length)
                 {
-                    InvokeChange(new SyncArrayChange<T>(SyncArrayOperation.Set, _array[i], i));
+                    Array.Resize(ref _array, length);
+                    _length = length;
+                    
+                    InvokeChange(new SyncArrayChange<T>(SyncArrayOperation.Resized));
+                    InvokeChange(new SyncArrayChange<T>(SyncArrayOperation.Cleared));
                 }
             }
         }
