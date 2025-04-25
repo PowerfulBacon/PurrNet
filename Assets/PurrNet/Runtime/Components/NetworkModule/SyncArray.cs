@@ -35,11 +35,13 @@ namespace PurrNet
     }
 
     [Serializable]
-    public class SyncArray<T> : NetworkModule, IList<T>
+    public class SyncArray<T> : NetworkModule, IList<T>, ISerializationCallbackReceiver
     {
         [SerializeField] private bool _ownerAuth;
-        [SerializeField] private T[] _array;
+        [SerializeField] private List<T> _serializedItems = new List<T>();
         [SerializeField] private int _length;
+        
+        private T[] _array;
 
         public delegate void SyncArrayChanged<TYPE>(SyncArrayChange<TYPE> change);
 
@@ -79,8 +81,28 @@ namespace PurrNet
         public SyncArray(int length = 0, bool ownerAuth = false)
         {
             _ownerAuth = ownerAuth;
-            _array = new T[length];
             _length = length;
+            _array = new T[length];
+            _serializedItems = new List<T>(length);
+            for (int i = 0; i < length; i++)
+                _serializedItems.Add(default);
+        }
+        
+        public void OnBeforeSerialize()
+        {
+            _serializedItems.Clear();
+            for (int i = 0; i < _length && i < _array.Length; i++)
+            {
+                _serializedItems.Add(_array[i]);
+            }
+        }
+        
+        public void OnAfterDeserialize()
+        {
+            _array = new T[_length];
+            
+            for (int i = 0; i < _serializedItems.Count && i < _length; i++)
+                _array[i] = _serializedItems[i];
         }
 
         public T this[int index]
@@ -131,6 +153,7 @@ namespace PurrNet
             else 
                 SendInitialSizeToServer(_length);
                 
+            // Send each item individually
             for (int i = 0; i < _length; i++)
             {
                 if (isServer)
@@ -144,6 +167,7 @@ namespace PurrNet
         {
             SendInitialSizeToTarget(player, _length);
             
+            // Send each item individually to the new observer
             for (int i = 0; i < _length; i++)
             {
                 SendSetToTarget(player, i, _array[i]);
