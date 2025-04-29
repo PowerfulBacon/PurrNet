@@ -142,9 +142,9 @@ namespace PurrNet
             }
         }
 
-        public override void OnSpawn()
+        public override void OnEarlySpawn()
         {
-            base.OnSpawn();
+            base.OnEarlySpawn();
             
             if (!IsController(_ownerAuth)) return;
             
@@ -153,7 +153,6 @@ namespace PurrNet
             else 
                 SendInitialSizeToServer(_length);
                 
-            // Send each item individually
             for (int i = 0; i < _length; i++)
             {
                 if (isServer)
@@ -167,7 +166,6 @@ namespace PurrNet
         {
             SendInitialSizeToTarget(player, _length);
             
-            // Send each item individually to the new observer
             for (int i = 0; i < _length; i++)
             {
                 SendSetToTarget(player, i, _array[i]);
