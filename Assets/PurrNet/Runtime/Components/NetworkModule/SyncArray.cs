@@ -142,10 +142,9 @@ namespace PurrNet
             }
         }
 
-        public override void OnEarlySpawn()
+        public override void OnInitializeModules()
         {
-            base.OnEarlySpawn();
-            
+            base.OnInitializeModules();
             if (!IsController(_ownerAuth)) return;
             
             if (isServer)
