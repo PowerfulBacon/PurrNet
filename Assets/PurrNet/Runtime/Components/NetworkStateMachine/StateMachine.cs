@@ -34,6 +34,10 @@ namespace PurrNet.StateMachine
         public StateNode currentStateNode => _currentState.stateId < 0 || _currentState.stateId >= _states.Count
             ? null
             : _states[_currentState.stateId];
+        
+        public StateNode previousStateNode => _previousStateId < 0 || _previousStateId >= _states.Count
+            ? null
+            : _states[_previousStateId];
 
         private bool _initialized;
 
