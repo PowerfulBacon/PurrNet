@@ -473,6 +473,9 @@ namespace PurrNet.Transports
 
         public void SendToClient(Connection target, ByteData data, Channel method = Channel.Unreliable)
         {
+            if (!_internalIsListening)
+                return;
+
             var pair = _rawConnections[target.connectionId];
             var protocol = _transports[pair.transportIdx];
             protocol.transport.SendToClient(pair.originalConnection, data, method);
