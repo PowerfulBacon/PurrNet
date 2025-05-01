@@ -107,7 +107,7 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static void WriteDisposableHashSet<T>(this BitPacker packer, DisposableHashSet<T> value)
         {
-            if (value.isDisposed)
+            if (value.isDisposed || value.set == null)
             {
                 Packer<bool>.Write(packer, false);
                 return;
@@ -149,7 +149,7 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static void WriteDisposableList<T>(this BitPacker packer, DisposableList<T> value)
         {
-            if (value.isDisposed)
+            if (value.isDisposed || value.list == null)
             {
                 Packer<bool>.Write(packer, false);
                 return;
