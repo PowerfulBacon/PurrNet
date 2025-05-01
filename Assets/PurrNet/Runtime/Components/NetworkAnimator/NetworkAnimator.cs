@@ -472,6 +472,8 @@ namespace PurrNet
         public void SetFloat(string propName, float value) => SetFloat(Animator.StringToHash(propName), value);
 
         public float GetFloat(string propName) => _animator.GetFloat(propName);
+        
+        public float GetFloat(int nameHash) => _animator.GetFloat(nameHash);
 
         public void SetBool(string propName, bool value) => SetBool(Animator.StringToHash(propName), value);
 

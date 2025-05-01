@@ -23,7 +23,9 @@ namespace PurrNet.StateMachine
         /// <summary>
         /// Invoked for both server and client when state changes
         /// </summary>
-        public event Action onStateChanged;
+        public event StateChangedDelegate onStateChanged;
+        public delegate void StateChangedDelegate(StateNode previousState, StateNode newState);
+        
 
         StateMachineState _currentState;
         private int _previousStateId = -1;
@@ -34,6 +36,10 @@ namespace PurrNet.StateMachine
         public StateNode currentStateNode => _currentState.stateId < 0 || _currentState.stateId >= _states.Count
             ? null
             : _states[_currentState.stateId];
+        
+        public StateNode previousStateNode => _previousStateId < 0 || _previousStateId >= _states.Count
+            ? null
+            : _states[_previousStateId];
 
         private bool _initialized;
 
@@ -112,6 +118,7 @@ namespace PurrNet.StateMachine
                 return;
 
             var newState = _states[_currentState.stateId];
+            var prevState = previousStateNode;
 
             if (hasData && newState is StateNode<T> node)
             {
@@ -122,7 +129,7 @@ namespace PurrNet.StateMachine
                 newState.Enter(false);
             }
 
-            onStateChanged?.Invoke();
+            onStateChanged?.Invoke(prevState, newState);
             onReceivedNewData?.Invoke();
         }
 
@@ -168,6 +175,9 @@ namespace PurrNet.StateMachine
 
             UpdateStateId(state);
             _currentState.data = data;
+            
+            var newState = _states[_currentState.stateId];
+            var prevState = previousStateNode;
 
             if (isServer)
                 RpcStateChange(_currentState, true, data);
@@ -186,7 +196,7 @@ namespace PurrNet.StateMachine
                 }
             }
 
-            onStateChanged?.Invoke();
+            onStateChanged?.Invoke(prevState, newState);
         }
 
         /// <summary>
@@ -206,6 +216,9 @@ namespace PurrNet.StateMachine
             UpdateStateId(state);
             _currentState.data = null;
 
+            var newState = _states[_currentState.stateId];
+            var prevState = previousStateNode;
+            
             if (isServer)
                 RpcStateChange<ushort>(_currentState, false, 0);
             else
@@ -219,7 +232,7 @@ namespace PurrNet.StateMachine
                     state.Enter(false);
             }
 
-            onStateChanged?.Invoke();
+            onStateChanged?.Invoke(prevState, newState);
         }
 
         /// <summary>
