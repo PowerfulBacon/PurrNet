@@ -46,7 +46,7 @@ namespace PurrNet.Logging
                     var projectPath = Directory.GetCurrentDirectory();
                     var relativePath = fullPath[(projectPath.Length + 1)..];
 
-                    string link = $"<a href=\"{relativePath}\" line={frame.GetFileLineNumber()}>{relativePath}:{frame.GetFileLineNumber()}</a>";
+                    string link = $"<a href=\"{relativePath}\" line=\"{frame.GetFileLineNumber()}\">{relativePath}:{frame.GetFileLineNumber()}</a>";
                     _sb.Append($" (at {link})");
                 }
 

@@ -43,9 +43,7 @@ namespace PurrNet.Logging
                 _arguments[2] = frame.GetFileLineNumber();
                 _arguments[3] = frame.GetFileColumnNumber();
 
-                Debug.LogException(exception);
                 _logPlayerBuildError.Invoke(null, _arguments);
-                Debug.LogException(exception);
             }
             catch
             {
