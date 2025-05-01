@@ -759,10 +759,7 @@ namespace PurrNet.Modules
                     }
                     catch (Exception e)
                     {
-                        Debug.LogException(
-                            new Exception(
-                                $"Failed to call RPC handler for id {packet.rpcId} on identity {identity.GetType().Name}.",
-                                e), identity);
+                        Debug.LogException(e);
                     }
                 }
                 else

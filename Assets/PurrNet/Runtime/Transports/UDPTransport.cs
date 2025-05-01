@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using LiteNetLib;
+using PurrNet.Logging;
 using UnityEngine;
 
 namespace PurrNet.Transports
@@ -361,17 +362,15 @@ namespace PurrNet.Transports
         {
             switch (level)
             {
-                case NetLogLevel.Trace:
-                    Debug.LogFormat(str, args);
-                    break;
+                case NetLogLevel.Trace: break;
                 case NetLogLevel.Info:
-                    Debug.LogFormat(str, args);
+                    PurrLogger.Log(string.Format(str, args));
                     break;
                 case NetLogLevel.Warning:
-                    Debug.LogWarningFormat(str, args);
+                    PurrLogger.LogWarning(string.Format(str, args));
                     break;
                 case NetLogLevel.Error:
-                    Debug.LogErrorFormat(str, args);
+                    PurrLogger.LogError(string.Format(str, args));
                     break;
             }
         }

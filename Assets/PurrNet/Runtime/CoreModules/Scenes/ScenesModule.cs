@@ -40,7 +40,6 @@ namespace PurrNet.Modules
         public LoadSceneMode mode;
         public LocalPhysicsMode physicsMode;
         public bool isPublic;
-        internal bool wasPresentFromStart;
     }
 
     public delegate void OnSceneActionEvent(SceneID scene, bool asServer);
@@ -178,8 +177,7 @@ namespace PurrNet.Modules
             {
                 mode = LoadSceneMode.Single,
                 isPublic = true,
-                physicsMode = LocalPhysicsMode.None,
-                wasPresentFromStart = true
+                physicsMode = LocalPhysicsMode.None
             }, GetNextID());
 
             if (currentScene != originalScene && originalScene.IsValid())
@@ -188,8 +186,7 @@ namespace PurrNet.Modules
                 {
                     mode = LoadSceneMode.Additive,
                     isPublic = true,
-                    physicsMode = LocalPhysicsMode.None,
-                    wasPresentFromStart = true
+                    physicsMode = LocalPhysicsMode.None
                 }, GetNextID());
             }
 

@@ -1235,7 +1235,7 @@ namespace PurrNet
 
         IEnumerator StartClientCoroutine()
         {
-            while (serverState is ConnectionState.Connecting)
+            while (serverState is ConnectionState.Disconnecting or ConnectionState.Connecting)
                 yield return null;
 
             _transport.StartClient(this);
