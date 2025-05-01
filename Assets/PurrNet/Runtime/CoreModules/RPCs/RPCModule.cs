@@ -759,7 +759,7 @@ namespace PurrNet.Modules
                     }
                     catch (Exception e)
                     {
-                        Debug.LogException(e);
+                        PurrLogger.LogException(e);
                     }
                 }
                 else
