@@ -634,7 +634,7 @@ namespace PurrNet.Modules
                 if (HierarchyPool.TryGetPrototype(scope, player, children, out var prototype))
                 {
                     if (_scenePlayers.IsPlayerLoadedInScene(player, _sceneId))
-                        SendSpawnPacket(player, prototype, true);
+                        SendSpawnPacket(player, prototype, children, true);
 
                     for (var i = 0; i < children.Count; i++)
                     {
@@ -645,8 +645,6 @@ namespace PurrNet.Modules
                     }
                 }
                 else PurrLogger.LogError($"Failed to get prototype for '{scope.name}'.", scope);
-
-                ListPool<NetworkIdentity>.Destroy(children);
                 return;
             }
 
@@ -684,14 +682,15 @@ namespace PurrNet.Modules
             else _playersManager.Send(player, packet);
         }
 
-        private void SendSpawnPacket(PlayerID player, GameObjectPrototype prototype, bool batched)
+        private void SendSpawnPacket(PlayerID player, GameObjectPrototype prototype, List<NetworkIdentity> spawned, bool batched)
         {
             var spawnId = new SpawnID(_nextPacketIdx++, player);
             var packet = new SpawnPacket
             {
                 sceneId = _sceneId,
                 packetIdx = spawnId,
-                prototype = prototype
+                prototype = prototype,
+                localcache = spawned
             };
 
             if (batched)
@@ -712,6 +711,7 @@ namespace PurrNet.Modules
                 if (player.isServer)
                     _playersManager.SendToServer(packet);
                 else _playersManager.Send(player, packet);
+                packet.Dispose();
                 _toCompleteNextFrame.Add(spawnId);
             }
         }
@@ -796,7 +796,7 @@ namespace PurrNet.Modules
 
             if (!_asServer)
             {
-                SendSpawnPacket(default, HierarchyPool.GetFullPrototype(gameObject.transform), false);
+                SendSpawnPacket(default, HierarchyPool.GetFullPrototype(gameObject.transform), null, false);
             }
             else if (_scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
             {
@@ -986,10 +986,25 @@ namespace PurrNet.Modules
                     for (var i = 0; i < count; i++)
                     {
                         var packet = batch.spawnPackets[i];
-                        if (packet.prototype.framework.Count > 0)
+
+                        if (packet.localcache != null)
                         {
-                            foreach (var piece in packet.prototype.framework)
+                            for (var j = 0; j < packet.localcache.Count; j++)
+                            {
+                                var piece = packet.localcache[j];
+                                if (!piece) continue;
+                                var pieceid = piece.id;
+                                if (!pieceid.HasValue) continue;
+                                onSentSpawnPacket?.Invoke(player, _sceneId, pieceid.Value);
+                            }
+                        }
+                        else if (packet.prototype.framework.Count > 0)
+                        {
+                            for (var j = 0; j < packet.prototype.framework.Count; j++)
+                            {
+                                var piece = packet.prototype.framework[j];
                                 onSentSpawnPacket?.Invoke(player, _sceneId, piece.id);
+                            }
                         }
                     }
                 }
