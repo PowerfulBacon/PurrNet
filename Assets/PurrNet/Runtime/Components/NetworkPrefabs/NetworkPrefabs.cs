@@ -95,6 +95,9 @@ namespace PurrNet
             if (ApplicationContext.isClone)
                 return;
 
+            // if somehow this got called on a destroyed object
+            if (!this) return;
+
             if (_generating) return;
 
             _generating = true;
@@ -110,6 +113,7 @@ namespace PurrNet
                     {
                         prefabs.Clear();
                         EditorUtility.SetDirty(this);
+                        AssetDatabase.SaveAssets();
                     }
 
                     EditorUtility.ClearProgressBar();
@@ -128,6 +132,7 @@ namespace PurrNet
                     {
                         prefabs.Clear();
                         EditorUtility.SetDirty(this);
+                        AssetDatabase.SaveAssets();
                     }
 
                     EditorUtility.ClearProgressBar();
@@ -214,11 +219,14 @@ namespace PurrNet
                 }
 
                 if (removed > 0 || added > 0)
+                {
                     EditorUtility.SetDirty(this);
+                    AssetDatabase.SaveAssets();
+                }
             }
             catch (Exception e)
             {
-                PurrLogger.LogError($"An error occurred during prefab generation: {e.Message}");
+                PurrLogger.LogError($"An error occurred during prefab generation: {e.Message}\n{e.StackTrace}");
             }
             finally
             {
