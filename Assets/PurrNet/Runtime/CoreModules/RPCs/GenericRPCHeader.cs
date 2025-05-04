@@ -28,8 +28,8 @@ namespace PurrNet
         [UsedImplicitly]
         public void Read(int genericIndex, int index)
         {
-            uint hash = default;
-            Packer<uint>.Read(stream, ref hash);
+            PackedUInt hash = default;
+            Packer<PackedUInt>.Read(stream, ref hash);
 
             if (!Hasher.TryGetType(hash, out var type))
             {

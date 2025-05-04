@@ -1245,30 +1245,23 @@ namespace PurrNet.Codegen
                 // if isGeneric, write the type hash
                 if (isGeneric)
                 {
-                    var getStableHashU32Generic = new GenericInstanceMethod(getStableHashU32WithInstance);
-                    getStableHashU32Generic.GenericArguments.Add(param.ParameterType);
-
-                    code.Append(Instruction.Create(OpCodes.Ldarg, param));
-                    code.Append(Instruction.Create(OpCodes.Call, getStableHashU32Generic));
-                    code.Append(Instruction.Create(OpCodes.Stloc, typeHash));
-
-                    var write = CreateSerializer(module, module.TypeSystem.UInt32, true);
+                    var packerType = module.GetTypeDefinition(typeof(Packer)).Import(module);
+                    var writeGen = packerType.GetMethod("WriteGeneric", true).Import(module);
+                    var writeMethod = new GenericInstanceMethod(writeGen);
+                    writeMethod.GenericArguments.Add(param.ParameterType);
 
                     code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
-                    code.Append(Instruction.Create(OpCodes.Ldloc, typeHash));
-                    code.Append(Instruction.Create(OpCodes.Call, write));
+                    code.Append(Instruction.Create(OpCodes.Ldarg, param));
+                    code.Append(Instruction.Create(OpCodes.Call, writeMethod));
                 }
+                else
+                {
+                    var serializeGenericMethod = CreateSerializer(module, param.ParameterType, true);
 
-                // Packer.Write(stream, type, fgrjrgi);
-
-                var packerType = module.GetTypeDefinition(typeof(Packer)).Import(module);
-                var writeGen = packerType.GetMethod("WriteGeneric", true).Import(module);
-                var writeMethod = new GenericInstanceMethod(writeGen);
-                writeMethod.GenericArguments.Add(param.ParameterType);
-
-                code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
-                code.Append(Instruction.Create(OpCodes.Ldarg, param));
-                code.Append(Instruction.Create(OpCodes.Call, writeMethod));
+                    code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
+                    code.Append(Instruction.Create(OpCodes.Ldarg, param));
+                    code.Append(Instruction.Create(OpCodes.Call, serializeGenericMethod));
+                }
             }
 
             if (methodRpc.Signature.isStatic)

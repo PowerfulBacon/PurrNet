@@ -330,6 +330,7 @@ namespace PurrNet.Packing
         public static void WriteGeneric<T>(BitPacker packer, T value)
         {
             var type = value == null ? typeof(T) : value.GetType();
+            Packer<PackedUInt>.Write(packer, Hasher.GetStableHashU32(type));
             Write(packer, type, value);
         }
 
