@@ -327,6 +327,7 @@ namespace PurrNet.Packing
             }
         }
 
+        [UsedByIL]
         public static void WriteGeneric<T>(BitPacker packer, T value)
         {
             var type = value == null ? typeof(T) : value.GetType();
