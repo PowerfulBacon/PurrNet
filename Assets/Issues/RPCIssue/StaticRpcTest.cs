@@ -23,15 +23,18 @@ public class StaticRpcTest : NetworkIdentity
             someString2 = "!"
         };
 
-        SendObserverRpc(someData, someData2);
+        SomeBaseData someData3 = someData2;
+
+        SendObserverRpcM(0, someData);
+        SendObserverRpcM(0, someData3);
     }
 
     [ObserversRpc(bufferLast: true)]
-    public void SendObserverRpc(SomeBaseData someData, SomeDerivedData someData2)
+    public void SendObserverRpcM<T>(int a, T someData) where T : SomeBaseData
     {
-        Debug.Log($"someData: {someData}");
-        Debug.Log($"someData2: {someData2}");
+        Debug.Log($"SendObserverRpcM: {someData} {someData.GetType().Name} {typeof(T).Name}");
     }
+
 }
 
 public class SomeBaseData : IPackedAuto
