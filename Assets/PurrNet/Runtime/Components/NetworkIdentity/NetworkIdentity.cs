@@ -94,6 +94,14 @@ namespace PurrNet
 
         public bool isSetup => _isSetup;
 
+        /// <summary>
+        /// Used for internal cleanup, avoid using this.
+        /// </summary>
+        public void ResetIsSetup()
+        {
+            _isSetup = false;
+        }
+
         public void PreparePrefabInfo(int prefabId, int componentIndex, bool shouldBePooled, bool isSceneObject)
         {
             _isSetup = true;
