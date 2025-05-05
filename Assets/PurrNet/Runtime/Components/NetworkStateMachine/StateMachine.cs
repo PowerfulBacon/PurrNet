@@ -134,13 +134,21 @@ namespace PurrNet.StateMachine
                 ? null
                 : _states[_currentState.stateId];
 
-            if (activeState != null)
+            try
             {
-                if(isServer)
-                    activeState.Exit(true);
-                if(isClient)
-                    activeState.Exit(false);
+                if (activeState != null)
+                {
+                    if (isServer)
+                        activeState.Exit(true);
+                    if (isClient)
+                        activeState.Exit(false);
+                }
             }
+            catch(Exception e)
+            {
+                PurrLogger.LogException(e);
+            }
+            
 
             _currentState = state;
             _currentState.data = data;
@@ -151,19 +159,26 @@ namespace PurrNet.StateMachine
             var newState = _states[_currentState.stateId];
             var prevState = previousStateNode;
 
-            if (hasData && newState is StateNode<T> node)
+            try
             {
-                if(isServer)
-                    node.Enter(data, true);
-                if(isClient)
-                    node.Enter(data, false);
+                if (hasData && newState is StateNode<T> node)
+                {
+                    if(isServer)
+                        node.Enter(data, true);
+                    if(isClient)
+                        node.Enter(data, false);
+                }
+                else
+                {
+                    if(isServer)
+                        newState.Enter(true);
+                    if(isClient)
+                        newState.Enter(false);
+                }
             }
-            else
+            catch(Exception e)
             {
-                if(isServer)
-                    newState.Enter(true);
-                if(isClient)
-                    newState.Enter(false);
+                PurrLogger.LogException(e);
             }
 
             onStateChanged?.Invoke(prevState, newState);
@@ -184,13 +199,20 @@ namespace PurrNet.StateMachine
             var newState = _states[_currentState.stateId];
             var prevState = previousStateNode;
 
-            if (hasData && newState is StateNode<T> node)
+            try
             {
-                node.Enter(data, false);
+                if (hasData && newState is StateNode<T> node)
+                {
+                    node.Enter(data, false);
+                }
+                else
+                {
+                    newState.Enter(false);
+                }
             }
-            else
+            catch(Exception e)
             {
-                newState.Enter(false);
+                PurrLogger.LogException(e);
             }
 
             onStateChanged?.Invoke(prevState, newState);
@@ -210,12 +232,19 @@ namespace PurrNet.StateMachine
                 ? null
                 : _states[_currentState.stateId];
 
-            if (oldState)
+            try
             {
-                if(isServer)
-                    oldState.Exit(true);
-                if (isClient)
-                    oldState.Exit(false);
+                if (oldState)
+                {
+                    if(isServer)
+                        oldState.Exit(true);
+                    if (isClient)
+                        oldState.Exit(false);
+                }
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogException(e);
             }
 
             _previousStateId = _currentState.stateId;
@@ -249,12 +278,19 @@ namespace PurrNet.StateMachine
             else
                 RpcStateChange_Server(_currentState, true, data);
 
-            if (state)
+            try
             {
-                if(isServer)
-                    state.Enter(data, true);
-                if(isClient)
-                    state.Enter(data, false);
+                if (state)
+                {
+                    if(isServer)
+                        state.Enter(data, true);
+                    if(isClient)
+                        state.Enter(data, false);
+                }
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogException(e);
             }
 
             onStateChanged?.Invoke(prevState, newState);
@@ -285,12 +321,19 @@ namespace PurrNet.StateMachine
             else
                 RpcStateChange_Server<ushort>(_currentState, false, 0);
 
-            if (state)
+            try
             {
-                if(isServer)
-                    state.Enter(true);
-                if(isClient)
-                    state.Enter(false);
+                if (state)
+                {
+                    if(isServer)
+                        state.Enter(true);
+                    if(isClient)
+                        state.Enter(false);
+                }
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogException(e);
             }
 
             onStateChanged?.Invoke(prevState, newState);
