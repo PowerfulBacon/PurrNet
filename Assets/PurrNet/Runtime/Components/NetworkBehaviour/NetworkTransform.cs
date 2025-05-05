@@ -141,6 +141,10 @@ namespace PurrNet
 
         static Quaternion NoInterpolation(Quaternion a, Quaternion b, float t) => b;
 
+        public Vector3 position => syncPosition && !IsController(_ownerAuth) ? _position.GetCurrentState() : _trs.position;
+        public Quaternion rotation => syncRotation && !IsController(_ownerAuth) ? _rotation.GetCurrentState() : _trs.rotation;
+        public Vector3 scale => syncScale && !IsController(_ownerAuth) ? _scale.GetCurrentState() : _trs.localScale;
+
         private void Awake()
         {
             _trs = transform;
@@ -341,7 +345,7 @@ namespace PurrNet
         {
             if (!isSpawned)
                 return;
-            
+
             bool isNotController = !IsController(_ownerAuth);
 
             if (_rb && isNotController)
