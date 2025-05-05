@@ -433,9 +433,8 @@ namespace PurrNet
                 _ => Quaternion.identity
             };
 
-            var scale = _syncScale ? _trs.localScale : default;
-
-            return new NetworkTransformData(pos, rot, scale);
+            var ntScale = _syncScale ? _trs.localScale : default;
+            return new NetworkTransformData(pos, rot, ntScale);
         }
 
         private bool _parentChanged;
@@ -572,7 +571,7 @@ namespace PurrNet
             {
                 var pos = oldValue.position;
                 var rot = oldValue.rotation;
-                var scale = oldValue.scale;
+                var ntScale = oldValue.scale;
 
                 if (syncPosition)
                     DeltaPacker<CompressedVector3>.Read(packet, pos, ref oldValue.position);
@@ -581,7 +580,7 @@ namespace PurrNet
                     DeltaPacker<PackedQuaternion>.Read(packet, rot, ref oldValue.rotation);
 
                 if (syncScale)
-                    DeltaPacker<CompressedVector3>.Read(packet, scale, ref oldValue.scale);
+                    DeltaPacker<CompressedVector3>.Read(packet, ntScale, ref oldValue.scale);
             }
 
             return oldValue;
