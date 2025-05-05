@@ -1042,7 +1042,6 @@ namespace PurrNet.Codegen
             var getId = identityType.GetProperty("id");
             var getSceneId = identityType.GetProperty("sceneId");
             var getStableHashU32 = hahserType.GetMethod("GetStableHashU32", true).Import(module);
-            var getStableHashU32WithInstance = hahserType.GetMethod("GetStableHashU32WithInstance", true).Import(module);
             var getParent = moduleType.GetProperty("parent").GetMethod.Import(module);
             var targetPlayerField = rpcSignatureType.GetField("targetPlayer").Import(module);
 
