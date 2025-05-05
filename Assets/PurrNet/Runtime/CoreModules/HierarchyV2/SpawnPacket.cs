@@ -29,20 +29,34 @@ namespace PurrNet.Modules
         }
     }
 
-    public struct SpawnPacket : IPackedAuto, IDisposable
+    public struct SpawnPacket : IPackedSimple, IDisposable
     {
         public SceneID sceneId;
         public SpawnID packetIdx;
         public GameObjectPrototype prototype;
+
+        public List<NetworkIdentity> localcache;
 
         public override string ToString()
         {
             return $"SpawnPacket: {{ sceneId: {sceneId}, packetIdx: {packetIdx}, prototype: {prototype} }}";
         }
 
+        public void Serialize(BitPacker packer)
+        {
+            Packer<SceneID>.Serialize(packer, ref sceneId);
+            Packer<SpawnID>.Serialize(packer, ref packetIdx);
+            Packer<GameObjectPrototype>.Serialize(packer, ref prototype);
+        }
+
         public void Dispose()
         {
             prototype.Dispose();
+            if (localcache != null)
+            {
+                ListPool<NetworkIdentity>.Destroy(localcache);
+                localcache = null;
+            }
         }
     }
 }

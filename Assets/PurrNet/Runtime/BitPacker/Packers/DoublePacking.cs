@@ -3,20 +3,8 @@ using PurrNet.Modules;
 
 namespace PurrNet.Packing
 {
-    public static class PackFloats
+    public static class DoublePacking
     {
-        [UsedByIL]
-        public static void Write(this BitPacker packer, float data)
-        {
-            packer.WriteBits((ulong)BitConverter.SingleToInt32Bits(data), 32);
-        }
-
-        [UsedByIL]
-        public static void Read(this BitPacker packer, ref float data)
-        {
-            data = BitConverter.Int32BitsToSingle((int)packer.ReadBits(32));
-        }
-
         [UsedByIL]
         public static void Write(this BitPacker packer, double data)
         {

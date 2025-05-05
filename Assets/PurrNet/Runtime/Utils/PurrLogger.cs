@@ -1,5 +1,7 @@
 using PurrNet.Modules;
 using System;
+using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -9,6 +11,50 @@ namespace PurrNet.Logging
 {
     public static class PurrLogger
     {
+        private static MethodInfo _logPlayerBuildError;
+        private static readonly object[] _arguments = new object[4];
+
+        [UsedByIL]
+        public static void LogException(Exception exception)
+        {
+#if UNITY_EDITOR && !PURRNET_DISABLE_CUSTOM_EXCEPTIONS
+            try
+            {
+                _logPlayerBuildError ??=
+                    typeof(Debug).GetMethod("LogPlayerBuildError", BindingFlags.NonPublic | BindingFlags.Static);
+
+                if (_logPlayerBuildError == null)
+                {
+                    Debug.LogException(exception);
+                    return;
+                }
+
+                var st = new StackTrace(exception, true);
+
+                if (st.FrameCount == 0)
+                {
+                    Debug.LogException(exception);
+                    return;
+                }
+
+                var frame = st.GetFrame(0);
+                _arguments[0] = $"{exception.GetType().Name}: {exception.Message}\n{st.FormatStackTraceWithLinks()}";
+                _arguments[1] = frame.GetFileName();
+                _arguments[2] = frame.GetFileLineNumber();
+                _arguments[3] = frame.GetFileColumnNumber();
+
+                _logPlayerBuildError.Invoke(null, _arguments);
+            }
+            catch
+            {
+                Debug.LogException(exception);
+                Debug.LogError("You fucked up, please report this to the devs");
+            }
+#else
+            Debug.LogException(exception);
+#endif
+        }
+
         [UsedByIL]
         public static void LogSimpleError(string message, Object reference)
         {

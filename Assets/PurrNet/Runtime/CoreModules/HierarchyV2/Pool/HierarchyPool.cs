@@ -474,7 +474,7 @@ namespace PurrNet.Modules
                     return false;
                 }
 
-                return TryBuildPrototypeHelper(pair, prototype, createdNids, null, 0, 1, out result,
+                return TryBuildPrototypeHelper(pair, prototype, createdNids, null, 0, out result,
                     out shouldBeActive);
             }
             catch
@@ -496,8 +496,7 @@ namespace PurrNet.Modules
         }
 
         private static bool TryBuildPrototypeHelper(PoolPair pair, GameObjectPrototype prototype,
-            List<NetworkIdentity> createdNids, Transform parent, int currentIdx,
-            int childrenStartIdx, out GameObject result, out bool shouldBeActive)
+            List<NetworkIdentity> createdNids, Transform parent, int currentIdx, out GameObject result, out bool shouldBeActive)
         {
             var framework = prototype.framework;
             var current = framework[currentIdx];
@@ -511,10 +510,8 @@ namespace PurrNet.Modules
             }
 
             var trs = instance.transform;
-
             var siblings = ListPool<NetworkIdentity>.Instantiate();
             instance.GetComponents(siblings);
-
             var nid = siblings.Count > 0 ? siblings[0] : null;
 
             shouldBeActive = current.isActive;
@@ -542,30 +539,28 @@ namespace PurrNet.Modules
                 }
             }
 
-            var nextChildIdx = childrenStartIdx + childCount;
-
             if (nid)
                 nid.ClearDirectChildren();
 
+            int childScopeStart = 1;
+
+            for (int i = 0; i < currentIdx; ++i)
+                childScopeStart += framework[i].childCount;
+
+            // Process each child in sequence - children start after all siblings
             for (var j = 0; j < childCount; j++)
             {
-                var childIdx = childrenStartIdx + j;
-                var child = framework[childIdx];
-
                 TryBuildPrototypeHelper(
                     pair,
                     prototype,
                     createdNids,
                     trs,
-                    childIdx,
-                    nextChildIdx,
+                    childScopeStart + j,
                     out var childGo,
                     out _);
 
                 if (nid && childGo && childGo.TryGetComponent<NetworkIdentity>(out var childNid))
                     nid.AddDirectChild(childNid);
-
-                nextChildIdx += child.childCount;
             }
 
             result = instance;

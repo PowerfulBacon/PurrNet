@@ -285,6 +285,9 @@ namespace PurrNet.Packing
                 return false;
             }
 
+            if (value != null)
+                return true;
+
             value = Activator.CreateInstance<T>();
             return true;
         }

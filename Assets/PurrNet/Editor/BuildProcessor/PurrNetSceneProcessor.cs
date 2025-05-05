@@ -1,4 +1,5 @@
 using System.IO;
+using PurrNet.Pooling;
 using PurrNet.Utils;
 using UnityEditor;
 using UnityEditor.Build;
@@ -64,10 +65,26 @@ namespace PurrNet.Editor
             var sceneInfo = obj.AddComponent<PurrSceneInfo>();
             sceneInfo.rootGameObjects = new System.Collections.Generic.List<GameObject>();
 
+
+            var total = ListPool<NetworkIdentity>.Instantiate();
+            var local = ListPool<NetworkIdentity>.Instantiate();
+
             for (uint i = 0; i < rootObjects.Length; i++)
             {
                 sceneInfo.rootGameObjects.Add(rootObjects[i]);
+                rootObjects[i].GetComponentsInChildren(true, local);
+                total.AddRange(local);
+                local.Clear();
             }
+
+            foreach (var nid in total)
+            {
+                if (!nid) continue;
+                nid.ResetIsSetup();
+            }
+
+            ListPool<NetworkIdentity>.Destroy(total);
+            ListPool<NetworkIdentity>.Destroy(local);
         }
     }
 }

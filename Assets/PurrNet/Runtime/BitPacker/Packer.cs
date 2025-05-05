@@ -327,6 +327,25 @@ namespace PurrNet.Packing
             }
         }
 
+        [UsedByIL]
+        public static void WriteGeneric<T>(BitPacker packer, T value)
+        {
+            var type = value == null ? typeof(T) : value.GetType();
+            Packer<PackedUInt>.Write(packer, Hasher.GetStableHashU32(type));
+            Write(packer, type, value);
+        }
+
+        [UsedByIL]
+        public static void ReadGeneric(BitPacker packer, ref object value)
+        {
+            PackedUInt hash = default;
+            Packer<PackedUInt>.Read(packer, ref hash);
+            if (!Hasher.TryGetType(hash, out var type))
+                throw new Exception($"Type with hash '{hash}' not found.");
+
+            Read(packer, type, ref value);
+        }
+
         public static void Write(BitPacker packer, object value)
         {
             var type = value.GetType();

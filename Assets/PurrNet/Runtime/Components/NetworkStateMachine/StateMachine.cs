@@ -23,7 +23,9 @@ namespace PurrNet.StateMachine
         /// <summary>
         /// Invoked for both server and client when state changes
         /// </summary>
-        public event Action onStateChanged;
+        public event StateChangedDelegate onStateChanged;
+        public delegate void StateChangedDelegate(StateNode previousState, StateNode newState);
+        
 
         StateMachineState _currentState;
         private int _previousStateId = -1;
@@ -34,6 +36,10 @@ namespace PurrNet.StateMachine
         public StateNode currentStateNode => _currentState.stateId < 0 || _currentState.stateId >= _states.Count
             ? null
             : _states[_currentState.stateId];
+        
+        public StateNode previousStateNode => _previousStateId < 0 || _previousStateId >= _states.Count
+            ? null
+            : _states[_previousStateId];
 
         private bool _initialized;
 
@@ -57,10 +63,10 @@ namespace PurrNet.StateMachine
             node.StateUpdate(isServer);
         }
 
-        protected override void OnSpawned(bool asServer)
+        protected override void OnSpawned()
         {
-            base.OnSpawned(asServer);
-
+            base.OnSpawned();
+            
             if (!IsController(ownerAuth))
                 return;
 
@@ -71,6 +77,34 @@ namespace PurrNet.StateMachine
                 SetState(_states[0]);
 
             _initialized = true;
+        }
+
+        protected override void OnObserverAdded(PlayerID player)
+        {
+            base.OnObserverAdded(player);
+            
+            if (!isServer)
+                return;
+            
+            if (_currentState.stateId < 0 || _currentState.stateId >= _states.Count)
+                return;
+            
+            var stateNode = _states[_currentState.stateId];
+            SendStateToObserver(player, stateNode);
+        }
+
+        private void SendStateToObserver(PlayerID player, StateNode stateNode)
+        {
+            Type dataType = GetDataType(_currentState.stateId);
+    
+            if (dataType != null && _currentState.data != null && dataType.IsInstanceOfType(_currentState.data))
+            {
+                RpcStateChange_Target(player, _currentState, true, _currentState.data);
+            }
+            else
+            {
+                RpcStateChange_Target<ushort>(player, _currentState, false, 0);
+            }
         }
 
         public Type GetDataType(int stateId)
@@ -100,10 +134,21 @@ namespace PurrNet.StateMachine
                 ? null
                 : _states[_currentState.stateId];
 
-            if (activeState != null)
+            try
             {
-                activeState.Exit(false);
+                if (activeState != null)
+                {
+                    if (isServer)
+                        activeState.Exit(true);
+                    if (isClient)
+                        activeState.Exit(false);
+                }
             }
+            catch(Exception e)
+            {
+                PurrLogger.LogException(e);
+            }
+            
 
             _currentState = state;
             _currentState.data = data;
@@ -112,17 +157,65 @@ namespace PurrNet.StateMachine
                 return;
 
             var newState = _states[_currentState.stateId];
+            var prevState = previousStateNode;
 
-            if (hasData && newState is StateNode<T> node)
+            try
             {
-                node.Enter(data, false);
+                if (hasData && newState is StateNode<T> node)
+                {
+                    if(isServer)
+                        node.Enter(data, true);
+                    if(isClient)
+                        node.Enter(data, false);
+                }
+                else
+                {
+                    if(isServer)
+                        newState.Enter(true);
+                    if(isClient)
+                        newState.Enter(false);
+                }
             }
-            else
+            catch(Exception e)
             {
-                newState.Enter(false);
+                PurrLogger.LogException(e);
             }
 
-            onStateChanged?.Invoke();
+            onStateChanged?.Invoke(prevState, newState);
+            onReceivedNewData?.Invoke();
+        }
+        
+        [TargetRpc]
+        private void RpcStateChange_Target<T>(PlayerID target, StateMachineState state, bool hasData, T data)
+        {
+            if (IsController(ownerAuth)) return;
+
+            _currentState = state;
+            _currentState.data = data;
+
+            if (_currentState.stateId < 0 || _currentState.stateId >= _states.Count)
+                return;
+
+            var newState = _states[_currentState.stateId];
+            var prevState = previousStateNode;
+
+            try
+            {
+                if (hasData && newState is StateNode<T> node)
+                {
+                    node.Enter(data, false);
+                }
+                else
+                {
+                    newState.Enter(false);
+                }
+            }
+            catch(Exception e)
+            {
+                PurrLogger.LogException(e);
+            }
+
+            onStateChanged?.Invoke(prevState, newState);
             onReceivedNewData?.Invoke();
         }
 
@@ -139,11 +232,19 @@ namespace PurrNet.StateMachine
                 ? null
                 : _states[_currentState.stateId];
 
-            if (oldState)
+            try
             {
-                oldState.Exit(true);
-                if (!IsController(ownerAuth))
-                    oldState.Exit(false);
+                if (oldState)
+                {
+                    if(isServer)
+                        oldState.Exit(true);
+                    if (isClient)
+                        oldState.Exit(false);
+                }
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogException(e);
             }
 
             _previousStateId = _currentState.stateId;
@@ -168,25 +269,31 @@ namespace PurrNet.StateMachine
 
             UpdateStateId(state);
             _currentState.data = data;
+            
+            var newState = _states[_currentState.stateId];
+            var prevState = previousStateNode;
 
             if (isServer)
                 RpcStateChange(_currentState, true, data);
             else
                 RpcStateChange_Server(_currentState, true, data);
 
-            if (state)
+            try
             {
-                state.Enter(data, true);
-                //state.Enter(true);
-
-                if (!IsController(ownerAuth))
+                if (state)
                 {
-                    state.Enter(data, false);
-                    //state.Enter(false);
+                    if(isServer)
+                        state.Enter(data, true);
+                    if(isClient)
+                        state.Enter(data, false);
                 }
             }
+            catch (Exception e)
+            {
+                PurrLogger.LogException(e);
+            }
 
-            onStateChanged?.Invoke();
+            onStateChanged?.Invoke(prevState, newState);
         }
 
         /// <summary>
@@ -206,20 +313,30 @@ namespace PurrNet.StateMachine
             UpdateStateId(state);
             _currentState.data = null;
 
+            var newState = _states[_currentState.stateId];
+            var prevState = previousStateNode;
+            
             if (isServer)
                 RpcStateChange<ushort>(_currentState, false, 0);
             else
                 RpcStateChange_Server<ushort>(_currentState, false, 0);
 
-            if (state)
+            try
             {
-                state.Enter(true);
-
-                if (!IsController(ownerAuth))
-                    state.Enter(false);
+                if (state)
+                {
+                    if(isServer)
+                        state.Enter(true);
+                    if(isClient)
+                        state.Enter(false);
+                }
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogException(e);
             }
 
-            onStateChanged?.Invoke();
+            onStateChanged?.Invoke(prevState, newState);
         }
 
         /// <summary>

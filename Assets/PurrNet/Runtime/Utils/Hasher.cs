@@ -82,6 +82,13 @@ namespace PurrNet.Utils
                 );
         }
 
+        public static uint GetStableHashU32WithInstance<T>(T obj)
+        {
+            if (obj != null)
+                return GetStableHashU32(obj.GetType());
+            return GetStableHashU32(typeof(T));
+        }
+
         public static uint GetStableHashU32<T>()
         {
             return GetStableHashU32(typeof(T));

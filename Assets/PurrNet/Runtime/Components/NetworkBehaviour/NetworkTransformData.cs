@@ -1,4 +1,5 @@
 ﻿using System;
+using PurrNet.Logging;
 using PurrNet.Packing;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace PurrNet
     public struct NetworkTransformData : IEquatable<NetworkTransformData>
     {
         public CompressedVector3 position;
-        public CompressedQuaternion rotation;
+        public PackedQuaternion rotation;
         public CompressedVector3 scale;
 
         public NetworkTransformData(Vector3 position, Quaternion rotation, Vector3 scale)

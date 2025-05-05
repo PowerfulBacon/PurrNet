@@ -310,6 +310,33 @@ namespace PurrNet.Codegen
 
                 ValidateReceivingRPC(module, isNetworkClass, originalRpcs[i], code, info, packet, asServer, end);
 
+                // Add debug information pointing to the original method
+                try
+                {
+                    if (originalRpcs[i].originalMethod.DebugInformation.HasSequencePoints)
+                    {
+                        var firstSequencePoint = originalRpcs[i].originalMethod.DebugInformation.SequencePoints[0];
+                        var document = firstSequencePoint.Document;
+
+                        // Get the first instruction of the new method
+                        var firstInstruction = newMethod.Body.Instructions[0];
+
+                        var newSequencePoint = new SequencePoint(firstInstruction, document)
+                        {
+                            StartLine = firstSequencePoint.StartLine,
+                            StartColumn = firstSequencePoint.StartColumn,
+                            EndLine = firstSequencePoint.EndLine,
+                            EndColumn = firstSequencePoint.EndColumn
+                        };
+
+                        newMethod.DebugInformation.SequencePoints.Add(newSequencePoint);
+                    }
+                }
+                catch
+                {
+                    // ignore
+                }
+
                 // call RPCModule.PostProcessRPC(RPCSignature signature, ref BitPacker packer)
                 var rpcModule = module.GetTypeDefinition<RPCModule>();
                 var postProcessRPC = rpcModule.GetMethod("PostProcessRpc").Import(module);
@@ -1180,7 +1207,6 @@ namespace PurrNet.Codegen
             for (var i = 0; i < newMethod.GenericParameters.Count; i++)
             {
                 var param = newMethod.GenericParameters[i];
-
                 var getStableHashU32Generic = new GenericInstanceMethod(getStableHashU32);
                 getStableHashU32Generic.GenericArguments.Add(param);
 
@@ -1197,6 +1223,7 @@ namespace PurrNet.Codegen
             for (var i = 0; i < paramCount; i++)
             {
                 var param = newMethod.Parameters[i];
+                bool isGeneric = param.ParameterType.IsGenericParameter;
 
                 if (methodRpc.Signature.type == RPCType.TargetRPC && i == 0)
                 {
@@ -1213,11 +1240,26 @@ namespace PurrNet.Codegen
                 if (ShouldIgnore(methodRpc.Signature.type, param, i, paramCount, out _))
                     continue;
 
-                var serializeGenericMethod = CreateSerializer(module, param.ParameterType, true);
+                // if isGeneric, write the type hash
+                if (isGeneric && param.ParameterType is GenericParameter { Type: GenericParameterType.Method })
+                {
+                    var packerType = module.GetTypeDefinition(typeof(Packer)).Import(module);
+                    var writeGen = packerType.GetMethod("WriteGeneric", true).Import(module);
+                    var writeMethod = new GenericInstanceMethod(writeGen);
+                    writeMethod.GenericArguments.Add(param.ParameterType);
 
-                code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
-                code.Append(Instruction.Create(OpCodes.Ldarg, param));
-                code.Append(Instruction.Create(OpCodes.Call, serializeGenericMethod));
+                    code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
+                    code.Append(Instruction.Create(OpCodes.Ldarg, param));
+                    code.Append(Instruction.Create(OpCodes.Call, writeMethod));
+                }
+                else
+                {
+                    var serializeGenericMethod = CreateSerializer(module, param.ParameterType, true);
+
+                    code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
+                    code.Append(Instruction.Create(OpCodes.Ldarg, param));
+                    code.Append(Instruction.Create(OpCodes.Call, serializeGenericMethod));
+                }
             }
 
             if (methodRpc.Signature.isStatic)

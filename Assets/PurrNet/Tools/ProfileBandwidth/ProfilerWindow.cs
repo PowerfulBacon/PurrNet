@@ -56,12 +56,12 @@ namespace PurrNet.Profiler.Editor
 
         #region Unity Editor Integration
 
-        [MenuItem("Tools/PurrNet/Profiler")]
+        [MenuItem("Tools/PurrNet/Analysis/Bandwidth Profiler")]
         public static void ShowWindow()
         {
-            var window = GetWindow<ProfilerWindow>("PurrNet Profiler");
+            var window = GetWindow<ProfilerWindow>("Bandwidth Profiler");
             var purrnetLogo = Resources.Load("purricon") as Texture2D;
-            window.titleContent = new GUIContent("PurrNet Profiler", purrnetLogo, "PurrNet Profiler");
+            window.titleContent = new GUIContent("Bandwidth Profiler", purrnetLogo, "Bandwidth Profiler");
             window.Show();
         }
 
@@ -99,8 +99,6 @@ namespace PurrNet.Profiler.Editor
 
         void OnGUI()
         {
-            GUILayout.Label("PurrNet Profiler", EditorStyles.boldLabel);
-
             // Add button row
             GUILayout.BeginHorizontal();
 
@@ -391,14 +389,14 @@ namespace PurrNet.Profiler.Editor
             {
                 float deltaY = Event.current.mousePosition.y - resizeStartY;
                 float newHeight = Mathf.Clamp(resizeStartHeight + deltaY, minGraphHeight, maxGraphHeight);
-                
+
                 // Only repaint if the height actually changed
                 if (newHeight != graphHeight)
                 {
                     graphHeight = newHeight;
                     Repaint();
                 }
-                
+
                 Event.current.Use();
             }
 

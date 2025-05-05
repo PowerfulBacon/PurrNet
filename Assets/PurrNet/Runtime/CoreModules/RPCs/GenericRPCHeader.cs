@@ -1,13 +1,14 @@
 ﻿using System;
 using JetBrains.Annotations;
+using PurrNet.Logging;
 using PurrNet.Packing;
+using PurrNet.Utils;
 
 namespace PurrNet
 {
     public struct GenericRPCHeader
     {
         public BitPacker stream;
-        public uint hash;
         public Type[] types;
         public object[] values;
         public RPCInfo info;
@@ -27,7 +28,17 @@ namespace PurrNet
         [UsedImplicitly]
         public void Read(int genericIndex, int index)
         {
-            Packer.Read(stream, types[genericIndex], ref values[index]);
+            PackedUInt hash = default;
+            Packer<PackedUInt>.Read(stream, ref hash);
+
+            if (!Hasher.TryGetType(hash, out var type))
+            {
+                throw new InvalidOperationException(
+                    PurrLogger.FormatMessage($"Type with hash '{hash}' not found.")
+                );
+            }
+
+            Packer.Read(stream, type, ref values[index]);
         }
 
         [UsedImplicitly]

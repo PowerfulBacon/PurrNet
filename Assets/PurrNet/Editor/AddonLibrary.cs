@@ -29,7 +29,7 @@ namespace PurrNet.Editor
 
         private GUIStyle wrapStyle;
 
-        [MenuItem("Tools/PurrNet/Addon Library")]
+        [MenuItem("Tools/PurrNet/Addon Library", false, -100)]
         public static void ShowWindow()
         {
             _fetchedAddons = false;
