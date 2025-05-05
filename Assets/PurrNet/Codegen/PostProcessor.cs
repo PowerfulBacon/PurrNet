@@ -1208,7 +1208,6 @@ namespace PurrNet.Codegen
             for (var i = 0; i < newMethod.GenericParameters.Count; i++)
             {
                 var param = newMethod.GenericParameters[i];
-
                 var getStableHashU32Generic = new GenericInstanceMethod(getStableHashU32);
                 getStableHashU32Generic.GenericArguments.Add(param);
 
@@ -1243,7 +1242,7 @@ namespace PurrNet.Codegen
                     continue;
 
                 // if isGeneric, write the type hash
-                if (isGeneric)
+                if (isGeneric && param.ParameterType is GenericParameter { Type: GenericParameterType.Method })
                 {
                     var packerType = module.GetTypeDefinition(typeof(Packer)).Import(module);
                     var writeGen = packerType.GetMethod("WriteGeneric", true).Import(module);

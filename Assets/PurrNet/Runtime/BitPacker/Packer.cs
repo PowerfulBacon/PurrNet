@@ -335,6 +335,17 @@ namespace PurrNet.Packing
             Write(packer, type, value);
         }
 
+        [UsedByIL]
+        public static void ReadGeneric(BitPacker packer, ref object value)
+        {
+            PackedUInt hash = default;
+            Packer<PackedUInt>.Read(packer, ref hash);
+            if (!Hasher.TryGetType(hash, out var type))
+                throw new Exception($"Type with hash '{hash}' not found.");
+
+            Read(packer, type, ref value);
+        }
+
         public static void Write(BitPacker packer, object value)
         {
             var type = value.GetType();

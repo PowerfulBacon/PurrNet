@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class StaticRpcTest : NetworkIdentity
 {
+    public SyncVar<float> someFloat = new SyncVar<float>(ownerAuth: false);
+
     [Button("SendObserverRpc"), UsedImplicitly]
     public void SendRpc()
     {
