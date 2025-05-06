@@ -175,6 +175,7 @@ namespace PurrNet
                     _trs.localScale, _maxBufferSize, _minBufferSize);
 
             _currentData = GetCurrentTransformData();
+            _latestData = _currentData;
             _lastReadData = _currentData;
             _lastSentDelta = _currentData;
         }
@@ -203,6 +204,7 @@ namespace PurrNet
             else if (newOwner == localPlayer && !isServer)
             {
                 _currentData = GetCurrentTransformData();
+                _latestData = _currentData;
                 SendLatestStateToServer(_currentData);
                 _lastSentDelta = _currentData;
             }
@@ -226,6 +228,7 @@ namespace PurrNet
             if (!asServer && !isServer && IsController(localPlayerForced, _ownerAuth, false))
             {
                 _currentData = GetCurrentTransformData();
+                _latestData = _currentData;
                 SendLatestStateToServer(_currentData);
                 _lastSentDelta = _currentData;
             }
@@ -274,6 +277,7 @@ namespace PurrNet
                 return;
 
             _currentData = GetCurrentTransformData();
+            _latestData = _currentData;
             SendLatestState(target, _currentData);
         }
 
@@ -286,6 +290,7 @@ namespace PurrNet
                 return;
 
             _currentData = GetCurrentTransformData();
+            _latestData = _currentData;
             ForceSyncServer(_currentData);
         }
 
@@ -358,16 +363,16 @@ namespace PurrNet
         private void Update()
         {
             if (_interpolationTiming == InterpolationTiming.Update)
-                Interpolate();
+                UpdateNT();
         }
 
         private void LateUpdate()
         {
             if (_interpolationTiming == InterpolationTiming.LateUpdate)
-                Interpolate();
+                UpdateNT();
         }
 
-        private void Interpolate()
+        private void UpdateNT()
         {
             if (!isSpawned)
                 return;
@@ -377,6 +382,10 @@ namespace PurrNet
             if (!isLocalController)
             {
                 ApplyLerpedPosition();
+            }
+            else
+            {
+                _latestData = GetCurrentTransformData();
             }
 
             if (_prevWasController != isLocalController)
@@ -528,6 +537,8 @@ namespace PurrNet
                 _scale.Add(data.scale);
         }
 
+        private NetworkTransformData _latestData;
+
         private NetworkTransformData _currentData;
         private NetworkTransformData _lastReadData;
         private NetworkTransformData _lastSentDelta;
@@ -588,7 +599,7 @@ namespace PurrNet
 
         public void GatherState()
         {
-            _currentData = GetCurrentTransformData();
+            _currentData = _latestData;
 
             if (IsController(_ownerAuth))
                 TeleportToData(_currentData);
