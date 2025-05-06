@@ -169,9 +169,14 @@ namespace PurrNet.Modules
 
         public void OnConnectionState(ConnectionState state, bool asServer)
         {
-            if (state != ConnectionState.Connected)
+            /*if (state != ConnectionState.Connected)
                 return;
 
+            Setup(asServer);*/
+        }
+
+        private void Setup(bool asServer)
+        {
             _asServer = asServer;
 
             var currentScene = _networkManager.gameObject.scene;
@@ -210,7 +215,7 @@ namespace PurrNet.Modules
 
         public void Enable(bool asServer)
         {
-
+            Setup(asServer);
         }
 
         public void Disable(bool asServer)
