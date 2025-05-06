@@ -8,6 +8,30 @@ public class StaticRpcTest : NetworkIdentity
 {
     public SyncVar<float> someFloat = new SyncVar<float>(ownerAuth: false);
 
+    protected override void OnEarlySpawn(bool asServer)
+    {
+        var someData2 = new SomeDerivedData
+        {
+            someInt = 2,
+            someString = "World",
+            someInt2 = 3,
+            someString2 = "!"
+        };
+        SendObserverRpcM(0, someData2);
+    }
+
+    protected override void OnSpawned()
+    {
+        var someData2 = new SomeDerivedData
+        {
+            someInt = 2,
+            someString = "World",
+            someInt2 = 3,
+            someString2 = "!"
+        };
+        SendObserverRpcM(0, someData2);
+    }
+
     [Button("SendObserverRpc"), UsedImplicitly]
     public void SendRpc()
     {

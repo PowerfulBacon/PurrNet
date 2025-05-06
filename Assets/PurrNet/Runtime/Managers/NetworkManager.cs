@@ -1277,8 +1277,15 @@ namespace PurrNet
         private void OnConnectionState(ConnectionState state, bool asServer)
         {
             if (asServer)
+            {
+                _serverModules.OnConnectionState(state, true);
                 onServerConnectionState?.Invoke(state);
-            else onClientConnectionState?.Invoke(state);
+            }
+            else
+            {
+                _clientModules.OnConnectionState(state, false);
+                onClientConnectionState?.Invoke(state);
+            }
 
             if (state == ConnectionState.Disconnected)
             {

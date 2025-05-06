@@ -8,6 +8,7 @@ namespace PurrNet
     {
         private readonly List<INetworkModule> _modules;
         private readonly List<IConnectionListener> _connectionListeners;
+        private readonly List<IConnectionStateListener> _connectionStateListeners;
         private readonly List<IDataListener> _dataListeners;
         private readonly List<IFixedUpdate> _fixedUpdatesListeners;
         private readonly List<IPreFixedUpdate> _preFixedUpdatesListeners;
@@ -23,6 +24,7 @@ namespace PurrNet
         {
             _modules = new List<INetworkModule>();
             _connectionListeners = new List<IConnectionListener>();
+            _connectionStateListeners = new List<IConnectionStateListener>();
             _preFixedUpdatesListeners = new List<IPreFixedUpdate>();
             _posteFixedUpdatesListeners = new List<IPostFixedUpdate>();
             _dataListeners = new List<IDataListener>();
@@ -68,6 +70,9 @@ namespace PurrNet
                 if (_modules[i] is IConnectionListener connectionListener)
                     _connectionListeners.Add(connectionListener);
 
+                if (_modules[i] is IConnectionStateListener connectionStateListener)
+                    _connectionStateListeners.Add(connectionStateListener);
+
                 if (_modules[i] is IDataListener dataListener)
                     _dataListeners.Add(dataListener);
 
@@ -95,6 +100,12 @@ namespace PurrNet
         {
             for (int i = 0; i < _connectionListeners.Count; i++)
                 _connectionListeners[i].OnConnected(conn, asServer);
+        }
+
+        public void OnConnectionState(ConnectionState state, bool asServer)
+        {
+            for (int i = 0; i < _connectionStateListeners.Count; i++)
+                _connectionStateListeners[i].OnConnectionState(state, asServer);
         }
 
         public void OnLostConnection(Connection conn, bool asServer)
@@ -161,6 +172,7 @@ namespace PurrNet
 
             _modules.Clear();
             _connectionListeners.Clear();
+            _connectionStateListeners.Clear();
             _dataListeners.Clear();
             _updateListeners.Clear();
             _fixedUpdatesListeners.Clear();
