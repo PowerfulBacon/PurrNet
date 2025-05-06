@@ -169,10 +169,10 @@ namespace PurrNet.Modules
 
         public void OnConnectionState(ConnectionState state, bool asServer)
         {
-            /*if (state != ConnectionState.Connected)
+            if (state != ConnectionState.Connected)
                 return;
 
-            Setup(asServer);*/
+            Setup(asServer);
         }
 
         private void Setup(bool asServer)
@@ -215,7 +215,7 @@ namespace PurrNet.Modules
 
         public void Enable(bool asServer)
         {
-            Setup(asServer);
+            // Setup(asServer);
         }
 
         public void Disable(bool asServer)
