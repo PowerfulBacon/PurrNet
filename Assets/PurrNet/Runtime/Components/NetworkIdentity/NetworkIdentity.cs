@@ -265,9 +265,16 @@ namespace PurrNet
             return asServer;
         }
 
-        public bool hasConnectedOwner => networkManager && owner.HasValue &&
-                                         networkManager.TryGetModule<PlayersManager>(isServer, out var module) &&
-                                         module.IsPlayerConnected(owner.Value);
+        public bool hasConnectedOwner
+        {
+            get
+            {
+                return networkManager && owner.HasValue &&
+                       networkManager.TryGetModule<PlayersManager>(isServer, out var module) &&
+                       module.IsPlayerConnected(owner.Value) &&
+                       networkManager.scenePlayersModule.IsPlayerLoadedInScene(owner.Value, sceneId);
+            }
+        }
 
         internal PlayerID? internalOwnerServer;
         internal PlayerID? internalOwnerClient;
