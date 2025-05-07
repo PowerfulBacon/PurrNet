@@ -278,7 +278,7 @@ namespace PurrNet
                            scenesModule.IsPlayerLoadedInScene(owner.Value, sceneId);
                 }
 
-                return networkManager.TryGetModule<PlayersManager>(isServer, out var module) &&
+                return networkManager.TryGetModule<PlayersManager>(false, out var module) &&
                        module.IsPlayerConnected(owner.Value);
             }
         }
