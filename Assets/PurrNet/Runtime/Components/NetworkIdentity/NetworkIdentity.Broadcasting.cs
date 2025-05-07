@@ -234,7 +234,7 @@ namespace PurrNet
                 return;
             }
 
-            if (!networkManager.TryGetModule<RPCModule>(!networkManager.isClient, out var module))
+            if (!networkManager.TryGetModule<RPCModule>(networkManager.isServer, out var module))
             {
                 if (signature is { runLocally: false, channel: Channel.ReliableOrdered or Channel.ReliableUnordered })
                     PurrLogger.LogError($"Trying to send RPC `{signature.rpcName}` from `{GetType().Name}` but RPCModule is missing for `{(networkManager.isServer ? "server" : "client")}`.", this);
