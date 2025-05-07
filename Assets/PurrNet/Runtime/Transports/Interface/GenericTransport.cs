@@ -66,6 +66,7 @@ namespace PurrNet.Transports
         {
             if (TryGetNetworkManager(manager, out var networkManager))
                 networkManager.InternalRegisterServerModules();
+
             StartServerInternal();
         }
 

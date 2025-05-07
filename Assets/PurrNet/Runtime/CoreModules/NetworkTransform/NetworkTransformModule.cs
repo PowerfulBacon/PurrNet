@@ -206,7 +206,7 @@ namespace PurrNet.Modules
             bool isSpawnedByLocalPlayer = _playersManager.localPlayerId.HasValue &&
                                           networkTransform.id.Value.scope == _playersManager.localPlayerId;
 
-            if (isSpawnedByLocalPlayer)
+            if (isSpawnedByLocalPlayer && !_networkTransforms.Contains(networkTransform))
                 AddTrs(networkTransform);
         }
 

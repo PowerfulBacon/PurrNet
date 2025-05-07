@@ -6,8 +6,6 @@ using UnityEngine;
 
 public class StaticRpcTest : NetworkIdentity
 {
-    public SyncVar<float> someFloat = new SyncVar<float>(ownerAuth: false);
-
     [Button("SendObserverRpc"), UsedImplicitly]
     public void SendRpc()
     {
@@ -17,18 +15,7 @@ public class StaticRpcTest : NetworkIdentity
             someString = "Hello"
         };
 
-        var someData2 = new SomeDerivedData
-        {
-            someInt = 2,
-            someString = "World",
-            someInt2 = 3,
-            someString2 = "!"
-        };
-
-        SomeBaseData someData3 = someData2;
-
         SendObserverRpcM(0, someData);
-        SendObserverRpcM(0, someData3);
     }
 
     [ObserversRpc(bufferLast: true)]
@@ -36,7 +23,6 @@ public class StaticRpcTest : NetworkIdentity
     {
         Debug.Log($"SendObserverRpcM: {someData} {someData.GetType().Name} {typeof(T).Name}");
     }
-
 }
 
 public class SomeBaseData : IPackedAuto
@@ -47,16 +33,5 @@ public class SomeBaseData : IPackedAuto
     public override string ToString()
     {
         return $"{nameof(SomeBaseData)}: {nameof(someInt)}: {someInt}, {nameof(someString)}: {someString}";
-    }
-}
-
-public class SomeDerivedData : SomeBaseData, IPackedAuto
-{
-    public int someInt2;
-    public string someString2;
-
-    public override string ToString()
-    {
-        return $"{nameof(SomeDerivedData)}: {nameof(someInt)}: {someInt}, {nameof(someString)}: {someString}, {nameof(someInt2)}: {someInt2}, {nameof(someString2)}: {someString2}";
     }
 }

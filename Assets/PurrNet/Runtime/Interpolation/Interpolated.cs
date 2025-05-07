@@ -70,6 +70,11 @@ namespace PurrNet
             _timer = 0f;
         }
 
+        public T GetCurrentState()
+        {
+            return _currentState;
+        }
+
         public T Advance(float deltaTime)
         {
             if (_waitForMinBufferSize)

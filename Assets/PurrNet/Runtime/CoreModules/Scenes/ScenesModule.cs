@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using PurrNet.Logging;
+using PurrNet.Transports;
 using PurrNet.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -46,7 +47,7 @@ namespace PurrNet.Modules
 
     public delegate void OnSceneVisibilityEvent(SceneID scene, bool isVisible, bool asServer);
 
-    public class ScenesModule : INetworkModule, IFixedUpdate, ICleanup
+    public class ScenesModule : INetworkModule, IFixedUpdate, ICleanup, IConnectionStateListener
     {
         private readonly NetworkManager _networkManager;
         private readonly PlayersManager _players;
@@ -166,7 +167,15 @@ namespace PurrNet.Modules
             _scenesToTriggerUnloadEvent.Add(id);
         }
 
-        public void Enable(bool asServer)
+        public void OnConnectionState(ConnectionState state, bool asServer)
+        {
+            if (state != ConnectionState.Connected)
+                return;
+
+            Setup(asServer);
+        }
+
+        private void Setup(bool asServer)
         {
             _asServer = asServer;
 
@@ -202,6 +211,11 @@ namespace PurrNet.Modules
             }
 
             SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
+        }
+
+        public void Enable(bool asServer)
+        {
+            // Setup(asServer);
         }
 
         public void Disable(bool asServer)
