@@ -94,7 +94,22 @@ namespace PurrNet
                 return null;
             }
 
-            return gmethod.Invoke(this, rpcHeader.values);
+            try
+            {
+                return gmethod.Invoke(this, rpcHeader.values);
+            }
+            catch (TargetInvocationException e)
+            {
+                var actualException = e.InnerException;
+
+                if (actualException != null)
+                {
+                    PurrLogger.LogException(actualException);
+                    throw BypassLoggingException.instance;
+                }
+
+                throw;
+            }
         }
 
         /// <summary>

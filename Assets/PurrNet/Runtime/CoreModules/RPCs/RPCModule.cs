@@ -677,9 +677,13 @@ namespace PurrNet.Modules
                     ((delegate* managed<BitPacker, StaticRPCPacket, RPCInfo, bool, void>)
                         rpcHandlerPtr)(stream, data, info, asServer);
                 }
+                catch (BypassLoggingException)
+                {
+                    // ignore
+                }
                 catch (Exception e)
                 {
-                    Debug.LogException(e);
+                    PurrLogger.LogException(e);
                 }
             }
             else PurrLogger.LogError($"Can't find RPC handler for id {data.rpcId} on '{type.Name}'.");
@@ -718,9 +722,13 @@ namespace PurrNet.Modules
                             ((delegate* managed<NetworkModule, BitPacker, ChildRPCPacket, RPCInfo, bool, void>)
                                 rpcHandlerPtr)(networkClass, stream, packet, info, asServer);
                         }
+                        catch (BypassLoggingException)
+                        {
+                            // ignore
+                        }
                         catch (Exception e)
                         {
-                            Debug.LogException(e);
+                            PurrLogger.LogException(e);
                         }
                     }
                     else
@@ -756,6 +764,10 @@ namespace PurrNet.Modules
                         // Call the RPC handler
                         ((delegate* managed<NetworkIdentity, BitPacker, RPCPacket, RPCInfo, bool, void>)
                             rpcHandlerPtr)(identity, stream, packet, info, asServer);
+                    }
+                    catch (BypassLoggingException)
+                    {
+                        // ignore
                     }
                     catch (Exception e)
                     {

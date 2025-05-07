@@ -8,30 +8,6 @@ public class StaticRpcTest : NetworkIdentity
 {
     public SyncVar<float> someFloat = new SyncVar<float>(ownerAuth: false);
 
-    protected override void OnEarlySpawn(bool asServer)
-    {
-        var someData2 = new SomeDerivedData
-        {
-            someInt = 2,
-            someString = "World",
-            someInt2 = 3,
-            someString2 = "!"
-        };
-        SendObserverRpcM(0, someData2);
-    }
-
-    protected override void OnSpawned()
-    {
-        var someData2 = new SomeDerivedData
-        {
-            someInt = 2,
-            someString = "World",
-            someInt2 = 3,
-            someString2 = "!"
-        };
-        SendObserverRpcM(0, someData2);
-    }
-
     [Button("SendObserverRpc"), UsedImplicitly]
     public void SendRpc()
     {
@@ -52,15 +28,14 @@ public class StaticRpcTest : NetworkIdentity
         SomeBaseData someData3 = someData2;
 
         SendObserverRpcM(0, someData);
-        SendObserverRpcM(0, someData3);
     }
 
     [ObserversRpc(bufferLast: true)]
     public void SendObserverRpcM<T>(int a, T someData) where T : SomeBaseData
     {
         Debug.Log($"SendObserverRpcM: {someData} {someData.GetType().Name} {typeof(T).Name}");
+        throw new System.NotImplementedException();
     }
-
 }
 
 public class SomeBaseData : IPackedAuto
