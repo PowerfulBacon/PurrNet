@@ -339,6 +339,27 @@ namespace PurrNet.Modules
             return false;
         }
 
+        int GetCurrentLoadedScenes()
+        {
+            int count = 0;
+
+            for (int i = 0; i < _rawScenes.Count; i++)
+            {
+                if (_scenes.TryGetValue(_rawScenes[i], out var state))
+                {
+                    bool isDontDestroyOnLoad = state.scene.name == "DontDestroyOnLoad";
+
+                    if (isDontDestroyOnLoad)
+                        continue;
+
+                    if (state.scene.isLoaded)
+                        count++;
+                }
+            }
+
+            return count;
+        }
+
         private void HandleNextSceneAction()
         {
             if (_actionsQueue.Count == 0) return;
@@ -390,7 +411,7 @@ namespace PurrNet.Modules
                 }
                 case SceneActionType.Unload:
                 {
-                    var currentlyLoadedCount = _scenes.Count;
+                    var currentlyLoadedCount = GetCurrentLoadedScenes();
                     if (currentlyLoadedCount == 1)
                     {
                         // wait for the next load action

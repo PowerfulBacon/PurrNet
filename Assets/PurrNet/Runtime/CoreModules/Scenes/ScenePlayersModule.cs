@@ -330,7 +330,6 @@ namespace PurrNet.Modules
             return false;
         }
 
-
         public void RemovePlayerFromScene(PlayerID player, SceneID scene)
         {
             if (!_asServer)
