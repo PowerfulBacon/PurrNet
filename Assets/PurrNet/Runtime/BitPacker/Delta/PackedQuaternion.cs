@@ -19,6 +19,11 @@ namespace PurrNet.Packing
             w = value.w;
         }
 
+        public override string ToString()
+        {
+            return $"PackedQuaternion({x}, {y}, {z}, {w})";
+        }
+
         public static implicit operator PackedQuaternion(Quaternion value)
         {
             return new PackedQuaternion(value);

@@ -380,13 +380,9 @@ namespace PurrNet
             bool isLocalController = IsController(_ownerAuth);
 
             if (!isLocalController)
-            {
                 ApplyLerpedPosition();
-            }
-            else
-            {
-                _latestData = GetCurrentTransformData();
-            }
+
+            _latestData = GetCurrentTransformData();
 
             if (_prevWasController != isLocalController)
             {
@@ -600,7 +596,6 @@ namespace PurrNet
         public void GatherState()
         {
             _currentData = _latestData;
-
             if (IsController(_ownerAuth))
                 TeleportToData(_currentData);
         }
