@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace PurrNet.Packing
 {
@@ -8,6 +9,11 @@ namespace PurrNet.Packing
         const double PRECISION = 1f / (1 << (BIT_RESOLUTION - 1));
 
         public long value;
+
+        public override string ToString()
+        {
+            return GetValue().ToString(CultureInfo.InvariantCulture);
+        }
 
         public NormalizedFloat(long value)
         {

@@ -16,6 +16,11 @@ namespace PurrNet.Packing
             this.z = z.Round();
         }
 
+        public override string ToString()
+        {
+            return $"CompressedVector3({x}, {y}, {z})";
+        }
+
         public static implicit operator CompressedVector3(Vector3 value) => new CompressedVector3(value.x, value.y, value.z);
         public static implicit operator Vector3(CompressedVector3 vector) => new Vector3(vector.x.value, vector.y.value, vector.z.value);
 
