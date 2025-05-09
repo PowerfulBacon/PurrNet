@@ -440,7 +440,7 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   _syncPosition: 2
-  _syncRotation: 1
+  _syncRotation: 2
   _syncScale: 0
   _syncParent: 1
   _interpolateSettings: 255

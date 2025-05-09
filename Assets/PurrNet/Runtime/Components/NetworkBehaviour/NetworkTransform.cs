@@ -102,7 +102,7 @@ namespace PurrNet
         private bool _isResettingParent;
 
         Interpolated<Vector3WithParent> _position;
-        Interpolated<Quaternion> _rotation;
+        Interpolated<QuaternionWithParent> _rotation;
         Interpolated<Vector3> _scale;
 
         private Transform _trs;
@@ -117,7 +117,7 @@ namespace PurrNet
         static Quaternion NoInterpolation(Quaternion a, Quaternion b, float t) => b;
 
         public Vector3 position => syncPosition && !IsController(_ownerAuth) ? _position.GetCurrentState().position : _trs.position;
-        public Quaternion rotation => syncRotation && !IsController(_ownerAuth) ? _rotation.GetCurrentState() : _trs.rotation;
+        public Quaternion rotation => syncRotation && !IsController(_ownerAuth) ? _rotation.GetCurrentState().rotation : _trs.rotation;
         public Vector3 scale => syncScale && !IsController(_ownerAuth) ? _scale.GetCurrentState() : _trs.localScale;
 
         private void Awake()
@@ -141,14 +141,19 @@ namespace PurrNet
                 var currentPos = _syncPosition == SyncMode.World ?
                     new Vector3WithParent(_parentId, false, _trs.position) :
                     new Vector3WithParent(_parentId, true, _trs.localPosition);
-                _position = new Interpolated<Vector3WithParent>(interpolatePosition ? Vector3WithParent.Lerp : Vector3WithParent.NoLerp, sendDelta,
-                    currentPos, _maxBufferSize, _minBufferSize);
+                _position = new Interpolated<Vector3WithParent>(interpolatePosition ? Vector3WithParent.Lerp : Vector3WithParent.NoLerp,
+                    sendDelta, currentPos, _maxBufferSize, _minBufferSize);
             }
 
             if (syncRotation)
-                _rotation = new Interpolated<Quaternion>(interpolateRotation ? Quaternion.Lerp : NoInterpolation,
-                    sendDelta,
-                    _syncRotation == SyncMode.World ? _trs.rotation : _trs.localRotation, _maxBufferSize, _minBufferSize);
+            {
+                var currentRot = _syncRotation == SyncMode.World ?
+                    new QuaternionWithParent(_parentId, false, _trs.rotation) :
+                    new QuaternionWithParent(_parentId, true, _trs.localRotation);
+                _rotation = new Interpolated<QuaternionWithParent>(
+                    interpolateRotation ? QuaternionWithParent.Lerp : QuaternionWithParent.NoLerp,
+                    sendDelta, currentRot, _maxBufferSize, _minBufferSize);
+            }
 
             if (syncScale)
                 _scale = new Interpolated<Vector3>(interpolateScale ? Vector3.Lerp : NoInterpolation, sendDelta,
@@ -294,7 +299,7 @@ namespace PurrNet
             if (syncPosition && targetPos.HasValue)
                 _position.Teleport(new Vector3WithParent(_parentId, _syncPosition == SyncMode.Local, targetPos.Value));
             if (syncRotation && targetRot.HasValue)
-                _rotation.Teleport(targetRot.Value);
+                _rotation.Teleport(new QuaternionWithParent(_parentId, _syncRotation == SyncMode.Local, targetRot.Value));
             if (syncScale && targetScale.HasValue)
                 _scale.Teleport(targetScale.Value);
         }
@@ -383,20 +388,14 @@ namespace PurrNet
                 _controller.enabled = false;
 
             if (syncPosition)
-            {
-                var data = _position.Advance(Time.deltaTime);
-                _trs.position = data.position;
-            }
+                _trs.position = _position.Advance(Time.deltaTime).position;
 
             if (syncRotation)
-            {
-                if (_syncRotation == SyncMode.World)
-                    _trs.rotation = _rotation.Advance(Time.deltaTime);
-                else _trs.localRotation = _rotation.Advance(Time.deltaTime);
-            }
+                _trs.rotation = _rotation.Advance(Time.deltaTime).rotation;
 
             if (syncScale)
                 _trs.localScale = _scale.Advance(Time.deltaTime);
+
             if (disableController && _characterControllerPatch)
                 _controller.enabled = true;
         }
@@ -480,19 +479,20 @@ namespace PurrNet
 
         private void TeleportToData(NetworkTransformData data)
         {
-            if (syncPosition)
+            var p = _parentId;
+
+            if (networkManager.TryGetModule<HierarchyFactory>(isServer, out var factory) &&
+                factory.TryGetHierarchy(sceneId, out var hierarchy) &&
+                data.parent.HasValue && hierarchy.TryGetIdentity(data.parent.Value, out var pid))
             {
-                if (networkManager.TryGetModule<HierarchyFactory>(isServer, out var factory) &&
-                    factory.TryGetHierarchy(sceneId, out var hierarchy) &&
-                    data.parent.HasValue && hierarchy.TryGetIdentity(data.parent.Value, out var p))
-                {
-                    _position.Teleport(new Vector3WithParent(p, _syncPosition == SyncMode.Local, data.position));
-                }
-                else _position.Teleport(new Vector3WithParent(_parentId, _syncPosition == SyncMode.Local, data.position));
+                p = pid;
             }
 
+            if (syncPosition)
+                _position.Teleport(new Vector3WithParent(p, _syncPosition == SyncMode.Local, data.position));
+
             if (syncRotation)
-                _rotation.Teleport(data.rotation);
+                _rotation.Teleport(new QuaternionWithParent(p, _syncRotation == SyncMode.Local, data.rotation));
 
             if (syncScale)
                 _scale.Teleport(data.scale);
@@ -500,17 +500,20 @@ namespace PurrNet
 
         private void ApplyData(NetworkTransformData data)
         {
-            if (syncPosition)
+            var p = _parentId;
+
+            if (networkManager.TryGetModule<HierarchyFactory>(isServer, out var factory) &&
+                factory.TryGetHierarchy(sceneId, out var hierarchy) &&
+                data.parent.HasValue && hierarchy.TryGetIdentity(data.parent.Value, out var pid))
             {
-                if (networkManager.TryGetModule<HierarchyFactory>(isServer, out var factory) &&
-                    factory.TryGetHierarchy(sceneId, out var hierarchy) &&
-                    data.parent.HasValue && hierarchy.TryGetIdentity(data.parent.Value, out var p))
-                    _position.Add(new Vector3WithParent(p, _syncPosition == SyncMode.Local, data.position));
-                else _position.Add(new Vector3WithParent(_parentId, _syncPosition == SyncMode.Local, data.position));
+                p = pid;
             }
 
+            if (syncPosition)
+                _position.Add(new Vector3WithParent(p, _syncPosition == SyncMode.Local, data.position));
+
             if (syncRotation)
-                _rotation.Add(data.rotation);
+                _rotation.Add(new QuaternionWithParent(p, _syncRotation == SyncMode.Local, data.rotation));
 
             if (syncScale)
                 _scale.Add(data.scale);
