@@ -386,8 +386,6 @@ namespace PurrNet
             {
                 var data = _position.Advance(Time.deltaTime);
                 _trs.position = data.position;
-
-                Debug.DrawLine(data.position, data.position + Vector3.up, Color.red, 10f);
             }
 
             if (syncRotation)
@@ -410,7 +408,7 @@ namespace PurrNet
             var pos = _syncPosition switch
             {
                 SyncMode.World => _trs.position,
-                SyncMode.Local => _trs.localPosition,
+                SyncMode.Local => _parentId ? _parentId.transform.InverseTransformPoint(_trs.position) : _trs.position,
                 _ => Vector3.zero
             };
 
@@ -420,6 +418,7 @@ namespace PurrNet
                 SyncMode.Local => _trs.localRotation,
                 _ => Quaternion.identity
             };
+
 
             var ntScale = _syncScale ? _trs.localScale : default;
             return new NetworkTransformData(_parentId, pos, rot, ntScale);
@@ -489,7 +488,7 @@ namespace PurrNet
                 {
                     _position.Teleport(new Vector3WithParent(p, _syncPosition == SyncMode.Local, data.position));
                 }
-                else _position.Teleport(new Vector3WithParent(parent, _syncPosition == SyncMode.Local, data.position));
+                else _position.Teleport(new Vector3WithParent(_parentId, _syncPosition == SyncMode.Local, data.position));
             }
 
             if (syncRotation)
@@ -507,7 +506,7 @@ namespace PurrNet
                     factory.TryGetHierarchy(sceneId, out var hierarchy) &&
                     data.parent.HasValue && hierarchy.TryGetIdentity(data.parent.Value, out var p))
                     _position.Add(new Vector3WithParent(p, _syncPosition == SyncMode.Local, data.position));
-                else _position.Add(new Vector3WithParent(parent, _syncPosition == SyncMode.Local, data.position));
+                else _position.Add(new Vector3WithParent(_parentId, _syncPosition == SyncMode.Local, data.position));
             }
 
             if (syncRotation)
@@ -531,7 +530,7 @@ namespace PurrNet
             if (syncParent)
             {
                 bool areEqual = NetworkID.Equals(_lastSentDelta.parent, _currentData.parent);
-                Packer<bool>.Read(packer, ref areEqual);
+                Packer<bool>.Write(packer, areEqual);
                 if (!areEqual)
                 {
                     hasChanged = true;
