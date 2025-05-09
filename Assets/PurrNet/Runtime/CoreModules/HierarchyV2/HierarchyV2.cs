@@ -429,6 +429,9 @@ namespace PurrNet.Modules
                 {
                     int count = list.Count;
 
+                    if (!list[0] || !list[0].isSpawned)
+                        return;
+
                     // if server, refresh visibility for all players in scene
                     if (count > 0 && list[0] && _asServer &&
                         _scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
