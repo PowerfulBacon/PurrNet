@@ -281,11 +281,11 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  _syncPosition: 2
-  _syncRotation: 2
+  _syncPosition: 1
+  _syncRotation: 1
   _syncScale: 0
   _syncParent: 0
-  _interpolateSettings: 7
+  _interpolateSettings: 255
   _minBufferSize: 1
   _maxBufferSize: 2
   _characterControllerPatch: 1
@@ -440,10 +440,10 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   _syncPosition: 2
-  _syncRotation: 2
+  _syncRotation: 1
   _syncScale: 0
   _syncParent: 1
-  _interpolateSettings: 7
+  _interpolateSettings: 255
   _minBufferSize: 1
   _maxBufferSize: 2
   _characterControllerPatch: 0

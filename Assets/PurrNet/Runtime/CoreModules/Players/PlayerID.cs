@@ -6,17 +6,17 @@ namespace PurrNet
     [Serializable]
     public readonly struct PlayerID : IPackedAuto, IEquatable<PlayerID>
     {
-        private ushort _id { get; }
+        private PackedUShort _id { get; }
 
         public bool isBot { get; }
 
-        public ushort id => _id;
+        public PackedUShort id => _id;
 
         public static readonly PlayerID Server = new PlayerID(0, false);
 
         public bool isServer => _id == 0;
 
-        public PlayerID(ushort id, bool isBot)
+        public PlayerID(PackedUShort id, bool isBot)
         {
             _id = id;
             this.isBot = isBot;
@@ -24,7 +24,7 @@ namespace PurrNet
 
         public override string ToString()
         {
-            return _id == 0 ? "Server" : _id.ToString("000");
+            return _id == 0 ? "Server" : _id.value.ToString("000");
         }
 
         public override int GetHashCode()

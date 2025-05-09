@@ -1,5 +1,3 @@
-using System;
-using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
@@ -9,29 +7,6 @@ using UnityEngine.Serialization;
 
 namespace PurrNet
 {
-    [Flags]
-    [Serializable]
-    public enum TransformSyncMode : byte
-    {
-        [UsedImplicitly] None,
-        Position = 1,
-        Rotation = 2,
-        Scale = 4
-    }
-
-    public enum SyncMode : byte
-    {
-        No,
-        World,
-        [UsedImplicitly] Local
-    }
-
-    public enum InterpolationTiming
-    {
-        Update,
-        LateUpdate
-    }
-
     public sealed class NetworkTransform : NetworkIdentity, ITick
     {
         [Header("What to Sync")]
@@ -126,7 +101,7 @@ namespace PurrNet
 
         private bool _isResettingParent;
 
-        Interpolated<Vector3> _position;
+        Interpolated<Vector3WithParent> _position;
         Interpolated<Quaternion> _rotation;
         Interpolated<Vector3> _scale;
 
@@ -141,7 +116,7 @@ namespace PurrNet
 
         static Quaternion NoInterpolation(Quaternion a, Quaternion b, float t) => b;
 
-        public Vector3 position => syncPosition && !IsController(_ownerAuth) ? _position.GetCurrentState() : _trs.position;
+        public Vector3 position => syncPosition && !IsController(_ownerAuth) ? _position.GetCurrentState().position : _trs.position;
         public Quaternion rotation => syncRotation && !IsController(_ownerAuth) ? _rotation.GetCurrentState() : _trs.rotation;
         public Vector3 scale => syncScale && !IsController(_ownerAuth) ? _scale.GetCurrentState() : _trs.localScale;
 
@@ -151,18 +126,23 @@ namespace PurrNet
             _rb = GetComponent<Rigidbody>();
             _rb2d = GetComponent<Rigidbody2D>();
             _controller = GetComponent<CharacterController>();
+            _parentId = GetNearestParent();
         }
 
         protected override void OnEarlySpawn()
         {
             _trs = transform;
+            _parentId = parent;
 
             float sendDelta = networkManager.tickModule.tickDelta;
 
             if (syncPosition)
             {
-                _position = new Interpolated<Vector3>(interpolatePosition ? Vector3.Lerp : NoInterpolation, sendDelta,
-                    _syncPosition == SyncMode.World ? _trs.position : _trs.localPosition, _maxBufferSize, _minBufferSize);
+                var currentPos = _syncPosition == SyncMode.World ?
+                    new Vector3WithParent(_parentId, false, _trs.position) :
+                    new Vector3WithParent(_parentId, true, _trs.localPosition);
+                _position = new Interpolated<Vector3WithParent>(interpolatePosition ? Vector3WithParent.Lerp : Vector3WithParent.NoLerp, sendDelta,
+                    currentPos, _maxBufferSize, _minBufferSize);
             }
 
             if (syncRotation)
@@ -312,7 +292,7 @@ namespace PurrNet
         public void ClearInterpolation(Vector3? targetPos, Quaternion? targetRot, Vector3? targetScale)
         {
             if (syncPosition && targetPos.HasValue)
-                _position.Teleport(targetPos.Value);
+                _position.Teleport(new Vector3WithParent(_parentId, _syncPosition == SyncMode.Local, targetPos.Value));
             if (syncRotation && targetRot.HasValue)
                 _rotation.Teleport(targetRot.Value);
             if (syncScale && targetScale.HasValue)
@@ -404,9 +384,10 @@ namespace PurrNet
 
             if (syncPosition)
             {
-                if (_syncPosition == SyncMode.World)
-                    _trs.position = _position.Advance(Time.deltaTime);
-                else _trs.localPosition = _position.Advance(Time.deltaTime);
+                var data = _position.Advance(Time.deltaTime);
+                _trs.position = data.position;
+
+                Debug.DrawLine(data.position, data.position + Vector3.up, Color.red, 10f);
             }
 
             if (syncRotation)
@@ -421,6 +402,8 @@ namespace PurrNet
             if (disableController && _characterControllerPatch)
                 _controller.enabled = true;
         }
+
+        private NetworkIdentity _parentId;
 
         private NetworkTransformData GetCurrentTransformData()
         {
@@ -439,18 +422,17 @@ namespace PurrNet
             };
 
             var ntScale = _syncScale ? _trs.localScale : default;
-            return new NetworkTransformData(pos, rot, ntScale);
+            return new NetworkTransformData(_parentId, pos, rot, ntScale);
         }
 
         private bool _parentChanged;
 
         void OnTransformParentChanged()
         {
+            _parentId = GetNearestParent();
+
             if (!isSpawned)
                 return;
-
-            var data = GetCurrentTransformData();
-            TeleportLocalToData(data);
 
             if (_isIgnoringParentChanges)
                 return;
@@ -497,22 +479,18 @@ namespace PurrNet
             _isIgnoringParentChanges = false;
         }
 
-        private void TeleportLocalToData(NetworkTransformData data)
-        {
-            if (_syncPosition == SyncMode.Local)
-                _position.Teleport(data.position);
-
-            if (_syncRotation == SyncMode.Local)
-                _rotation.Teleport(data.rotation);
-
-            if (syncScale)
-                _scale.Teleport(data.scale);
-        }
-
         private void TeleportToData(NetworkTransformData data)
         {
             if (syncPosition)
-                _position.Teleport(data.position);
+            {
+                if (networkManager.TryGetModule<HierarchyFactory>(isServer, out var factory) &&
+                    factory.TryGetHierarchy(sceneId, out var hierarchy) &&
+                    data.parent.HasValue && hierarchy.TryGetIdentity(data.parent.Value, out var p))
+                {
+                    _position.Teleport(new Vector3WithParent(p, _syncPosition == SyncMode.Local, data.position));
+                }
+                else _position.Teleport(new Vector3WithParent(parent, _syncPosition == SyncMode.Local, data.position));
+            }
 
             if (syncRotation)
                 _rotation.Teleport(data.rotation);
@@ -524,7 +502,13 @@ namespace PurrNet
         private void ApplyData(NetworkTransformData data)
         {
             if (syncPosition)
-                _position.Add(data.position);
+            {
+                if (networkManager.TryGetModule<HierarchyFactory>(isServer, out var factory) &&
+                    factory.TryGetHierarchy(sceneId, out var hierarchy) &&
+                    data.parent.HasValue && hierarchy.TryGetIdentity(data.parent.Value, out var p))
+                    _position.Add(new Vector3WithParent(p, _syncPosition == SyncMode.Local, data.position));
+                else _position.Add(new Vector3WithParent(parent, _syncPosition == SyncMode.Local, data.position));
+            }
 
             if (syncRotation)
                 _rotation.Add(data.rotation);
@@ -544,8 +528,21 @@ namespace PurrNet
             int flagPos = packer.AdvanceBits(1);
             bool hasChanged = false;
 
+            if (syncParent)
+            {
+                bool areEqual = NetworkID.Equals(_lastSentDelta.parent, _currentData.parent);
+                Packer<bool>.Read(packer, ref areEqual);
+                if (!areEqual)
+                {
+                    hasChanged = true;
+                    Packer<NetworkID?>.Write(packer, _currentData.parent);
+                }
+            }
+
             if (syncPosition)
-                hasChanged = DeltaPacker<CompressedVector3>.Write(packer, _lastSentDelta.position, _currentData.position);
+                hasChanged =
+                    DeltaPacker<CompressedVector3>.Write(packer, _lastSentDelta.position, _currentData.position) ||
+                    hasChanged;
 
             if (syncRotation)
                 hasChanged = DeltaPacker<PackedQuaternion>.Write(packer, _lastSentDelta.rotation, _currentData.rotation) ||
@@ -579,6 +576,14 @@ namespace PurrNet
                 var pos = oldValue.position;
                 var rot = oldValue.rotation;
                 var ntScale = oldValue.scale;
+
+                if (syncParent)
+                {
+                    bool areEqual = default;
+                    Packer<bool>.Read(packet, ref areEqual);
+                    if (!areEqual)
+                        Packer<NetworkID?>.Read(packet, ref oldValue.parent);
+                }
 
                 if (syncPosition)
                     DeltaPacker<CompressedVector3>.Read(packet, pos, ref oldValue.position);

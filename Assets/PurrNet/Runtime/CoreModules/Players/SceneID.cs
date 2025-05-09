@@ -1,12 +1,13 @@
 ﻿using System;
+using PurrNet.Packing;
 
 namespace PurrNet
 {
-    public readonly struct SceneID : IEquatable<SceneID>
+    public readonly struct SceneID : IEquatable<SceneID>, IPackedAuto
     {
-        private ushort _id { get; }
+        private PackedUShort _id { get; }
 
-        public ushort id => _id;
+        public PackedUShort id => _id;
 
         public SceneID(ushort id)
         {
@@ -15,7 +16,7 @@ namespace PurrNet
 
         public override string ToString()
         {
-            return _id.ToString("000");
+            return _id.value.ToString("000");
         }
 
         public override int GetHashCode()

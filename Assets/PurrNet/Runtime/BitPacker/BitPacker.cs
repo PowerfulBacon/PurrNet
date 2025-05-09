@@ -238,7 +238,7 @@ namespace PurrNet.Packing
         }
 
         [UsedByIL]
-        public bool HandleNullScenarios<T>(T oldValue, T newValue, ref bool areEqual) where T : class
+        public bool HandleNullScenarios<T>(T oldValue, T newValue, ref bool areEqual)
         {
             if (oldValue == null)
             {
@@ -256,7 +256,7 @@ namespace PurrNet.Packing
             if (newValue == null)
             {
                 areEqual = false;
-                Packer<T>.Write(this, null);
+                Packer<T>.Write(this, default);
                 return false;
             }
 
@@ -277,7 +277,7 @@ namespace PurrNet.Packing
         }
 
         [UsedByIL]
-        public bool ReadIsNull<T>(ref T value) where T : class
+        public bool ReadIsNull<T>(ref T value)
         {
             if (ReadBits(1) == 1)
             {

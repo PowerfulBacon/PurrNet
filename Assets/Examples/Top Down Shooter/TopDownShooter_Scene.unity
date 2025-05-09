@@ -1613,7 +1613,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _stopPlayingOnDisconnect: 1
   _startServerFlags: 9
-  _startClientFlags: 7
+  _startClientFlags: 6
   _cookieScope: 1
   _dontDestroyOnLoad: 0
   _transport: {fileID: 1216416902}
@@ -2559,7 +2559,7 @@ MonoBehaviour:
   _maxBufferSize: 2
   _characterControllerPatch: 0
   _ownerAuth: 1
-  _interpolationTiming: 0
+  _interpolationTiming: 1
 --- !u!114 &1864834789
 MonoBehaviour:
   m_ObjectHideFlags: 0
