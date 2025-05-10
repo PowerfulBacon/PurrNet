@@ -186,7 +186,6 @@ namespace PurrNet
             }
             else if (newOwner == localPlayer && !isServer)
             {
-                PurrLogger.Log($"Called SendLatestStateToServer");
                 _currentData = GetCurrentTransformData();
                 _latestData = _currentData;
                 SendLatestStateToServer(_currentData);
