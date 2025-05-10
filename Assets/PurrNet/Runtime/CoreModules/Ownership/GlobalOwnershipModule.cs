@@ -328,7 +328,19 @@ namespace PurrNet.Modules
             var idCount = change.identities.Count;
 
             for (var j = 0; j < idCount; j++)
-                HandleOwnershipChange(player, change, change.identities[j]);
+            {
+                if (!HandleOwnershipChange(player, change, change.identities[j]))
+                {
+                    change.identities.RemoveAt(j--);
+                    idCount--;
+                }
+            }
+
+            if (!asServer)
+                return;
+
+            if (_scenePlayers.TryGetPlayersInScene(change.sceneId, out var players))
+                _playersManager.Send(players, change);
         }
 
         private void OnSceneUnloaded(SceneID scene, bool asServer)
@@ -417,8 +429,6 @@ namespace PurrNet.Modules
                         identity = identity
                     });
                 }
-                // identity.TriggerOnOwnerChanged(oldOwner, player, _asServer);
-
                 _idsCache.Add(identity.id.Value);
             }
 
@@ -691,18 +701,18 @@ namespace PurrNet.Modules
                 identity.TriggerOnOwnerChanged(oldOwner, change.player, _asServer);
         }
 
-        private void HandleOwnershipChange(PlayerID actor, OwnershipChange change, NetworkID id)
+        private bool HandleOwnershipChange(PlayerID actor, OwnershipChange change, NetworkID id)
         {
             string verb = change.isAdding ? "give" : "remove";
 
             if (!_hierarchy.TryGetIdentity(change.sceneId, id, out var identity))
-                return;
+                return false;
 
             if (!_sceneOwnerships.TryGetValue(change.sceneId, out var module))
             {
                 PurrLogger.LogError(
                     $"Failed to find ownership module for scene {change.sceneId} when applying ownership change for identity {id}");
-                return;
+                return false;
             }
 
             if (identity.hasOwner)
@@ -712,7 +722,7 @@ namespace PurrNet.Modules
                     PurrLogger.LogError(
                         $"Failed to {verb} (transfer) ownership of '{identity.gameObject.name}' to {change.player} because of missing authority.",
                         identity);
-                    return;
+                    return false;
                 }
             }
             else if (!identity.HasGiveOwnershipAuthority(!_asServer))
@@ -720,7 +730,7 @@ namespace PurrNet.Modules
                 PurrLogger.LogError(
                     $"Failed to {verb} ownership of '{identity.gameObject.name}' to {change.player} because of missing authority.",
                     identity);
-                return;
+                return false;
             }
 
             var oldOwner = identity.GetOwner(_asServer);
@@ -745,6 +755,8 @@ namespace PurrNet.Modules
                     identity.TriggerOnOwnerChanged(oldOwner, null, _asServer);
                 }
             }
+
+            return true;
         }
 
         static void GetAllChildrenOrSelf(NetworkIdentity id, List<NetworkIdentity> result, bool? propagateToChildren)
