@@ -2433,6 +2433,7 @@ GameObject:
   - component: {fileID: 1864834788}
   - component: {fileID: 1864834789}
   - component: {fileID: 1864834790}
+  - component: {fileID: 1864834791}
   m_Layer: 0
   m_Name: Platform
   m_TagString: Untagged
@@ -2603,6 +2604,27 @@ MonoBehaviour:
   _toDeactivate: []
   _toEnable: []
   _toDisable: []
+--- !u!114 &1864834791
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1864834783}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 849b56fffc1fec14785ec1ac52737d94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
 --- !u!1001 &1997076166
 PrefabInstance:
   m_ObjectHideFlags: 0

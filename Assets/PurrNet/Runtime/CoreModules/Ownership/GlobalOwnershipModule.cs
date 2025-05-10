@@ -20,6 +20,13 @@ namespace PurrNet.Modules
         public List<OwnershipInfo> state;
     }
 
+    internal struct OwnershipCallback
+    {
+        public PlayerID? oldOwner;
+        public PlayerID? newOwner;
+        public NetworkIdentity identity;
+    }
+
     internal struct OwnershipChange : IPackedSimple
     {
         public SceneID sceneId;
@@ -377,6 +384,8 @@ namespace PurrNet.Modules
 
             _idsCache.Clear();
 
+            var callbacks = ListPool<OwnershipCallback>.Instantiate();
+
             for (var i = 0; i < affectedIds.Count; i++)
             {
                 var identity = affectedIds[i];
@@ -400,7 +409,15 @@ namespace PurrNet.Modules
                 var oldOwner = identity.GetOwner(_asServer);
 
                 if (module.GiveOwnership(identity, player))
-                    identity.TriggerOnOwnerChanged(oldOwner, player, _asServer);
+                {
+                    callbacks.Add(new OwnershipCallback
+                    {
+                        oldOwner = oldOwner,
+                        newOwner = player,
+                        identity = identity
+                    });
+                }
+                // identity.TriggerOnOwnerChanged(oldOwner, player, _asServer);
 
                 _idsCache.Add(identity.id.Value);
             }
@@ -434,6 +451,14 @@ namespace PurrNet.Modules
                 _playersManager.SendToServer(data);
             }
 
+            for (var i = 0; i < callbacks.Count; i++)
+            {
+                var info = callbacks[i];
+                if (info.identity)
+                    info.identity.TriggerOnOwnerChanged(info.oldOwner, info.newOwner, _asServer);
+            }
+
+            ListPool<OwnershipCallback>.Destroy(callbacks);
             ListPool<NetworkIdentity>.Destroy(affectedIds);
         }
 

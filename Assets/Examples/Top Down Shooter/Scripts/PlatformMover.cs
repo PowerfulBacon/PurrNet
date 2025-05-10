@@ -7,6 +7,7 @@ public class PlatformMover : MonoBehaviour
 
     private Vector3 _startPos;
     private Vector3 _endPos;
+    private float _time;
 
     private void Awake()
     {
@@ -16,7 +17,8 @@ public class PlatformMover : MonoBehaviour
 
     void Update()
     {
-        var pingpong = Mathf.PingPong(Time.time * _speed, 1);
+        _time += Time.deltaTime;
+        var pingpong = Mathf.PingPong(_time * _speed, 1);
         transform.position = Vector3.Lerp(_startPos, _endPos, pingpong);
     }
 }

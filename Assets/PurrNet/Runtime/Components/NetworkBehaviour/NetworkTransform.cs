@@ -114,8 +114,6 @@ namespace PurrNet
 
         static Vector3 NoInterpolation(Vector3 a, Vector3 b, float t) => b;
 
-        static Quaternion NoInterpolation(Quaternion a, Quaternion b, float t) => b;
-
         public Vector3 position => syncPosition && !IsController(_ownerAuth) ? _position.GetCurrentState().position : _trs.position;
         public Quaternion rotation => syncRotation && !IsController(_ownerAuth) ? _rotation.GetCurrentState().rotation : _trs.rotation;
         public Vector3 scale => syncScale && !IsController(_ownerAuth) ? _scale.GetCurrentState() : _trs.localScale;
@@ -188,6 +186,7 @@ namespace PurrNet
             }
             else if (newOwner == localPlayer && !isServer)
             {
+                PurrLogger.Log($"Called SendLatestStateToServer");
                 _currentData = GetCurrentTransformData();
                 _latestData = _currentData;
                 SendLatestStateToServer(_currentData);
@@ -305,7 +304,7 @@ namespace PurrNet
         }
 
         [ServerRpc]
-        private void SendLatestStateToServer(NetworkTransformData data)
+        private void SendLatestStateToServer(NetworkTransformData data, RPCInfo info = default)
         {
             _lastReadData = data;
             _currentData = data;
