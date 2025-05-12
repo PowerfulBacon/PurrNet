@@ -69,18 +69,18 @@ namespace PurrNet
         [UsedByIL]
         public static void WriteGameObject(this BitPacker packer, GameObject go)
         {
-            NetworkIdentity identity = null;
-            if (go) identity = go.GetComponent<NetworkIdentity>();
-            WriteIdentity(packer, identity);
+            Transform trs = null;
+            if (go)
+                trs = go.transform;
+            WriteTrasform(packer, trs);
         }
 
         [UsedByIL]
         public static void ReadGameObject(this BitPacker packer, ref GameObject go)
         {
-            NetworkIdentity identity = null;
-            ReadIdentity(packer, ref identity);
-
-            go = identity ? identity.gameObject : null;
+            Transform trs = null;
+            ReadTrasform(packer, ref trs);
+            go = trs ? trs.gameObject : null;
         }
 
         static NetworkIdentity GetSpawnedParent(Transform trs)
