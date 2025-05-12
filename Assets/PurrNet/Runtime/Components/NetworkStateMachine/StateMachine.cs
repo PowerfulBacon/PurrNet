@@ -11,6 +11,8 @@ namespace PurrNet.StateMachine
     {
         [SerializeField] private bool ownerAuth = false;
 
+        public bool OwnerAuth => ownerAuth;
+        
         [SerializeField] List<StateNode> _states;
 
         public IReadOnlyList<StateNode> states => _states;

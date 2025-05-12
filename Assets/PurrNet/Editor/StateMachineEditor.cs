@@ -95,7 +95,7 @@ namespace PurrNet.StateMachine.InspectorEditor
 
         private void DrawStateControls()
         {
-            if (!Application.isPlaying || !_stateMachine.isServer)
+            if (!Application.isPlaying || !_stateMachine.IsController(_stateMachine.OwnerAuth))
                 return;
 
             EditorGUILayout.Space();
