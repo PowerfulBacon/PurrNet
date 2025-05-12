@@ -559,10 +559,13 @@ namespace PurrNet
             return hasChanged;
         }
 
-        public void DeltaRead(BitPacker packet)
+        public void DeltaRead(BitPacker packet, bool applyData)
         {
-            _lastReadData = DeltaRead(packet, _lastReadData);
-            ApplyData(_lastReadData);
+            var read = DeltaRead(packet, _lastReadData);
+            if (!applyData)
+                return;
+            _lastReadData = read;
+            ApplyData(read);
         }
 
         NetworkTransformData DeltaRead(BitPacker packet, NetworkTransformData oldValue)

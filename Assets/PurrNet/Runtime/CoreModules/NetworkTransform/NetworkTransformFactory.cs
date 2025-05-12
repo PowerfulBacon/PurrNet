@@ -58,7 +58,7 @@ namespace PurrNet.Modules
                 return;
             }
 
-            var hierarchy = new NetworkTransformModule(_manager, _broadcaster, _players, _scenePlayers, scene, _factory);
+            var hierarchy = new NetworkTransformModule(_manager, _broadcaster, _scenePlayers, scene, _factory);
 
             hierarchy.Enable(asServer);
 

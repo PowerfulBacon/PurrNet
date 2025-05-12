@@ -20,36 +20,22 @@ namespace PurrNet.Modules
         }
     }
 
-    public struct NetworkTransformRegister : IPackedAuto
-    {
-        public SceneID scene;
-        public readonly DisposableList<NetworkID> toRegister;
-
-        public NetworkTransformRegister(SceneID context, DisposableList<NetworkID> list)
-        {
-            scene = context;
-            toRegister = list;
-        }
-    }
-
     public class NetworkTransformModule : INetworkModule, IFixedUpdate
     {
         private readonly List<NetworkTransform> _networkTransforms = new();
         private readonly ScenePlayersModule _scenePlayers;
         private readonly PlayersBroadcaster _broadcaster;
-        private readonly PlayersManager _playersManager;
         private readonly NetworkManager _manager;
         private readonly SceneID _scene;
         private readonly HierarchyFactory _factory;
         private bool _asServer;
 
-        public NetworkTransformModule(NetworkManager manager, PlayersBroadcaster broadcaster, PlayersManager players,
+        public NetworkTransformModule(NetworkManager manager, PlayersBroadcaster broadcaster,
             ScenePlayersModule scenePlayers, SceneID scene, HierarchyFactory factory)
         {
             _manager = manager;
             _scenePlayers = scenePlayers;
             _broadcaster = broadcaster;
-            _playersManager = players;
             _scene = scene;
             _factory = factory;
         }
@@ -57,64 +43,13 @@ namespace PurrNet.Modules
         public void Enable(bool asServer)
         {
             _asServer = asServer;
-            _factory.onObserverAdded += OnObserverAdded;
 
             _broadcaster.Subscribe<NetworkTransformDelta>(OnNetworkTransformDelta);
-
-            if (!asServer)
-                _broadcaster.Subscribe<NetworkTransformRegister>(OnNetworkTransformRegister);
         }
 
         public void Disable(bool asServer)
         {
-            _factory.onObserverAdded -= OnObserverAdded;
             _broadcaster.Unsubscribe<NetworkTransformDelta>(OnNetworkTransformDelta);
-
-            if (!asServer)
-                _broadcaster.Unsubscribe<NetworkTransformRegister>(OnNetworkTransformRegister);
-        }
-
-        readonly Dictionary<PlayerID, DisposableList<NetworkID>> _pendingToRegister = new();
-
-        private void OnObserverAdded(PlayerID player, NetworkIdentity identity)
-        {
-            if (identity is not NetworkTransform)
-                return;
-
-            var id = identity.id;
-
-            if (!id.HasValue)
-                return;
-
-            if (!_pendingToRegister.TryGetValue(player, out var list))
-            {
-                list = new DisposableList<NetworkID>(16);
-                _pendingToRegister[player] = list;
-            }
-
-            list.Add(id.Value);
-        }
-
-        private void OnNetworkTransformRegister(PlayerID player, NetworkTransformRegister data, bool asServer)
-        {
-            if (asServer)
-                return;
-
-            if (data.scene != _scene)
-                return;
-
-            int count = data.toRegister.Count;
-            for (var i = 0; i < count; i++)
-            {
-                var id = data.toRegister[i];
-
-                if (_factory.TryGetIdentity(_scene, id, out var identity) &&
-                    identity is NetworkTransform nt)
-                {
-                    if (!_networkTransforms.Contains(nt))
-                        AddTrs(nt);
-                }
-            }
         }
 
         private void OnNetworkTransformDelta(PlayerID player, NetworkTransformDelta data, bool asServer)
@@ -137,7 +72,8 @@ namespace PurrNet.Modules
 
                 if (_factory.TryGetIdentity(_scene, lastNid, out var identity) && identity is NetworkTransform nt)
                 {
-                    nt.DeltaRead(packet);
+                    bool isController = !asServer || nt.IsControlling(player, false);
+                    nt.DeltaRead(packet, isController);
                 }
                 else
                 {
@@ -145,9 +81,6 @@ namespace PurrNet.Modules
                         $"NetworkTransformDelta: `{player}` tried to update a transform `{lastNid}` that is not in the scene `{_scene}`");
                     break;
                 }
-
-                if (packet.positionInBits >= data.packerLengthInBits)
-                    break;
             }
         }
 
@@ -214,22 +147,14 @@ namespace PurrNet.Modules
         {
             if (!networkTransform.id.HasValue)
                 return;
-
-            if (_asServer)
-            {
-                AddTrs(networkTransform);
-                return;
-            }
-
-            bool isSpawnedByLocalPlayer = _playersManager.localPlayerId.HasValue &&
-                                          networkTransform.id.Value.scope == _playersManager.localPlayerId;
-
-            if (isSpawnedByLocalPlayer && !_networkTransforms.Contains(networkTransform))
-                AddTrs(networkTransform);
+            AddTrs(networkTransform);
         }
 
         private void AddTrs(NetworkTransform networkTransform)
         {
+            if (_networkTransforms.Contains(networkTransform))
+                return;
+
             for (int i = 0; i < _networkTransforms.Count; i++)
             {
                 var networkID = _networkTransforms[i].id;
@@ -249,29 +174,9 @@ namespace PurrNet.Modules
             _networkTransforms.Remove(networkTransform);
         }
 
-        private void FlushPendingRegistrations(PlayerID localPlayer)
-        {
-            foreach (var (player, toRegister) in _pendingToRegister)
-            {
-                if (player == localPlayer)
-                    continue;
-
-                if (toRegister.Count == 0)
-                    continue;
-
-                NetworkTransformRegister packet = new (_scene, toRegister);
-                _broadcaster.Send(player, packet);
-            }
-
-            _pendingToRegister.Clear();
-        }
-
         public void FixedUpdate()
         {
             var localPlayer = GetLocalPlayer();
-
-            if (_asServer)
-                FlushPendingRegistrations(localPlayer);
 
             int ntCount = _networkTransforms.Count;
 
