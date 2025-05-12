@@ -5,11 +5,18 @@ namespace PurrNet.Examples.TopDownShooter
 {
     public class PlayerMovement : NetworkIdentity
     {
+        [SerializeField] private Reference<Transform> _visualsRef;
         [SerializeField] private Transform _visuals;
         [SerializeField] private float moveSpeed = 4f;
         [SerializeField] private float acceleration = 4f;
         [SerializeField] private float jumpForce = 1.5f;
         [SerializeField] private float gravity = 9.81f;
+
+        [PurrButton]
+        public void PrintVisualRef()
+        {
+            Debug.Log($"Visuals: {_visualsRef}");
+        }
 
         private Transform _lastGround;
         private Vector3 _lastGroundPos;
