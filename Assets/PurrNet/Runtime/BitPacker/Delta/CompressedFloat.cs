@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace PurrNet.Packing
 {
+    [System.Serializable]
     public struct CompressedFloat : IEquatable<CompressedFloat>
     {
         public const float PRECISION = 0.001f;

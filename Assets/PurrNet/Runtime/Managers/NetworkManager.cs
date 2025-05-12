@@ -682,6 +682,8 @@ namespace PurrNet
         /// </summary>
         public ScenePlayersModule scenePlayersModule => _serverScenePlayersModule ?? _clientScenePlayersModule;
 
+        public DeltaModule deltaModule => _serverDeltaModule ?? _clientDeltaModule;
+
         /// <summary>
         /// The local player of the network manager.
         /// If the local player is not set, this will return the default value of the player id.
@@ -704,6 +706,9 @@ namespace PurrNet
 
         private ScenePlayersModule _clientScenePlayersModule;
         private ScenePlayersModule _serverScenePlayersModule;
+
+        private DeltaModule _clientDeltaModule;
+        private DeltaModule _serverDeltaModule;
 
         public delegate void OnTickDelegate(bool asServer);
 
@@ -911,6 +916,10 @@ namespace PurrNet
                 _clientScenePlayersModule.onPlayerLeftScene += OnPlayerLeftScene;
             }
 
+            var newDeltaModule = new DeltaModule(this, asServer);
+            if (asServer) _serverDeltaModule = newDeltaModule;
+            else _clientDeltaModule = newDeltaModule;
+
             scenesModule.SetScenePlayers(scenePlayers);
             playersManager.SetBroadcaster(playersBroadcast);
 
@@ -920,6 +929,7 @@ namespace PurrNet
             modules.AddModule(connBroadcaster);
             modules.AddModule(authModule);
             modules.AddModule(networkCookies);
+            modules.AddModule(newDeltaModule);
 
             modules.AddModule(scenesModule);
             modules.AddModule(scenePlayers);
