@@ -432,7 +432,7 @@ namespace PurrNet.Modules
                 {
                     int count = list.Count;
 
-                    if (!list[0] || !list[0].isSpawned)
+                    if (count > 0 && !list[0] || !list[0].isSpawned)
                         return;
 
                     // if server, refresh visibility for all players in scene
@@ -505,7 +505,7 @@ namespace PurrNet.Modules
                 return;
 
             var createdNids = new DisposableList<NetworkIdentity>(16);
-            CreatePrototype(data.prototype, createdNids.list);
+            var result = CreatePrototype(data.prototype, createdNids.list);
 
             if (_asServer)
             {
@@ -642,7 +642,9 @@ namespace PurrNet.Modules
                 if (HierarchyPool.TryGetPrototype(scope, player, children, out var prototype))
                 {
                     if (_scenePlayers.IsPlayerLoadedInScene(player, _sceneId))
+                    {
                         SendSpawnPacket(player, prototype, children, true);
+                    }
 
                     for (var i = 0; i < children.Count; i++)
                     {
