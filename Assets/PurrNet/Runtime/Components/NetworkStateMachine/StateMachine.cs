@@ -25,6 +25,8 @@ namespace PurrNet.StateMachine
         /// </summary>
         public event StateChangedDelegate onStateChanged;
         public delegate void StateChangedDelegate(StateNode previousState, StateNode newState);
+
+        private Queue<Action> _stateChangeQueue = new();
         
 
         StateMachineState _currentState;
@@ -149,7 +151,8 @@ namespace PurrNet.StateMachine
                 PurrLogger.LogException(e);
             }
             
-
+            if(_currentState.stateId > -1 && _states.Count > _currentState.stateId)
+                UpdateStateId(_states[_currentState.stateId]);
             _currentState = state;
             _currentState.data = data;
 
@@ -161,6 +164,11 @@ namespace PurrNet.StateMachine
 
             try
             {
+                _stateChangeQueue.Enqueue(() =>
+                {
+                    onStateChanged?.Invoke(prevState, newState);
+                });
+                
                 if (hasData && newState is StateNode<T> node)
                 {
                     if(isServer)
@@ -181,10 +189,22 @@ namespace PurrNet.StateMachine
                 PurrLogger.LogException(e);
             }
 
-            onStateChanged?.Invoke(prevState, newState);
+            HandleStateChangeQueue();
             onReceivedNewData?.Invoke();
         }
-        
+
+        private void HandleStateChangeQueue()
+        {
+            if (_stateChangeQueue.Count == 0)
+                return;
+
+            while (_stateChangeQueue.Count > 0)
+            {
+                var del = _stateChangeQueue.Dequeue();
+                del.Invoke();
+            }
+        }
+
         [TargetRpc]
         private void RpcStateChange_Target<T>(PlayerID target, StateMachineState state, bool hasData, T data)
         {
@@ -201,6 +221,11 @@ namespace PurrNet.StateMachine
 
             try
             {
+                _stateChangeQueue.Enqueue(() =>
+                {
+                    onStateChanged?.Invoke(prevState, newState);
+                });
+                
                 if (hasData && newState is StateNode<T> node)
                 {
                     node.Enter(data, false);
@@ -215,7 +240,7 @@ namespace PurrNet.StateMachine
                 PurrLogger.LogException(e);
             }
 
-            onStateChanged?.Invoke(prevState, newState);
+            HandleStateChangeQueue();
             onReceivedNewData?.Invoke();
         }
 
@@ -282,6 +307,10 @@ namespace PurrNet.StateMachine
             {
                 if (state)
                 {
+                    _stateChangeQueue.Enqueue(() =>
+                    {
+                        onStateChanged?.Invoke(prevState, newState);
+                    });
                     if(isServer)
                         state.Enter(data, true);
                     if(isClient)
@@ -293,7 +322,7 @@ namespace PurrNet.StateMachine
                 PurrLogger.LogException(e);
             }
 
-            onStateChanged?.Invoke(prevState, newState);
+            HandleStateChangeQueue();
         }
 
         /// <summary>
@@ -325,6 +354,10 @@ namespace PurrNet.StateMachine
             {
                 if (state)
                 {
+                    _stateChangeQueue.Enqueue(() =>
+                    {
+                        onStateChanged?.Invoke(prevState, newState);
+                    });
                     if(isServer)
                         state.Enter(true);
                     if(isClient)
@@ -336,7 +369,7 @@ namespace PurrNet.StateMachine
                 PurrLogger.LogException(e);
             }
 
-            onStateChanged?.Invoke(prevState, newState);
+            HandleStateChangeQueue();
         }
 
         /// <summary>
