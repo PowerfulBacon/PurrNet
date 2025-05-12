@@ -18,10 +18,35 @@ public class StaticRpcTest : NetworkIdentity
         SendObserverRpcM(0, someData);
     }
 
+    [Button("SendTargetRpc"), UsedImplicitly]
+    public void SendTargetRpc()
+    {
+        if (owner.HasValue)
+            TargetRpc(owner.Value);
+    }
+
+    [Button("SendServerRpc"), UsedImplicitly]
+    public void SendServerRpcNoOwner()
+    {
+        ServerRpc();
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    public void ServerRpc()
+    {
+        Debug.Log($"ServerRpc");
+    }
+
     [ObserversRpc(bufferLast: true)]
     public void SendObserverRpcM<T>(int a, T someData) where T : SomeBaseData
     {
         Debug.Log($"SendObserverRpcM: {someData} {someData.GetType().Name} {typeof(T).Name}");
+    }
+
+    [TargetRpc(requireServer: false)]
+    public void TargetRpc(PlayerID player, RPCInfo info = default)
+    {
+        Debug.Log($"TargetRpc from {info.sender}");
     }
 }
 

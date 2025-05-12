@@ -210,7 +210,11 @@ namespace PurrNet.Modules
                     if (nm.isServer)
                         nm.GetModule<PlayersManager>(true)
                             .Send(signature.targetPlayer!.Value, packet, signature.channel);
-                    else nm.GetModule<PlayersManager>(false).SendToServer(packet, signature.channel);
+                    else
+                    {
+                        packet.targetPlayerId = signature.targetPlayer!.Value;
+                        nm.GetModule<PlayersManager>(false).SendToServer(packet, signature.channel);
+                    }
                     break;
                 }
                 default: throw new ArgumentOutOfRangeException();
@@ -277,7 +281,7 @@ namespace PurrNet.Modules
                 {
                     var players = nm.GetModule<PlayersManager>(true);
                     var rawData = BroadcastModule.GetImmediateData(data);
-                    players.SendRaw(data.senderPlayerId, rawData, signature.channel);
+                    players.SendRaw(data.targetPlayerId, rawData, signature.channel);
                     return false;
                 }
                 default:
@@ -778,7 +782,6 @@ namespace PurrNet.Modules
                     PurrLogger.LogError(
                         $"Can't find RPC handler for id {packet.rpcId} in identity {identity.GetType().Name}.");
             }
-            // else PurrLogger.LogError($"Can't find identity with id {packet.networkId} in scene {packet.sceneId}.");
         }
 
         [UsedByIL]

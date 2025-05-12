@@ -312,7 +312,11 @@ namespace PurrNet
 #endif
                     if (isServer)
                         SendToTarget(signature.targetPlayer!.Value, packet, signature.channel);
-                    else SendToServer(packet, signature.channel);
+                    else
+                    {
+                        packet.targetPlayerId = signature.targetPlayer!.Value;
+                        SendToServer(packet, signature.channel);
+                    }
                     break;
                 default: throw new ArgumentOutOfRangeException();
             }
@@ -423,7 +427,7 @@ namespace PurrNet
                 case RPCType.TargetRPC:
                 {
                     var rawData = BroadcastModule.GetImmediateData(data);
-                    SendToTarget(data.senderPlayerId, rawData, signature.channel);
+                    SendToTarget(data.targetPlayerId, rawData, signature.channel);
                     return false;
                 }
                 default: throw new ArgumentOutOfRangeException(nameof(signature.type));
