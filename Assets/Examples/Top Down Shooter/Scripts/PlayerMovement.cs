@@ -5,18 +5,11 @@ namespace PurrNet.Examples.TopDownShooter
 {
     public class PlayerMovement : NetworkIdentity
     {
-        [SerializeField] private Reference<Transform> _visualsRef;
-        [SerializeField] private Transform _visuals;
+        [SerializeField] private Reference<Transform> _visuals;
         [SerializeField] private float moveSpeed = 4f;
         [SerializeField] private float acceleration = 4f;
         [SerializeField] private float jumpForce = 1.5f;
         [SerializeField] private float gravity = 9.81f;
-
-        [PurrButton]
-        public void PrintVisualRef()
-        {
-            Debug.Log($"Visuals: {_visualsRef}");
-        }
 
         private Transform _lastGround;
         private Vector3 _lastGroundPos;
@@ -45,14 +38,14 @@ namespace PurrNet.Examples.TopDownShooter
                 if (_lastGround != hit.transform)
                 {
                     _lastGround = hit.transform;
-                    _visuals.SetParent(_lastGround, true);
+                    _visuals.value.SetParent(_lastGround, true);
                 }
                 _lastGroundPos = _lastGround.position;
             }
             else if (_lastGround)
             {
                 _lastGround = null;
-                _visuals.SetParent(transform, true);
+                _visuals.value.SetParent(transform, true);
             }
         }
 
@@ -98,8 +91,8 @@ namespace PurrNet.Examples.TopDownShooter
 
         private void LateUpdate()
         {
-            _visuals.position = transform.position;
-            _visuals.rotation = transform.rotation;
+            _visuals.value.position = transform.position;
+            _visuals.value.rotation = transform.rotation;
         }
     }
 }

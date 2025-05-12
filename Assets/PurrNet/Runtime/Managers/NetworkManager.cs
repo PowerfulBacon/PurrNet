@@ -937,17 +937,14 @@ namespace PurrNet
             var hierarchyV2 = new HierarchyFactory(this, scenesModule, scenePlayers, playersManager);
             var ownershipModule = new GlobalOwnershipModule(hierarchyV2, playersManager, scenePlayers, scenesModule);
             var rpcModule = new RPCModule(this, playersManager, hierarchyV2, ownershipModule, scenesModule);
+            var networkTransform = new NetworkTransformFactory(scenesModule, scenePlayers, playersManager, playersBroadcast, this, hierarchyV2);
+            var colliderRollback = new ColliderRollbackFactory(tickManager, scenesModule);
 
+            modules.AddModule(networkTransform);
             modules.AddModule(hierarchyV2);
             modules.AddModule(ownershipModule);
             modules.AddModule(rpcModule);
             modules.AddModule(new RpcRequestResponseModule(playersManager));
-
-            var networkTransform =
-                new NetworkTransformFactory(scenesModule, scenePlayers, playersManager, playersBroadcast, this, hierarchyV2);
-            var colliderRollback = new ColliderRollbackFactory(tickManager, scenesModule);
-
-            modules.AddModule(networkTransform);
             modules.AddModule(colliderRollback);
 
             var deltaMessager = new DeltaMessagerFactory(scenesModule, scenePlayers , playersBroadcast);

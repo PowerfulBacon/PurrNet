@@ -292,6 +292,18 @@ namespace PurrNet.Packing
             return true;
         }
 
+        public void WriteBits(BitPacker packer, int bits)
+        {
+            EnsureBitsExist(bits);
+
+            int chunks = bits / 64;
+            byte excess = (byte)(bits % 64);
+
+            for (int i = 0; i < chunks; i++)
+                WriteBits(packer.ReadBits(64), 64);
+            WriteBits(packer.ReadBits(excess), excess);
+        }
+
         public void WriteBits(ulong data, byte bits)
         {
             EnsureBitsExist(bits);

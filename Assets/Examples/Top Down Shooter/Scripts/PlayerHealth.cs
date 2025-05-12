@@ -5,7 +5,7 @@ namespace PurrNet.Examples.TopDownShooter
     public class PlayerHealth : NetworkIdentity
     {
         [SerializeField] private int maxHealth = 100;
-        [SerializeField] private TextMesh healthText;
+        [SerializeField] private Reference<TextMesh> _healthText;
         [SerializeField] SyncVar<int> _health = new SyncVar<int>();
 
         protected override void OnSpawned(bool asServer)
@@ -22,21 +22,26 @@ namespace PurrNet.Examples.TopDownShooter
 
         private void Update()
         {
-            Vector3 direction = healthText.transform.position - Camera.main.transform.position;
+            if (!_healthText.value)
+                return;
+
+            Vector3 direction = _healthText.value.transform.position - Camera.main.transform.position;
             direction.x = 0;
-            healthText.transform.rotation = Quaternion.LookRotation(direction);
+            _healthText.value.transform.rotation = Quaternion.LookRotation(direction);
         }
 
         private void UpdateHealthUI()
         {
-            healthText.text = _health.value.ToString();
+            if (!_healthText.value)
+                return;
+            _healthText.value.text = _health.value.ToString();
         }
 
         private void FixedUpdate()
         {
             UpdateHealthUI();
         }
-        
+
         public void ChangeHealth(int change)
         {
             if (_health + change <= 0)

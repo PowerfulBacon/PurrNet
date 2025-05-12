@@ -83,7 +83,7 @@ namespace PurrNet.Modules
         public void PostFixedUpdate()
         {
             for (var i = 0; i < _rawModules.Count; i++)
-                _rawModules[i].FixedUpdate();
+                _rawModules[i].PostFixedUpdate();
         }
 
         public bool TryGetModule(SceneID sceneId, out NetworkTransformModule module)

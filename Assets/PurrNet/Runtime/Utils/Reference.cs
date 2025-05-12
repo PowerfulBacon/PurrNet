@@ -56,7 +56,7 @@ namespace PurrNet
 
             try
             {
-                container.gameObject.GetComponentAtIndex<T>(componentIdx);
+                _reference = container.gameObject.GetComponentAtIndex<T>(componentIdx);
             }
             catch
             {
