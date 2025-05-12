@@ -253,47 +253,59 @@ namespace PurrNet.Modules
                 return;
 
             foreach (var go in _toDestroy)
+            {
                 if (go)
-                    UnityProxy.DestroyDirectly(go);
+                    UnityProxy.DestroyImmediateDirectly(go);
+            }
 
             _toDestroy.Clear();
         }
 
         private static bool TryGetFromPool(PoolPair pair, PrefabPieceID pid, out GameObject instance)
         {
-            var pool = pid.prefabId >= 0 ? pair.prefabPool : pair.scenePool;
-
-            if (!pool._pool.TryGetValue(pid, out var queue))
+            while (true)
             {
-                pool.Warmup(pid);
+                var pool = pid.prefabId >= 0 ? pair.prefabPool : pair.scenePool;
 
-                if (!pool._pool.TryGetValue(pid, out queue))
+                if (!pool._pool.TryGetValue(pid, out var queue))
                 {
-                    instance = null;
-                    return false;
-                }
-            }
+                    pool.Warmup(pid);
 
-            if (queue.Count == 0)
-            {
-                pool.Warmup(pid);
+                    if (!pool._pool.TryGetValue(pid, out queue))
+                    {
+                        instance = null;
+                        return false;
+                    }
+                }
 
                 if (queue.Count == 0)
                 {
-                    instance = null;
-                    return false;
+                    pool.Warmup(pid);
+
+                    if (queue.Count == 0)
+                    {
+                        instance = null;
+                        return false;
+                    }
                 }
+
+                while (queue.Count > 0)
+                {
+                    if (queue.TryDequeue(out instance) && instance)
+                    {
+                        pool._toDestroy.Remove(instance);
+                        return true;
+                    }
+                }
+
+                if (queue.Count == 0)
+                {
+                    continue;
+                }
+
+                instance = null;
+                return false;
             }
-
-
-            if (queue.TryDequeue(out instance))
-            {
-                pool._toDestroy.Remove(instance);
-                return true;
-            }
-
-            instance = null;
-            return false;
         }
 
         private void Warmup(PrefabPieceID pid)
