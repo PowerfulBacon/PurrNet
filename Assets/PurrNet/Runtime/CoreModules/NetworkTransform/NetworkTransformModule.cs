@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using PurrNet.Logging;
 using PurrNet.Packing;
 using PurrNet.Pooling;
 using PurrNet.Transports;
@@ -125,35 +126,28 @@ namespace PurrNet.Modules
 
             packet.ResetPositionAndMode(true);
 
-            int ntCount = _networkTransforms.Count;
+            PackedInt ntCount = default;
+            NetworkID lastNid = default;
 
-            if (asServer)
+            Packer<PackedInt>.Read(packet, ref ntCount);
+
+            for (var i = 0; i < ntCount; i++)
             {
-                for (var i = 0; i < ntCount; i++)
-                {
-                    var nt = _networkTransforms[i];
-                    if (nt.IsControlling(player, false))
-                    {
-                        nt.DeltaRead(packet);
+                DeltaPacker<NetworkID>.Read(packet, lastNid, ref lastNid);
 
-                        if (packet.positionInBits >= data.packerLengthInBits)
-                            break;
-                    }
-                }
-            }
-            else
-            {
-                for (var i = 0; i < ntCount; i++)
+                if (_factory.TryGetIdentity(_scene, lastNid, out var identity) && identity is NetworkTransform nt)
                 {
-                    var nt = _networkTransforms[i];
-                    if (!nt.IsControlling(nt.localPlayerForced, false))
-                    {
-                        nt.DeltaRead(packet);
-
-                        if (packet.positionInBits >= data.packerLengthInBits)
-                            break;
-                    }
+                    nt.DeltaRead(packet);
                 }
+                else
+                {
+                    PurrLogger.LogError(
+                        $"NetworkTransformDelta: `{player}` tried to update a transform `{lastNid}` that is not in the scene `{_scene}`");
+                    break;
+                }
+
+                if (packet.positionInBits >= data.packerLengthInBits)
+                    break;
             }
         }
 
@@ -170,13 +164,19 @@ namespace PurrNet.Modules
             int ntCount = _networkTransforms.Count;
             bool anyWritten = false;
 
+            var controlled = ListPool<NetworkTransform>.Instantiate();
+
             if (player == PlayerID.Server)
             {
                 for (var i = 0; i < ntCount; i++)
                 {
                     var nt = _networkTransforms[i];
+
+                    if (!nt.id.HasValue)
+                        continue;
+
                     if (nt.IsControlling(localPlayer, false))
-                        anyWritten = nt.DeltaWrite(packer) || anyWritten;
+                        controlled.Add(nt);
                 }
             }
             else
@@ -184,10 +184,28 @@ namespace PurrNet.Modules
                 for (var i = 0; i < ntCount; i++)
                 {
                     var nt = _networkTransforms[i];
+
+                    if (!nt.id.HasValue)
+                        continue;
+
                     if (!nt.IsControlling(player, false) && nt.observers.Contains(player))
-                        anyWritten = nt.DeltaWrite(packer) || anyWritten;
+                        controlled.Add(nt);
+
                 }
             }
+
+            NetworkID lastNid = default;
+            int count = controlled.Count;
+            Packer<PackedInt>.Write(packer, count);
+            for (var i = 0; i < count; i++)
+            {
+                var nt = controlled[i];
+                anyWritten = DeltaPacker<NetworkID>.Write(packer, lastNid, nt.id!.Value) || anyWritten;
+                lastNid = nt.id.Value;
+                anyWritten = nt.DeltaWrite(packer) || anyWritten;
+            }
+
+            ListPool<NetworkTransform>.Destroy(controlled);
 
             return anyWritten;
         }
