@@ -103,7 +103,7 @@ namespace PurrNet
 
         Interpolated<Vector3WithParent> _position;
         Interpolated<QuaternionWithParent> _rotation;
-        Interpolated<Vector3> _scale;
+        Interpolated<ScaleWithParent> _scale;
 
         private Transform _trs;
         private Rigidbody _rb;
@@ -112,11 +112,9 @@ namespace PurrNet
 
         private bool _prevWasController;
 
-        static Vector3 NoInterpolation(Vector3 a, Vector3 b, float t) => b;
-
         public Vector3 position => syncPosition && !IsController(_ownerAuth) ? _position.GetCurrentState().position : _trs.position;
         public Quaternion rotation => syncRotation && !IsController(_ownerAuth) ? _rotation.GetCurrentState().rotation : _trs.rotation;
-        public Vector3 scale => syncScale && !IsController(_ownerAuth) ? _scale.GetCurrentState() : _trs.localScale;
+        public Vector3 scale => syncScale && !IsController(_ownerAuth) ? _scale.GetCurrentState().scale : _trs.localScale;
 
         private void Awake()
         {
@@ -154,8 +152,11 @@ namespace PurrNet
             }
 
             if (syncScale)
-                _scale = new Interpolated<Vector3>(interpolateScale ? Vector3.Lerp : NoInterpolation, sendDelta,
-                    _trs.localScale, _maxBufferSize, _minBufferSize);
+            {
+                var currentScale = new ScaleWithParent(_parentId, _trs.localScale);
+                _scale = new Interpolated<ScaleWithParent>(interpolateScale ? ScaleWithParent.Lerp : ScaleWithParent.NoLerp,
+                    sendDelta, currentScale, _maxBufferSize, _minBufferSize);
+            }
 
             _currentData = GetCurrentTransformData();
             _latestData = _currentData;
@@ -299,7 +300,7 @@ namespace PurrNet
             if (syncRotation && targetRot.HasValue)
                 _rotation.Teleport(new QuaternionWithParent(_parentId, _syncRotation == SyncMode.Local, targetRot.Value));
             if (syncScale && targetScale.HasValue)
-                _scale.Teleport(targetScale.Value);
+                _scale.Teleport(new ScaleWithParent(_parentId, targetScale.Value));
         }
 
         [ServerRpc]
@@ -392,7 +393,14 @@ namespace PurrNet
                 _trs.rotation = _rotation.Advance(Time.deltaTime).rotation;
 
             if (syncScale)
-                _trs.localScale = _scale.Advance(Time.deltaTime);
+            {
+                var worldScale = _scale.Advance(Time.deltaTime).scale;
+                var parentTrs = transform.parent;
+
+                _trs.localScale = parentTrs ?
+                    parentTrs.GetLocalScale(worldScale) :
+                    worldScale;
+            }
 
             if (disableController && _characterControllerPatch)
                 _controller.enabled = true;
@@ -493,7 +501,7 @@ namespace PurrNet
                 _rotation.Teleport(new QuaternionWithParent(p, _syncRotation == SyncMode.Local, data.rotation));
 
             if (syncScale)
-                _scale.Teleport(data.scale);
+                _scale.Teleport(new ScaleWithParent(p, data.scale));
         }
 
         private void ApplyData(NetworkTransformData data)
@@ -514,7 +522,7 @@ namespace PurrNet
                 _rotation.Add(new QuaternionWithParent(p, _syncRotation == SyncMode.Local, data.rotation));
 
             if (syncScale)
-                _scale.Add(data.scale);
+                _scale.Add(new ScaleWithParent(p, data.scale));
         }
 
         private NetworkTransformData _latestData;

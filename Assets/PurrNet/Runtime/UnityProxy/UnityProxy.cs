@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Pooling;
+using PurrNet.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -66,6 +67,9 @@ namespace PurrNet
 
         static bool OnDestroy(Object instance)
         {
+            if (ApplicationContext.isQuitting)
+                return true;
+
             if (instance is not NetworkIdentity &&
                 instance is not GameObject)
                 return true;

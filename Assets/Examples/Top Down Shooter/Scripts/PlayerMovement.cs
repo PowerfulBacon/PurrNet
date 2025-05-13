@@ -1,4 +1,5 @@
 using PurrNet.Logging;
+using PurrNet.Utils;
 using UnityEngine;
 
 namespace PurrNet.Examples.TopDownShooter
@@ -29,6 +30,14 @@ namespace PurrNet.Examples.TopDownShooter
         {
             if (!asServer)
                 enabled = isOwner;
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if (_visuals.value)
+                Destroy(_visuals.value.gameObject);
         }
 
         private void CheckGround()
