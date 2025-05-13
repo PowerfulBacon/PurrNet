@@ -4,6 +4,7 @@ using UnityEditor;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using JetBrains.Annotations;
 using PurrNet.Authentication;
 using PurrNet.Logging;
@@ -376,16 +377,28 @@ namespace PurrNet
 
             foreach (var assembly in allAssemblies)
             {
-                var types = assembly.GetTypes();
+                Type[] types;
+
+                try
+                {
+                    types = assembly.GetTypes();
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    types = ex.Types;
+                }
 
                 foreach (var type in types)
                 {
+                    if (type == null)
+                        continue;
+
                     if (!type.IsAbstract || !type.IsSealed)
                         continue;
 
-                    var methods = type.GetMethods(System.Reflection.BindingFlags.Static |
-                                                  System.Reflection.BindingFlags.Public |
-                                                  System.Reflection.BindingFlags.NonPublic);
+                    var methods = type.GetMethods(BindingFlags.Static |
+                                                  BindingFlags.Public |
+                                                  BindingFlags.NonPublic);
 
                     foreach (var method in methods)
                     {
