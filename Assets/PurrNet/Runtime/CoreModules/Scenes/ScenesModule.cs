@@ -860,7 +860,7 @@ namespace PurrNet.Modules
                         ? CleanupStage.LoadEmptyScene
                         : CleanupStage.UnloadScenesOnly;
 
-                    if (_networkManager.TryGetModule(!_asServer, out ScenesModule module))
+                    if (_networkManager.TryGetModule(!_asServer, out ScenesModule module) && module._wasSetup)
                         module._cleanupStage = CleanupStage.Skip;
 
                     return false;
