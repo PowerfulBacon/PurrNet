@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using PurrNet.Logging;
 using PurrNet.Packing;
 using PurrNet.Pooling;
 using PurrNet.Transports;
@@ -10,13 +9,11 @@ namespace PurrNet.Modules
     {
         public SceneID scene;
         public readonly ByteData packet;
-        public readonly int packerLengthInBits;
 
-        public NetworkTransformDelta(SceneID context, BitPacker packer, int packerLengthInBits)
+        public NetworkTransformDelta(SceneID context, BitPacker packer)
         {
             scene = context;
             packet = packer.ToByteData();
-            this.packerLengthInBits = packerLengthInBits;
         }
     }
 
@@ -72,10 +69,10 @@ namespace PurrNet.Modules
                 Packer<PackedInt>.Read(packet, ref length);
                 DeltaPacker<NetworkID>.Read(packet, lastNid, ref lastNid);
 
-                if (_factory.TryGetIdentity(_scene, lastNid, out var identity) && identity is NetworkTransform nt)
+                if (_factory.TryGetIdentity(_scene, lastNid, out var identity) && identity is NetworkTransform nt &&
+                    (!asServer || nt.IsControlling(player, false)))
                 {
-                    bool isController = !asServer || nt.IsControlling(player, false);
-                    nt.DeltaRead(packet, isController);
+                    nt.DeltaRead(packet);
                 }
                 else packet.SkipBits(length);
             }
@@ -198,7 +195,7 @@ namespace PurrNet.Modules
                 using var packer = BitPackerPool.Get();
 
                 if (PrepareDeltaState(packer, PlayerID.Server) && packer.positionInBits > 0)
-                    _broadcaster.SendToServer(new NetworkTransformDelta(_scene, packer, packer.positionInBits));
+                    _broadcaster.SendToServer(new NetworkTransformDelta(_scene, packer));
             }
             else if (_scenePlayers.TryGetPlayersInScene(_scene, out var players))
             {
@@ -210,7 +207,7 @@ namespace PurrNet.Modules
                     using var packer = BitPackerPool.Get();
 
                     if (PrepareDeltaState(packer, player) && packer.positionInBits > 0)
-                        _broadcaster.Send(player, new NetworkTransformDelta(_scene, packer, packer.positionInBits));
+                        _broadcaster.Send(player, new NetworkTransformDelta(_scene, packer));
                 }
             }
 

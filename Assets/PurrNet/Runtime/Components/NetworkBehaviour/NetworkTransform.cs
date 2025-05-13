@@ -180,10 +180,10 @@ namespace PurrNet
             if (asServer)
             {
                 if (newOwner.HasValue && newOwner != localPlayer)
-                    SendLatestState(newOwner.Value, _currentData);
+                    SendLatestState(newOwner.Value, _currentData, false);
 
                 if (oldOwner.HasValue && newOwner != oldOwner && oldOwner != localPlayer)
-                    SendLatestState(oldOwner.Value, _currentData);
+                    SendLatestState(oldOwner.Value, _currentData, false);
             }
             else if (newOwner == localPlayer && !isServer)
             {
@@ -249,7 +249,7 @@ namespace PurrNet
                 return;
 
             if (!_ownerAuth || player != owner)
-                SendLatestState(player, _currentData);
+                SendLatestState(player, _currentData, true);
         }
 
         /// <summary>
@@ -262,7 +262,7 @@ namespace PurrNet
 
             _currentData = GetCurrentTransformData();
             _latestData = _currentData;
-            SendLatestState(target, _currentData);
+            SendLatestState(target, _currentData, true);
         }
 
         /// <summary>
@@ -285,7 +285,7 @@ namespace PurrNet
                 if (IsController(observer, _ownerAuth, false))
                     return; //No need to send state to controller
 
-                SendLatestState(observer, data);
+                SendLatestState(observer, data, true);
             }
         }
 
@@ -313,12 +313,16 @@ namespace PurrNet
         }
 
         [TargetRpc]
-        private void SendLatestState(PlayerID player, NetworkTransformData data)
+        private void SendLatestState(PlayerID player, NetworkTransformData data, bool applyPosition)
         {
             _lastReadData = data;
             _currentData = data;
-            TeleportToData(data);
-            ApplyLerpedPosition();
+
+            if (applyPosition)
+            {
+                TeleportToData(data);
+                ApplyLerpedPosition();
+            }
         }
 
         public void OnTick(float delta)
@@ -367,6 +371,8 @@ namespace PurrNet
                 ApplyLerpedPosition();
 
             _latestData = GetCurrentTransformData();
+            if (isLocalController)
+                TeleportToData(_latestData);
 
             if (_prevWasController != isLocalController)
             {
@@ -567,13 +573,10 @@ namespace PurrNet
             return hasChanged;
         }
 
-        public void DeltaRead(BitPacker packet, bool applyData)
+        public void DeltaRead(BitPacker packet)
         {
-            var read = DeltaRead(packet, _lastReadData);
-            if (!applyData)
-                return;
-            _lastReadData = read;
-            ApplyData(read);
+            _lastReadData = DeltaRead(packet, _lastReadData);
+            ApplyData(_lastReadData);
         }
 
         NetworkTransformData DeltaRead(BitPacker packet, NetworkTransformData oldValue)

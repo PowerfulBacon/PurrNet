@@ -9,19 +9,17 @@ namespace PurrNet.Modules
         readonly ScenePlayersModule _scenePlayers;
         readonly PlayersBroadcaster _broadcaster;
         readonly NetworkManager _manager;
-        private readonly PlayersManager _players;
         private readonly HierarchyFactory _factory;
 
         readonly List<NetworkTransformModule> _rawModules = new();
         readonly Dictionary<SceneID, NetworkTransformModule> _modules = new();
 
-        public NetworkTransformFactory(ScenesModule scenes, ScenePlayersModule scenePlayers, PlayersManager players,
+        public NetworkTransformFactory(ScenesModule scenes, ScenePlayersModule scenePlayers,
             PlayersBroadcaster broadcaster, NetworkManager manager, HierarchyFactory factory)
         {
             _scenes = scenes;
             _scenePlayers = scenePlayers;
             _broadcaster = broadcaster;
-            _players = players;
             _manager = manager;
             _factory = factory;
         }
