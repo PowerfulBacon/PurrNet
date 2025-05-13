@@ -146,7 +146,7 @@ namespace PurrNet.Modules
             _playersManager.onNetworkIDReceived += OnNetworkIDReceived;
 
             if (_playersManager.localPlayerId.HasValue)
-                _isPlayerReady = true;
+                OnPlayerReceivedID(_playersManager.localPlayerId.Value);
             else _playersManager.onLocalPlayerReceivedID += OnPlayerReceivedID;
 
             _playersManager.Subscribe<SpawnPacketBatch>(OnSpawnPacketBatch);
