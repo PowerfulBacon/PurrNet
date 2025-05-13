@@ -1002,10 +1002,20 @@ namespace PurrNet
             bool shouldStartClient = transport && ShouldStart(_startClientFlags);
 
             if (shouldStartServer)
+            {
+#if !UNITY_EDITOR
+                PurrLogger.Log("Auto-Starting server...");
+#endif
                 StartServer();
+            }
 
             if (shouldStartClient)
+            {
+#if !UNITY_EDITOR
+                PurrLogger.Log("Auto-Starting client...");
+#endif
                 StartClient();
+            }
         }
 
         private void Update()
