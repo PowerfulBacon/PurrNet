@@ -36,7 +36,7 @@ namespace PurrNet.Examples.TopDownShooter
         {
             base.OnDestroy();
 
-            if (_visuals.value)
+            if (_visuals.value && isSpawned)
                 Destroy(_visuals.value.gameObject);
         }
 

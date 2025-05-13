@@ -65,7 +65,6 @@ namespace PurrNet.Modules
             _prefabsPool = NetworkPoolManager.GetPool(manager);
 
             SetupSceneObjects(scene);
-
         }
 
         readonly List<GameObjectPrototype> _defaultPrototypes = new List<GameObjectPrototype>();
@@ -505,7 +504,7 @@ namespace PurrNet.Modules
                 return;
 
             var createdNids = new DisposableList<NetworkIdentity>(16);
-            var result = CreatePrototype(data.prototype, createdNids.list);
+            CreatePrototype(data.prototype, createdNids.list);
 
             if (_asServer)
             {
