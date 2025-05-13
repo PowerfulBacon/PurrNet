@@ -175,8 +175,11 @@ namespace PurrNet.Modules
             Setup(asServer);
         }
 
+        private bool _wasSetup;
+
         private void Setup(bool asServer)
         {
+            _wasSetup = true;
             _asServer = asServer;
 
             var currentScene = _networkManager.gameObject.scene;
@@ -832,6 +835,9 @@ namespace PurrNet.Modules
 
         public bool Cleanup()
         {
+            if (!_wasSetup)
+                return true;
+
             var rules = _networkManager.networkRules;
 
             if (rules && !rules.ShouldCleanupScenesOnDisconnect())
