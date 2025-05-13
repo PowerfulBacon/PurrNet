@@ -1,5 +1,4 @@
 using PurrNet.Logging;
-using PurrNet.Utils;
 using UnityEngine;
 
 namespace PurrNet.Examples.TopDownShooter
@@ -32,10 +31,8 @@ namespace PurrNet.Examples.TopDownShooter
                 enabled = isOwner;
         }
 
-        protected override void OnDestroy()
+        protected override void OnDespawned()
         {
-            base.OnDestroy();
-
             if (_visuals.value && isSpawned)
                 Destroy(_visuals.value.gameObject);
         }
