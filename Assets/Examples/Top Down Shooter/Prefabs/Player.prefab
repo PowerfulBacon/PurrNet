@@ -210,7 +210,6 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   maxHealth: 100
-  healthText: {fileID: 2339485392063238819}
   _healthText:
     _reference: {fileID: 2339485392063238819}
   _health:
@@ -448,7 +447,7 @@ MonoBehaviour:
   _syncParent: 1
   _interpolateSettings: 255
   _minBufferSize: 1
-  _maxBufferSize: 2
+  _maxBufferSize: 4
   _characterControllerPatch: 0
   _ownerAuth: 1
   _interpolationTiming: 1

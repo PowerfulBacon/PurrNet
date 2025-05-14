@@ -10,7 +10,6 @@ namespace PurrNet
         private readonly LerpFunction<T> _lerp;
         private readonly List<T> _buffer;
         private T _lastValue;
-        private T _currentState;
         private T _currentStateRaw;
         private float _timer;
         private float _tickDelta;
@@ -47,7 +46,6 @@ namespace PurrNet
 
             _tickDelta = tickDelta;
             _lastValue = initialValue;
-            _currentState = _lerp(initialValue, initialValue, 1f);
             _waitForMinBufferSize = true;
         }
 
@@ -67,14 +65,13 @@ namespace PurrNet
         public void Teleport(T value)
         {
             _lastValue = value;
-            _currentState = _lerp(_lastValue, value, 1f);
             _buffer.Clear();
             _timer = 0f;
         }
 
         public T GetCurrentState()
         {
-            return _currentState;
+            return _lerp(_lastValue, _lastValue, 1f);
         }
 
         public T Advance(float deltaTime)
@@ -84,7 +81,7 @@ namespace PurrNet
                 if (_buffer.Count < minBufferSize)
                 {
                     _timer = 0f;
-                    return _currentState;
+                    return _lerp(_lastValue, _lastValue, 1f);
                 }
 
                 _waitForMinBufferSize = false;
@@ -94,7 +91,7 @@ namespace PurrNet
             {
                 _timer = 0f;
                 _waitForMinBufferSize = true;
-                return _currentState;
+                return _lerp(_lastValue, _lastValue, 1f);
             }
 
             _timer += deltaTime;
@@ -109,13 +106,11 @@ namespace PurrNet
                 {
                     _timer = 0f;
                     _waitForMinBufferSize = true;
-                    _currentState = _lerp(_lastValue, _lastValue, 1f);
-                    return _currentState;
+                    return _lerp(_lastValue, _lastValue, 1f);
                 }
             }
 
-            _currentState = _lerp(_lastValue, _buffer[0], _timer / _tickDelta);
-            return _currentState;
+            return _lerp(_lastValue, _buffer[0], _timer / _tickDelta);
         }
     }
 }
