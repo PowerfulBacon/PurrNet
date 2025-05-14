@@ -126,6 +126,7 @@ namespace PurrNet.Packing
         public BitPacker Pickle(LZ4Level level = LZ4Level.L00_FAST)
         {
             var packer = BitPackerPool.Get();
+            packer.EnsureBitsExist(positionInBits);
             PickleInto(packer, level);
             return packer;
         }
