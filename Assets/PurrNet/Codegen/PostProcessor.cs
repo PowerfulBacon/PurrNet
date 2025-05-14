@@ -9,6 +9,7 @@ using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using PurrNet.Editor;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Pooling;
@@ -946,7 +947,76 @@ namespace PurrNet.Codegen
             return true;
         }
 
-        private MethodDefinition HandleRPC(ModuleDefinition module, int id, RPCMethod methodRpc, bool isNetworkClass,
+        private static void StripBody(MethodDefinition method)
+        {
+            var il = method.Body.GetILProcessor();
+            method.Body.Instructions.Clear();
+
+            // Handle return value
+            var returnType = method.ReturnType;
+            if (returnType.MetadataType != MetadataType.Void)
+                EmitDefaultValue(method, il, returnType);
+
+            il.Append(il.Create(OpCodes.Ret));
+        }
+
+        private static void EmitDefaultValue(MethodDefinition method, ILProcessor il, TypeReference type)
+        {
+            switch (type.MetadataType)
+            {
+                case MetadataType.Boolean:
+                case MetadataType.Byte:
+                case MetadataType.SByte:
+                case MetadataType.Int16:
+                case MetadataType.UInt16:
+                case MetadataType.Int32:
+                case MetadataType.UInt32:
+                case MetadataType.Int64:
+                case MetadataType.UInt64:
+                case MetadataType.IntPtr:
+                case MetadataType.UIntPtr:
+                case MetadataType.Char:
+                    il.Append(il.Create(OpCodes.Ldc_I4_0));
+                    break;
+                case MetadataType.Single:
+                    il.Append(il.Create(OpCodes.Ldc_R4, 0f));
+                    break;
+                case MetadataType.Double:
+                    il.Append(il.Create(OpCodes.Ldc_R8, 0d));
+                    break;
+                case MetadataType.String:
+                case MetadataType.Class:
+                case MetadataType.Object:
+                case MetadataType.Array:
+                case MetadataType.ByReference:
+                    il.Append(il.Create(OpCodes.Ldnull));
+                    break;
+                case MetadataType.ValueType:
+                    // For structs, emit a local, initobj, ldloc
+                    var varDef = new VariableDefinition(type);
+                    method.Body.Variables.Add(varDef);
+                    il.Append(il.Create(OpCodes.Ldloca_S, varDef));
+                    il.Append(il.Create(OpCodes.Initobj, type));
+                    il.Append(il.Create(OpCodes.Ldloc, varDef));
+                    break;
+                case MetadataType.Void:
+                case MetadataType.Pointer:
+                case MetadataType.Var:
+                case MetadataType.GenericInstance:
+                case MetadataType.TypedByReference:
+                case MetadataType.FunctionPointer:
+                case MetadataType.MVar:
+                case MetadataType.RequiredModifier:
+                case MetadataType.OptionalModifier:
+                case MetadataType.Sentinel:
+                case MetadataType.Pinned:
+                default:
+                    il.Append(il.Create(OpCodes.Ldnull));
+                    break;
+            }
+        }
+
+        private MethodDefinition HandleRPC(ModuleDefinition module, int id, RPCMethod methodRpc, bool isNetworkClass, bool isServerBuild, PurrNetSettings settings,
             DisposableHashSet<TypeReference> usedTypes, [UsedImplicitly] List<DiagnosticMessage> messages)
         {
             var method = methodRpc.originalMethod;
@@ -1413,6 +1483,9 @@ namespace PurrNet.Codegen
 
             code.Append(Instruction.Create(OpCodes.Ret));
 
+            if (settings.stripServerCode && methodRpc.Signature is { runLocally: false, type: RPCType.ServerRPC } && !isServerBuild)
+                StripBody(method);
+
             return newMethod;
         }
 
@@ -1668,16 +1741,25 @@ namespace PurrNet.Codegen
                 if (!WillProcess(compiledAssembly))
                     return null!;
 
+                var settings = PurrNetSettings.GetOrCreateSettings();
                 bool isEditor = false;
+                bool isServerBuild = false;
 
                 foreach (var define in compiledAssembly.Defines)
                 {
-                    if (define == "UNITY_EDITOR")
+                    switch (define)
                     {
-                        isEditor = true;
-                        break;
+                        case "UNITY_EDITOR":
+                            isEditor = true;
+                            break;
+                        case "UNITY_SERVER":
+                            isServerBuild = true;
+                            break;
                     }
                 }
+
+                if (isEditor)
+                    isServerBuild = true;
 
                 var visitedTypes = new HashSet<string>(128);
                 var typesToGenerateSerializer = new HashSet<TypeReference>(128, TypeReferenceEqualityComparer.Default);
@@ -1861,7 +1943,7 @@ namespace PurrNet.Codegen
                             try
                             {
                                 var newMethod = HandleRPC(module, idOffset + index, _rpcMethods[index],
-                                    inheritsFromNetworkClass, usedTypes, messages);
+                                    inheritsFromNetworkClass, isServerBuild, settings, usedTypes, messages);
 
                                 if (newMethod != null)
                                 {

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 using PurrNet;
 using PurrNet.Packing;
@@ -44,9 +45,10 @@ public class StaticRpcTest : NetworkIdentity
     }
 
     [TargetRpc(requireServer: false)]
-    public void TargetRpc(PlayerID player, RPCInfo info = default)
+    public Task TargetRpc(PlayerID player, RPCInfo info = default)
     {
         Debug.Log($"TargetRpc from {info.sender}");
+        return Task.CompletedTask;
     }
 }
 
