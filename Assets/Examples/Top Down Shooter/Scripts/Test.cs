@@ -1,4 +1,6 @@
 using PurrNet;
+using PurrNet.Logging;
+using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Transports;
 using UnityEngine;
@@ -12,7 +14,7 @@ public class Test : NetworkIdentity
         if (!isController)
             return;
 
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        if (Input.GetKeyDown(KeyCode.Space))
             SendData(_testData);
     }
 
@@ -37,9 +39,15 @@ public class Test : NetworkIdentity
         PackedUInt valueId = default;
 
         if (!networkManager.TryGetModule(out DeltaModule deltaModule, false))
+        {
+            packer.Dispose();
             return;
+        }
 
+        var startPos = packer.positionInBits;
         deltaModule.Read(packer, localPlayerForced, 123, ref receivedData, ref valueId);
+
+        PurrLogger.Log($"Received data: {receivedData} with ID: {valueId}, length: {packer.positionInBits - startPos} bits");
 
         packer.Dispose();
     }

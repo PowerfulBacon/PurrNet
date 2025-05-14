@@ -1,10 +1,8 @@
 using System.Collections.Generic;
-using PurrNet.Modules;
 using PurrNet.Packing;
-using PurrNet.Pooling;
 using PurrNet.Transports;
 
-namespace PurrNet
+namespace PurrNet.Modules
 {
     public class DeltaModule : INetworkModule
     {
@@ -28,43 +26,7 @@ namespace PurrNet
             _networkManager.Unsubscribe<DeltaAcknowledge>(Acknowledge, asServer);
         }
 
-        private struct DeltaAcknowledge : IPackedAuto
-        {
-            public int key;
-            public PackedUInt valueId;
-        }
-
-        private struct ClientDeltaTracker
-        {
-            public object currentValue;
-            public uint lastConfirmedId;
-            public uint oldestIdInHistory;
-            public Dictionary<uint, object> history;
-            public uint nextId;
-
-            public uint GenerateId()
-            {
-                return nextId++;
-            }
-
-            public void CleanupHistory(uint lastConfirmedId)
-            {
-                var toRemove = ListPool<uint>.Instantiate();
-
-                foreach (var id in history.Keys)
-                {
-                    if (id < lastConfirmedId)
-                        toRemove.Add(id);
-                }
-
-                foreach (var id in toRemove)
-                    history.Remove(id);
-
-                ListPool<uint>.Destroy(toRemove);
-            }
-        }
-
-        private ClientDeltaTracker GetOrCreateTracker<T>(PlayerID player, int key)
+        private ClientDeltaTracker<T> GetOrCreateTracker<T>(PlayerID player, int key)
         {
             if (!_clientTrackers.TryGetValue(player, out var clientDict))
             {
@@ -74,17 +36,16 @@ namespace PurrNet
 
             if (!clientDict.TryGetValue(key, out var tracker))
             {
-                tracker = new ClientDeltaTracker
-                {
-                    currentValue = default(T),
-                    lastConfirmedId = default,
-                    history = new Dictionary<uint, object>(),
-                    nextId = 1
-                };
+                var result = new ClientDeltaTracker<T>();
+                tracker = result;
                 clientDict[key] = tracker;
+                return result;
             }
 
-            return tracker;
+            if (tracker is not ClientDeltaTracker<T> typedTracker)
+                throw new System.Exception($"Tracker for key {key} is not of type {typeof(ClientDeltaTracker<T>).Name}");
+
+            return typedTracker;
         }
 
         public bool Write<T>(BitPacker packer, PlayerID player, int key, T newValue)
@@ -92,12 +53,11 @@ namespace PurrNet
             var tracker = GetOrCreateTracker<T>(player, key);
 
             T oldValue = default;
-            if (tracker.lastConfirmedId != 0 && tracker.history.TryGetValue(tracker.lastConfirmedId, out var confirmedValue))
-            {
-                oldValue = (T)confirmedValue;
-            }
 
-            Packer<uint>.Write(packer, tracker.lastConfirmedId);
+            if (tracker.lastConfirmedId != 0 && tracker.history.TryGetValue(tracker.lastConfirmedId, out var confirmedValue))
+                oldValue = confirmedValue;
+
+            Packer<PackedUInt>.Write(packer, tracker.lastConfirmedId);
 
             var pos = packer.positionInBits;
             Packer<bool>.Write(packer, false);
@@ -129,8 +89,8 @@ namespace PurrNet
         {
             var tracker = GetOrCreateTracker<T>(player, key);
 
-            uint lastConfirmedId = default;
-            Packer<uint>.Read(packer, ref lastConfirmedId);
+            PackedUInt lastConfirmedId = default;
+            Packer<PackedUInt>.Read(packer, ref lastConfirmedId);
 
             bool changed = false;
             Packer<bool>.Read(packer, ref changed);
@@ -140,7 +100,7 @@ namespace PurrNet
                 T oldValue = default;
                 if (lastConfirmedId != 0 && tracker.history.TryGetValue(lastConfirmedId, out var confirmedValue))
                 {
-                    oldValue = (T)confirmedValue;
+                    oldValue = confirmedValue;
                 }
 
                 DeltaPacker<T>.Read(packer, oldValue, ref newValue);
@@ -157,7 +117,7 @@ namespace PurrNet
             else
             {
                 newValue = tracker.currentValue != null
-                    ? (T)tracker.currentValue
+                    ? tracker.currentValue
                     : default;
             }
 
@@ -169,7 +129,7 @@ namespace PurrNet
             _networkManager.SendToServer(data, Channel.Unreliable);
         }
 
-        private void CleanupClientHistory(ref ClientDeltaTracker tracker, int maxHistoryCount = 10)
+        private static void CleanupClientHistory<T>(ref ClientDeltaTracker<T> tracker, int maxHistoryCount = 10)
         {
             if (tracker.history.Count <= maxHistoryCount)
                 return;
@@ -199,7 +159,7 @@ namespace PurrNet
                 !clientDict.TryGetValue(data.key, out var tracker))
                 return;
 
-            if (tracker.history.ContainsKey(data.valueId))
+            if (tracker.ContainsKey(data.valueId))
             {
                 if (data.valueId > tracker.lastConfirmedId)
                 {
@@ -207,8 +167,6 @@ namespace PurrNet
                     tracker.CleanupHistory(data.valueId);
 
                     clientDict[data.key] = tracker;
-
-                    //Debug.Log($"{player} acknowledged value {valueId.value} for key {key}");
                 }
             }
         }
