@@ -960,10 +960,6 @@ namespace PurrNet
             modules.AddModule(new RpcRequestResponseModule(playersManager));
             modules.AddModule(colliderRollback);
 
-            var deltaMessager = new DeltaMessagerFactory(scenesModule, scenePlayers , playersBroadcast);
-
-            modules.AddModule(deltaMessager);
-
             RenewSubscriptions(asServer);
         }
 
