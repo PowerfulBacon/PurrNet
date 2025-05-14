@@ -112,9 +112,9 @@ namespace PurrNet
 
         private bool _prevWasController;
 
-        public Vector3 position => syncPosition && !IsController(_ownerAuth) ? _position.GetCurrentState().position : _trs.position;
-        public Quaternion rotation => syncRotation && !IsController(_ownerAuth) ? _rotation.GetCurrentState().rotation : _trs.rotation;
-        public Vector3 scale => syncScale && !IsController(_ownerAuth) ? _scale.GetCurrentState().scale : _trs.localScale;
+        public Vector3 position { get; private set; }
+        public Quaternion rotation { get; private set; }
+        public Vector3 localScale { get; private set; }
 
         private void Awake()
         {
@@ -393,19 +393,26 @@ namespace PurrNet
                 _controller.enabled = false;
 
             if (syncPosition)
-                _trs.position = _position.Advance(Time.deltaTime).position;
+            {
+                var worldPos = _position.Advance(Time.deltaTime).position;
+                _trs.position = worldPos;
+                position = worldPos;
+            }
 
             if (syncRotation)
-                _trs.rotation = _rotation.Advance(Time.deltaTime).rotation;
+            {
+                var worldRot = _rotation.Advance(Time.deltaTime).rotation;
+                _trs.rotation = worldRot;
+                rotation = worldRot;
+            }
 
             if (syncScale)
             {
                 var worldScale = _scale.Advance(Time.deltaTime).scale;
                 var parentTrs = transform.parent;
-
-                _trs.localScale = parentTrs ?
-                    parentTrs.GetLocalScale(worldScale) :
-                    worldScale;
+                var ls = parentTrs ? parentTrs.GetLocalScale(worldScale) : worldScale;
+                _trs.localScale = ls;
+                this.localScale = ls;
             }
 
             if (disableController && _characterControllerPatch)

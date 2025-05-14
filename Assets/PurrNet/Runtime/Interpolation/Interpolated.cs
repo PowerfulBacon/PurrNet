@@ -69,11 +69,6 @@ namespace PurrNet
             _timer = 0f;
         }
 
-        public T GetCurrentState()
-        {
-            return _lerp(_lastValue, _lastValue, 1f);
-        }
-
         public T Advance(float deltaTime)
         {
             if (_waitForMinBufferSize)
