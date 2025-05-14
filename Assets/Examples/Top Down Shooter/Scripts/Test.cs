@@ -6,7 +6,7 @@ using UnityEngine;
 public class Test : NetworkIdentity
 {
     [SerializeField] private CompressedVector3 _testData;
-    
+
     private void Update()
     {
         if (!isController)
@@ -23,8 +23,8 @@ public class Test : NetworkIdentity
         {
             if (!networkManager.TryGetModule(out DeltaModule deltaModule, isServer))
                 continue;
-            
-            using BitPacker packer = BitPackerPool.Get();
+
+            using var packer = BitPackerPool.Get();
             deltaModule.Write(packer, player, 123, testData);
             ReceiveData(player, packer);
         }
@@ -38,9 +38,9 @@ public class Test : NetworkIdentity
 
         if (!networkManager.TryGetModule(out DeltaModule deltaModule, false))
             return;
-        
+
         deltaModule.Read(packer, localPlayerForced, 123, ref receivedData, ref valueId);
-        
+
         packer.Dispose();
     }
 }

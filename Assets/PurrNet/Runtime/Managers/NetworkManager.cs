@@ -929,7 +929,7 @@ namespace PurrNet
                 _clientScenePlayersModule.onPlayerLeftScene += OnPlayerLeftScene;
             }
 
-            var newDeltaModule = new DeltaModule(this, asServer);
+            var newDeltaModule = new DeltaModule(this);
             if (asServer) _serverDeltaModule = newDeltaModule;
             else _clientDeltaModule = newDeltaModule;
 
