@@ -30,7 +30,7 @@ namespace PurrNet.StateMachine
 
         private Queue<Action> _stateChangeQueue = new();
         
-
+        private Queue<IStateCommand> _stateCommandQueue = new();
         StateMachineState _currentState;
         private int _previousStateId = -1;
 
@@ -65,6 +65,15 @@ namespace PurrNet.StateMachine
 
             var node = _states[_currentState.stateId];
             node.StateUpdate(isServer);
+        }
+        
+        void LateUpdate()
+        {
+            while (_stateCommandQueue.Count > 0)
+            {
+                var command = _stateCommandQueue.Dequeue();
+                command.Execute();
+            }
         }
 
         protected override void OnSpawned()
@@ -286,6 +295,12 @@ namespace PurrNet.StateMachine
         /// <typeparam name="T">Your data type</typeparam>
         public void SetState<T>(StateNode<T> state, T data)
         {
+            var command = new GenericStateCommand<T>(state, data, SetStateInternal);
+            _stateCommandQueue.Enqueue(command);
+        }
+
+        private void SetStateInternal<T>(StateNode<T> state, T data)
+        {
             if (!IsController(ownerAuth))
             {
                 PurrLogger.LogError(
@@ -332,6 +347,12 @@ namespace PurrNet.StateMachine
         /// </summary>
         /// <param name="state">Reference to the state you want to go to</param>
         public void SetState(StateNode state)
+        {
+            var command = new StateCommand(state, SetStateInternal);
+            _stateCommandQueue.Enqueue(command);
+        }
+
+        private void SetStateInternal(StateNode state)
         {
             if (!IsController(ownerAuth))
             {
@@ -462,6 +483,47 @@ namespace PurrNet.StateMachine
         {
             Packer<int>.Read(packer, ref stateId);
             Packer<object>.Read(packer, ref data);
+        }
+    }
+    
+    public interface IStateCommand
+    {
+        void Execute();
+    }
+    
+    internal struct GenericStateCommand<T> : IStateCommand
+    {
+        private StateNode<T> state;
+        private T data;
+        private Action<StateNode<T>, T> setStateMethod;
+
+        public GenericStateCommand(StateNode<T> state, T data, Action<StateNode<T>, T> setStateMethod)
+        {
+            this.state = state;
+            this.data = data;
+            this.setStateMethod = setStateMethod;
+        }
+
+        public void Execute()
+        {
+            setStateMethod(state, data);
+        }
+    }
+
+    internal struct StateCommand : IStateCommand
+    {
+        private StateNode state;
+        private Action<StateNode> setStateMethod;
+
+        public StateCommand(StateNode state, Action<StateNode> setStateMethod)
+        {
+            this.state = state;
+            this.setStateMethod = setStateMethod;
+        }
+
+        public void Execute()
+        {
+            setStateMethod(state);
         }
     }
 }
