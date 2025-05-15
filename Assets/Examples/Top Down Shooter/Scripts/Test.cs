@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class Test : NetworkIdentity
 {
+    [SerializeField] private int _packKey = 123;
     [SerializeField] private CompressedVector3 _testData;
 
     private void Update()
@@ -27,7 +28,8 @@ public class Test : NetworkIdentity
                 continue;
 
             using var packer = BitPackerPool.Get();
-            deltaModule.Write(packer, player, 123, testData);
+            var key = new TestKey() { key = _packKey };
+            deltaModule.Write(packer, player, key, testData);
             ReceiveData(player, packer);
         }
     }
@@ -45,10 +47,26 @@ public class Test : NetworkIdentity
         }
 
         var startPos = packer.positionInBits;
-        deltaModule.Read(packer, localPlayerForced, 123, ref receivedData, ref valueId);
+        var key = new TestKey() { key = _packKey };
+        deltaModule.Read(packer, localPlayerForced, key, ref receivedData, ref valueId);
 
-        PurrLogger.Log($"Received data: {receivedData} with ID: {valueId}, length: {packer.positionInBits - startPos} bits");
+        PurrLogger.Log($"Received data ({key.GetType().Name}: {key.ToString()}): {receivedData} with ID: {valueId.value}, length: {packer.positionInBits - startPos} bits");
 
         packer.Dispose();
+    }
+
+    private struct TestKey : IStableHashable
+    {
+        public int key;
+
+        public override string ToString()
+        {
+            return $"{key}";
+        }
+
+        public uint GetStableHash()
+        {
+            return (uint)key;
+        }
     }
 }

@@ -1,18 +1,21 @@
+using System;
 using System.Collections.Generic;
 using PurrNet.Packing;
 using PurrNet.Transports;
+using PurrNet.Utils;
+using UnityEngine;
 
 namespace PurrNet.Modules
 {
     public class DeltaModule : INetworkModule
     {
         private readonly NetworkManager _networkManager;
-        private readonly Dictionary<PlayerID, Dictionary<int, ClientDeltaTracker>> _clientTrackers;
+        private readonly Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>> _clientTrackers;
 
         public DeltaModule(NetworkManager networkManager)
         {
             _networkManager = networkManager;
-            _clientTrackers = new Dictionary<PlayerID, Dictionary<int, ClientDeltaTracker>>();
+            _clientTrackers = new Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>>();
         }
 
         public void Enable(bool asServer)
@@ -26,11 +29,11 @@ namespace PurrNet.Modules
             _networkManager.Unsubscribe<DeltaAcknowledge>(Acknowledge, asServer);
         }
 
-        private ClientDeltaTracker<T> GetOrCreateTracker<T>(PlayerID player, int key)
+        private ClientDeltaTracker<T> GetOrCreateTracker<T>(PlayerID player, uint key)
         {
             if (!_clientTrackers.TryGetValue(player, out var clientDict))
             {
-                clientDict = new Dictionary<int, ClientDeltaTracker>();
+                clientDict = new Dictionary<uint, ClientDeltaTracker>();
                 _clientTrackers[player] = clientDict;
             }
 
@@ -48,9 +51,10 @@ namespace PurrNet.Modules
             return typedTracker;
         }
 
-        public bool Write<T>(BitPacker packer, PlayerID player, int key, T newValue)
+        public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue) where Key : struct, IStableHashable
         {
-            var tracker = GetOrCreateTracker<T>(player, key);
+            var hash = GetKeyHash(key);
+            var tracker = GetOrCreateTracker<T>(player, hash);
 
             T oldValue = default;
 
@@ -75,7 +79,7 @@ namespace PurrNet.Modules
                 tracker.history[newId] = newValue;
 
                 var clientDict = _clientTrackers[player];
-                clientDict[key] = tracker;
+                clientDict[hash] = tracker;
             }
             else
             {
@@ -85,9 +89,10 @@ namespace PurrNet.Modules
             return changed;
         }
 
-        public void Read<T>(BitPacker packer, PlayerID player, int key, ref T newValue, ref PackedUInt valueId)
+        public void Read<Key, T>(BitPacker packer, PlayerID player, Key key, ref T newValue, ref PackedUInt valueId) where Key : struct, IStableHashable
         {
-            var tracker = GetOrCreateTracker<T>(player, key);
+            var keyHash = GetKeyHash(key);
+            var tracker = GetOrCreateTracker<T>(player, keyHash);
 
             PackedUInt lastConfirmedId = default;
             Packer<PackedUInt>.Read(packer, ref lastConfirmedId);
@@ -112,7 +117,7 @@ namespace PurrNet.Modules
                 CleanupClientHistory(ref tracker);
 
                 var clientDict = _clientTrackers[player];
-                clientDict[key] = tracker;
+                clientDict[keyHash] = tracker;
             }
             else
             {
@@ -123,7 +128,7 @@ namespace PurrNet.Modules
 
             var data = new DeltaAcknowledge
             {
-                key = key,
+                key = keyHash,
                 valueId = valueId
             };
             _networkManager.SendToServer(data, Channel.Unreliable);
@@ -151,6 +156,13 @@ namespace PurrNet.Modules
                 tracker.history.Remove(tracker.oldestIdInHistory);
                 tracker.oldestIdInHistory++;
             }
+        }
+
+        private static uint GetKeyHash<T>(T key) where T : struct, IStableHashable
+        {
+            uint typeHash = Hasher.PrepareType(typeof(T));
+            uint valueHash = key.GetStableHash();
+            return Hasher.CombineHashes(typeHash, valueHash);
         }
 
         private void Acknowledge(PlayerID player, DeltaAcknowledge data, bool asServer)

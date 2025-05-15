@@ -4,7 +4,12 @@ namespace PurrNet.Modules
 {
     internal struct DeltaAcknowledge : IPackedAuto
     {
-        public int key;
+        public uint key;
         public PackedUInt valueId;
+    }
+    
+    public interface IStableHashable
+    {
+        uint GetStableHash();
     }
 }
