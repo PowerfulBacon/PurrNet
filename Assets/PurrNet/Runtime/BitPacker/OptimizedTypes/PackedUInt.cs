@@ -3,7 +3,7 @@ using System;
 namespace PurrNet.Packing
 {
     [Serializable]
-    public struct PackedByte
+    public struct PackedByte : IPackedAuto
     {
         public byte value;
 
@@ -18,7 +18,7 @@ namespace PurrNet.Packing
     }
 
     [Serializable]
-    public struct PackedSByte
+    public struct PackedSByte : IPackedAuto
     {
         public sbyte value;
 
@@ -33,7 +33,7 @@ namespace PurrNet.Packing
     }
 
     [Serializable]
-    public struct PackedULong : IEquatable<PackedULong>
+    public struct PackedULong : IEquatable<PackedULong>, IPackedAuto
     {
         public ulong value;
 
@@ -68,7 +68,7 @@ namespace PurrNet.Packing
     }
 
     [Serializable]
-    public struct PackedLong
+    public struct PackedLong : IPackedAuto
     {
         public long value;
 
@@ -83,7 +83,7 @@ namespace PurrNet.Packing
     }
 
     [Serializable]
-    public struct PackedUInt : IEquatable<PackedUInt>
+    public struct PackedUInt : IEquatable<PackedUInt>, IPackedAuto
     {
         public uint value;
 
@@ -113,7 +113,7 @@ namespace PurrNet.Packing
     }
 
     [Serializable]
-    public struct PackedInt : IEquatable<PackedInt>
+    public struct PackedInt : IEquatable<PackedInt>, IPackedAuto
     {
         public int value;
 
@@ -148,7 +148,7 @@ namespace PurrNet.Packing
     }
 
     [Serializable]
-    public struct PackedUShort
+    public struct PackedUShort : IPackedAuto
     {
         public ushort value;
 
@@ -163,7 +163,7 @@ namespace PurrNet.Packing
     }
 
     [Serializable]
-    public struct PackedShort
+    public struct PackedShort : IPackedAuto
     {
         public short value;
 
