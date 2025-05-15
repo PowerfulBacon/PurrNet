@@ -21,7 +21,6 @@ namespace PurrNet.Modules
 
     internal class ClientDeltaTracker<T> : ClientDeltaTracker
     {
-        public T currentValue;
         public readonly Dictionary<uint, T> history = new();
 
         public override void CleanupHistory(uint lastConfirmedId)
