@@ -225,6 +225,8 @@ namespace PurrNet.Codegen
 
             if (type.IsEnum)
             {
+                il.Emit(OpCodes.Ldc_I4_0);
+                il.Emit(OpCodes.Ret);
                 return;
             }
 
