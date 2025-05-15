@@ -10,7 +10,8 @@ namespace PurrNet.Modules
     {
         private readonly PlayersManager _players;
         private readonly PlayersBroadcaster _broadcaster;
-        private readonly Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>> _clientTrackers;
+        private readonly Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>> _receivingTrackers;
+        private readonly Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>> _sendingTrackers;
 
         private bool _asServer;
 
@@ -18,7 +19,8 @@ namespace PurrNet.Modules
         {
             _players = players;
             _broadcaster = broadcaster;
-            _clientTrackers = new Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>>();
+            _receivingTrackers = new Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>>();
+            _sendingTrackers = new Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>>();
         }
 
         public void Enable(bool asServer)
@@ -31,21 +33,22 @@ namespace PurrNet.Modules
         public void Disable(bool asServer)
         {
             _players.onPlayerLeft -= OnPlayerLeft;
-            _clientTrackers.Clear();
             _broadcaster.Unsubscribe<DeltaAcknowledge>(Acknowledge);
         }
 
         private void OnPlayerLeft(PlayerID player, bool asServer)
         {
-            _clientTrackers.Remove(player);
+            _receivingTrackers.Remove(player);
+            _sendingTrackers.Remove(player);
         }
 
-        private ClientDeltaTracker<T> GetOrCreateTracker<T>(PlayerID player, uint key)
+        private ClientDeltaTracker<T> GetOrCreateTracker<T>(PlayerID player, uint key, bool isWriting)
         {
-            if (!_clientTrackers.TryGetValue(player, out var clientDict))
+            var dictionary = isWriting ? _sendingTrackers : _receivingTrackers;
+            if (!dictionary.TryGetValue(player, out var clientDict))
             {
                 clientDict = new Dictionary<uint, ClientDeltaTracker>();
-                _clientTrackers[player] = clientDict;
+                dictionary[player] = clientDict;
             }
 
             if (!clientDict.TryGetValue(key, out var tracker))
@@ -65,7 +68,7 @@ namespace PurrNet.Modules
         public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue) where Key : struct, IStableHashable
         {
             var hash = GetKeyHash(key);
-            var tracker = GetOrCreateTracker<T>(player, hash);
+            var tracker = GetOrCreateTracker<T>(player, hash, true);
 
             T oldValue = default;
 
@@ -89,7 +92,7 @@ namespace PurrNet.Modules
                 tracker.currentValue = newValue;
                 tracker.history[newId] = newValue;
 
-                var clientDict = _clientTrackers[player];
+                var clientDict = _sendingTrackers[player];
                 clientDict[hash] = tracker;
             }
             else
@@ -105,7 +108,7 @@ namespace PurrNet.Modules
             var player = _players.localPlayerId ?? default;
 
             var keyHash = GetKeyHash(key);
-            var tracker = GetOrCreateTracker<T>(player, keyHash);
+            var tracker = GetOrCreateTracker<T>(player, keyHash, false);
 
             PackedUInt lastConfirmedId = default;
             Packer<PackedUInt>.Read(packer, ref lastConfirmedId);
@@ -130,7 +133,7 @@ namespace PurrNet.Modules
 
                 CleanupClientHistory(ref tracker);
 
-                var clientDict = _clientTrackers[player];
+                var clientDict = _receivingTrackers[player];
                 clientDict[keyHash] = tracker;
             }
             else
@@ -187,7 +190,7 @@ namespace PurrNet.Modules
             if (!asServer)
                 player = default;
 
-            if (!_clientTrackers.TryGetValue(player, out var clientDict) ||
+            if (!_sendingTrackers.TryGetValue(player, out var clientDict) ||
                 !clientDict.TryGetValue(data.key, out var tracker))
                 return;
 
