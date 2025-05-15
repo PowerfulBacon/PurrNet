@@ -47,7 +47,7 @@ namespace PurrNet.Modules
             }
 
             if (tracker is not ClientDeltaTracker<T> typedTracker)
-                throw new System.Exception($"Tracker for key {key} is not of type {typeof(ClientDeltaTracker<T>).Name}");
+                throw new Exception($"Tracker for key {key} is not of type {typeof(ClientDeltaTracker<T>).Name}");
 
             return typedTracker;
         }
@@ -92,10 +92,7 @@ namespace PurrNet.Modules
 
         public void Read<Key, T>(BitPacker packer, Key key, ref T newValue) where Key : struct, IStableHashable
         {
-            if (!_players.localPlayerId.HasValue)
-                throw new Exception("Local player id is not ready.");
-
-            var player = _players.localPlayerId.Value;
+            var player = _players.localPlayerId ?? default;
 
             var keyHash = GetKeyHash(key);
             var tracker = GetOrCreateTracker<T>(player, keyHash);

@@ -12,9 +12,6 @@ public class Test : NetworkIdentity
 
     private void Update()
     {
-        if (!isController)
-            return;
-
         if (Input.GetKeyDown(KeyCode.Space))
             SendData(_testData);
     }
