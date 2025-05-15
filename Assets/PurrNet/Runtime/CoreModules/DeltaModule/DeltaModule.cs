@@ -184,6 +184,9 @@ namespace PurrNet.Modules
 
         private void Acknowledge(PlayerID player, DeltaAcknowledge data, bool asServer)
         {
+            if (!asServer)
+                player = default;
+
             if (!_clientTrackers.TryGetValue(player, out var clientDict) ||
                 !clientDict.TryGetValue(data.key, out var tracker))
                 return;
