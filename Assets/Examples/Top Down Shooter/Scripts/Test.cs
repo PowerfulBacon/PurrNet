@@ -16,17 +16,18 @@ public class Test : NetworkIdentity
             SendData(_testData);
     }
 
-    [ServerRpc(Channel.Unreliable)]
+    [ServerRpc(Channel.Unreliable, requireOwnership: false)]
     private void SendData(CompressedVector3 testData)
     {
         foreach (var player in networkManager.players)
         {
-            if (!networkManager.TryGetModule(out DeltaModule deltaModule, isServer))
+            if (!networkManager.TryGetModule(out DeltaModule deltaModule, true))
                 continue;
 
             using var packer = BitPackerPool.Get();
             var key = new TestKey() { key = _packKey };
             deltaModule.Write(packer, player, key, testData);
+            PurrLogger.Log($"Sending {player} data ({key.GetType().Name}: {key.ToString()}): {testData}, length: {packer.positionInBits} bits");
             ReceiveData(player, packer);
         }
     }
@@ -44,7 +45,7 @@ public class Test : NetworkIdentity
 
         var startPos = packer.positionInBits;
         var key = new TestKey() { key = _packKey };
-        deltaModule.Read(packer, key, ref receivedData);
+        deltaModule.Read(packer, key, default, ref receivedData);
 
         PurrLogger.Log($"Received data ({key.GetType().Name}: {key.ToString()}): {receivedData}, length: {packer.positionInBits - startPos} bits");
 
