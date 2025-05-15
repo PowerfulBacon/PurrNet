@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using PurrNet.Packing;
 using PurrNet.Transports;
 using PurrNet.Utils;
-using UnityEngine;
 
 namespace PurrNet.Modules
 {
     public class DeltaModule : INetworkModule
     {
+        private readonly PlayersManager _players;
         private readonly NetworkManager _networkManager;
         private readonly Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>> _clientTrackers;
 
-        public DeltaModule(NetworkManager networkManager)
+        public DeltaModule(NetworkManager networkManager, PlayersManager players)
         {
+            _players = players;
             _networkManager = networkManager;
             _clientTrackers = new Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>>();
         }
@@ -89,8 +90,13 @@ namespace PurrNet.Modules
             return changed;
         }
 
-        public void Read<Key, T>(BitPacker packer, PlayerID player, Key key, ref T newValue, ref PackedUInt valueId) where Key : struct, IStableHashable
+        public void Read<Key, T>(BitPacker packer, Key key, ref T newValue) where Key : struct, IStableHashable
         {
+            if (!_players.localPlayerId.HasValue)
+                throw new Exception("Local player id is not ready.");
+
+            var player = _players.localPlayerId.Value;
+
             var keyHash = GetKeyHash(key);
             var tracker = GetOrCreateTracker<T>(player, keyHash);
 
@@ -98,6 +104,7 @@ namespace PurrNet.Modules
             Packer<PackedUInt>.Read(packer, ref lastConfirmedId);
 
             bool changed = false;
+            PackedUInt valueId = default;
             Packer<bool>.Read(packer, ref changed);
 
             if (changed)

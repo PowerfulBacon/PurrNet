@@ -38,7 +38,6 @@ public class Test : NetworkIdentity
     private void ReceiveData(PlayerID target, BitPacker packer, RPCInfo info = default)
     {
         CompressedVector3 receivedData = default;
-        PackedUInt valueId = default;
 
         if (!networkManager.TryGetModule(out DeltaModule deltaModule, false))
         {
@@ -48,9 +47,9 @@ public class Test : NetworkIdentity
 
         var startPos = packer.positionInBits;
         var key = new TestKey() { key = _packKey };
-        deltaModule.Read(packer, localPlayerForced, key, ref receivedData, ref valueId);
+        deltaModule.Read(packer, key, ref receivedData);
 
-        PurrLogger.Log($"Received data ({key.GetType().Name}: {key.ToString()}): {receivedData} with ID: {valueId.value}, length: {packer.positionInBits - startPos} bits");
+        PurrLogger.Log($"Received data ({key.GetType().Name}: {key.ToString()}): {receivedData}, length: {packer.positionInBits - startPos} bits");
 
         packer.Dispose();
     }
