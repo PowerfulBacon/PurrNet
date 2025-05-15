@@ -108,6 +108,19 @@ namespace PurrNet.Utils
 
             return builder.ToString();
         }
+        
+        public static uint CombineHashes(uint hash1, uint hash2)
+        {
+            unchecked
+            {
+                uint hash = FNV_offset_basis32;
+                hash ^= hash1;
+                hash *= FNV_prime32;
+                hash ^= hash2;
+                hash *= FNV_prime32;
+                return hash;
+            }
+        }
 
         public static void ClearState()
         {
