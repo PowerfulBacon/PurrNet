@@ -7,11 +7,13 @@ namespace PurrNet.Modules
     public class DeltaModule : INetworkModule
     {
         private readonly NetworkManager _networkManager;
+        private readonly PlayersManager _players;
         private readonly Dictionary<PlayerID, Dictionary<int, ClientDeltaTracker>> _clientTrackers;
 
-        public DeltaModule(NetworkManager networkManager)
+        public DeltaModule(NetworkManager networkManager, PlayersManager players)
         {
             _networkManager = networkManager;
+            _players = players;
             _clientTrackers = new Dictionary<PlayerID, Dictionary<int, ClientDeltaTracker>>();
         }
 
@@ -85,14 +87,20 @@ namespace PurrNet.Modules
             return changed;
         }
 
-        public void Read<T>(BitPacker packer, PlayerID player, int key, ref T newValue, ref PackedUInt valueId)
+        public void Read<T>(BitPacker packer, int key, ref T newValue)
         {
+            if (!_players.localPlayerId.HasValue)
+                throw new System.Exception("Local player id is not ready.");
+
+            var player = _players.localPlayerId.Value;
             var tracker = GetOrCreateTracker<T>(player, key);
 
             PackedUInt lastConfirmedId = default;
             Packer<PackedUInt>.Read(packer, ref lastConfirmedId);
 
             bool changed = false;
+            PackedUInt valueId = default;
+
             Packer<bool>.Read(packer, ref changed);
 
             if (changed)
