@@ -9,15 +9,15 @@ namespace PurrNet.Modules
     public class DeltaModule : INetworkModule
     {
         private readonly PlayersManager _players;
-        private readonly NetworkManager _networkManager;
+        private readonly PlayersBroadcaster _broadcaster;
         private readonly Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>> _clientTrackers;
 
         private bool _asServer;
 
-        public DeltaModule(NetworkManager networkManager, PlayersManager players)
+        public DeltaModule(PlayersManager players, PlayersBroadcaster broadcaster)
         {
             _players = players;
-            _networkManager = networkManager;
+            _broadcaster = broadcaster;
             _clientTrackers = new Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>>();
         }
 
@@ -25,14 +25,14 @@ namespace PurrNet.Modules
         {
             _asServer = asServer;
             _players.onPlayerLeft += OnPlayerLeft;
-            _networkManager.Subscribe<DeltaAcknowledge>(Acknowledge, asServer);
+            _broadcaster.Subscribe<DeltaAcknowledge>(Acknowledge);
         }
 
         public void Disable(bool asServer)
         {
             _players.onPlayerLeft -= OnPlayerLeft;
             _clientTrackers.Clear();
-            _networkManager.Unsubscribe<DeltaAcknowledge>(Acknowledge, asServer);
+            _broadcaster.Unsubscribe<DeltaAcknowledge>(Acknowledge);
         }
 
         private void OnPlayerLeft(PlayerID player, bool asServer)
@@ -147,8 +147,8 @@ namespace PurrNet.Modules
             };
 
             if (_asServer)
-                 _networkManager.Send(sender, data, Channel.Unreliable);
-            else _networkManager.SendToServer(data, Channel.Unreliable);
+                _broadcaster.Send(sender, data, Channel.Unreliable);
+            else _broadcaster.SendToServer(data, Channel.Unreliable);
         }
 
         private static void CleanupClientHistory<T>(ref ClientDeltaTracker<T> tracker, int maxHistoryCount = 10)
