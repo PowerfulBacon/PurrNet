@@ -187,7 +187,7 @@ namespace PurrNet.Modules
 
         private static uint GetKeyHash<T>(T key) where T : struct, IStableHashable
         {
-            uint typeHash = Hasher.PrepareType(typeof(T));
+            uint typeHash = Hasher<T>.stableHash;
             uint valueHash = key.GetStableHash();
             return Hasher.CombineHashes(typeHash, valueHash);
         }

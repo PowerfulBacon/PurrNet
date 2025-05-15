@@ -7,6 +7,17 @@ using PurrNet.Modules;
 
 namespace PurrNet.Utils
 {
+    public static class Hasher<T>
+    {
+        // ReSharper disable once StaticMemberInGenericType
+        public static readonly uint stableHash;
+
+        static Hasher()
+        {
+            stableHash = Hasher.ActualHash(typeof(T).FullName);
+        }
+    }
+
     public class Hasher
     {
         private const uint FNV_offset_basis32 = 2166136261;
@@ -108,7 +119,7 @@ namespace PurrNet.Utils
 
             return builder.ToString();
         }
-        
+
         public static uint CombineHashes(uint hash1, uint hash2)
         {
             unchecked
