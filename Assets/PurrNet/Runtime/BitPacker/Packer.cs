@@ -244,12 +244,12 @@ namespace PurrNet.Packing
             Packer<T>.Write(packerA, a);
             Packer<T>.Write(packerB, b);
 
+            var spanA = packerA.ToByteData().span;
+            var spanB = packerB.ToByteData().span;
+
             // Write a zero byte to the end of the packer to ensure the bits are aligned
             Packer<byte>.Write(packerA, 0);
             Packer<byte>.Write(packerB, 0);
-
-            var spanA = packerA.ToByteData().span;
-            var spanB = packerB.ToByteData().span;
 
             if (spanA.Length != spanB.Length)
                 return false;
