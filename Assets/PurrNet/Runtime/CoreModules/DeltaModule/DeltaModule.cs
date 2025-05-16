@@ -132,10 +132,19 @@ namespace PurrNet.Modules
                     T testValue = default;
                     using var tmp = BitPackerPool.Get();
                     DeltaPacker<T>.Write(tmp, oldValue, newValue);
+                    var bitPosition = tmp.positionInBits;
                     tmp.ResetPositionAndMode(true);
                     DeltaPacker<T>.Read(tmp, oldValue, ref testValue);
+                    var newBitPosition = tmp.positionInBits;
+
                     if (!Packer.AreEqual(newValue, testValue))
+                    {
                         PurrLogger.LogError($"Delta packer failed to pack/unpack correctly for `{typeof(T).Name}`\nOld: {oldValue}\nNew: {newValue}\nRead: {testValue}");
+                    }
+                    else if (newBitPosition != bitPosition)
+                    {
+                        PurrLogger.LogError($"Delta packer failed to pack/unpack correctly for `{typeof(T).Name}`\nOld: {oldValue}\nNew: {newValue}\nRead: {testValue}");
+                    }
                 }
 
                 PackedUInt newId = tracker.GenerateId();
