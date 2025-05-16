@@ -252,13 +252,7 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static bool AreEqualRef<T>(ref T a, ref T b)
         {
-            using var packerA = BitPackerPool.Get();
-            using var packerB = BitPackerPool.Get();
-
-            Write(packerA, a);
-            Write(packerB, b);
-
-            return packerA.ToByteData().span.SequenceEqual(packerB.ToByteData().span);
+            return AreEqual(a, b);
         }
 
         static readonly Dictionary<Type, MethodInfo> _writeMethods = new Dictionary<Type, MethodInfo>();
