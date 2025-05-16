@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using PurrNet.Packing;
 using PurrNet.Pooling;
 
 namespace PurrNet.Modules
 {
-    internal abstract class ClientDeltaTracker
+    internal abstract class ClientDeltaTracker : IDisposable
     {
         public uint lastConfirmedId;
         public uint oldestIdInHistory;
@@ -17,6 +18,8 @@ namespace PurrNet.Modules
 
         public abstract void CleanupHistory(uint lastConfirmedId);
         public abstract bool ContainsKey(uint id);
+
+        public abstract void Dispose();
     }
 
     internal class ClientDeltaTracker<T> : ClientDeltaTracker
@@ -34,7 +37,13 @@ namespace PurrNet.Modules
             }
 
             foreach (var id in toRemove)
-                history.Remove(id);
+            {
+                if (history.Remove(id, out var item))
+                {
+                    if (item is IDisposable disposable)
+                        disposable.Dispose();
+                }
+            }
 
             ListPool<uint>.Destroy(toRemove);
         }
@@ -42,6 +51,20 @@ namespace PurrNet.Modules
         public override bool ContainsKey(uint id)
         {
             return history.ContainsKey(id);
+        }
+
+        public override void Dispose()
+        {
+            if (history != null)
+            {
+                foreach (var item in history.Values)
+                {
+                    if (item is IDisposable disposable)
+                        disposable.Dispose();
+                }
+
+                history.Clear();
+            }
         }
     }
 }

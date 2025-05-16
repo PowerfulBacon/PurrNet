@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Utils;
@@ -213,20 +214,11 @@ namespace PurrNet.Packing
 
     public static class Packer
     {
-        /// <summary>
-        /// If the type is a value type, it will be returned as is instead of being deep copied.
-        /// </summary>
-        public static T FastCopy<T>(T value)
-        {
-            bool isValueType = typeof(T).IsValueType;
-            if (isValueType)
-                return value;
-
-            return Copy(value);
-        }
-
         public static T Copy<T>(T value)
         {
+            bool isUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+            if (isUnmanaged)
+                return value;
             using var tmpPacker = BitPackerPool.Get();
             Packer<T>.Write(tmpPacker, value);
             tmpPacker.ResetPositionAndMode(true);

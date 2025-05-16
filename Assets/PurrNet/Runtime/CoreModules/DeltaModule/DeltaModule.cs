@@ -35,12 +35,42 @@ namespace PurrNet.Modules
         {
             _players.onPlayerLeft -= OnPlayerLeft;
             _broadcaster.Unsubscribe<DeltaAcknowledge>(Acknowledge);
+
+            foreach (var player in _sendingTrackers.Keys)
+            {
+                if (_sendingTrackers.TryGetValue(player, out var clientDict))
+                {
+                    foreach (var tracker in clientDict.Values)
+                        tracker.Dispose();
+                }
+            }
+
+            foreach (var player in _receivingTrackers.Keys)
+            {
+                if (_receivingTrackers.TryGetValue(player, out var receiveDict))
+                {
+                    foreach (var tracker in receiveDict.Values)
+                        tracker.Dispose();
+                }
+            }
+
+            _sendingTrackers.Clear();
+            _receivingTrackers.Clear();
         }
 
         private void OnPlayerLeft(PlayerID player, bool asServer)
         {
-            _receivingTrackers.Remove(player);
-            _sendingTrackers.Remove(player);
+            if (_receivingTrackers.Remove(player, out var receiveDict))
+            {
+                foreach (var tracker in receiveDict.Values)
+                    tracker.Dispose();
+            }
+
+            if (_sendingTrackers.Remove(player, out var clientDict))
+            {
+                foreach (var tracker in clientDict.Values)
+                    tracker.Dispose();
+            }
         }
 
         private ClientDeltaTracker<T> GetOrCreateTracker<T>(PlayerID player, uint key, bool isWriting)
@@ -73,8 +103,16 @@ namespace PurrNet.Modules
 
             T oldValue = default;
 
-            if (tracker.lastConfirmedId != 0 && tracker.history.TryGetValue(tracker.lastConfirmedId, out var confirmedValue))
-                oldValue = confirmedValue;
+            if (tracker.lastConfirmedId != 0)
+            {
+                if (tracker.history.TryGetValue(tracker.lastConfirmedId, out var confirmedValue))
+                    oldValue = confirmedValue;
+                else
+                {
+                    PurrLogger.LogError($"Confirmed value not found for key {hash} and {tracker.lastConfirmedId} and player {player}");
+                    oldValue = default;
+                }
+            }
 
             Packer<PackedUInt>.Write(packer, tracker.lastConfirmedId);
 
@@ -147,9 +185,6 @@ namespace PurrNet.Modules
                 UpdateValueAtIndex<T>(newValue, tracker, valueId);
                 CleanupClientHistory(ref tracker);
 
-                var clientDict = _receivingTrackers[player];
-                clientDict[keyHash] = tracker;
-
                 var data = new DeltaAcknowledge
                 {
                     key = keyHash,
@@ -173,7 +208,7 @@ namespace PurrNet.Modules
             else newValue = default;
         }
 
-        private static void CleanupClientHistory<T>(ref ClientDeltaTracker<T> tracker, int maxHistoryCount = 10)
+        private static void CleanupClientHistory<T>(ref ClientDeltaTracker<T> tracker, int maxHistoryCount = 60)
         {
             if (tracker.history.Count <= maxHistoryCount)
                 return;
@@ -192,7 +227,11 @@ namespace PurrNet.Modules
 
             for (int i = 0; i < toRemoveCount; i++)
             {
-                tracker.history.Remove(tracker.oldestIdInHistory);
+                if (tracker.history.Remove(tracker.oldestIdInHistory, out var old))
+                {
+                    if (old is IDisposable disposable)
+                        disposable.Dispose();
+                }
                 tracker.oldestIdInHistory++;
             }
         }
