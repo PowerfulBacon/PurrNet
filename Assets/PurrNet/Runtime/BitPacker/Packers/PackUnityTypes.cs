@@ -136,35 +136,19 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static void Write(this BitPacker packer, Quaternion value)
         {
-            value.Normalize();
-
             packer.Write(value.x);
             packer.Write(value.y);
             packer.Write(value.z);
-
-            packer.Write(value.w < 0);
+            packer.Write(value.w);
         }
 
         [UsedByIL]
         public static void Read(this BitPacker packer, ref Quaternion value)
         {
-            float x = default;
-            float y = default;
-            float z = default;
-
-            packer.Read(ref x);
-            packer.Read(ref y);
-            packer.Read(ref z);
-
-            bool wSign = false;
-            packer.Read(ref wSign);
-
-            float w = Mathf.Sqrt(Mathf.Max(0, 1 - x * x - y * y - z * z));
-
-            if (wSign)
-                w = -w;
-
-            value = new Quaternion(x, y, z, w);
+            packer.Read(ref value.x);
+            packer.Read(ref value.y);
+            packer.Read(ref value.z);
+            packer.Read(ref value.w);
         }
 
         [UsedByIL]
