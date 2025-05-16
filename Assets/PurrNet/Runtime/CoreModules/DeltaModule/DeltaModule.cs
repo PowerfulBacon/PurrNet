@@ -96,7 +96,7 @@ namespace PurrNet.Modules
             return typedTracker;
         }
 
-        public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue) where Key : struct, IStableHashable
+        public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue, bool validate = false) where Key : struct, IStableHashable
         {
             var hash = GetKeyHash(key);
             var tracker = GetOrCreateTracker<T>(player, hash, true);
@@ -119,12 +119,25 @@ namespace PurrNet.Modules
             var pos = packer.positionInBits;
             Packer<bool>.Write(packer, false);
             bool changed = DeltaPacker<T>.Write(packer, oldValue, newValue);
+
             packer.WriteAt(pos, changed);
 
             //Debug.Log($"WRITE: Changed: {changed} | Player: {player} | LastConfirmedId: {tracker.LastConfirmedId} | Old: {oldValue} | New: {newValue}");
 
             if (changed)
             {
+                if (validate)
+                {
+                    // validate that the delta packer is working correctly
+                    T testValue = default;
+                    using var tmp = BitPackerPool.Get();
+                    DeltaPacker<T>.Write(tmp, oldValue, newValue);
+                    tmp.ResetPositionAndMode(true);
+                    DeltaPacker<T>.Read(tmp, oldValue, ref testValue);
+                    if (!Packer.AreEqual(oldValue, testValue))
+                        PurrLogger.LogError($"Delta packer failed to pack/unpack correctly for `{typeof(T).Name}`\nOld: {oldValue}\nNew: {newValue}\nRead: {testValue}");
+                }
+
                 PackedUInt newId = tracker.GenerateId();
                 Packer<PackedUInt>.Write(packer, newId);
                 UpdateValueAtIndex<T>(newValue, tracker, newId);
