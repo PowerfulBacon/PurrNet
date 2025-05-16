@@ -220,7 +220,7 @@ namespace PurrNet.Modules
             else if (lastConfirmedId != 0)
             {
                 if (tracker.history.TryGetValue(lastConfirmedId, out var confirmedValue))
-                    newValue = confirmedValue;
+                    newValue = Packer.Copy(confirmedValue);
                 else
                 {
                     PurrLogger.LogError($"Confirmed value not found for key {keyHash} and {lastConfirmedId.value} and player {player}");
