@@ -10,13 +10,6 @@ namespace PurrNet.Pooling
 
         public List<T> list { get; }
 
-        public DisposableList(List<T> list)
-        {
-            this.list = list;
-            isDisposed = false;
-            _shouldDispose = true;
-        }
-
         public DisposableList(int capacity)
         {
             var newList = ListPool<T>.Instantiate();
@@ -25,7 +18,7 @@ namespace PurrNet.Pooling
                 newList.Capacity = capacity;
 
             list = newList;
-            isDisposed = false;
+            _isAllocated = true;
             _shouldDispose = true;
         }
 
@@ -42,7 +35,7 @@ namespace PurrNet.Pooling
 
             if (_shouldDispose && list != null)
                 ListPool<T>.Destroy(list);
-            isDisposed = true;
+            _isAllocated = false;
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -105,7 +98,9 @@ namespace PurrNet.Pooling
             }
         }
 
-        public bool isDisposed { get; private set; }
+        private bool _isAllocated;
+
+        public bool isDisposed => !_isAllocated;
 
         public int IndexOf(T item)
         {
