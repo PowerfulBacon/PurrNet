@@ -134,7 +134,7 @@ namespace PurrNet.Modules
                     DeltaPacker<T>.Write(tmp, oldValue, newValue);
                     tmp.ResetPositionAndMode(true);
                     DeltaPacker<T>.Read(tmp, oldValue, ref testValue);
-                    if (!Packer.AreEqual(oldValue, testValue))
+                    if (!Packer.AreEqual(newValue, testValue))
                         PurrLogger.LogError($"Delta packer failed to pack/unpack correctly for `{typeof(T).Name}`\nOld: {oldValue}\nNew: {newValue}\nRead: {testValue}");
                 }
 
