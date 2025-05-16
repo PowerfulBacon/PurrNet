@@ -213,16 +213,44 @@ namespace PurrNet.Packing
 
     public static class Packer
     {
+        /// <summary>
+        /// If the type is a value type, it will be returned as is instead of being deep copied.
+        /// </summary>
+        public static T FastCopy<T>(T value)
+        {
+            bool isValueType = typeof(T).IsValueType;
+            if (isValueType)
+                return value;
+
+            return Copy(value);
+        }
+
+        public static T Copy<T>(T value)
+        {
+            using var tmpPacker = BitPackerPool.Get();
+            Packer<T>.Write(tmpPacker, value);
+            tmpPacker.ResetPositionAndMode(true);
+            var copy = default(T);
+            Packer<T>.Read(tmpPacker, ref copy);
+            return copy;
+        }
+
         [UsedByIL]
         public static bool AreEqual<T>(T a, T b)
         {
             using var packerA = BitPackerPool.Get();
             using var packerB = BitPackerPool.Get();
 
-            Write(packerA, a);
-            Write(packerB, b);
+            Packer<T>.Write(packerA, a);
+            Packer<T>.Write(packerB, b);
 
-            return packerA.ToByteData().span.SequenceEqual(packerB.ToByteData().span);
+            var spanA = packerA.ToByteData().span;
+            var spanB = packerB.ToByteData().span;
+
+            if (spanA.Length != spanB.Length)
+                return false;
+
+            return spanA.SequenceEqual(spanB);
         }
 
         [UsedByIL]
