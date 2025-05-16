@@ -32,18 +32,18 @@ namespace PurrNet.Packing
             Packer<bool>.Write(packer, true);
 
             bool newSign = (newbits & 0x80000000) != 0;
-            long newExp = (newbits & 0x7F800000) >> 23;
-            long newMantissa = newbits & 0x007FFFFF;
+            int newExp = (newbits & 0x7F800000) >> 23;
+            int newMantissa = newbits & 0x007FFFFF;
 
-            long oldExp = (oldbits & 0x7F800000) >> 23;
-            long oldMantissa = oldbits & 0x007FFFFF;
+            int oldExp = (oldbits & 0x7F800000) >> 23;
+            int oldMantissa = oldbits & 0x007FFFFF;
 
-            long expDiff = newExp - oldExp;
-            long mantissaDiff = newMantissa - oldMantissa;
+            int expDiff = newExp - oldExp;
+            int mantissaDiff = newMantissa - oldMantissa;
 
             Packer<bool>.Write(packer, newSign);
-            PackingIntegers.WriteSegmented(packer, expDiff, 2, 8);
-            PackingIntegers.WriteSegmented(packer, mantissaDiff, 9, 23);
+            Packer<PackedInt>.Write(packer, expDiff);
+            Packer<PackedInt>.Write(packer, mantissaDiff);
 
             return true;
         }
@@ -61,21 +61,21 @@ namespace PurrNet.Packing
             }
 
             var oldbits = BitConverter.SingleToInt32Bits(oldvalue);
-            long oldExp = (oldbits & 0x7F800000) >> 23;
-            long oldMantissa = oldbits & 0x007FFFFF;
+            int oldExp = (oldbits & 0x7F800000) >> 23;
+            int oldMantissa = oldbits & 0x007FFFFF;
 
             bool newSign = default;
-            long newExp = default;
-            long newMantissa = default;
+            PackedInt newExp = default;
+            PackedInt newMantissa = default;
 
             Packer<bool>.Read(packer, ref newSign);
-            PackingIntegers.ReadSegmented(packer, ref newExp, 2, 8);
-            PackingIntegers.ReadSegmented(packer, ref newMantissa, 9, 23);
+            Packer<PackedInt>.Read(packer, ref newExp);
+            Packer<PackedInt>.Read(packer, ref newMantissa);
 
             newExp += oldExp;
             newMantissa += oldMantissa;
 
-            int bits = (int)(newSign ? 0x80000000 : 0) | ((int)newExp << 23) | (int)newMantissa;
+            int bits = (int)(newSign ? 0x80000000 : 0) | (newExp << 23) | newMantissa;
             value = BitConverter.Int32BitsToSingle(bits);
         }
     }
