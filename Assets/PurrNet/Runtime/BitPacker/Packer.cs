@@ -216,9 +216,9 @@ namespace PurrNet.Packing
     {
         public static T Copy<T>(T value)
         {
-            bool isUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>();
-            if (isUnmanaged)
+            if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                 return value;
+
             using var tmpPacker = BitPackerPool.Get();
             Packer<T>.Write(tmpPacker, value);
             tmpPacker.ResetPositionAndMode(true);
