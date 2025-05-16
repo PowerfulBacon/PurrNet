@@ -104,8 +104,6 @@ namespace PurrNet.Packing
         [UsedByIL]
         private static bool WriteQuaternion(BitPacker packer, Quaternion oldvalue, Quaternion newvalue)
         {
-            newvalue.Normalize();
-
             int flagPos = packer.AdvanceBits(1);
             bool isEqual;
 
@@ -128,14 +126,10 @@ namespace PurrNet.Packing
 
             if (hasChanged)
             {
-                float x = default, y = default, z = default, w = default;
-
-                DeltaPacker<float>.Read(packer, oldvalue.x, ref x);
-                DeltaPacker<float>.Read(packer, oldvalue.y, ref y);
-                DeltaPacker<float>.Read(packer, oldvalue.z, ref z);
-                DeltaPacker<float>.Read(packer, oldvalue.w, ref w);
-
-                value = new Quaternion(x, y, z, w);
+                DeltaPacker<float>.Read(packer, oldvalue.x, ref value.x);
+                DeltaPacker<float>.Read(packer, oldvalue.y, ref value.y);
+                DeltaPacker<float>.Read(packer, oldvalue.z, ref value.z);
+                DeltaPacker<float>.Read(packer, oldvalue.w, ref value.w);
             }
             else value = oldvalue;
         }
