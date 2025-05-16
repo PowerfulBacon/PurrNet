@@ -78,7 +78,7 @@ namespace PurrNet.Packing
     }
 
     [Serializable]
-    public struct PackedLong : IPackedAuto
+    public struct PackedLong : IPackedAuto, IEquatable<PackedLong>
     {
         public long value;
 
@@ -94,6 +94,21 @@ namespace PurrNet.Packing
         public override string ToString()
         {
             return $"{value}";
+        }
+
+        public bool Equals(PackedLong other)
+        {
+            return value == other.value;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is PackedLong other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return value.GetHashCode();
         }
     }
 
@@ -168,7 +183,7 @@ namespace PurrNet.Packing
     }
 
     [Serializable]
-    public struct PackedUShort : IPackedAuto
+    public struct PackedUShort : IPackedAuto, IEquatable<PackedUShort>
     {
         public ushort value;
 
@@ -184,6 +199,21 @@ namespace PurrNet.Packing
         public override string ToString()
         {
             return $"{value}";
+        }
+
+        public bool Equals(PackedUShort other)
+        {
+            return value == other.value;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is PackedUShort other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return value.GetHashCode();
         }
     }
 
