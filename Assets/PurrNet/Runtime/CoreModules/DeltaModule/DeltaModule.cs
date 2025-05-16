@@ -89,8 +89,7 @@ namespace PurrNet.Modules
             {
                 PackedUInt newId = tracker.GenerateId();
                 Packer<PackedUInt>.Write(packer, newId);
-
-                tracker.history[newId] = newValue;
+                UpdateValueAtIndex<T>(newValue, tracker, newId);
 
                 var clientDict = _sendingTrackers[player];
                 clientDict[hash] = tracker;
@@ -101,6 +100,20 @@ namespace PurrNet.Modules
             }
 
             return changed;
+        }
+
+        private static void UpdateValueAtIndex<T>(T newValue, ClientDeltaTracker<T> tracker, PackedUInt newId)
+        {
+            if (tracker.history.TryGetValue(newId, out var old))
+            {
+                if (old is IDisposable disposable)
+                    disposable.Dispose();
+                tracker.history[newId] = Packer.Copy(newValue);
+            }
+            else
+            {
+                tracker.history.Add(newId, Packer.Copy(newValue));
+            }
         }
 
         public void Read<Key, T>(BitPacker packer, Key key, PlayerID sender, ref T newValue) where Key : struct, IStableHashable
@@ -131,8 +144,7 @@ namespace PurrNet.Modules
                 DeltaPacker<T>.Read(packer, oldValue, ref newValue);
                 Packer<PackedUInt>.Read(packer, ref valueId);
 
-                tracker.history[valueId] = newValue;
-
+                UpdateValueAtIndex<T>(newValue, tracker, valueId);
                 CleanupClientHistory(ref tracker);
 
                 var clientDict = _receivingTrackers[player];
