@@ -15,6 +15,11 @@ namespace PurrNet.Packing
         public static implicit operator PackedByte(byte value) => new PackedByte(value);
 
         public static implicit operator byte(PackedByte value) => value.value;
+
+        public override string ToString()
+        {
+            return $"{value}";
+        }
     }
 
     [Serializable]
@@ -30,6 +35,11 @@ namespace PurrNet.Packing
         public static implicit operator PackedSByte(sbyte value) => new PackedSByte(value);
 
         public static implicit operator sbyte(PackedSByte value) => value.value;
+
+        public override string ToString()
+        {
+            return $"{value}";
+        }
     }
 
     [Serializable]
@@ -80,6 +90,11 @@ namespace PurrNet.Packing
         public static implicit operator PackedLong(long value) => new PackedLong(value);
 
         public static implicit operator long(PackedLong value) => value.value;
+
+        public override string ToString()
+        {
+            return $"{value}";
+        }
     }
 
     [Serializable]
@@ -109,6 +124,11 @@ namespace PurrNet.Packing
         public override int GetHashCode()
         {
             return (int)value;
+        }
+
+        public override string ToString()
+        {
+            return $"{value}";
         }
     }
 
@@ -160,6 +180,11 @@ namespace PurrNet.Packing
         public static implicit operator PackedUShort(ushort value) => new PackedUShort(value);
 
         public static implicit operator ushort(PackedUShort value) => value.value;
+
+        public override string ToString()
+        {
+            return $"{value}";
+        }
     }
 
     [Serializable]
@@ -175,5 +200,10 @@ namespace PurrNet.Packing
         public static implicit operator PackedShort(short value) => new PackedShort(value);
 
         public static implicit operator short(PackedShort value) => value.value;
+
+        public override string ToString()
+        {
+            return $"{value}";
+        }
     }
 }
