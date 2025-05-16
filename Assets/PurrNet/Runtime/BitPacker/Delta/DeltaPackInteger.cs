@@ -216,6 +216,34 @@ namespace PurrNet.Packing
         }
 
         [UsedByIL]
+        private static void ReadInt64(BitPacker packer, long oldvalue, ref long value)
+        {
+            bool hasChanged = default;
+            Packer<bool>.Read(packer, ref hasChanged);
+
+            if (hasChanged)
+            {
+                PackedLong packed = default;
+                Packer<PackedLong>.Read(packer, ref packed);
+                value = oldvalue + packed.value;
+            }
+            else value = oldvalue;
+        }
+
+        [UsedByIL]
+        private static void WriteUInt64(BitPacker packer, ulong oldvalue, ulong newvalue)
+        {
+            bool hasChanged = oldvalue != newvalue;
+            Packer<bool>.Write(packer, hasChanged);
+
+            if (hasChanged)
+            {
+                PackedULong diff = newvalue - oldvalue;
+                Packer<PackedULong>.Write(packer, diff);
+            }
+        }
+
+        [UsedByIL]
         private static void ReadUInt64(BitPacker packer, ulong oldvalue, ref ulong value)
         {
             bool hasChanged = default;
