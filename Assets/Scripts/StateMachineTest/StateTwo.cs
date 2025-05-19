@@ -3,11 +3,19 @@ using UnityEngine;
 
 public class StateTwo : StateNode<int>
 {
-    public override void StateUpdate(bool asServer)
+    public override void Enter(bool asServer)
     {
-        base.StateUpdate(asServer);
+        base.Enter(asServer);
         
-        if(Input.GetKeyDown(KeyCode.X) && isController)
+        Debug.Log($"Entered state {this} asServer: {asServer}");
+        if(isController && !asServer)
             machine.Next();
+    }
+    
+    public override void Exit(bool asServer)
+    {
+        base.Exit(asServer);
+        
+        Debug.Log($"Exited state {this} asServer: {asServer}");
     }
 }

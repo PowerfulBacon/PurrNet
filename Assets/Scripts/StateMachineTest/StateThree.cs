@@ -1,27 +1,17 @@
+using System;
 using PurrNet.StateMachine;
 using UnityEngine;
 
-public class StateOne : StateNode
+public class StateThree : StateNode
 {
-    protected override void OnSpawned()
-    {
-        base.OnSpawned();
-
-        machine.onStateChanged += OnStateChanged;
-    }
-
-    private void OnStateChanged(StateNode previousState, StateNode newState)
-    {
-        Debug.Log($"Changed from state {previousState} to state {newState}");
-    }
-
     public override void Enter(bool asServer)
     {
         base.Enter(asServer);
-
         Debug.Log($"Entered state {this} asServer: {asServer}");
+        if(isController && !asServer)
+            machine.Next();
     }
-
+    
     public override void Exit(bool asServer)
     {
         base.Exit(asServer);
