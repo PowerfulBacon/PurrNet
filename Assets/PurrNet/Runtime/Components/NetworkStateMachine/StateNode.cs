@@ -10,27 +10,63 @@ namespace PurrNet.StateMachine
             machine = stateMachine;
         }
 
+        /// <summary>
+        /// This is called when the state is entered.
+        /// </summary>
+        /// <param name="asServer">Whether you are acting as server or client</param>
         public virtual void Enter(bool asServer)
         {
         }
 
+        /// <summary>
+        /// This is like the update loop, which only runs when the state is active.
+        /// </summary>
+        /// <param name="asServer">Whether you are acting as server or client</param>
         public virtual void StateUpdate(bool asServer)
         {
         }
 
+        /// <summary>
+        /// This is called when the state is exited
+        /// </summary>
+        /// <param name="asServer">Whether you are acting as server or client</param>
         public virtual void Exit(bool asServer)
         {
         }
+
+        /// <summary>
+        /// Override this to control whether the state can be entered
+        /// </summary>
+        public virtual bool CanEnter() => true;
+        
+        /// <summary>
+        /// Override this to control whether the state can be exited
+        /// </summary>
+        public virtual bool CanExit() => true;
     }
 
     public abstract class StateNode<T> : StateNode
     {
+        /// <summary>
+        /// This is called when the state is entered.
+        /// </summary>
+        /// <param name="asServer">Whether you are acting as server or client</param>
+        /// <param name="data">The data which the state is entered with</param>
         public virtual void Enter(T data, bool asServer)
         {
         }
-
-        public virtual void Resume(T data, bool asServer)
-        {
-        }
+        
+        /// <summary>
+        /// Override this to control whether the state can be entered
+        /// </summary>
+        /// <param name="data">The data which the state is attempted to be entered with</param>
+        public virtual bool CanEnter(T data) => true;
+        
+        /// <summary>
+        /// Override this to control whether the state can be exited
+        /// </summary>
+        /// <param name="data">The data which the state is attempted to be exited with</param>
+        public virtual bool CanExit(T data) => true;
+        
     }
 }
