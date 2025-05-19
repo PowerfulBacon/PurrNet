@@ -6,7 +6,6 @@ using PurrNet.Logging;
 using PurrNet.Packing;
 using PurrNet.Transports;
 using PurrNet.Utils;
-using UnityEngine;
 
 namespace PurrNet.Modules
 {
