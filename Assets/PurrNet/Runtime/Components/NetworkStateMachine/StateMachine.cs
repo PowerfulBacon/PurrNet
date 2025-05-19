@@ -506,6 +506,29 @@ namespace PurrNet.StateMachine
 
             return SetState(_states[prevNodeId], force);
         }
+        
+        /// <summary>
+        /// Will continue to the previous state in the states list until it finds a state that can be entered
+        /// </summary>
+        public bool PreviousValid()
+        {
+            if (currentStateNode != null && !currentStateNode.CanExit())
+                return false;
+
+            var startId = _currentState.stateId;
+            var prevNodeId = GetPreviousId(startId);
+
+            do
+            {
+                if (SetState(_states[prevNodeId]))
+                    return true;
+
+                prevNodeId = GetPreviousId(prevNodeId);
+            }
+            while (prevNodeId != startId);
+
+            return false;
+        }
 
         /// <summary>
         /// Takes the state machine to the previous state in the states list
@@ -528,6 +551,40 @@ namespace PurrNet.StateMachine
             PurrLogger.LogException(
                 $"Node {prevNode.name}:{prevNode.GetType().Name} does not have a generic type argument of type {typeof(T).Name}");
             return false;
+        }
+        
+        /// <summary>
+        /// Will continue to the previous state in the states list until it finds a state that can be entered
+        /// </summary>
+        /// <param name="data">Data to send to the previous state</param>
+        /// <typeparam name="T">The type of your data</typeparam>
+        public bool PreviousValid<T>(T data)
+        {
+            if (currentStateNode != null && !currentStateNode.CanExit())
+                return false;
+
+            var startId = _currentState.stateId;
+            var prevNodeId = GetPreviousId(startId);
+
+            do
+            {
+                var node = _states[prevNodeId];
+                if (node is StateNode<T> genericNode && SetState(genericNode, data))
+                    return true;
+
+                prevNodeId = GetPreviousId(prevNodeId);
+            }
+            while (prevNodeId != startId);
+
+            return false;
+        }
+        
+        private int GetPreviousId(int currentId)
+        {
+            var prevNodeId = currentId - 1;
+            if (prevNodeId < 0)
+                prevNodeId = _states.Count - 1;
+            return prevNodeId;
         }
         
         internal enum StateTransitionStatus
