@@ -4,11 +4,11 @@ namespace PurrNet
 {
     public struct QuaternionWithParent
     {
-        readonly NetworkIdentity parent;
+        readonly Transform parent;
         public readonly Quaternion rotation;
         readonly bool isLocalPos;
 
-        public QuaternionWithParent(NetworkIdentity parent, bool isLocalPos, Quaternion rotation)
+        public QuaternionWithParent(Transform parent, bool isLocalPos, Quaternion rotation)
         {
             this.parent = parent;
             this.rotation = rotation;
@@ -20,8 +20,8 @@ namespace PurrNet
             if (!b.isLocalPos)
                 return new QuaternionWithParent(default, default, Quaternion.Lerp(a.rotation, b.rotation, t));
 
-            var aWorldRot = a.parent ? a.parent.transform.rotation * a.rotation : a.rotation;
-            var bWorldRot = b.parent ? b.parent.transform.rotation * b.rotation : b.rotation;
+            var aWorldRot = a.parent ? a.parent.rotation * a.rotation : a.rotation;
+            var bWorldRot = b.parent ? b.parent.rotation * b.rotation : b.rotation;
 
             var lerpedWorldRot = Quaternion.Lerp(aWorldRot, bWorldRot, t);
             return new QuaternionWithParent(default, default, lerpedWorldRot);
@@ -32,7 +32,7 @@ namespace PurrNet
             if (!b.isLocalPos)
                 return new QuaternionWithParent(default, default, b.rotation);
 
-            var bWorldRot = b.parent ? b.parent.transform.rotation * b.rotation : b.rotation;
+            var bWorldRot = b.parent ? b.parent.rotation * b.rotation : b.rotation;
             return new QuaternionWithParent(default, default, bWorldRot);
         }
     }

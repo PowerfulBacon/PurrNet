@@ -4,11 +4,11 @@ namespace PurrNet
 {
     public struct Vector3WithParent
     {
-        readonly NetworkIdentity parent;
+        readonly Transform parent;
         public readonly Vector3 position;
         readonly bool isLocalPos;
 
-        public Vector3WithParent(NetworkIdentity parent, bool isLocalPos, Vector3 position)
+        public Vector3WithParent(Transform parent, bool isLocalPos, Vector3 position)
         {
             this.parent = parent;
             this.position = position;
@@ -20,8 +20,8 @@ namespace PurrNet
             if (!b.isLocalPos)
                 return new Vector3WithParent(default, default, Vector3.Lerp(a.position, b.position, t));
 
-            var aWorldPos = a.parent ? a.parent.transform.TransformPoint(a.position) : a.position;
-            var bWorldPos = b.parent ? b.parent.transform.TransformPoint(b.position) : b.position;
+            var aWorldPos = a.parent ? a.parent.TransformPoint(a.position) : a.position;
+            var bWorldPos = b.parent ? b.parent.TransformPoint(b.position) : b.position;
             var lerpedWorldPos = Vector3.Lerp(aWorldPos, bWorldPos, t);
             return new Vector3WithParent(default, default, lerpedWorldPos);
         }
@@ -30,7 +30,7 @@ namespace PurrNet
         {
             if (!b.isLocalPos)
                 return new Vector3WithParent(default, default, b.position);
-            var worldPos = b.parent ? b.parent.transform.TransformPoint(b.position) : b.position;
+            var worldPos = b.parent ? b.parent.TransformPoint(b.position) : b.position;
             return new Vector3WithParent(default, default, worldPos);
         }
     }

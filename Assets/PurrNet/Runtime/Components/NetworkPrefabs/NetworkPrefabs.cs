@@ -97,7 +97,6 @@ namespace PurrNet
         public void Generate()
         {
 #if UNITY_EDITOR
-            PurrLogger.Log("Generating network prefabs...");
             if (ApplicationContext.isClone)
                 return;
 
