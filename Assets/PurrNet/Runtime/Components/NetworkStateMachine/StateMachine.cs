@@ -64,7 +64,10 @@ namespace PurrNet.StateMachine
                 return;
 
             var node = _states[_currentState.stateId];
-            node.StateUpdate(isServer);
+            if(isServer)
+                node.StateUpdate(true);
+            if(isClient)
+                node.StateUpdate(false);
         }
         
         void LateUpdate()
