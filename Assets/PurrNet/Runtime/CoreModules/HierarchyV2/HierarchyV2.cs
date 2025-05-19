@@ -431,16 +431,20 @@ namespace PurrNet.Modules
                 {
                     int count = list.Count;
 
-                    if (count > 0 && !list[0] || !list[0].isSpawned)
-                        return;
-
-                    // if server, refresh visibility for all players in scene
-                    if (count > 0 && list[0] && _asServer &&
-                        _scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
+                    switch (count)
                     {
-                        foreach (var playerInScene in players)
-                            _visibility.RefreshVisibilityForGameObject(playerInScene, list[0].transform);
-                        FlushSpawnPackets();
+                        case > 0 when !list[0] || !list[0].isSpawned:
+                            return;
+
+                        // if server, refresh visibility for all players in scene
+                        case > 0 when list[0] && _asServer &&
+                                      _scenePlayers.TryGetPlayersInScene(_sceneId, out var players):
+                        {
+                            foreach (var playerInScene in players)
+                                _visibility.RefreshVisibilityForGameObject(playerInScene, list[0].transform);
+                            FlushSpawnPackets();
+                            break;
+                        }
                     }
 
                     bool isHost = IsServerHost();

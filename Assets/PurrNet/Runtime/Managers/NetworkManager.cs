@@ -334,7 +334,11 @@ namespace PurrNet
                 return;
             }
 
+            if (prefabProvider == provider)
+                return;
+
             prefabProvider = provider;
+            prefabProvider.Refresh();
         }
 
         /// <summary>
@@ -537,11 +541,11 @@ namespace PurrNet
 
             if (_networkPrefabs)
             {
-                if (prefabProvider == null)
-                    SetPrefabProvider(_networkPrefabs);
-
                 if (_networkPrefabs.autoGenerate)
                     _networkPrefabs.Generate();
+
+                if (prefabProvider == null)
+                    SetPrefabProvider(_networkPrefabs);
             }
 
             if (!_subscribed)

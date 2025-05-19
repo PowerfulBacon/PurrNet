@@ -51,6 +51,11 @@ namespace PurrNet
             return false;
         }
 
+        public override void Refresh()
+        {
+            RegeneratePrefabLookup();
+        }
+
 #if UNITY_EDITOR
         private bool _generating;
 
@@ -92,6 +97,7 @@ namespace PurrNet
         public void Generate()
         {
 #if UNITY_EDITOR
+            PurrLogger.Log("Generating network prefabs...");
             if (ApplicationContext.isClone)
                 return;
 
