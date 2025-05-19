@@ -61,12 +61,5 @@ namespace PurrNet.StateMachine
         /// </summary>
         /// <param name="data">The data which the state is attempted to be entered with</param>
         public virtual bool CanEnter(T data) => true;
-        
-        /// <summary>
-        /// Override this to control whether the state can be exited
-        /// </summary>
-        /// <param name="data">The data which the state is attempted to be exited with</param>
-        public virtual bool CanExit(T data) => true;
-        
     }
 }

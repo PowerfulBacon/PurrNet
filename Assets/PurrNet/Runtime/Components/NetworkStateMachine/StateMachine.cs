@@ -295,11 +295,15 @@ namespace PurrNet.StateMachine
         /// </summary>
         /// <param name="state">Reference to the state you want to go to</param>
         /// <param name="data">Data to send with the state</param>
+        /// <param name="force">Whether to skip the CanEnter and CanExit checks</param>
         /// <typeparam name="T">Your data type</typeparam>
-        public void SetState<T>(StateNode<T> state, T data)
+        public bool SetState<T>(StateNode<T> state, T data, bool force = false)
         {
-            var command = new GenericStateCommand<T>(state, data, SetStateInternal);
-            _stateCommandQueue.Enqueue(command);
+            if (!force && TryEvaluateTransition(state, data) != StateTransitionStatus.Success)
+                return false;
+            
+            _stateCommandQueue.Enqueue(new GenericStateCommand<T>(state, data, SetStateInternal));
+            return true;
         }
 
         private void SetStateInternal<T>(StateNode<T> state, T data)
@@ -349,10 +353,14 @@ namespace PurrNet.StateMachine
         /// Goes to a specific state in the StateMachine list
         /// </summary>
         /// <param name="state">Reference to the state you want to go to</param>
-        public void SetState(StateNode state)
+        /// <param name="force">Whether to skip the CanEnter and CanExit checks</param>
+        public bool SetState(StateNode state, bool force = false)
         {
-            var command = new StateCommand(state, SetStateInternal);
-            _stateCommandQueue.Enqueue(command);
+            if (!force && TryEvaluateTransition(state) != StateTransitionStatus.Success)
+                return false;
+            
+            _stateCommandQueue.Enqueue(new StateCommand(state, SetStateInternal));
+            return true;
         }
 
         private void SetStateInternal(StateNode state)
@@ -402,56 +410,110 @@ namespace PurrNet.StateMachine
         /// Takes the state machine to the next state in the states list
         /// </summary>
         /// <param name="data">Data to send with the state</param>
+        /// <param name="force">Whether to skip the CanEnter and CanExit checks</param>
         /// <typeparam name="T">The type of your data</typeparam>
-        public void Next<T>(T data)
+        public bool Next<T>(T data, bool force = false)
         {
-            var nextNodeId = _currentState.stateId + 1;
-            if (nextNodeId >= _states.Count)
-                nextNodeId = 0;
+            var startId = _currentState.stateId;
+            var nextNodeId = GetNextId(startId);
 
-            var nextNode = _states[nextNodeId];
+            if (_states[nextNodeId] is StateNode<T> node)
+                return SetState(node, data, force);
+            
+            PurrLogger.LogException($"Node {_states[nextNodeId].name}:{_states[nextNodeId].GetType().Name} does not have a generic type argument of type {typeof(T).Name}");
+            return false;
+        }
 
-            if (nextNode is StateNode<T> stateNode)
+        /// <summary>
+        /// Will continue to the next state in the states list until it finds a state that can be entered
+        /// </summary>
+        /// <param name="data">Data utilized to enter next state</param>
+        /// <typeparam name="T">The type of your data</typeparam>
+        /// <returns>Whether it successfully found any state that is valid to enter</returns>
+        public bool NextValid<T>(T data)
+        {
+            if (currentStateNode != null && !currentStateNode.CanExit())
+                return false;
+            
+            var startId = _currentState.stateId;
+            var nextNodeId = GetNextId(startId);
+
+            do
             {
-                SetState(stateNode, data);
+                var node = _states[nextNodeId];
+                if (node is StateNode<T> genericNode && SetState(genericNode, data))
+                    return true;
+
+                nextNodeId = GetNextId(nextNodeId);
             }
-            else
-            {
-                PurrLogger.LogException(
-                    $"Node {nextNode.name}:{nextNode.GetType().Name} does not have a generic type argument of type {typeof(T).Name}");
-            }
+            while (nextNodeId != startId);
+
+            return false;
         }
 
         /// <summary>
         /// Takes the state machine to the next state in the states list
         /// </summary>
-        public void Next()
+        /// <param name="force">Whether to skip the CanEnter and CanExit checks</param>
+        public bool Next(bool force = false)
         {
-            var nextNodeId = _currentState.stateId + 1;
+            var startId = _currentState.stateId;
+            var nextNodeId = GetNextId(startId);
+
+            return SetState(_states[nextNodeId], force);
+        }
+        
+        /// <summary>
+        /// Will continue to the next state in the states list until it finds a state that can be entered
+        /// </summary>
+        /// <returns>Whether it successfully found any state that is valid to enter</returns>
+        public bool NextValid()
+        {
+            if (currentStateNode != null && !currentStateNode.CanExit())
+                return false;
+            
+            var startId = _currentState.stateId;
+            var nextNodeId = GetNextId(startId);
+
+            do
+            {
+                if (SetState(_states[nextNodeId]))
+                    return true;
+
+                nextNodeId = GetNextId(nextNodeId);
+            }
+            while (nextNodeId != startId);
+
+            return false;
+        }
+
+        private int GetNextId(int currentId)
+        {
+            var nextNodeId = currentId + 1;
             if (nextNodeId >= _states.Count)
                 nextNodeId = 0;
-
-            SetState(_states[nextNodeId]);
+            return nextNodeId;
         }
 
         /// <summary>
         /// Takes the state machine to the previous state in the states list
         /// </summary>
-        public void Previous()
+        public bool Previous(bool force = false)
         {
             var prevNodeId = _currentState.stateId - 1;
             if (prevNodeId < 0)
                 prevNodeId = _states.Count - 1;
 
-            SetState(_states[prevNodeId]);
+            return SetState(_states[prevNodeId], force);
         }
 
         /// <summary>
         /// Takes the state machine to the previous state in the states list
         /// </summary>
         /// <param name="data">Data to send to the previous state</param>
+        /// <param name="force">Whether to skip the CanEnter and CanExit checks</param>
         /// <typeparam name="T">The type of your data</typeparam>
-        public void Previous<T>(T data)
+        public bool Previous<T>(T data, bool force = false)
         {
             var prevNodeId = _currentState.stateId - 1;
             if (prevNodeId < 0)
@@ -461,13 +523,36 @@ namespace PurrNet.StateMachine
 
             if (prevNode is StateNode<T> stateNode)
             {
-                SetState(stateNode, data);
+                return SetState(stateNode, data, force);
             }
-            else
-            {
-                PurrLogger.LogException(
-                    $"Node {prevNode.name}:{prevNode.GetType().Name} does not have a generic type argument of type {typeof(T).Name}");
-            }
+            PurrLogger.LogException(
+                $"Node {prevNode.name}:{prevNode.GetType().Name} does not have a generic type argument of type {typeof(T).Name}");
+            return false;
+        }
+        
+        internal enum StateTransitionStatus
+        {
+            Success,
+            InvalidState,
+            CannotExit,
+            CannotEnter,
+            WrongGenericType
+        }
+
+        internal StateTransitionStatus TryEvaluateTransition(StateNode to)
+        {
+            if (to == null) return StateTransitionStatus.InvalidState;
+            if (currentStateNode != null && !currentStateNode.CanExit()) return StateTransitionStatus.CannotExit;
+            if (!to.CanEnter()) return StateTransitionStatus.CannotEnter;
+            return StateTransitionStatus.Success;
+        }
+
+        internal StateTransitionStatus TryEvaluateTransition<T>(StateNode<T> to, T data)
+        {
+            if (to == null) return StateTransitionStatus.InvalidState;
+            if (currentStateNode != null && !currentStateNode.CanExit()) return StateTransitionStatus.CannotExit;
+            if (!to.CanEnter() || !to.CanEnter(data)) return StateTransitionStatus.CannotEnter;
+            return StateTransitionStatus.Success;
         }
     }
 
