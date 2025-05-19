@@ -7,15 +7,13 @@ public class StateThree : StateNode
     public override void Enter(bool asServer)
     {
         base.Enter(asServer);
-        Debug.Log($"Entered state {this} asServer: {asServer}");
-        if(isController && !asServer)
-            machine.Next();
+        //Debug.Log($"Entered state {this} asServer: {asServer}");
     }
     
     public override void Exit(bool asServer)
     {
         base.Exit(asServer);
         
-        Debug.Log($"Exited state {this} asServer: {asServer}");
+        //Debug.Log($"Exited state {this} asServer: {asServer}");
     }
 }

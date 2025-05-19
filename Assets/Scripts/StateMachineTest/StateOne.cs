@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class StateOne : StateNode
 {
+    [SerializeField] private bool _force;
+    
     protected override void OnSpawned()
     {
         base.OnSpawned();
@@ -19,13 +21,20 @@ public class StateOne : StateNode
     {
         base.Enter(asServer);
 
-        Debug.Log($"Entered state {this} asServer: {asServer}");
+        //Debug.Log($"Entered state {this} asServer: {asServer}");
     }
 
     public override void Exit(bool asServer)
     {
         base.Exit(asServer);
         
-        Debug.Log($"Exited state {this} asServer: {asServer}");
+        //Debug.Log($"Exited state {this} asServer: {asServer}");
+    }
+
+    [ContextMenu("Next state")]
+    private void NextState()
+    {
+        var goesNext = machine.Next(_force);
+        Debug.Log($"Went to next state (forced: {_force}) and was successful: {goesNext}");
     }
 }
