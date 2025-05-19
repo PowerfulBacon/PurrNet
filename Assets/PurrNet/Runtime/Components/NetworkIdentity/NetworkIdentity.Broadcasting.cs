@@ -360,6 +360,9 @@ namespace PurrNet
             var rules = networkManager.networkRules;
             bool shouldIgnoreOwnership = rules && rules.ShouldIgnoreRequireOwner();
 
+            if (!networkManager.TryGetModule<RPCModule>(networkManager.isServer, out var module))
+                return false;
+
             if (!shouldIgnoreOwnership && signature.requireOwnership && info.sender != owner)
                 return false;
 
@@ -421,12 +424,14 @@ namespace PurrNet
                 case RPCType.ObserversRPC:
                 {
                     var rawData = BroadcastModule.GetImmediateData(data);
+                    AppendToBufferedRPCs(signature, data, module);
                     SendToObservers(rawData, predicate, signature.channel);
                     return !isClient;
                 }
                 case RPCType.TargetRPC:
                 {
                     var rawData = BroadcastModule.GetImmediateData(data);
+                    AppendToBufferedRPCs(signature, data, module);
                     SendToTarget(data.targetPlayerId, rawData, signature.channel);
                     return false;
                 }
@@ -439,6 +444,19 @@ namespace PurrNet
                     return false;
 
                 return !signature.excludeOwner || IsNotOwnerPredicate(player);
+            }
+        }
+
+        private static void AppendToBufferedRPCs(RPCSignature signature, IRpc data, RPCModule module)
+        {
+            switch (data)
+            {
+                case RPCPacket rpcPacket:
+                    module.AppendToBufferedRPCs(rpcPacket, signature);
+                    break;
+                case ChildRPCPacket childRpcPacket:
+                    module.AppendToBufferedRPCs(childRpcPacket, signature);
+                    break;
             }
         }
 

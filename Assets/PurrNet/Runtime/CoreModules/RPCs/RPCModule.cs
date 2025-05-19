@@ -242,6 +242,12 @@ namespace PurrNet.Modules
                 return false;
             }
 
+            if (!nm.TryGetModule<RPCModule>(nm.isServer, out var module))
+            {
+                PurrLogger.LogError("Failed to get RPC module while sending static RPC.", nm);
+                return false;
+            }
+
             if (!asServer)
             {
                 if (signature.type == RPCType.ServerRPC)
@@ -274,6 +280,8 @@ namespace PurrNet.Modules
                     var collection = signature.excludeSender
                         ? GetImmediateExcept(players, info.sender)
                         : players.players;
+                    if (data is StaticRPCPacket staticRpc)
+                        module.AppendToBufferedRPCs(staticRpc, signature);
                     players.SendRaw(collection, rawData, signature.channel);
                     return !nm.isClient;
                 }
@@ -281,6 +289,8 @@ namespace PurrNet.Modules
                 {
                     var players = nm.GetModule<PlayersManager>(true);
                     var rawData = BroadcastModule.GetImmediateData(data);
+                    if (data is StaticRPCPacket staticRpc)
+                        module.AppendToBufferedRPCs(staticRpc, signature);
                     players.SendRaw(data.targetPlayerId, rawData, signature.channel);
                     return false;
                 }
