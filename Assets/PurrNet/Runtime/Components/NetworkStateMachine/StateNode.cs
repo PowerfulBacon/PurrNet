@@ -3,6 +3,7 @@ namespace PurrNet.StateMachine
     public abstract class StateNode : NetworkBehaviour
     {
         protected StateMachine machine { get; private set; }
+        public bool isCurrentState => machine && machine.currentStateNode == this;
 
         public void Setup(StateMachine stateMachine)
         {
