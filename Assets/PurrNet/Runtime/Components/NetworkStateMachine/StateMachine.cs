@@ -12,10 +12,11 @@ namespace PurrNet.StateMachine
         [SerializeField] private bool ownerAuth = false;
 
         public bool OwnerAuth => ownerAuth;
-        
-        [SerializeField] List<StateNode> _states;
 
-        public IReadOnlyList<StateNode> states => _states;
+        [SerializeField] private List<StateNode> _states = new();
+        private SyncList<StateNode> _syncedStates;
+
+        public IReadOnlyList<StateNode> states => _syncedStates.ToList();
 
         /// <summary>
         /// Invoked for clients when receiving changes to the state machine from the server
@@ -37,33 +38,41 @@ namespace PurrNet.StateMachine
         public StateMachineState currentState => _currentState;
         public int previousStateId => _previousStateId;
 
-        public StateNode currentStateNode => _currentState.stateId < 0 || _currentState.stateId >= _states.Count
+        public StateNode currentStateNode => _currentState.stateId < 0 || _currentState.stateId >= _syncedStates.Count
             ? null
-            : _states[_currentState.stateId];
+            : _syncedStates[_currentState.stateId];
         
-        public StateNode previousStateNode => _previousStateId < 0 || _previousStateId >= _states.Count
+        public StateNode previousStateNode => _previousStateId < 0 || _previousStateId >= _syncedStates.Count
             ? null
-            : _states[_previousStateId];
+            : _syncedStates[_previousStateId];
 
         private bool _initialized;
 
         private void Awake()
         {
+            _syncedStates = new SyncList<StateNode>(_states, ownerAuth);
+            _syncedStates.onChanged += OnSyncedStateListChanged;
             _currentState.stateId = -1;
 
-            for (var i = 0; i < _states.Count; i++)
+            for (var i = 0; i < _syncedStates.Count; i++)
             {
-                var state = _states[i];
+                var state = _syncedStates[i];
                 state.Setup(this);
             }
         }
 
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            _syncedStates.onChanged -= OnSyncedStateListChanged;
+        }
+
         private void Update()
         {
-            if (_currentState.stateId < 0 || _currentState.stateId >= _states.Count)
+            if (_currentState.stateId < 0 || _currentState.stateId >= _syncedStates.Count)
                 return;
 
-            var node = _states[_currentState.stateId];
+            var node = _syncedStates[_currentState.stateId];
             if(isServer)
                 node.StateUpdate(true);
             if(isClient)
@@ -89,8 +98,8 @@ namespace PurrNet.StateMachine
             if (_initialized)
                 return;
 
-            if (_states.Count > 0)
-                SetState(_states[0]);
+            if (_syncedStates.Count > 0)
+                SetState(_syncedStates[0]);
 
             _initialized = true;
         }
@@ -102,10 +111,10 @@ namespace PurrNet.StateMachine
             if (!isServer)
                 return;
             
-            if (_currentState.stateId < 0 || _currentState.stateId >= _states.Count)
+            if (_currentState.stateId < 0 || _currentState.stateId >= _syncedStates.Count)
                 return;
             
-            var stateNode = _states[_currentState.stateId];
+            var stateNode = _syncedStates[_currentState.stateId];
             SendStateToObserver(player, stateNode);
         }
 
@@ -125,14 +134,116 @@ namespace PurrNet.StateMachine
 
         public Type GetDataType(int stateId)
         {
-            if (stateId < 0 || stateId >= _states.Count)
+            if (stateId < 0 || stateId >= _syncedStates.Count)
                 return null;
 
-            var node = _states[stateId];
+            var node = _syncedStates[stateId];
             var type = node.GetType();
             var generics = type.BaseType!.GenericTypeArguments;
 
             return generics.Length == 0 ? null : generics[0];
+        }
+
+        /// <summary>
+        /// Adds a state to the StateMachine
+        /// </summary>
+        /// <param name="state">The state to add</param>
+        public void AddState(StateNode state)
+        {
+            if (!state)
+            {
+                PurrLogger.LogError($"Failed to add state | State is null");
+                return;
+            }
+            
+            if (!IsController(ownerAuth))
+            {
+                PurrLogger.LogError($"Failed to add state {state.name}:{state.GetType().Name} | Only the controller can add states");
+                return;
+            }
+            
+            _syncedStates.Add(state);
+            state.Setup(this);
+        }
+
+        /// <summary>
+        /// Adds a state to the StateMachine at a specific index
+        /// </summary>
+        /// <param name="state">The state to add</param>
+        /// <param name="index">The index to add it at</param>
+        public void InsertState(StateNode state, int index)
+        {
+            if (!state)
+            {
+                PurrLogger.LogError($"Failed to insert state at index: {index} | State is null");
+                return;
+            }
+            
+            if (!IsController(ownerAuth))
+            {
+                PurrLogger.LogError($"Failed to insert state at index: {index} | State: {state.name}:{state.GetType().Name} | Only the controller can add states");
+                return;
+            }
+            
+            _syncedStates.Insert(index, state);
+            state.Setup(this);
+        }
+
+        /// <summary>
+        /// Removes a state from the StateMachine
+        /// </summary>
+        /// <param name="state">State you want to remove</param>
+        public bool RemoveState(StateNode state)
+        {
+            if (!state)
+            {
+                PurrLogger.LogError($"Failed to remove state | State is null");
+                return false;
+            }
+            
+            if (!IsController(ownerAuth))
+            {
+                PurrLogger.LogError($"Failed to remove state {state.name}:{state.GetType().Name} | Only the controller can remove states");
+                return false;
+            }
+
+            if (currentStateNode == state)
+            {
+                PurrLogger.LogError($"Failed to remove state {state.name}:{state.GetType().Name} | Cannot remove current state");
+                return false;
+            }
+            
+            return _syncedStates.Remove(state);
+        }
+
+        /// <summary>
+        /// Removes a state from the StateMachine at a specific index
+        /// </summary>
+        /// <param name="index">The index at which you wish to remove a state</param>
+        public void RemoveStateAt(int index)
+        {
+            if (!IsController(ownerAuth))
+            {
+                PurrLogger.LogError($"Failed to remove state at index {index} | Only the controller can remove states");
+                return;
+            }
+            
+            if (_syncedStates[index] == currentStateNode)
+            {
+                PurrLogger.LogError($"Failed to remove state at index {index} | Cannot remove current state");
+                return;
+            }
+            
+            _syncedStates.RemoveAt(index);
+        }
+        
+        private void OnSyncedStateListChanged(SyncListChange<StateNode> change)
+        {
+            _states = _syncedStates.ToList();
+            if (change.operation != SyncListOperation.Insert && change.operation != SyncListOperation.Added && change.operation != SyncListOperation.Set)
+                return;
+            
+            change.value.Setup(this);
         }
 
         [ServerRpc]
@@ -146,9 +257,9 @@ namespace PurrNet.StateMachine
         {
             if (IsController(ownerAuth)) return;
 
-            var activeState = _currentState.stateId < 0 || _currentState.stateId >= _states.Count
+            var activeState = _currentState.stateId < 0 || _currentState.stateId >= _syncedStates.Count
                 ? null
-                : _states[_currentState.stateId];
+                : _syncedStates[_currentState.stateId];
 
             try
             {
@@ -165,15 +276,15 @@ namespace PurrNet.StateMachine
                 PurrLogger.LogException(e);
             }
             
-            if(_currentState.stateId > -1 && _states.Count > _currentState.stateId)
-                UpdateStateId(_states[_currentState.stateId]);
+            if(_currentState.stateId > -1 && _syncedStates.Count > _currentState.stateId)
+                UpdateStateId(_syncedStates[_currentState.stateId]);
             _currentState = state;
             _currentState.data = data;
 
-            if (_currentState.stateId < 0 || _currentState.stateId >= _states.Count)
+            if (_currentState.stateId < 0 || _currentState.stateId >= _syncedStates.Count)
                 return;
 
-            var newState = _states[_currentState.stateId];
+            var newState = _syncedStates[_currentState.stateId];
             var prevState = previousStateNode;
 
             try
@@ -227,10 +338,10 @@ namespace PurrNet.StateMachine
             _currentState = state;
             _currentState.data = data;
 
-            if (_currentState.stateId < 0 || _currentState.stateId >= _states.Count)
+            if (_currentState.stateId < 0 || _currentState.stateId >= _syncedStates.Count)
                 return;
 
-            var newState = _states[_currentState.stateId];
+            var newState = _syncedStates[_currentState.stateId];
             var prevState = previousStateNode;
 
             try
@@ -260,16 +371,16 @@ namespace PurrNet.StateMachine
 
         private void UpdateStateId(StateNode node)
         {
-            var idx = node == null ? -2 : _states.IndexOf(node);
+            var idx = node == null ? -2 : _syncedStates.IndexOf(node);
 
             if (idx == -1)
                 PurrLogger.LogException($"State '{node.name}' of type {node.GetType().Name} not in states list");
 
             var newStateId = idx < 0 ? -1 : idx;
 
-            var oldState = _currentState.stateId < 0 || _currentState.stateId >= _states.Count
+            var oldState = _currentState.stateId < 0 || _currentState.stateId >= _syncedStates.Count
                 ? null
-                : _states[_currentState.stateId];
+                : _syncedStates[_currentState.stateId];
 
             try
             {
@@ -319,7 +430,7 @@ namespace PurrNet.StateMachine
             UpdateStateId(state);
             _currentState.data = data;
             
-            var newState = _states[_currentState.stateId];
+            var newState = _syncedStates[_currentState.stateId];
             var prevState = previousStateNode;
 
             if (isServer)
@@ -376,7 +487,7 @@ namespace PurrNet.StateMachine
             UpdateStateId(state);
             _currentState.data = null;
 
-            var newState = _states[_currentState.stateId];
+            var newState = _syncedStates[_currentState.stateId];
             var prevState = previousStateNode;
             
             if (isServer)
@@ -417,10 +528,10 @@ namespace PurrNet.StateMachine
             var startId = _currentState.stateId;
             var nextNodeId = GetNextId(startId);
 
-            if (_states[nextNodeId] is StateNode<T> node)
+            if (_syncedStates[nextNodeId] is StateNode<T> node)
                 return SetState(node, data, force);
             
-            PurrLogger.LogException($"Node {_states[nextNodeId].name}:{_states[nextNodeId].GetType().Name} does not have a generic type argument of type {typeof(T).Name}");
+            PurrLogger.LogException($"Node {_syncedStates[nextNodeId].name}:{_syncedStates[nextNodeId].GetType().Name} does not have a generic type argument of type {typeof(T).Name}");
             return false;
         }
 
@@ -440,7 +551,7 @@ namespace PurrNet.StateMachine
 
             do
             {
-                var node = _states[nextNodeId];
+                var node = _syncedStates[nextNodeId];
                 if (node is StateNode<T> genericNode && SetState(genericNode, data))
                     return true;
 
@@ -460,7 +571,7 @@ namespace PurrNet.StateMachine
             var startId = _currentState.stateId;
             var nextNodeId = GetNextId(startId);
 
-            return SetState(_states[nextNodeId], force);
+            return SetState(_syncedStates[nextNodeId], force);
         }
         
         /// <summary>
@@ -477,7 +588,7 @@ namespace PurrNet.StateMachine
 
             do
             {
-                if (SetState(_states[nextNodeId]))
+                if (SetState(_syncedStates[nextNodeId]))
                     return true;
 
                 nextNodeId = GetNextId(nextNodeId);
@@ -490,7 +601,7 @@ namespace PurrNet.StateMachine
         private int GetNextId(int currentId)
         {
             var nextNodeId = currentId + 1;
-            if (nextNodeId >= _states.Count)
+            if (nextNodeId >= _syncedStates.Count)
                 nextNodeId = 0;
             return nextNodeId;
         }
@@ -502,9 +613,9 @@ namespace PurrNet.StateMachine
         {
             var prevNodeId = _currentState.stateId - 1;
             if (prevNodeId < 0)
-                prevNodeId = _states.Count - 1;
+                prevNodeId = _syncedStates.Count - 1;
 
-            return SetState(_states[prevNodeId], force);
+            return SetState(_syncedStates[prevNodeId], force);
         }
         
         /// <summary>
@@ -520,7 +631,7 @@ namespace PurrNet.StateMachine
 
             do
             {
-                if (SetState(_states[prevNodeId]))
+                if (SetState(_syncedStates[prevNodeId]))
                     return true;
 
                 prevNodeId = GetPreviousId(prevNodeId);
@@ -540,9 +651,9 @@ namespace PurrNet.StateMachine
         {
             var prevNodeId = _currentState.stateId - 1;
             if (prevNodeId < 0)
-                prevNodeId = _states.Count - 1;
+                prevNodeId = _syncedStates.Count - 1;
 
-            var prevNode = _states[prevNodeId];
+            var prevNode = _syncedStates[prevNodeId];
 
             if (prevNode is StateNode<T> stateNode)
             {
@@ -568,7 +679,7 @@ namespace PurrNet.StateMachine
 
             do
             {
-                var node = _states[prevNodeId];
+                var node = _syncedStates[prevNodeId];
                 if (node is StateNode<T> genericNode && SetState(genericNode, data))
                     return true;
 
@@ -583,7 +694,7 @@ namespace PurrNet.StateMachine
         {
             var prevNodeId = currentId - 1;
             if (prevNodeId < 0)
-                prevNodeId = _states.Count - 1;
+                prevNodeId = _syncedStates.Count - 1;
             return prevNodeId;
         }
         

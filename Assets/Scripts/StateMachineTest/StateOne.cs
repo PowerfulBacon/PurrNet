@@ -4,6 +4,8 @@ using UnityEngine;
 public class StateOne : StateNode
 {
     [SerializeField] private bool _force;
+    [SerializeField] private StateNode _stateToAdd;
+    [SerializeField] private int _indexTest;
     
     protected override void OnSpawned()
     {
@@ -36,5 +38,29 @@ public class StateOne : StateNode
     {
         var goesNext = machine.Next(_force);
         Debug.Log($"Went to next state (forced: {_force}) and was successful: {goesNext}");
+    }
+
+    [ContextMenu("Add state")]
+    private void AddState()
+    {
+        machine.AddState(_stateToAdd);
+    }
+    
+    [ContextMenu("Remove state")]
+    private void RemoveState()
+    {
+        machine.RemoveState(_stateToAdd);
+    }
+    
+    [ContextMenu("Insert state")]
+    private void InsertState()
+    {
+        machine.InsertState(_stateToAdd, _indexTest);
+    }
+    
+    [ContextMenu("Remove state at index")]
+    private void RemoveStateAtIndex()
+    {
+        machine.RemoveStateAt(_indexTest);
     }
 }

@@ -1023,6 +1023,8 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   _force: 0
+  _stateToAdd: {fileID: 634351196}
+  _indexTest: 0
 --- !u!114 &634351199
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1044,7 +1046,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  ownerAuth: 0
+  ownerAuth: 1
   _states:
   - {fileID: 634351198}
   - {fileID: 634351197}
