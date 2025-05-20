@@ -76,6 +76,12 @@ namespace PurrNet
             _ownerAuth = ownerAuth;
         }
 
+        public SyncList(List<T> defaultValues, bool ownerAuth = false)
+        {
+            _list = defaultValues;
+            _ownerAuth = ownerAuth;
+        }
+
         public T this[int idx]
         {
             get => _list[idx];
