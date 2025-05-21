@@ -240,10 +240,32 @@ namespace PurrNet.StateMachine
         private void OnSyncedStateListChanged(SyncListChange<StateNode> change)
         {
             _states = _syncedStates.ToList();
-            if (change.operation != SyncListOperation.Insert && change.operation != SyncListOperation.Added && change.operation != SyncListOperation.Set)
-                return;
-            
-            change.value.Setup(this);
+
+            if (change.operation == SyncListOperation.Insert && change.index <= _currentState.stateId)
+                _currentState.stateId++;
+
+            if (change.operation == SyncListOperation.Insert && change.index <= _previousStateId)
+                _previousStateId++;
+
+            if (change.operation == SyncListOperation.Removed)
+            {
+                if (change.index < _currentState.stateId)
+                    _currentState.stateId--;
+                else if (change.index == _currentState.stateId)
+                    _currentState.stateId = -1;
+
+                if (change.index < _previousStateId)
+                    _previousStateId--;
+                else if (change.index == _previousStateId)
+                    _previousStateId = -1;
+            }
+
+            if (change.operation == SyncListOperation.Insert || 
+                change.operation == SyncListOperation.Added || 
+                change.operation == SyncListOperation.Set)
+            {
+                change.value.Setup(this);
+            }
         }
 
         [ServerRpc]
