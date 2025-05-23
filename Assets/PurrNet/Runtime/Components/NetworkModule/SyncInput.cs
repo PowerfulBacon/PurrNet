@@ -9,7 +9,7 @@ using UnityEngine;
 namespace PurrNet
 {
     /// <summary>
-    /// Will automatically sync a value from client to server, so the server can utilize it.
+    /// Will automatically sync a value from client to server, so the server can utilize it. Automatically filters away multiple entries of the same value.
     /// </summary>
     /// <typeparam name="T">Type to sync to the server</typeparam>
     [System.Serializable]
@@ -37,10 +37,20 @@ namespace PurrNet
         private readonly Queue<PendingInput> _pendingHostInputs = new();
 
         public delegate void OnChangedDelegate(T newInput);
+        
+        /// <summary>
+        /// Called back every time the server receives a value change
+        /// </summary>
         public event OnChangedDelegate onChanged;
 
+        /// <summary>
+        /// Called back every time the value has been marked as dirty and sent to the server.
+        /// </summary>
         public event Action onSentData;
 
+        /// <summary>
+        /// The current value of the SyncInput. 
+        /// </summary>
         public T value
         {
             get => _value;
