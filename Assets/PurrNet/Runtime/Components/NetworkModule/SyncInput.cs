@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using PurrNet.Logging;
 using PurrNet.Packing;
@@ -37,6 +38,8 @@ namespace PurrNet
 
         public delegate void OnChangedDelegate(T newInput);
         public event OnChangedDelegate onChanged;
+
+        public event Action onSentData;
 
         public T value
         {
@@ -110,6 +113,7 @@ namespace PurrNet
                 _currentId++;
                 var current = isHost ? _queuedHostValue : _value;
                 _history[_currentId] = current;
+                onSentData?.Invoke();
 
                 if (isHost)
                     QueueOrApplyHostInput(current);
