@@ -3,11 +3,31 @@ using UnityEngine;
 
 public class StateTwo : StateNode<int>
 {
-    public override void StateUpdate(bool asServer)
+    [SerializeField] private bool canEnter;
+    
+    public override void Enter(bool asServer)
     {
-        base.StateUpdate(asServer);
+        base.Enter(asServer);
         
-        if(Input.GetKeyDown(KeyCode.X) && isController)
-            machine.Next();
+        //Debug.Log($"Entered state {this} asServer: {asServer}");
+    }
+
+    public override void Exit(bool asServer)
+    {
+        base.Exit(asServer);
+        
+        //Debug.Log($"Exited state {this} asServer: {asServer}");
+    }
+
+    public override bool CanEnter()
+    {
+        return canEnter;
+    }
+
+    [ContextMenu("Next state")]
+    private void NextState()
+    {
+        var goesNext = machine.Next();
+        Debug.Log($"{goesNext}");
     }
 }

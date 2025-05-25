@@ -190,7 +190,11 @@ namespace PurrNet
                 case RPCType.TargetRPC:
                     if (isServer)
                         parent.SendToTarget(signature.targetPlayer!.Value, packet, signature.channel);
-                    else parent.SendToServer(packet, signature.channel);
+                    else
+                    {
+                        packet.targetPlayerId = signature.targetPlayer!.Value;
+                        parent.SendToServer(packet, signature.channel);
+                    }
                     break;
                 default: throw new ArgumentOutOfRangeException();
             }

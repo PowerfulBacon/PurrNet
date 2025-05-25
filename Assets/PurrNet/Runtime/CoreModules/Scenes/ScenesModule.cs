@@ -175,8 +175,11 @@ namespace PurrNet.Modules
             Setup(asServer);
         }
 
+        private bool _wasSetup;
+
         private void Setup(bool asServer)
         {
+            _wasSetup = true;
             _asServer = asServer;
 
             var currentScene = _networkManager.gameObject.scene;
@@ -339,6 +342,27 @@ namespace PurrNet.Modules
             return false;
         }
 
+        int GetCurrentLoadedScenes()
+        {
+            int count = 0;
+
+            for (int i = 0; i < _rawScenes.Count; i++)
+            {
+                if (_scenes.TryGetValue(_rawScenes[i], out var state))
+                {
+                    bool isDontDestroyOnLoad = state.scene.name == "DontDestroyOnLoad";
+
+                    if (isDontDestroyOnLoad)
+                        continue;
+
+                    if (state.scene.isLoaded)
+                        count++;
+                }
+            }
+
+            return count;
+        }
+
         private void HandleNextSceneAction()
         {
             if (_actionsQueue.Count == 0) return;
@@ -390,7 +414,7 @@ namespace PurrNet.Modules
                 }
                 case SceneActionType.Unload:
                 {
-                    var currentlyLoadedCount = _scenes.Count;
+                    var currentlyLoadedCount = GetCurrentLoadedScenes();
                     if (currentlyLoadedCount == 1)
                     {
                         // wait for the next load action
@@ -811,6 +835,9 @@ namespace PurrNet.Modules
 
         public bool Cleanup()
         {
+            if (!_wasSetup)
+                return true;
+
             var rules = _networkManager.networkRules;
 
             if (rules && !rules.ShouldCleanupScenesOnDisconnect())
@@ -833,7 +860,7 @@ namespace PurrNet.Modules
                         ? CleanupStage.LoadEmptyScene
                         : CleanupStage.UnloadScenesOnly;
 
-                    if (_networkManager.TryGetModule(!_asServer, out ScenesModule module))
+                    if (_networkManager.TryGetModule(!_asServer, out ScenesModule module) && module._wasSetup)
                         module._cleanupStage = CleanupStage.Skip;
 
                     return false;

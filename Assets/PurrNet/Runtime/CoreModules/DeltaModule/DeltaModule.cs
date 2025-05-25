@@ -1,0 +1,289 @@
+using System;
+using System.Collections.Generic;
+using PurrNet.Logging;
+using PurrNet.Packing;
+using PurrNet.Transports;
+using PurrNet.Utils;
+
+namespace PurrNet.Modules
+{
+    public class DeltaModule : INetworkModule
+    {
+        private readonly PlayersManager _players;
+        private readonly PlayersBroadcaster _broadcaster;
+        private readonly Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>> _receivingTrackers;
+        private readonly Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>> _sendingTrackers;
+
+        private bool _asServer;
+
+        public DeltaModule(PlayersManager players, PlayersBroadcaster broadcaster)
+        {
+            _players = players;
+            _broadcaster = broadcaster;
+            _receivingTrackers = new Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>>();
+            _sendingTrackers = new Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>>();
+        }
+
+        public void Enable(bool asServer)
+        {
+            _asServer = asServer;
+            _players.onPlayerLeft += OnPlayerLeft;
+            _broadcaster.Subscribe<DeltaAcknowledge>(Acknowledge);
+        }
+
+        public void Disable(bool asServer)
+        {
+            _players.onPlayerLeft -= OnPlayerLeft;
+            _broadcaster.Unsubscribe<DeltaAcknowledge>(Acknowledge);
+
+            foreach (var player in _sendingTrackers.Keys)
+            {
+                if (_sendingTrackers.TryGetValue(player, out var clientDict))
+                {
+                    foreach (var tracker in clientDict.Values)
+                        tracker.Dispose();
+                }
+            }
+
+            foreach (var player in _receivingTrackers.Keys)
+            {
+                if (_receivingTrackers.TryGetValue(player, out var receiveDict))
+                {
+                    foreach (var tracker in receiveDict.Values)
+                        tracker.Dispose();
+                }
+            }
+
+            _sendingTrackers.Clear();
+            _receivingTrackers.Clear();
+        }
+
+        private void OnPlayerLeft(PlayerID player, bool asServer)
+        {
+            if (_receivingTrackers.Remove(player, out var receiveDict))
+            {
+                foreach (var tracker in receiveDict.Values)
+                    tracker.Dispose();
+            }
+
+            if (_sendingTrackers.Remove(player, out var clientDict))
+            {
+                foreach (var tracker in clientDict.Values)
+                    tracker.Dispose();
+            }
+        }
+
+        private ClientDeltaTracker<T> GetOrCreateTracker<T>(PlayerID player, uint key, bool isWriting)
+        {
+            var dictionary = isWriting ? _sendingTrackers : _receivingTrackers;
+            if (!dictionary.TryGetValue(player, out var clientDict))
+            {
+                clientDict = new Dictionary<uint, ClientDeltaTracker>();
+                dictionary[player] = clientDict;
+            }
+
+            if (!clientDict.TryGetValue(key, out var tracker))
+            {
+                var result = new ClientDeltaTracker<T>();
+                tracker = result;
+                clientDict[key] = tracker;
+                return result;
+            }
+
+            if (tracker is not ClientDeltaTracker<T> typedTracker)
+                throw new Exception($"Tracker for key {key} is not of type {typeof(ClientDeltaTracker<T>).Name}");
+
+            return typedTracker;
+        }
+
+        public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue, bool validate = false) where Key : struct, IStableHashable
+        {
+            var hash = GetKeyHash(key);
+            var tracker = GetOrCreateTracker<T>(player, hash, true);
+
+            T oldValue = default;
+
+            if (tracker.lastConfirmedId != 0)
+            {
+                if (tracker.history.TryGetValue(tracker.lastConfirmedId, out var confirmedValue))
+                    oldValue = confirmedValue;
+                else
+                {
+                    PurrLogger.LogError($"Confirmed value not found for key {hash} and {tracker.lastConfirmedId} and player {player}");
+                    oldValue = default;
+                }
+            }
+
+            Packer<PackedUInt>.Write(packer, tracker.lastConfirmedId);
+
+            var pos = packer.positionInBits;
+            Packer<bool>.Write(packer, false);
+            bool changed = DeltaPacker<T>.Write(packer, oldValue, newValue);
+
+            packer.WriteAt(pos, changed);
+
+            //Debug.Log($"WRITE: Changed: {changed} | Player: {player} | LastConfirmedId: {tracker.LastConfirmedId} | Old: {oldValue} | New: {newValue}");
+
+            if (changed)
+            {
+                if (validate)
+                {
+                    // validate that the delta packer is working correctly
+                    T testValue = default;
+                    using var tmp = BitPackerPool.Get();
+                    DeltaPacker<T>.Write(tmp, oldValue, newValue);
+                    var bitPosition = tmp.positionInBits;
+                    tmp.ResetPositionAndMode(true);
+                    DeltaPacker<T>.Read(tmp, oldValue, ref testValue);
+                    var newBitPosition = tmp.positionInBits;
+
+                    if (!Packer.AreEqual(newValue, testValue))
+                    {
+                        PurrLogger.LogError($"Delta packer failed to pack/unpack correctly for `{typeof(T).Name}`\nOld: {oldValue}\nNew: {newValue}\nRead: {testValue}");
+                    }
+                    else if (newBitPosition != bitPosition)
+                    {
+                        PurrLogger.LogError($"Delta packer failed to pack/unpack correctly for `{typeof(T).Name}`\nOld: {oldValue}\nNew: {newValue}\nRead: {testValue}");
+                    }
+                }
+
+                PackedUInt newId = tracker.GenerateId();
+                Packer<PackedUInt>.Write(packer, newId);
+                UpdateValueAtIndex<T>(newValue, tracker, newId);
+
+                var clientDict = _sendingTrackers[player];
+                clientDict[hash] = tracker;
+            }
+            else
+            {
+                packer.SetBitPosition(pos + 1);
+            }
+
+            return changed;
+        }
+
+        private static void UpdateValueAtIndex<T>(T newValue, ClientDeltaTracker<T> tracker, PackedUInt newId)
+        {
+            if (tracker.history.TryGetValue(newId, out var old))
+            {
+                if (old is IDisposable disposable)
+                    disposable.Dispose();
+                tracker.history[newId] = Packer.Copy(newValue);
+            }
+            else
+            {
+                tracker.history.Add(newId, Packer.Copy(newValue));
+            }
+        }
+
+        public void Read<Key, T>(BitPacker packer, Key key, PlayerID sender, ref T newValue) where Key : struct, IStableHashable
+        {
+            var player = _players.localPlayerId ?? default;
+
+            var keyHash = GetKeyHash(key);
+            var tracker = GetOrCreateTracker<T>(player, keyHash, false);
+
+            PackedUInt lastConfirmedId = default;
+            Packer<PackedUInt>.Read(packer, ref lastConfirmedId);
+
+            bool changed = false;
+            PackedUInt valueId = default;
+            Packer<bool>.Read(packer, ref changed);
+
+            if (changed)
+            {
+                T oldValue = default;
+
+                if (lastConfirmedId != 0)
+                {
+                    if (tracker.history.TryGetValue(lastConfirmedId, out var confirmedValue))
+                        oldValue = confirmedValue;
+                    else PurrLogger.LogError($"Confirmed value not found for key {keyHash} and {lastConfirmedId.value} and player {player}");
+                }
+
+                DeltaPacker<T>.Read(packer, oldValue, ref newValue);
+                Packer<PackedUInt>.Read(packer, ref valueId);
+
+                UpdateValueAtIndex<T>(newValue, tracker, valueId);
+                CleanupClientHistory(ref tracker);
+
+                var data = new DeltaAcknowledge
+                {
+                    key = keyHash,
+                    valueId = valueId
+                };
+
+                if (_asServer)
+                    _broadcaster.Send(sender, data, Channel.Unreliable);
+                else _broadcaster.SendToServer(data, Channel.Unreliable);
+            }
+            else if (lastConfirmedId != 0)
+            {
+                if (tracker.history.TryGetValue(lastConfirmedId, out var confirmedValue))
+                    newValue = Packer.Copy(confirmedValue);
+                else
+                {
+                    PurrLogger.LogError($"Confirmed value not found for key {keyHash} and {lastConfirmedId.value} and player {player}");
+                    newValue = default;
+                }
+            }
+            else newValue = default;
+        }
+
+        private static void CleanupClientHistory<T>(ref ClientDeltaTracker<T> tracker, int maxHistoryCount = 60)
+        {
+            if (tracker.history.Count <= maxHistoryCount)
+                return;
+
+            if (tracker.oldestIdInHistory == 0 && tracker.history.Count > 0)
+            {
+                uint minId = uint.MaxValue;
+                foreach (var id in tracker.history.Keys)
+                {
+                    if (id < minId) minId = id;
+                }
+                tracker.oldestIdInHistory = minId;
+            }
+
+            int toRemoveCount = tracker.history.Count - maxHistoryCount;
+
+            for (int i = 0; i < toRemoveCount; i++)
+            {
+                if (tracker.history.Remove(tracker.oldestIdInHistory, out var old))
+                {
+                    if (old is IDisposable disposable)
+                        disposable.Dispose();
+                }
+                tracker.oldestIdInHistory++;
+            }
+        }
+
+        private static uint GetKeyHash<T>(T key) where T : struct, IStableHashable
+        {
+            uint typeHash = Hasher<T>.stableHash;
+            uint valueHash = key.GetStableHash();
+            return Hasher.CombineHashes(typeHash, valueHash);
+        }
+
+        private void Acknowledge(PlayerID player, DeltaAcknowledge data, bool asServer)
+        {
+            if (!asServer)
+                player = default;
+
+            if (!_sendingTrackers.TryGetValue(player, out var clientDict) ||
+                !clientDict.TryGetValue(data.key, out var tracker))
+                return;
+
+            if (tracker.ContainsKey(data.valueId))
+            {
+                if (data.valueId > tracker.lastConfirmedId)
+                {
+                    tracker.lastConfirmedId = data.valueId;
+                    tracker.CleanupHistory(data.valueId);
+
+                    clientDict[data.key] = tracker;
+                }
+            }
+        }
+    }
+}

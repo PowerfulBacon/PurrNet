@@ -10,14 +10,13 @@ namespace PurrNet.Codegen
         public static void HandleType(AssemblyDefinition assembly, TypeReference type, TypeDefinition generatedClass)
         {
             var bitStreamType = assembly.MainModule.GetTypeDefinition(typeof(BitPacker)).Import(assembly.MainModule);
-            var packerType = assembly.MainModule.GetTypeDefinition(typeof(Packer)).Import(assembly.MainModule);
 
             var writeMethod = new MethodDefinition("WriteDelta", MethodAttributes.Public | MethodAttributes.Static,
                 assembly.MainModule.TypeSystem.Boolean);
             var readMethod = new MethodDefinition("ReadDelta", MethodAttributes.Public | MethodAttributes.Static,
                 assembly.MainModule.TypeSystem.Void);
 
-            CreateWriteMethod(assembly.MainModule, writeMethod, type, bitStreamType, packerType);
+            CreateWriteMethod(assembly.MainModule, writeMethod, type, bitStreamType);
             CreateReadMethod(assembly.MainModule, readMethod, type, bitStreamType);
 
             generatedClass.Methods.Add(writeMethod);
@@ -168,7 +167,7 @@ namespace PurrNet.Codegen
         }
 
         private static void CreateWriteMethod(ModuleDefinition module, MethodDefinition method, TypeReference typeRef,
-            TypeReference bitStreamType, TypeReference packerType)
+            TypeReference bitStreamType)
         {
             var bitPackerType = module.GetTypeDefinition(typeof(BitPacker)).Import(module);
             var deltaPackerGenType = module.GetTypeDefinition(typeof(DeltaPacker<>)).Import(module);
@@ -225,6 +224,8 @@ namespace PurrNet.Codegen
 
             if (type.IsEnum)
             {
+                il.Emit(OpCodes.Ldc_I4_0);
+                il.Emit(OpCodes.Ret);
                 return;
             }
 

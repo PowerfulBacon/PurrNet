@@ -9,19 +9,17 @@ namespace PurrNet.Modules
         readonly ScenePlayersModule _scenePlayers;
         readonly PlayersBroadcaster _broadcaster;
         readonly NetworkManager _manager;
-        private readonly PlayersManager _players;
         private readonly HierarchyFactory _factory;
 
         readonly List<NetworkTransformModule> _rawModules = new();
         readonly Dictionary<SceneID, NetworkTransformModule> _modules = new();
 
-        public NetworkTransformFactory(ScenesModule scenes, ScenePlayersModule scenePlayers, PlayersManager players,
+        public NetworkTransformFactory(ScenesModule scenes, ScenePlayersModule scenePlayers,
             PlayersBroadcaster broadcaster, NetworkManager manager, HierarchyFactory factory)
         {
             _scenes = scenes;
             _scenePlayers = scenePlayers;
             _broadcaster = broadcaster;
-            _players = players;
             _manager = manager;
             _factory = factory;
         }
@@ -58,7 +56,7 @@ namespace PurrNet.Modules
                 return;
             }
 
-            var hierarchy = new NetworkTransformModule(_manager, _broadcaster, _players, _scenePlayers, scene, _factory);
+            var hierarchy = new NetworkTransformModule(_manager, _broadcaster, _scenePlayers, scene, _factory);
 
             hierarchy.Enable(asServer);
 
@@ -83,7 +81,7 @@ namespace PurrNet.Modules
         public void PostFixedUpdate()
         {
             for (var i = 0; i < _rawModules.Count; i++)
-                _rawModules[i].FixedUpdate();
+                _rawModules[i].PostFixedUpdate();
         }
 
         public bool TryGetModule(SceneID sceneId, out NetworkTransformModule module)

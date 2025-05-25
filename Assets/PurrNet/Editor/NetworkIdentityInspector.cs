@@ -125,7 +125,6 @@ namespace PurrNet.Editor
                 return;
             }
 
-
             HandleOverrides(identity, identities > 1);
             HandleStatus(identity, identities > 1);
         }

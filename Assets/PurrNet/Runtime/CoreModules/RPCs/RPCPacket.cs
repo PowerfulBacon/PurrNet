@@ -8,6 +8,7 @@ namespace PurrNet
     {
         public ByteData rpcData { get; set; }
         PlayerID senderPlayerId { get; }
+        PlayerID targetPlayerId { get; set; }
     }
 
     public struct RPCPacket : IPackedAuto, IRpc
@@ -15,6 +16,7 @@ namespace PurrNet
         public NetworkID networkId;
         public SceneID sceneId;
         public PlayerID senderId;
+        public PlayerID? targetId;
         public byte rpcId;
         public ByteData data;
 
@@ -25,6 +27,12 @@ namespace PurrNet
         }
 
         public PlayerID senderPlayerId => senderId;
+
+        public PlayerID targetPlayerId
+        {
+            get => targetId ?? default;
+            set => targetId = value;
+        }
     }
 
     public struct ChildRPCPacket : IPackedAuto, IRpc
@@ -32,6 +40,7 @@ namespace PurrNet
         public NetworkID networkId;
         public SceneID sceneId;
         public PlayerID senderId;
+        public PlayerID? targetId;
         public byte rpcId;
         public byte childId;
         public ByteData data;
@@ -43,6 +52,12 @@ namespace PurrNet
         }
 
         public PlayerID senderPlayerId => senderId;
+
+        public PlayerID targetPlayerId
+        {
+            get => targetId ?? default;
+            set => targetId = value;
+        }
     }
 
     public struct StaticRPCPacket : IPackedAuto, IRpc
@@ -50,6 +65,7 @@ namespace PurrNet
         public uint typeHash;
         public byte rpcId;
         public PlayerID senderId;
+        public PlayerID? targetId;
         public ByteData data;
 
         public ByteData rpcData
@@ -59,6 +75,11 @@ namespace PurrNet
         }
 
         public PlayerID senderPlayerId => senderId;
+        public PlayerID targetPlayerId
+        {
+            get => targetId ?? default;
+            set => targetId = value;
+        }
     }
 
     internal readonly struct RPC_ID : IEquatable<RPC_ID>
@@ -66,7 +87,6 @@ namespace PurrNet
         public readonly uint typeHash;
         public readonly SceneID sceneId;
         public readonly NetworkID networkId;
-        public readonly PlayerID senderId;
         private readonly byte rpcId;
         private readonly byte childId;
 
@@ -75,7 +95,6 @@ namespace PurrNet
             sceneId = packet.sceneId;
             networkId = packet.networkId;
             rpcId = packet.rpcId;
-            senderId = packet.senderId;
             typeHash = default;
             childId = default;
         }
@@ -86,7 +105,6 @@ namespace PurrNet
             networkId = default;
             rpcId = packet.rpcId;
             typeHash = packet.typeHash;
-            senderId = packet.senderId;
             childId = default;
         }
 
@@ -97,7 +115,6 @@ namespace PurrNet
             rpcId = packet.rpcId;
             typeHash = default;
             childId = packet.childId;
-            senderId = packet.senderId;
         }
 
         public override int GetHashCode()
@@ -114,7 +131,6 @@ namespace PurrNet
             return typeHash == other.typeHash &&
                    sceneId.Equals(other.sceneId) &&
                    networkId.Equals(other.networkId) &&
-                   senderId.Equals(other.senderId) &&
                    rpcId == other.rpcId &&
                    childId == other.childId;
         }

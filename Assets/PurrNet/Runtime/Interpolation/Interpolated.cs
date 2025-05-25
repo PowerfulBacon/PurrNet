@@ -10,7 +10,7 @@ namespace PurrNet
         private readonly LerpFunction<T> _lerp;
         private readonly List<T> _buffer;
         private T _lastValue;
-        private T _currentState;
+        private T _currentStateRaw;
         private float _timer;
         private float _tickDelta;
         protected bool _waitForMinBufferSize;
@@ -46,7 +46,6 @@ namespace PurrNet
 
             _tickDelta = tickDelta;
             _lastValue = initialValue;
-            _currentState = initialValue;
             _waitForMinBufferSize = true;
         }
 
@@ -57,7 +56,7 @@ namespace PurrNet
                 // remove up to minBufferSize
                 var removeCount = _buffer.Count - minBufferSize;
                 _buffer.RemoveRange(0, removeCount);
-                _lastValue = _currentState;
+                // _lastValue = _currentState;
                 _timer = 0f;
             }
             _buffer.Add(value);
@@ -70,11 +69,6 @@ namespace PurrNet
             _timer = 0f;
         }
 
-        public T GetCurrentState()
-        {
-            return _currentState;
-        }
-
         public T Advance(float deltaTime)
         {
             if (_waitForMinBufferSize)
@@ -82,7 +76,7 @@ namespace PurrNet
                 if (_buffer.Count < minBufferSize)
                 {
                     _timer = 0f;
-                    return _lastValue;
+                    return _lerp(_lastValue, _lastValue, 1f);
                 }
 
                 _waitForMinBufferSize = false;
@@ -92,29 +86,26 @@ namespace PurrNet
             {
                 _timer = 0f;
                 _waitForMinBufferSize = true;
-                return _lastValue;
+                return _lerp(_lastValue, _lastValue, 1f);
             }
 
             _timer += deltaTime;
 
             while (_timer >= _tickDelta)
             {
-                var lerped = _lerp(_lastValue, _buffer[0], 1f);
+                _lastValue = _buffer[0];
                 _buffer.RemoveAt(0);
-                _lastValue = lerped;
                 _timer -= _tickDelta;
 
                 if (_buffer.Count <= 0)
                 {
                     _timer = 0f;
                     _waitForMinBufferSize = true;
-                    _currentState = _lastValue;
-                    return _lastValue;
+                    return _lerp(_lastValue, _lastValue, 1f);
                 }
             }
 
-            _currentState = _lerp(_lastValue, _buffer[0], _timer / _tickDelta);
-            return _currentState;
+            return _lerp(_lastValue, _buffer[0], _timer / _tickDelta);
         }
     }
 }

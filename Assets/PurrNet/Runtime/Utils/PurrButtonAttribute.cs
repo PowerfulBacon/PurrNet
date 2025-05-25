@@ -6,11 +6,12 @@ using PurrNet.Logging;
 using UnityEditor;
 #endif
 using UnityEngine;
+using UnityEngine.Scripting;
 
 namespace PurrNet
 {
     [AttributeUsage(AttributeTargets.Method), UsedImplicitly]
-    public class PurrButtonAttribute : PropertyAttribute
+    public class PurrButtonAttribute : PreserveAttribute
     {
         public string ButtonName { get; private set; }
 

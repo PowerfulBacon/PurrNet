@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Utils;
@@ -213,28 +214,45 @@ namespace PurrNet.Packing
 
     public static class Packer
     {
+        public static T Copy<T>(T value)
+        {
+            if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+                return value;
+
+            using var tmpPacker = BitPackerPool.Get();
+            Packer<T>.Write(tmpPacker, value);
+            tmpPacker.ResetPositionAndMode(true);
+            var copy = default(T);
+            Packer<T>.Read(tmpPacker, ref copy);
+            return copy;
+        }
+
         [UsedByIL]
         public static bool AreEqual<T>(T a, T b)
         {
             using var packerA = BitPackerPool.Get();
             using var packerB = BitPackerPool.Get();
 
-            Write(packerA, a);
-            Write(packerB, b);
+            Packer<T>.Write(packerA, a);
+            Packer<T>.Write(packerB, b);
 
-            return packerA.ToByteData().span.SequenceEqual(packerB.ToByteData().span);
+            var spanA = packerA.ToByteData().span;
+            var spanB = packerB.ToByteData().span;
+
+            // Write a zero byte to the end of the packer to ensure the bits are aligned
+            Packer<byte>.Write(packerA, 0);
+            Packer<byte>.Write(packerB, 0);
+
+            if (spanA.Length != spanB.Length)
+                return false;
+
+            return spanA.SequenceEqual(spanB);
         }
 
         [UsedByIL]
         public static bool AreEqualRef<T>(ref T a, ref T b)
         {
-            using var packerA = BitPackerPool.Get();
-            using var packerB = BitPackerPool.Get();
-
-            Write(packerA, a);
-            Write(packerB, b);
-
-            return packerA.ToByteData().span.SequenceEqual(packerB.ToByteData().span);
+            return AreEqual(a, b);
         }
 
         static readonly Dictionary<Type, MethodInfo> _writeMethods = new Dictionary<Type, MethodInfo>();

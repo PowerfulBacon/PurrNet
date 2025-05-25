@@ -51,6 +51,11 @@ namespace PurrNet
             return false;
         }
 
+        public override void Refresh()
+        {
+            RegeneratePrefabLookup();
+        }
+
 #if UNITY_EDITOR
         private bool _generating;
 

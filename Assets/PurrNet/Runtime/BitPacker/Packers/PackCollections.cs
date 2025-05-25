@@ -11,59 +11,11 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static void RegisterNullable<T>() where T : struct
         {
-            Packer<T?>.RegisterWriter(WriteNullable);
-            Packer<T?>.RegisterReader(ReadNullable);
+            Packer<T?>.RegisterWriter(PackNullables.WriteNullable);
+            Packer<T?>.RegisterReader(PackNullables.ReadNullable);
 
-            DeltaPacker<T?>.RegisterWriter(WriteDeltaNullable);
-            DeltaPacker<T?>.RegisterReader(ReadDeltaNullable);
-        }
-
-        private static bool WriteDeltaNullable<T>(BitPacker packer, T? oldvalue, T? newvalue) where T : struct
-        {
-            bool hasChanged = oldvalue.HasValue != newvalue.HasValue;
-            Packer<bool>.Write(packer, hasChanged);
-
-            if (hasChanged)
-                WriteNullable(packer, newvalue);
-
-            return hasChanged;
-        }
-
-        private static void ReadDeltaNullable<T>(BitPacker packer, T? oldvalue, ref T? value) where T : struct
-        {
-            bool hasChanged = default;
-            packer.Read(ref hasChanged);
-
-            if (hasChanged)
-                ReadNullable(packer, ref value);
-        }
-
-        private static void WriteNullable<T>(BitPacker packer, T? value) where T : struct
-        {
-            if (!value.HasValue)
-            {
-                Packer<bool>.Write(packer, false);
-                return;
-            }
-
-            Packer<bool>.Write(packer, true);
-            Packer<T>.Write(packer, value.Value);
-        }
-
-        private static void ReadNullable<T>(BitPacker packer, ref T? value) where T : struct
-        {
-            bool hasValue = default;
-            packer.Read(ref hasValue);
-
-            if (!hasValue)
-            {
-                value = null;
-                return;
-            }
-
-            T val = default;
-            Packer<T>.Read(packer, ref val);
-            value = val;
+            DeltaPacker<T?>.RegisterWriter(PackNullables.WriteDeltaNullable);
+            DeltaPacker<T?>.RegisterReader(PackNullables.ReadDeltaNullable);
         }
 
         [UsedByIL]
@@ -91,10 +43,10 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static void RegisterDisposableList<T>()
         {
-            Packer<DisposableList<T>>.RegisterWriter(WriteDisposableList);
-            Packer<DisposableList<T>>.RegisterReader(ReadDisposableList);
-            DeltaPacker<DisposableList<T>>.RegisterWriter(WriteDisposableDeltaList);
-            DeltaPacker<DisposableList<T>>.RegisterReader(ReadDisposableDeltaList);
+            Packer<DisposableList<T>>.RegisterWriter(PackDisposableLists.WriteDisposableList);
+            Packer<DisposableList<T>>.RegisterReader(PackDisposableLists.ReadDisposableList);
+            DeltaPacker<DisposableList<T>>.RegisterWriter(PackDisposableLists.WriteDisposableDeltaList);
+            DeltaPacker<DisposableList<T>>.RegisterReader(PackDisposableLists.ReadDisposableDeltaList);
         }
 
         [UsedByIL]
@@ -137,83 +89,6 @@ namespace PurrNet.Packing
 
             packer.ReadInteger(ref length, 31);
             value = new DisposableHashSet<T>((int)length);
-
-            for (int i = 0; i < length; i++)
-            {
-                T item = default;
-                Packer<T>.Read(packer, ref item);
-                value.Add(item);
-            }
-        }
-
-        [UsedByIL]
-        public static void WriteDisposableList<T>(this BitPacker packer, DisposableList<T> value)
-        {
-            if (value.isDisposed || value.list == null)
-            {
-                Packer<bool>.Write(packer, false);
-                return;
-            }
-
-            Packer<bool>.Write(packer, true);
-
-            int length = value.Count;
-            packer.WriteInteger(length, 31);
-
-            for (int i = 0; i < length; i++)
-                Packer<T>.Write(packer, value[i]);
-        }
-
-        [UsedByIL]
-        public static void ReadDisposableDeltaList<T>(this BitPacker packer, DisposableList<T> old,
-            ref DisposableList<T> value)
-        {
-            bool areEqual = default;
-            packer.Read(ref areEqual);
-
-            if (areEqual)
-            {
-                // do a deep copy
-                using var tmpPacker = BitPackerPool.Get();
-                WriteDisposableList(tmpPacker, old);
-                tmpPacker.ResetPositionAndMode(true);
-                ReadDisposableList(tmpPacker, ref value);
-                return;
-            }
-
-            ReadDisposableList(packer, ref value);
-        }
-
-        [UsedByIL]
-        public static bool WriteDisposableDeltaList<T>(this BitPacker packer, DisposableList<T> old,
-            DisposableList<T> value)
-        {
-            if (Packer.AreEqual(old, value))
-            {
-                Packer<bool>.Write(packer, true);
-                return false;
-            }
-
-            Packer<bool>.Write(packer, false);
-            WriteDisposableList(packer, value);
-            return true;
-        }
-
-        [UsedByIL]
-        public static void ReadDisposableList<T>(this BitPacker packer, ref DisposableList<T> value)
-        {
-            value.Dispose();
-
-            bool hasValue = default;
-
-            packer.Read(ref hasValue);
-
-            if (!hasValue)
-                return;
-
-            long length = default;
-            packer.ReadInteger(ref length, 31);
-            value = new DisposableList<T>((int)length);
 
             for (int i = 0; i < length; i++)
             {

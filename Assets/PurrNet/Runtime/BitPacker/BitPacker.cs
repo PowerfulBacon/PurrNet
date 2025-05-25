@@ -126,6 +126,7 @@ namespace PurrNet.Packing
         public BitPacker Pickle(LZ4Level level = LZ4Level.L00_FAST)
         {
             var packer = BitPackerPool.Get();
+            packer.EnsureBitsExist(positionInBits);
             PickleInto(packer, level);
             return packer;
         }
@@ -238,7 +239,7 @@ namespace PurrNet.Packing
         }
 
         [UsedByIL]
-        public bool HandleNullScenarios<T>(T oldValue, T newValue, ref bool areEqual) where T : class
+        public bool HandleNullScenarios<T>(T oldValue, T newValue, ref bool areEqual)
         {
             if (oldValue == null)
             {
@@ -256,7 +257,7 @@ namespace PurrNet.Packing
             if (newValue == null)
             {
                 areEqual = false;
-                Packer<T>.Write(this, null);
+                Packer<T>.Write(this, default);
                 return false;
             }
 
@@ -277,7 +278,7 @@ namespace PurrNet.Packing
         }
 
         [UsedByIL]
-        public bool ReadIsNull<T>(ref T value) where T : class
+        public bool ReadIsNull<T>(ref T value)
         {
             if (ReadBits(1) == 1)
             {
@@ -290,6 +291,18 @@ namespace PurrNet.Packing
 
             value = Activator.CreateInstance<T>();
             return true;
+        }
+
+        public void WriteBits(BitPacker packer, int bits)
+        {
+            EnsureBitsExist(bits);
+
+            int chunks = bits / 64;
+            byte excess = (byte)(bits % 64);
+
+            for (int i = 0; i < chunks; i++)
+                WriteBits(packer.ReadBits(64), 64);
+            WriteBits(packer.ReadBits(excess), excess);
         }
 
         public void WriteBits(ulong data, byte bits)

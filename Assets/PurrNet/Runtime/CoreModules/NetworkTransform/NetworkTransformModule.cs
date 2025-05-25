@@ -9,46 +9,30 @@ namespace PurrNet.Modules
     {
         public SceneID scene;
         public readonly ByteData packet;
-        public readonly int packerLengthInBits;
 
-        public NetworkTransformDelta(SceneID context, BitPacker packer, int packerLengthInBits)
+        public NetworkTransformDelta(SceneID context, BitPacker packer)
         {
             scene = context;
             packet = packer.ToByteData();
-            this.packerLengthInBits = packerLengthInBits;
         }
     }
 
-    public struct NetworkTransformRegister : IPackedAuto
-    {
-        public SceneID scene;
-        public readonly DisposableList<NetworkID> toRegister;
-
-        public NetworkTransformRegister(SceneID context, DisposableList<NetworkID> list)
-        {
-            scene = context;
-            toRegister = list;
-        }
-    }
-
-    public class NetworkTransformModule : INetworkModule, IFixedUpdate
+    public class NetworkTransformModule : INetworkModule
     {
         private readonly List<NetworkTransform> _networkTransforms = new();
         private readonly ScenePlayersModule _scenePlayers;
         private readonly PlayersBroadcaster _broadcaster;
-        private readonly PlayersManager _playersManager;
         private readonly NetworkManager _manager;
         private readonly SceneID _scene;
         private readonly HierarchyFactory _factory;
         private bool _asServer;
 
-        public NetworkTransformModule(NetworkManager manager, PlayersBroadcaster broadcaster, PlayersManager players,
+        public NetworkTransformModule(NetworkManager manager, PlayersBroadcaster broadcaster,
             ScenePlayersModule scenePlayers, SceneID scene, HierarchyFactory factory)
         {
             _manager = manager;
             _scenePlayers = scenePlayers;
             _broadcaster = broadcaster;
-            _playersManager = players;
             _scene = scene;
             _factory = factory;
         }
@@ -56,64 +40,13 @@ namespace PurrNet.Modules
         public void Enable(bool asServer)
         {
             _asServer = asServer;
-            _factory.onObserverAdded += OnObserverAdded;
 
             _broadcaster.Subscribe<NetworkTransformDelta>(OnNetworkTransformDelta);
-
-            if (!asServer)
-                _broadcaster.Subscribe<NetworkTransformRegister>(OnNetworkTransformRegister);
         }
 
         public void Disable(bool asServer)
         {
-            _factory.onObserverAdded -= OnObserverAdded;
             _broadcaster.Unsubscribe<NetworkTransformDelta>(OnNetworkTransformDelta);
-
-            if (!asServer)
-                _broadcaster.Unsubscribe<NetworkTransformRegister>(OnNetworkTransformRegister);
-        }
-
-        readonly Dictionary<PlayerID, DisposableList<NetworkID>> _pendingToRegister = new();
-
-        private void OnObserverAdded(PlayerID player, NetworkIdentity identity)
-        {
-            if (identity is not NetworkTransform)
-                return;
-
-            var id = identity.id;
-
-            if (!id.HasValue)
-                return;
-
-            if (!_pendingToRegister.TryGetValue(player, out var list))
-            {
-                list = new DisposableList<NetworkID>(16);
-                _pendingToRegister[player] = list;
-            }
-
-            list.Add(id.Value);
-        }
-
-        private void OnNetworkTransformRegister(PlayerID player, NetworkTransformRegister data, bool asServer)
-        {
-            if (asServer)
-                return;
-
-            if (data.scene != _scene)
-                return;
-
-            int count = data.toRegister.Count;
-            for (var i = 0; i < count; i++)
-            {
-                var id = data.toRegister[i];
-
-                if (_factory.TryGetIdentity(_scene, id, out var identity) &&
-                    identity is NetworkTransform nt)
-                {
-                    if (!_networkTransforms.Contains(nt))
-                        AddTrs(nt);
-                }
-            }
         }
 
         private void OnNetworkTransformDelta(PlayerID player, NetworkTransformDelta data, bool asServer)
@@ -125,35 +58,23 @@ namespace PurrNet.Modules
 
             packet.ResetPositionAndMode(true);
 
-            int ntCount = _networkTransforms.Count;
+            PackedInt ntCount = default;
+            NetworkID lastNid = default;
 
-            if (asServer)
+            Packer<PackedInt>.Read(packet, ref ntCount);
+
+            for (var i = 0; i < ntCount; i++)
             {
-                for (var i = 0; i < ntCount; i++)
-                {
-                    var nt = _networkTransforms[i];
-                    if (nt.IsControlling(player, false))
-                    {
-                        nt.DeltaRead(packet);
+                PackedInt length = default;
+                Packer<PackedInt>.Read(packet, ref length);
+                DeltaPacker<NetworkID>.Read(packet, lastNid, ref lastNid);
 
-                        if (packet.positionInBits >= data.packerLengthInBits)
-                            break;
-                    }
-                }
-            }
-            else
-            {
-                for (var i = 0; i < ntCount; i++)
+                if (_factory.TryGetIdentity(_scene, lastNid, out var identity) && identity is NetworkTransform nt &&
+                    (!asServer || nt.IsControlling(player, false)))
                 {
-                    var nt = _networkTransforms[i];
-                    if (!nt.IsControlling(nt.localPlayerForced, false))
-                    {
-                        nt.DeltaRead(packet);
-
-                        if (packet.positionInBits >= data.packerLengthInBits)
-                            break;
-                    }
+                    nt.DeltaRead(packet);
                 }
+                else packet.SkipBits(length);
             }
         }
 
@@ -170,13 +91,20 @@ namespace PurrNet.Modules
             int ntCount = _networkTransforms.Count;
             bool anyWritten = false;
 
+            var controlled = ListPool<NetworkTransform>.Instantiate();
+            using var dummy = BitPackerPool.Get();
+
             if (player == PlayerID.Server)
             {
                 for (var i = 0; i < ntCount; i++)
                 {
                     var nt = _networkTransforms[i];
+
+                    if (!nt.IsSpawned(_asServer) || !nt.id.HasValue)
+                        continue;
+
                     if (nt.IsControlling(localPlayer, false))
-                        anyWritten = nt.DeltaWrite(packer) || anyWritten;
+                        controlled.Add(nt);
                 }
             }
             else
@@ -184,10 +112,36 @@ namespace PurrNet.Modules
                 for (var i = 0; i < ntCount; i++)
                 {
                     var nt = _networkTransforms[i];
+
+                    if (!nt.IsSpawned(_asServer) || !nt.id.HasValue)
+                        continue;
+
                     if (!nt.IsControlling(player, false) && nt.observers.Contains(player))
-                        anyWritten = nt.DeltaWrite(packer) || anyWritten;
+                        controlled.Add(nt);
                 }
             }
+
+            NetworkID lastNid = default;
+            int count = controlled.Count;
+            Packer<PackedInt>.Write(packer, count);
+            for (var i = 0; i < count; i++)
+            {
+                var nt = controlled[i];
+                using var tmp = BitPackerPool.Get();
+
+                anyWritten = nt.DeltaWrite(tmp) || anyWritten;
+
+                PackedInt length = tmp.positionInBits;
+                tmp.ResetPositionAndMode(true);
+
+                Packer<PackedInt>.Write(packer, length);
+                DeltaPacker<NetworkID>.Write(packer, lastNid, nt.id!.Value);
+                packer.WriteBits(tmp, length);
+
+                lastNid = nt.id.Value;
+            }
+
+            ListPool<NetworkTransform>.Destroy(controlled);
 
             return anyWritten;
         }
@@ -196,22 +150,14 @@ namespace PurrNet.Modules
         {
             if (!networkTransform.id.HasValue)
                 return;
-
-            if (_asServer)
-            {
-                AddTrs(networkTransform);
-                return;
-            }
-
-            bool isSpawnedByLocalPlayer = _playersManager.localPlayerId.HasValue &&
-                                          networkTransform.id.Value.scope == _playersManager.localPlayerId;
-
-            if (isSpawnedByLocalPlayer && !_networkTransforms.Contains(networkTransform))
-                AddTrs(networkTransform);
+            AddTrs(networkTransform);
         }
 
         private void AddTrs(NetworkTransform networkTransform)
         {
+            if (_networkTransforms.Contains(networkTransform))
+                return;
+
             for (int i = 0; i < _networkTransforms.Count; i++)
             {
                 var networkID = _networkTransforms[i].id;
@@ -231,29 +177,9 @@ namespace PurrNet.Modules
             _networkTransforms.Remove(networkTransform);
         }
 
-        private void FlushPendingRegistrations(PlayerID localPlayer)
-        {
-            foreach (var (player, toRegister) in _pendingToRegister)
-            {
-                if (player == localPlayer)
-                    continue;
-
-                if (toRegister.Count == 0)
-                    continue;
-
-                NetworkTransformRegister packet = new (_scene, toRegister);
-                _broadcaster.Send(player, packet);
-            }
-
-            _pendingToRegister.Clear();
-        }
-
-        public void FixedUpdate()
+        public void PostFixedUpdate()
         {
             var localPlayer = GetLocalPlayer();
-
-            if (_asServer)
-                FlushPendingRegistrations(localPlayer);
 
             int ntCount = _networkTransforms.Count;
 
@@ -269,7 +195,7 @@ namespace PurrNet.Modules
                 using var packer = BitPackerPool.Get();
 
                 if (PrepareDeltaState(packer, PlayerID.Server) && packer.positionInBits > 0)
-                    _broadcaster.SendToServer(new NetworkTransformDelta(_scene, packer, packer.positionInBits));
+                    _broadcaster.SendToServer(new NetworkTransformDelta(_scene, packer));
             }
             else if (_scenePlayers.TryGetPlayersInScene(_scene, out var players))
             {
@@ -281,7 +207,7 @@ namespace PurrNet.Modules
                     using var packer = BitPackerPool.Get();
 
                     if (PrepareDeltaState(packer, player) && packer.positionInBits > 0)
-                        _broadcaster.Send(player, new NetworkTransformDelta(_scene, packer, packer.positionInBits));
+                        _broadcaster.Send(player, new NetworkTransformDelta(_scene, packer));
                 }
             }
 

@@ -122,7 +122,7 @@ namespace PurrNet.Packing
             value = new PackedShort((short)ZigzagDecode(packed.value));
         }
 
-        private const int SEGMENTS = 16;
+        private const int SEGMENTS = 16*2;
         const int TOTAL_BITS = 64;
         const int CHUNK = TOTAL_BITS / SEGMENTS;
 

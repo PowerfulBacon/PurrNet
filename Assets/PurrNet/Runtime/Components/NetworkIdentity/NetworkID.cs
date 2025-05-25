@@ -40,6 +40,15 @@ namespace PurrNet
             return _scope == other._scope && _id == other._id;
         }
 
+        public static bool Equals(NetworkID? a, NetworkID? b)
+        {
+            if (a == null && b == null)
+                return true;
+            if (a == null || b == null)
+                return false;
+            return a.Value.Equals(b.Value);
+        }
+
         public override bool Equals(object obj)
         {
             return obj is NetworkID other && Equals(other);

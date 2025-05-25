@@ -17,7 +17,7 @@ namespace PurrNet.Examples.Sumo
 
             int index = 0;
             if (owner.Value.id != 0)
-                index = (int)(owner.Value.id % bodies.Count);
+                index = (int)(owner.Value.id % (ulong)bodies.Count);
 
             for (int i = 0; i < bodies.Count; i++)
             {

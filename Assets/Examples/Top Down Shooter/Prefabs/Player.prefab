@@ -26,12 +26,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 871477370877421358}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 1.9, z: 0}
   m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 6956860889567420228}
+  m_Father: {fileID: 7133067894972459132}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &6869688174691093996
 MeshRenderer:
@@ -136,8 +136,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6183224292089968140}
-  - {fileID: 8684701679911864042}
+  - {fileID: 7133067894972459132}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6798584989352981788
@@ -161,6 +160,8 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
+  _visuals:
+    _reference: {fileID: 7133067894972459132}
   moveSpeed: 4
   acceleration: 4
   jumpForce: 1.5
@@ -209,7 +210,8 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   maxHealth: 100
-  healthText: {fileID: 2339485392063238819}
+  _healthText:
+    _reference: {fileID: 2339485392063238819}
   _health:
     _value: 0
     _ownerAuth: 0
@@ -281,16 +283,16 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  _syncPosition: 2
-  _syncRotation: 2
+  _syncPosition: 1
+  _syncRotation: 1
   _syncScale: 0
   _syncParent: 0
-  _interpolateSettings: 7
+  _interpolateSettings: 255
   _minBufferSize: 1
   _maxBufferSize: 2
   _characterControllerPatch: 1
   _ownerAuth: 1
-  _interpolationTiming: 0
+  _interpolationTiming: 1
 --- !u!114 &468800014021081407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -318,6 +320,10 @@ MonoBehaviour:
   _gameObjects:
   - target: {fileID: 871477370877421358}
     activeAsOwner: 0
+  _toActivate: []
+  _toDeactivate: []
+  _toEnable: []
+  _toDisable: []
 --- !u!1 &6426148537294609696
 GameObject:
   m_ObjectHideFlags: 0
@@ -343,7 +349,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6426148537294609696}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -352,7 +358,7 @@ Transform:
   - {fileID: 1599962796381844036}
   - {fileID: 2340768514705598068}
   - {fileID: 8140307410169494927}
-  m_Father: {fileID: 6956860889567420228}
+  m_Father: {fileID: 7133067894972459132}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5347730777669328160
 MonoBehaviour:
@@ -380,6 +386,71 @@ MonoBehaviour:
   - {fileID: 2125669350971959550}
   - {fileID: 3114173323945344206}
   - {fileID: 8913748296582932277}
+--- !u!1 &8887981878880113861
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7133067894972459132}
+  - component: {fileID: 6420344825331331730}
+  m_Layer: 0
+  m_Name: Visuals
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7133067894972459132
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8887981878880113861}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6183224292089968140}
+  - {fileID: 8684701679911864042}
+  m_Father: {fileID: 6956860889567420228}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6420344825331331730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8887981878880113861}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 817fe5016bd0a2a49a95b6eb338bb132, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _syncPosition: 2
+  _syncRotation: 2
+  _syncScale: 1
+  _syncParent: 1
+  _interpolateSettings: 255
+  _minBufferSize: 1
+  _maxBufferSize: 4
+  _characterControllerPatch: 0
+  _ownerAuth: 1
+  _interpolationTiming: 1
 --- !u!1001 &1278614181189473711
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -8,7 +8,7 @@ namespace PurrNet
     [CustomPropertyDrawer(typeof(PurrSceneAttribute))]
     public class PurrSceneDrawer : PropertyDrawer
     {
-        private static Dictionary<string, SceneAsset> sceneCache = new Dictionary<string, SceneAsset>();
+        private static readonly Dictionary<string, SceneAsset> sceneCache = new Dictionary<string, SceneAsset>();
         private static double lastCacheUpdate;
         private const double CACHE_LIFETIME = 30.0;
 

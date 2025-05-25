@@ -65,7 +65,6 @@ namespace PurrNet.Modules
             _prefabsPool = NetworkPoolManager.GetPool(manager);
 
             SetupSceneObjects(scene);
-
         }
 
         readonly List<GameObjectPrototype> _defaultPrototypes = new List<GameObjectPrototype>();
@@ -147,7 +146,7 @@ namespace PurrNet.Modules
             _playersManager.onNetworkIDReceived += OnNetworkIDReceived;
 
             if (_playersManager.localPlayerId.HasValue)
-                _isPlayerReady = true;
+                OnPlayerReceivedID(_playersManager.localPlayerId.Value);
             else _playersManager.onLocalPlayerReceivedID += OnPlayerReceivedID;
 
             _playersManager.Subscribe<SpawnPacketBatch>(OnSpawnPacketBatch);
@@ -178,6 +177,9 @@ namespace PurrNet.Modules
             int count = data.spawnPackets.Count;
             for (var i = 0; i < count; ++i)
                 OnSpawnPacket(player, data.spawnPackets[i], asServer);
+            count = data.despawnPackets.Count;
+            for (var i = 0; i < count; ++i)
+                OnDespawnPacket(player, data.despawnPackets[i], asServer);
         }
 
         bool _isDisposed;
@@ -429,13 +431,20 @@ namespace PurrNet.Modules
                 {
                     int count = list.Count;
 
-                    // if server, refresh visibility for all players in scene
-                    if (count > 0 && list[0] && _asServer &&
-                        _scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
+                    switch (count)
                     {
-                        foreach (var playerInScene in players)
-                            _visibility.RefreshVisibilityForGameObject(playerInScene, list[0].transform);
-                        FlushSpawnPackets();
+                        case > 0 when !list[0] || !list[0].isSpawned:
+                            return;
+
+                        // if server, refresh visibility for all players in scene
+                        case > 0 when list[0] && _asServer &&
+                                      _scenePlayers.TryGetPlayersInScene(_sceneId, out var players):
+                        {
+                            foreach (var playerInScene in players)
+                                _visibility.RefreshVisibilityForGameObject(playerInScene, list[0].transform);
+                            FlushSpawnPackets();
+                            break;
+                        }
                     }
 
                     bool isHost = IsServerHost();
@@ -550,7 +559,9 @@ namespace PurrNet.Modules
                 return;
 
             if (!TryGetIdentity(data.parentId, out var identity))
+            {
                 return;
+            }
 
             if (_asServer && !identity.HasDespawnAuthority(player, !_asServer))
             {
@@ -634,7 +645,9 @@ namespace PurrNet.Modules
                 if (HierarchyPool.TryGetPrototype(scope, player, children, out var prototype))
                 {
                     if (_scenePlayers.IsPlayerLoadedInScene(player, _sceneId))
+                    {
                         SendSpawnPacket(player, prototype, children, true);
+                    }
 
                     for (var i = 0; i < children.Count; i++)
                     {
@@ -662,11 +675,11 @@ namespace PurrNet.Modules
                 ListPool<NetworkIdentity>.Destroy(children);
 
                 if (_scenePlayers.IsPlayerLoadedInScene(player, _sceneId))
-                    SendDespawnPacket(player, identity);
+                    SendDespawnPacket(player, identity, true);
             }
         }
 
-        private void SendDespawnPacket(PlayerID player, NetworkIdentity identity)
+        private void SendDespawnPacket(PlayerID player, NetworkIdentity identity, bool batched)
         {
             if (!identity.id.HasValue)
                 return;
@@ -677,9 +690,28 @@ namespace PurrNet.Modules
                 parentId = identity.id.Value
             };
 
-            if (player.isServer)
-                _playersManager.SendToServer(packet);
-            else _playersManager.Send(player, packet);
+            if (batched)
+            {
+                if (!_spawnPackets.TryGetValue(player, out var batch))
+                {
+                    batch = new SpawnPacketBatch(
+                        ListPool<SpawnPacket>.Instantiate(),
+                        ListPool<DespawnPacket>.Instantiate()
+                    );
+                    batch.despawnPackets.Add(packet);
+                    _spawnPackets.Add(player, batch);
+                }
+                else
+                {
+                    batch.despawnPackets.Add(packet);
+                }
+            }
+            else
+            {
+                if (player.isServer)
+                    _playersManager.SendToServer(packet);
+                else _playersManager.Send(player, packet);
+            }
         }
 
         private void SendSpawnPacket(PlayerID player, GameObjectPrototype prototype, List<NetworkIdentity> spawned, bool batched)
@@ -697,7 +729,10 @@ namespace PurrNet.Modules
             {
                 if (!_spawnPackets.TryGetValue(player, out var batch))
                 {
-                    batch = new SpawnPacketBatch(ListPool<SpawnPacket>.Instantiate());
+                    batch = new SpawnPacketBatch(
+                        ListPool<SpawnPacket>.Instantiate(),
+                        ListPool<DespawnPacket>.Instantiate()
+                    );
                     batch.spawnPackets.Add(packet);
                     _spawnPackets.Add(player, batch);
                 }
@@ -895,16 +930,19 @@ namespace PurrNet.Modules
                 return;
             }
 
-            for (var i = 0; i < c; i++)
-                TriggerDespawnEvent(children[i]);
-
             if (_asServer)
             {
                 _visibility.ClearVisibilityForGameObject(gameObject.transform);
+                for (var i = 0; i < c; i++)
+                    TriggerDespawnEvent(children[i]);
                 FlushSpawnPackets();
             }
             else if (!bypassBroadcast)
-                SendDespawnPacket(default, children[0]);
+            {
+                for (var i = 0; i < c; i++)
+                    TriggerDespawnEvent(children[i]);
+                SendDespawnPacket(default, children[0], false);
+            }
 
             for (var i = 0; i < c; i++)
             {

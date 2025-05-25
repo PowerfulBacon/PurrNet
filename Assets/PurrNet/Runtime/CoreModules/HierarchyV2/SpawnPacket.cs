@@ -8,12 +8,13 @@ namespace PurrNet.Modules
     public readonly struct SpawnPacketBatch : IPackedAuto, IDisposable
     {
         public readonly List<SpawnPacket> spawnPackets;
+        public readonly List<DespawnPacket> despawnPackets;
 
-        public SpawnPacketBatch(List<SpawnPacket> spawnPackets)
+        public SpawnPacketBatch(List<SpawnPacket> spawnPackets, List<DespawnPacket> despawnPackets)
         {
+            this.despawnPackets = despawnPackets;
             this.spawnPackets = spawnPackets;
         }
-
         public void Dispose()
         {
             int c = spawnPackets.Count;
@@ -21,6 +22,7 @@ namespace PurrNet.Modules
                 spawnPackets[i].Dispose();
 
             ListPool<SpawnPacket>.Destroy(spawnPackets);
+            ListPool<DespawnPacket>.Destroy(despawnPackets);
         }
 
         public override string ToString()

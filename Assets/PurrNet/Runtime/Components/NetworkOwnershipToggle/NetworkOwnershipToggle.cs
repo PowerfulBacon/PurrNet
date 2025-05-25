@@ -17,11 +17,17 @@ namespace PurrNet
         [SerializeField, HideInInspector] private Behaviour[] _toEnable;
         [SerializeField, HideInInspector] private Behaviour[] _toDisable;
 
-        private bool _lastOwner;
+        private bool _lastIsController;
 
         private void Awake()
         {
             Setup(false);
+        }
+
+        protected override void OnSpawned()
+        {
+            if (isController)
+                Setup(true);
         }
 
         // migrate old data to _components and _gameObjects
@@ -89,7 +95,7 @@ namespace PurrNet
         [UsedImplicitly]
         public void Setup(bool asOwner)
         {
-            _lastOwner = asOwner;
+            _lastIsController = asOwner;
 
             for (var i = 0; i < _components.Length; i++)
             {
@@ -131,8 +137,9 @@ namespace PurrNet
 
         protected override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
         {
-            if (isOwner != _lastOwner)
-                Setup(isOwner);
+            bool controller = isController;
+            if (controller != _lastIsController)
+                Setup(controller);
         }
     }
 }

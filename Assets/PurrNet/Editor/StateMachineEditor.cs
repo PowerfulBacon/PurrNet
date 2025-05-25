@@ -1,20 +1,23 @@
+using PurrNet.Editor;
 using UnityEditor;
 using UnityEngine;
 
 namespace PurrNet.StateMachine.InspectorEditor
 {
     [CustomEditor(typeof(StateMachine))]
-    public class StateMachineEditor : UnityEditor.Editor
+    public class StateMachineEditor : NetworkIdentityInspector
     {
         private StateMachine _stateMachine;
         SerializedProperty _ownerAuthProperty;
         SerializedProperty _statesProperty;
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
             _stateMachine = target as StateMachine;
             _statesProperty = serializedObject.FindProperty("_states");
             _ownerAuthProperty = serializedObject.FindProperty("ownerAuth");
+
         }
 
         public override void OnInspectorGUI()
@@ -47,6 +50,8 @@ namespace PurrNet.StateMachine.InspectorEditor
             DrawStateMachineInfo();
             DrawStateControls();
             DrawNetworkStatus();
+
+            DrawIdentityInspector();
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -95,7 +100,7 @@ namespace PurrNet.StateMachine.InspectorEditor
 
         private void DrawStateControls()
         {
-            if (!Application.isPlaying || !_stateMachine.isServer)
+            if (!Application.isPlaying || !_stateMachine.IsController(_stateMachine.OwnerAuth))
                 return;
 
             EditorGUILayout.Space();
@@ -130,8 +135,8 @@ namespace PurrNet.StateMachine.InspectorEditor
 
             if (obj is Object unityObj)
             {
-                var serializedObject = new SerializedObject(unityObj);
-                var iterator = serializedObject.GetIterator();
+                var so = new SerializedObject(unityObj);
+                var iterator = so.GetIterator();
                 bool enterChildren = true;
 
                 while (iterator.NextVisible(enterChildren))

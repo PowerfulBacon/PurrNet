@@ -6,7 +6,6 @@ using PurrNet.Logging;
 using PurrNet.Packing;
 using PurrNet.Transports;
 using PurrNet.Utils;
-using UnityEngine;
 
 namespace PurrNet.Modules
 {
@@ -210,7 +209,11 @@ namespace PurrNet.Modules
                     if (nm.isServer)
                         nm.GetModule<PlayersManager>(true)
                             .Send(signature.targetPlayer!.Value, packet, signature.channel);
-                    else nm.GetModule<PlayersManager>(false).SendToServer(packet, signature.channel);
+                    else
+                    {
+                        packet.targetPlayerId = signature.targetPlayer!.Value;
+                        nm.GetModule<PlayersManager>(false).SendToServer(packet, signature.channel);
+                    }
                     break;
                 }
                 default: throw new ArgumentOutOfRangeException();
@@ -235,6 +238,12 @@ namespace PurrNet.Modules
             if (!nm)
             {
                 PurrLogger.LogError($"Aborted RPC '{signature.rpcName}'. NetworkManager not found.");
+                return false;
+            }
+
+            if (!nm.TryGetModule<RPCModule>(nm.isServer, out var module))
+            {
+                PurrLogger.LogError("Failed to get RPC module while sending static RPC.", nm);
                 return false;
             }
 
@@ -270,6 +279,8 @@ namespace PurrNet.Modules
                     var collection = signature.excludeSender
                         ? GetImmediateExcept(players, info.sender)
                         : players.players;
+                    if (data is StaticRPCPacket staticRpc)
+                        module.AppendToBufferedRPCs(staticRpc, signature);
                     players.SendRaw(collection, rawData, signature.channel);
                     return !nm.isClient;
                 }
@@ -277,7 +288,9 @@ namespace PurrNet.Modules
                 {
                     var players = nm.GetModule<PlayersManager>(true);
                     var rawData = BroadcastModule.GetImmediateData(data);
-                    players.SendRaw(data.senderPlayerId, rawData, signature.channel);
+                    if (data is StaticRPCPacket staticRpc)
+                        module.AppendToBufferedRPCs(staticRpc, signature);
+                    players.SendRaw(data.targetPlayerId, rawData, signature.channel);
                     return false;
                 }
                 default:
@@ -778,7 +791,6 @@ namespace PurrNet.Modules
                     PurrLogger.LogError(
                         $"Can't find RPC handler for id {packet.rpcId} in identity {identity.GetType().Name}.");
             }
-            // else PurrLogger.LogError($"Can't find identity with id {packet.networkId} in scene {packet.sceneId}.");
         }
 
         [UsedByIL]
