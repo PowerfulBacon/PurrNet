@@ -201,7 +201,7 @@ namespace PurrNet
             {
                 _array[index] = value;
                 var change = new SyncArrayChange<T>(SyncArrayOperation.Set, value, index);
-                QueueChange(change);
+                //QueueChange(change);
                 InvokeChange(change);
 
             }
@@ -253,7 +253,7 @@ namespace PurrNet
                     var clearChange = new SyncArrayChange<T>(SyncArrayOperation.Cleared);
                     QueueChange(resizeChange);
                     InvokeChange(resizeChange);
-                    QueueChange(clearChange);
+                    //QueueChange(clearChange);
                     InvokeChange(clearChange);
                 }
             }
