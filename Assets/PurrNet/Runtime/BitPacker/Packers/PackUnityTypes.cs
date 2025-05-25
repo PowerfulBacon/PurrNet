@@ -106,11 +106,11 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static void Read(this BitPacker packer, ref Vector2Int value)
         {
-            float x = default;
-            float y = default;
+            int x = default;
+            int y = default;
             packer.Read(ref x);
             packer.Read(ref y);
-            value = new Vector2Int((int)x, (int)y);
+            value = new Vector2Int(x, y);
         }
 
         [UsedByIL]
@@ -124,13 +124,13 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static void Read(this BitPacker packer, ref Vector3Int value)
         {
-            float x = default;
-            float y = default;
-            float z = default;
+            int x = default;
+            int y = default;
+            int z = default;
             packer.Read(ref x);
             packer.Read(ref y);
             packer.Read(ref z);
-            value = new Vector3Int((int)x, (int)y, (int)z);
+            value = new Vector3Int(x, y, z);
         }
 
         [UsedByIL]
