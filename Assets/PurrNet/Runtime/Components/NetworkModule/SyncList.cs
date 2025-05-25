@@ -164,13 +164,11 @@ namespace PurrNet
                 _list.AddRange(items);
 
                 var change = new SyncListChange<T>(SyncListOperation.Cleared);
-                QueueChange(change);
                 InvokeChange(change);
 
                 for (int i = 0; i < items.Count; i++)
                 {
                     var changeI = new SyncListChange<T>(SyncListOperation.Added, items[i], i);
-                    QueueChange(changeI);
                     InvokeChange(changeI);
                 }
             }
@@ -192,13 +190,11 @@ namespace PurrNet
                 _list.AddRange(items);
 
                 var change = new SyncListChange<T>(SyncListOperation.Cleared);
-                QueueChange(change);
                 InvokeChange(change);
 
                 for (int i = 0; i < items.Count; i++)
                 {
                     var changeI = new SyncListChange<T>(SyncListOperation.Added, items[i], i);
-                    QueueChange(changeI);
                     InvokeChange(changeI);
                 }
             }
@@ -396,7 +392,6 @@ namespace PurrNet
             {
                 _list.Add(item);
                 var change = new SyncListChange<T>(SyncListOperation.Added, item, _list.Count - 1);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -408,7 +403,6 @@ namespace PurrNet
             {
                 _list.Add(item);
                 var change = new SyncListChange<T>(SyncListOperation.Added, item, _list.Count - 1);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -430,7 +424,6 @@ namespace PurrNet
                 {
                     _list.RemoveAt(idx);
                     var change = new SyncListChange<T>(SyncListOperation.Removed, item, idx);
-                    QueueChange(change);
                     InvokeChange(change);
                 }
             }
@@ -446,7 +439,6 @@ namespace PurrNet
                 {
                     _list.RemoveAt(idx);
                     var change = new SyncListChange<T>(SyncListOperation.Removed, item, idx);
-                    QueueChange(change);
                     InvokeChange(change);
                 }
             }
@@ -467,7 +459,6 @@ namespace PurrNet
                 T item = _list[index];
                 _list.RemoveAt(index);
                 var change = new SyncListChange<T>(SyncListOperation.Removed, item, index);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -480,7 +471,6 @@ namespace PurrNet
                 T item = _list[index];
                 _list.RemoveAt(index);
                 var change = new SyncListChange<T>(SyncListOperation.Removed, item, index);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -499,7 +489,6 @@ namespace PurrNet
             {
                 _list.Clear();
                 var change = new SyncListChange<T>(SyncListOperation.Cleared);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -511,7 +500,6 @@ namespace PurrNet
             {
                 _list.Clear();
                 var change = new SyncListChange<T>(SyncListOperation.Cleared);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -530,7 +518,6 @@ namespace PurrNet
             {
                 _list[index] = item;
                 var change = new SyncListChange<T>(SyncListOperation.Set, item, index);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -542,7 +529,6 @@ namespace PurrNet
             {
                 _list[index] = item;
                 var change = new SyncListChange<T>(SyncListOperation.Set, item, index);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -561,7 +547,6 @@ namespace PurrNet
             {
                 _list.Insert(index, item);
                 var change = new SyncListChange<T>(SyncListOperation.Insert, item, index);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -573,7 +558,6 @@ namespace PurrNet
             {
                 _list.Insert(index, item);
                 var change = new SyncListChange<T>(SyncListOperation.Insert, item, index);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -594,7 +578,6 @@ namespace PurrNet
                 {
                     _list[index] = value;
                     var change = new SyncListChange<T>(SyncListOperation.Set, value, index);
-                    QueueChange(change);
                     InvokeChange(change);
                 }
             }
@@ -609,7 +592,6 @@ namespace PurrNet
                 {
                     _list[index] = value;
                     var change = new SyncListChange<T>(SyncListOperation.Set, value, index);
-                    QueueChange(change);
                     InvokeChange(change);
                 }
             }
