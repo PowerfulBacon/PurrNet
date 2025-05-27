@@ -226,7 +226,6 @@ namespace PurrNet.Modules
 
             var rules = _networkManager.networkRules;
 
-            PurrLogger.Log(hasDontDestroyOnLoadScene.ToString());
             if (!hasDontDestroyOnLoadScene && rules && rules.ShouldAlwaysIncludeDontDestroyOnLoadScene())
             {
                 var dontDestroyScene = GetDontDestroyOnLoadScene();
