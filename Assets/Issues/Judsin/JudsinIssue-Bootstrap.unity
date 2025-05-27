@@ -170,7 +170,7 @@ MonoBehaviour:
   _startServerFlags: 0
   _startClientFlags: 0
   _cookieScope: 1
-  _dontDestroyOnLoad: 0
+  _dontDestroyOnLoad: 1
   _transport: {fileID: 999871912}
   _networkPrefabs: {fileID: 11400000, guid: 66bdb7e568137b84887e111a409374f1, type: 2}
   _networkRules: {fileID: 11400000, guid: 8f3429b7f9dffb64e9edfa4da575bd20, type: 2}

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using PurrNet;
+using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Utils;
 using TriInspector;
@@ -7,7 +8,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace SpellBound.Core {
-    public sealed class SceneManagement : NetworkBehaviour {
+    public sealed class SceneManagement : MonoBehaviour {
         // Scene Names
         [SerializeField]
         private string LoadingSceneName = "Loading";
@@ -22,7 +23,7 @@ namespace SpellBound.Core {
             DontDestroyOnLoad(this);
         }
 
-        protected override void OnDestroy() {
+        void OnDestroy() {
             InstanceHandler.UnregisterInstance<SceneManagement>();
             // PlayerSpawner bookkeeping.
             if (!_playerSpawner) return;
@@ -37,7 +38,7 @@ namespace SpellBound.Core {
 
         public IEnumerator LoadGameCoroutine(bool asHost, string serverAddress = null) {
             // Loading Screen!
-            yield return SceneManager.LoadSceneAsync(LoadingSceneName, LoadSceneMode.Additive);
+            yield return SceneManager.LoadSceneAsync(LoadingSceneName, LoadSceneMode.Single);
 
             // First things first - connect to the server.
             if (asHost) {
@@ -60,6 +61,7 @@ namespace SpellBound.Core {
                 NetworkManager.main.playerModule.onPlayerJoined += HandlePlayerJoined;
 
                 // Once the client has successfully connected then the sceneModule will try to load the networked scene.
+                PurrLogger.Log("Client is waiting for the server to load the World scene.", this);
                 yield return AwaitSceneLoaded(WorldSceneName);
             }
         }
@@ -98,22 +100,34 @@ namespace SpellBound.Core {
         }
 
         private IEnumerator AwaitSceneLoaded(string sceneName) {
+            yield return null;
+
+            PurrLogger.Log($"Awaiting scene {sceneName} to be loaded.", this);
             var sceneBuildID = SceneNameToBuildIndex(sceneName);
             var sceneIsLoaded = false;
             while (!sceneIsLoaded) {
                 if (NetworkManager.main.sceneModule.IsSceneLoaded(sceneBuildID)) {
                     sceneIsLoaded = true;
-                    Debug.Log("Scene is loaded is true.");
+                    PurrLogger.Log("Scene is loaded is true.");
+                }
+                else {
+                    PurrLogger.Log("Scene is loaded is false, waiting for next frame.", this);
                 }
                 yield return null;
             }
 
+            PurrLogger.Log($"-----", this);
+            yield return new WaitForSeconds(1);
+
             if (NetworkManager.main != null) {
+                PurrLogger.Log("NetworkManager is not null, proceeding to find PlayerSpawner.", this);
                 _playerSpawner = FindFirstObjectByType<PlayerSpawner>();
                 if (_playerSpawner != null) {
                     _playerSpawner.OnPlayerSpawned += HandlePlayerSpawned;
                 } else Debug.LogError("PlayerSpawner is null!", this);
             } else Debug.LogError("NetworkManager is null!", this);
+
+            PurrLogger.Log($"Scene {sceneName} loaded successfully.", this);
         }
 
         private IEnumerator WaitForNetworkedSceneLoaded(AsyncOperation op) {
@@ -136,11 +150,6 @@ namespace SpellBound.Core {
         }
 
         private void StartConnection(string input) {
-            if (input == null) {
-                Debug.LogError("Connection address is null", this);
-                return;
-            }
-
             NetworkManager.main.StartClient();
         }
 
