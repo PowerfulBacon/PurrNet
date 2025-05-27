@@ -171,13 +171,11 @@ namespace PurrNet
                 _dict = initialState;
 
                 var initialChang = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
-                QueueChange(initialChang);
                 InvokeChange(initialChang);
 
                 foreach (var kvp in _dict)
                 {
                     var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, kvp.Key, kvp.Value);
-                    QueueChange(change);
                     InvokeChange(change);
                 }
             }
@@ -193,13 +191,11 @@ namespace PurrNet
                 _dict = initialState;
 
                 var initialChange = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
-                QueueChange(initialChange);
                 InvokeChange(initialChange);
 
                 foreach (var kvp in _dict)
                 {
                     var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, kvp.Key, kvp.Value);
-                    QueueChange(change);
                     InvokeChange(change);
                 }
             }
@@ -385,7 +381,6 @@ namespace PurrNet
             {
                 _dict[key] = value;
                 var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, key, value);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -397,7 +392,6 @@ namespace PurrNet
             {
                 _dict[key] = value;
                 var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, key, value);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -418,7 +412,6 @@ namespace PurrNet
                 {
                     _dict.Remove(key);
                     var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Removed, key, value);
-                    QueueChange(change);
                     InvokeChange(change);
                 }
             }
@@ -432,7 +425,6 @@ namespace PurrNet
                 if (_dict.Remove(key, out TValue value))
                 {
                     var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Removed, key, value);
-                    QueueChange(change);
                     InvokeChange(change);
                 }
             }
@@ -452,7 +444,6 @@ namespace PurrNet
             {
                 _dict.Clear();
                 var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -464,7 +455,6 @@ namespace PurrNet
             {
                 _dict.Clear();
                 var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -484,7 +474,6 @@ namespace PurrNet
                 _dict[key] = value;
                 var operation = isNewKey ? SyncDictionaryOperation.Added : SyncDictionaryOperation.Set;
                 var change = new SyncDictionaryChange<TKey, TValue>(operation, key, value);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -497,7 +486,6 @@ namespace PurrNet
                 _dict[key] = value;
                 var operation = isNewKey ? SyncDictionaryOperation.Added : SyncDictionaryOperation.Set;
                 var change = new SyncDictionaryChange<TKey, TValue>(operation, key, value);
-                QueueChange(change);
                 InvokeChange(change);
             }
         }
@@ -544,7 +532,6 @@ namespace PurrNet
                 {
                     _dict[key] = value;
                     var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Set, key, value);
-                    QueueChange(change);
                     InvokeChange(change);
                 }
             }
@@ -559,7 +546,6 @@ namespace PurrNet
                 {
                     _dict[key] = value;
                     var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Set, key, value);
-                    QueueChange(change);
                     InvokeChange(change);
                 }
             }
