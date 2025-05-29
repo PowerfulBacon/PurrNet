@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using PurrNet.Packing;
 
 namespace PurrNet.Modules
 {
@@ -94,7 +95,8 @@ namespace PurrNet.Modules
         {
             if (_history != null)
             {
-                for (int i = 0; i < _history.Count; i++)
+                int c = _history.Count;
+                for (int i = 0; i < c; i++)
                 {
                     if (_history[i].value is IDisposable disposable)
                         disposable.Dispose();
@@ -126,11 +128,11 @@ namespace PurrNet.Modules
                 var old = _history[index];
                 if (old.value is IDisposable disposable)
                     disposable.Dispose();
-                _history[index] = new Entry { key = id, value = newValue };
+                _history[index] = new Entry { key = id, value = Packer.Copy(newValue) };
             }
             else
             {
-                _history.Insert(index, new Entry { key = id, value = newValue });
+                _history.Insert(index, new Entry { key = id, value = Packer.Copy(newValue) });
             }
         }
     }
