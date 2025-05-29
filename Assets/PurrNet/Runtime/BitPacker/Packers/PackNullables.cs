@@ -9,6 +9,8 @@
             bool hasChanged = DeltaPacker<bool>.Write(packer, oldvalue.HasValue, newvalue.HasValue);
             hasChanged = DeltaPacker<T>.Write(packer, oldvalue.GetValueOrDefault(), newvalue.GetValueOrDefault()) || hasChanged;
 
+            packer.WriteAt(flagPos, hasChanged);
+
             if (!hasChanged)
                 packer.SetBitPosition(flagPos + 1);
 
