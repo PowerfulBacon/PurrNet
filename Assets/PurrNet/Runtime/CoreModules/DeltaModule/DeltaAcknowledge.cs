@@ -8,6 +8,11 @@ namespace PurrNet.Modules
         public PackedUInt valueId;
     }
 
+    internal struct DeltaCleanup : IPackedAuto
+    {
+        public PackedUInt upToId;
+    }
+
     public interface IStableHashable
     {
         uint GetStableHash();

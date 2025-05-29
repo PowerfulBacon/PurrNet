@@ -105,7 +105,7 @@ namespace PurrNet.Modules
 
             if (tracker.lastConfirmedId != 0)
             {
-                if (tracker.history.TryGetValue(tracker.lastConfirmedId, out var confirmedValue))
+                if (tracker.TryGetValue(tracker.lastConfirmedId, out var confirmedValue))
                     oldValue = confirmedValue;
                 else
                 {
@@ -149,7 +149,7 @@ namespace PurrNet.Modules
 
                 PackedUInt newId = tracker.GenerateId();
                 Packer<PackedUInt>.Write(packer, newId);
-                UpdateValueAtIndex<T>(newValue, tracker, newId);
+                tracker.Set(newId, newValue);
 
                 var clientDict = _sendingTrackers[player];
                 clientDict[hash] = tracker;
@@ -160,20 +160,6 @@ namespace PurrNet.Modules
             }
 
             return changed;
-        }
-
-        private static void UpdateValueAtIndex<T>(T newValue, ClientDeltaTracker<T> tracker, PackedUInt newId)
-        {
-            if (tracker.history.TryGetValue(newId, out var old))
-            {
-                if (old is IDisposable disposable)
-                    disposable.Dispose();
-                tracker.history[newId] = Packer.Copy(newValue);
-            }
-            else
-            {
-                tracker.history.Add(newId, Packer.Copy(newValue));
-            }
         }
 
         public void Read<Key, T>(BitPacker packer, Key key, PlayerID sender, ref T newValue) where Key : struct, IStableHashable
@@ -196,7 +182,7 @@ namespace PurrNet.Modules
 
                 if (lastConfirmedId != 0)
                 {
-                    if (tracker.history.TryGetValue(lastConfirmedId, out var confirmedValue))
+                    if (tracker.TryGetValue(lastConfirmedId, out var confirmedValue))
                         oldValue = confirmedValue;
                     else PurrLogger.LogError($"Confirmed value not found for key {keyHash} and {lastConfirmedId.value} and player {player}");
                 }
@@ -204,8 +190,7 @@ namespace PurrNet.Modules
                 DeltaPacker<T>.Read(packer, oldValue, ref newValue);
                 Packer<PackedUInt>.Read(packer, ref valueId);
 
-                UpdateValueAtIndex<T>(newValue, tracker, valueId);
-                CleanupClientHistory(ref tracker);
+                tracker.Set(valueId, newValue);
 
                 var data = new DeltaAcknowledge
                 {
@@ -219,7 +204,7 @@ namespace PurrNet.Modules
             }
             else if (lastConfirmedId != 0)
             {
-                if (tracker.history.TryGetValue(lastConfirmedId, out var confirmedValue))
+                if (tracker.TryGetValue(lastConfirmedId, out var confirmedValue))
                     newValue = Packer.Copy(confirmedValue);
                 else
                 {
@@ -228,34 +213,6 @@ namespace PurrNet.Modules
                 }
             }
             else newValue = default;
-        }
-
-        private static void CleanupClientHistory<T>(ref ClientDeltaTracker<T> tracker, int maxHistoryCount = 60)
-        {
-            if (tracker.history.Count <= maxHistoryCount)
-                return;
-
-            if (tracker.oldestIdInHistory == 0 && tracker.history.Count > 0)
-            {
-                uint minId = uint.MaxValue;
-                foreach (var id in tracker.history.Keys)
-                {
-                    if (id < minId) minId = id;
-                }
-                tracker.oldestIdInHistory = minId;
-            }
-
-            int toRemoveCount = tracker.history.Count - maxHistoryCount;
-
-            for (int i = 0; i < toRemoveCount; i++)
-            {
-                if (tracker.history.Remove(tracker.oldestIdInHistory, out var old))
-                {
-                    if (old is IDisposable disposable)
-                        disposable.Dispose();
-                }
-                tracker.oldestIdInHistory++;
-            }
         }
 
         private static uint GetKeyHash<T>(T key) where T : struct, IStableHashable
@@ -279,7 +236,7 @@ namespace PurrNet.Modules
                 if (data.valueId > tracker.lastConfirmedId)
                 {
                     tracker.lastConfirmedId = data.valueId;
-                    tracker.CleanupHistory(data.valueId);
+                    // tracker.CleanupHistory(data.valueId);
 
                     clientDict[data.key] = tracker;
                 }

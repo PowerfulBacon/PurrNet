@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using PurrNet.Pooling;
 
 namespace PurrNet.Modules
 {
@@ -16,6 +15,7 @@ namespace PurrNet.Modules
         }
 
         public abstract void CleanupHistory(uint lastConfirmedId);
+
         public abstract bool ContainsKey(uint id);
 
         public abstract void Dispose();
@@ -23,46 +23,114 @@ namespace PurrNet.Modules
 
     internal class ClientDeltaTracker<T> : ClientDeltaTracker
     {
-        public readonly Dictionary<uint, T> history = new();
-
-        public override void CleanupHistory(uint lastConfirmedId)
+        private struct Entry
         {
-            var toRemove = ListPool<uint>.Instantiate();
+            public uint key;
+            public T value;
+        }
 
-            foreach (var id in history.Keys)
-            {
-                if (id < lastConfirmedId)
-                    toRemove.Add(id);
-            }
+        private readonly List<Entry> _history = new();
 
-            foreach (var id in toRemove)
+        private int BinarySearch(uint key)
+        {
+            int low = 0;
+            int high = _history.Count - 1;
+
+            while (low <= high)
             {
-                if (history.Remove(id, out var item))
+                int mid = (low + high) / 2;
+                if (_history[mid].key < key)
                 {
-                    if (item is IDisposable disposable)
-                        disposable.Dispose();
+                    low = mid + 1;
+                }
+                else if (_history[mid].key > key)
+                {
+                    high = mid - 1;
+                }
+                else
+                {
+                    return mid;
                 }
             }
 
-            ListPool<uint>.Destroy(toRemove);
+            return low;
+        }
+
+        public override void CleanupHistory(uint lastConfirmedId)
+        {
+            int removeUpTo = BinarySearch(lastConfirmedId);
+
+            if (removeUpTo == 0)
+                return;
+
+            if (removeUpTo >= _history.Count)
+            {
+                for (int i = 0; i < _history.Count; i++)
+                {
+                    if (_history[i].value is IDisposable disposable)
+                        disposable.Dispose();
+                }
+
+                _history.Clear();
+                return;
+            }
+
+            for (int i = 0; i < removeUpTo; i++)
+            {
+                if (_history[i].value is IDisposable disposable)
+                    disposable.Dispose();
+            }
+
+            _history.RemoveRange(0, removeUpTo);
         }
 
         public override bool ContainsKey(uint id)
         {
-            return history.ContainsKey(id);
+            int index = BinarySearch(id);
+            return index < _history.Count && _history[index].key == id;
         }
 
         public override void Dispose()
         {
-            if (history != null)
+            if (_history != null)
             {
-                foreach (var item in history.Values)
+                for (int i = 0; i < _history.Count; i++)
                 {
-                    if (item is IDisposable disposable)
+                    if (_history[i].value is IDisposable disposable)
                         disposable.Dispose();
                 }
 
-                history.Clear();
+                _history.Clear();
+            }
+        }
+
+        public bool TryGetValue(uint id, out T o)
+        {
+            int index = BinarySearch(id);
+
+            if (index < _history.Count && _history[index].key == id)
+            {
+                o = _history[index].value;
+                return true;
+            }
+
+            o = default;
+            return false;
+        }
+
+        public void Set(uint id, T newValue)
+        {
+            int index = BinarySearch(id);
+            if (index < _history.Count && _history[index].key == id)
+            {
+                var old = _history[index];
+                if (old.value is IDisposable disposable)
+                    disposable.Dispose();
+                _history[index] = new Entry { key = id, value = newValue };
+            }
+            else
+            {
+                _history.Insert(index, new Entry { key = id, value = newValue });
             }
         }
     }
