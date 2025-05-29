@@ -7,7 +7,9 @@
             int flagPos = packer.AdvanceBits(1);
 
             bool hasChanged = DeltaPacker<bool>.Write(packer, oldvalue.HasValue, newvalue.HasValue);
-            hasChanged = DeltaPacker<T>.Write(packer, oldvalue.GetValueOrDefault(), newvalue.GetValueOrDefault()) || hasChanged;
+
+            if (newvalue.HasValue)
+                hasChanged = DeltaPacker<T>.Write(packer, oldvalue.GetValueOrDefault(), newvalue.GetValueOrDefault()) || hasChanged;
 
             packer.WriteAt(flagPos, hasChanged);
 
@@ -28,9 +30,16 @@
                 T readValue = default;
 
                 DeltaPacker<bool>.Read(packer, oldvalue.HasValue, ref hasValue);
-                DeltaPacker<T>.Read(packer, oldvalue.GetValueOrDefault(), ref readValue);
 
-                value = hasValue ? readValue : null;
+                if (hasValue)
+                {
+                    DeltaPacker<T>.Read(packer, oldvalue.GetValueOrDefault(), ref readValue);
+                    value = readValue;
+                }
+                else
+                {
+                    value = null;
+                }
             }
             else
             {
