@@ -10,6 +10,7 @@ namespace PurrNet.Modules
 
     internal struct DeltaCleanup : IPackedAuto
     {
+        public PackedUInt key;
         public PackedUInt upToId;
     }
 

@@ -15,7 +15,11 @@ namespace PurrNet.Modules
             return nextId++;
         }
 
-        public abstract void CleanupHistory(uint lastConfirmedId);
+        public abstract int Count { get; }
+
+        public abstract uint CleanupUpTo();
+
+        public abstract void CleanupUpTo(uint exclusive);
 
         public abstract bool ContainsKey(uint id);
 
@@ -57,9 +61,25 @@ namespace PurrNet.Modules
             return low;
         }
 
-        public override void CleanupHistory(uint lastConfirmedId)
+        public override int Count => _history.Count;
+
+        public override uint CleanupUpTo()
         {
-            int removeUpTo = BinarySearch(lastConfirmedId);
+            int removeUpTo = _history.Count / 2;
+
+            for (int i = 0; i < removeUpTo; i++)
+            {
+                if (_history[i].value is IDisposable disposable)
+                    disposable.Dispose();
+            }
+
+            _history.RemoveRange(0, removeUpTo);
+            return _history.Count > 0 ? _history[0].key : 0;
+        }
+
+        public override void CleanupUpTo(uint exclusive)
+        {
+            int removeUpTo = BinarySearch(exclusive);
 
             if (removeUpTo == 0)
                 return;

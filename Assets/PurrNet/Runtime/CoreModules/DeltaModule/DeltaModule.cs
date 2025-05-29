@@ -29,12 +29,14 @@ namespace PurrNet.Modules
             _asServer = asServer;
             _players.onPlayerLeft += OnPlayerLeft;
             _broadcaster.Subscribe<DeltaAcknowledge>(Acknowledge);
+            _broadcaster.Subscribe<DeltaCleanup>(Cleanup);
         }
 
         public void Disable(bool asServer)
         {
             _players.onPlayerLeft -= OnPlayerLeft;
             _broadcaster.Unsubscribe<DeltaAcknowledge>(Acknowledge);
+            _broadcaster.Unsubscribe<DeltaCleanup>(Cleanup);
 
             foreach (var player in _sendingTrackers.Keys)
             {
@@ -236,11 +238,33 @@ namespace PurrNet.Modules
                 if (data.valueId > tracker.lastConfirmedId)
                 {
                     tracker.lastConfirmedId = data.valueId;
-                    // tracker.CleanupHistory(data.valueId);
+
+                    var currentCount = tracker.Count;
+                    if (currentCount > 1024)
+                    {
+                        var cleanupPacket = new DeltaCleanup
+                        {
+                            key = data.key,
+                            upToId = tracker.CleanupUpTo()
+                        };
+
+                        if (_asServer)
+                            _broadcaster.Send(player, cleanupPacket, Channel.Unreliable);
+                        else _broadcaster.SendToServer(cleanupPacket, Channel.Unreliable);
+                    }
 
                     clientDict[data.key] = tracker;
                 }
             }
+        }
+
+        private void Cleanup(PlayerID player, DeltaCleanup data, bool asserver)
+        {
+            if (!_receivingTrackers.TryGetValue(player, out var clientDict) ||
+                !clientDict.TryGetValue(data.key, out var tracker))
+                return;
+
+            tracker.CleanupUpTo(data.upToId);
         }
     }
 }
