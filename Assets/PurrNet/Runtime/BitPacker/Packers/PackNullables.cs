@@ -24,13 +24,13 @@
 
             if (hasChanged)
             {
-                bool isNull = default;
+                bool hasValue = default;
                 T readValue = default;
 
-                DeltaPacker<bool>.Read(packer, oldvalue.HasValue, ref isNull);
+                DeltaPacker<bool>.Read(packer, oldvalue.HasValue, ref hasValue);
                 DeltaPacker<T>.Read(packer, oldvalue.GetValueOrDefault(), ref readValue);
 
-                value = isNull ? null : readValue;
+                value = hasValue ? readValue : null;
             }
             else
             {
