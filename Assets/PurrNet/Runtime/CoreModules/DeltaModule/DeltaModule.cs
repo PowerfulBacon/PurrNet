@@ -258,8 +258,10 @@ namespace PurrNet.Modules
             }
         }
 
-        private void Cleanup(PlayerID player, DeltaCleanup data, bool asserver)
+        private void Cleanup(PlayerID sender, DeltaCleanup data, bool asserver)
         {
+            var player = _players.localPlayerId ?? default;
+
             if (!_receivingTrackers.TryGetValue(player, out var clientDict) ||
                 !clientDict.TryGetValue(data.key, out var tracker))
                 return;
