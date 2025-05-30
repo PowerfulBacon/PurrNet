@@ -1,18 +1,22 @@
 using System;
 using System.Collections.Generic;
+using K4os.Compression.LZ4;
 using PurrNet.Logging;
 using PurrNet.Packing;
+using PurrNet.Pooling;
 using PurrNet.Transports;
 using PurrNet.Utils;
 
 namespace PurrNet.Modules
 {
-    public class DeltaModule : INetworkModule
+    public class DeltaModule : INetworkModule, IPostFixedUpdate
     {
         private readonly PlayersManager _players;
         private readonly PlayersBroadcaster _broadcaster;
         private readonly Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>> _receivingTrackers;
         private readonly Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>> _sendingTrackers;
+
+        private readonly List<DeltaAcknowledgeBatch> _acknowledgements = new ();
 
         private bool _asServer;
 
@@ -28,6 +32,7 @@ namespace PurrNet.Modules
         {
             _asServer = asServer;
             _players.onPlayerLeft += OnPlayerLeft;
+            _broadcaster.Subscribe<DeltaBatch>(AcknowledgeBatch);
             _broadcaster.Subscribe<DeltaAcknowledge>(Acknowledge);
             _broadcaster.Subscribe<DeltaCleanup>(Cleanup);
         }
@@ -35,6 +40,7 @@ namespace PurrNet.Modules
         public void Disable(bool asServer)
         {
             _players.onPlayerLeft -= OnPlayerLeft;
+            _broadcaster.Unsubscribe<DeltaBatch>(AcknowledgeBatch);
             _broadcaster.Unsubscribe<DeltaAcknowledge>(Acknowledge);
             _broadcaster.Unsubscribe<DeltaCleanup>(Cleanup);
 
@@ -200,9 +206,11 @@ namespace PurrNet.Modules
                     valueId = valueId
                 };
 
-                if (_asServer)
+                Batch(sender, data);
+
+                /*if (_asServer)
                     _broadcaster.Send(sender, data, Channel.Unreliable);
-                else _broadcaster.SendToServer(data, Channel.Unreliable);
+                else _broadcaster.SendToServer(data, Channel.Unreliable);*/
             }
             else if (lastConfirmedId != 0)
             {
@@ -217,6 +225,42 @@ namespace PurrNet.Modules
             else newValue = default;
         }
 
+        private void Batch(PlayerID sender, DeltaAcknowledge acknowledge)
+        {
+            int c = _acknowledgements.Count;
+            for (int i = 0; i < c; i++)
+            {
+                var entry = _acknowledgements[i];
+                if (entry.playerId != sender)
+                     continue;
+
+                // add sorted
+                for (int j = 0; j < entry.entries.Count; j++)
+                {
+                    if (entry.entries[j].key > acknowledge.key)
+                    {
+                        entry.entries.Insert(j, acknowledge);
+                        return;
+                    }
+
+                    if (entry.entries[j].key == acknowledge.key && entry.entries[j].valueId >= acknowledge.valueId)
+                    {
+                        // already acknowledged
+                        return;
+                    }
+                }
+
+                entry.entries.Add(acknowledge);
+                return;
+            }
+
+            _acknowledgements.Add(new DeltaAcknowledgeBatch
+            {
+                playerId = sender,
+                entries = new DisposableList<DeltaAcknowledge>(16)
+            });
+        }
+
         private static uint GetKeyHash<T>(T key) where T : struct, IStableHashable
         {
             uint typeHash = Hasher<T>.stableHash;
@@ -226,6 +270,8 @@ namespace PurrNet.Modules
 
         private void Acknowledge(PlayerID player, DeltaAcknowledge data, bool asServer)
         {
+            const int MAX_TRACKER_COUNT = 1024;
+
             if (!asServer)
                 player = default;
 
@@ -240,7 +286,7 @@ namespace PurrNet.Modules
                     tracker.lastConfirmedId = data.valueId;
 
                     var currentCount = tracker.Count;
-                    if (currentCount > 1024)
+                    if (currentCount > MAX_TRACKER_COUNT)
                     {
                         var cleanupPacket = new DeltaCleanup
                         {
@@ -267,6 +313,91 @@ namespace PurrNet.Modules
                 return;
 
             tracker.CleanupUpTo(data.upToId);
+        }
+
+        const int MTU = 1024;
+
+        public void PostFixedUpdate()
+        {
+            SendAllAcks();
+        }
+
+        private void SendAllAcks()
+        {
+            for (int i = 0; i < _acknowledgements.Count; i++)
+            {
+                var batch = _acknowledgements[i];
+                using var packer = BitPackerPool.Get();
+
+                PackedUInt prevKey = default;
+                PackedUInt prevVal = default;
+
+                var count = batch.entries.Count;
+
+                for (var e = 0; e < count; e++)
+                {
+                    var entry = batch.entries[e];
+                    DeltaPacker<PackedUInt>.Write(packer, prevKey, entry.key);
+                    DeltaPacker<PackedUInt>.Write(packer, prevVal, entry.valueId);
+
+                    prevKey = entry.key;
+                    prevVal = entry.valueId;
+
+                    if (packer.positionInBytes + 10 >= MTU)
+                    {
+                        using var pickled = packer.Pickle(LZ4Level.L12_MAX);
+                        var batchData = new DeltaBatch { data = pickled, bitCount = packer.positionInBits};
+
+                        if (_asServer)
+                            _broadcaster.Send(batch.playerId, batchData, Channel.Unreliable);
+                        else _broadcaster.SendToServer(batchData, Channel.Unreliable);
+
+                        packer.ResetPositionAndMode(false);
+                        prevKey = default;
+                        prevVal = default;
+                    }
+                }
+
+                if (packer.positionInBytes > 0)
+                {
+                    using var pickled = packer.Pickle(LZ4Level.L12_MAX);
+                    var batchData = new DeltaBatch { data = pickled, bitCount = packer.positionInBits };
+
+                    if (_asServer)
+                        _broadcaster.Send(batch.playerId, batchData, Channel.Unreliable);
+                    else _broadcaster.SendToServer(batchData, Channel.Unreliable);
+                }
+
+                batch.Dispose();
+            }
+
+            _acknowledgements.Clear();
+        }
+
+        private void AcknowledgeBatch(PlayerID player, DeltaBatch data, bool asserver)
+        {
+            using (data.data)
+            {
+                using var packer = BitPackerPool.Get();
+                packer.UnpickleFrom(data.data);
+
+                PackedUInt prevKey = default;
+                PackedUInt prevVal = default;
+
+                while (packer.positionInBits < data.bitCount)
+                {
+                    DeltaPacker<PackedUInt>.Read(packer, prevKey, ref prevKey);
+                    DeltaPacker<PackedUInt>.Read(packer, prevVal, ref prevVal);
+
+                    var acknowledge = new DeltaAcknowledge
+                    {
+                        key = prevKey,
+                        valueId = prevVal
+                    };
+
+                    Acknowledge(player, acknowledge, asserver);
+                }
+            }
         }
     }
 }

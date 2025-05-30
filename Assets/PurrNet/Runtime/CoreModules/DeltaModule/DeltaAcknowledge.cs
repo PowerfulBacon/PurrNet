@@ -1,7 +1,26 @@
-﻿using PurrNet.Packing;
+﻿using System;
+using PurrNet.Packing;
+using PurrNet.Pooling;
 
 namespace PurrNet.Modules
 {
+    internal struct DeltaAcknowledgeBatch : IPackedAuto, IDisposable
+    {
+        public PlayerID playerId;
+        public DisposableList<DeltaAcknowledge> entries;
+
+        public void Dispose()
+        {
+            entries.Dispose();
+        }
+    }
+
+    internal struct DeltaBatch : IPackedAuto
+    {
+        public PackedInt bitCount;
+        public BitPacker data;
+    }
+
     internal struct DeltaAcknowledge : IPackedAuto
     {
         public PackedUInt key;
