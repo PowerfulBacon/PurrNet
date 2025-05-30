@@ -359,8 +359,13 @@ namespace PurrNet
             }
             else if (_wasLastDirty)
             {
-                if(_useForceSend)
-                    ForceSendReliable();
+                if (_useForceSend)
+                {
+                    if(isServer)
+                        SendInitialStateToAll(_dict);
+                    else
+                        ForceSendReliable();
+                }
                 _wasLastDirty = false;
             }
         }

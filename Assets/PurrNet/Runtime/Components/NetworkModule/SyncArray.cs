@@ -428,7 +428,10 @@ namespace PurrNet
             }
             else if (_wasLastDirty)
             {
-                ForceSendReliable();
+                if(isServer)
+                    ForceSendReliable_Internal();
+                else
+                    ForceSendReliable();
                 _wasLastDirty = false;
             }
         }
@@ -581,6 +584,11 @@ namespace PurrNet
         
         [ServerRpc(Channel.ReliableOrdered)]
         private void ForceSendReliable()
+        {
+            ForceSendReliable_Internal();
+        }
+
+        private void ForceSendReliable_Internal()
         {
             SendInitialSizeToAll(_length);
             for (int i = 0; i < _length; i++)

@@ -371,7 +371,10 @@ namespace PurrNet
             }
             else if (_wasLastDirty)
             {
-                ForceSendReliable();
+                if(isServer)
+                    SendInitialStateToAll(_list);
+                else
+                    ForceSendReliable();
                 _wasLastDirty = false;
             }
         }
