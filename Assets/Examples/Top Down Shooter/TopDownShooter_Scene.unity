@@ -2177,7 +2177,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _fileName: bandwidth_profiler.data
-  _maxFileSizeInMb: 0.01
+  _maxFileSizeInMb: 10
 --- !u!4 &1260065140
 Transform:
   m_ObjectHideFlags: 0
