@@ -237,23 +237,44 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static bool AreEqual<T>(T a, T b)
         {
+            if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+                return EqualityComparer<T>.Default.Equals(a, b);
+
             using var packerA = BitPackerPool.Get();
             using var packerB = BitPackerPool.Get();
 
             Packer<T>.Write(packerA, a);
             Packer<T>.Write(packerB, b);
 
-            var spanA = packerA.ToByteData().span;
-            var spanB = packerB.ToByteData().span;
-
-            // Write a zero byte to the end of the packer to ensure the bits are aligned
-            Packer<byte>.Write(packerA, 0);
-            Packer<byte>.Write(packerB, 0);
-
-            if (spanA.Length != spanB.Length)
+            if (packerA.positionInBits != packerB.positionInBits)
                 return false;
 
-            return spanA.SequenceEqual(spanB);
+            int bits = packerA.positionInBits;
+
+            packerA.ResetPositionAndMode(true);
+            packerB.ResetPositionAndMode(true);
+
+            while (bits >= 64)
+            {
+                ulong aBits = packerA.ReadBits(64);
+                ulong bBits = packerB.ReadBits(64);
+
+                if (aBits != bBits)
+                    return false;
+
+                bits -= 64;
+            }
+
+            if (bits > 0)
+            {
+                var remainingBits = (byte)bits;
+                ulong aBits = packerA.ReadBits(remainingBits);
+                ulong bBits = packerB.ReadBits(remainingBits);
+                if (aBits != bBits)
+                    return false;
+            }
+
+            return true;
         }
 
         [UsedByIL]
