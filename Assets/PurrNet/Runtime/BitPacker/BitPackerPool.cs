@@ -36,6 +36,11 @@ namespace PurrNet.Packing
             else _instance.Delete(packer);
         }
 
+        public static BitPacker Get(byte[] from)
+        {
+            return Get(new ByteData(from, 0, from.Length));
+        }
+
         public static BitPacker Get(ByteData from)
         {
             var packer = _instanceTmp.Allocate();

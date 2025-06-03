@@ -3,8 +3,7 @@ using UnityEditor;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text;
 using PurrNet.Packing;
 
 namespace PurrNet.Profiler.Editor
@@ -65,6 +64,15 @@ namespace PurrNet.Profiler.Editor
             window.Show();
         }
 
+        [MenuItem("Tools/PurrNet/Analysis/Bandwidth Profiler (New Window)")]
+        public static void CreateWindow()
+        {
+            var window = CreateInstance<ProfilerWindow>();
+            var purrnetLogo = Resources.Load("purricon") as Texture2D;
+            window.titleContent = new GUIContent("Bandwidth Profiler", purrnetLogo, "Bandwidth Profiler");
+            window.Show();
+        }
+
         void OnEnable()
         {
             Statistics.inspecting += 1;
@@ -115,6 +123,17 @@ namespace PurrNet.Profiler.Editor
                 Statistics.samples.Clear();
                 selectedSampleIndex = -1;
                 Repaint();
+            }
+
+            if (GUILayout.Button("Load File"))
+            {
+                string path = EditorUtility.OpenFilePanel("Load Bandwidth Profile", "", "data");
+                if (!string.IsNullOrEmpty(path))
+                {
+                    BandwidthProfilerToFile.LoadSamples(path);
+                    selectedSampleIndex = -1; // Reset selection when loading new data
+                    Repaint();
+                }
             }
 
             GUILayout.EndHorizontal();
@@ -391,7 +410,7 @@ namespace PurrNet.Profiler.Editor
                 float newHeight = Mathf.Clamp(resizeStartHeight + deltaY, minGraphHeight, maxGraphHeight);
 
                 // Only repaint if the height actually changed
-                if (newHeight != graphHeight)
+                if (!Mathf.Approximately(newHeight, graphHeight))
                 {
                     graphHeight = newHeight;
                     Repaint();
@@ -941,14 +960,17 @@ namespace PurrNet.Profiler.Editor
             if (method == null)
                 return $"Failed to find method {methodName} in type {type.Name}";
 
-            var resutl = new JObject();
             var parameters = method.GetParameters();
+            var _sb = new StringBuilder();
 
             for (int i = 0; i < parameters.Length; i++)
             {
                 var param = parameters[i];
                 var paramType = param.ParameterType;
                 var paramName = param.Name;
+
+                if (paramType.IsGenericParameter)
+                    continue;
 
                 if (ShouldIgnore(rpcType, paramType, i, parameters.Length))
                     continue;
@@ -957,17 +979,11 @@ namespace PurrNet.Profiler.Editor
                 Packer.Read(tempPacker, paramType, ref obj);
                 _deserializedObjects[paramType] = obj;
 
-                resutl.Add(paramName, JToken.FromObject(obj));
+                _sb.AppendLine($"Parameter {i + 1:00}: {paramName} ({paramType.Name}) = {obj}");
             }
 
-            return resutl.ToString(Formatting.Indented);
+            return _sb.ToString();
         }
-
-        static readonly JsonSerializerSettings settings = new JsonSerializerSettings
-        {
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            NullValueHandling = NullValueHandling.Include
-        };
 
         private static string PrintBroadcast(Type type, BitPacker tempPacker)
         {
@@ -976,8 +992,7 @@ namespace PurrNet.Profiler.Editor
             Packer<PackedUInt>.Read(tempPacker, ref typeIdx);
             Packer.Read(tempPacker, type, ref obj);
             _deserializedObjects[type] = obj;
-            var res = JsonConvert.SerializeObject(obj, Formatting.Indented, settings);
-            return $"{obj}\n\n{res}";
+            return $"{obj}";
         }
 
         #endregion

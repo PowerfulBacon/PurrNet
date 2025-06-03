@@ -958,6 +958,24 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   _localHealth: 100
+  _dictionary:
+    _ownerAuth: 0
+    _serializedDict:
+      keys: 
+      values: 
+      stringKeys: []
+      stringValues: []
+    _sendIntervalInSeconds: 0
+    _useForceSend: 0
+  gecko1: {fileID: 0}
+  gecko2: {fileID: 0}
+  gecko3: {fileID: 0}
+  gecko4: {fileID: 0}
+  price1: 0
+  price2: 0
+  price3: 0
+  price4: 0
+  resultEventName: N SEND
 --- !u!114 &634351196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2013,7 +2031,6 @@ GameObject:
   - component: {fileID: 1216416902}
   - component: {fileID: 1216416903}
   - component: {fileID: 1216416905}
-  - component: {fileID: 1216416906}
   m_Layer: 0
   m_Name: Network
   m_TagString: Untagged
@@ -2130,23 +2147,52 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _timeout: 5
   _password: PurrNet!
---- !u!114 &1216416906
+--- !u!1 &1260065138
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1260065140}
+  - component: {fileID: 1260065139}
+  m_Layer: 0
+  m_Name: --
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1260065139
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1216416895}
+  m_GameObject: {fileID: 1260065138}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef882a0e84c58df4885b0e1e59320b49, type: 3}
+  m_Script: {fileID: 11500000, guid: a0deefd53f70afc4ca6416192f41e151, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkInterval: 0.33
-  placement: 1
-  displayType: 2
-  fontSize: 13
-  textColor: {r: 1, g: 1, b: 1, a: 1}
+  _fileName: bandwidth_profiler.data
+  _maxFileSizeInMb: 0.01
+--- !u!4 &1260065140
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1260065138}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1284249959
 GameObject:
   m_ObjectHideFlags: 0
@@ -3724,3 +3770,4 @@ SceneRoots:
   - {fileID: 634351194}
   - {fileID: 919051973}
   - {fileID: 1329324631}
+  - {fileID: 1260065140}

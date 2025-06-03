@@ -204,6 +204,13 @@ namespace PurrNet.Packing
             }
         }
 
+        public static T Read(BitPacker packer)
+        {
+            var value = default(T);
+            Read(packer, ref value);
+            return value;
+        }
+
         public static void Serialize(BitPacker packer, ref T value)
         {
             if (packer.isWriting)

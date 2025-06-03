@@ -13,6 +13,8 @@ namespace PurrNet.Profiler
 
         public static event Action onSampleEnded;
 
+        public static event Action<TickSample> onSample;
+
         public static bool paused;
 
         public static int inspecting;
@@ -79,8 +81,9 @@ namespace PurrNet.Profiler
             }
 
             samples.Add(_currentSample);
-            _currentSample = new TickSample();
+            onSample?.Invoke(_currentSample);
 
+            _currentSample = new TickSample();
             onSampleEnded?.Invoke();
         }
     }
