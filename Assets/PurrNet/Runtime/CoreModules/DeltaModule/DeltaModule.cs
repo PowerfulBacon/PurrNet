@@ -270,7 +270,7 @@ namespace PurrNet.Modules
 
         private void Acknowledge(PlayerID player, DeltaAcknowledge data, bool asServer)
         {
-            const int MAX_TRACKER_COUNT = 1024;
+            const float MAX_HISTORY_TIME_ALIVE = 0.5f;
 
             if (!asServer)
                 player = default;
@@ -284,22 +284,16 @@ namespace PurrNet.Modules
                 if (data.valueId > tracker.lastConfirmedId)
                 {
                     tracker.lastConfirmedId = data.valueId;
-
-                    var currentCount = tracker.Count;
-                    if (currentCount > MAX_TRACKER_COUNT)
+                    
+                    var cleanupPacket = new DeltaCleanup
                     {
-                        var cleanupPacket = new DeltaCleanup
-                        {
-                            key = data.key,
-                            upToId = tracker.CleanupUpTo()
-                        };
+                        key = data.key,
+                        upToId = tracker.CleanupUpTo(MAX_HISTORY_TIME_ALIVE)
+                    };
 
-                        if (_asServer)
-                            _broadcaster.Send(player, cleanupPacket, Channel.Unreliable);
-                        else _broadcaster.SendToServer(cleanupPacket, Channel.Unreliable);
-                    }
-
-                    clientDict[data.key] = tracker;
+                    if (_asServer)
+                        _broadcaster.Send(player, cleanupPacket, Channel.Unreliable);
+                    else _broadcaster.SendToServer(cleanupPacket, Channel.Unreliable);
                 }
             }
         }
