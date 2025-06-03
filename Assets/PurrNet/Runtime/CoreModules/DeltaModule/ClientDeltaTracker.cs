@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using PurrNet.Packing;
+using UnityEngine;
 
 namespace PurrNet.Modules
 {
@@ -17,7 +18,7 @@ namespace PurrNet.Modules
 
         public abstract int Count { get; }
 
-        public abstract uint CleanupUpTo();
+        public abstract uint CleanupUpTo(float maxAge);
 
         public abstract void CleanupUpTo(uint exclusive);
 
@@ -32,6 +33,7 @@ namespace PurrNet.Modules
         {
             public uint key;
             public T value;
+            public float enterTime;
         }
 
         private readonly List<Entry> _history = new();
@@ -61,11 +63,35 @@ namespace PurrNet.Modules
             return low;
         }
 
+        private int BinarySearchOlderThan(float seconds)
+        {
+            float threshold = Time.unscaledTime - seconds;
+            int low = 0;
+            int high = _history.Count - 1;
+            int result = _history.Count;
+
+            while (low <= high)
+            {
+                int mid = (low + high) / 2;
+                if (_history[mid].enterTime < threshold)
+                {
+                    result = mid;
+                    high = mid - 1;
+                }
+                else
+                {
+                    low = mid + 1;
+                }
+            }
+
+            return result;
+        }
+
         public override int Count => _history.Count;
 
-        public override uint CleanupUpTo()
+        public override uint CleanupUpTo(float maxAge)
         {
-            int removeUpTo = _history.Count / 2;
+            int removeUpTo = BinarySearchOlderThan(maxAge);
 
             for (int i = 0; i < removeUpTo; i++)
             {
