@@ -47,9 +47,12 @@ namespace PurrNet.StateMachine.InspectorEditor
                 return;
             }
 
-            DrawStateMachineInfo();
-            DrawStateControls();
-            DrawNetworkStatus();
+            if (Application.isPlaying && _stateMachine && _stateMachine.currentState.stateId >= 0 && _stateMachine.states.Count > _stateMachine.currentState.stateId)
+            {
+                DrawStateMachineInfo();
+                DrawStateControls();
+                DrawNetworkStatus();
+            }
 
             DrawIdentityInspector();
 
