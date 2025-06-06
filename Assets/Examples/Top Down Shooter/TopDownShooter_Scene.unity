@@ -2027,7 +2027,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1216416898}
   - component: {fileID: 1216416897}
-  - component: {fileID: 1216416901}
   - component: {fileID: 1216416902}
   - component: {fileID: 1216416903}
   - component: {fileID: 1216416905}
@@ -2051,8 +2050,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _stopPlayingOnDisconnect: 0
-  _startServerFlags: 9
-  _startClientFlags: 7
+  _startServerFlags: -1
+  _startClientFlags: -1
   _cookieScope: 1
   _dontDestroyOnLoad: 0
   _transport: {fileID: 1216416902}
@@ -2077,23 +2076,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1216416901
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1216416895}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 332e746c3c3253246aacad4d5559f1fb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _masterServer: https://purrbalancer.riten.dev:8080/
-  _roomName: PurrNet
-  _region: eu-central
-  _host: eu1.purrlay.riten.dev
-  _pollEventsInUpdate: 0
 --- !u!114 &1216416902
 MonoBehaviour:
   m_ObjectHideFlags: 0
