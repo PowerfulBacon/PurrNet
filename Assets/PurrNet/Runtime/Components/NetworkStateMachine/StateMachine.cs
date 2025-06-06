@@ -109,6 +109,26 @@ namespace PurrNet.StateMachine
             _initialized = true;
         }
 
+        protected override void OnDespawned(bool asServer)
+        {
+            base.OnDespawned(asServer);
+
+            if (_currentState.stateId < 0 || _currentState.stateId >= _syncedStates.Count)
+                return;
+            
+            _states[_currentState.stateId].Exit(asServer);
+        }
+
+        protected override void OnDespawned()
+        {
+            base.OnDespawned();
+            
+            if (_currentState.stateId < 0 || _currentState.stateId >= _syncedStates.Count)
+                return;
+            
+            _states[_currentState.stateId].Exit();
+        }
+
         protected override void OnObserverAdded(PlayerID player)
         {
             base.OnObserverAdded(player);
