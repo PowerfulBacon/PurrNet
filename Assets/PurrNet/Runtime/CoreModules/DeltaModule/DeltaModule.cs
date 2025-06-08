@@ -81,6 +81,17 @@ namespace PurrNet.Modules
             }
         }
 
+        private ClientDeltaTracker GetTracker(PlayerID player, uint key, bool isWriting)
+        {
+            var dictionary = isWriting ? _sendingTrackers : _receivingTrackers;
+            if (!dictionary.TryGetValue(player, out var clientDict))
+            {
+                clientDict = new Dictionary<uint, ClientDeltaTracker>();
+                dictionary[player] = clientDict;
+            }
+            return clientDict.GetValueOrDefault(key);
+        }
+
         private ClientDeltaTracker<T> GetOrCreateTracker<T>(PlayerID player, uint key, bool isWriting)
         {
             var dictionary = isWriting ? _sendingTrackers : _receivingTrackers;
@@ -272,7 +283,7 @@ namespace PurrNet.Modules
             if (!asServer)
                 player = default;
 
-            var tracker = GetOrCreateTracker<PackedUInt>(player, data.key, true);
+            var tracker = GetTracker(player, data.key, true);
             var removeUpTo = tracker.CleanupUpTo(MAX_HISTORY_TIME_ALIVE);
 
             if (removeUpTo > 0)
