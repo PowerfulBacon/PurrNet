@@ -32,6 +32,8 @@ namespace PurrNet.Modules
 
     internal class ClientDeltaTracker<T> : ClientDeltaTracker
     {
+        const int MAX_HISTORY_SIZE = 64;
+
         private struct Entry
         {
             public uint key;
@@ -39,7 +41,7 @@ namespace PurrNet.Modules
             public float enterTime;
         }
 
-        private readonly List<Entry> _history = new();
+        private readonly List<Entry> _history = new(MAX_HISTORY_SIZE);
 
         private int BinarySearch(uint key)
         {
@@ -101,8 +103,6 @@ namespace PurrNet.Modules
 
         public override uint CleanupUpTo(float maxAge)
         {
-            const int MAX_HISTORY_SIZE = 256;
-
             // If the history is smaller than the maximum size, we don't need to clean up.
             if (_history.Count < MAX_HISTORY_SIZE)
                 return 0;
