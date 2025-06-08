@@ -115,7 +115,8 @@ namespace PurrNet.Modules
             return typedTracker;
         }
 
-        public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue) where Key : struct, IStableHashable
+
+        public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue, ref PackedUInt cachedKey) where Key : struct, IStableHashable
         {
             var hash = GetKeyHash(key);
             var tracker = GetOrCreateTracker<T>(player, hash, true);
@@ -135,10 +136,11 @@ namespace PurrNet.Modules
                 }
             }
 
-            Packer<PackedUInt>.Write(packer, bestKey);
 
             var pos = packer.positionInBits;
             Packer<bool>.Write(packer, false);
+            DeltaPacker<PackedUInt>.Write(packer, cachedKey, bestKey);
+            cachedKey = bestKey;
             bool changed = DeltaPacker<T>.Write(packer, oldValue, newValue);
 
             packer.WriteAt(pos, changed);
@@ -146,7 +148,8 @@ namespace PurrNet.Modules
             if (changed)
             {
                 PackedUInt newId = tracker.GenerateId();
-                DeltaPacker<PackedUInt>.Write(packer, bestKey, newId);
+                DeltaPacker<PackedUInt>.Write(packer, cachedKey, newId);
+                cachedKey = newId;
                 tracker.Set(newId, newValue);
             }
             else
@@ -157,7 +160,7 @@ namespace PurrNet.Modules
             return changed;
         }
 
-        public void Read<Key, T>(BitPacker packer, Key key, PlayerID sender, ref T newValue) where Key : struct, IStableHashable
+        public void Read<Key, T>(BitPacker packer, Key key, PlayerID sender, ref T newValue, ref PackedUInt cachedKey) where Key : struct, IStableHashable
         {
             var player = _players.localPlayerId ?? default;
 
@@ -165,7 +168,8 @@ namespace PurrNet.Modules
             var tracker = GetOrCreateTracker<T>(player, keyHash, false);
 
             PackedUInt lastConfirmedId = default;
-            Packer<PackedUInt>.Read(packer, ref lastConfirmedId);
+            DeltaPacker<PackedUInt>.Read(packer, cachedKey, ref lastConfirmedId);
+            cachedKey = lastConfirmedId;
 
             bool changed = false;
 
@@ -184,7 +188,8 @@ namespace PurrNet.Modules
                 }
 
                 DeltaPacker<T>.Read(packer, oldValue, ref newValue);
-                DeltaPacker<PackedUInt>.Read(packer, lastConfirmedId, ref valueId);
+                DeltaPacker<PackedUInt>.Read(packer, cachedKey, ref valueId);
+                cachedKey = lastConfirmedId;
 
                 tracker.Set(valueId, newValue);
 

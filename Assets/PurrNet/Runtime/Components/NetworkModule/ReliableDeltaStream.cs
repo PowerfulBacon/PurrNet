@@ -47,11 +47,12 @@ namespace PurrNet
             {
                 using var packer = BitPackerPool.Get();
                 Packer<int>.Write(packer, _dirtyIndices.Count);
+                PackedUInt cacheId = default;
                 foreach (var index in _dirtyIndices)
                 {
                     Packer<int>.Write(packer, index);
                     var key = new IndexKey(_keyBase, index);
-                    networkManager.deltaModule.Write(packer, player, key, _values[index]);
+                    networkManager.deltaModule.Write(packer, player, key, _values[index], ref cacheId);
                 }
 
                 if (packer.positionInBits > 0)
@@ -70,13 +71,14 @@ namespace PurrNet
 
             int count = 0;
             Packer<int>.Read(packer, ref count);
+            PackedUInt cacheId = default;
             for (int i = 0; i < count; i++)
             {
                 int index = 0;
                 Packer<int>.Read(packer, ref index);
                 var key = new IndexKey(_keyBase, index);
                 T val = default;
-                networkManager.deltaModule.Read(packer, key,default, ref val);
+                networkManager.deltaModule.Read(packer, key,default, ref val, ref cacheId);
                 _values[index] = val;
             }
         }
