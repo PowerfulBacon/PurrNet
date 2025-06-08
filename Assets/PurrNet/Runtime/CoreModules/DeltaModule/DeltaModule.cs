@@ -284,6 +284,11 @@ namespace PurrNet.Modules
                 player = default;
 
             var tracker = GetTracker(player, data.key, true);
+
+            if (tracker == null)
+                return;
+
+            tracker.ValidateId(data.valueId);
             var removeUpTo = tracker.CleanupUpTo(MAX_HISTORY_TIME_ALIVE);
 
             if (removeUpTo > 0)

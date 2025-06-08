@@ -7,6 +7,7 @@ namespace PurrNet.Modules
 {
     internal abstract class ClientDeltaTracker : IDisposable
     {
+        protected uint mostRecentId;
         private uint nextId = 1;
 
         public uint GenerateId()
@@ -21,6 +22,12 @@ namespace PurrNet.Modules
         public abstract bool ContainsKey(uint id);
 
         public abstract void Dispose();
+
+        public void ValidateId(PackedUInt dataValueId)
+        {
+            if (dataValueId.value > mostRecentId)
+                mostRecentId = dataValueId.value;
+        }
     }
 
     internal class ClientDeltaTracker<T> : ClientDeltaTracker
@@ -85,15 +92,11 @@ namespace PurrNet.Modules
 
         public int FindBestMatch(out uint key)
         {
-            if (_history.Count == 0)
-            {
-                key = 0;
-                return -1;
-            }
-
-            var idx = _history.Count - 1;
-            key = _history[idx].key;
-            return idx;
+            key = mostRecentId;
+            int index = BinarySearch(mostRecentId);
+            if (index < _history.Count && _history[index].key == mostRecentId)
+                return index;
+            return -1;
         }
 
         public override uint CleanupUpTo(float maxAge)
