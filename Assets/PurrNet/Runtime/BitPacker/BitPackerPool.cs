@@ -18,9 +18,7 @@ namespace PurrNet.Packing
 
         static void Reset(BitPacker list) => list.ResetPosition();
 
-        public BitPackerPool() : base(Factory, Reset)
-        {
-        }
+        private BitPackerPool() : base(Factory, Reset) {}
 
         public static BitPacker Get(bool readMode = false)
         {

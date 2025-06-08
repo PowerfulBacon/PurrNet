@@ -83,15 +83,18 @@ namespace PurrNet.Modules
             return result;
         }
 
-        public virtual int Count => _history.Count;
-
         public int FindBestMatch(in T value, out uint key)
         {
             int minBits = int.MaxValue;
             int bestMatchIndex = -1;
             key = 0;
 
-            for (int i = _history.Count - 1; i >= 0; i--)
+            const int MAX_ITERATIONS = 5;
+
+            int c = _history.Count;
+            int minIndex = Math.Max(0, c - MAX_ITERATIONS);
+
+            for (int i = c - 1; i >= minIndex; i--)
             {
                 int dist = DeltaPacker<T>.GetNecessaryBitsToWrite(_history[i].value, value);
 
