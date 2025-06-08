@@ -136,11 +136,11 @@ namespace PurrNet.Modules
                 }
             }
 
+            DeltaPacker<PackedUInt>.Write(packer, cachedKey, bestKey);
+            cachedKey = bestKey;
 
             var pos = packer.positionInBits;
             Packer<bool>.Write(packer, false);
-            DeltaPacker<PackedUInt>.Write(packer, cachedKey, bestKey);
-            cachedKey = bestKey;
             bool changed = DeltaPacker<T>.Write(packer, oldValue, newValue);
 
             packer.WriteAt(pos, changed);
