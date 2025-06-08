@@ -168,12 +168,12 @@ namespace PurrNet.Modules
             Packer<PackedUInt>.Read(packer, ref lastConfirmedId);
 
             bool changed = false;
-            PackedUInt valueId = default;
 
             Packer<bool>.Read(packer, ref changed);
 
             if (changed)
             {
+                PackedUInt valueId = default;
                 T oldValue = default;
 
                 if (lastConfirmedId != 0)
@@ -184,7 +184,7 @@ namespace PurrNet.Modules
                 }
 
                 DeltaPacker<T>.Read(packer, oldValue, ref newValue);
-                DeltaPacker<PackedUInt>.Read(packer, valueId, ref valueId);
+                DeltaPacker<PackedUInt>.Read(packer, lastConfirmedId, ref valueId);
 
                 tracker.Set(valueId, newValue);
 
