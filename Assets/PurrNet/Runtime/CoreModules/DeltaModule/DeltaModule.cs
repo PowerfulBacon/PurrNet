@@ -115,23 +115,6 @@ namespace PurrNet.Modules
             return typedTracker;
         }
 
-        private bool _writingReliably;
-        private bool _readingReliably;
-        private PackedUInt _lastWrittenBestKey;
-        private PackedUInt _lastReadBestKey;
-
-        public void BeginWrite(bool reliable)
-        {
-            _writingReliably = reliable;
-            _lastWrittenBestKey = default;
-        }
-
-        public void BeginRead(bool reliable)
-        {
-            _readingReliably = reliable;
-            _lastReadBestKey = default;
-        }
-
         public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue) where Key : struct, IStableHashable
         {
             var hash = GetKeyHash(key);
@@ -152,12 +135,7 @@ namespace PurrNet.Modules
                 }
             }
 
-            if (_writingReliably)
-            {
-                DeltaPacker<PackedUInt>.Write(packer, _lastWrittenBestKey, bestKey);
-                _lastWrittenBestKey = bestKey;
-            }
-            else Packer<PackedUInt>.Write(packer, bestKey);
+            Packer<PackedUInt>.Write(packer, bestKey);
 
             var pos = packer.positionInBits;
             Packer<bool>.Write(packer, false);
@@ -170,10 +148,6 @@ namespace PurrNet.Modules
                 PackedUInt newId = tracker.GenerateId();
                 DeltaPacker<PackedUInt>.Write(packer, bestKey, newId);
                 tracker.Set(newId, newValue);
-
-                // if we are reliable ordered, we can assume that the id is valid for next writes
-                if (_writingReliably)
-                    tracker.ValidateId(newId);
             }
             else
             {
@@ -196,12 +170,7 @@ namespace PurrNet.Modules
             bool changed = false;
             PackedUInt valueId = default;
 
-            if (_readingReliably)
-            {
-                DeltaPacker<PackedUInt>.Read(packer, _lastReadBestKey, ref valueId);
-                _lastReadBestKey = valueId;
-            }
-            else Packer<bool>.Read(packer, ref changed);
+            Packer<bool>.Read(packer, ref changed);
 
             if (changed)
             {
@@ -219,15 +188,13 @@ namespace PurrNet.Modules
 
                 tracker.Set(valueId, newValue);
 
-                if (!_readingReliably)
+                var data = new DeltaAcknowledge
                 {
-                    var data = new DeltaAcknowledge
-                    {
-                        key = keyHash,
-                        valueId = valueId
-                    };
-                    Batch(sender, data);
-                }
+                    key = keyHash,
+                    valueId = valueId
+                };
+
+                Batch(sender, data);
             }
             else if (lastConfirmedId != 0)
             {
