@@ -283,22 +283,19 @@ namespace PurrNet.Modules
                 !clientDict.TryGetValue(data.key, out var tracker))
                 return;
 
-            if (tracker.ContainsKey(data.valueId))
+            var removeUpTo = tracker.CleanupUpTo(MAX_HISTORY_TIME_ALIVE);
+
+            if (removeUpTo > 0)
             {
-                var removeUpTo = tracker.CleanupUpTo(MAX_HISTORY_TIME_ALIVE);
-
-                if (removeUpTo > 0)
+                var cleanupPacket = new DeltaCleanup
                 {
-                    var cleanupPacket = new DeltaCleanup
-                    {
-                        key = data.key,
-                        upToId = removeUpTo
-                    };
+                    key = data.key,
+                    upToId = removeUpTo
+                };
 
-                    if (_asServer)
-                        _broadcaster.Send(player, cleanupPacket, Channel.Unreliable);
-                    else _broadcaster.SendToServer(cleanupPacket, Channel.Unreliable);
-                }
+                if (_asServer)
+                    _broadcaster.Send(player, cleanupPacket, Channel.Unreliable);
+                else _broadcaster.SendToServer(cleanupPacket, Channel.Unreliable);
             }
         }
 
