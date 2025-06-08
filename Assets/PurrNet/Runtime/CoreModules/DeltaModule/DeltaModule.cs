@@ -122,7 +122,7 @@ namespace PurrNet.Modules
 
             T oldValue = default;
 
-            int id = tracker.FindBestMatch(newValue, out var bestKey);
+            int id = tracker.FindBestMatch(out var bestKey);
 
             if (id >= 0)
             {

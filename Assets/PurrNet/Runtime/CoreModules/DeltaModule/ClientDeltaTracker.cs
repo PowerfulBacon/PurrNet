@@ -83,34 +83,17 @@ namespace PurrNet.Modules
             return result;
         }
 
-        public int FindBestMatch(in T value, out uint key)
+        public int FindBestMatch(out uint key)
         {
-            int minBits = int.MaxValue;
-            int bestMatchIndex = -1;
-            key = 0;
-
-            const int MAX_ITERATIONS = 5;
-
-            int c = _history.Count;
-            int minIndex = Math.Max(0, c - MAX_ITERATIONS);
-
-            for (int i = c - 1; i >= minIndex; i--)
+            if (_history.Count == 0)
             {
-                var entry = _history[i];
-                int dist = DeltaPacker<T>.GetNecessaryBitsToWrite(entry.value, value);
-
-                if (dist < minBits)
-                {
-                    minBits = dist;
-                    bestMatchIndex = i;
-                    key = entry.key;
-
-                    if (minBits == 0)
-                        break;
-                }
+                key = 0;
+                return -1;
             }
 
-            return bestMatchIndex;
+            var idx = _history.Count - 1;
+            key = _history[idx].key;
+            return idx;
         }
 
         public override uint CleanupUpTo(float maxAge)
