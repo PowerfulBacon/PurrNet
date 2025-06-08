@@ -1,20 +1,21 @@
-﻿using System;
-using PurrNet.Modules;
+﻿using PurrNet.Modules;
 
 namespace PurrNet.Packing
 {
     public static class FloatPacking
     {
         [UsedByIL]
-        public static void Write(this BitPacker packer, float data)
+        public static unsafe void Write(this BitPacker packer, float data)
         {
-            packer.WriteBits((ulong)BitConverter.SingleToInt32Bits(data), 32);
+            ulong bits = *(uint*)&data;
+            packer.WriteBits(bits, 32);
         }
 
         [UsedByIL]
-        public static void Read(this BitPacker packer, ref float data)
+        public static unsafe void Read(this BitPacker packer, ref float data)
         {
-            data = BitConverter.Int32BitsToSingle((int)packer.ReadBits(32));
+            ulong bits = packer.ReadBits(32);
+            data = *(float*)&bits;
         }
 
         [UsedByIL]
