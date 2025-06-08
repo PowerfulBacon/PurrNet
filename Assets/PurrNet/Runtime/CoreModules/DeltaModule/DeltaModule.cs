@@ -200,7 +200,7 @@ namespace PurrNet.Modules
 
                 DeltaPacker<T>.Read(packer, oldValue, ref newValue);
                 DeltaPacker<PackedUInt>.Read(packer, cachedKey, ref valueId);
-                cachedKey = lastConfirmedId;
+                cachedKey = valueId;
 
                 tracker.Set(valueId, newValue);
 
