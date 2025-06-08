@@ -67,14 +67,19 @@ namespace PurrNet.Packing
 
         public bool isWrapper { get; private set; }
 
-        public int positionInBits { get; private set; }
+        private int _positionInBits;
+
+        public int positionInBits
+        {
+            get => _positionInBits;
+        }
 
         public int positionInBytes
         {
             get
             {
-                int pos = positionInBits / 8;
-                int len = pos + (positionInBits % 8 == 0 ? 0 : 1);
+                int pos = _positionInBits / 8;
+                int len = pos + (_positionInBits % 8 == 0 ? 0 : 1);
                 return len;
             }
         }
@@ -92,8 +97,6 @@ namespace PurrNet.Packing
         public bool isReading => _isReading;
 
         public bool isWriting => !_isReading;
-
-        public int Length => length;
 
         /// <summary>
         /// Pickles the current buffer into the provided BitPacker.
@@ -126,7 +129,7 @@ namespace PurrNet.Packing
         public BitPacker Pickle(LZ4Level level = LZ4Level.L00_FAST)
         {
             var packer = BitPackerPool.Get();
-            packer.EnsureBitsExist(positionInBits);
+            packer.EnsureBitsExist(_positionInBits);
             PickleInto(packer, level);
             return packer;
         }
@@ -134,14 +137,14 @@ namespace PurrNet.Packing
         public void Advance(int count)
         {
             EnsureBitsExist(count * 8);
-            positionInBits += count * 8;
+            _positionInBits += count * 8;
         }
 
         public int AdvanceBits(int bitCount)
         {
             EnsureBitsExist(bitCount);
-            var old = positionInBits;
-            positionInBits += bitCount;
+            var old = _positionInBits;
+            _positionInBits += bitCount;
             return old;
         }
 
@@ -165,7 +168,7 @@ namespace PurrNet.Packing
         public void MakeWrapper(ByteData data)
         {
             _buffer = data.data;
-            positionInBits = data.offset * 8;
+            _positionInBits = data.offset * 8;
             isWrapper = true;
         }
 
@@ -181,7 +184,7 @@ namespace PurrNet.Packing
 
         public void ResetPosition()
         {
-            positionInBits = 0;
+            _positionInBits = 0;
         }
 
         public void ResetMode(bool readMode)
@@ -191,28 +194,28 @@ namespace PurrNet.Packing
 
         public void SetBitPosition(int bitPosition)
         {
-            positionInBits = bitPosition;
+            _positionInBits = bitPosition;
         }
 
         public void SkipBytes(int skip)
         {
-            positionInBits += skip * 8;
+            _positionInBits += skip * 8;
         }
 
         public void SkipBytes(uint skip)
         {
-            positionInBits += (int)skip * 8;
+            _positionInBits += (int)skip * 8;
         }
 
         public void ResetPositionAndMode(bool readMode)
         {
-            positionInBits = 0;
+            _positionInBits = 0;
             _isReading = readMode;
         }
 
         public void EnsureBitsExist(int bits)
         {
-            int targetPos = positionInBits + bits;
+            int targetPos = _positionInBits + bits;
             var bufferBitSize = _buffer.Length * 8;
 
             if (targetPos > bufferBitSize)
@@ -220,7 +223,7 @@ namespace PurrNet.Packing
                 if (_isReading)
                     throw new IndexOutOfRangeException("Not enough bits in the buffer. | " + targetPos + " > " +
                                                        bufferBitSize);
-                Array.Resize(ref _buffer, _buffer.Length * 2);
+                Array.Resize(ref _buffer, (_buffer.Length + bits) * 2);
             }
         }
 
@@ -295,7 +298,7 @@ namespace PurrNet.Packing
 
         public void WriteBits(BitPacker packer)
         {
-            var bits = packer.positionInBits;
+            var bits = packer._positionInBits;
 
             EnsureBitsExist(bits);
 
@@ -303,8 +306,8 @@ namespace PurrNet.Packing
             byte excess = (byte)(bits % 64);
 
             for (int i = 0; i < chunks; i++)
-                WriteBits(packer.ReadBits(64), 64);
-            WriteBits(packer.ReadBits(excess), excess);
+                WriteBitsWithoutChecks(packer.ReadBits(64), 64);
+            WriteBitsWithoutChecks(packer.ReadBits(excess), excess);
         }
 
         public void WriteBits(BitPacker packer, int bits)
@@ -315,14 +318,18 @@ namespace PurrNet.Packing
             byte excess = (byte)(bits % 64);
 
             for (int i = 0; i < chunks; i++)
-                WriteBits(packer.ReadBits(64), 64);
-            WriteBits(packer.ReadBits(excess), excess);
+                WriteBitsWithoutChecks(packer.ReadBits(64), 64);
+            WriteBitsWithoutChecks(packer.ReadBits(excess), excess);
         }
 
         public void WriteBits(ulong data, byte bits)
         {
             EnsureBitsExist(bits);
+            WriteBitsWithoutChecks(data, bits);
+        }
 
+        public void WriteBitsWithoutChecks(ulong data, byte bits)
+        {
             if (bits > 64)
                 throw new ArgumentOutOfRangeException(nameof(bits), "Cannot write more than 64 bits at a time.");
 
@@ -330,9 +337,11 @@ namespace PurrNet.Packing
 
             while (bitsLeft > 0)
             {
-                int bytePos = positionInBits / 8;
-                int bitOffset = positionInBits % 8;
-                int bitsToWrite = Math.Min(bitsLeft, 8 - bitOffset);
+                int bytePos = _positionInBits / 8;
+                int bitOffset = _positionInBits % 8;
+
+                int t = 8 - bitOffset;
+                int bitsToWrite = bitsLeft < t ? bitsLeft : t;
 
                 byte mask = (byte)((1 << bitsToWrite) - 1);
                 byte value = (byte)((data >> (bits - bitsLeft)) & mask);
@@ -341,7 +350,7 @@ namespace PurrNet.Packing
                 _buffer[bytePos] |= (byte)(value << bitOffset); // Set the bits
 
                 bitsLeft -= bitsToWrite;
-                positionInBits += bitsToWrite;
+                _positionInBits += bitsToWrite;
             }
         }
 
@@ -355,8 +364,8 @@ namespace PurrNet.Packing
 
             while (bitsLeft > 0)
             {
-                int bytePos = positionInBits / 8;
-                int bitOffset = positionInBits % 8;
+                int bytePos = _positionInBits / 8;
+                int bitOffset = _positionInBits % 8;
                 int bitsToRead = Math.Min(bitsLeft, 8 - bitOffset);
 
                 byte mask = (byte)((1 << bitsToRead) - 1);
@@ -365,7 +374,7 @@ namespace PurrNet.Packing
                 result |= (ulong)value << (bits - bitsLeft);
 
                 bitsLeft -= bitsToRead;
-                positionInBits += bitsToRead;
+                _positionInBits += bitsToRead;
             }
 
             return result;
@@ -435,11 +444,11 @@ namespace PurrNet.Packing
 
             // Process full 64-bit chunks
             for (int i = 0; i < fullChunks; i++)
-                WriteBits(other.ReadBits(64), 64);
+                WriteBitsWithoutChecks(other.ReadBits(64), 64);
 
             // Process excess bytes (remaining bytes before full 64-bit chunks)
             for (int i = 0; i < excess; i++)
-                WriteBits(other.ReadBits(8), 8);
+                WriteBitsWithoutChecks(other.ReadBits(8), 8);
         }
 
         public void WriteBytes(ReadOnlySpan<byte> bytes)
@@ -462,19 +471,19 @@ namespace PurrNet.Packing
                     longValue |= (ulong)bytes[index++] << (j * 8);
 
                 // Write the 64-bit chunk
-                WriteBits(longValue, 64);
+                WriteBitsWithoutChecks(longValue, 64);
             }
 
             // Process remaining excess bytes
             for (int i = 0; i < excess; i++)
             {
-                WriteBits(bytes[index++], 8);
+                WriteBitsWithoutChecks(bytes[index++], 8);
             }
         }
 
         public void SkipBits(int skip)
         {
-            positionInBits += skip;
+            _positionInBits += skip;
         }
 
         public void WriteString(Encoding utf8, string valueValue)
@@ -511,13 +520,17 @@ namespace PurrNet.Packing
 
         public void WriteAt(int positionInBits, bool data)
         {
-            WriteBitsAt(positionInBits, data ? 1UL : 0UL, 1);
+            WriteBitsAtWithoutChecks(positionInBits, data ? 1UL : 0UL, 1);
         }
 
         public void WriteBitsAt(int positionInBits, ulong data, byte bits)
         {
             EnsureBitsExist(positionInBits, bits);
+            WriteBitsAtWithoutChecks(positionInBits, data, bits);
+        }
 
+        void WriteBitsAtWithoutChecks(int positionInBits, ulong data, byte bits)
+        {
             if (bits > 64)
                 throw new ArgumentOutOfRangeException(nameof(bits), "Cannot write more than 64 bits at a time.");
 

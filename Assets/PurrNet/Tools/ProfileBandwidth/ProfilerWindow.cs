@@ -174,10 +174,10 @@ namespace PurrNet.Profiler.Editor
             // Add data from each sample
             foreach (var sample in Statistics.samples)
             {
-                receivedRpcData.Add(sample.receivedRpcs.Sum(rpc => rpc.data.Length));
-                sentRpcData.Add(sample.sentRpcs.Sum(rpc => rpc.data.Length));
-                receivedBroadcastData.Add(sample.receivedBroadcasts.Sum(b => b.data.Length));
-                sentBroadcastData.Add(sample.sentBroadcasts.Sum(b => b.data.Length));
+                receivedRpcData.Add(sample.receivedRpcs.Sum(rpc => rpc.data.length));
+                sentRpcData.Add(sample.sentRpcs.Sum(rpc => rpc.data.length));
+                receivedBroadcastData.Add(sample.receivedBroadcasts.Sum(b => b.data.length));
+                sentBroadcastData.Add(sample.sentBroadcasts.Sum(b => b.data.length));
                 forwardedBytesData.Add(sample.forwardedBytes.Sum());
             }
 
@@ -277,10 +277,10 @@ namespace PurrNet.Profiler.Editor
                         {
                             var sample = Statistics.samples[i];
                             string tooltip = $"Frame {i}\n" +
-                                            $"Received RPCs: {FormatBytes(sample.receivedRpcs.Sum(rpc => rpc.data.Length))}\n" +
-                                            $"Sent RPCs: {FormatBytes(sample.sentRpcs.Sum(rpc => rpc.data.Length))}\n" +
-                                            $"Received Broadcasts: {FormatBytes(sample.receivedBroadcasts.Sum(b => b.data.Length))}\n" +
-                                            $"Sent Broadcasts: {FormatBytes(sample.sentBroadcasts.Sum(b => b.data.Length))}\n" +
+                                            $"Received RPCs: {FormatBytes(sample.receivedRpcs.Sum(rpc => rpc.data.length))}\n" +
+                                            $"Sent RPCs: {FormatBytes(sample.sentRpcs.Sum(rpc => rpc.data.length))}\n" +
+                                            $"Received Broadcasts: {FormatBytes(sample.receivedBroadcasts.Sum(b => b.data.length))}\n" +
+                                            $"Sent Broadcasts: {FormatBytes(sample.sentBroadcasts.Sum(b => b.data.length))}\n" +
                                             $"Forwarded: {FormatBytes(sample.forwardedBytes.Sum())}";
 
                             GUI.tooltip = tooltip;
