@@ -342,7 +342,12 @@ namespace PurrNet.Modules
                     if (packer.positionInBytes + 10 >= MTU)
                     {
                         using var pickled = packer.Pickle(LZ4Level.L12_MAX);
-                        var batchData = new DeltaBatch { data = pickled, bitCount = packer.positionInBits};
+                        var batchData = new DeltaBatch
+                        {
+                            data = pickled,
+                            ogBitCount = packer.positionInBits,
+                            dataBitCount = pickled.positionInBits
+                        };
 
                         if (_asServer)
                             _broadcaster.Send(batch.playerId, batchData, Channel.Unreliable);
@@ -357,7 +362,12 @@ namespace PurrNet.Modules
                 if (packer.positionInBytes > 0)
                 {
                     using var pickled = packer.Pickle(LZ4Level.L12_MAX);
-                    var batchData = new DeltaBatch { data = pickled, bitCount = packer.positionInBits };
+                    var batchData = new DeltaBatch
+                    {
+                        data = pickled,
+                        ogBitCount = packer.positionInBits,
+                        dataBitCount = pickled.positionInBits
+                    };
 
                     if (_asServer)
                         _broadcaster.Send(batch.playerId, batchData, Channel.Unreliable);
@@ -375,14 +385,14 @@ namespace PurrNet.Modules
             using (data.data)
             {
                 using var packer = BitPackerPool.Get();
-                data.data.SetBitPosition(data.bitCount);
+                data.data.SetBitPosition(data.dataBitCount);
                 packer.UnpickleFrom(data.data);
                 packer.ResetPositionAndMode(false);
 
                 PackedUInt prevKey = default;
                 PackedUInt prevVal = default;
 
-                while (packer.positionInBits < data.bitCount)
+                while (packer.positionInBits < data.ogBitCount)
                 {
                     DeltaPacker<PackedUInt>.Read(packer, prevKey, ref prevKey);
                     DeltaPacker<PackedUInt>.Read(packer, prevVal, ref prevVal);

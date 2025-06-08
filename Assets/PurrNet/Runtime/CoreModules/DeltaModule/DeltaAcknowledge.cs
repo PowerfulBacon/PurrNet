@@ -17,7 +17,8 @@ namespace PurrNet.Modules
 
     internal struct DeltaBatch : IPackedAuto
     {
-        public PackedInt bitCount;
+        public PackedInt ogBitCount;
+        public PackedInt dataBitCount;
         public BitPacker data;
     }
 
