@@ -160,9 +160,6 @@ namespace PurrNet.Modules
                 PackedUInt newId = tracker.GenerateId();
                 Packer<PackedUInt>.Write(packer, newId);
                 tracker.Set(newId, newValue);
-
-                var clientDict = _sendingTrackers[player];
-                clientDict[hash] = tracker;
             }
             else
             {
@@ -209,10 +206,6 @@ namespace PurrNet.Modules
                 };
 
                 Batch(sender, data);
-
-                /*if (_asServer)
-                    _broadcaster.Send(sender, data, Channel.Unreliable);
-                else _broadcaster.SendToServer(data, Channel.Unreliable);*/
             }
             else if (lastConfirmedId != 0)
             {
@@ -279,10 +272,7 @@ namespace PurrNet.Modules
             if (!asServer)
                 player = default;
 
-            if (!_sendingTrackers.TryGetValue(player, out var clientDict) ||
-                !clientDict.TryGetValue(data.key, out var tracker))
-                return;
-
+            var tracker = GetOrCreateTracker<PackedUInt>(player, data.key, true);
             var removeUpTo = tracker.CleanupUpTo(MAX_HISTORY_TIME_ALIVE);
 
             if (removeUpTo > 0)

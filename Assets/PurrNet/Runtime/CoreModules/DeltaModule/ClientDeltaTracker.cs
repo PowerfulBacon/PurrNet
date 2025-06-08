@@ -96,13 +96,14 @@ namespace PurrNet.Modules
 
             for (int i = c - 1; i >= minIndex; i--)
             {
-                int dist = DeltaPacker<T>.GetNecessaryBitsToWrite(_history[i].value, value);
+                var entry = _history[i];
+                int dist = DeltaPacker<T>.GetNecessaryBitsToWrite(entry.value, value);
 
                 if (dist < minBits)
                 {
                     minBits = dist;
                     bestMatchIndex = i;
-                    key = _history[i].key;
+                    key = entry.key;
 
                     if (minBits == 0)
                         break;
@@ -114,7 +115,7 @@ namespace PurrNet.Modules
 
         public override uint CleanupUpTo(float maxAge)
         {
-            const int MAX_HISTORY_SIZE = 16;
+            const int MAX_HISTORY_SIZE = 256;
 
             // If the history is smaller than the maximum size, we don't need to clean up.
             if (_history.Count < MAX_HISTORY_SIZE)
