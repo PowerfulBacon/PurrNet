@@ -21,6 +21,20 @@ namespace PurrNet.Packing
         static DeltaWriteFunc<T> _write;
         static DeltaReadFunc<T> _read;
 
+        public static int GetNecessaryBitsToWrite(in T oldValue, in T newValue)
+        {
+            if (_write == null)
+            {
+                PurrLogger.LogError($"No delta writer for type '{typeof(T)}' is registered.");
+                return 0;
+            }
+
+            using var packer = BitPackerPool.Get();
+            if (_write(packer, oldValue, newValue))
+                return packer.positionInBits;
+            return 0;
+        }
+
         public static void Register(DeltaWriteFunc<T> write, DeltaReadFunc<T> read)
         {
             RegisterWriter(write);

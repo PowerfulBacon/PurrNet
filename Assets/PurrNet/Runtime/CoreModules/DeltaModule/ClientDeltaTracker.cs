@@ -7,16 +7,12 @@ namespace PurrNet.Modules
 {
     internal abstract class ClientDeltaTracker : IDisposable
     {
-        public uint lastConfirmedId;
-        public uint oldestIdInHistory;
         private uint nextId = 1;
 
         public uint GenerateId()
         {
             return nextId++;
         }
-
-        public abstract int Count { get; }
 
         public abstract uint CleanupUpTo(float maxAge);
 
@@ -87,7 +83,31 @@ namespace PurrNet.Modules
             return result;
         }
 
-        public override int Count => _history.Count;
+        public virtual int Count => _history.Count;
+
+        public int FindBestMatch(in T value, out uint key)
+        {
+            int minBits = int.MaxValue;
+            int bestMatchIndex = -1;
+            key = 0;
+
+            for (int i = _history.Count - 1; i >= 0; i--)
+            {
+                int dist = DeltaPacker<T>.GetNecessaryBitsToWrite(_history[i].value, value);
+
+                if (dist < minBits)
+                {
+                    minBits = dist;
+                    bestMatchIndex = i;
+                    key = _history[i].key;
+
+                    if (minBits == 0)
+                        break;
+                }
+            }
+
+            return bestMatchIndex;
+        }
 
         public override uint CleanupUpTo(float maxAge)
         {
@@ -158,6 +178,18 @@ namespace PurrNet.Modules
 
                 _history.Clear();
             }
+        }
+
+        public bool TryGetValueAtIndex(int id, out T o)
+        {
+            if (id < 0 || id >= _history.Count)
+            {
+                o = default;
+                return false;
+            }
+
+            o = _history[id].value;
+            return true;
         }
 
         public bool TryGetValue(uint id, out T o)

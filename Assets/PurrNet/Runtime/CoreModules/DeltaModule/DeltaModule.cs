@@ -111,18 +111,20 @@ namespace PurrNet.Modules
 
             T oldValue = default;
 
-            if (tracker.lastConfirmedId != 0)
+            int id = tracker.FindBestMatch(newValue, out var bestKey);
+
+            if (id >= 0)
             {
-                if (tracker.TryGetValue(tracker.lastConfirmedId, out var confirmedValue))
+                if (tracker.TryGetValueAtIndex(id, out var confirmedValue))
                     oldValue = confirmedValue;
                 else
                 {
-                    PurrLogger.LogError($"Confirmed value not found for key {hash} and {tracker.lastConfirmedId} and player {player}");
+                    PurrLogger.LogError($"Confirmed value not found for key {hash} and {id} and player {player}");
                     oldValue = default;
                 }
             }
 
-            Packer<PackedUInt>.Write(packer, tracker.lastConfirmedId);
+            Packer<PackedUInt>.Write(packer, bestKey);
 
             var pos = packer.positionInBits;
             Packer<bool>.Write(packer, false);
@@ -283,23 +285,19 @@ namespace PurrNet.Modules
 
             if (tracker.ContainsKey(data.valueId))
             {
-                if (data.valueId > tracker.lastConfirmedId)
+                var removeUpTo = tracker.CleanupUpTo(MAX_HISTORY_TIME_ALIVE);
+
+                if (removeUpTo > 0)
                 {
-                    tracker.lastConfirmedId = data.valueId;
-                    var removeUpTo = tracker.CleanupUpTo(MAX_HISTORY_TIME_ALIVE);
-
-                    if (removeUpTo > 0)
+                    var cleanupPacket = new DeltaCleanup
                     {
-                        var cleanupPacket = new DeltaCleanup
-                        {
-                            key = data.key,
-                            upToId = removeUpTo
-                        };
+                        key = data.key,
+                        upToId = removeUpTo
+                    };
 
-                        if (_asServer)
-                            _broadcaster.Send(player, cleanupPacket, Channel.Unreliable);
-                        else _broadcaster.SendToServer(cleanupPacket, Channel.Unreliable);
-                    }
+                    if (_asServer)
+                        _broadcaster.Send(player, cleanupPacket, Channel.Unreliable);
+                    else _broadcaster.SendToServer(cleanupPacket, Channel.Unreliable);
                 }
             }
         }
