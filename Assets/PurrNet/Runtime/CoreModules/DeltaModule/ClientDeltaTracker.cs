@@ -91,6 +91,14 @@ namespace PurrNet.Modules
 
         public override uint CleanupUpTo(float maxAge)
         {
+            if (_history.Count == 0)
+                return 0;
+
+            bool isFirstOldEnough = _history[0].enterTime < Time.unscaledTime - maxAge;
+
+            if (!isFirstOldEnough)
+                return 0;
+
             int removeUpTo = BinarySearchOlderThan(maxAge);
 
             for (int i = 0; i < removeUpTo; i++)

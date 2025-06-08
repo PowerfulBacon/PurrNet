@@ -286,16 +286,20 @@ namespace PurrNet.Modules
                 if (data.valueId > tracker.lastConfirmedId)
                 {
                     tracker.lastConfirmedId = data.valueId;
+                    var removeUpTo = tracker.CleanupUpTo(MAX_HISTORY_TIME_ALIVE);
 
-                    var cleanupPacket = new DeltaCleanup
+                    if (removeUpTo > 0)
                     {
-                        key = data.key,
-                        upToId = tracker.CleanupUpTo(MAX_HISTORY_TIME_ALIVE)
-                    };
+                        var cleanupPacket = new DeltaCleanup
+                        {
+                            key = data.key,
+                            upToId = removeUpTo
+                        };
 
-                    if (_asServer)
-                        _broadcaster.Send(player, cleanupPacket, Channel.Unreliable);
-                    else _broadcaster.SendToServer(cleanupPacket, Channel.Unreliable);
+                        if (_asServer)
+                            _broadcaster.Send(player, cleanupPacket, Channel.Unreliable);
+                        else _broadcaster.SendToServer(cleanupPacket, Channel.Unreliable);
+                    }
                 }
             }
         }
