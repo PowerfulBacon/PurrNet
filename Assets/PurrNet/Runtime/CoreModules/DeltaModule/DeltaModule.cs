@@ -254,10 +254,12 @@ namespace PurrNet.Modules
                 return;
             }
 
+            var entries = new DisposableList<DeltaAcknowledge>(16);
+            entries.Add(acknowledge);
             _acknowledgements.Add(new DeltaAcknowledgeBatch
             {
                 playerId = sender,
-                entries = new DisposableList<DeltaAcknowledge>(16)
+                entries = entries
             });
         }
 
@@ -284,7 +286,7 @@ namespace PurrNet.Modules
                 if (data.valueId > tracker.lastConfirmedId)
                 {
                     tracker.lastConfirmedId = data.valueId;
-                    
+
                     var cleanupPacket = new DeltaCleanup
                     {
                         key = data.key,
