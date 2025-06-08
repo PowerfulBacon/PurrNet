@@ -114,7 +114,7 @@ namespace PurrNet.Modules
 
         public override uint CleanupUpTo(float maxAge)
         {
-            const int MAX_HISTORY_SIZE = 1024;
+            const int MAX_HISTORY_SIZE = 16;
 
             // If the history is smaller than the maximum size, we don't need to clean up.
             if (_history.Count < MAX_HISTORY_SIZE)
