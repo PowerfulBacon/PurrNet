@@ -115,6 +115,11 @@ namespace PurrNet.Modules
             return typedTracker;
         }
 
+        public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue) where Key : struct, IStableHashable
+        {
+            PackedUInt cache = default;
+            return Write(packer, player, key, newValue, ref cache);
+        }
 
         public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue, ref PackedUInt cachedKey) where Key : struct, IStableHashable
         {
@@ -158,6 +163,12 @@ namespace PurrNet.Modules
             }
 
             return changed;
+        }
+
+        public void Read<Key, T>(BitPacker packer, Key key, PlayerID sender, ref T newValue) where Key : struct, IStableHashable
+        {
+            PackedUInt cachedKey = default;
+            Read(packer, key, sender, ref newValue, ref cachedKey);
         }
 
         public void Read<Key, T>(BitPacker packer, Key key, PlayerID sender, ref T newValue, ref PackedUInt cachedKey) where Key : struct, IStableHashable
