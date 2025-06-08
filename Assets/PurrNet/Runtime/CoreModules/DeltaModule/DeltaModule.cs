@@ -115,7 +115,24 @@ namespace PurrNet.Modules
             return typedTracker;
         }
 
-        public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue, bool validate = false) where Key : struct, IStableHashable
+        private bool _writingReliably;
+        private bool _readingReliably;
+        private PackedUInt _lastWrittenBestKey;
+        private PackedUInt _lastReadBestKey;
+
+        public void BeginWrite(bool reliable)
+        {
+            _writingReliably = reliable;
+            _lastWrittenBestKey = default;
+        }
+
+        public void BeginRead(bool reliable)
+        {
+            _readingReliably = reliable;
+            _lastReadBestKey = default;
+        }
+
+        public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue) where Key : struct, IStableHashable
         {
             var hash = GetKeyHash(key);
             var tracker = GetOrCreateTracker<T>(player, hash, true);
@@ -135,7 +152,12 @@ namespace PurrNet.Modules
                 }
             }
 
-            Packer<PackedUInt>.Write(packer, bestKey);
+            if (_writingReliably)
+            {
+                DeltaPacker<PackedUInt>.Write(packer, _lastWrittenBestKey, bestKey);
+                _lastWrittenBestKey = bestKey;
+            }
+            else Packer<PackedUInt>.Write(packer, bestKey);
 
             var pos = packer.positionInBits;
             Packer<bool>.Write(packer, false);
@@ -143,34 +165,15 @@ namespace PurrNet.Modules
 
             packer.WriteAt(pos, changed);
 
-            //Debug.Log($"WRITE: Changed: {changed} | Player: {player} | LastConfirmedId: {tracker.LastConfirmedId} | Old: {oldValue} | New: {newValue}");
-
             if (changed)
             {
-                if (validate)
-                {
-                    // validate that the delta packer is working correctly
-                    T testValue = default;
-                    using var tmp = BitPackerPool.Get();
-                    DeltaPacker<T>.Write(tmp, oldValue, newValue);
-                    var bitPosition = tmp.positionInBits;
-                    tmp.ResetPositionAndMode(true);
-                    DeltaPacker<T>.Read(tmp, oldValue, ref testValue);
-                    var newBitPosition = tmp.positionInBits;
-
-                    if (!Packer.AreEqual(newValue, testValue))
-                    {
-                        PurrLogger.LogError($"Delta packer failed to pack/unpack correctly for `{typeof(T).Name}`\nOld: {oldValue}\nNew: {newValue}\nRead: {testValue}");
-                    }
-                    else if (newBitPosition != bitPosition)
-                    {
-                        PurrLogger.LogError($"Delta packer failed to pack/unpack correctly for `{typeof(T).Name}`\nOld: {oldValue}\nNew: {newValue}\nRead: {testValue}");
-                    }
-                }
-
                 PackedUInt newId = tracker.GenerateId();
-                Packer<PackedUInt>.Write(packer, newId);
+                DeltaPacker<PackedUInt>.Write(packer, bestKey, newId);
                 tracker.Set(newId, newValue);
+
+                // if we are reliable ordered, we can assume that the id is valid for next writes
+                if (_writingReliably)
+                    tracker.ValidateId(newId);
             }
             else
             {
@@ -192,7 +195,13 @@ namespace PurrNet.Modules
 
             bool changed = false;
             PackedUInt valueId = default;
-            Packer<bool>.Read(packer, ref changed);
+
+            if (_readingReliably)
+            {
+                DeltaPacker<PackedUInt>.Read(packer, _lastReadBestKey, ref valueId);
+                _lastReadBestKey = valueId;
+            }
+            else Packer<bool>.Read(packer, ref changed);
 
             if (changed)
             {
@@ -206,17 +215,19 @@ namespace PurrNet.Modules
                 }
 
                 DeltaPacker<T>.Read(packer, oldValue, ref newValue);
-                Packer<PackedUInt>.Read(packer, ref valueId);
+                DeltaPacker<PackedUInt>.Read(packer, valueId, ref valueId);
 
                 tracker.Set(valueId, newValue);
 
-                var data = new DeltaAcknowledge
+                if (!_readingReliably)
                 {
-                    key = keyHash,
-                    valueId = valueId
-                };
-
-                Batch(sender, data);
+                    var data = new DeltaAcknowledge
+                    {
+                        key = keyHash,
+                        valueId = valueId
+                    };
+                    Batch(sender, data);
+                }
             }
             else if (lastConfirmedId != 0)
             {
