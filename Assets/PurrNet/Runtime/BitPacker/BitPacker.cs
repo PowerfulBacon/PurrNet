@@ -1,7 +1,6 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Text;
 using JetBrains.Annotations;
 using K4os.Compression.LZ4;
