@@ -375,7 +375,9 @@ namespace PurrNet.Modules
             using (data.data)
             {
                 using var packer = BitPackerPool.Get();
+                data.data.SetBitPosition(data.bitCount);
                 packer.UnpickleFrom(data.data);
+                packer.ResetPositionAndMode(false);
 
                 PackedUInt prevKey = default;
                 PackedUInt prevVal = default;
