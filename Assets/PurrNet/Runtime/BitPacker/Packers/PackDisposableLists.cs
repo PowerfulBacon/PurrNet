@@ -50,15 +50,31 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static bool WriteDisposableDeltaList<T>(this BitPacker packer, DisposableList<T> old, DisposableList<T> value)
         {
-            if (Packer.AreEqual(old, value))
+            var start = packer.AdvanceBits(1);
+
+            bool hasChanged;
+
+            PackedInt oldCount = old.isDisposed ? -1 : old.Count;
+            PackedInt newCount = value.isDisposed ? -1 : value.Count;
+
+            hasChanged = DeltaPacker<PackedInt>.Write(packer, oldCount, newCount);
+
+            if (newCount > 0)
             {
-                Packer<bool>.Write(packer, true);
-                return false;
+                for (int i = 0; i < newCount.value; i++)
+                {
+                    var oldValue = i < oldCount.value ? old[i] : default;
+                    var newValue = i < newCount.value ? value[i] : default;
+                    hasChanged = DeltaPacker<T>.Write(packer, oldValue, newValue) || hasChanged;
+                }
             }
 
-            Packer<bool>.Write(packer, false);
-            WriteDisposableList(packer, value);
-            return true;
+            packer.WriteAt(start, hasChanged);
+
+            if (!hasChanged)
+                packer.SetBitPosition(start + 1);
+
+            return hasChanged;
         }
 
         [UsedByIL]
@@ -74,17 +90,28 @@ namespace PurrNet.Packing
                 return;
             }
 
-            /*uint isEqualUpTo = 0;
+            PackedInt count = default;
+            PackedInt oldCount = old.isDisposed ? -1 : old.Count;
 
-            for (int i = 0; i < old.Count; i++, isEqualUpTo++)
+            DeltaPacker<PackedInt>.Read(packer, oldCount, ref count);
+
+            if (count < 0)
             {
-                if (!Packer.AreEqual(old[i], value[i]))
-                    break;
+                value.Dispose();
+                return;
             }
 
-            Packer<PackedUInt>.Write(packer, isEqualUpTo);*/
+            if (value.isDisposed)
+                value = new DisposableList<T>(count.value);
+            else value.Clear();
 
-            ReadDisposableList(packer, ref value);
+            for (int i = 0; i < count; i++)
+            {
+                var oldValue = i < oldCount ? old[i] : default;
+                T newValue = default;
+                DeltaPacker<T>.Read(packer, oldValue, ref newValue);
+                value.Add(newValue);
+            }
         }
     }
 }
