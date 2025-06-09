@@ -300,7 +300,7 @@ namespace PurrNet
         /// It will return the owner of the closest parent object.
         /// If you can, cache this value for performance.
         /// </summary>
-        public PlayerID? owner => internalOwnerServer ?? internalOwnerClient;
+        public PlayerID? owner => isServer ? internalOwnerServer : internalOwnerClient;
 
         public NetworkManager networkManager { get; private set; }
 
