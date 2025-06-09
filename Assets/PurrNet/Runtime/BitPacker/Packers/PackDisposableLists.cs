@@ -80,8 +80,7 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static void ReadDisposableDeltaList<T>(this BitPacker packer, DisposableList<T> old, ref DisposableList<T> value)
         {
-            bool hasChanged = default;
-            packer.Read(ref hasChanged);
+            bool hasChanged = packer.ReadBits(1) == 1;
 
             if (!hasChanged)
             {
