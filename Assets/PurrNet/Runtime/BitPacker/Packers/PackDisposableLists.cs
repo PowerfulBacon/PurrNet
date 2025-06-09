@@ -64,7 +64,7 @@ namespace PurrNet.Packing
                 for (int i = 0; i < newCount.value; i++)
                 {
                     var oldValue = i < oldCount.value ? old[i] : default;
-                    var newValue = i < newCount.value ? value[i] : default;
+                    var newValue = value[i];
                     hasChanged = DeltaPacker<T>.Write(packer, oldValue, newValue) || hasChanged;
                 }
             }
@@ -107,7 +107,7 @@ namespace PurrNet.Packing
 
             for (int i = 0; i < count; i++)
             {
-                var oldValue = i < oldCount ? old[i] : default;
+                var oldValue = i < oldCount.value ? old[i] : default;
                 T newValue = default;
                 DeltaPacker<T>.Read(packer, oldValue, ref newValue);
                 value.Add(newValue);
