@@ -12,7 +12,6 @@ namespace PurrNet
         }
     }
 
-    /*[AttributeUsage(AttributeTargets.Method), Preserve]
-    public class RegisterGenericPackerAttribute : PreserveAttribute
-    { }*/
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true), Preserve]
+    public class DontPackAttribute : Attribute { }
 }

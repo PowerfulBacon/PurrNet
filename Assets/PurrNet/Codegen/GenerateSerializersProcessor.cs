@@ -614,12 +614,21 @@ namespace PurrNet.Codegen
                 if (isDelegate)
                     continue;
 
+                bool ignore = field.CustomAttributes.Any(a =>
+                    a.AttributeType.FullName == typeof(DontPackAttribute).FullName);
+
+                if (ignore)
+                    continue;
+
                 var fieldType = ResolveGenericFieldType(field, typeRef);
                 var genericM = CreateGenericMethod(packerType, fieldType, serialize, mainmodule);
 
                 // make field public
                 if (!field.IsPublic)
                 {
+                    if (GenerateDeltaSerializersProcessor.ShouldSkipProperty(type, field))
+                        continue;
+
                     if (isWriting)
                     {
                         var getter = CreateGetterMethod(type, field);
