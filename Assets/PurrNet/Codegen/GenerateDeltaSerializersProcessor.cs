@@ -131,9 +131,6 @@ namespace PurrNet.Codegen
 
                     if (!field.IsPublic)
                     {
-                        if (ShouldSkipProperty(type, field))
-                            continue;
-
                         var variable = new VariableDefinition(fieldType);
                         method.Body.Variables.Add(variable);
 
@@ -195,20 +192,6 @@ namespace PurrNet.Codegen
             il.Emit(OpCodes.Stobj, typeRef);
 
             il.Append(endOfFunction);
-        }
-
-        public static bool ShouldSkipProperty(TypeDefinition type, FieldDefinition field)
-        {
-            foreach (var prop in type.Properties)
-            {
-                if (prop.Name == field.Name && prop.GetMethod != null && prop.SetMethod != null)
-                {
-                    bool hasDontPackAttribute = prop.CustomAttributes.Any(a =>
-                        a.AttributeType.FullName == typeof(DontPackAttribute).FullName);
-                    return hasDontPackAttribute;
-                }
-            }
-            return false;
         }
 
         private static void CreateWriteMethod(ModuleDefinition module, MethodDefinition method, TypeReference typeRef,
@@ -313,9 +296,6 @@ namespace PurrNet.Codegen
 
                     if (!field.IsPublic)
                     {
-                        if (ShouldSkipProperty(type, field))
-                            continue;
-
                         var variable = new VariableDefinition(fieldType);
                         method.Body.Variables.Add(variable);
 

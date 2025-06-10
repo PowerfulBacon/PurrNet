@@ -12,6 +12,6 @@ namespace PurrNet
         }
     }
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true), Preserve]
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = true), Preserve]
     public class DontPackAttribute : Attribute { }
 }

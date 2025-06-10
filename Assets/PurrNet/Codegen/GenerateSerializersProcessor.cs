@@ -626,9 +626,6 @@ namespace PurrNet.Codegen
                 // make field public
                 if (!field.IsPublic)
                 {
-                    if (GenerateDeltaSerializersProcessor.ShouldSkipProperty(type, field))
-                        continue;
-
                     if (isWriting)
                     {
                         var getter = CreateGetterMethod(type, field);
