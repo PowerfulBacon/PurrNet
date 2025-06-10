@@ -9,6 +9,13 @@
       },
       "hash": "1921fb03fe903a64f9244106f3152c41404c2fc5"
     },
+    "com.cysharp.unitask": {
+      "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "f213ff497e4ff462a77319cf677cf20cc0860ca9"
+    },
     "com.github.kurotu.unity-terminal-launcher": {
       "version": "https://github.com/kurotu/UnityTerminalLauncher.git",
       "depth": 0,
