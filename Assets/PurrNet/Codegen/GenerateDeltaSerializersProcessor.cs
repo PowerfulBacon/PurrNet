@@ -97,8 +97,6 @@ namespace PurrNet.Codegen
                 il.Emit(OpCodes.Ldarg_1);
                 il.Emit(OpCodes.Ldloca, tmpVar);
                 il.Emit(OpCodes.Call, enumReadMethod);
-                il.Emit(OpCodes.Pop);
-
                 il.Emit(OpCodes.Ldarg_2);
                 il.Emit(OpCodes.Ldloc_1);
                 GenerateSerializersProcessor.EmitStindForEnum(il, type);
