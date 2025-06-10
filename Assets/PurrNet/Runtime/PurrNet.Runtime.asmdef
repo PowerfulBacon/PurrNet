@@ -20,6 +20,12 @@
     ],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.cysharp.unitask",
+            "expression": "",
+            "define": "UNITASK_PURRNET_SUPPORT"
+        }
+    ],
     "noEngineReferences": false
 }

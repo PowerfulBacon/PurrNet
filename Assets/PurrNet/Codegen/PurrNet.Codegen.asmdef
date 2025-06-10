@@ -22,6 +22,11 @@
             "name": "com.unity.nuget.mono-cecil",
             "expression": "",
             "define": "UNITY_MONO_CECIL"
+        },
+        {
+            "name": "com.cysharp.unitask",
+            "expression": "",
+            "define": "UNITASK_PURRNET_SUPPORT"
         }
     ],
     "noEngineReferences": false

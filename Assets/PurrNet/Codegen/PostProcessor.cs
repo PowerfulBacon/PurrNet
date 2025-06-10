@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+#if UNITASK_PURRNET_SUPPORT
 using Cysharp.Threading.Tasks;
+#endif
 using JetBrains.Annotations;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -906,6 +908,7 @@ namespace PurrNet.Codegen
                 return true;
             }
 
+#if UNITASK_PURRNET_SUPPORT
             bool isUniTask = method.ReturnType.FullName == typeof(UniTask).FullName;
 
             if (isUniTask)
@@ -919,7 +922,7 @@ namespace PurrNet.Codegen
                 mode = ReturnMode.UniTask;
                 return true;
             }
-
+#endif
             return false;
         }
 

@@ -23,6 +23,11 @@
             "name": "com.codewriter.triinspector",
             "expression": "",
             "define": "TRI_INSPECTOR_PACKAGE"
+        },
+        {
+            "name": "com.cysharp.unitask",
+            "expression": "",
+            "define": "UNITASK_PURRNET_SUPPORT"
         }
     ],
     "noEngineReferences": false

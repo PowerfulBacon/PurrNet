@@ -3026,8 +3026,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _stopPlayingOnDisconnect: 0
-  _startServerFlags: -1
-  _startClientFlags: -1
+  _startServerFlags: 9
+  _startClientFlags: 7
   _cookieScope: 1
   _dontDestroyOnLoad: 0
   _transport: {fileID: 1216416902}
@@ -3083,7 +3083,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _serverPort: 5001
   _maxConnections: 100
-  _address: 127.0.0.1
+  _address: localhost
   _query: 
   _path: 
   _pollEventsInUpdate: 0
