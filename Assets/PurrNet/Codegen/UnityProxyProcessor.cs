@@ -24,6 +24,9 @@ namespace PurrNet.Codegen
                 string objectClassFullName = typeof(UnityEngine.Object).FullName;
                 var unityProxyType = module.GetTypeReference(typeof(UnityProxy)).Import(module).Resolve();
 
+                if (unityProxyType == null)
+                    return;
+
                 foreach (var method in type.Methods)
                 {
                     if (method.Body == null) continue;
