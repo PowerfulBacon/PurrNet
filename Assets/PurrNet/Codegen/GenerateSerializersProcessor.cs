@@ -934,7 +934,7 @@ namespace PurrNet.Codegen
             return valueField?.FieldType;
         }
 
-        private static void EmitStindForEnum(ILProcessor il, TypeDefinition enumType)
+        public static void EmitStindForEnum(ILProcessor il, TypeDefinition enumType)
         {
             if (!enumType.IsEnum)
             {

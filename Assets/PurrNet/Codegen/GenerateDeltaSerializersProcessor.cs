@@ -80,80 +80,102 @@ namespace PurrNet.Codegen
 
             if (type.IsEnum)
             {
-                il.Append(endOfFunction);
-                return;
-            }
-
-            foreach (var field in type.Fields)
-            {
-                if (field.IsStatic)
-                    continue;
-
-                bool isDelegate = PostProcessor.InheritsFrom(field.FieldType.Resolve(), typeof(Delegate).FullName);
-
-                if (isDelegate)
-                    continue;
-
-                var fieldType = GenerateSerializersProcessor.ResolveGenericFieldType(field, typeRef);
-
-                if (fieldType == null)
-                    continue;
-
-                var packer =
-                    GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, fieldType, deltaSerializer,
+                var underlyingType = type.GetField("value__").FieldType;
+                var enumReadMethod =
+                    GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, underlyingType, deltaSerializer,
                         module);
 
-                if (!field.IsPublic)
+                var tmpVar = new VariableDefinition(underlyingType);
+
+                method.Body.Variables.Add(tmpVar);
+                il.Emit(OpCodes.Ldc_I4_0);
+                il.Emit(OpCodes.Stloc_1);
+
+                il.Emit(OpCodes.Ldarg_0);
+
+                // load the address of the field
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Ldloca, tmpVar);
+                il.Emit(OpCodes.Call, enumReadMethod);
+                il.Emit(OpCodes.Pop);
+
+                il.Emit(OpCodes.Ldarg_2);
+                il.Emit(OpCodes.Ldloc_1);
+                GenerateSerializersProcessor.EmitStindForEnum(il, type);
+            }
+            else
+            {
+                foreach (var field in type.Fields)
                 {
-                    var variable = new VariableDefinition(fieldType);
-                    method.Body.Variables.Add(variable);
+                    if (field.IsStatic)
+                        continue;
 
-                    var getter = GenerateSerializersProcessor.MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}");
-                    var setter = GenerateSerializersProcessor.MakeFullNameValidCSharp($"Purrnet_Set_{field.Name}");
+                    bool isDelegate = PostProcessor.InheritsFrom(field.FieldType.Resolve(), typeof(Delegate).FullName);
 
-                    var getterReference = new MethodReference(getter, fieldType, typeRef)
+                    if (isDelegate)
+                        continue;
+
+                    var fieldType = GenerateSerializersProcessor.ResolveGenericFieldType(field, typeRef);
+
+                    if (fieldType == null)
+                        continue;
+
+                    var packer =
+                        GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, fieldType, deltaSerializer,
+                            module);
+
+                    if (!field.IsPublic)
                     {
-                        HasThis = true
-                    };
+                        var variable = new VariableDefinition(fieldType);
+                        method.Body.Variables.Add(variable);
 
-                    var setterReference = new MethodReference(setter, module.TypeSystem.Void, typeRef)
-                    {
-                        HasThis = true
-                    };
+                        var getter = GenerateSerializersProcessor.MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}");
+                        var setter = GenerateSerializersProcessor.MakeFullNameValidCSharp($"Purrnet_Set_{field.Name}");
 
-                    setterReference.Parameters.Add(
-                        new ParameterDefinition("value", ParameterAttributes.None, fieldType));
+                        var getterReference = new MethodReference(getter, fieldType, typeRef)
+                        {
+                            HasThis = true
+                        };
 
+                        var setterReference = new MethodReference(setter, module.TypeSystem.Void, typeRef)
+                        {
+                            HasThis = true
+                        };
+
+                        setterReference.Parameters.Add(
+                            new ParameterDefinition("value", ParameterAttributes.None, fieldType));
+
+                        il.Emit(OpCodes.Ldarg_0);
+
+                        if (isClass)
+                            il.Emit(OpCodes.Ldarg_1);
+                        else il.Emit(OpCodes.Ldarga_S, oldValueArg);
+
+                        il.Emit(OpCodes.Call, getterReference);
+
+                        il.Emit(OpCodes.Ldloca, variable);
+                        il.Emit(OpCodes.Call, packer);
+
+                        il.Emit(OpCodes.Ldarg_2);
+                        if (isClass) il.Emit(OpCodes.Ldind_Ref);
+                        il.Emit(OpCodes.Ldloc, variable);
+                        il.Emit(OpCodes.Call, setterReference);
+
+                        continue;
+                    }
+
+                    var fieldRef = new FieldReference(field.Name, field.FieldType, typeRef).Import(module);
                     il.Emit(OpCodes.Ldarg_0);
 
-                    if (isClass)
-                        il.Emit(OpCodes.Ldarg_1);
-                    else il.Emit(OpCodes.Ldarga_S, oldValueArg);
-
-                    il.Emit(OpCodes.Call, getterReference);
-
-                    il.Emit(OpCodes.Ldloca, variable);
-                    il.Emit(OpCodes.Call, packer);
+                    il.Emit(OpCodes.Ldarg_1);
+                    il.Emit(OpCodes.Ldfld, fieldRef);
 
                     il.Emit(OpCodes.Ldarg_2);
                     if (isClass) il.Emit(OpCodes.Ldind_Ref);
-                    il.Emit(OpCodes.Ldloc, variable);
-                    il.Emit(OpCodes.Call, setterReference);
+                    il.Emit(OpCodes.Ldflda, fieldRef);
 
-                    continue;
+                    il.Emit(OpCodes.Call, packer);
                 }
-
-                var fieldRef = new FieldReference(field.Name, field.FieldType, typeRef).Import(module);
-                il.Emit(OpCodes.Ldarg_0);
-
-                il.Emit(OpCodes.Ldarg_1);
-                il.Emit(OpCodes.Ldfld, fieldRef);
-
-                il.Emit(OpCodes.Ldarg_2);
-                if (isClass) il.Emit(OpCodes.Ldind_Ref);
-                il.Emit(OpCodes.Ldflda, fieldRef);
-
-                il.Emit(OpCodes.Call, packer);
             }
 
             il.Emit(OpCodes.Br, endOfFunction);
@@ -225,78 +247,90 @@ namespace PurrNet.Codegen
 
             if (type.IsEnum)
             {
-                il.Emit(OpCodes.Ldc_I4_0);
-                il.Emit(OpCodes.Ret);
-                return;
-            }
-
-            for (var i = 0; i < type.Fields.Count; i++)
-            {
-                var field = type.Fields[i];
-                if (field.IsStatic)
-                    continue;
-
-                bool isDelegate = PostProcessor.InheritsFrom(field.FieldType.Resolve(), typeof(Delegate).FullName);
-
-                if (isDelegate)
-                    continue;
-
-                var fieldType = GenerateSerializersProcessor.ResolveGenericFieldType(field, typeRef);
-
-                if (fieldType == null)
-                    continue;
-
-                var packer =
-                    GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, fieldType, deltaSerializer,
+                var underlyingType = type.GetField("value__").FieldType;
+                var enumWriteMethod =
+                    GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, underlyingType, deltaSerializer,
                         module);
 
-                if (!field.IsPublic)
-                {
-                    var variable = new VariableDefinition(fieldType);
-                    method.Body.Variables.Add(variable);
+                il.Emit(OpCodes.Ldarg_0);
 
-                    var getter = GenerateSerializersProcessor.MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}");
-                    var getterReference = new MethodReference(getter, fieldType, typeRef)
-                    {
-                        HasThis = true
-                    };
-
-                    il.Emit(OpCodes.Ldarg_0);
-
-                    if (isClass)
-                        il.Emit(OpCodes.Ldarg_1);
-                    else il.Emit(OpCodes.Ldarga_S, oldValueArg);
-
-                    il.Emit(OpCodes.Call, getterReference);
-
-                    if (isClass)
-                        il.Emit(OpCodes.Ldarg_2);
-                    else il.Emit(OpCodes.Ldarga_S, valueArg);
-
-                    il.Emit(OpCodes.Call, getterReference);
-                }
-                else
-                {
-                    var fieldRef = new FieldReference(field.Name, field.FieldType, typeRef).Import(module);
-
-                    il.Emit(OpCodes.Ldarg_0);
-
-                    il.Emit(OpCodes.Ldarg_1);
-                    il.Emit(OpCodes.Ldfld, fieldRef);
-
-                    il.Emit(OpCodes.Ldarg_2);
-                    il.Emit(OpCodes.Ldfld, fieldRef);
-                }
-
-                il.Emit(OpCodes.Call, packer);
-
-                if (i > 0)
-                {
-                    il.Emit(OpCodes.Ldloc_1);
-                    il.Emit(OpCodes.Or);
-                }
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Ldarg_2);
+                il.Emit(OpCodes.Call, enumWriteMethod);
 
                 il.Emit(OpCodes.Stloc_1);
+            }
+            else
+            {
+
+                for (var i = 0; i < type.Fields.Count; i++)
+                {
+                    var field = type.Fields[i];
+                    if (field.IsStatic)
+                        continue;
+
+                    bool isDelegate = PostProcessor.InheritsFrom(field.FieldType.Resolve(), typeof(Delegate).FullName);
+
+                    if (isDelegate)
+                        continue;
+
+                    var fieldType = GenerateSerializersProcessor.ResolveGenericFieldType(field, typeRef);
+
+                    if (fieldType == null)
+                        continue;
+
+                    var packer =
+                        GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, fieldType, deltaSerializer,
+                            module);
+
+                    if (!field.IsPublic)
+                    {
+                        var variable = new VariableDefinition(fieldType);
+                        method.Body.Variables.Add(variable);
+
+                        var getter = GenerateSerializersProcessor.MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}");
+                        var getterReference = new MethodReference(getter, fieldType, typeRef)
+                        {
+                            HasThis = true
+                        };
+
+                        il.Emit(OpCodes.Ldarg_0);
+
+                        if (isClass)
+                            il.Emit(OpCodes.Ldarg_1);
+                        else il.Emit(OpCodes.Ldarga_S, oldValueArg);
+
+                        il.Emit(OpCodes.Call, getterReference);
+
+                        if (isClass)
+                            il.Emit(OpCodes.Ldarg_2);
+                        else il.Emit(OpCodes.Ldarga_S, valueArg);
+
+                        il.Emit(OpCodes.Call, getterReference);
+                    }
+                    else
+                    {
+                        var fieldRef = new FieldReference(field.Name, field.FieldType, typeRef).Import(module);
+
+                        il.Emit(OpCodes.Ldarg_0);
+
+                        il.Emit(OpCodes.Ldarg_1);
+                        il.Emit(OpCodes.Ldfld, fieldRef);
+
+                        il.Emit(OpCodes.Ldarg_2);
+                        il.Emit(OpCodes.Ldfld, fieldRef);
+                    }
+
+                    il.Emit(OpCodes.Call, packer);
+
+                    if (i > 0)
+                    {
+                        il.Emit(OpCodes.Ldloc_1);
+                        il.Emit(OpCodes.Or);
+                    }
+
+                    il.Emit(OpCodes.Stloc_1);
+                }
             }
 
             // WriteAt
