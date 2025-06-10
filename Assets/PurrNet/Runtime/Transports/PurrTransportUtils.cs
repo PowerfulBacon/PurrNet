@@ -5,7 +5,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEngine;
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+#if UNITY_WEB
 using UnityEngine.Networking;
+#endif
 
 namespace PurrNet.Transports
 {
@@ -48,15 +51,21 @@ namespace PurrNet.Transports
 
     public static class PurrTransportUtils
     {
-        static async Task<string> Get(string url)
+        static async Task<string> Get([UsedImplicitly] string url)
         {
+#if UNITY_WEB
             var request = UnityWebRequest.Get(url);
             var response = await request.SendWebRequest();
             return response.webRequest.downloadHandler.text;
+
+#else
+            throw new NotSupportedException("You need the `com.unity.modules.unitywebrequest` package to use this.");
+#endif
         }
 
         internal static async Task<ClientJoinInfo> Join(string server, string roomName)
         {
+#if UNITY_WEB
             var url = $"{server}join";
             var request = UnityWebRequest.Get(url);
             request.SetRequestHeader("name", roomName);
@@ -69,10 +78,14 @@ namespace PurrNet.Transports
             res.ssl = true;
 #endif
             return res;
+#else
+            throw new NotSupportedException("You need the `com.unity.modules.unitywebrequest` package to use this.");
+#endif
         }
 
         internal static async Task<HostJoinInfo> Alloc(string server, string region, string roomName)
         {
+#if UNITY_WEB
             var url = $"{server}allocate_ws";
 
             var request = UnityWebRequest.Get(url);
@@ -87,15 +100,22 @@ namespace PurrNet.Transports
             res.ssl = true;
 #endif
             return res;
+#else
+            throw new NotSupportedException("You need the `com.unity.modules.unitywebrequest` package to use this.");
+#endif
         }
 
-        static async Task<float> PingInMS(string url)
+        static async Task<float> PingInMS([UsedImplicitly] string url)
         {
+#if UNITY_WEB
             var request = UnityWebRequest.Get(url);
             var sent = DateTime.Now;
             await request.SendWebRequest();
             var received = DateTime.Now;
             return (float)(received - sent).TotalSeconds;
+#else
+            throw new NotSupportedException("You need the `com.unity.modules.unitywebrequest` package to use this.");
+#endif
         }
 
         public static async Task<Relayers> GetRelayServersAsync(string server)

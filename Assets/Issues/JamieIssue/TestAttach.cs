@@ -1,3 +1,4 @@
+#if UNITY_PHYSICS_3D
 using PurrNet;
 using UnityEngine;
 using CompressionLevel = PurrNet.CompressionLevel;
@@ -54,7 +55,7 @@ public class TestAttach : NetworkBehaviour
     {
         ServerSetPlayerIDAsOwner(null);
     }
-    
+
     [ServerRpc(requireOwnership: false, compressionLevel: CompressionLevel.Best)]
     private void SendSomeBigChunkOfData(PlayerID? playerID)
     {
@@ -74,3 +75,4 @@ public class TestAttach : NetworkBehaviour
         }
     }
 }
+#endif

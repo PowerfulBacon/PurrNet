@@ -1165,29 +1165,37 @@ namespace PurrNet.Modules
 
         static void SetLocalPosAndRot(Transform t, Vector3 pos, Quaternion rot, Vector3 scale)
         {
+#if UNITY_PHYSICS_3D
             var cc = t.GetComponent<CharacterController>();
             bool wasCCEnabled = cc && cc.enabled;
 
             if (wasCCEnabled)
                 cc.enabled = false;
+#endif
 
             t.SetLocalPositionAndRotation(pos, rot);
             t.localScale = scale;
 
+#if UNITY_PHYSICS_3D
             if (t.TryGetComponent<Rigidbody>(out var rb))
             {
                 rb.position = t.position;
                 rb.rotation = t.rotation;
             }
+#endif
 
+#if UNITY_PHYSICS_2D
             if (t.TryGetComponent<Rigidbody2D>(out var rb2d))
             {
                 rb2d.position = t.position;
                 rb2d.rotation = t.rotation.eulerAngles.z;
             }
+#endif
 
+#if UNITY_PHYSICS_3D
             if (wasCCEnabled)
                 cc.enabled = true;
+#endif
         }
 
         public GameObject CreatePrototype(GameObjectPrototype prototype, List<NetworkIdentity> createdNids)

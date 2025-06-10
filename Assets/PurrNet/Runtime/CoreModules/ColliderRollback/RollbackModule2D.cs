@@ -1,3 +1,5 @@
+#if UNITY_PHYSICS_2D
+
 using UnityEngine;
 
 namespace PurrNet.Modules
@@ -162,3 +164,5 @@ namespace PurrNet.Modules
         }
     }
 }
+
+#endif

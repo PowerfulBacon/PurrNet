@@ -3,7 +3,6 @@ using PurrNet;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Utils;
-using TriInspector;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -30,7 +29,7 @@ namespace SpellBound.Core {
             _playerSpawner.OnPlayerSpawned -= HandlePlayerSpawned;
         }
 
-        [Button("LoadGame")]
+        [PurrButton("LoadGame")]
         public void LoadGame()
         {
             StartCoroutine(LoadGameCoroutine(!ApplicationContext.isClone));
@@ -153,7 +152,7 @@ namespace SpellBound.Core {
             NetworkManager.main.StartClient();
         }
 
-        [Button("HandleTerrainLoaded")]
+        [PurrButton("HandleTerrainLoaded")]
         public void HandleTerrainLoaded() {
             Debug.Log("First line of HandleTerrainLoaded.");
             var worldScene = SceneManager.GetSceneByName(WorldSceneName);

@@ -1,3 +1,5 @@
+#if UNITY_PHYSICS_3D
+
 using UnityEngine;
 
 namespace PurrNet.Examples.TopDownShooter
@@ -15,10 +17,12 @@ namespace PurrNet.Examples.TopDownShooter
         {
             if (!Input.GetMouseButtonDown(0))
                 return;
-            
+
             var trs = transform;
 
             UnityProxy.Instantiate(bulletPrefab, trs.position + trs.forward * 0.5f + Vector3.up * 0.7f, trs.rotation);
         }
     }
 }
+
+#endif

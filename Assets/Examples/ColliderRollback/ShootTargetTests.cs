@@ -4,23 +4,27 @@ using UnityEngine;
 public class ShootTargetTests : NetworkBehaviour
 {
     [SerializeField] private Camera _camera;
-    
+
     private void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
             var shootTarget = _camera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 5));
             var ray = new Ray(transform.position, shootTarget - transform.position);
-            
+
             transform.localRotation = Quaternion.LookRotation(ray.direction);
 
+#if UNITY_PHYSICS_3D
             if (Physics.Raycast(ray, out var hit))
                 Debug.DrawLine(hit.point, hit.point + hit.normal, Color.red, 5f);
+#endif
 
+#if UNITY_PHYSICS_2D
             var hit2D = Physics2D.Raycast(ray.origin, ray.direction);
             if (hit2D.collider != null)
                 Debug.DrawLine(hit2D.point, hit2D.point + hit2D.normal, Color.blue, 5f);
-            
+#endif
+
             Shoot(rollbackTick, ray);
         }
     }
@@ -28,11 +32,15 @@ public class ShootTargetTests : NetworkBehaviour
     [ServerRpc(requireOwnership: false)]
     private void Shoot(double preciseTick, Ray ray)
     {
+#if UNITY_PHYSICS_3D
         if (rollbackModule.Raycast(preciseTick, ray, out var hit))
             Debug.DrawLine(hit.point, hit.point + hit.normal, Color.green, 5f);
-        
+#endif
+
+#if UNITY_PHYSICS_2D
         var ray2d = new Ray2D(ray.origin, ray.direction);
         if (rollbackModule.Raycast(preciseTick, ray2d, out var hit2D))
             Debug.DrawLine(hit2D.point, hit2D.point + hit2D.normal, Color.yellow, 5f);
+#endif
     }
 }

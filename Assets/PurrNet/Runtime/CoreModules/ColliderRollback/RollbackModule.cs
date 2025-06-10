@@ -8,23 +8,30 @@ namespace PurrNet.Modules
 {
     public partial class RollbackModule : INetworkModule
     {
-        PhysicsScene _physicsScene;
-        PhysicsScene2D _physicsScene2D;
-
         readonly TickManager _tickManager;
         readonly HashSet<Component> _trackedColliders = new();
 
+#if UNITY_PHYSICS_3D
+        PhysicsScene _physicsScene;
         private readonly List<Collider> _colliders3D = new();
-        private readonly List<Collider2D> _colliders2D = new();
-
         readonly Dictionary<Collider, SimpleHistory<Collider3DState>> _collider3DStates = new();
+#endif
+
+#if UNITY_PHYSICS_2D
+        PhysicsScene2D _physicsScene2D;
+        private readonly List<Collider2D> _colliders2D = new();
         readonly Dictionary<Collider2D, SimpleHistory<Collider2DState>> _collider2DStates = new();
+#endif
 
         public RollbackModule(TickManager tick, Scene scene)
         {
             _tickManager = tick;
+#if UNITY_PHYSICS_3D
             _physicsScene = scene.GetPhysicsScene();
+#endif
+#if UNITY_PHYSICS_2D
             _physicsScene2D = scene.GetPhysicsScene2D();
+#endif
         }
 
         public void Enable(bool asServer)
@@ -35,6 +42,7 @@ namespace PurrNet.Modules
         {
         }
 
+#if UNITY_PHYSICS_2D
         /// <summary>
         /// Tries to get the state of a collider at a precise tick in the past.
         /// </summary>
@@ -74,7 +82,10 @@ namespace PurrNet.Modules
             state = default;
             return false;
         }
+#endif
 
+
+#if UNITY_PHYSICS_3D
         /// <summary>
         /// Tries to get the state of a collider at a precise tick in the past.
         /// </summary>
@@ -114,9 +125,11 @@ namespace PurrNet.Modules
             state = default;
             return false;
         }
+#endif
 
         public void OnPostTick()
         {
+#if UNITY_PHYSICS_3D
             for (var i = 0; i < _colliders3D.Count; i++)
             {
                 var col = _colliders3D[i];
@@ -132,7 +145,9 @@ namespace PurrNet.Modules
 
                 history.Write(_tickManager.localTick, new Collider3DState(col));
             }
+#endif
 
+#if UNITY_PHYSICS_2D
             for (var i = 0; i < _colliders2D.Count; i++)
             {
                 var col = _colliders2D[i];
@@ -148,13 +163,13 @@ namespace PurrNet.Modules
 
                 history.Write(_tickManager.localTick, new Collider2DState(col));
             }
+#endif
         }
 
         public void Register(ColliderRollback component)
         {
+#if UNITY_PHYSICS_3D
             var colliders3d = component.colliders3D;
-            var colliders2d = component.colliders2D;
-
             int maxEntries = Mathf.CeilToInt(_tickManager.tickRate * component.storeHistoryInSeconds);
 
             if (colliders3d != null)
@@ -170,7 +185,10 @@ namespace PurrNet.Modules
                     _colliders3D.Add(collider);
                 }
             }
+#endif
 
+#if UNITY_PHYSICS_2D
+            var colliders2d = component.colliders2D;
             if (colliders2d != null)
             {
                 for (var i = 0; i < colliders2d.Length; i++)
@@ -184,12 +202,13 @@ namespace PurrNet.Modules
                     _colliders2D.Add(collider);
                 }
             }
+#endif
         }
 
         public void Unregister(ColliderRollback component)
         {
+#if UNITY_PHYSICS_3D
             var colliders3d = component.colliders3D;
-            var colliders2d = component.colliders2D;
 
             if (colliders3d != null)
             {
@@ -204,7 +223,11 @@ namespace PurrNet.Modules
                     _colliders3D.Remove(collider);
                 }
             }
+#endif
 
+
+#if UNITY_PHYSICS_2D
+            var colliders2d = component.colliders2D;
             if (colliders2d != null)
             {
                 for (var i = 0; i < colliders2d.Length; i++)
@@ -218,6 +241,7 @@ namespace PurrNet.Modules
                     _colliders2D.Remove(collider);
                 }
             }
+#endif
         }
     }
 }

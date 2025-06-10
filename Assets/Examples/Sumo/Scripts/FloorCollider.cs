@@ -1,3 +1,5 @@
+#if UNITY_PHYSICS_3D
+
 using System.Collections.Generic;
 using PurrNet.Examples.Sumo;
 using UnityEngine;
@@ -10,8 +12,10 @@ public class FloorCollider : MonoBehaviour
     {
         if (!other.transform.TryGetComponent(out Movement_RB_InputSync player))
             return;
-        
+
         int index = UnityEngine.Random.Range(0, spawnPoints.Count);
         player.ResetPosition(spawnPoints[index].position);
     }
 }
+
+#endif

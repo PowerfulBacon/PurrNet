@@ -1,3 +1,4 @@
+#if UNITY_MONO_CECIL
 using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
@@ -170,3 +171,4 @@ namespace PurrNet.Codegen
         }
     }
 }
+#endif

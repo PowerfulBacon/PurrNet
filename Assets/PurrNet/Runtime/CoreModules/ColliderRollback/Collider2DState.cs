@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if UNITY_PHYSICS_2D
+using UnityEngine;
 
 namespace PurrNet.Modules
 {
@@ -8,6 +9,7 @@ namespace PurrNet.Modules
         public float rotation;
         public Vector2 scale;
         public bool enabled;
+
 
         public Collider2DState(Collider2D collider)
         {
@@ -30,3 +32,4 @@ namespace PurrNet.Modules
         }
     }
 }
+#endif

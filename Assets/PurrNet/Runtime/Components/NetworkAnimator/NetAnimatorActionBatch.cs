@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if UNITY_ANIMATION
+using System.Collections.Generic;
 using PurrNet.Packing;
 using UnityEngine;
 
@@ -187,3 +188,4 @@ namespace PurrNet
         }
     }
 }
+#endif

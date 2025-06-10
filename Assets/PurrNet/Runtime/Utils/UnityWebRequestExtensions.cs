@@ -1,8 +1,9 @@
+#if UNITY_WEB
 using System;
 using System.Runtime.CompilerServices;
-using UnityEngine.Networking;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace PurrNet
 {
@@ -70,3 +71,5 @@ namespace PurrNet
         }
     }
 }
+
+#endif

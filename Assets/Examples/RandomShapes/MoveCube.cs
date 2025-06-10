@@ -1,3 +1,5 @@
+#if UNITY_PHYSICS_3D
+
 using PurrNet;
 using PurrNet.Logging;
 using UnityEngine;
@@ -74,3 +76,4 @@ public class MoveCube : NetworkBehaviour
         transform.rotation = Quaternion.Euler(xRot, yRot, zRot);
     }
 }
+#endif

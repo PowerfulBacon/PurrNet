@@ -1,3 +1,5 @@
+#if UNITY_PHYSICS_3D
+
 using PurrNet.Logging;
 using UnityEngine;
 
@@ -102,3 +104,5 @@ namespace PurrNet.Examples.TopDownShooter
         }
     }
 }
+
+#endif

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if UNITY_ANIMATION
+using System.Collections.Generic;
 using JetBrains.Annotations;
 
 namespace PurrNet
@@ -172,3 +173,4 @@ namespace PurrNet
         }
     }
 }
+#endif

@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using PurrNet;
-using TriInspector;
 using UnityEngine;
 
 public class Test : NetworkIdentity
@@ -51,7 +49,7 @@ public class Test : NetworkIdentity
         price4 = fourthPrice;
     }
 
-    [Button]
+    [PurrButton]
     public void SendToAllClients()
     {
         SendToAllClientsInternal(

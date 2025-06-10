@@ -1,3 +1,4 @@
+#if UNITY_PHYSICS_3D
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -11,7 +12,7 @@ namespace PurrNet.Examples.BoxCarry
 
         private Rigidbody _rigidbody;
         private readonly SyncVar<bool> _gettingCarried = new SyncVar<bool>(ownerAuth: true);
-        
+
         private void Awake()
         {
             if(!TryGetComponent(out _rigidbody))
@@ -45,13 +46,13 @@ namespace PurrNet.Examples.BoxCarry
         {
             if (!playerPickUp.owner.HasValue)
                 return;
-            
+
             GiveOwnership(playerPickUp.owner.Value);
             transform.SetParent(playerPickUp.transform);
             transform.localPosition = Vector3.up + Vector3.forward;
             _rigidbody.isKinematic = true;
             _gettingCarried.value = true;
-            
+
             //TODO: This should be able to go directly to ObserversRPC from client, once logic is in place
             BoxPickedUp_Server();
         }
@@ -61,16 +62,16 @@ namespace PurrNet.Examples.BoxCarry
         {
             BoxPickedUp();
         }
-        
+
         [ObserversRpc(excludeOwner:true)]
         private void BoxPickedUp()
         {
             if(!InstanceHandler.TryGetInstance<PlayerPickUp>(out var playerPickUp))
                 return;
-            
+
             playerPickUp.BoxTaken(this);
         }
-        
+
         public void DropBox()
         {
             transform.SetParent(null);
@@ -82,7 +83,7 @@ namespace PurrNet.Examples.BoxCarry
         {
             if (_gettingCarried.value)
                 return;
-            
+
             if (other.gameObject.TryGetComponent(out PlayerPickUp playerPickUp))
             {
                 if (!playerPickUp.owner.HasValue)
@@ -90,7 +91,7 @@ namespace PurrNet.Examples.BoxCarry
 
                 if (playerPickUp.owner.Value == owner || playerPickUp.owner.Value != localPlayer)
                     return;
-            
+
                 GiveOwnership(localPlayer.Value);
             }
 
@@ -98,12 +99,13 @@ namespace PurrNet.Examples.BoxCarry
             {
                 if (!box.owner.HasValue)
                     return;
-                
+
                 if (box.owner.Value == owner || box.owner.Value != localPlayer)
                     return;
-                
+
                 GiveOwnership(localPlayer.Value);
             }
         }
     }
 }
+#endif

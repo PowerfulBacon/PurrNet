@@ -1,3 +1,4 @@
+#if UNITY_PHYSICS_3D
 using PurrNet.Logging;
 using PurrNet.Transports;
 using UnityEngine;
@@ -12,26 +13,26 @@ namespace PurrNet.Examples.Sumo
         [SerializeField] private float jumpForce = 20f;
         [SerializeField] private float visualRotationSpeed = 10f;
 
-        [Space(10)] 
-        [Header("Collision")] 
+        [Space(10)]
+        [Header("Collision")]
         [SerializeField] private float playerCollisionForce = 10;
-        
+
         [Space(10)]
         [Header("Ground check")]
         [SerializeField] private float groundCheckDistance = 0.1f;
         [SerializeField] private float groundCheckRadius = 0.5f;
         [SerializeField] private LayerMask groundMask;
-        
+
         private Rigidbody _rigidbody;
         private float _originalDrag;
-        
+
         //Client variable
         private Vector2 _lastInput;
         private readonly SyncVar<Quaternion> _targetRotation = new SyncVar<Quaternion>();
-        
+
         //Server variable
         private Vector2 _serverInput;
-        
+
         private void Awake()
         {
             if (!TryGetComponent(out _rigidbody))
@@ -72,14 +73,14 @@ namespace PurrNet.Examples.Sumo
             {
                 _rigidbody.rotation = Quaternion.Slerp(transform.rotation, _targetRotation.value.normalized, delta * visualRotationSpeed);
             }
-            
+
             if (isOwner)
                 OwnerTick();
 
             if (isServer)
                 ServerTick();
         }
-        
+
         private void ServerTick()
         {
             if(_serverInput.magnitude > 1)
@@ -87,13 +88,13 @@ namespace PurrNet.Examples.Sumo
             var force = new Vector3(_serverInput.x, 0, _serverInput.y);
 
             Vector3 velocity;
-            
+
 #if UNITY_6000_0_OR_NEWER
             velocity = _rigidbody.linearVelocity;
 #else
             velocity = _rigidbody.velocity;
 #endif
-            
+
             var magnitude = new Vector3(velocity.x, 0, velocity.z).magnitude;
             if (magnitude < maxSpeed)
                 _rigidbody.AddForce(force * moveForce);
@@ -154,7 +155,7 @@ namespace PurrNet.Examples.Sumo
 #endif
                 return;
             }
-            
+
 #if UNITY_6000_0_OR_NEWER
             _rigidbody.linearDamping = 0;
 #else
@@ -194,3 +195,4 @@ namespace PurrNet.Examples.Sumo
         }
     }
 }
+#endif

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if UNITY_PHYSICS_3D
+using UnityEngine;
 
 namespace PurrNet.Modules
 {
@@ -30,3 +31,4 @@ namespace PurrNet.Modules
         }
     }
 }
+#endif
