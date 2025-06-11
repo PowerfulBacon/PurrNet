@@ -2181,6 +2181,8 @@ namespace PurrNet.Codegen
 
             // at the end, return default value
             var mode = GetMode(settings, modeOverride);
+            if (mode == StripCodeMode.DoNotStrip)
+                mode = StripCodeMode.ReplaceWithEmptyMethod;
             AppendStripAction(method, method.Name, mode, il, "server only");
 
             var returnDefaultInst = instructions[ogInstructionCount];

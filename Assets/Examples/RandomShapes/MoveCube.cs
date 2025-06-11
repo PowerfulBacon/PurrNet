@@ -5,7 +5,7 @@ using PurrNet.Logging;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class TFDRTF
+public class TestingClass
 {
     [ServerOnly(StripCodeModeOverride.ReplaceWithLogError)]
     public void Testy()
