@@ -49,8 +49,8 @@ namespace PurrNet
                 if (isSpawned && !parent.IsController(_ownerAuth))
                 {
                     PurrLogger.LogError(
-                        $"Invalid permissions when setting '<b>SyncVar<{typeof(T).Name}> {name}</b>' on '{parent.name}'." +
-                        $"\nMaybe try enabling owner authority.", parent);
+                        $"Invalid permissions when setting `<b>SyncVar<{typeof(T).Name}> {name}</b>` on `{parent.name}`." +
+                        $"\n{GetPermissionErrorDetails(_ownerAuth, this)}", parent);
                     return;
                 }
 

@@ -35,11 +35,11 @@ namespace PurrNet
 
         public int remainingInt => Mathf.CeilToInt(_remaining);
 
-        public Action onTimerEnd;
-        public Action onTimerStart;
-        public Action onTimerSecondTick;
-        public Action onTimerPaused;
-        public Action onTimerResumed;
+        public event Action onTimerEnd;
+        public event Action onTimerStart;
+        public event Action onTimerSecondTick;
+        public event Action onTimerPaused;
+        public event Action onTimerResumed;
 
         public SyncTimer(bool ownerAuth = false, float reconcileInterval = 3)
         {

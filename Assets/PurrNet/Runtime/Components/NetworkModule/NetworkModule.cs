@@ -301,5 +301,27 @@ namespace PurrNet
         public virtual void OnPoolReset()
         {
         }
+
+        protected static string GetPermissionErrorDetails(bool ownerAuth, NetworkModule module)
+        {
+            return GetPermissionErrorDetails(
+                ownerAuth,
+                module.isServer,
+                module.owner,
+                module.localPlayer
+            );
+        }
+
+        static string GetPermissionErrorDetails(bool ownerAuth, bool isServer, PlayerID? owner, PlayerID? local)
+        {
+            return ownerAuth switch
+            {
+                true when isServer =>
+                    $"Server is trying to act on module that is `<b>ownerAuth</b>` but the owner is `<b>{owner}</b>` (not you).",
+                true =>
+                    $"Client is trying to act on module that is `<b>ownerAuth</b>` but the owner is `<b>{owner}</b>` (not you: `{local}`).",
+                _ => "Client is trying to act on module that is not `<b>ownerAuth</b>`, only server can act on it."
+            };
+        }
     }
 }

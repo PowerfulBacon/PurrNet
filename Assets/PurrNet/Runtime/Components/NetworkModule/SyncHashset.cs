@@ -167,7 +167,8 @@ namespace PurrNet
         /// </summary>
         public bool Add(T item)
         {
-            ValidateAuthority();
+            if (!ValidateAuthority())
+                return false;
 
             if (!_set.Add(item))
                 return false;
@@ -188,7 +189,7 @@ namespace PurrNet
 
         void ICollection<T>.Add(T item)
         {
-            Add(item);
+            Add(item!);
         }
 
         /// <summary>
@@ -196,7 +197,8 @@ namespace PurrNet
         /// </summary>
         public bool Remove(T item)
         {
-            ValidateAuthority();
+            if (!ValidateAuthority())
+                return false;
 
             if (!_set.Remove(item))
                 return false;
@@ -220,7 +222,8 @@ namespace PurrNet
         /// </summary>
         public void Clear()
         {
-            ValidateAuthority();
+            if (!ValidateAuthority())
+                return;
 
             _set.Clear();
             var change = new SyncHashSetChange<T>(SyncHashSetOperation.Cleared);
@@ -260,18 +263,20 @@ namespace PurrNet
         public IEnumerator<T> GetEnumerator() => _set.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        private void ValidateAuthority()
+        private bool ValidateAuthority()
         {
-            if (!isSpawned) return;
+            if (!isSpawned) return true;
 
-            bool isController = parent.IsController(_ownerAuth);
-            if (!isController)
+            bool controlling = parent.IsController(_ownerAuth);
+            if (!controlling)
             {
                 PurrLogger.LogError(
-                    $"Invalid permissions when modifying '<b>SyncHashSet<{typeof(T).Name}> {name}</b>' on '{parent.name}'." +
-                    $"\nMaybe try enabling owner authority.", parent);
-                throw new InvalidOperationException("Invalid permissions");
+                    $"Invalid permissions when modifying `<b>SyncHashSet<{typeof(T).Name}> {name}</b>` on `{parent.name}`." +
+                    $"\n{GetPermissionErrorDetails(_ownerAuth, this)}", parent);
+                return false;
             }
+
+            return true;
         }
 
         private void InvokeChange(SyncHashSetChange<T> change)

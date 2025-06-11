@@ -86,7 +86,8 @@ namespace PurrNet
 
         public void Enqueue(T item)
         {
-            ValidateAuthority();
+            if (!ValidateAuthority())
+                return;
 
             _queue.Enqueue(item);
             var change = new SyncQueueChange<T>(SyncQueueOperation.Enqueued, item);
@@ -103,7 +104,8 @@ namespace PurrNet
 
         public T Dequeue()
         {
-            ValidateAuthority();
+            if (!ValidateAuthority())
+                return default;
 
             if (_queue.Count == 0)
                 throw new InvalidOperationException("Queue is empty");
@@ -137,7 +139,8 @@ namespace PurrNet
 
         public void Clear()
         {
-            ValidateAuthority();
+            if (!ValidateAuthority())
+                return;
 
             _queue.Clear();
             var change = new SyncQueueChange<T>(SyncQueueOperation.Cleared);
@@ -160,18 +163,21 @@ namespace PurrNet
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        private void ValidateAuthority()
+        private bool ValidateAuthority()
         {
-            if (!isSpawned) return;
+            if (!isSpawned)
+                return true;
 
-            bool isController = parent.IsController(_ownerAuth);
-            if (!isController)
+            bool controlling = parent.IsController(_ownerAuth);
+            if (!controlling)
             {
                 PurrLogger.LogError(
-                    $"Invalid permissions when modifying '<b>SyncQueue<{typeof(T).Name}> {name}</b>' on '{parent.name}'." +
-                    $"\nMaybe try enabling owner authority.", parent);
-                throw new InvalidOperationException("Invalid permissions");
+                    $"Invalid permissions when modifying `<b>SyncQueue<{typeof(T).Name}> {name}</b>` on `{parent.name}`." +
+                    $"\n{GetPermissionErrorDetails(_ownerAuth, this)}", parent);
+                return false;
             }
+
+            return true;
         }
 
         private void InvokeChange(SyncQueueChange<T> change)
