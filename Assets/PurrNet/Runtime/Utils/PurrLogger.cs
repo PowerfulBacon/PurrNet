@@ -60,6 +60,24 @@ namespace PurrNet.Logging
             Debug.LogError(message, reference);
         }
 
+        [UsedByIL]
+        public static void LogSimplerError(string message)
+        {
+            Debug.LogError(message);
+        }
+
+        [UsedByIL]
+        public static void LogSimplerWarning(string message)
+        {
+            Debug.LogWarning(message);
+        }
+
+        [UsedByIL]
+        public static void ThrowUnsupportedException(string message)
+        {
+            throw new NotSupportedException(message);
+        }
+
         public static void Log(string message, Object reference = null, LogStyle logStyle = default,
             [CallerFilePath] string filePath = "")
         {

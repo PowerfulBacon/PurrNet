@@ -40,6 +40,9 @@ namespace PurrNet.Codegen
                         if (instruction.Operand is not MethodReference methodReference)
                             continue;
 
+                        if (methodReference.DeclaringType == null)
+                            continue;
+
                         if (methodReference.DeclaringType.FullName != objectClassFullName)
                             continue;
 
@@ -79,7 +82,7 @@ namespace PurrNet.Codegen
             {
                 messages.Add(new DiagnosticMessage
                 {
-                    MessageData = $"Failed to process UnityProxy: {e.Message}",
+                    MessageData = $"Failed to process UnityProxy: {e.Message} {e.StackTrace}",
                     DiagnosticType = DiagnosticType.Error
                 });
             }

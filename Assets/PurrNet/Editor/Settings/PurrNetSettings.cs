@@ -11,7 +11,9 @@ namespace PurrNet.Editor
 
         static object _lock = new object();
 
-        public bool stripServerCode;
+        public StripCodeMode stripCodeMode = StripCodeMode.DoNotStrip;
+
+        public bool stripServerCode => stripCodeMode != StripCodeMode.DoNotStrip;
 
         public static void SaveSettings(PurrNetSettings settings)
         {

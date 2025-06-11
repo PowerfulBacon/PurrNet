@@ -12,12 +12,14 @@ using JetBrains.Annotations;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using PurrNet.Editor;
+using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Pooling;
 using PurrNet.Utils;
 using Unity.CompilationPipeline.Common.Diagnostics;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
+using UnityEngine;
 using UnityEngine.Scripting;
 using Channel = PurrNet.Transports.Channel;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
@@ -112,9 +114,9 @@ namespace PurrNet.Codegen
             {
                 if (attribute.AttributeType.FullName == typeof(ServerRpcAttribute).FullName)
                 {
-                    if (attribute.ConstructorArguments.Count != 5)
+                    if (attribute.ConstructorArguments.Count != 6)
                     {
-                        Error(messages, "ServerRPC attribute must have 5 arguments", method);
+                        Error(messages, "ServerRPC attribute must have 6 arguments", method);
                         return null;
                     }
 
@@ -123,6 +125,7 @@ namespace PurrNet.Codegen
                     var requireOwnership = (bool)attribute.ConstructorArguments[2].Value;
                     var compressionLevel = (CompressionLevel)attribute.ConstructorArguments[3].Value;
                     var asyncTimeoutInSec = (float)attribute.ConstructorArguments[4].Value;
+                    var stripCode = (StripCodeModeOverride)attribute.ConstructorArguments[5].Value;
 
                     data = new RPCSignature
                     {
@@ -135,7 +138,8 @@ namespace PurrNet.Codegen
                         excludeOwner = false,
                         isStatic = method.IsStatic,
                         asyncTimeoutInSec = asyncTimeoutInSec,
-                        compressionLevel = compressionLevel
+                        compressionLevel = compressionLevel,
+                        stripCodeMode = stripCode
                     };
                     rpcCount++;
                 }
@@ -354,13 +358,16 @@ namespace PurrNet.Codegen
 
                 try
                 {
-                    if (originalRpcs[i].originalMethod.HasGenericParameters)
+                    if (originalRpcs[i].originalMethod.DeclaringType != null)
                     {
-                        HandleGenericRPCReceiver(module, originalRpcs[i], newMethod, stream, info, isNetworkClass);
+                        if (originalRpcs[i].originalMethod.HasGenericParameters)
+                        {
+                            HandleGenericRPCReceiver(module, originalRpcs[i], newMethod, stream, info, isNetworkClass);
+                        }
+                        else
+                            HandleNonGenericRPCReceiver(module, originalRpcs[i], newMethod, stream, info, returnMode,
+                                isNetworkClass);
                     }
-                    else
-                        HandleNonGenericRPCReceiver(module, originalRpcs[i], newMethod, stream, info, returnMode,
-                            isNetworkClass);
                 }
                 catch (Exception e)
                 {
@@ -950,16 +957,80 @@ namespace PurrNet.Codegen
             return true;
         }
 
-        private static void StripBody(MethodDefinition method)
+        static StripCodeMode GetMode(PurrNetSettings settings, StripCodeModeOverride overrideMode)
         {
-            var il = method.Body.GetILProcessor();
-            method.Body.Instructions.Clear();
+            switch (overrideMode)
+            {
+                case StripCodeModeOverride.DoNotStrip:
+                    return StripCodeMode.DoNotStrip;
+                case StripCodeModeOverride.StripAll:
+                    return StripCodeMode.StripAll;
+                case StripCodeModeOverride.ReplaceWithEmptyMethod:
+                    return StripCodeMode.ReplaceWithEmptyMethod;
+                case StripCodeModeOverride.ReplaceWithLogWarning:
+                    return StripCodeMode.ReplaceWithLogWarning;
+                case StripCodeModeOverride.ReplaceWithLogError:
+                    return StripCodeMode.ReplaceWithLogError;
+                case StripCodeModeOverride.ThrowNotSupportedException:
+                    return StripCodeMode.ThrowNotSupportedException;
+                case StripCodeModeOverride.Settings:
+                default:
+                    return settings.stripCodeMode;
+            }
+        }
 
-            // Handle return value
+        private static void StripBody(MethodDefinition method, string methodName, PurrNetSettings settings, StripCodeModeOverride overrideMode)
+        {
+            var mode = GetMode(settings, overrideMode);
+
+            if (mode == StripCodeMode.DoNotStrip)
+                return;
+
+            var il = method.Body.GetILProcessor();
+            il.Clear();
+
+            switch (mode)
+            {
+                case StripCodeMode.StripAll:
+                    method.DeclaringType.Methods.Remove(method);
+                    break;
+
+                case StripCodeMode.ReplaceWithLogWarning:
+                    var logWarningMethod = method.Module.GetTypeDefinition(typeof(PurrLogger))
+                        .GetMethod("LogSimplerWarning", false).Import(method.Module);
+                    il.Append(il.Create(OpCodes.Ldstr, $"RPC method '{methodName}' is stripped and cannot be called."));
+                    il.Append(il.Create(OpCodes.Call, logWarningMethod));
+                    break;
+
+                case StripCodeMode.ReplaceWithLogError:
+                    var logErrorMethod = method.Module.GetTypeDefinition(typeof(PurrLogger))
+                        .GetMethod("LogSimplerError", false).Import(method.Module);
+                    il.Append(il.Create(OpCodes.Ldstr, $"RPC method '{methodName}' is stripped and cannot be called."));
+                    il.Append(il.Create(OpCodes.Call, logErrorMethod));
+                    break;
+
+                case StripCodeMode.ReplaceWithEmptyMethod:
+                    break;
+
+                case StripCodeMode.ThrowNotSupportedException:
+                    var throwExcep = method.Module.GetTypeDefinition(typeof(PurrLogger))
+                        .GetMethod("ThrowUnsupportedException", false).Import(method.Module);
+                    il.Append(il.Create(OpCodes.Ldstr, $"RPC method '{methodName}' is stripped and cannot be called."));
+                    il.Append(il.Create(OpCodes.Call, throwExcep));
+                    break;
+                case StripCodeMode.DoNotStrip:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            ProperlyEndMethod(method, il);
+        }
+
+        private static void ProperlyEndMethod(MethodDefinition method, ILProcessor il)
+        {
             var returnType = method.ReturnType;
             if (returnType.MetadataType != MetadataType.Void)
                 EmitDefaultValue(method, il, returnType);
-
             il.Append(il.Create(OpCodes.Ret));
         }
 
@@ -1023,6 +1094,10 @@ namespace PurrNet.Codegen
             DisposableHashSet<TypeReference> usedTypes, [UsedImplicitly] List<DiagnosticMessage> messages)
         {
             var method = methodRpc.originalMethod;
+
+            if (method.DeclaringType == null)
+                return null;
+
             bool isValidReturn = ValidateReturnType(method, out var returnMode);
 
             if (!isValidReturn)
@@ -1486,8 +1561,13 @@ namespace PurrNet.Codegen
 
             code.Append(Instruction.Create(OpCodes.Ret));
 
-            if (settings.stripServerCode && methodRpc.Signature is { runLocally: false, type: RPCType.ServerRPC } && !isServerBuild)
-                StripBody(method);
+            if (!isServerBuild)
+            {
+                if (settings.stripServerCode && methodRpc.Signature is { runLocally: false, type: RPCType.ServerRPC })
+                {
+                    StripBody(method, methodRpc.ogName, settings, methodRpc.Signature.stripCodeMode);
+                }
+            }
 
             return newMethod;
         }
@@ -1619,7 +1699,10 @@ namespace PurrNet.Codegen
                     {
                         var instruction = method.Body.Instructions[i];
 
-                        if (instruction.OpCode == OpCodes.Call && instruction.Operand is MethodReference flag)
+                        if (instruction.OpCode == OpCodes.Call && instruction.Operand is MethodReference
+                            {
+                                DeclaringType: not null
+                            } flag)
                         {
                             if (flag.FullName == startLocalExecutionFlag)
                             {
@@ -1948,13 +2031,11 @@ namespace PurrNet.Codegen
                                 var newMethod = HandleRPC(module, idOffset + index, _rpcMethods[index],
                                     inheritsFromNetworkClass, isServerBuild, settings, usedTypes, messages);
 
-                                if (newMethod != null)
+                                if (newMethod != null && method.DeclaringType != null)
                                 {
                                     type.Methods.Add(newMethod);
                                     if (!UpdateMethodReferences(module, method, newMethod, messages))
-                                    {
                                         return new ILPostProcessResult(compiledAssembly.InMemoryAssembly, messages);
-                                    }
                                 }
                             }
                             catch (Exception e)
@@ -2457,22 +2538,29 @@ namespace PurrNet.Codegen
 
         private static bool IsRpcMethod(GenericInstanceMethod currentMethod)
         {
-            var resolved = currentMethod.Resolve();
-
-            if (resolved == null)
-                return false;
-
-            foreach (var attribute in resolved.CustomAttributes)
+            try
             {
-                if (attribute.AttributeType.FullName == typeof(ServerRpcAttribute).FullName ||
-                    attribute.AttributeType.FullName == typeof(TargetRpcAttribute).FullName ||
-                    attribute.AttributeType.FullName == typeof(ObserversRpcAttribute).FullName)
-                {
-                    return true;
-                }
-            }
+                var resolved = currentMethod.Resolve();
 
-            return false;
+                if (resolved == null)
+                    return false;
+
+                foreach (var attribute in resolved.CustomAttributes)
+                {
+                    if (attribute.AttributeType.FullName == typeof(ServerRpcAttribute).FullName ||
+                        attribute.AttributeType.FullName == typeof(TargetRpcAttribute).FullName ||
+                        attribute.AttributeType.FullName == typeof(ObserversRpcAttribute).FullName)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public static bool IsTypeInOwnModule(TypeReference typeReference, ModuleDefinition ownModule)
