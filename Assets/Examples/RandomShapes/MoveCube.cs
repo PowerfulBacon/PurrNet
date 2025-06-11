@@ -5,6 +5,15 @@ using PurrNet.Logging;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+public class TFDRTF
+{
+    [ServerOnly(StripCodeModeOverride.ReplaceWithLogError)]
+    public void Testy()
+    {
+        Debug.Log("Testy called!");
+    }
+}
+
 public class MoveCube : NetworkBehaviour
 {
     [SerializeField] private float _speed = 1f;

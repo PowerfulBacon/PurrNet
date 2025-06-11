@@ -19,7 +19,6 @@ using PurrNet.Pooling;
 using PurrNet.Utils;
 using Unity.CompilationPipeline.Common.Diagnostics;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
-using UnityEngine;
 using UnityEngine.Scripting;
 using Channel = PurrNet.Transports.Channel;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
@@ -989,6 +988,11 @@ namespace PurrNet.Codegen
             var il = method.Body.GetILProcessor();
             il.Clear();
 
+            AppendStripAction(method, methodName, mode, il, "stripped");
+        }
+
+        private static void AppendStripAction(MethodDefinition method, string methodName, StripCodeMode mode, ILProcessor il, string action)
+        {
             switch (mode)
             {
                 case StripCodeMode.StripAll:
@@ -998,14 +1002,14 @@ namespace PurrNet.Codegen
                 case StripCodeMode.ReplaceWithLogWarning:
                     var logWarningMethod = method.Module.GetTypeDefinition(typeof(PurrLogger))
                         .GetMethod("LogSimplerWarning", false).Import(method.Module);
-                    il.Append(il.Create(OpCodes.Ldstr, $"RPC method '{methodName}' is stripped and cannot be called."));
+                    il.Append(il.Create(OpCodes.Ldstr, $"Method '{method.DeclaringType.Name}.{methodName}' is {action} and cannot be called."));
                     il.Append(il.Create(OpCodes.Call, logWarningMethod));
                     break;
 
                 case StripCodeMode.ReplaceWithLogError:
                     var logErrorMethod = method.Module.GetTypeDefinition(typeof(PurrLogger))
                         .GetMethod("LogSimplerError", false).Import(method.Module);
-                    il.Append(il.Create(OpCodes.Ldstr, $"RPC method '{methodName}' is stripped and cannot be called."));
+                    il.Append(il.Create(OpCodes.Ldstr, $"Method '{method.DeclaringType.Name}.{methodName}' is {action} and cannot be called."));
                     il.Append(il.Create(OpCodes.Call, logErrorMethod));
                     break;
 
@@ -1015,7 +1019,7 @@ namespace PurrNet.Codegen
                 case StripCodeMode.ThrowNotSupportedException:
                     var throwExcep = method.Module.GetTypeDefinition(typeof(PurrLogger))
                         .GetMethod("ThrowUnsupportedException", false).Import(method.Module);
-                    il.Append(il.Create(OpCodes.Ldstr, $"RPC method '{methodName}' is stripped and cannot be called."));
+                    il.Append(il.Create(OpCodes.Ldstr, $"Method '{method.DeclaringType.Name}.{methodName}' is {action} and cannot be called."));
                     il.Append(il.Create(OpCodes.Call, throwExcep));
                     break;
                 case StripCodeMode.DoNotStrip:
@@ -1936,7 +1940,11 @@ namespace PurrNet.Codegen
                         }
 
                         if (!type.IsClass)
+                        {
+                            for (var i = 0; i < type.Methods.Count; i++)
+                                ProcessServerOnlyMethods(type.Methods[i], settings, isServerBuild, isEditor);
                             continue;
+                        }
 
                         var idFullName = typeof(NetworkIdentity).FullName;
                         var classFullName = typeof(NetworkModule).FullName;
@@ -1974,6 +1982,7 @@ namespace PurrNet.Codegen
                             try
                             {
                                 var method = type.Methods[i];
+                                ProcessServerOnlyMethods(type.Methods[i], settings, isServerBuild, isEditor);
 
                                 if (inheritsFromNetworkIdentity && MakeSureOverrideIsCalled.ShouldProcess(method))
                                     MakeSureOverrideIsCalled.Process(method, messages);
@@ -2133,6 +2142,60 @@ namespace PurrNet.Codegen
 
                 return new ILPostProcessResult(compiledAssembly.InMemoryAssembly, messages);
             }
+        }
+
+        private static void ProcessServerOnlyMethods(MethodDefinition method, PurrNetSettings settings, bool serverBuild, bool isEditor)
+        {
+            CustomAttribute serverOnlyAttribute = null;
+
+            foreach (var attribute in method.CustomAttributes)
+            {
+                if (attribute.AttributeType.FullName == typeof(ServerOnlyAttribute).FullName)
+                {
+                    serverOnlyAttribute = attribute;
+                    break;
+                }
+            }
+
+            if (serverOnlyAttribute == null)
+                return;
+
+            if (serverBuild && !isEditor)
+                return;
+
+            var stripCodeMode = (StripCodeModeOverride)serverOnlyAttribute.ConstructorArguments[0].Value;
+            PutServerCheck(method, settings, stripCodeMode);
+            if (!serverBuild)
+                StripBody(method, method.Name, settings, stripCodeMode);
+        }
+
+        static void PutServerCheck(MethodDefinition method, PurrNetSettings settings, StripCodeModeOverride modeOverride)
+        {
+            var il = method.Body.GetILProcessor();
+            var instructions = method.Body.Instructions;
+            var module = method.Module;
+
+            var getIsServer = GetIsServerMethod(module);
+            var firstInstruction = instructions[0];
+            var ogInstructionCount = instructions.Count;
+
+            // at the end, return default value
+            var mode = GetMode(settings, modeOverride);
+            AppendStripAction(method, method.Name, mode, il, "server only");
+
+            var returnDefaultInst = instructions[ogInstructionCount];
+
+            il.InsertBefore(firstInstruction, getIsServer);
+            il.InsertAfter(getIsServer, Instruction.Create(OpCodes.Brfalse, returnDefaultInst));
+        }
+
+        private static Instruction GetIsServerMethod(ModuleDefinition module)
+        {
+            var isServerOnlyProp = module.GetTypeDefinition<NetworkManager>()
+                .GetProperty("isServerStatic")
+                .GetMethod.Import(module);
+            var getIsServer = Instruction.Create(OpCodes.Call, isServerOnlyProp);
+            return getIsServer;
         }
 
         private static void IncludeAnyConcreteGenericParameters(TypeDefinition type,

@@ -229,6 +229,9 @@ namespace PurrNet
         /// </summary>
         public bool isServer => _transport && _transport.transport.listenerState == ConnectionState.Connected;
 
+        [UsedByIL]
+        public static bool isServerStatic => main && main.isServer;
+
         /// <summary>
         /// Whether the network manager is a client.
         /// </summary>

@@ -8,7 +8,6 @@ namespace PurrNet
     public class ServerOnlyAttribute : PreserveAttribute
     {
         [UsedImplicitly]
-        // TODO: Implement codegen for this attribute and stripping too
         public ServerOnlyAttribute(StripCodeModeOverride stripCodeMode = StripCodeModeOverride.Settings) { }
     }
 }
