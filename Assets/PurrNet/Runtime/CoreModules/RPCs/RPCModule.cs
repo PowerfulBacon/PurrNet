@@ -793,9 +793,19 @@ namespace PurrNet.Modules
             }
         }
 
+        public delegate void RPCPreProcessDelegate(ref ByteData rpcData, RPCSignature signature, ref BitPacker packer);
+
+        public delegate void RPCPostProcessDelegate(ByteData rpcData, RPCInfo info, ref BitPacker packer);
+
+        public static event RPCPreProcessDelegate onPreProcessRpc;
+
+        public static event RPCPostProcessDelegate onPostProcessRpc;
+
         [UsedByIL]
         public static void PreProcessRpc(ref ByteData rpcData, RPCSignature signature, ref BitPacker packer)
         {
+            onPreProcessRpc?.Invoke(ref rpcData, signature, ref packer);
+
             if (signature.compressionLevel == CompressionLevel.None)
                 return;
 
@@ -817,6 +827,8 @@ namespace PurrNet.Modules
         [UsedByIL]
         public static void PostProcessRpc(ByteData rpcData, RPCInfo info, ref BitPacker packer)
         {
+            onPostProcessRpc?.Invoke(rpcData, info, ref packer);
+
             if (info.compileTimeSignature.compressionLevel == CompressionLevel.None)
                 return;
 
