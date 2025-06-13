@@ -20,7 +20,7 @@ namespace PurrNet
 
         public T this[int index]
         {
-            get => _values.TryGetValue(index, out var val) ? val : default;
+            get => _values.GetValueOrDefault(index);
             set
             {
                 if (!_values.TryGetValue(index, out var existing) || !existing.Equals(value))
@@ -47,11 +47,11 @@ namespace PurrNet
             {
                 using var packer = BitPackerPool.Get();
                 Packer<int>.Write(packer, _dirtyIndices.Count);
-                foreach (var index in _dirtyIndices)
+                foreach (var idx in _dirtyIndices)
                 {
-                    Packer<int>.Write(packer, index);
-                    var key = new IndexKey(_keyBase, index);
-                    networkManager.deltaModule.Write(packer, player, key, _values[index]);
+                    Packer<int>.Write(packer, idx);
+                    var key = new IndexKey(_keyBase, idx);
+                    networkManager.deltaModule.Write(packer, player, key, _values[idx]);
                 }
 
                 if (packer.positionInBits > 0)
@@ -72,12 +72,12 @@ namespace PurrNet
             Packer<int>.Read(packer, ref count);
             for (int i = 0; i < count; i++)
             {
-                int index = 0;
-                Packer<int>.Read(packer, ref index);
-                var key = new IndexKey(_keyBase, index);
+                int idx = 0;
+                Packer<int>.Read(packer, ref idx);
+                var key = new IndexKey(_keyBase, idx);
                 T val = default;
                 networkManager.deltaModule.Read(packer, key,default, ref val);
-                _values[index] = val;
+                _values[idx] = val;
             }
         }
 

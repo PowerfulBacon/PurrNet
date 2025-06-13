@@ -121,6 +121,52 @@ namespace PurrNet.Modules
             return Write(packer, player, key, newValue, ref cache);
         }
 
+        public bool WriteReliable<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue, ref PackedUInt cachedKey)
+            where Key : struct, IStableHashable
+        {
+            var hash = GetKeyHash(key);
+            var tracker = GetOrCreateTracker<T>(player, hash, true);
+
+            T oldValue = default;
+
+            int id = tracker.FindBestMatch(out var bestKey);
+
+            if (id >= 0)
+            {
+                if (tracker.TryGetValueAtIndex(id, out var confirmedValue))
+                    oldValue = confirmedValue;
+                else
+                {
+                    PurrLogger.LogError($"Confirmed value not found for key {hash} and {id} and player {player}");
+                    oldValue = default;
+                }
+            }
+
+            DeltaPacker<PackedUInt>.Write(packer, cachedKey, bestKey);
+            cachedKey = bestKey;
+
+            var pos = packer.positionInBits;
+            Packer<bool>.Write(packer, false);
+            bool changed = DeltaPacker<T>.Write(packer, oldValue, newValue);
+
+            packer.WriteAt(pos, changed);
+
+            if (changed)
+            {
+                PackedUInt newId = tracker.GenerateId();
+                DeltaPacker<PackedUInt>.Write(packer, cachedKey, newId);
+                cachedKey = newId;
+                tracker.Set(newId, newValue);
+                tracker.ValidateId(newId);
+            }
+            else
+            {
+                packer.SetBitPosition(pos + 1);
+            }
+
+            return changed;
+        }
+
         public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue, ref PackedUInt cachedKey) where Key : struct, IStableHashable
         {
             var hash = GetKeyHash(key);
@@ -169,6 +215,52 @@ namespace PurrNet.Modules
         {
             PackedUInt cachedKey = default;
             Read(packer, key, sender, ref newValue, ref cachedKey);
+        }
+
+        public void ReadReliable<Key, T>(BitPacker packer, Key key, PlayerID sender, ref T newValue, ref PackedUInt cachedKey) where Key : struct, IStableHashable
+        {
+            var player = _players.localPlayerId ?? default;
+
+            var keyHash = GetKeyHash(key);
+            var tracker = GetOrCreateTracker<T>(player, keyHash, false);
+
+            PackedUInt lastConfirmedId = default;
+            DeltaPacker<PackedUInt>.Read(packer, cachedKey, ref lastConfirmedId);
+            cachedKey = lastConfirmedId;
+
+            bool changed = false;
+
+            Packer<bool>.Read(packer, ref changed);
+
+            if (changed)
+            {
+                PackedUInt valueId = default;
+                T oldValue = default;
+
+                if (lastConfirmedId != 0)
+                {
+                    if (tracker.TryGetValue(lastConfirmedId, out var confirmedValue))
+                        oldValue = confirmedValue;
+                    else PurrLogger.LogError($"Confirmed value not found for key {keyHash} and {lastConfirmedId.value} and player {player}");
+                }
+
+                DeltaPacker<T>.Read(packer, oldValue, ref newValue);
+                DeltaPacker<PackedUInt>.Read(packer, cachedKey, ref valueId);
+                cachedKey = valueId;
+
+                tracker.Set(valueId, newValue);
+            }
+            else if (lastConfirmedId != 0)
+            {
+                if (tracker.TryGetValue(lastConfirmedId, out var confirmedValue))
+                    newValue = Packer.Copy(confirmedValue);
+                else
+                {
+                    PurrLogger.LogError($"Confirmed value not found for key {keyHash} and {lastConfirmedId.value} and player {player}");
+                    newValue = default;
+                }
+            }
+            else newValue = default;
         }
 
         public void Read<Key, T>(BitPacker packer, Key key, PlayerID sender, ref T newValue, ref PackedUInt cachedKey) where Key : struct, IStableHashable
