@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using PurrNet.Packing;
 using UnityEngine;
 
@@ -90,6 +91,20 @@ namespace PurrNet.Modules
             }
 
             return result;
+        }
+
+        public int GetLastMatch()
+        {
+            if (_history.Count == 0)
+                return -1;
+            return _history.Count - 1;
+        }
+
+        public T GetLastValue()
+        {
+            if (_history.Count == 0)
+                return default;
+            return _history[^1].value;
         }
 
         public int FindBestMatch(out uint key)
@@ -200,6 +215,12 @@ namespace PurrNet.Modules
 
             o = default;
             return false;
+        }
+
+        public void Set(T oldValue)
+        {
+            _history.Clear();
+            _history.Add(new Entry { key = 0, value = Packer.Copy(oldValue), enterTime = Time.unscaledTime });
         }
 
         public void Set(uint id, T newValue)
