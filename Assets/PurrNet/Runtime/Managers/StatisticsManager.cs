@@ -31,16 +31,17 @@ namespace PurrNet
         public bool connectedServer { get; private set; }
         public bool connectedClient { get; private set; }
 
-        private const int PING_HISTORY_SIZE = 10;
+        private const float PING_HISTORY_TIME = 2.5f; // Seconds
         private const int PACKET_HISTORY_SECONDS = 5;
         private const int MAX_PACKET_HISTORY = 200;
         
-        private readonly int[] _pingStats = new int[PING_HISTORY_SIZE];
+        private int[] _pingStats;
         private readonly uint[] _sentPacketSequences = new uint[MAX_PACKET_HISTORY];
         private readonly uint[] _receivedPacketSequences = new uint[MAX_PACKET_HISTORY];
         private readonly float[] _sentPacketTimes = new float[MAX_PACKET_HISTORY];
         private readonly float[] _receivedPacketTimes = new float[MAX_PACKET_HISTORY];
         
+        private int _pingHistorySize;
         private int _pingIndex;
         private int _pingCount;
         private int _sentPacketIndex;
@@ -226,6 +227,8 @@ namespace PurrNet
         private void OnServerConnectionState(ConnectionState state)
         {
             _playersServerBroadcaster = _networkManager.GetModule<PlayersBroadcaster>(true);
+            _pingHistorySize = Mathf.RoundToInt(_networkManager.tickModule.tickRate * PING_HISTORY_TIME);
+            _pingStats = new int[_pingHistorySize];
 
             connectedServer = state == ConnectionState.Connected;
 
@@ -248,6 +251,8 @@ namespace PurrNet
         {
             _tickManager = _networkManager.GetModule<TickManager>(false);
             _playersClientBroadcaster = _networkManager.GetModule<PlayersBroadcaster>(false);
+            _pingHistorySize = Mathf.RoundToInt(_networkManager.tickModule.tickRate * PING_HISTORY_TIME);
+            _pingStats = new int[_pingHistorySize];
 
             connectedClient = state == ConnectionState.Connected;
 
@@ -350,8 +355,8 @@ namespace PurrNet
             currentPing -= Mathf.Min(currentPing, Mathf.RoundToInt((_tickManager.tickDelta * 3) * 1000));
 
             _pingStats[_pingIndex] = currentPing;
-            _pingIndex = (_pingIndex + 1) % PING_HISTORY_SIZE;
-            if (_pingCount < PING_HISTORY_SIZE)
+            _pingIndex = (_pingIndex + 1) % _pingHistorySize;
+            if (_pingCount < _pingHistorySize)
                 _pingCount++;
 
             CalculatePingStats();
