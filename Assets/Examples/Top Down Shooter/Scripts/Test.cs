@@ -7,6 +7,12 @@ public class Test : NetworkIdentity
     [SerializeField] private int _localHealth = 100;
     [SerializeField] private SyncDictionary<int, int> _dictionary = new ();
 
+    [ServerRpc]
+    private void TesT()
+    {
+
+    }
+
     private void Awake()
     {
         _dictionary.onChanged += OnListChanged;
