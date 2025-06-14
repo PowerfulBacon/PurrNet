@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using PurrNet.Collections;
 using UnityEngine;
 
 namespace PurrNet
@@ -9,16 +10,63 @@ namespace PurrNet
         [SerializeField, HideInInspector] private NetworkRules _networkRules;
         [SerializeField, HideInInspector] private NetworkVisibilityRuleSet _visitiblityRules;
 
+        private readonly PurrHashSet<PlayerID> _whitelist = new PurrHashSet<PlayerID>();
+
+        private readonly PurrHashSet<PlayerID> _blacklist = new PurrHashSet<PlayerID>();
+
         /// <summary>
         /// Whitelist of players that can interact with this identity.
         /// This doesn't block visibility for others but rather enforces visibility for these players.
         /// </summary>
-        [UsedImplicitly] public readonly HashSet<PlayerID> whitelist = new HashSet<PlayerID>();
+        [UsedImplicitly] public IReadonlyHashSet<PlayerID> whitelist => _whitelist;
 
         /// <summary>
         /// Blacklist of players that can't interact with this identity.
         /// </summary>
-        [UsedImplicitly] public readonly HashSet<PlayerID> blacklist = new HashSet<PlayerID>();
+        [UsedImplicitly] public IReadonlyHashSet<PlayerID> blacklist => _blacklist;
+
+
+        private bool _whiteBlackDirty;
+
+        public bool WhitelistPlayer(PlayerID player)
+        {
+            if (_whitelist.Add(player))
+            {
+                _whiteBlackDirty = true;
+                return true;
+            }
+            return false;
+        }
+
+        public bool BlacklistPlayer(PlayerID player)
+        {
+            if (_blacklist.Add(player))
+            {
+                _whiteBlackDirty = true;
+                return true;
+            }
+            return false;
+        }
+
+        public bool RemoveWhitelistPlayer(PlayerID player)
+        {
+            if (_whitelist.Remove(player))
+            {
+                _whiteBlackDirty = true;
+                return true;
+            }
+            return false;
+        }
+
+        public bool RemoveBlacklistPlayer(PlayerID player)
+        {
+            if (_blacklist.Remove(player))
+            {
+                _whiteBlackDirty = true;
+                return true;
+            }
+            return false;
+        }
 
         private NetworkRules networkRules =>
             _networkRules ? _networkRules : networkManager ? networkManager.networkRules : null;
@@ -122,12 +170,12 @@ namespace PurrNet
             return rules && rules.HasRemoveOwnershipAuthority(this, player, asServer);
         }
 
-        public bool TryAddObserver(PlayerID player)
+        internal bool TryAddObserver(PlayerID player)
         {
             return _observers.Add(player);
         }
 
-        public bool TryRemoveObserver(PlayerID player)
+        internal bool TryRemoveObserver(PlayerID player)
         {
             return _observers.Remove(player);
         }

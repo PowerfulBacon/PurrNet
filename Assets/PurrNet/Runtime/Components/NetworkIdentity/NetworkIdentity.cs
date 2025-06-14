@@ -498,6 +498,7 @@ namespace PurrNet
 
         private void ClientTick()
         {
+            InternalTick();
             _ticker?.OnTick(_clientTickManager.tickDelta);
 
             for (var i = 0; i < _tickables.Count; i++)
@@ -511,12 +512,22 @@ namespace PurrNet
         {
             if (!isClient)
             {
+                InternalTick();
                 _ticker?.OnTick(_serverTickManager.tickDelta);
                 for (var i = 0; i < _tickables.Count; i++)
                 {
                     var ticker = _tickables[i];
                     ticker.OnTick(_serverTickManager.tickDelta);
                 }
+            }
+        }
+
+        private void InternalTick()
+        {
+            if (_whiteBlackDirty)
+            {
+                _whiteBlackDirty = false;
+                EvaluateVisibility();
             }
         }
 
