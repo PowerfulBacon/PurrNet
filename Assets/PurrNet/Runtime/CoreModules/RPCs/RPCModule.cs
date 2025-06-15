@@ -151,6 +151,12 @@ namespace PurrNet.Modules
         }
 
         [UsedByIL]
+        public static bool ArePlayersEqual(PlayerID player1, PlayerID player2)
+        {
+            return player1.Equals(player2);
+        }
+
+        [UsedByIL]
         public static void SendStaticRPC(StaticRPCPacket packet, RPCSignature signature)
         {
             var nm = NetworkManager.main;

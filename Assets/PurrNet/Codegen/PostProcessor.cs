@@ -1268,6 +1268,14 @@ namespace PurrNet.Codegen
                 PutIsServerOnStack(module, methodRpc, isNetworkClass, code, moduleType, identityType);
                 code.Append(Instruction.Create(OpCodes.Brtrue, executeRunLocally));
             }
+            else if (methodRpc.Signature.type == RPCType.TargetRPC)
+            {
+                PushLocalPlayerProp(module, code, isNetworkClass, methodRpc.Signature.isStatic);
+                code.Append(Instruction.Create(OpCodes.Ldarg_S, newMethod.Parameters[0]));
+                var areEqualMethod = rpcType.GetMethod("ArePlayersEqual", false).Import(module);
+                code.Append(Instruction.Create(OpCodes.Call, areEqualMethod));
+                code.Append(Instruction.Create(OpCodes.Brtrue, executeRunLocally));
+            }
 
             if (returnMode != ReturnMode.Void)
             {
