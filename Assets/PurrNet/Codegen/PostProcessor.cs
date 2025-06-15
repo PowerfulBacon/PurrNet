@@ -385,7 +385,7 @@ namespace PurrNet.Codegen
             var compileTimeSignatureField = info.ParameterType.GetField("compileTimeSignature").Import(module);
 
             code.Append(Instruction.Create(OpCodes.Ldarga, info));
-            ReturnRPCSignature(module, code, originalRpc, true, isNetworkClass);
+            PushRPCSignature(module, code, originalRpc, true, isNetworkClass);
             code.Append(Instruction.Create(OpCodes.Stfld, compileTimeSignatureField));
 
             MethodReference validateReceivingRPC;
@@ -548,17 +548,7 @@ namespace PurrNet.Codegen
                     code.Append(Instruction.Create(OpCodes.Ldarg, info));
                     code.Append(Instruction.Create(OpCodes.Ldloc, reqId));
                     // load networkManager
-                    if (newMethod.IsStatic)
-                    {
-                        code.Append(Instruction.Create(OpCodes.Call, mainManagerGetter));
-                    }
-                    else
-                    {
-                        code.Append(Instruction.Create(OpCodes.Ldarg_0));
-                        code.Append(isNetworkClass
-                            ? Instruction.Create(OpCodes.Call, getNetworkManagerModule)
-                            : Instruction.Create(OpCodes.Call, getNetworkManager));
-                    }
+                    PushNetworkManager(module, code, isNetworkClass, newMethod.IsStatic);
 
                     var genericResponse =
                         new GenericInstanceMethod(returnMode is ReturnMode.Task ? responder : responderUniTask);
@@ -591,6 +581,34 @@ namespace PurrNet.Codegen
                         _ => throw new ArgumentOutOfRangeException()
                     });
                 }
+            }
+        }
+
+        private static void PushNetworkManager(ModuleDefinition module, ILProcessor code, bool isNetworkClass, bool isStatic)
+        {
+            var managerType = module.GetTypeDefinition<NetworkManager>();
+            var networkModule = module.GetTypeDefinition<NetworkModule>();
+            var identityType = module.GetTypeDefinition<NetworkIdentity>();
+
+            var networkManagerProp = identityType.GetProperty("networkManager");
+            var getNetworkManager = networkManagerProp.GetMethod.Import(module);
+
+            var networkManagerModuleProp = networkModule.GetProperty("networkManager");
+            var getNetworkManagerModule = networkManagerModuleProp.GetMethod.Import(module);
+
+            var mainManagerProp = managerType.GetProperty("main");
+            var mainManagerGetter = mainManagerProp.GetMethod.Import(module);
+
+            if (isStatic)
+            {
+                code.Append(Instruction.Create(OpCodes.Call, mainManagerGetter));
+            }
+            else
+            {
+                code.Append(Instruction.Create(OpCodes.Ldarg_0));
+                code.Append(isNetworkClass
+                    ? Instruction.Create(OpCodes.Call, getNetworkManagerModule)
+                    : Instruction.Create(OpCodes.Call, getNetworkManager));
             }
         }
 
@@ -1238,6 +1256,7 @@ namespace PurrNet.Codegen
             newMethod.Body.Variables.Add(rpcSignature);
 
             var paramCount = newMethod.Parameters.Count;
+
             var endOfRunLocallyCheck = Instruction.Create(OpCodes.Nop);
             var executeRunLocally = Instruction.Create(OpCodes.Nop);
 
@@ -1247,7 +1266,7 @@ namespace PurrNet.Codegen
                 code.Append(Instruction.Create(OpCodes.Brtrue, executeRunLocally));
             }
 
-            ReturnRPCSignature(module, code, methodRpc, false, isNetworkClass);
+            PushRPCSignature(module, code, methodRpc, false, isNetworkClass);
             code.Append(Instruction.Create(OpCodes.Stloc, rpcSignature));
 
             if (returnMode != ReturnMode.Void)
@@ -1511,6 +1530,39 @@ namespace PurrNet.Codegen
             code.Append(Instruction.Create(OpCodes.Br, endOfRunLocallyCheck));
             code.Append(executeRunLocally);
 
+            bool hasRpcInfoParam = paramCount > 0 && newMethod.Parameters[^1].ParameterType.FullName == typeof(RPCInfo).FullName;
+            if (hasRpcInfoParam)
+            {
+                var RPCInfo_compileTimeSignatureField = module.GetTypeDefinition<RPCInfo>()
+                    .GetField("compileTimeSignature").Import(module);
+
+                var RPCInfo_manager = module.GetTypeDefinition<RPCInfo>()
+                    .GetField("manager").Import(module);
+
+                var RPCInfo_sender = module.GetTypeDefinition<RPCInfo>()
+                    .GetField("sender").Import(module);
+
+                var RPCInfo_asServer = module.GetTypeDefinition<RPCInfo>()
+                    .GetField("asServer").Import(module);
+
+                code.Append(Instruction.Create(OpCodes.Ldarga, newMethod.Parameters[^1]));
+                code.Append(Instruction.Create(OpCodes.Dup));
+                code.Append(Instruction.Create(OpCodes.Dup));
+                code.Append(Instruction.Create(OpCodes.Dup));
+
+                code.Append(Instruction.Create(OpCodes.Ldloc, rpcSignature));
+                code.Append(Instruction.Create(OpCodes.Stfld, RPCInfo_compileTimeSignatureField));
+
+                PushNetworkManager(module, code, isNetworkClass, methodRpc.Signature.isStatic);
+                code.Append(Instruction.Create(OpCodes.Stfld, RPCInfo_manager));
+
+                PushLocalPlayerProp(module, code, isNetworkClass, methodRpc.Signature.isStatic);
+                code.Append(Instruction.Create(OpCodes.Stfld, RPCInfo_sender));
+
+                code.Append(Instruction.Create(methodRpc.Signature.type == RPCType.ServerRPC ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0));
+                code.Append(Instruction.Create(OpCodes.Stfld, RPCInfo_asServer));
+            }
+
             var callMethod = GetOriginalMethod(method);
 
             if (method.HasGenericParameters)
@@ -1616,7 +1668,7 @@ namespace PurrNet.Codegen
             }
         }
 
-        private static void ReturnRPCSignature(ModuleDefinition module, ILProcessor code, RPCMethod rpc,
+        private static void PushRPCSignature(ModuleDefinition module, ILProcessor code, RPCMethod rpc,
             bool isReceiving, bool isNetworkModule)
         {
             var rpcDetails = module.GetTypeDefinition<RPCSignature>();
@@ -1647,24 +1699,8 @@ namespace PurrNet.Codegen
                 }
                 else
                 {
-                    if (!rpc.Signature.isStatic)
-                    {
-                        var localPlayerProp =
-                            isNetworkModule
-                                ? module.GetTypeDefinition<NetworkModule>().GetProperty("localPlayerForced").GetMethod
-                                    .Import(module)
-                                : module.GetTypeDefinition<NetworkIdentity>().GetProperty("localPlayerForced").GetMethod
-                                    .Import(module);
-
-                        code.Append(Instruction.Create(OpCodes.Ldarg_0));
-                        code.Append(Instruction.Create(OpCodes.Call, localPlayerProp));
-                    }
-                    else
-                    {
-                        var rpcModule = module.GetTypeDefinition<RPCModule>();
-                        var getLocalPlayer = rpcModule.GetMethod("GetLocalPlayer").Import(module);
-                        code.Append(Instruction.Create(OpCodes.Call, getLocalPlayer));
-                    }
+                    bool isStatic = rpc.Signature.isStatic;
+                    PushLocalPlayerProp(module, code, isNetworkModule, isStatic);
                 }
 
                 code.Append(Instruction.Create(OpCodes.Call, makeRpcDetailsTarget));
@@ -1672,6 +1708,28 @@ namespace PurrNet.Codegen
             else
             {
                 code.Append(Instruction.Create(OpCodes.Call, makeRpcDetails));
+            }
+        }
+
+        private static void PushLocalPlayerProp(ModuleDefinition module, ILProcessor code, bool isNetworkModule, bool isStatic)
+        {
+            if (!isStatic)
+            {
+                var localPlayerProp =
+                    isNetworkModule
+                        ? module.GetTypeDefinition<NetworkModule>().GetProperty("localPlayerForced").GetMethod
+                            .Import(module)
+                        : module.GetTypeDefinition<NetworkIdentity>().GetProperty("localPlayerForced").GetMethod
+                            .Import(module);
+
+                code.Append(Instruction.Create(OpCodes.Ldarg_0));
+                code.Append(Instruction.Create(OpCodes.Call, localPlayerProp));
+            }
+            else
+            {
+                var rpcModule = module.GetTypeDefinition<RPCModule>();
+                var getLocalPlayer = rpcModule.GetMethod("GetLocalPlayer").Import(module);
+                code.Append(Instruction.Create(OpCodes.Call, getLocalPlayer));
             }
         }
 

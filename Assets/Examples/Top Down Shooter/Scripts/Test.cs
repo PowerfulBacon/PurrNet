@@ -7,8 +7,19 @@ public class Test : NetworkIdentity
     [SerializeField] private int _localHealth = 100;
     [SerializeField] private SyncDictionary<int, int> _dictionary = new ();
 
-    [ServerRpc]
-    private void TesT()
+    [ServerRpc(runLocally: true)]
+    private void TesT(RPCInfo info = default)
+    {
+
+    }
+
+    [TargetRpc(runLocally: true)]
+    private void TesfT(PlayerID id, RPCInfo info = default)
+    {
+
+    }
+    [ObserversRpc(runLocally: true)]
+    private void TesffT(RPCInfo info = default)
     {
 
     }
