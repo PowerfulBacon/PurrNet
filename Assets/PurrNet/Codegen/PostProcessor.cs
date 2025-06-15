@@ -1550,7 +1550,9 @@ namespace PurrNet.Codegen
                 code.Append(Instruction.Create(OpCodes.Dup));
                 code.Append(Instruction.Create(OpCodes.Dup));
 
+                PushRPCSignature(module, code, methodRpc, false, isNetworkClass);
                 code.Append(Instruction.Create(OpCodes.Ldloc, rpcSignature));
+
                 code.Append(Instruction.Create(OpCodes.Stfld, RPCInfo_compileTimeSignatureField));
 
                 PushNetworkManager(module, code, isNetworkClass, methodRpc.Signature.isStatic);
