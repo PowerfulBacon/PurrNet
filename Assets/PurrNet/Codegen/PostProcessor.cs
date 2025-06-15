@@ -1260,14 +1260,14 @@ namespace PurrNet.Codegen
             var endOfRunLocallyCheck = Instruction.Create(OpCodes.Nop);
             var executeRunLocally = Instruction.Create(OpCodes.Nop);
 
+            PushRPCSignature(module, code, methodRpc, false, isNetworkClass);
+            code.Append(Instruction.Create(OpCodes.Stloc, rpcSignature));
+
             if (methodRpc.Signature.type == RPCType.ServerRPC)
             {
                 PutIsServerOnStack(module, methodRpc, isNetworkClass, code, moduleType, identityType);
                 code.Append(Instruction.Create(OpCodes.Brtrue, executeRunLocally));
             }
-
-            PushRPCSignature(module, code, methodRpc, false, isNetworkClass);
-            code.Append(Instruction.Create(OpCodes.Stloc, rpcSignature));
 
             if (returnMode != ReturnMode.Void)
             {
@@ -1550,9 +1550,7 @@ namespace PurrNet.Codegen
                 code.Append(Instruction.Create(OpCodes.Dup));
                 code.Append(Instruction.Create(OpCodes.Dup));
 
-                PushRPCSignature(module, code, methodRpc, false, isNetworkClass);
                 code.Append(Instruction.Create(OpCodes.Ldloc, rpcSignature));
-
                 code.Append(Instruction.Create(OpCodes.Stfld, RPCInfo_compileTimeSignatureField));
 
                 PushNetworkManager(module, code, isNetworkClass, methodRpc.Signature.isStatic);
