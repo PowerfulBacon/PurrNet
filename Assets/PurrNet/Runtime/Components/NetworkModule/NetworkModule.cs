@@ -49,6 +49,9 @@ namespace PurrNet
         public bool IsController(bool ownerHasAuthority) => parent && parent.IsController(ownerHasAuthority);
 
         [UsedImplicitly]
+        public bool IsController(IOwnerAuth auth) => parent && parent.IsController(auth.ownerAuth);
+
+        [UsedImplicitly]
         public bool IsController(bool ownerHasAuthority, bool asServer) =>
             parent && parent.IsController(asServer, ownerHasAuthority);
 
@@ -300,6 +303,16 @@ namespace PurrNet
         /// </summary>
         public virtual void OnPoolReset()
         {
+        }
+
+        protected string GetPermissionErrorDetails(IOwnerAuth auth)
+        {
+            return GetPermissionErrorDetails(
+                auth.ownerAuth,
+                isServer,
+                owner,
+                localPlayer
+            );
         }
 
         protected static string GetPermissionErrorDetails(bool ownerAuth, NetworkModule module)
