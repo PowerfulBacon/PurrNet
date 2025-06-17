@@ -1,9 +1,19 @@
+#if !(UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX || STEAMWORKS_WIN || STEAMWORKS_LIN_OSX)
+#define DISABLESTEAMWORKS
+#endif
+
+#if STEAMWORKS_NET
+#define STEAMWORKS_NET_PACKAGE
+#endif
+
 using System.Collections.Generic;
 using PurrNet.Editor;
 using PurrNet.Transports;
 using UnityEditor;
 using UnityEditor.Build;
+#if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
 using UnityEditor.PackageManager;
+#endif
 using UnityEngine;
 
 namespace PurrNet.Steam.Editor

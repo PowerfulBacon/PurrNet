@@ -34,13 +34,13 @@ namespace PurrNet
         private const float PING_HISTORY_TIME = 2.5f; // Seconds
         private const int PACKET_HISTORY_SECONDS = 5;
         private const int MAX_PACKET_HISTORY = 200;
-        
+
         private int[] _pingStats;
         private readonly uint[] _sentPacketSequences = new uint[MAX_PACKET_HISTORY];
         private readonly uint[] _receivedPacketSequences = new uint[MAX_PACKET_HISTORY];
         private readonly float[] _sentPacketTimes = new float[MAX_PACKET_HISTORY];
         private readonly float[] _receivedPacketTimes = new float[MAX_PACKET_HISTORY];
-        
+
         private int _pingHistorySize;
         private int _pingIndex;
         private int _pingCount;
@@ -107,8 +107,12 @@ namespace PurrNet
         {
             if (_networkManager)
             {
+                _networkManager.onServerConnectionState -= OnServerConnectionState;
+                _networkManager.onClientConnectionState -= OnClientConnectionState;
                 _networkManager.transport.transport.onDataReceived -= OnDataReceived;
                 _networkManager.transport.transport.onDataSent -= OnDataSent;
+                if (_networkManager.TryGetModule(out TickManager tm, false))
+                    tm.onTick -= OnClientTick;
             }
 
             if (_playersServerBroadcaster != null)
@@ -119,9 +123,6 @@ namespace PurrNet
 
             if (_playersClientBroadcaster != null)
             {
-                if (_networkManager.TryGetModule(out TickManager tm, false))
-                    tm.onTick -= OnClientTick;
-
                 _playersClientBroadcaster.Unsubscribe<PingMessage>(ReceivePing);
                 _playersClientBroadcaster.Unsubscribe<PacketMessage>(ReceivePacket);
             }
@@ -219,7 +220,7 @@ namespace PurrNet
                 _totalDataSent = 0;
                 _lastDataCheckTime = Time.time;
             }
-            
+
             if (connectedClient)
                 CleanupOldPackets(Time.time);
         }
@@ -299,7 +300,7 @@ namespace PurrNet
             _sentPacketCount = 0;
             _receivedPacketCount = 0;
             _packetSequence = 0;
-            
+
             for (int i = 0; i < MAX_PACKET_HISTORY; i++)
             {
                 _sentPacketTimes[i] = 0;
@@ -396,15 +397,15 @@ namespace PurrNet
                 return;
 
             _lastPacketSendTick = _tickManager.localTick;
-            
+
             _sentPacketSequences[_sentPacketIndex] = _packetSequence;
             _sentPacketTimes[_sentPacketIndex] = Time.time;
             _sentPacketIndex = (_sentPacketIndex + 1) % MAX_PACKET_HISTORY;
             if (_sentPacketCount < MAX_PACKET_HISTORY)
                 _sentPacketCount++;
-            
+
             _playersClientBroadcaster.SendToServer(new PacketMessage { sequenceId = _packetSequence++ }, Channel.Unreliable);
-            
+
             CalculatePacketLoss();
         }
 
@@ -412,27 +413,27 @@ namespace PurrNet
         {
             float currentTime = Time.time;
             float cutoffTime = currentTime - PACKET_HISTORY_SECONDS;
-            
+
             int validSentPackets = 0;
             int validReceivedPackets = 0;
-            
+
             for (int i = 0; i < _sentPacketCount; i++)
             {
                 if (_sentPacketTimes[i] > 0 && _sentPacketTimes[i] >= cutoffTime)
                     validSentPackets++;
             }
-            
+
             for (int i = 0; i < _receivedPacketCount; i++)
             {
                 if (_receivedPacketTimes[i] > 0 && _receivedPacketTimes[i] >= cutoffTime)
                     validReceivedPackets++;
             }
-            
+
             if (validSentPackets > 0)
             {
                 int lossPercentage = 100 - (validReceivedPackets * 100 / validSentPackets);
                 packetLoss = Mathf.Clamp(lossPercentage, 0, 100);
-                
+
                 if (_tickManager.localTick < 3 * _tickManager.tickRate)
                     packetLoss = 0;
             }
@@ -445,7 +446,7 @@ namespace PurrNet
         private void CleanupOldPackets(float currentTime)
         {
             float cutoffTime = currentTime - PACKET_HISTORY_SECONDS - 1f;
-            
+
             for (int i = 0; i < MAX_PACKET_HISTORY; i++)
             {
                 if (_sentPacketTimes[i] > 0 && _sentPacketTimes[i] < cutoffTime)
@@ -453,7 +454,7 @@ namespace PurrNet
                     _sentPacketTimes[i] = 0;
                     _sentPacketSequences[i] = 0;
                 }
-                    
+
                 if (_receivedPacketTimes[i] > 0 && _receivedPacketTimes[i] < cutoffTime)
                 {
                     _receivedPacketTimes[i] = 0;
