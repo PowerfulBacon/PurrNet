@@ -11,9 +11,7 @@ using PurrNet.Editor;
 using PurrNet.Transports;
 using UnityEditor;
 using UnityEditor.Build;
-#if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
 using UnityEditor.PackageManager;
-#endif
 using UnityEngine;
 
 namespace PurrNet.Steam.Editor
