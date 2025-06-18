@@ -137,6 +137,8 @@ namespace PurrNet
             if (_dirty.Count <= 0)
                 return;
 
+            OptimizeBatch();
+
             var batch = new NetAnimatorActionBatch
             {
                 actions = _dirty
