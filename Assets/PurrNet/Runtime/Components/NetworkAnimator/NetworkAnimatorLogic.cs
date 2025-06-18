@@ -113,7 +113,7 @@ namespace PurrNet
                     }
                     case NetAnimatorAction.SetSpeed:
                     {
-                        RemovePast(i, action, (a, b) => true);
+                        RemovePast(i, action, (_, _) => true);
                         break;
                     }
                 }
