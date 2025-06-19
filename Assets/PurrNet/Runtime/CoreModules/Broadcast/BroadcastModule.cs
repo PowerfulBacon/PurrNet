@@ -43,7 +43,6 @@ namespace PurrNet.Modules
         private readonly ITransport _transport;
 
         private readonly bool _asServer;
-        private readonly NetworkManager _manager;
 
         private readonly Dictionary<uint, List<IBroadcastCallback>> _actions =
             new Dictionary<uint, List<IBroadcastCallback>>();
@@ -52,7 +51,6 @@ namespace PurrNet.Modules
 
         public BroadcastModule(NetworkManager manager, bool asServer)
         {
-            _manager = manager;
             _transport = manager.transport.transport;
             _asServer = asServer;
         }
@@ -79,8 +77,9 @@ namespace PurrNet.Modules
             return stream.ToByteData();
         }
 
-        private static ByteData GetData<T>(BitPacker stream, T data)
+        private static ByteData GetData<T>(T data)
         {
+            using var stream = BitPackerPool.Get();
             var typeId = Hasher.GetStableHashU32<T>();
 
             Packer<PackedUInt>.Write(stream, typeId);
@@ -98,23 +97,18 @@ namespace PurrNet.Modules
         {
             AssertIsServer("Cannot send data to all clients from client.");
 
-            using var stream = BitPackerPool.Get();
-            var byteData = GetData(stream, data);
-
+            var byteData = GetData(data);
+#if UNITY_EDITOR
             var type = typeof(T);
             bool shouldTrack = ShouldTrackType(type);
+#endif
             int connCount = _transport.connections.Count;
             for (int i = 0; i < connCount; i++)
             {
+#if UNITY_EDITOR
                 if (shouldTrack)
                     Statistics.SentBroadcast(type, byteData.segment);
-
-                if (_manager.localClientConnection == _transport.connections[i])
-                {
-                    _transport.RaiseDataReceived(_transport.connections[i], byteData, false);
-                    continue;
-                }
-
+#endif
                 _transport.SendToClient(_transport.connections[i], byteData, method);
             }
         }
@@ -122,56 +116,41 @@ namespace PurrNet.Modules
         public void SendRaw(Connection conn, ByteData data, Channel method = Channel.ReliableOrdered)
         {
             AssertIsServer("Cannot send data to player from client.");
-
-            if (_manager.localClientConnection == conn)
-            {
-                // if we are client, we should just call the method directly
-                _transport.RaiseDataReceived(conn, data, false);
-                return;
-            }
-
+#if UNITY_EDITOR
             Statistics.ForwardedBytes(data.length);
+#endif
             _transport.SendToClient(conn, data, method);
         }
 
         public void Send<T>(Connection conn, T data, Channel method = Channel.ReliableOrdered)
         {
             AssertIsServer("Cannot send data to player from client.");
-            using var stream = BitPackerPool.Get();
-            var byteData = GetData(stream, data);
+
+            var byteData = GetData(data);
+#if UNITY_EDITOR
             var type = typeof(T);
             if (ShouldTrackType(type))
                 Statistics.SentBroadcast(type, byteData.segment);
-
-            if (_manager.localClientConnection == conn)
-            {
-                // if we are client, we should just call the method directly
-                _transport.RaiseDataReceived(conn, byteData, false);
-                return;
-            }
+#endif
             _transport.SendToClient(conn, byteData, method);
         }
 
         public void Send<T>(IEnumerable<Connection> conn, T data, Channel method = Channel.ReliableOrdered)
         {
             AssertIsServer("Cannot send data to player from client.");
-            using var stream = BitPackerPool.Get();
-            var byteData = GetData(stream, data);
+
+            var byteData = GetData(data);
+#if UNITY_EDITOR
             var type = typeof(T);
             var shouldTrack = ShouldTrackType(type);
+#endif
 
             foreach (var connection in conn)
             {
+#if UNITY_EDITOR
                 if (shouldTrack)
                     Statistics.SentBroadcast(type, byteData.segment);
-
-                if (_manager.localClientConnection == connection)
-                {
-                    // if we are client, we should just call the method directly
-                    _transport.RaiseDataReceived(connection, byteData, false);
-                    continue;
-                }
-
+#endif
                 _transport.SendToClient(connection, byteData, method);
             }
         }
@@ -182,14 +161,9 @@ namespace PurrNet.Modules
 
             foreach (var connection in conn)
             {
-                if (_manager.localClientConnection == connection)
-                {
-                    // if we are client, we should just call the method directly
-                    _transport.RaiseDataReceived(connection, byteData, false);
-                    continue;
-                }
-
+#if UNITY_EDITOR
                 Statistics.ForwardedBytes(byteData.length);
+#endif
                 _transport.SendToClient(connection, byteData, method);
             }
         }
@@ -199,23 +173,13 @@ namespace PurrNet.Modules
             if (_asServer)
                 return;
 
-            using var stream = BitPackerPool.Get();
-            var byteData = GetData(stream, data);
-
+            var byteData = GetData(data);
+#if UNITY_EDITOR
             var type = typeof(T);
             if (ShouldTrackType(type))
                 Statistics.SentBroadcast(type, byteData.segment);
-
-            if (_transport.listenerState == ConnectionState.Connected)
-            {
-                // if we are server, we should just call the method directly
-                _transport.RaiseDataReceived(_manager.localClientConnection ?? default, byteData, true);
-            }
-            else
-            {
-                // otherwise, we can't bypass the network layer
-                _transport.SendToServer(byteData, method);
-            }
+#endif
+            _transport.SendToServer(byteData, method);
         }
 
         public void OnDataReceived(Connection conn, ByteData data, bool asServer)
@@ -240,8 +204,10 @@ namespace PurrNet.Modules
             Packer.Read(stream, typeInfo, ref instance);
             TriggerCallback(conn, typeId, instance);
 
+#if UNITY_EDITOR
             if (ShouldTrackType(typeInfo))
                 Statistics.ReceivedBroadcast(typeInfo, data.segment);
+#endif
         }
 
         public void Subscribe<T>(BroadcastDelegate<T> callback)
