@@ -98,7 +98,7 @@ public class Test : NetworkIdentity
     private void TestList()
     {
         if(!_dictionary.TryAdd(0, 0))
-            _dictionary[0] += 1;
+            _dictionary[0] += 1; 
         if(!_dictionary.TryAdd(1, 0))
             _dictionary[1] += 1;
         if(!_dictionary.TryAdd(2, 0))
