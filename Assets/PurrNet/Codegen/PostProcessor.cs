@@ -1263,7 +1263,7 @@ namespace PurrNet.Codegen
             PushRPCSignature(module, code, methodRpc, false, isNetworkClass);
             code.Append(Instruction.Create(OpCodes.Stloc, rpcSignature));
 
-            if (methodRpc.Signature.type == RPCType.ServerRPC)
+            /*if (methodRpc.Signature.type == RPCType.ServerRPC)
             {
                 PutIsServerOnStack(module, methodRpc, isNetworkClass, code, moduleType, identityType);
                 code.Append(Instruction.Create(OpCodes.Brtrue, executeRunLocally));
@@ -1275,7 +1275,7 @@ namespace PurrNet.Codegen
                 var areEqualMethod = rpcType.GetMethod("ArePlayersEqual", false).Import(module);
                 code.Append(Instruction.Create(OpCodes.Call, areEqualMethod));
                 code.Append(Instruction.Create(OpCodes.Brtrue, executeRunLocally));
-            }
+            }*/
 
             if (returnMode != ReturnMode.Void)
             {
@@ -1616,7 +1616,7 @@ namespace PurrNet.Codegen
 
             return newMethod;
         }
-
+/*
         private static void PutIsServerOnStack(ModuleDefinition module, RPCMethod methodRpc, bool isNetworkClass,
             ILProcessor code, TypeDefinition moduleType, TypeDefinition identityType)
         {
@@ -1645,7 +1645,7 @@ namespace PurrNet.Codegen
                 code.Append(Instruction.Create(OpCodes.Call, getIsServerOnly.GetMethod.Import(module)));
             }
         }
-
+*/
         private static MethodReference CreateSerializer(ModuleDefinition module, TypeReference type, bool isWrite)
         {
             var packerType = module.GetTypeDefinition(typeof(Packer<>)).Import(module);

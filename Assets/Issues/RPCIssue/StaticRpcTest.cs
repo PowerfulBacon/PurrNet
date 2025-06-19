@@ -44,7 +44,7 @@ public class StaticRpcTest : NetworkIdentity
     }
 
     [TargetRpc(requireServer: false)]
-    public Task TargetRpc(PlayerID player, RPCInfo info = default)
+    public static Task TargetRpc(PlayerID player, RPCInfo info = default)
     {
         Debug.Log($"TargetRpc from {info.sender}");
         return Task.CompletedTask;

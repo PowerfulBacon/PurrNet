@@ -302,9 +302,7 @@ namespace PurrNet
                     if (signature.runLocally && isServer)
                         break;
 
-#if UNITY_EDITOR
                     Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
-#endif
                     SendToServer(packet, signature.channel);
                     break;
                 case RPCType.ObserversRPC:
@@ -313,17 +311,13 @@ namespace PurrNet
                         SendToObservers(packet, ShouldSend, signature.channel);
                     else
                     {
-#if UNITY_EDITOR
                         Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
-#endif
                         SendToServer(packet, signature.channel);
                     }
                     break;
                 }
                 case RPCType.TargetRPC:
-#if UNITY_EDITOR
                     Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
-#endif
                     if (isServer)
                         SendToTarget(signature.targetPlayer!.Value, packet, signature.channel);
                     else
