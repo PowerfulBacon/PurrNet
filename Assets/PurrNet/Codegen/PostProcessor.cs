@@ -1205,6 +1205,7 @@ namespace PurrNet.Codegen
             var rpcRequestType = module.GetTypeDefinition<RpcRequest>();
             var rpcSignatureType = module.GetTypeDefinition<RPCSignature>();
             var reqRespModule = module.GetTypeDefinition<RpcRequestResponseModule>();
+            var packerType = module.GetTypeDefinition(typeof(Packer)).Import(module);
 
             var allocStreamMethod = rpcType.GetMethod("AllocStream").Import(module);
             var freeStreamMethod = rpcType.GetMethod("FreeStream").Import(module);
@@ -1430,7 +1431,6 @@ namespace PurrNet.Codegen
                 // if isGeneric, write the type hash
                 if (isGeneric && param.ParameterType is GenericParameter { Type: GenericParameterType.Method })
                 {
-                    var packerType = module.GetTypeDefinition(typeof(Packer)).Import(module);
                     var writeGen = packerType.GetMethod("WriteGeneric", true).Import(module);
                     var writeMethod = new GenericInstanceMethod(writeGen);
                     writeMethod.GenericArguments.Add(param.ParameterType);
@@ -1589,11 +1589,26 @@ namespace PurrNet.Codegen
             if (!methodRpc.Signature.isStatic)
                 code.Append(Instruction.Create(OpCodes.Ldarg_0)); // this
 
+            // Packer.Copy<T>
+            var copyMethod = packerType.GetMethod("Copy", true).Import(module);
+
             for (int i = 0; i < paramCount; ++i)
             {
                 var param = newMethod.Parameters[i];
                 code.Append(Instruction.Create(OpCodes.Ldarg, param)); // param
+
+                bool shouldIgnore = ShouldIgnore(methodRpc.Signature.type, param, i, paramCount, out _);
+                var resolved = param.ParameterType.Resolve();
+
+                if (shouldIgnore || resolved != null && resolved.IsUnmanaged())
+                    continue;
+
+                var copyMethodGeneric = new GenericInstanceMethod(copyMethod);
+                copyMethodGeneric.GenericArguments.Add(param.ParameterType);
+
+                code.Append(Instruction.Create(OpCodes.Call, copyMethodGeneric)); // Packer.Copy<T>(param)
             }
+
 
             code.Append(Instruction.Create(OpCodes.Call, callMethod)); // Call original method
 
