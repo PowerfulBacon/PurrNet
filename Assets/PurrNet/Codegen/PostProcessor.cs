@@ -629,7 +629,7 @@ namespace PurrNet.Codegen
             {
                 HasThis = originalMethod.HasThis,
                 ExplicitThis = originalMethod.ExplicitThis,
-                CallingConvention = originalMethod.CallingConvention
+                CallingConvention = originalMethod.CallingConvention,
             };
 
             foreach (var parameter in originalMethod.Parameters)
