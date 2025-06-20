@@ -1521,25 +1521,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  _localHealth: 100
-  _dictionary:
-    _ownerAuth: 0
-    _serializedDict:
-      keys: 
-      values: 
-      stringKeys: []
-      stringValues: []
-    _sendIntervalInSeconds: 0
-    _useForceSend: 0
-  gecko1: {fileID: 0}
-  gecko2: {fileID: 0}
-  gecko3: {fileID: 0}
-  gecko4: {fileID: 0}
-  price1: 0
-  price2: 0
-  price3: 0
-  price4: 0
-  resultEventName: N SEND
+  _testMaterial: {fileID: 2100000, guid: 1a364b74476e8e745be0e98df89274cc, type: 2}
 --- !u!114 &634351196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3032,6 +3014,7 @@ MonoBehaviour:
   _dontDestroyOnLoad: 0
   _transport: {fileID: 1216416902}
   _networkPrefabs: {fileID: 11400000, guid: 37af97d33ef8d9747b965053a79d21f4, type: 2}
+  _networkAssets: {fileID: 11400000, guid: a519d78740d8b804e80cc0fd8da9b0cd, type: 2}
   _networkRules: {fileID: 11400000, guid: d8799083b96579a42b8b2d03e4ceae98, type: 2}
   _visibilityRules: {fileID: 11400000, guid: 8f014a5bd8dc68646a2a3c0b18c5bbd8, type: 2}
   _authenticator: {fileID: 1216416905}

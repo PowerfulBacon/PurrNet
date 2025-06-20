@@ -56,6 +56,9 @@ namespace PurrNet
         [PurrDocs("systems-and-modules/network-manager/network-prefabs")] [SerializeField]
         private NetworkPrefabs _networkPrefabs;
 
+        [PurrDocs("systems-and-modules/network-manager/network-assets")] [SerializeField] 
+        private NetworkAssets _networkAssets;
+
         [PurrDocs("systems-and-modules/network-manager/network-rules")] [SerializeField]
         private NetworkRules _networkRules;
 
@@ -113,6 +116,11 @@ namespace PurrNet
             get => _startClientFlags;
             set => _startClientFlags = value;
         }
+
+        /// <summary>
+        /// The Network Assets of the network manager.
+        /// </summary>
+        public NetworkAssets networkAssets => _networkAssets;
 
         /// <summary>
         /// The prefab provider of the network manager.

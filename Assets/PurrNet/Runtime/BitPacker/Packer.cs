@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Utils;
+using UnityEngine;
 
 namespace PurrNet.Packing
 {
@@ -320,6 +321,17 @@ namespace PurrNet.Packing
                 if (!hasValue) return;
 
                 object obj = value;
+                
+                int index = NetworkManager.main.networkAssets.GetIndex((UnityEngine.Object)obj);
+                bool isNetworkAsset = index != -1;
+                Packer<bool>.Write(packer, isNetworkAsset);
+
+                if (isNetworkAsset)
+                {
+                    Packer<PackedInt>.Write(packer, index);
+                    return;
+                }
+                
                 uint typeHash = Hasher.GetStableHashU32(obj.GetType());
 
                 Packer<uint>.Write(packer, typeHash);
@@ -342,6 +354,15 @@ namespace PurrNet.Packing
                 if (!hasValue)
                 {
                     value = default;
+                    return;
+                }
+                
+                bool isNetworkAsset = Packer<bool>.Read(packer);
+
+                if (isNetworkAsset)
+                {
+                    int index = Packer<PackedInt>.Read(packer);
+                    value = NetworkManager.main.networkAssets.GetAsset(index) is T cast ? cast : default; 
                     return;
                 }
 
