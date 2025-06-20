@@ -379,8 +379,8 @@ namespace PurrNet.Modules
                 }
             }
 
-            if (hadOwnerPreviously)
-                RemoveOwnership(nid);
+            /*if (hadOwnerPreviously)
+                RemoveOwnership(nid);*/
 
             if (!_sceneOwnerships.TryGetValue(nid.sceneId, out var module))
             {
