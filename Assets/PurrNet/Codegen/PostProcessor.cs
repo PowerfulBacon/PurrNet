@@ -2162,7 +2162,7 @@ namespace PurrNet.Codegen
 
                         try
                         {
-                            FindUsedTypes(module, types, usedTypes);
+                            FindUsedTypes(module, types, usedTypes, messages);
 
                             foreach (var usedType in usedTypes)
                             {
@@ -2601,7 +2601,7 @@ namespace PurrNet.Codegen
         }
 
         private static void FindUsedTypes(ModuleDefinition module, DisposableList<TypeDefinition> allTypes,
-            DisposableHashSet<TypeReference> types)
+            DisposableHashSet<TypeReference> types, List<DiagnosticMessage> messages)
         {
             var playersBroadcasterSubscribe = module.GetTypeDefinition<PlayersBroadcaster>();
             var playersManagerSubscribe = module.GetTypeDefinition<PlayersManager>();
@@ -2635,12 +2635,23 @@ namespace PurrNet.Codegen
                         if (instruction.OpCode != OpCodes.Call && instruction.OpCode != OpCodes.Callvirt)
                             continue;
 
+                        if (instruction.Operand is MethodReference normalMethod)
+                        {
+                            if (IsRpcMethod(normalMethod) && normalMethod.DeclaringType is GenericInstanceType genericInstanceType)
+                            {
+                                for (var index = 0; index < genericInstanceType.GenericArguments.Count; index++)
+                                {
+                                    var ga = genericInstanceType.GenericArguments[index];
+                                    if (IsConcreteType(ga, out var concreteType))
+                                        types.Add(concreteType);
+                                }
+                            }
+                        }
+
                         if (instruction.Operand is GenericInstanceMethod currentMethod)
                         {
                             if (IsRpcMethod(currentMethod))
-                            {
                                 FindUsedGenericRpcTypes(types, currentMethod);
-                            }
 
                             var isSubscribeMethod =
                                 currentMethod.GenericArguments.Count == 1 && currentMethod.Name.Equals("Subscribe") &&
@@ -2692,7 +2703,7 @@ namespace PurrNet.Codegen
             }
         }
 
-        private static bool IsRpcMethod(GenericInstanceMethod currentMethod)
+        private static bool IsRpcMethod(MethodReference currentMethod)
         {
             try
             {
