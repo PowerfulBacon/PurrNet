@@ -2639,6 +2639,9 @@ namespace PurrNet.Codegen
                         {
                             if (IsRpcMethod(normalMethod) && normalMethod.DeclaringType is GenericInstanceType genericInstanceType)
                             {
+                                if (IsConcreteType(genericInstanceType, out var gconcreteType))
+                                    types.Add(gconcreteType);
+
                                 for (var index = 0; index < genericInstanceType.GenericArguments.Count; index++)
                                 {
                                     var ga = genericInstanceType.GenericArguments[index];
