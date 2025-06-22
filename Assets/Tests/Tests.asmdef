@@ -11,8 +11,6 @@
         "Android",
         "EmbeddedLinux",
         "iOS",
-        "LinuxStandalone64",
-        "LinuxStandalone64Server",
         "CloudRendering",
         "macOSStandalone",
         "Switch",
