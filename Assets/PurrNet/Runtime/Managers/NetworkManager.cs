@@ -56,7 +56,7 @@ namespace PurrNet
         [PurrDocs("systems-and-modules/network-manager/network-prefabs")] [SerializeField]
         private NetworkPrefabs _networkPrefabs;
 
-        [PurrDocs("systems-and-modules/network-manager/network-assets")] [SerializeField] 
+        [PurrDocs("systems-and-modules/network-manager/network-assets")] [SerializeField]
         private NetworkAssets _networkAssets;
 
         [PurrDocs("systems-and-modules/network-manager/network-rules")] [SerializeField]
@@ -149,6 +149,16 @@ namespace PurrNet
         /// Occurs when the client connection state changes.
         /// </summary>
         public event Action<ConnectionState> onClientConnectionState;
+
+        /// <summary>
+        /// Occurs when the server connection state changes.
+        /// </summary>
+        public static event Action<ConnectionState> onAnyServerConnectionState;
+
+        /// <summary>
+        /// Occurs when the client connection state changes.
+        /// </summary>
+        public static event  Action<ConnectionState> onAnyClientConnectionState;
 
         /// <summary>
         /// The transport of the network manager.
@@ -1287,11 +1297,13 @@ namespace PurrNet
             {
                 _serverModules.OnConnectionState(state, true);
                 onServerConnectionState?.Invoke(state);
+                onAnyServerConnectionState?.Invoke(state);
             }
             else
             {
                 _clientModules.OnConnectionState(state, false);
                 onClientConnectionState?.Invoke(state);
+                onAnyClientConnectionState?.Invoke(state);
             }
 
             if (state == ConnectionState.Disconnected)
