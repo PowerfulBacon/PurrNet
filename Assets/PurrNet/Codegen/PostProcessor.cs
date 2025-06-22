@@ -2162,7 +2162,7 @@ namespace PurrNet.Codegen
 
                         try
                         {
-                            FindUsedTypes(module, types, usedTypes, messages);
+                            FindUsedTypes(module, types, usedTypes);
 
                             foreach (var usedType in usedTypes)
                             {
@@ -2601,7 +2601,7 @@ namespace PurrNet.Codegen
         }
 
         private static void FindUsedTypes(ModuleDefinition module, DisposableList<TypeDefinition> allTypes,
-            DisposableHashSet<TypeReference> types, List<DiagnosticMessage> messages)
+            DisposableHashSet<TypeReference> types)
         {
             var playersBroadcasterSubscribe = module.GetTypeDefinition<PlayersBroadcaster>();
             var playersManagerSubscribe = module.GetTypeDefinition<PlayersManager>();
