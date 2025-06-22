@@ -11,7 +11,7 @@ namespace PurrNet
     {
         public bool autoGenerate;
         public Object folder;
-    
+
         [Serializable]
         public class TypeToggle
         {
@@ -26,9 +26,7 @@ namespace PurrNet
         {
             get
             {
-                if (_enabledTypeLookup == null)
-                    _enabledTypeLookup = new HashSet<string>(_enabledTypeNames);
-                return _enabledTypeLookup;
+                return _enabledTypeLookup ??= new HashSet<string>(_enabledTypeNames);
             }
         }
 
@@ -37,20 +35,20 @@ namespace PurrNet
         [SerializeField, HideInInspector]
         private List<string> _availableTypeNames = new();
         public IReadOnlyList<string> AvailableTypeNames => _availableTypeNames;
-        
+
         private readonly Dictionary<int, Object> idToAsset = new();
         private readonly Dictionary<Object, int> assetToId = new();
-        
+
         [SerializeField, HideInInspector] private List<int> _bakedIds = new();
         [SerializeField, HideInInspector] private List<Object> _bakedAssets = new();
-        
-        public Object GetAsset(int index) => idToAsset.TryGetValue(index, out var obj) ? obj : null;
+
+        public Object GetAsset(int index) => idToAsset.GetValueOrDefault(index);
 
         public int GetIndex(Object obj)
         {
-            return assetToId.TryGetValue(obj, out var id) ? id : -1;
+            return assetToId.GetValueOrDefault(obj, -1);
         }
-        
+
         private void OnEnable()
         {
             idToAsset.Clear();
@@ -62,11 +60,18 @@ namespace PurrNet
                 int id = _bakedIds[i];
                 if (!obj) continue;
 
-                idToAsset[id] = obj;
-                assetToId[obj] = id;
+                try
+                {
+                    idToAsset[id] = obj;
+                    assetToId[obj] = id;
+                }
+                catch
+                {
+                    idToAsset.Remove(id);
+                }
             }
         }
-        
+
         public IReadOnlyList<Object> AllAssets => assets;
         public IReadOnlyDictionary<int, Object> IndexToAsset => idToAsset;
         public IReadOnlyDictionary<Object, int> AssetToIndex => assetToId;
@@ -90,7 +95,7 @@ namespace PurrNet
                 _bakedAssets.Add(obj);
             }
         }
-        
+
         public void AddAsset(Object obj, bool logIfDuplicate = true)
         {
             if (!obj) return;
@@ -105,12 +110,12 @@ namespace PurrNet
             assets.Add(obj);
             Refresh();
         }
-        
+
         public void CacheAvailableTypes(IEnumerable<Type> types)
         {
             _availableTypeNames = types.Select(t => t.AssemblyQualifiedName).Distinct().ToList();
         }
-        
+
         public void SetEnabledType(string typeName, bool enable)
         {
             if (enable)
