@@ -61,8 +61,11 @@ namespace PurrNet
             }
         }
 
-        public override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
+        public override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool isSpawnEvent, bool asServer)
         {
+            if (isSpawnEvent)
+                return;
+
             if (_ownerAuth && asServer)
             {
                 _id = 0;
@@ -70,8 +73,11 @@ namespace PurrNet
             }
         }
 
-        public override void OnObserverAdded(PlayerID player)
+        public override void OnObserverAdded(PlayerID player, bool isSpawner)
         {
+            if (isSpawner)
+                return;
+
             SendLatestState(player, _id, _value);
         }
 

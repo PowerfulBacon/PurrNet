@@ -180,10 +180,11 @@ namespace PurrNet.Modules
         {
             int count = data.spawnPackets.Count;
             for (var i = 0; i < count; ++i)
-                OnSpawnPacket(player, data.spawnPackets[i], asServer);
+                HandleSpawn(player, data.spawnPackets[i], false);
             count = data.despawnPackets.Count;
             for (var i = 0; i < count; ++i)
                 OnDespawnPacket(player, data.despawnPackets[i], asServer);
+            FlushSpawnPackets();
         }
 
         bool _isDisposed;
@@ -498,6 +499,11 @@ namespace PurrNet.Modules
 
         private void OnSpawnPacket(PlayerID player, SpawnPacket data, bool asServer)
         {
+            HandleSpawn(player, data, true);
+        }
+
+        private void HandleSpawn(PlayerID player, SpawnPacket data, bool flushData)
+        {
             if (_asServer && !_manager.networkRules.HasSpawnAuthority(_manager, false))
             {
                 PurrLogger.LogError($"Spawn failed from client due to lack of permissions.");
@@ -527,8 +533,8 @@ namespace PurrNet.Modules
                     if (nid.TryAddObserver(player))
                     {
                         onObserverAdded?.Invoke(player, nid);
-                        nid.TriggerOnPreObserverAdded(player);
-                        _triggerLateObserverAdded.Add(new PlayerNid { player = player, nid = nid });
+                        nid.TriggerOnPreObserverAdded(player, true);
+                        _triggerLateObserverAdded.Add(new PlayerNid { player = player, nid = nid, isSpawner = true});
                     }
                 }
 
@@ -555,6 +561,9 @@ namespace PurrNet.Modules
             }
 
             _pendingSpawns.Add(data.packetIdx, createdNids);
+
+            if (flushData)
+                FlushSpawnPackets();
         }
 
         private void OnDespawnPacket(PlayerID player, DespawnPacket data, bool asServer)
@@ -636,6 +645,7 @@ namespace PurrNet.Modules
         {
             public PlayerID player;
             public NetworkIdentity nid;
+            public bool isSpawner;
         }
 
         private readonly List<PlayerNid> _triggerLateObserverAdded = new List<PlayerNid>();
@@ -657,8 +667,8 @@ namespace PurrNet.Modules
                     {
                         var nid = children[i];
                         onObserverAdded?.Invoke(player, nid);
-                        nid.TriggerOnPreObserverAdded(player);
-                        _triggerLateObserverAdded.Add(new PlayerNid { player = player, nid = nid });
+                        nid.TriggerOnPreObserverAdded(player, false);
+                        _triggerLateObserverAdded.Add(new PlayerNid { player = player, nid = nid, isSpawner = false});
                     }
                 }
                 else PurrLogger.LogError($"Failed to get prototype for '{scope.name}'.", scope);
@@ -748,7 +758,7 @@ namespace PurrNet.Modules
             else
             {
                 if (player.isServer)
-                    _playersManager.SendToServer(packet);
+                     _playersManager.SendToServer(packet);
                 else _playersManager.Send(player, packet);
                 packet.Dispose();
                 _toCompleteNextFrame.Add(spawnId);
@@ -867,7 +877,7 @@ namespace PurrNet.Modules
             }
 
             if (playersManager.localPlayerId.HasValue)
-                id.GiveOwnership(playersManager.localPlayerId.Value);
+                id.GiveOwnershipInternal(playersManager.localPlayerId.Value, false, true);
         }
 
         public static void GetComponentsInChildren(GameObject go, List<NetworkIdentity> list)
@@ -1080,7 +1090,7 @@ namespace PurrNet.Modules
                 if (!nid.nid || !nid.nid.isSpawned)
                     continue;
 
-                nid.nid.TriggerOnObserverAdded(nid.player);
+                nid.nid.TriggerOnObserverAdded(nid.player, nid.isSpawner);
                 onLateObserverAdded?.Invoke(nid.player, nid.nid);
             }
 

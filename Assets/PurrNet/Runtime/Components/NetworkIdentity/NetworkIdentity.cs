@@ -609,6 +609,17 @@ namespace PurrNet
         }
 
         /// <summary>
+        /// Called when the owner of this object changes.
+        /// </summary>
+        /// <param name="oldOwner">The old owner of this object</param>
+        /// <param name="newOwner">The new owner of this object</param>
+        /// <param name="isSpawnEvent">If this object was just spawned and the newOwner is the spawner</param>
+        /// <param name="asServer">Is this on the server</param>
+        protected virtual void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool isSpawnEvent, bool asServer)
+        {
+        }
+
+        /// <summary>
         /// Called when the owner of this object disconnects.
         /// Server only.
         /// </summary>
@@ -640,15 +651,27 @@ namespace PurrNet
         /// Server only.
         /// </summary>
         /// <param name="player">The observer player id</param>
+        /// <param name="isSpawner">If this object was just spawned and the observer is the spawner</param>
+        protected virtual void OnPreObserverAdded(PlayerID player, bool isSpawner)
+        {
+        }
+
+        /// <summary>
+        /// Called when an observer is added.
+        /// Server only.
+        /// </summary>
+        /// <param name="player">The observer player id</param>
         protected virtual void OnObserverAdded(PlayerID player)
         {
         }
 
         /// <summary>
-        /// Same as OnObserverAdded but called after all other observers have been added.
+        /// Called when an observer is added.
+        /// Server only.
         /// </summary>
         /// <param name="player">The observer player id</param>
-        protected virtual void OnLateObserverAdded(PlayerID player)
+        /// <param name="isSpawner">If this object was just spawned and the observer is the spawner</param>
+        protected virtual void OnObserverAdded(PlayerID player, bool isSpawner)
         {
         }
 
@@ -838,7 +861,7 @@ namespace PurrNet
         {
             if (!networkManager)
                 return;
-            GiveOwnershipInternal(player, silent);
+            GiveOwnershipInternal(player, silent, false);
         }
 
         /// <summary>
@@ -955,7 +978,7 @@ namespace PurrNet
             GiveOwnership(player.Value, silent);
         }
 
-        private void GiveOwnershipInternal(PlayerID player, bool silent = false)
+        internal void GiveOwnershipInternal(PlayerID player, bool silent, bool isSpawner)
         {
             if (!networkManager)
             {
@@ -966,7 +989,7 @@ namespace PurrNet
 
             if (networkManager.TryGetModule(networkManager.isServer, out GlobalOwnershipModule module))
             {
-                module.GiveOwnership(this, player, silent: silent);
+                module.GiveOwnership(this, player, silent: silent, isSpawner: isSpawner);
             }
             else if (!silent) PurrLogger.LogError("Failed to get ownership module.", this);
         }
@@ -1169,11 +1192,12 @@ namespace PurrNet
             }
         }
 
-        internal void TriggerOnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
+        internal void TriggerOnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer, bool isSpawner)
         {
             try
             {
                 OnOwnerChanged(oldOwner, newOwner, asServer);
+                OnOwnerChanged(oldOwner, newOwner, isSpawner, asServer);
             }
             catch (Exception e)
             {
@@ -1185,6 +1209,7 @@ namespace PurrNet
                 try
                 {
                     _externalModulesView[i].OnOwnerChanged(oldOwner, newOwner, asServer);
+                    _externalModulesView[i].OnOwnerChanged(oldOwner, newOwner, isSpawner, asServer);
                 }
                 catch (Exception e)
                 {
@@ -1241,11 +1266,12 @@ namespace PurrNet
             }
         }
 
-        public void TriggerOnPreObserverAdded(PlayerID target)
+        public void TriggerOnPreObserverAdded(PlayerID target, bool isSpawner)
         {
             try
             {
                 OnPreObserverAdded(target);
+                OnPreObserverAdded(target, isSpawner);
             }
             catch (Exception e)
             {
@@ -1257,6 +1283,7 @@ namespace PurrNet
                 try
                 {
                     _externalModulesView[i].OnPreObserverAdded(target);
+                    _externalModulesView[i].OnPreObserverAdded(target, isSpawner);
                 }
                 catch (Exception e)
                 {
@@ -1265,11 +1292,12 @@ namespace PurrNet
             }
         }
 
-        public void TriggerOnObserverAdded(PlayerID target)
+        public void TriggerOnObserverAdded(PlayerID target, bool isSpawner)
         {
             try
             {
                 OnObserverAdded(target);
+                OnObserverAdded(target, isSpawner);
             }
             catch (Exception e)
             {
@@ -1281,6 +1309,7 @@ namespace PurrNet
                 try
                 {
                     _externalModulesView[i].OnObserverAdded(target);
+                    _externalModulesView[i].OnObserverAdded(target, isSpawner);
                 }
                 catch (Exception e)
                 {
