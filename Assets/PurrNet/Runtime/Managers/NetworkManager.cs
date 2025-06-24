@@ -993,6 +993,11 @@ namespace PurrNet
 #if !UNITY_EDITOR
                 PurrLogger.Log("Auto-Starting server...");
 #endif
+                if (ApplicationContext.isServerBuild)
+                {
+                    QualitySettings.vSyncCount = 0;
+                    Application.targetFrameRate = _tickRate;
+                }
                 StartServer();
             }
 
