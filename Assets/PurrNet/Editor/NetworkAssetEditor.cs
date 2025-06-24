@@ -200,11 +200,15 @@ namespace PurrNet
             foreach (var guid in guids)
             {
                 string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-                foreach (var type in enabledTypes)
+
+                if (assetPath.EndsWith(".unity"))
+                    continue;
+                
+                var all = AssetDatabase.LoadAllAssetsAtPath(assetPath);
+                foreach (var obj in all)
                 {
-                    var obj = AssetDatabase.LoadAssetAtPath(assetPath, type);
-                    if (obj)
-                        found.Add(obj);
+                    if (obj && enabledTypes.Contains(obj.GetType()) && !_target.assets.Contains(obj))
+                        _target.assets.Add(obj);
                 }
             }
 
@@ -240,14 +244,21 @@ namespace PurrNet
             foreach (string guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
-                UnityEngine.Object obj = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path);
-                if (!obj) continue;
+                if (string.IsNullOrEmpty(path) || path.StartsWith("Assets/") == false || path.EndsWith(".unity"))
+                    continue;
+                
+                var all = AssetDatabase.LoadAllAssetsAtPath(path);
 
-                Type type = obj.GetType();
-                while (type != null && typeof(UnityEngine.Object).IsAssignableFrom(type))
+                foreach (var obj in all)
                 {
-                    types.Add(type);
-                    type = type.BaseType;
+                    if (!obj) continue;
+
+                    Type type = obj.GetType();
+                    while (type != null && typeof(UnityEngine.Object).IsAssignableFrom(type))
+                    {
+                        types.Add(type);
+                        type = type.BaseType;
+                    }
                 }
             }
 
