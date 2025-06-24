@@ -4,17 +4,25 @@ using UnityEngine;
 
 public class Test : NetworkIdentity
 {
-    [SerializeField] private Material _testMaterial;
+    [SerializeField] private Texture _testTexture;
+    [SerializeField] private Sprite _testSprite;
 
     [PurrButton]
     private void SendMat()
     {
-        TestRpc(_testMaterial);
+        TestRpc(_testTexture);
+        TestRpc(_testSprite);
     }
     
     [ObserversRpc]
-    private void TestRpc(Material received)
+    private void TestRpc(Texture receivedTexture)
     {
-        Debug.Log($"Received material: {received.name}", received);
+        Debug.Log($"Received Texture: {receivedTexture.name}", receivedTexture);
+    }
+    
+    [ObserversRpc]
+    private void TestRpc(Sprite receivedSprite)
+    {
+        Debug.Log($"Received sprite: {receivedSprite.name}", receivedSprite);
     }
 }
