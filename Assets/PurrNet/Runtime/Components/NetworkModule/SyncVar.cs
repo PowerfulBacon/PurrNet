@@ -75,7 +75,7 @@ namespace PurrNet
 
         public override void OnObserverAdded(PlayerID player, bool isSpawner)
         {
-            if (ownerAuth && owner == player)
+            if (isSpawner && ownerAuth && owner == player)
                 return;
 
             SendLatestState(player, _id, _value);
