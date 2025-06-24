@@ -1,4 +1,5 @@
-using System;
+using System.Collections.Generic;
+using System.Linq;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Transports;
@@ -34,12 +35,15 @@ namespace PurrNet
         private const float PING_HISTORY_TIME = 2.5f; // Seconds
         private const int PACKET_HISTORY_SECONDS = 5;
         private const int MAX_PACKET_HISTORY = 200;
+        private const float JITTER_SAMPLE_TIME = 2.5f;
+
 
         private int[] _pingStats;
         private readonly uint[] _sentPacketSequences = new uint[MAX_PACKET_HISTORY];
         private readonly uint[] _receivedPacketSequences = new uint[MAX_PACKET_HISTORY];
         private readonly float[] _sentPacketTimes = new float[MAX_PACKET_HISTORY];
         private readonly float[] _receivedPacketTimes = new float[MAX_PACKET_HISTORY];
+        private readonly Queue<(float time, int value)> _pingVisibleHistory = new();
 
         private int _pingHistorySize;
         private int _pingIndex;
@@ -378,12 +382,17 @@ namespace PurrNet
 
             ping = sum / _pingCount;
 
-            if (_pingCount > 1)
+            float now = Time.time;
+            _pingVisibleHistory.Enqueue((now, ping));
+;
+            while (_pingVisibleHistory.Count > 0 && now - _pingVisibleHistory.Peek().time > JITTER_SAMPLE_TIME)
+                _pingVisibleHistory.Dequeue();
+
+            if (_pingVisibleHistory.Count > 1)
             {
-                int jitterSum = 0;
-                for (int i = 0; i < _pingCount; i++)
-                    jitterSum += Mathf.Abs(_pingStats[i] - ping);
-                jitter = jitterSum / _pingCount;
+                int min = _pingVisibleHistory.Min(x => x.value);
+                int max = _pingVisibleHistory.Max(x => x.value);
+                jitter = max - min;
             }
             else
             {

@@ -16,7 +16,7 @@ public class StateOne : StateNode
 
     private void OnStateChanged(StateNode previousState, StateNode newState)
     {
-        Debug.Log($"Changed from state {previousState} to state {newState}");
+        //Debug.Log($"Changed from state {previousState} to state {newState}");
     }
 
     public override void Enter(bool asServer)
