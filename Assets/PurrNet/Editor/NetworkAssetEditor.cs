@@ -200,11 +200,15 @@ namespace PurrNet
             foreach (var guid in guids)
             {
                 string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-                foreach (var type in enabledTypes)
+
+                if (assetPath.EndsWith(".unity"))
+                    continue;
+                
+                var all = AssetDatabase.LoadAllAssetsAtPath(assetPath);
+                foreach (var obj in all)
                 {
-                    var obj = AssetDatabase.LoadAssetAtPath(assetPath, type);
-                    if (obj)
-                        found.Add(obj);
+                    if (obj && enabledTypes.Contains(obj.GetType()) && !_target.assets.Contains(obj))
+                        _target.assets.Add(obj);
                 }
             }
 
