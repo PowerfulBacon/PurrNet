@@ -39,7 +39,7 @@ namespace PurrNet.Packing
 
             data = BitPackerPool.Get();
             packer.ReadBytes(data, length);
-            data.ResetPosition();
+            data.ResetPositionAndMode(true);
         }
 
         [UsedByIL]
