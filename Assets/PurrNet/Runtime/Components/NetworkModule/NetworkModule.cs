@@ -49,6 +49,9 @@ namespace PurrNet
         public bool IsController(bool ownerHasAuthority) => parent && parent.IsController(ownerHasAuthority);
 
         [UsedImplicitly]
+        public bool IsController(IOwnerAuth auth) => parent && parent.IsController(auth.ownerAuth);
+
+        [UsedImplicitly]
         public bool IsController(bool ownerHasAuthority, bool asServer) =>
             parent && parent.IsController(asServer, ownerHasAuthority);
 
@@ -79,17 +82,39 @@ namespace PurrNet
         /// Called when an observer is added.
         /// Server only.
         /// </summary>
-        /// <param name="player"></param>
+        /// <param name="player">The observer player id</param>
+        public virtual void OnPreObserverAdded(PlayerID player)
+        {
+        }
+
+        /// <summary>
+        /// Called when an observer is added.
+        /// Server only.
+        /// </summary>
+        /// <param name="player">The observer player id</param>
+        /// <param name="isSpawner">If this object was just spawned and the observer is the spawner</param>
+        public virtual void OnPreObserverAdded(PlayerID player, bool isSpawner)
+        {
+        }
+
+        /// <summary>
+        /// Called when an observer is added.
+        /// Server only.
+        /// </summary>
+        /// <param name="player">The observer player id</param>
         public virtual void OnObserverAdded(PlayerID player)
         {
         }
 
         /// <summary>
-        /// Called instantly when an observer is added.
+        /// Called when an observer is added.
         /// Server only.
         /// </summary>
-        /// <param name="player"></param>
-        public virtual void OnPreObserverAdded(PlayerID player) { }
+        /// <param name="player">The observer player id</param>
+        /// <param name="isSpawner">If this object was just spawned and the observer is the spawner</param>
+        public virtual void OnObserverAdded(PlayerID player, bool isSpawner)
+        {
+        }
 
         /// <summary>
         /// Called when an observer is removed.
@@ -101,6 +126,17 @@ namespace PurrNet
         }
 
         public virtual void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
+        {
+        }
+
+        /// <summary>
+        /// Called when the owner of this object changes.
+        /// </summary>
+        /// <param name="oldOwner">The old owner of this object</param>
+        /// <param name="newOwner">The new owner of this object</param>
+        /// <param name="isSpawnEvent">If this object was just spawned and the newOwner is the spawner</param>
+        /// <param name="asServer">Is this on the server</param>
+        public virtual void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool isSpawnEvent, bool asServer)
         {
         }
 
@@ -300,6 +336,38 @@ namespace PurrNet
         /// </summary>
         public virtual void OnPoolReset()
         {
+        }
+
+        protected string GetPermissionErrorDetails(IOwnerAuth auth)
+        {
+            return GetPermissionErrorDetails(
+                auth.ownerAuth,
+                isServer,
+                owner,
+                localPlayer
+            );
+        }
+
+        protected static string GetPermissionErrorDetails(bool ownerAuth, NetworkModule module)
+        {
+            return GetPermissionErrorDetails(
+                ownerAuth,
+                module.isServer,
+                module.owner,
+                module.localPlayer
+            );
+        }
+
+        static string GetPermissionErrorDetails(bool ownerAuth, bool isServer, PlayerID? owner, PlayerID? local)
+        {
+            return ownerAuth switch
+            {
+                true when isServer =>
+                    $"Server is trying to act on module that is `<b>ownerAuth</b>` but the owner is `<b>{owner}</b>` (not you).",
+                true =>
+                    $"Client is trying to act on module that is `<b>ownerAuth</b>` but the owner is `<b>{owner}</b>` (not you: `{local}`).",
+                _ => "Client is trying to act on module that is not `<b>ownerAuth</b>`, only server can act on it."
+            };
         }
     }
 }

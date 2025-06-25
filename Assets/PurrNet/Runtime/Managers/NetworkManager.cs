@@ -19,40 +19,6 @@ using UnityEngine.SceneManagement;
 
 namespace PurrNet
 {
-    [Flags]
-    public enum StartFlags
-    {
-        /// <summary>
-        /// No flags.
-        /// </summary>
-        None = 0,
-
-        /// <summary>
-        /// The server should start in the editor.
-        /// </summary>
-        Editor = 1,
-
-        /// <summary>
-        /// The client should start in the editor.
-        /// A clone is an editor instance that is not the main editor instance.
-        /// For example when you use ParrelSync or other tools that create a clone of the editor.
-        /// </summary>
-        Clone = 2,
-
-        /// <summary>
-        /// A client build.
-        /// It is a build that doesn't contain the UNITY_SERVER define.
-        /// </summary>
-        ClientBuild = 4,
-
-        /// <summary>
-        /// A server build.
-        /// It is a build that contains the UNITY_SERVER define.
-        /// The define is added automatically when doing a server build.
-        /// </summary>
-        ServerBuild = 8
-    }
-
     [DefaultExecutionOrder(-999)]
     public sealed partial class NetworkManager : MonoBehaviour
     {
@@ -89,6 +55,9 @@ namespace PurrNet
 
         [PurrDocs("systems-and-modules/network-manager/network-prefabs")] [SerializeField]
         private NetworkPrefabs _networkPrefabs;
+
+        [PurrDocs("systems-and-modules/network-manager/network-assets")] [SerializeField]
+        private NetworkAssets _networkAssets;
 
         [PurrDocs("systems-and-modules/network-manager/network-rules")] [SerializeField]
         private NetworkRules _networkRules;
@@ -149,6 +118,11 @@ namespace PurrNet
         }
 
         /// <summary>
+        /// The Network Assets of the network manager.
+        /// </summary>
+        public NetworkAssets networkAssets => _networkAssets;
+
+        /// <summary>
         /// The prefab provider of the network manager.
         /// </summary>
         public IPrefabProvider prefabProvider { get; private set; }
@@ -175,6 +149,16 @@ namespace PurrNet
         /// Occurs when the client connection state changes.
         /// </summary>
         public event Action<ConnectionState> onClientConnectionState;
+
+        /// <summary>
+        /// Occurs when the server connection state changes.
+        /// </summary>
+        public static event Action<ConnectionState> onAnyServerConnectionState;
+
+        /// <summary>
+        /// Occurs when the client connection state changes.
+        /// </summary>
+        public static event  Action<ConnectionState> onAnyClientConnectionState;
 
         /// <summary>
         /// The transport of the network manager.
@@ -262,6 +246,9 @@ namespace PurrNet
         /// Whether the network manager is a server.
         /// </summary>
         public bool isServer => _transport && _transport.transport.listenerState == ConnectionState.Connected;
+
+        [UsedByIL]
+        public static bool isServerStatic => main && main.isServer;
 
         /// <summary>
         /// Whether the network manager is a client.
@@ -1006,6 +993,11 @@ namespace PurrNet
 #if !UNITY_EDITOR
                 PurrLogger.Log("Auto-Starting server...");
 #endif
+                if (ApplicationContext.isServerBuild)
+                {
+                    QualitySettings.vSyncCount = 0;
+                    Application.targetFrameRate = _tickRate;
+                }
                 StartServer();
             }
 
@@ -1310,11 +1302,13 @@ namespace PurrNet
             {
                 _serverModules.OnConnectionState(state, true);
                 onServerConnectionState?.Invoke(state);
+                onAnyServerConnectionState?.Invoke(state);
             }
             else
             {
                 _clientModules.OnConnectionState(state, false);
                 onClientConnectionState?.Invoke(state);
+                onAnyClientConnectionState?.Invoke(state);
             }
 
             if (state == ConnectionState.Disconnected)

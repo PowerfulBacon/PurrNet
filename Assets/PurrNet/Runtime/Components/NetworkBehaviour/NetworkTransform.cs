@@ -31,10 +31,11 @@ namespace PurrNet
         [SerializeField, PurrLock, Min(1)] private int _minBufferSize = 1;
         [Tooltip("The maximum amount of buffered ticks to store.\nThis is used for interpolation.")]
         [SerializeField, PurrLock, Min(1)] private int _maxBufferSize = 2;
+#if UNITY_PHYSICS_3D
         [Tooltip("Will enforce the character controller getting enabled and disabled when attempting to sync the transform - CAUTION - Physics events can/will be called multiple times")]
         [SerializeField]
         private bool _characterControllerPatch;
-
+#endif
         [Header("When to Sync")]
         [FormerlySerializedAs("_clientAuth")]
         [Tooltip(
@@ -104,9 +105,15 @@ namespace PurrNet
         Interpolated<ScaleWithParent> _scale;
 
         private Transform _trs;
+#if UNITY_PHYSICS_3D
         private Rigidbody _rb;
+#endif
+#if UNITY_PHYSICS_2D
         private Rigidbody2D _rb2d;
+#endif
+#if UNITY_PHYSICS_3D
         private CharacterController _controller;
+#endif
 
         private bool _prevWasController;
 
@@ -117,9 +124,13 @@ namespace PurrNet
         private void Awake()
         {
             _trs = transform;
+#if UNITY_PHYSICS_3D
             _rb = GetComponent<Rigidbody>();
-            _rb2d = GetComponent<Rigidbody2D>();
             _controller = GetComponent<CharacterController>();
+#endif
+#if UNITY_PHYSICS_2D
+            _rb2d = GetComponent<Rigidbody2D>();
+#endif
         }
 
         protected override void OnEarlySpawn()
@@ -323,19 +334,25 @@ namespace PurrNet
             }
         }
 
+#if UNITY_PHYSICS_3D || UNITY_PHYSICS_2D
         private void FixedUpdate()
         {
+
             if (!isSpawned)
                 return;
-
             bool isNotController = !IsController(_ownerAuth);
 
+#if UNITY_PHYSICS_3D
             if (_rb && isNotController)
                 _rb.Sleep();
+#endif
 
+#if UNITY_PHYSICS_2D
             if (_rb2d && isNotController)
                 _rb2d.Sleep();
+#endif
         }
+#endif
 
         private void Update()
         {
@@ -369,23 +386,32 @@ namespace PurrNet
             if (isLocalController)
                 TeleportToData(_latestData);
 
+#if UNITY_PHYSICS_3D || UNITY_PHYSICS_2D
             if (_prevWasController != isLocalController)
             {
+#if UNITY_PHYSICS_3D
                 if (isLocalController && _rb)
                     _rb.WakeUp();
+#endif
+
+#if UNITY_PHYSICS_2D
                 if (isLocalController && _rb2d)
                     _rb2d.WakeUp();
+#endif
 
                 _prevWasController = isLocalController;
             }
+#endif
         }
 
         private void ApplyLerpedPosition()
         {
+#if UNITY_PHYSICS_3D
             bool disableController = _controller && _controller.enabled;
 
             if (disableController && _characterControllerPatch)
                 _controller.enabled = false;
+#endif
 
             if (syncPosition)
             {
@@ -410,8 +436,10 @@ namespace PurrNet
                 this.localScale = ls;
             }
 
+#if UNITY_PHYSICS_3D
             if (disableController && _characterControllerPatch)
                 _controller.enabled = true;
+#endif
         }
 
         private NetworkTransformData GetCurrentTransformData()

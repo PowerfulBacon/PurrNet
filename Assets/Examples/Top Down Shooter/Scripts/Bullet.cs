@@ -1,3 +1,5 @@
+#if UNITY_PHYSICS_3D
+
 using UnityEngine;
 
 namespace PurrNet.Examples.TopDownShooter
@@ -6,7 +8,7 @@ namespace PurrNet.Examples.TopDownShooter
     {
         public int test;
     }
-    
+
     public class Bullet : NetworkIdentity
     {
         [SerializeField] private float speed = 8f;
@@ -68,3 +70,5 @@ namespace PurrNet.Examples.TopDownShooter
         }
     }
 }
+
+#endif

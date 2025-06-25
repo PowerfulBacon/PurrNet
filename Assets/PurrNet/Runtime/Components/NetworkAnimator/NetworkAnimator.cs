@@ -1,13 +1,16 @@
+#if UNITY_ANIMATION
 using System;
 using System.Collections.Generic;
 using PurrNet.Utils;
 using UnityEngine;
 using UnityEngine.Playables;
+#endif
 
 namespace PurrNet
 {
     public sealed partial class NetworkAnimator : NetworkIdentity
     {
+#if UNITY_ANIMATION
         [PurrDocs("systems-and-modules/plug-n-play-components/network-animator")]
         [Tooltip("The animator to sync")]
         [SerializeField, PurrLock]
@@ -472,7 +475,7 @@ namespace PurrNet
         public void SetFloat(string propName, float value) => SetFloat(Animator.StringToHash(propName), value);
 
         public float GetFloat(string propName) => _animator.GetFloat(propName);
-        
+
         public float GetFloat(int nameHash) => _animator.GetFloat(nameHash);
 
         public void SetBool(string propName, bool value) => SetBool(Animator.StringToHash(propName), value);
@@ -991,5 +994,6 @@ namespace PurrNet
             IfSameReplace(new NetAnimatorRPC(setIKHintPositionWeight),
                 (a, b) => a._setIKHintPositionWeight.hint == b._setIKHintPositionWeight.hint);
         }
+#endif
     }
 }

@@ -2,11 +2,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
 using PurrNet.Logging;
 using PurrNet.Packing;
 using PurrNet.Transports;
 using UnityEngine;
+
+#if !UNITASK_PURRNET_SUPPORT
+using RawTask = System.Threading.Tasks.Task;
+#else
+using Cysharp.Threading.Tasks;
+using RawTask = Cysharp.Threading.Tasks.UniTask;
+#endif
 
 namespace PurrNet.Modules
 {
@@ -129,7 +135,7 @@ namespace PurrNet.Modules
         }
 
         [UsedByIL]
-        public static UniTask GetNextIdUniTaskStatic(PlayerID? target, RPCType rpcType, float timeout,
+        public static RawTask GetNextIdUniTaskStatic(PlayerID? target, RPCType rpcType, float timeout,
             out RpcRequest request)
         {
             var networkManager = NetworkManager.main;
@@ -137,7 +143,7 @@ namespace PurrNet.Modules
 
             if (!networkManager)
             {
-                return UniTask.FromException(new InvalidOperationException(
+                return RawTask.FromException(new InvalidOperationException(
                     "NetworkManager is not initialized. Make sure you have a NetworkManager active."));
             }
 
@@ -151,7 +157,7 @@ namespace PurrNet.Modules
 
             if (!networkManager.TryGetModule(out RpcRequestResponseModule rpcModule, asServer))
             {
-                return UniTask.FromException(new InvalidOperationException(
+                return RawTask.FromException(new InvalidOperationException(
                     "RpcRequestResponseModule is not initialized.."));
             }
 
@@ -159,7 +165,12 @@ namespace PurrNet.Modules
         }
 
         [UsedByIL]
-        public static UniTask<T> GetNextIdUniTaskStatic<T>(PlayerID? target, RPCType rpcType, float timeout,
+#if !UNITASK_PURRNET_SUPPORT
+        public static Task<T>
+#else
+        public static UniTask<T>
+#endif
+        GetNextIdUniTaskStatic<T>(PlayerID? target, RPCType rpcType, float timeout,
             out RpcRequest request)
         {
             var networkManager = NetworkManager.main;
@@ -167,7 +178,7 @@ namespace PurrNet.Modules
 
             if (!networkManager)
             {
-                return UniTask.FromException<T>(new InvalidOperationException(
+                return RawTask.FromException<T>(new InvalidOperationException(
                     "NetworkManager is not initialized. Make sure you have a NetworkManager active."));
             }
 
@@ -181,7 +192,7 @@ namespace PurrNet.Modules
 
             if (!networkManager.TryGetModule(out RpcRequestResponseModule rpcModule, asServer))
             {
-                return UniTask.FromException<T>(new InvalidOperationException(
+                return RawTask.FromException<T>(new InvalidOperationException(
                     "RpcRequestResponseModule is not initialized.."));
             }
 
@@ -212,9 +223,13 @@ namespace PurrNet.Modules
             return tcs.Task;
         }
 
-        public UniTask GetNextIdUniTask(PlayerID? target, float timeout, out RpcRequest request)
+        public RawTask GetNextIdUniTask(PlayerID? target, float timeout, out RpcRequest request)
         {
-            var tcs = new UniTaskCompletionSource();
+#if !UNITASK_PURRNET_SUPPORT
+            var tcs = new TaskCompletionSource<bool>();
+#else
+            var tcs = new UniTaskCompletionSource<bool>();
+#endif
             var id = _nextId++;
 
             request = new RpcRequest
@@ -223,7 +238,7 @@ namespace PurrNet.Modules
                 target = target,
                 timeSent = Time.unscaledTime,
                 timeout = timeout,
-                respond = _ => { tcs.TrySetResult(); },
+                respond = _ => { tcs.TrySetResult(true); },
                 timeoutRequest = () =>
                 {
                     tcs.TrySetException(
@@ -236,9 +251,18 @@ namespace PurrNet.Modules
             return tcs.Task;
         }
 
-        public UniTask<T> GetNextIdUniTask<T>(PlayerID? target, float timeout, out RpcRequest request)
+#if !UNITASK_PURRNET_SUPPORT
+        public Task<T>
+#else
+        public UniTask<T>
+#endif
+        GetNextIdUniTask<T>(PlayerID? target, float timeout, out RpcRequest request)
         {
+#if !UNITASK_PURRNET_SUPPORT
+            var tcs = new TaskCompletionSource<T>();
+#else
             var tcs = new UniTaskCompletionSource<T>();
+#endif
             var id = _nextId++;
 
             request = new RpcRequest
@@ -443,7 +467,7 @@ namespace PurrNet.Modules
         }
 
         [UsedByIL]
-        public static async void CompleteRequestWithUniTaskEmptyResponse(UniTask response, RPCInfo info, uint reqId,
+        public static async void CompleteRequestWithUniTaskEmptyResponse(RawTask response, RPCInfo info, uint reqId,
             NetworkManager manager)
         {
             try
@@ -480,7 +504,11 @@ namespace PurrNet.Modules
         public static void CompleteRequestWithUniTaskObject<T>(object task, RPCInfo info, uint reqId,
             NetworkManager manager)
         {
+#if !UNITASK_PURRNET_SUPPORT
+            if (task is not Task<T> response)
+#else
             if (task is not UniTask<T> response)
+#endif
             {
                 PurrLogger.LogError("Task is not UniTask<T>, response won't be sent and receiver will timeout.");
                 return;
@@ -490,7 +518,13 @@ namespace PurrNet.Modules
         }
 
         [UsedByIL]
-        public static async void CompleteRequestWithUniTask<T>(UniTask<T> response, RPCInfo info, uint reqId,
+        public static async void CompleteRequestWithUniTask<T>(
+#if !UNITASK_PURRNET_SUPPORT
+            Task<T> response
+#else
+            UniTask<T> response
+#endif
+            , RPCInfo info, uint reqId,
             NetworkManager manager)
         {
             try

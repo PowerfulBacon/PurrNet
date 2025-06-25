@@ -48,7 +48,6 @@ namespace PurrNet.Logging
             catch
             {
                 Debug.LogException(exception);
-                Debug.LogError("You fucked up, please report this to the devs");
             }
 #else
             Debug.LogException(exception);
@@ -59,6 +58,24 @@ namespace PurrNet.Logging
         public static void LogSimpleError(string message, Object reference)
         {
             Debug.LogError(message, reference);
+        }
+
+        [UsedByIL]
+        public static void LogSimplerError(string message)
+        {
+            Debug.LogError(message);
+        }
+
+        [UsedByIL]
+        public static void LogSimplerWarning(string message)
+        {
+            Debug.LogWarning(message);
+        }
+
+        [UsedByIL]
+        public static void ThrowUnsupportedException(string message)
+        {
+            throw new NotSupportedException(message);
         }
 
         public static void Log(string message, Object reference = null, LogStyle logStyle = default,

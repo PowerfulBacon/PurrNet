@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+#if UNITASK_PURRNET_SUPPORT
 using Cysharp.Threading.Tasks;
+#endif
 using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Modules;
@@ -12,6 +14,13 @@ using PurrNet.Transports;
 using PurrNet.Utils;
 using UnityEngine.Scripting;
 using Channel = PurrNet.Transports.Channel;
+
+#if !UNITASK_PURRNET_SUPPORT
+using RawTask = System.Threading.Tasks.Task;
+#else
+using RawTask = Cysharp.Threading.Tasks.UniTask;
+#endif
+
 
 namespace PurrNet
 {
@@ -145,13 +154,13 @@ namespace PurrNet
         }
 
         [UsedByIL]
-        public UniTask GetNextIdUniTask(RPCType rpcType, PlayerID? target, float timeout, out RpcRequest request)
+        public RawTask GetNextIdUniTask(RPCType rpcType, PlayerID? target, float timeout, out RpcRequest request)
         {
             request = default;
 
             if (!networkManager)
             {
-                return UniTask.FromException(new InvalidOperationException(
+                return RawTask.FromException(new InvalidOperationException(
                     "NetworkIdentity is not spawned."));
             }
 
@@ -165,7 +174,7 @@ namespace PurrNet
 
             if (!networkManager.TryGetModule<RpcRequestResponseModule>(asServer, out var module))
             {
-                return UniTask.FromException(new InvalidOperationException(
+                return RawTask.FromException(new InvalidOperationException(
                     "RpcRequestResponseModule module is missing."));
             }
 
@@ -173,13 +182,18 @@ namespace PurrNet
         }
 
         [UsedByIL]
-        public UniTask<T> GetNextIdUniTask<T>(RPCType rpcType, PlayerID? target, float timeout, out RpcRequest request)
+#if !UNITASK_PURRNET_SUPPORT
+        public Task<T>
+#else
+        public UniTask<T>
+#endif
+            GetNextIdUniTask<T>(RPCType rpcType, PlayerID? target, float timeout, out RpcRequest request)
         {
             request = default;
 
             if (!networkManager)
             {
-                return UniTask.FromException<T>(new InvalidOperationException(
+                return RawTask.FromException<T>(new InvalidOperationException(
                     "NetworkIdentity is not spawned."));
             }
 
@@ -193,7 +207,7 @@ namespace PurrNet
 
             if (!networkManager.TryGetModule<RpcRequestResponseModule>(asServer, out var module))
             {
-                return UniTask.FromException<T>(new InvalidOperationException(
+                return RawTask.FromException<T>(new InvalidOperationException(
                     "RpcRequestResponseModule module is missing."));
             }
 

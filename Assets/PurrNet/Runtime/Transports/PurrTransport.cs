@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+#if UNITASK_PURRNET_SUPPORT
 using Cysharp.Threading.Tasks;
+#endif
 using JamesFrowen.SimpleWeb;
 using JetBrains.Annotations;
 using PurrNet.Logging;
@@ -389,7 +391,13 @@ namespace PurrNet.Transports
                 clientState = ConnectionState.Connecting;
 
                 while (listenerState == ConnectionState.Connecting)
+                {
+#if UNITASK_PURRNET_SUPPORT
                     await UniTask.DelayFrame(1);
+#else
+                    await System.Threading.Tasks.Task.Yield();
+#endif
+                }
 
                 _client = SimpleWebClient.Create(ushort.MaxValue, 5000, _tcpConfig);
 

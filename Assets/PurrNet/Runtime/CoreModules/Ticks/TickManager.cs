@@ -26,7 +26,9 @@ namespace PurrNet.Modules
         }
 
         /// <summary>
-        /// This is the round trip time. Local time it takes for the client to get a response from the server
+        /// This is the round trip time. Local time it takes for the client to get a response from the server.
+        /// This includes 1 tick for packing and 1 tick for unpacking, meaning you'll have 2 ticks delay calculated into the rtt.
+        /// For actual ping, utilize the statistics manager, or make up for these 2 ticks delay manually.
         /// </summary>
         public double rtt { get; private set; }
 

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#if UNITY_ANIMATION
+using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 
 namespace PurrNet
@@ -75,10 +77,67 @@ namespace PurrNet
             }
         }
 
+        private void OptimizeBatch()
+        {
+            if (_dirty.Count <= 0)
+                return;
+
+            for (var i = _dirty.Count - 1; i >= 0; i--)
+            {
+                var action = _dirty[i];
+                switch (action.type)
+                {
+                    case NetAnimatorAction.SetBool:
+                    {
+                        RemovePast(i, action, (a, b)
+                            => a._bool.nameHash == b._bool.nameHash);
+                        break;
+                    }
+                    case NetAnimatorAction.SetFloat:
+                    {
+                        RemovePast(i, action, (a, b)
+                            => a._float.nameHash == b._float.nameHash);
+                        break;
+                    }
+                    case NetAnimatorAction.SetInt:
+                    {
+                        RemovePast(i, action, (a, b)
+                            => a._int.nameHash == b._int.nameHash);
+                        break;
+                    }
+                    case NetAnimatorAction.SetTrigger:
+                    {
+                        RemovePast(i, action, (a, b)
+                            => a._trigger.nameHash == b._trigger.nameHash);
+                        break;
+                    }
+                    case NetAnimatorAction.SetSpeed:
+                    {
+                        RemovePast(i, action, (_, _) => true);
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void RemovePast(int i, NetAnimatorRPC action, Func<NetAnimatorRPC, NetAnimatorRPC, bool> match)
+        {
+            for (var j = i - 1; j >= 0; j--)
+            {
+                if (_dirty[j].type == action.type && match(_dirty[j], action))
+                {
+                    _dirty.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
         private void SendDirtyActions()
         {
             if (_dirty.Count <= 0)
                 return;
+
+            OptimizeBatch();
 
             var batch = new NetAnimatorActionBatch
             {
@@ -115,7 +174,7 @@ namespace PurrNet
                 _ikActions[i].Apply(_animator);
         }
 
-        [TargetRpc]
+        [TargetRpc(compressionLevel: CompressionLevel.Best)]
         private void ReconcileState([UsedImplicitly] PlayerID player, NetAnimatorActionBatch actions)
         {
             if (IsController(_ownerAuth))
@@ -124,14 +183,14 @@ namespace PurrNet
             ExecuteBatch(actions);
         }
 
-        [ServerRpc]
+        [ServerRpc(compressionLevel: CompressionLevel.Best)]
         private void ForwardThroughServerToTarget(PlayerID target, NetAnimatorActionBatch actions)
         {
             if (_ownerAuth)
                 ReconcileState(target, actions);
         }
 
-        [ServerRpc]
+        [ServerRpc(compressionLevel: CompressionLevel.Best)]
         private void ForwardThroughServer(NetAnimatorActionBatch actions)
         {
             if (_ownerAuth)
@@ -141,7 +200,7 @@ namespace PurrNet
             }
         }
 
-        [ObserversRpc(excludeSender: true)]
+        [ObserversRpc(excludeSender: true, compressionLevel: CompressionLevel.Best)]
         private void ApplyActionsOnObservers(NetAnimatorActionBatch actions)
         {
             if (IsController(_ownerAuth))
@@ -172,3 +231,4 @@ namespace PurrNet
         }
     }
 }
+#endif

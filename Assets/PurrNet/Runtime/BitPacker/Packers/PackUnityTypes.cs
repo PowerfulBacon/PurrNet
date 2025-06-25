@@ -63,19 +63,35 @@ namespace PurrNet.Packing
         }
 
         [UsedByIL]
-        public static void Write(this BitPacker packer, Vector3 value)
+        public static unsafe void Write(this BitPacker packer, Vector3 value)
         {
-            packer.Write(value.x);
-            packer.Write(value.y);
-            packer.Write(value.z);
+            var x = value.x;
+            var y = value.y;
+            var z = value.z;
+
+            uint xbits = *(uint*)&x;
+            uint ybits = *(uint*)&y;
+            uint zbits = *(uint*)&z;
+
+            ulong xyBits = ((ulong)xbits << 32) | ybits;
+
+            packer.EnsureBitsExist(64 + 32);
+            packer.WriteBitsWithoutChecks(xyBits, 64);
+            packer.WriteBitsWithoutChecks(zbits, 32);
         }
 
         [UsedByIL]
-        public static void Read(this BitPacker packer, ref Vector3 value)
+        public static unsafe void Read(this BitPacker packer, ref Vector3 value)
         {
-            packer.Read(ref value.x);
-            packer.Read(ref value.y);
-            packer.Read(ref value.z);
+            ulong xyBits = packer.ReadBits(64);
+            ulong zbits = packer.ReadBits(32);
+
+            uint xbits = (uint)(xyBits >> 32);
+            uint ybits = (uint)(xyBits & 0xFFFFFFFF);
+
+            value.x = *(float*)&xbits;
+            value.y = *(float*)&ybits;
+            value.z = *(float*)&zbits;
         }
 
         [UsedByIL]

@@ -49,7 +49,7 @@ namespace PurrNet
         [SerializeField] private bool _ownerAuth;
         [SerializeField, Min(0)] private float _sendIntervalInSeconds;
         [SerializeField] private List<T> _list = new List<T>();
-        
+
         public List<T> list => _list;
         public List<T> ToList() => _list;
 
@@ -64,7 +64,7 @@ namespace PurrNet
         /// Whether it is the owner or the server that has the authority to modify the list
         /// </summary>
         public bool ownerAuth => _ownerAuth;
-        
+
         public float sendIntervalInSeconds
         {
             get => _sendIntervalInSeconds;
@@ -77,7 +77,7 @@ namespace PurrNet
         public int Count => _list.Count;
 
         public bool IsReadOnly => false;
-        
+
         private List<SyncListChange<T>> _pendingChanges = new();
         private float _lastSendTime;
         private bool _wasLastDirty;
@@ -99,7 +99,8 @@ namespace PurrNet
             get => _list[idx];
             set
             {
-                ValidateAuthority();
+                if (!ValidateAuthority())
+                    return;
 
                 var oldValue = _list[idx];
 
@@ -121,7 +122,7 @@ namespace PurrNet
                 }
             }
         }
-        
+
         private void QueueChange(SyncListChange<T> change)
         {
             _pendingChanges.Add(change);
@@ -206,7 +207,8 @@ namespace PurrNet
         /// <param name="item">The item you want to add</param>
         public void Add(T item)
         {
-            ValidateAuthority();
+            if (!ValidateAuthority())
+                return;
 
             _list.Add(item);
             var change = new SyncListChange<T>(SyncListOperation.Added, item, _list.Count - 1);
@@ -219,7 +221,8 @@ namespace PurrNet
         /// </summary>
         public void Clear()
         {
-            ValidateAuthority();
+            if (!ValidateAuthority())
+                return;
 
             _list.Clear();
             var change = new SyncListChange<T>(SyncListOperation.Cleared);
@@ -234,7 +237,8 @@ namespace PurrNet
         /// <param name="item">Item to be inserted at the given index</param>
         public void Insert(int index, T item)
         {
-            ValidateAuthority();
+            if (!ValidateAuthority())
+                return;
 
             _list.Insert(index, item);
             var change = new SyncListChange<T>(SyncListOperation.Insert, item, index);
@@ -249,7 +253,8 @@ namespace PurrNet
         /// <returns></returns>
         public bool Remove(T item)
         {
-            ValidateAuthority();
+            if (!ValidateAuthority())
+                return false;
 
             int idx = _list.IndexOf(item);
             if (idx < 0) return false;
@@ -268,7 +273,8 @@ namespace PurrNet
         /// <param name="index">Index of which to remove the entry</param>
         public void RemoveAt(int index)
         {
-            ValidateAuthority();
+            if (!ValidateAuthority())
+                return;
 
             T item = _list[index];
             _list.RemoveAt(index);
@@ -283,18 +289,19 @@ namespace PurrNet
         public int IndexOf(T item) => _list.IndexOf(item);
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        private void ValidateAuthority()
+        private bool ValidateAuthority()
         {
-            if (!isSpawned) return;
+            if (!isSpawned) return true;
 
             bool controller = parent.IsController(_ownerAuth);
             if (!controller)
             {
                 PurrLogger.LogError(
-                    $"Invalid permissions when modifying '<b>SyncList<{typeof(T).Name}> {name}</b>' on '{parent.name}'." +
-                    $"\nMaybe try enabling owner authority.", parent);
-                throw new InvalidOperationException("Invalid permissions");
+                    $"Invalid permissions when modifying `<b>SyncList<{typeof(T).Name}> {name}</b>` on `{parent.name}`." +
+                    $"\n{GetPermissionErrorDetails(_ownerAuth, this)}", parent);
+                return false;
             }
+            return true;
         }
 
         private void InvokeChange(SyncListChange<T> change)
@@ -310,7 +317,8 @@ namespace PurrNet
         {
             if (!isSpawned) return;
 
-            ValidateAuthority();
+            if (!ValidateAuthority())
+                return;
 
             if (index < 0 || index >= _list.Count)
             {
@@ -371,7 +379,10 @@ namespace PurrNet
             }
             else if (_wasLastDirty)
             {
-                ForceSendReliable();
+                if(isServer)
+                    SendInitialStateToAll(_list);
+                else
+                    ForceSendReliable();
                 _wasLastDirty = false;
             }
         }
@@ -596,7 +607,7 @@ namespace PurrNet
                 }
             }
         }
-        
+
         [ServerRpc(Channel.ReliableOrdered)]
         private void ForceSendReliable()
         {

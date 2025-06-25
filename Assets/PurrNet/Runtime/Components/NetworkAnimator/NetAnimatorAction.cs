@@ -1,4 +1,5 @@
-﻿using PurrNet.Packing;
+﻿#if UNITY_ANIMATION
+using PurrNet.Packing;
 using UnityEngine;
 
 namespace PurrNet
@@ -1039,3 +1040,4 @@ namespace PurrNet
         }
     }
 }
+#endif

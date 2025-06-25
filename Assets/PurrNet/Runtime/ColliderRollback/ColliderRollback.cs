@@ -14,14 +14,23 @@ namespace PurrNet
         [SerializeField, PurrLock, HideInInspector]
         bool _autoAddAllChildren = true;
 
+#if UNITY_PHYSICS_3D
         [SerializeField, PurrLock, HideInInspector]
         Collider[] _colliders3D;
+#endif
 
+#if UNITY_PHYSICS_2D
         [SerializeField, PurrLock, HideInInspector]
         Collider2D[] _colliders2D;
+#endif
 
+#if UNITY_PHYSICS_3D
         public Collider[] colliders3D => _colliders3D;
+#endif
+
+#if UNITY_PHYSICS_2D
         public Collider2D[] colliders2D => _colliders2D;
+#endif
 
         public float storeHistoryInSeconds => _storeHistoryInSeconds;
 
@@ -32,8 +41,12 @@ namespace PurrNet
         {
             if (_autoAddAllChildren)
             {
+#if UNITY_PHYSICS_3D
                 _colliders3D = GetComponentsInChildren<Collider>(true);
+#endif
+#if UNITY_PHYSICS_2D
                 _colliders2D = GetComponentsInChildren<Collider2D>(true);
+#endif
             }
         }
 

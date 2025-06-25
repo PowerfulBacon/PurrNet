@@ -1,3 +1,4 @@
+#if UNITY_MONO_CECIL
 using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;
@@ -334,3 +335,4 @@ namespace PurrNet.Codegen
         }
     }
 }
+#endif

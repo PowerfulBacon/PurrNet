@@ -2,12 +2,33 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using PurrNet;
 using PurrNet.Packing;
-using TriInspector;
 using UnityEngine;
+
+struct RandomType{}
+
+public static class StaticRpcTest2<T>
+{
+    [ObserversRpc(bufferLast: true)]
+    public static void StaticMethod(T data)
+    {
+        Debug.Log($"StaticMethod called with data: {data}");
+    }
+}
 
 public class StaticRpcTest : NetworkIdentity
 {
-    [Button("SendObserverRpc"), UsedImplicitly]
+    protected override void OnSpawned()
+    {
+        base.OnSpawned();
+        Test();
+    }
+
+    void Test()
+    {
+        StaticRpcTest2<RandomType>.StaticMethod(default);
+    }
+
+    [PurrButton("SendObserverRpc"), UsedImplicitly]
     public void SendRpc()
     {
         var someData = new SomeBaseData
@@ -19,14 +40,14 @@ public class StaticRpcTest : NetworkIdentity
         SendObserverRpcM(0, someData);
     }
 
-    [Button("SendTargetRpc"), UsedImplicitly]
+    [PurrButton("SendTargetRpc"), UsedImplicitly]
     public void SendTargetRpc()
     {
         if (owner.HasValue)
             TargetRpc(owner.Value);
     }
 
-    [Button("SendServerRpc"), UsedImplicitly]
+    [PurrButton("SendServerRpc"), UsedImplicitly]
     public void SendServerRpcNoOwner()
     {
         ServerRpc();

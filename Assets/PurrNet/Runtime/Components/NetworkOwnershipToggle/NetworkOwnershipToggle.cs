@@ -126,9 +126,11 @@ namespace PurrNet
                 case Behaviour behaviour:
                     behaviour.enabled = targetState;
                     break;
+#if UNITY_PHYSICS_3D
                 case Collider col:
                     col.enabled = targetState;
                     break;
+#endif
                 case Renderer r:
                     r.enabled = targetState;
                     break;

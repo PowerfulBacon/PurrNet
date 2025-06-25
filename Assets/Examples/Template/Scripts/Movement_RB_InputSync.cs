@@ -1,3 +1,5 @@
+#if UNITY_PHYSICS_3D
+
 using PurrNet.Logging;
 using UnityEngine;
 
@@ -10,22 +12,22 @@ namespace PurrNet.Examples.Template
         [SerializeField] private float maxSpeed = 5f;
         [SerializeField] private float jumpForce = 20f;
         [SerializeField] private float visualRotationSpeed = 10f;
-        
+
         [Space(10)]
         [Header("Ground check")]
         [SerializeField] private float groundCheckDistance = 0.1f;
         [SerializeField] private float groundCheckRadius = 0.5f;
         [SerializeField] private LayerMask groundMask;
-        
+
         private Rigidbody _rigidbody;
-        
+
         //Client variable
         private Vector2 _lastInput;
         private readonly SyncVar<Quaternion> _targetRotation = new SyncVar<Quaternion>();
-        
+
         //Server variable
         private Vector2 _serverInput;
-        
+
         private void Awake()
         {
             if (!TryGetComponent(out _rigidbody))
@@ -76,12 +78,12 @@ namespace PurrNet.Examples.Template
 #else
             Vector3 velocity = _rigidbody.velocity;
 #endif
-            
+
             var magnitude = new Vector3(velocity.x, 0, velocity.z).magnitude;
             if (magnitude > maxSpeed)
             {
                 var clamped = velocity.normalized * maxSpeed;
-                 
+
 #if UNITY_6000_0_OR_NEWER
                 _rigidbody.linearVelocity = new Vector3(clamped.x, velocity.y, clamped.z);
 #else
@@ -131,7 +133,7 @@ namespace PurrNet.Examples.Template
 
             return false;
         }
-        
+
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.red;
@@ -139,3 +141,5 @@ namespace PurrNet.Examples.Template
         }
     }
 }
+
+#endif

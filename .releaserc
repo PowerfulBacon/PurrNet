@@ -13,6 +13,9 @@
   "plugins": [
     "@semantic-release/commit-analyzer", 
     "@semantic-release/release-notes-generator",
+    ["@semantic-release/changelog", {
+      "changelogFile": "Assets/PurrNet/CHANGELOG.md"
+    }],
     ["semantic-release-replace-plugin", {
         "replacements": [
           {
@@ -28,6 +31,12 @@
               }
             ],
             "countMatches": true
+          },
+          {
+            "files": ["Assets/PurrNet/package.json"],
+            "from": "\"changelogUrl\": \".*?\"",
+            "to": "\"changelogUrl\": \"https://github.com/PurrNet/PurrNet/blob/dev/Assets/PurrNet/CHANGELOG.md\"",
+            "countMatches": true
           }
         ]
     }],
@@ -37,7 +46,7 @@
       "output": "PurrNet_${nextRelease.version}.unitypackage"
     }],
     ["@semantic-release/git", {
-        "assets": ["Assets/PurrNet/package.json"],
+        "assets": ["Assets/PurrNet/package.json", "Assets/PurrNet/CHANGELOG.md"],
         "message": "ci(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
     }],
     ["@semantic-release/github", {

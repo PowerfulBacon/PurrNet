@@ -1,55 +1,23 @@
-using System;
-using System.Collections.Generic;
 using PurrNet;
 using UnityEngine;
 
+[RegisterNetworkType(typeof(Texture))]
+[RegisterNetworkType(typeof(Sprite))]
 public class Test : NetworkIdentity
 {
-    [SerializeField] private int _localHealth = 100;
-    [SerializeField] private SyncDictionary<int, int> _dictionary = new ();
+    [SerializeField] private Texture _testTexture;
+    [SerializeField] private Sprite _testSprite;
 
-    private void Awake()
+    [PurrButton]
+    private void SendMat()
     {
-        _dictionary.onChanged += OnListChanged;
+        TestRpc(_testTexture);
+        TestRpc(_testSprite);
     }
 
-    protected override void OnDestroy()
+    [ObserversRpc]
+    private void TestRpc(object receivedTexture)
     {
-        base.OnDestroy();
-        
-        _dictionary.onChanged -= OnListChanged;
-    }
-
-    private void OnListChanged(SyncDictionaryChange<int, int> change)
-    {
-        Debug.Log($"{change} | Tick: {networkManager.tickModule.syncedTick}");
-    }
-
-    private void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.X))
-            SetHealth(_localHealth - 10);
-        if (Input.GetKeyDown(KeyCode.C))
-            TestList();
-    }
-
-    private void TestList()
-    {
-        if(!_dictionary.TryAdd(0, 0))
-            _dictionary[0] += 1;
-        if(!_dictionary.TryAdd(1, 0))
-            _dictionary[1] += 1;
-        if(!_dictionary.TryAdd(2, 0))
-            _dictionary[2] += 1;
-        if(!_dictionary.TryAdd(3, 0))
-            _dictionary[3] += 1;
-
-        _dictionary.Remove(0);
-    }
-
-    [ObserversRpc(bufferLast: true)]
-    private void SetHealth(int newHealth)
-    {
-        _localHealth = newHealth;
+        Debug.Log($"Received: {receivedTexture.GetType().Name}");
     }
 }

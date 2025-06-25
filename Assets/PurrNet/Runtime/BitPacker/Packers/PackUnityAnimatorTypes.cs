@@ -1,3 +1,4 @@
+#if UNITY_ANIMATION
 using PurrNet.Modules;
 using UnityEngine;
 
@@ -73,3 +74,4 @@ namespace PurrNet.Packing
         }
     }
 }
+#endif

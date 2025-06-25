@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Utils;
+using Object = UnityEngine.Object;
 
 namespace PurrNet.Packing
 {
@@ -20,6 +21,20 @@ namespace PurrNet.Packing
     {
         static DeltaWriteFunc<T> _write;
         static DeltaReadFunc<T> _read;
+
+        public static int GetNecessaryBitsToWrite(in T oldValue, in T newValue)
+        {
+            if (_write == null)
+            {
+                PurrLogger.LogError($"No delta writer for type '{typeof(T)}' is registered.");
+                return 0;
+            }
+
+            using var packer = BitPackerPool.Get();
+            if (_write(packer, oldValue, newValue))
+                return packer.positionInBits;
+            return 0;
+        }
 
         public static void Register(DeltaWriteFunc<T> write, DeltaReadFunc<T> read)
         {
@@ -204,6 +219,13 @@ namespace PurrNet.Packing
             }
         }
 
+        public static T Read(BitPacker packer)
+        {
+            var value = default(T);
+            Read(packer, ref value);
+            return value;
+        }
+
         public static void Serialize(BitPacker packer, ref T value)
         {
             if (packer.isWriting)
@@ -236,17 +258,35 @@ namespace PurrNet.Packing
             Packer<T>.Write(packerA, a);
             Packer<T>.Write(packerB, b);
 
-            var spanA = packerA.ToByteData().span;
-            var spanB = packerB.ToByteData().span;
-
-            // Write a zero byte to the end of the packer to ensure the bits are aligned
-            Packer<byte>.Write(packerA, 0);
-            Packer<byte>.Write(packerB, 0);
-
-            if (spanA.Length != spanB.Length)
+            if (packerA.positionInBits != packerB.positionInBits)
                 return false;
 
-            return spanA.SequenceEqual(spanB);
+            int bits = packerA.positionInBits;
+
+            packerA.ResetPositionAndMode(true);
+            packerB.ResetPositionAndMode(true);
+
+            while (bits >= 64)
+            {
+                ulong aBits = packerA.ReadBits(64);
+                ulong bBits = packerB.ReadBits(64);
+
+                if (aBits != bBits)
+                    return false;
+
+                bits -= 64;
+            }
+
+            if (bits > 0)
+            {
+                var remainingBits = (byte)bits;
+                ulong aBits = packerA.ReadBits(remainingBits);
+                ulong bBits = packerB.ReadBits(remainingBits);
+                if (aBits != bBits)
+                    return false;
+            }
+
+            return true;
         }
 
         [UsedByIL]
@@ -281,10 +321,20 @@ namespace PurrNet.Packing
                 if (!hasValue) return;
 
                 object obj = value;
-                uint typeHash = Hasher.GetStableHashU32(obj.GetType());
 
-                Packer<uint>.Write(packer, typeHash);
-                Write(packer, obj);
+                int index = obj is Object unityObj ? NetworkManager.main.networkAssets.GetIndex(unityObj) : -1;
+                bool isNetworkAsset = index != -1;
+                Packer<bool>.Write(packer, isNetworkAsset);
+
+                if (isNetworkAsset)
+                {
+                    Packer<PackedInt>.Write(packer, index);
+                    return;
+                }
+
+                PackedUInt typeHash = Hasher.GetStableHashU32(obj.GetType());
+                Packer<PackedUInt>.Write(packer, typeHash);
+                WriteRawObject(obj, packer);
             }
             catch (Exception e)
             {
@@ -306,13 +356,20 @@ namespace PurrNet.Packing
                     return;
                 }
 
-                uint typeHash = default;
-                Packer<uint>.Read(packer, ref typeHash);
+                bool isNetworkAsset = Packer<bool>.Read(packer);
 
+                if (isNetworkAsset)
+                {
+                    int index = Packer<PackedInt>.Read(packer);
+                    value = NetworkManager.main.networkAssets.GetAsset(index) is T cast ? cast : default;
+                    return;
+                }
+
+                var typeHash = Packer<PackedUInt>.Read(packer);
                 var type = Hasher.ResolveType(typeHash);
 
                 object obj = null;
-                Read(packer, type, ref obj);
+                ReadRawObject(type, packer, ref obj);
 
                 if (obj is T entity)
                     value = entity;
@@ -370,6 +427,28 @@ namespace PurrNet.Packing
 
             if (!_writeMethods.TryGetValue(type, out var method))
             {
+                FallbackWriter(packer, value);
+                return;
+            }
+
+            try
+            {
+                _args[0] = packer;
+                _args[1] = value;
+                method.Invoke(null, _args);
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to write value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        static void WriteRawObject(object value, BitPacker packer)
+        {
+            var type = value.GetType();
+
+            if (!_writeMethods.TryGetValue(type, out var method))
+            {
                 PurrLogger.LogError($"No writer for type '{type}' is registered.");
                 return;
             }
@@ -387,6 +466,27 @@ namespace PurrNet.Packing
         }
 
         public static void Read(BitPacker packer, Type type, ref object value)
+        {
+            if (!_readMethods.TryGetValue(type, out var method))
+            {
+                FallbackReader(packer, ref value);
+                return;
+            }
+
+            try
+            {
+                _args[0] = packer;
+                _args[1] = value;
+                method.Invoke(null, _args);
+                value = _args[1];
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to read value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        public static void ReadRawObject(Type type, BitPacker packer, ref object value)
         {
             if (!_readMethods.TryGetValue(type, out var method))
             {

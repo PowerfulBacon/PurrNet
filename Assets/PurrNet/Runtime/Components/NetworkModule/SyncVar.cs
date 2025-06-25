@@ -49,8 +49,8 @@ namespace PurrNet
                 if (isSpawned && !parent.IsController(_ownerAuth))
                 {
                     PurrLogger.LogError(
-                        $"Invalid permissions when setting '<b>SyncVar<{typeof(T).Name}> {name}</b>' on '{parent.name}'." +
-                        $"\nMaybe try enabling owner authority.", parent);
+                        $"Invalid permissions when setting `<b>SyncVar<{typeof(T).Name}> {name}</b>` on `{parent.name}`." +
+                        $"\n{GetPermissionErrorDetails(_ownerAuth, this)}", parent);
                     return;
                 }
 
@@ -61,8 +61,11 @@ namespace PurrNet
             }
         }
 
-        public override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
+        public override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool isSpawnEvent, bool asServer)
         {
+            if (isSpawnEvent)
+                return;
+
             if (_ownerAuth && asServer)
             {
                 _id = 0;
@@ -70,8 +73,11 @@ namespace PurrNet
             }
         }
 
-        public override void OnObserverAdded(PlayerID player)
+        public override void OnObserverAdded(PlayerID player, bool isSpawner)
         {
+            if (isSpawner && ownerAuth && owner == player)
+                return;
+
             SendLatestState(player, _id, _value);
         }
 

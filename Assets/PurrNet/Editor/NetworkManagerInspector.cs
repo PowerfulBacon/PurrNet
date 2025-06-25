@@ -16,6 +16,7 @@ namespace PurrNet.Editor
         private SerializedProperty _cookieScope;
         private SerializedProperty _dontDestroyOnLoad;
         private SerializedProperty _networkPrefabs;
+        private SerializedProperty _networkAssets;
         private SerializedProperty _networkRules;
         private SerializedProperty _authenticator;
         private SerializedProperty _transport;
@@ -44,6 +45,7 @@ namespace PurrNet.Editor
             _cookieScope = serializedObject.FindProperty("_cookieScope");
             _dontDestroyOnLoad = serializedObject.FindProperty("_dontDestroyOnLoad");
             _networkPrefabs = serializedObject.FindProperty("_networkPrefabs");
+            _networkAssets = serializedObject.FindProperty("_networkAssets");
             _networkRules = serializedObject.FindProperty("_networkRules");
             _transport = serializedObject.FindProperty("_transport");
             _tickRate = serializedObject.FindProperty("_tickRate");
@@ -177,6 +179,7 @@ namespace PurrNet.Editor
             EditorGUILayout.PropertyField(_dontDestroyOnLoad);
             EditorGUILayout.PropertyField(_transport);
             DrawNetworkPrefabs();
+            DrawNetworkAssets();
             EditorGUILayout.PropertyField(_networkRules);
             EditorGUILayout.PropertyField(_visibilityRules);
             EditorGUILayout.PropertyField(_authenticator);
@@ -214,6 +217,23 @@ namespace PurrNet.Editor
             {
                 if (GUILayout.Button("New", GUILayout.Width(50)))
                     CreateNewNetworkPrefabs();
+            }
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void DrawNetworkAssets()
+        {
+            EditorGUILayout.BeginHorizontal();
+            Color originalBgColor = GUI.backgroundColor;
+
+            EditorGUILayout.PropertyField(_networkAssets);
+            GUI.backgroundColor = originalBgColor;
+
+            if (_networkAssets.objectReferenceValue == null)
+            {
+                if (GUILayout.Button("New", GUILayout.Width(50)))
+                    CreateNewNetworkAssets();
             }
 
             EditorGUILayout.EndHorizontal();
@@ -322,6 +342,25 @@ namespace PurrNet.Editor
             GUI.color = Color.white;
             GUI.enabled = true;
             GUILayout.EndHorizontal();
+
+#if PURRNET_CONNECTION_DEBUG
+            GUILayout.BeginHorizontal();
+
+            // draw buttons for all actions, independnt of state
+            if (GUILayout.Button("Start Server", GUILayout.Width(10), GUILayout.ExpandWidth(true)))
+                _networkManager.StartServer();
+
+            if (GUILayout.Button("Stop Server", GUILayout.Width(10), GUILayout.ExpandWidth(true)))
+                _networkManager.StopServer();
+
+            if (GUILayout.Button("Start Client", GUILayout.Width(10), GUILayout.ExpandWidth(true)))
+                _networkManager.StartClient();
+
+            if (GUILayout.Button("Stop Client", GUILayout.Width(10), GUILayout.ExpandWidth(true)))
+                _networkManager.StopClient();
+
+            GUILayout.EndHorizontal();
+#endif
         }
 
         private void RenderServerButton()
@@ -349,6 +388,8 @@ namespace PurrNet.Editor
                         _networkManager.StopServer();
                     break;
             }
+
+
         }
 
         private void RenderClientButton()
@@ -413,6 +454,24 @@ namespace PurrNet.Editor
             serializedObject.ApplyModifiedProperties();
 
             EditorGUIUtility.PingObject(networkPrefabs);
+        }
+
+        private void CreateNewNetworkAssets()
+        {
+            string folderPath = "Assets";
+
+            var networkAssets = ScriptableObject.CreateInstance<NetworkAssets>();
+
+            string assetPath = $"{folderPath}/NetworkAssets.asset";
+            assetPath = AssetDatabase.GenerateUniqueAssetPath(assetPath);
+
+            AssetDatabase.CreateAsset(networkAssets, assetPath);
+            AssetDatabase.SaveAssets();
+
+            _networkAssets.objectReferenceValue = networkAssets;
+            serializedObject.ApplyModifiedProperties();
+
+            EditorGUIUtility.PingObject(networkAssets);
         }
     }
 }

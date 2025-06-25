@@ -26,12 +26,12 @@ namespace PurrNet
         {
             if (!isSpawned) return true;
 
-            bool isController = parent.IsController(_ownerAuth);
-            if (!isController)
+            bool controller = parent.IsController(_ownerAuth);
+            if (!controller)
             {
                 PurrLogger.LogError(
-                    $"Invalid permissions when invoking '<b>{GetType().Name} {name}</b>' on '{parent.name}'." +
-                    $"\nMaybe try enabling owner authority.", parent);
+                    $"Invalid permissions when invoking `<b>{GetType().Name} {name}</b>` on `{parent.name}`." +
+                    $"\n{GetPermissionErrorDetails(_ownerAuth, this)}", parent);
                 return false;
             }
 

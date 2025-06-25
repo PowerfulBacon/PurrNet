@@ -1,3 +1,4 @@
+#if UNITY_MONO_CECIL
 using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
@@ -23,6 +24,9 @@ namespace PurrNet.Codegen
                 string objectClassFullName = typeof(UnityEngine.Object).FullName;
                 var unityProxyType = module.GetTypeReference(typeof(UnityProxy)).Import(module).Resolve();
 
+                if (unityProxyType == null)
+                    return;
+
                 foreach (var method in type.Methods)
                 {
                     if (method.Body == null) continue;
@@ -34,6 +38,9 @@ namespace PurrNet.Codegen
                         var instruction = method.Body.Instructions[i];
 
                         if (instruction.Operand is not MethodReference methodReference)
+                            continue;
+
+                        if (methodReference.DeclaringType == null)
                             continue;
 
                         if (methodReference.DeclaringType.FullName != objectClassFullName)
@@ -75,7 +82,7 @@ namespace PurrNet.Codegen
             {
                 messages.Add(new DiagnosticMessage
                 {
-                    MessageData = $"Failed to process UnityProxy: {e.Message}",
+                    MessageData = $"Failed to process UnityProxy: {e.Message} {e.StackTrace}",
                     DiagnosticType = DiagnosticType.Error
                 });
             }
@@ -170,3 +177,4 @@ namespace PurrNet.Codegen
         }
     }
 }
+#endif

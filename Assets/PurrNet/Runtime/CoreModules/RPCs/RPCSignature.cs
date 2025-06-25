@@ -35,6 +35,7 @@ namespace PurrNet
         public float asyncTimeoutInSec;
         public CompressionLevel compressionLevel;
         public PlayerID? targetPlayer;
+        public StripCodeModeOverride stripCodeMode;
 
         [UsedImplicitly]
         public static RPCSignature Make(RPCType type, Channel channel, bool runLocally, bool requireOwnership,

@@ -1,7 +1,18 @@
+#if UNITY_PHYSICS_3D
+
 using PurrNet;
 using PurrNet.Logging;
 using UnityEngine;
 using Random = UnityEngine.Random;
+
+public class TestingClass
+{
+    [ServerOnly(StripCodeModeOverride.ReplaceWithLogError)]
+    public void Testy()
+    {
+        Debug.Log("Testy called!");
+    }
+}
 
 public class MoveCube : NetworkBehaviour
 {
@@ -74,3 +85,4 @@ public class MoveCube : NetworkBehaviour
         transform.rotation = Quaternion.Euler(xRot, yRot, zRot);
     }
 }
+#endif

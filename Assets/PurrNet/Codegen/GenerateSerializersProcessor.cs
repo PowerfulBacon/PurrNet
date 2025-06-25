@@ -1,3 +1,4 @@
+#if UNITY_MONO_CECIL
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -613,6 +614,12 @@ namespace PurrNet.Codegen
                 if (isDelegate)
                     continue;
 
+                bool ignore = field.CustomAttributes.Any(a =>
+                    a.AttributeType.FullName == typeof(DontPackAttribute).FullName);
+
+                if (ignore)
+                    continue;
+
                 var fieldType = ResolveGenericFieldType(field, typeRef);
                 var genericM = CreateGenericMethod(packerType, fieldType, serialize, mainmodule);
 
@@ -933,7 +940,7 @@ namespace PurrNet.Codegen
             return valueField?.FieldType;
         }
 
-        private static void EmitStindForEnum(ILProcessor il, TypeDefinition enumType)
+        public static void EmitStindForEnum(ILProcessor il, TypeDefinition enumType)
         {
             if (!enumType.IsEnum)
             {
@@ -978,3 +985,5 @@ namespace PurrNet.Codegen
         }
     }
 }
+
+#endif

@@ -38,10 +38,10 @@ namespace PurrNet
     public class SyncArray<T> : NetworkModule, IList<T>, ISerializationCallbackReceiver, ITick
     {
         [SerializeField] private bool _ownerAuth;
-        [SerializeField] private List<T> _serializedItems = new List<T>();
+        [SerializeField] private List<T> _serializedItems;
         [SerializeField] private int _length;
         [SerializeField, Min(0)] private float _sendIntervalInSeconds;
-        
+
         private T[] _array;
 
         public delegate void SyncArrayChanged<TYPE>(SyncArrayChange<TYPE> change);
@@ -49,29 +49,30 @@ namespace PurrNet
         public event SyncArrayChanged<T> onChanged;
 
         public bool ownerAuth => _ownerAuth;
-        
+
         public float sendIntervalInSeconds
         {
             get => _sendIntervalInSeconds;
             set => _sendIntervalInSeconds = value;
         }
-        
+
         public int Length
         {
             get => _length;
             set
             {
-                ValidateAuthority();
-                
+                if (!ValidateAuthority())
+                    return;
+
                 if (_length == value)
                     return;
-                
+
                 Array.Resize(ref _array, value);
                 _length = value;
-                
+
                 var change = new SyncArrayChange<T>(SyncArrayOperation.Resized);
                 InvokeChange(change);
-                
+
                 if (isSpawned)
                 {
                     if (isServer)
@@ -98,7 +99,7 @@ namespace PurrNet
             for (int i = 0; i < length; i++)
                 _serializedItems.Add(default);
         }
-        
+
         public void OnBeforeSerialize()
         {
             _serializedItems.Clear();
@@ -107,11 +108,11 @@ namespace PurrNet
                 _serializedItems.Add(_array[i]);
             }
         }
-        
+
         public void OnAfterDeserialize()
         {
             _array = new T[_length];
-            
+
             for (int i = 0; i < _serializedItems.Count && i < _length; i++)
                 _array[i] = _serializedItems[i];
         }
@@ -122,27 +123,28 @@ namespace PurrNet
             {
                 if (index < 0 || index >= _length)
                     throw new IndexOutOfRangeException();
-                    
+
                 return _array[index];
             }
             set
             {
-                ValidateAuthority();
-                
+                if (!ValidateAuthority())
+                    return;
+
                 if (index < 0 || index >= _length)
                     throw new IndexOutOfRangeException();
-                
+
                 bool bothNull = value == null && _array[index] == null;
                 bool bothEqual = value != null && value.Equals(_array[index]);
-                
+
                 if (bothNull || bothEqual)
                     return;
-                
+
                 _array[index] = value;
-                
+
                 var change = new SyncArrayChange<T>(SyncArrayOperation.Set, value, index);
                 InvokeChange(change);
-                
+
                 if (isSpawned)
                 {
                     if (isServer)
@@ -157,12 +159,12 @@ namespace PurrNet
         {
             base.OnInitializeModules();
             if (!IsController(_ownerAuth)) return;
-            
+
             if (isServer)
                 SendInitialSizeToAll(_length);
-            else 
+            else
                 SendInitialSizeToServer(_length);
-                
+
             for (int i = 0; i < _length; i++)
             {
                 if (isServer)
@@ -175,13 +177,13 @@ namespace PurrNet
         public override void OnObserverAdded(PlayerID player)
         {
             SendInitialSizeToTarget(player, _length);
-            
+
             for (int i = 0; i < _length; i++)
             {
                 SendSetToTarget(player, i, _array[i]);
             }
         }
-        
+
         private void QueueChange(SyncArrayChange<T> change)
         {
             _pendingChanges.Add(change);
@@ -193,7 +195,7 @@ namespace PurrNet
         {
             HandleInitialSize(length);
         }
-        
+
         [TargetRpc(Channel.ReliableOrdered)]
         private void SendSetToTarget(PlayerID player, int index, T value)
         {
@@ -248,7 +250,7 @@ namespace PurrNet
                 {
                     Array.Resize(ref _array, length);
                     _length = length;
-                    
+
                     var resizeChange = new SyncArrayChange<T>(SyncArrayOperation.Resized);
                     var clearChange = new SyncArrayChange<T>(SyncArrayOperation.Cleared);
                     QueueChange(resizeChange);
@@ -261,14 +263,15 @@ namespace PurrNet
 
         public void Clear()
         {
-            ValidateAuthority();
-            
+            if (!ValidateAuthority())
+                return;
+
             Array.Clear(_array, 0, _length);
-            
+
             var change = new SyncArrayChange<T>(SyncArrayOperation.Cleared);
             QueueChange(change);
             InvokeChange(change);
-            
+
             if (isSpawned)
             {
                 if (isServer)
@@ -317,13 +320,13 @@ namespace PurrNet
         {
             if (array == null)
                 throw new ArgumentNullException(nameof(array));
-                
+
             if (arrayIndex < 0)
                 throw new ArgumentOutOfRangeException(nameof(arrayIndex));
-                
+
             if (array.Length - arrayIndex < _length)
                 throw new ArgumentException("Destination array is not long enough");
-                
+
             Array.Copy(_array, 0, array, arrayIndex, _length);
         }
 
@@ -350,46 +353,49 @@ namespace PurrNet
         public void SetDirty(int index)
         {
             if (!isSpawned) return;
-            
-            ValidateAuthority();
-            
+
+            if (!ValidateAuthority())
+                return;
+
             if (index < 0 || index >= _length)
             {
                 PurrLogger.LogError($"Invalid index {index} for SetDirty in SyncArray. Array length: {_length}",
                     parent);
                 return;
             }
-            
+
             var value = _array[index];
             var change = new SyncArrayChange<T>(SyncArrayOperation.Set, value, index);
             QueueChange(change);
             InvokeChange(change);
-            
+
             if (isServer)
                 SendSetDirtyToAll(index, value);
             else
                 SendSetDirtyToServer(index, value);
         }
 
-        private void ValidateAuthority()
+        private bool ValidateAuthority()
         {
-            if (!isSpawned) return;
-            
-            bool isController = parent.IsController(_ownerAuth);
-            if (!isController)
+            if (!isSpawned)
+                return true;
+
+            bool controlling = parent.IsController(_ownerAuth);
+            if (!controlling)
             {
                 PurrLogger.LogError(
-                    $"Invalid permissions when modifying '<b>SyncArray<{typeof(T).Name}> {name}</b>' on '{parent.name}'." +
-                    $"\nMaybe try enabling owner authority.", parent);
-                throw new InvalidOperationException("Invalid permissions");
+                    $"Invalid permissions when modifying `<b>SyncArray<{typeof(T).Name}> {name}</b>` on `{parent.name}`." +
+                    $"\n{GetPermissionErrorDetails(_ownerAuth, this)}", parent);
+                return false;
             }
+            return true;
         }
 
         private void InvokeChange(SyncArrayChange<T> change)
         {
             onChanged?.Invoke(change);
         }
-        
+
         public void OnTick(float delta)
         {
             if (!IsController(_ownerAuth))
@@ -428,7 +434,10 @@ namespace PurrNet
             }
             else if (_wasLastDirty)
             {
-                ForceSendReliable();
+                if(isServer)
+                    ForceSendReliable_Internal();
+                else
+                    ForceSendReliable();
                 _wasLastDirty = false;
             }
         }
@@ -578,9 +587,14 @@ namespace PurrNet
                 }
             }
         }
-        
+
         [ServerRpc(Channel.ReliableOrdered)]
         private void ForceSendReliable()
+        {
+            ForceSendReliable_Internal();
+        }
+
+        private void ForceSendReliable_Internal()
         {
             SendInitialSizeToAll(_length);
             for (int i = 0; i < _length; i++)

@@ -1,3 +1,5 @@
+#if UNITY_PHYSICS_3D
+
 using UnityEngine;
 
 namespace PurrNet.Examples.BoxCarry
@@ -8,7 +10,7 @@ namespace PurrNet.Examples.BoxCarry
         [SerializeField] private Vector3 pickupOffset;
 
         private Box _carriedBox;
-        
+
         protected override void OnSpawned()
         {
             enabled = isOwner;
@@ -39,13 +41,13 @@ namespace PurrNet.Examples.BoxCarry
 
                 if (_carriedBox && _carriedBox == box)
                     continue;
-                
+
                 if(_carriedBox) _carriedBox.DropBox();
                 _carriedBox = box;
                 box.PickUpBox(this);
                 return;
             }
-            
+
             if(_carriedBox) _carriedBox.DropBox();
             _carriedBox = null;
         }
@@ -63,3 +65,5 @@ namespace PurrNet.Examples.BoxCarry
         }
     }
 }
+
+#endif
