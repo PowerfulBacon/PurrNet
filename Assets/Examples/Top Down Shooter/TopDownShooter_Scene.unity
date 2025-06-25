@@ -1500,6 +1500,7 @@ GameObject:
   - component: {fileID: 634351197}
   - component: {fileID: 634351196}
   - component: {fileID: 634351200}
+  - component: {fileID: 634351201}
   m_Layer: 0
   m_Name: Test
   m_TagString: Untagged
@@ -1534,15 +1535,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c33faa44fdf4d84bab0da8a06d90e8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isSetup: 0
-  _prefabId: -2147483648
-  _componentIndex: -2147483648
-  _shouldBePooled: 0
-  _parent: {fileID: 0}
-  _invertedPathToNearestParent: 
-  _directChildren: []
-  _networkRules: {fileID: 0}
-  _visitiblityRules: {fileID: 0}
 --- !u!114 &634351196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1659,6 +1651,32 @@ MonoBehaviour:
   _visitiblityRules: {fileID: 0}
   _testTexture: {fileID: 2800000, guid: c045e762b92c03044978d319c6d672db, type: 3}
   _testSprite: {fileID: 21300000, guid: 1aa0a06e1bb4a894d9df83b31ed47345, type: 3}
+--- !u!114 &634351201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 634351193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cb763cfb0fbf2c44b3587223c4aad1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.NetworkReflection
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _trackedBehaviour: {fileID: 634351194}
+  _trackedFields:
+  - type: 1
+    name: name
+  _ownerAuth: 1
 --- !u!1 &667181803
 GameObject:
   m_ObjectHideFlags: 0

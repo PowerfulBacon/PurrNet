@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Utils;
-using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace PurrNet.Packing
 {
@@ -321,8 +321,8 @@ namespace PurrNet.Packing
                 if (!hasValue) return;
 
                 object obj = value;
-                
-                int index = NetworkManager.main.networkAssets.GetIndex((UnityEngine.Object)obj);
+
+                int index = obj is Object unityObj ? NetworkManager.main.networkAssets.GetIndex(unityObj) : -1;
                 bool isNetworkAsset = index != -1;
                 Packer<bool>.Write(packer, isNetworkAsset);
 
@@ -331,11 +331,10 @@ namespace PurrNet.Packing
                     Packer<PackedInt>.Write(packer, index);
                     return;
                 }
-                
-                uint typeHash = Hasher.GetStableHashU32(obj.GetType());
 
-                Packer<uint>.Write(packer, typeHash);
-                Write(packer, obj);
+                PackedUInt typeHash = Hasher.GetStableHashU32(obj.GetType());
+                Packer<PackedUInt>.Write(packer, typeHash);
+                WriteRawObject(obj, packer);
             }
             catch (Exception e)
             {
@@ -356,23 +355,21 @@ namespace PurrNet.Packing
                     value = default;
                     return;
                 }
-                
+
                 bool isNetworkAsset = Packer<bool>.Read(packer);
 
                 if (isNetworkAsset)
                 {
                     int index = Packer<PackedInt>.Read(packer);
-                    value = NetworkManager.main.networkAssets.GetAsset(index) is T cast ? cast : default; 
+                    value = NetworkManager.main.networkAssets.GetAsset(index) is T cast ? cast : default;
                     return;
                 }
 
-                uint typeHash = default;
-                Packer<uint>.Read(packer, ref typeHash);
-
+                var typeHash = Packer<PackedUInt>.Read(packer);
                 var type = Hasher.ResolveType(typeHash);
 
                 object obj = null;
-                Read(packer, type, ref obj);
+                ReadRawObject(type, packer, ref obj);
 
                 if (obj is T entity)
                     value = entity;
@@ -430,6 +427,28 @@ namespace PurrNet.Packing
 
             if (!_writeMethods.TryGetValue(type, out var method))
             {
+                FallbackWriter(packer, value);
+                return;
+            }
+
+            try
+            {
+                _args[0] = packer;
+                _args[1] = value;
+                method.Invoke(null, _args);
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to write value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        static void WriteRawObject(object value, BitPacker packer)
+        {
+            var type = value.GetType();
+
+            if (!_writeMethods.TryGetValue(type, out var method))
+            {
                 PurrLogger.LogError($"No writer for type '{type}' is registered.");
                 return;
             }
@@ -447,6 +466,27 @@ namespace PurrNet.Packing
         }
 
         public static void Read(BitPacker packer, Type type, ref object value)
+        {
+            if (!_readMethods.TryGetValue(type, out var method))
+            {
+                FallbackReader(packer, ref value);
+                return;
+            }
+
+            try
+            {
+                _args[0] = packer;
+                _args[1] = value;
+                method.Invoke(null, _args);
+                value = _args[1];
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to read value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        public static void ReadRawObject(Type type, BitPacker packer, ref object value)
         {
             if (!_readMethods.TryGetValue(type, out var method))
             {

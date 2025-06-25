@@ -6,7 +6,7 @@ namespace PurrNet
 {
     public static class PackGenericObject
     {
-        [UsedByIL]
+        /*[UsedByIL]
         public static void WriteObject(this BitPacker packer, object value)
         {
             bool isNull = value == null;
@@ -44,6 +44,6 @@ namespace PurrNet
                 return;
 
             Packer.Read(packer, type, ref value);
-        }
+        }*/
     }
 }

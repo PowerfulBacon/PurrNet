@@ -1,7 +1,8 @@
-using System.Collections.Generic;
 using PurrNet;
 using UnityEngine;
 
+[RegisterNetworkType(typeof(Texture))]
+[RegisterNetworkType(typeof(Sprite))]
 public class Test : NetworkIdentity
 {
     [SerializeField] private Texture _testTexture;
@@ -13,16 +14,10 @@ public class Test : NetworkIdentity
         TestRpc(_testTexture);
         TestRpc(_testSprite);
     }
-    
+
     [ObserversRpc]
-    private void TestRpc(Texture receivedTexture)
+    private void TestRpc(object receivedTexture)
     {
-        Debug.Log($"Received Texture: {receivedTexture.name}", receivedTexture);
-    }
-    
-    [ObserversRpc]
-    private void TestRpc(Sprite receivedSprite)
-    {
-        Debug.Log($"Received sprite: {receivedSprite.name}", receivedSprite);
+        Debug.Log($"Received: {receivedTexture.GetType().Name}");
     }
 }
