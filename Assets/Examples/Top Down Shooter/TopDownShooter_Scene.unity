@@ -1494,7 +1494,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 634351194}
-  - component: {fileID: 634351195}
   - component: {fileID: 634351199}
   - component: {fileID: 634351198}
   - component: {fileID: 634351197}
@@ -1523,18 +1522,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &634351195
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 634351193}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c33faa44fdf4d84bab0da8a06d90e8a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &634351196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3063,6 +3050,7 @@ GameObject:
   - component: {fileID: 1216416903}
   - component: {fileID: 1216416905}
   - component: {fileID: 1216416906}
+  - component: {fileID: 1216416907}
   m_Layer: 0
   m_Name: Network
   m_TagString: Untagged
@@ -3180,6 +3168,23 @@ MonoBehaviour:
   displayType: 2
   fontSize: 13
   textColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &1216416907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1216416895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 332e746c3c3253246aacad4d5559f1fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.PurrTransport
+  _masterServer: https://purrbalancer.riten.dev:8080/
+  _roomName: d183be76477d40b5b16d5df51ffec9ff
+  _region: eu-central
+  _host: eu1.purrlay.riten.dev
+  _pollEventsInUpdate: 0
 --- !u!1 &1284249959
 GameObject:
   m_ObjectHideFlags: 0
