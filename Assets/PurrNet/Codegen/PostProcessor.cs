@@ -1113,7 +1113,7 @@ namespace PurrNet.Codegen
         }
 
         private MethodDefinition HandleRPC(ModuleDefinition module, int id, RPCMethod methodRpc, bool isNetworkClass, bool isServerBuild, PurrNetSettings settings,
-            DisposableHashSet<TypeReference> usedTypes, [UsedImplicitly] List<DiagnosticMessage> messages)
+            HashSet<TypeReference> usedTypes, [UsedImplicitly] List<DiagnosticMessage> messages)
         {
             var method = methodRpc.originalMethod;
 
@@ -1969,7 +1969,7 @@ namespace PurrNet.Codegen
                 {
                     var module = assemblyDefinition.Modules[m];
                     using var types = GetAllTypes(module);
-                    using var usedTypes = new DisposableHashSet<TypeReference>(32);
+                    var usedTypes = new HashSet<TypeReference>(TypeReferenceEqualityComparer.Default);
 
                     for (var t = 0; t < types.Count; t++)
                     {
@@ -2601,7 +2601,7 @@ namespace PurrNet.Codegen
         }
 
         private static void FindUsedTypes(ModuleDefinition module, DisposableList<TypeDefinition> allTypes,
-            DisposableHashSet<TypeReference> types)
+            HashSet<TypeReference> types)
         {
             var playersBroadcasterSubscribe = module.GetTypeDefinition<PlayersBroadcaster>();
             var playersManagerSubscribe = module.GetTypeDefinition<PlayersManager>();
@@ -2671,7 +2671,7 @@ namespace PurrNet.Codegen
             }
         }
 
-        private static void AddAnySyncVarOrGenericNetworkModulesType(DisposableHashSet<TypeReference> types, TypeReference type,
+        private static void AddAnySyncVarOrGenericNetworkModulesType(HashSet<TypeReference> types, TypeReference type,
             TypeDefinition resolved,
             TypeDefinition networkModule)
         {
@@ -2697,7 +2697,7 @@ namespace PurrNet.Codegen
             }
         }
 
-        private static void FindUsedGenericRpcTypes(DisposableHashSet<TypeReference> types, GenericInstanceMethod currentMethod)
+        private static void FindUsedGenericRpcTypes(HashSet<TypeReference> types, GenericInstanceMethod currentMethod)
         {
             foreach (var argument in currentMethod.GenericArguments)
             {
