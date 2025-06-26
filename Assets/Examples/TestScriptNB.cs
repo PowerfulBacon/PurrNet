@@ -9,16 +9,16 @@ public class TestScriptNB : NetworkIdentity
         ServerRpcTesT();
     }
 
-    protected override void OnSpawned(bool asServer)
+    protected override void OnSpawned()
     {
-        if (!asServer)
+        if (isOwner)
             ServerRpcTesT();
     }
 
     [ServerRpc]
     public void ServerRpcTesT(RPCInfo info = default)
     {
-        PurrLogger.Log($"ServerRpcTesT called from {info.sender} {isClient} {localPlayer}");
+        PurrLogger.Log($"ServerRpcTesT called from {info.sender} {isClient}");
         TargetRpcT(info.sender);
     }
 

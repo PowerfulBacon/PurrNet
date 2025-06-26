@@ -4,8 +4,6 @@ using PurrNet;
 using PurrNet.Packing;
 using UnityEngine;
 
-struct RandomType{}
-
 public static class StaticRpcTest2<T>
 {
     [ObserversRpc(bufferLast: true)]
@@ -17,17 +15,6 @@ public static class StaticRpcTest2<T>
 
 public class StaticRpcTest : NetworkIdentity
 {
-    protected override void OnSpawned()
-    {
-        base.OnSpawned();
-        Test();
-    }
-
-    void Test()
-    {
-        StaticRpcTest2<RandomType>.StaticMethod(default);
-    }
-
     [PurrButton("SendObserverRpc"), UsedImplicitly]
     public void SendRpc()
     {
