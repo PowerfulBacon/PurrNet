@@ -322,7 +322,7 @@ namespace PurrNet.Packing
 
                 object obj = value;
                 var nassets = NetworkManager.main.networkAssets;
-                int index = obj is Object unityObj ? nassets ? nassets.GetIndex(unityObj) : -1 : -1;
+                int index = nassets && obj is Object unityObj ? nassets.GetIndex(unityObj) : -1;
                 bool isNetworkAsset = index != -1;
                 Packer<bool>.Write(packer, isNetworkAsset);
 

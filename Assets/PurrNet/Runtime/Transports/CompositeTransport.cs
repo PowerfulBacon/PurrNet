@@ -402,7 +402,7 @@ namespace PurrNet.Transports
 
                         try
                         {
-                            _transports[i].StartServer();
+                            _transports[i].StartServerInternalOnly();
                         }
                         catch (Exception ex)
                         {

@@ -61,7 +61,6 @@ namespace PurrNet.Transports
         /// Optionally, you can pass a NetworkManager to register server modules.
         /// If you do not pass a NetworkManager, it will try to find one in the hierarchy.
         /// </summary>
-        /// <param name="manager">The NetworkManager to register server modules.</param>
         public void StartServer()
         {
             if (TryGetNetworkManager(NetworkManager.main, out var networkManager))
@@ -106,7 +105,6 @@ namespace PurrNet.Transports
         /// Optionally, you can pass a NetworkManager to register client modules.
         /// If you do not pass a NetworkManager, it will try to find one in the hierarchy.
         /// </summary>
-        /// <param name="manager">The NetworkManager to register client modules.</param>
         public void StartClient()
         {
             if (TryGetNetworkManager(NetworkManager.main, out var networkManager))
@@ -134,7 +132,6 @@ namespace PurrNet.Transports
         /// Optionally, you can pass a NetworkManager to register client modules.
         /// If you do not pass a NetworkManager, it will try to find one in the hierarchy.
         /// </summary>
-        /// <param name="manager">The NetworkManager to unregister client modules.</param>
         public void StopClient()
         {
             if (TryGetNetworkManager(NetworkManager.main, out var networkManager))
@@ -152,6 +149,11 @@ namespace PurrNet.Transports
         internal void StartClientInternalOnly()
         {
             StartClientInternal();
+        }
+
+        internal void StartServerInternalOnly()
+        {
+            StartServerInternal();
         }
 
         protected abstract void StartClientInternal();

@@ -84,7 +84,7 @@ namespace PurrNet.Modules
             _scenes.onSceneUnloaded += OnSceneUnloaded;
 
             _hierarchy.onIdentityRemoved += OnIdentityDespawned;
-            _hierarchy.onLateObserverAdded += OnPlayerObserverAdded;
+            _hierarchy.onObserverAdded += OnPlayerObserverAdded;
 
             _scenePlayers.onPlayerUnloadedScene += OnPlayerUnloadedScene;
             _scenePlayers.onPlayerLoadedScene += OnPlayerLoadedScene;
@@ -101,7 +101,7 @@ namespace PurrNet.Modules
             _scenes.onSceneUnloaded -= OnSceneUnloaded;
 
             _hierarchy.onIdentityRemoved -= OnIdentityDespawned;
-            _hierarchy.onLateObserverAdded -= OnPlayerObserverAdded;
+            _hierarchy.onObserverAdded -= OnPlayerObserverAdded;
 
             _scenePlayers.onPlayerUnloadedScene -= OnPlayerUnloadedScene;
             _scenePlayers.onPlayerLoadedScene -= OnPlayerLoadedScene;
@@ -716,11 +716,7 @@ namespace PurrNet.Modules
             string verb = change.isAdding ? "give" : "remove";
 
             if (!_hierarchy.TryGetIdentity(change.sceneId, id, out var identity))
-            {
-                PurrLogger.LogError(
-                    $"Failed to find identity {id} in scene {change.sceneId} when applying ownership change for player {change.player}");
                 return false;
-            }
 
             if (!_sceneOwnerships.TryGetValue(change.sceneId, out var module))
             {
