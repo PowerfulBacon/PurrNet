@@ -154,6 +154,11 @@ namespace PurrNet.Transports
             StartClientInternal();
         }
 
+        internal void StartServerInternalOnly()
+        {
+            StartServerInternal();
+        }
+
         protected abstract void StartClientInternal();
 
         protected abstract void StartServerInternal();
