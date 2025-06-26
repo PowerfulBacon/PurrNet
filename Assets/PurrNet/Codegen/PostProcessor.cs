@@ -1915,6 +1915,7 @@ namespace PurrNet.Codegen
             return types;
         }
 
+
         public override ILPostProcessResult Process(ICompiledAssembly compiledAssembly)
         {
             try
@@ -1968,6 +1969,7 @@ namespace PurrNet.Codegen
                 {
                     var module = assemblyDefinition.Modules[m];
                     using var types = GetAllTypes(module);
+                    using var usedTypes = new DisposableHashSet<TypeReference>(32);
 
                     for (var t = 0; t < types.Count; t++)
                     {
@@ -2029,6 +2031,7 @@ namespace PurrNet.Codegen
                         {
                             typesToGenerateSerializer.Add(type);
                         }
+
 
                         if (!type.IsClass)
                         {
@@ -2119,9 +2122,6 @@ namespace PurrNet.Codegen
                         if (inheritsFromNetworkIdentity || inheritsFromNetworkClass)
                             typesToGenerateSerializer.Add(type);
 
-                        // Note: not sure how to include equality comparer here
-                        using var usedTypes = new DisposableHashSet<TypeReference>(32);
-
                         for (var index = 0; index < _rpcMethods.Count; index++)
                         {
                             var method = _rpcMethods[index].originalMethod;
@@ -2159,25 +2159,25 @@ namespace PurrNet.Codegen
                                 MessageData = $"HandleRPCReceiver [{type.Name}]: {e.Message}\n{e.StackTrace}"
                             });
                         }
+                    }
 
-                        try
-                        {
-                            FindUsedTypes(module, types, usedTypes);
+                    try
+                    {
+                        FindUsedTypes(module, types, usedTypes);
 
-                            foreach (var usedType in usedTypes)
-                            {
-                                if (IsTypeInOwnModule(usedType, module))
-                                    typesToGenerateSerializer.Add(usedType);
-                            }
-                        }
-                        catch (Exception e)
+                        foreach (var usedType in usedTypes)
                         {
-                            messages.Add(new DiagnosticMessage
-                            {
-                                DiagnosticType = DiagnosticType.Error,
-                                MessageData = $"GenerateExecuteFunction [{type.Name}]: {e.Message}\n{e.StackTrace}"
-                            });
+                            if (IsTypeInOwnModule(usedType, module))
+                                typesToGenerateSerializer.Add(usedType);
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        messages.Add(new DiagnosticMessage
+                        {
+                            DiagnosticType = DiagnosticType.Error,
+                            MessageData = $"FindUsedTypes {e.Message}\n{e.StackTrace}"
+                        });
                     }
                 }
 
