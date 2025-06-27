@@ -357,7 +357,10 @@ namespace PurrNet
 
             float sentTime = msg.realSendTime;
             int currentPing = Mathf.Max(0, Mathf.FloorToInt((Time.time - sentTime) * 1000));
-            currentPing -= Mathf.Min(currentPing, Mathf.RoundToInt((_tickManager.tickDelta * 3) * 1000));
+            var multiplier = 2f;
+            if (_networkManager.isServer)
+                multiplier = 3f;
+            currentPing -= Mathf.Min(currentPing, Mathf.RoundToInt((_tickManager.tickDelta * multiplier) * 1000));
 
             _pingStats[_pingIndex] = currentPing;
             _pingIndex = (_pingIndex + 1) % _pingHistorySize;
