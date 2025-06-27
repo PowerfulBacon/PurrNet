@@ -40,10 +40,19 @@ namespace PurrNet
 
             if (_whitelist.Add(player))
             {
-                _whiteBlackDirty = true;
+                SetVisibilityDirty();
                 return true;
             }
             return false;
+        }
+
+        private void SetVisibilityDirty()
+        {
+            if (!_whiteBlackDirty)
+            {
+                RegisterTickEvent(true);
+                _whiteBlackDirty = true;
+            }
         }
 
         public bool BlacklistPlayer(PlayerID player)
@@ -57,7 +66,7 @@ namespace PurrNet
 
             if (_blacklist.Add(player))
             {
-                _whiteBlackDirty = true;
+                SetVisibilityDirty();
                 return true;
             }
             return false;
@@ -74,7 +83,7 @@ namespace PurrNet
 
             if (_whitelist.Remove(player))
             {
-                _whiteBlackDirty = true;
+                SetVisibilityDirty();
                 return true;
             }
             return false;
@@ -91,7 +100,7 @@ namespace PurrNet
 
             if (_blacklist.Remove(player))
             {
-                _whiteBlackDirty = true;
+                SetVisibilityDirty();
                 return true;
             }
             return false;

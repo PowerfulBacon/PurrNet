@@ -17,10 +17,14 @@ public class TestScriptNB : NetworkIdentity
         ServerRpcTesT(new PickedUpEvent("TestItem", 1));
     }
 
-    protected override void OnSpawned()
+    [PurrButton]
+    public void WhitelistAllPlayers()
     {
-        if (isOwner)
-            ServerRpcTesT(new PickedUpEvent("SpawnedItem", 1));
+        foreach (var p in networkManager.players)
+        {
+            if (!WhitelistPlayer(p))
+                PurrLogger.LogError($"Failed to whitelist player {p} on {this}");
+        }
     }
 
     [ServerRpc]
