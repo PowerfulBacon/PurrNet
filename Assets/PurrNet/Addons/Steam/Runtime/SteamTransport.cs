@@ -229,11 +229,13 @@ namespace PurrNet.Steam
                 return;
 
             _server.SendToConnection(target.connectionId, data, method);
+            RaiseDataSent(target, data, true);
         }
 
         public void SendToServer(ByteData data, Channel method = Channel.ReliableOrdered)
         {
             _client.Send(data, method);
+            RaiseDataSent(default, data, false);
         }
 
         public void CloseConnection(Connection conn)
