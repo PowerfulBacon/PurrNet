@@ -184,27 +184,6 @@ namespace PurrNet.Modules
             {
                 var identity = identities[i];
 
-                var r = identity.GetOverrideOrDefault(rules);
-
-                if (r && r.childrenInherit)
-                    rules = r;
-
-                if (r == null)
-                {
-                    isAnyVisible = true;
-                    if (identity.TryAddObserver(player))
-                        fullyChanged = true;
-                    continue;
-                }
-
-                if (identity.owner == player)
-                {
-                    isAnyVisible = true;
-                    if (identity.TryAddObserver(player))
-                        fullyChanged = true;
-                    continue;
-                }
-
                 if (identity.whitelist.Contains(player))
                 {
                     isAnyVisible = true;
@@ -216,6 +195,27 @@ namespace PurrNet.Modules
                 if (identity.blacklist.Contains(player))
                 {
                     if (identity.TryRemoveObserver(player))
+                        fullyChanged = true;
+                    continue;
+                }
+
+                var r = identity.GetOverrideOrDefault(rules);
+
+                if (r && r.childrenInherit)
+                    rules = r;
+
+                if (!r)
+                {
+                    isAnyVisible = true;
+                    if (identity.TryAddObserver(player))
+                        fullyChanged = true;
+                    continue;
+                }
+
+                if (identity.owner == player)
+                {
+                    isAnyVisible = true;
+                    if (identity.TryAddObserver(player))
                         fullyChanged = true;
                     continue;
                 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using PurrNet.Collections;
+using PurrNet.Logging;
 using UnityEngine;
 
 namespace PurrNet
@@ -30,6 +31,13 @@ namespace PurrNet
 
         public bool WhitelistPlayer(PlayerID player)
         {
+            if (!isServer)
+            {
+                PurrLogger.LogError(
+                    $"Tried to whitelist player `{player}` on `{this}` but only the server can modify the whitelist.", this);
+                return false;
+            }
+
             if (_whitelist.Add(player))
             {
                 _whiteBlackDirty = true;
@@ -40,6 +48,13 @@ namespace PurrNet
 
         public bool BlacklistPlayer(PlayerID player)
         {
+            if (!isServer)
+            {
+                PurrLogger.LogError(
+                    $"Tried to blacklist player `{player}` on `{this}` but only the server can modify the blacklist.", this);
+                return false;
+            }
+
             if (_blacklist.Add(player))
             {
                 _whiteBlackDirty = true;
@@ -50,6 +65,13 @@ namespace PurrNet
 
         public bool RemoveWhitelistPlayer(PlayerID player)
         {
+            if (!isServer)
+            {
+                PurrLogger.LogError(
+                    $"Tried to remove player `{player}` from whitelist on `{this}` but only the server can modify the whitelist.", this);
+                return false;
+            }
+
             if (_whitelist.Remove(player))
             {
                 _whiteBlackDirty = true;
@@ -60,6 +82,13 @@ namespace PurrNet
 
         public bool RemoveBlacklistPlayer(PlayerID player)
         {
+            if (!isServer)
+            {
+                PurrLogger.LogError(
+                    $"Tried to remove player `{player}` from blacklist on `{this}` but only the server can modify the blacklist.", this);
+                return false;
+            }
+
             if (_blacklist.Remove(player))
             {
                 _whiteBlackDirty = true;
