@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 using JetBrains.Annotations;
 using K4os.Compression.LZ4;
@@ -289,7 +290,7 @@ namespace PurrNet.Packing
             if (value != null)
                 return true;
 
-            value = Activator.CreateInstance<T>();
+            value = (T)FormatterServices.GetUninitializedObject(typeof(T));
             return true;
         }
 
