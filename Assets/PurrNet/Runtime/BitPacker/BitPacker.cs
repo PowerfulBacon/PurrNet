@@ -290,7 +290,10 @@ namespace PurrNet.Packing
             if (value != null)
                 return true;
 
-            value = (T)FormatterServices.GetUninitializedObject(typeof(T));
+            if (typeof(T).GetConstructor(Type.EmptyTypes) != null)
+                 value = Activator.CreateInstance<T>();
+            else value = (T)FormatterServices.GetUninitializedObject(typeof(T));
+
             return true;
         }
 
