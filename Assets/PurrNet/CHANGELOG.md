@@ -1,3 +1,10 @@
+## [1.12.3-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.12.2...v1.12.3-beta.1) (2025-06-27)
+
+
+### Bug Fixes
+
+* records ([983728a](https://github.com/PurrNet/PurrNet/commit/983728a6befc13b375ae4b8e5bbde8ed63c2cdbe))
+
 ## [1.12.2](https://github.com/PurrNet/PurrNet/compare/v1.12.1...v1.12.2) (2025-06-26)
 
 
