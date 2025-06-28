@@ -25,6 +25,14 @@ namespace PurrNet.Packing
             Packer<Dictionary<TKey, TValue>>.RegisterReader(ReadDictionary);
         }
 
+        [UsedByIL]
+        public static void RegisterDisposableDictionary<TKey, TValue>()
+        {
+            Packer<DisposableDictionary<TKey, TValue>>.RegisterWriter(PackDisposableDictionary.WriteDictionary);
+            Packer<DisposableDictionary<TKey, TValue>>.RegisterReader(PackDisposableDictionary.ReadDictionary);
+            DeltaPacker<DisposableDictionary<TKey, TValue>>.RegisterWriter(PackDisposableDictionary.WriteDeltaDictionary);
+            DeltaPacker<DisposableDictionary<TKey, TValue>>.RegisterReader(PackDisposableDictionary.ReadDeltaDictionary);
+        }
 
         [UsedByIL]
         public static void RegisterQueue<T>()

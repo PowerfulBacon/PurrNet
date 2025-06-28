@@ -2750,6 +2750,9 @@ namespace PurrNet.Codegen
             if (IsGeneric(typeReference, typeof(DisposableHashSet<>)))
                 return true;
 
+            if (IsGeneric(typeReference, typeof(DisposableDictionary<,>)))
+                return true;
+
             if (IsGeneric(typeReference, typeof(Queue<>)))
                 return true;
 

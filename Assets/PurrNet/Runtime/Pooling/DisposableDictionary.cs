@@ -9,6 +9,8 @@ namespace PurrNet.Pooling
     {
         private bool _isAllocated;
 
+        public bool isDisposed => !_isAllocated;
+
         public Dictionary<TKey, TValue> dictionary { get; private set; }
 
         public static DisposableDictionary<TKey, TValue> Create()
