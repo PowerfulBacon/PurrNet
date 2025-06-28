@@ -1,3 +1,17 @@
+## [1.12.3-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.5...v1.12.3-beta.6) (2025-06-28)
+
+
+### Bug Fixes
+
+* introduce disposable dictionary delta packers ([086c701](https://github.com/PurrNet/PurrNet/commit/086c701df10263ce47423aaf4b8aa20b023d8f51))
+
+## [1.12.3-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.4...v1.12.3-beta.5) (2025-06-28)
+
+
+### Bug Fixes
+
+* add DisposableDictionary along side it's pool ([baa2c99](https://github.com/PurrNet/PurrNet/commit/baa2c9962539222ae62a203499712db0285321ce))
+
 ## [1.12.3-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.3...v1.12.3-beta.4) (2025-06-27)
 
 

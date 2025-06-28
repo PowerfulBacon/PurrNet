@@ -22,7 +22,8 @@ namespace PurrNet.Codegen
         Queue,
         Stack,
         DisposableList,
-        DisposableHashSet
+        DisposableHashSet,
+        DisposableDictionary
     }
 
     public static class GenerateSerializersProcessor
@@ -383,12 +384,19 @@ namespace PurrNet.Codegen
                     il.Emit(OpCodes.Call, genericRegisterDListMethod);
                     break;
                 case HandledGenericTypes.DisposableHashSet when importedType is GenericInstanceType stackType:
-
                     var registerDisposableHashSetMethod =
                         packCollectionsType.GetMethod("RegisterDisposableHashSet", true).Import(module);
                     var genericRegisterDSetMethod = new GenericInstanceMethod(registerDisposableHashSetMethod);
                     genericRegisterDSetMethod.GenericArguments.Add(stackType.GenericArguments[0]);
                     il.Emit(OpCodes.Call, genericRegisterDSetMethod);
+                    break;
+                case HandledGenericTypes.DisposableDictionary when importedType is GenericInstanceType stackType:
+                    var registerDisposableDicMethod =
+                        packCollectionsType.GetMethod("RegisterDisposableDictionary", true).Import(module);
+                    var genericRegisterDDSetMethod = new GenericInstanceMethod(registerDisposableDicMethod);
+                    genericRegisterDDSetMethod.GenericArguments.Add(stackType.GenericArguments[0]);
+                    genericRegisterDDSetMethod.GenericArguments.Add(stackType.GenericArguments[1]);
+                    il.Emit(OpCodes.Call, genericRegisterDDSetMethod);
                     break;
                 case HandledGenericTypes.Dictionary when importedType is GenericInstanceType dictionaryType:
 
@@ -873,6 +881,12 @@ namespace PurrNet.Codegen
             if (IsGeneric(typeDef, typeof(DisposableHashSet<>)))
             {
                 type = HandledGenericTypes.DisposableHashSet;
+                return true;
+            }
+
+            if (IsGeneric(typeDef, typeof(DisposableDictionary<,>)))
+            {
+                type = HandledGenericTypes.DisposableDictionary;
                 return true;
             }
 
