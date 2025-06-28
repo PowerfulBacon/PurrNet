@@ -3165,7 +3165,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   checkInterval: 0.1
   placement: 1
-  displayType: 2
+  _displayType: -1
   fontSize: 13
   textColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1216416907
