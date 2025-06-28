@@ -4,9 +4,19 @@ using System.Text;
 using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Modules;
+using PurrNet.Packing;
 
 namespace PurrNet.Utils
 {
+    public static class HasherBoilerplate
+    {
+        [RegisterPackers]
+        static void Register()
+        {
+            Hasher.PrepareType(typeof(object));
+        }
+    }
+
     public static class Hasher<T>
     {
         // ReSharper disable once StaticMemberInGenericType

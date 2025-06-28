@@ -222,6 +222,8 @@ namespace PurrNet
 
         public bool isClient => isSpawned && networkManager.isClient;
 
+        public bool isClientAndObserving => isClient && observers.Contains(localPlayerForced);
+
         public bool isHost => isSpawned && networkManager.isHost;
 
         public bool isOwner => isSpawned && localPlayer.HasValue && owner == localPlayer;
@@ -417,16 +419,7 @@ namespace PurrNet
 
             if (_ticker != null || _tickables.Count > 0)
             {
-                if (asServer)
-                {
-                    _serverTickManager = networkManager.GetModule<TickManager>(true);
-                    _serverTickManager.onTick += ServerTick;
-                }
-                else
-                {
-                    _clientTickManager = networkManager.GetModule<TickManager>(false);
-                    _clientTickManager.onTick += ClientTick;
-                }
+                RegisterTickEvent(asServer);
             }
 
             if (networkManager.TryGetModule<PlayersManager>(asServer, out var players))
@@ -451,20 +444,34 @@ namespace PurrNet
             }
         }
 
+        private int _tickRegisteredServer;
+        private int _tickRegisteredClient;
+
+        private void RegisterTickEvent(bool asServer)
+        {
+            if (asServer)
+            {
+                if (_tickRegisteredServer++ > 0)
+                    return;
+
+                _serverTickManager = networkManager.GetModule<TickManager>(true);
+                _serverTickManager.onTick += ServerTick;
+            }
+            else
+            {
+                if (_tickRegisteredClient++ > 0)
+                    return;
+
+                _clientTickManager = networkManager.GetModule<TickManager>(false);
+                _clientTickManager.onTick += ClientTick;
+            }
+        }
+
         private void InternalOnDespawn(bool asServer)
         {
             if (_ticker != null || _tickables.Count > 0)
             {
-                if (asServer)
-                {
-                    if (_serverTickManager != null)
-                        _serverTickManager.onTick -= ServerTick;
-                }
-                else
-                {
-                    if (_clientTickManager != null)
-                        _clientTickManager.onTick -= ClientTick;
-                }
+                UnregisterTickEvent(asServer);
             }
 
             if (!networkManager.TryGetModule<PlayersManager>(asServer, out var players)) return;
@@ -482,6 +489,23 @@ namespace PurrNet
 
             scenePlayers.onPlayerLoadedScene -= OnServerJoinedScene;
             scenePlayers.onPlayerUnloadedScene -= OnServerLeftScene;
+        }
+
+        private void UnregisterTickEvent(bool asServer)
+        {
+            if (asServer)
+            {
+                if (--_tickRegisteredServer <= 0)
+                {
+                    if (_serverTickManager != null)
+                        _serverTickManager.onTick -= ServerTick;
+                }
+            }
+            else if (--_tickRegisteredClient  <= 0)
+            {
+                if (_clientTickManager != null)
+                    _clientTickManager.onTick -= ClientTick;
+            }
         }
 
         void OnServerJoinedScene(PlayerID player, SceneID scene, bool asServer)
@@ -510,7 +534,7 @@ namespace PurrNet
 
         private void ServerTick()
         {
-            if (!isClient)
+            if (_tickRegisteredClient <= 0)
             {
                 InternalTick();
                 _ticker?.OnTick(_serverTickManager.tickDelta);
@@ -528,6 +552,7 @@ namespace PurrNet
             {
                 _whiteBlackDirty = false;
                 EvaluateVisibility();
+                UnregisterTickEvent(true);
             }
         }
 
@@ -780,6 +805,9 @@ namespace PurrNet
             _ticker = null;
             isInPool = true;
             _wasEarlySpawned = false;
+            _tickRegisteredServer = 0;
+            _tickRegisteredClient = 0;
+            _whiteBlackDirty = false;
         }
 
         private void OnChildDespawned(NetworkIdentity networkIdentity)

@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Transports;
@@ -7,11 +9,11 @@ using UnityEngine;
 
 namespace PurrNet
 {
-    public class StatisticsManager : MonoBehaviour
+    public partial class StatisticsManager : MonoBehaviour
     {
         [Range(0.05f, 1f)] public float checkInterval = 0.33f;
         [SerializeField] private StatisticsPlacement placement = StatisticsPlacement.None;
-        [SerializeField] private StatisticsDisplayType displayType = StatisticsDisplayType.All;
+        [SerializeField] private StatisticsDisplayType _displayType = StatisticsDisplayType.Ping | StatisticsDisplayType.Usage;
         [SerializeField] private float fontSize = 13f;
         [SerializeField] private Color textColor = Color.white;
 
@@ -70,6 +72,8 @@ namespace PurrNet
         private float _lastGuiUpdateTime;
         private const float GUI_UPDATE_INTERVAL = 0.1f;
 
+        private readonly StringBuilder _stringBuilder = new();
+
         private void Awake()
         {
             _networkManager = NetworkManager.main;
@@ -91,8 +95,10 @@ namespace PurrNet
 
         private void OnValidate()
         {
-            if (_labelStyle != null)
+#if UNITY_EDITOR
+            if (!Application.isPlaying) 
                 UpdateLabelStyle();
+#endif
         }
 
         private void UpdateLabelStyle()
@@ -130,6 +136,9 @@ namespace PurrNet
                 _playersClientBroadcaster.Unsubscribe<PingMessage>(ReceivePing);
                 _playersClientBroadcaster.Unsubscribe<PacketMessage>(ReceivePacket);
             }
+
+            ServerUnsubscribe_ServerStats();
+            ClientUnsubscribe_ServerStats();
         }
 
         private void OnGUI()
@@ -140,35 +149,36 @@ namespace PurrNet
             UpdateCachedStrings();
 
             var position = GetPosition();
-            var currentY = position.y;
-            var labelWidth = 200;
-
-            if (displayType == StatisticsDisplayType.All || displayType == StatisticsDisplayType.Ping)
+            float currentY = position.y;
+            float labelWidth = 200;
+            Rect rect = new(position.x, currentY, labelWidth, LineHeight);
+            if (_displayType.HasFlag(StatisticsDisplayType.Ping))
             {
-                var pingRect = new Rect(position.x, currentY, labelWidth, LineHeight);
-                GUI.Label(pingRect, _cachedPingText, _labelStyle);
-                currentY += LineHeight;
-
-                var jitterRect = new Rect(position.x, currentY, labelWidth, LineHeight);
-                GUI.Label(jitterRect, _cachedJitterText, _labelStyle);
-                currentY += LineHeight;
-
-                var packetRect = new Rect(position.x, currentY, labelWidth, LineHeight);
-                GUI.Label(packetRect, _cachedPacketLossText, _labelStyle);
-                currentY += LineHeight;
+                GUI.Label(rect, _cachedPingText, _labelStyle);
+                rect.y += LineHeight;
+                GUI.Label(rect, _cachedJitterText, _labelStyle);
+                rect.y += LineHeight;
+                GUI.Label(rect, _cachedPacketLossText, _labelStyle);
+                rect.y += LineHeight;
             }
 
-            if (displayType == StatisticsDisplayType.All || displayType == StatisticsDisplayType.Usage)
+            if (_displayType.HasFlag(StatisticsDisplayType.Usage))
             {
-                if (displayType == StatisticsDisplayType.All)
-                    currentY += LineHeight / 2;
+                GUI.Label(rect, _cachedUploadText, _labelStyle);
+                rect.y += LineHeight;
+                GUI.Label(rect, _cachedDownloadText, _labelStyle);
+                rect.y += LineHeight;
+            }
 
-                var uploadRect = new Rect(position.x, currentY, labelWidth, LineHeight);
-                GUI.Label(uploadRect, _cachedUploadText, _labelStyle);
-                currentY += LineHeight;
-
-                var downloadRect = new Rect(position.x, currentY, labelWidth, LineHeight);
-                GUI.Label(downloadRect, _cachedDownloadText, _labelStyle);
+            if (_displayType.HasFlag(StatisticsDisplayType.ServerStats))
+            {
+                GUI.Label(rect, "Server Stats:", _labelStyle);
+                rect.y += LineHeight;
+                GUI.Label(rect, _cachedServerMaxFpsText, _labelStyle);
+                rect.y += LineHeight;
+                GUI.Label(rect, _cachedServerAvgFpsText, _labelStyle);
+                rect.y += LineHeight;
+                GUI.Label(rect, _cachedServerMinFpsText, _labelStyle);
             }
         }
 
@@ -179,11 +189,22 @@ namespace PurrNet
                 return;
 
             _lastGuiUpdateTime = currentTime;
-            _cachedPingText = $"Ping: {ping}ms";
-            _cachedJitterText = $"Jitter: {jitter}ms";
-            _cachedPacketLossText = $"Packet Loss: {packetLoss}%";
-            _cachedUploadText = $"Upload: {upload:F3}KB/s";
-            _cachedDownloadText = $"Download: {download:F3}KB/s";
+
+            _stringBuilder.Clear().Append("Ping: ").Append(ping).Append("ms");
+            _cachedPingText = _stringBuilder.ToString();
+
+            _stringBuilder.Clear().Append("Jitter: ").Append(jitter).Append("ms");
+            _cachedJitterText = _stringBuilder.ToString();
+
+            _stringBuilder.Clear().Append("Packet Loss: ").Append(packetLoss).Append('%');
+            _cachedPacketLossText = _stringBuilder.ToString();
+
+            _stringBuilder.Clear().Append("Upload: ").Append(upload.ToString("F3")).Append("KB/s");
+            _cachedUploadText = _stringBuilder.ToString();
+
+            _stringBuilder.Clear().Append("Download: ").Append(download.ToString("F3")).Append("KB/s");
+            _cachedDownloadText = _stringBuilder.ToString();
+            UpdateCachedStrings_ServerStats();
         }
 
         private Vector2 GetPosition()
@@ -205,13 +226,18 @@ namespace PurrNet
 
         private int GetStatsHeight()
         {
-            return displayType switch
-            {
-                StatisticsDisplayType.Ping => (int)LineHeight * 3,
-                StatisticsDisplayType.Usage => (int)LineHeight * 2,
-                StatisticsDisplayType.All => (int)LineHeight * 6,
-                _ => 0
-            };
+            int lines = 0;
+
+            if (_displayType.HasFlag(StatisticsDisplayType.Ping))
+                lines += 3;
+
+            if (_displayType.HasFlag(StatisticsDisplayType.Usage))
+                lines += 2;
+
+            if (_displayType.HasFlag(StatisticsDisplayType.ServerStats))
+                lines += 3;
+
+            return Mathf.CeilToInt(LineHeight * lines);
         }
 
         private void Update()
@@ -227,6 +253,8 @@ namespace PurrNet
 
             if (connectedClient)
                 CleanupOldPackets(Time.time);
+
+            ServerStatsUpdate();
         }
 
         private void OnServerConnectionState(ConnectionState state)
@@ -243,6 +271,7 @@ namespace PurrNet
                 _playersServerBroadcaster.Unsubscribe<PacketMessage>(ReceivePacket);
                 _networkManager.transport.transport.onDataReceived -= OnDataReceived;
                 _networkManager.transport.transport.onDataSent -= OnDataSent;
+                ServerUnsubscribe_ServerStats();
                 return;
             }
 
@@ -250,6 +279,7 @@ namespace PurrNet
             _playersServerBroadcaster.Subscribe<PacketMessage>(ReceivePacket);
             _networkManager.transport.transport.onDataReceived += OnDataReceived;
             _networkManager.transport.transport.onDataSent += OnDataSent;
+            ServerSubscribe_ServerStats();
         }
 
         private void OnClientConnectionState(ConnectionState state)
@@ -272,6 +302,7 @@ namespace PurrNet
                     _networkManager.transport.transport.onDataSent -= OnDataSent;
                 }
 
+                ClientUnsubscribe_ServerStats();
                 ResetStatistics();
                 return;
             }
@@ -289,6 +320,7 @@ namespace PurrNet
             if (_tickManager.tickRate < _packetsToSendPerSec)
                 _packetsToSendPerSec = Mathf.Max(5, _tickManager.tickRate / 2);
 
+            ClientSubscribe_ServerStats();
             ResetStatistics();
         }
 
@@ -312,6 +344,8 @@ namespace PurrNet
                 _sentPacketSequences[i] = 0;
                 _receivedPacketSequences[i] = 0;
             }
+
+            ResetStatistics_ServerStats();
         }
 
         private void OnClientTick()
@@ -357,7 +391,10 @@ namespace PurrNet
 
             float sentTime = msg.realSendTime;
             int currentPing = Mathf.Max(0, Mathf.FloorToInt((Time.time - sentTime) * 1000));
-            currentPing -= Mathf.Min(currentPing, Mathf.RoundToInt((_tickManager.tickDelta * 3) * 1000));
+            var multiplier = 2f;
+            if (_networkManager.isServer)
+                multiplier = 3f;
+            currentPing -= Mathf.Min(currentPing, Mathf.RoundToInt((_tickManager.tickDelta * multiplier) * 1000));
 
             _pingStats[_pingIndex] = currentPing;
             _pingIndex = (_pingIndex + 1) % _pingHistorySize;
@@ -517,11 +554,12 @@ namespace PurrNet
             BottomRight
         }
 
+        [Flags]
         public enum StatisticsDisplayType
         {
-            Ping,
-            Usage,
-            All
+            Ping = 1 << 0,
+            Usage = 1 << 1,
+            ServerStats = 1 << 2,
         }
     }
 }

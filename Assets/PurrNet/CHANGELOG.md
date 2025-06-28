@@ -1,3 +1,67 @@
+## [1.12.3-beta.9](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.8...v1.12.3-beta.9) (2025-06-28)
+
+
+### Bug Fixes
+
+* writer for Ray2D ([24587cd](https://github.com/PurrNet/PurrNet/commit/24587cd0ee263e44e04997e3d09626300691f2e4))
+
+## [1.12.3-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.7...v1.12.3-beta.8) (2025-06-28)
+
+
+### Bug Fixes
+
+* always prepare the hash for `System.Object` ([5315b82](https://github.com/PurrNet/PurrNet/commit/5315b823ccb6edc1119b640c669b41538e711c8e))
+
+## [1.12.3-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.6...v1.12.3-beta.7) (2025-06-28)
+
+
+### Bug Fixes
+
+* Server Stats added to statistics manager ([37a49ec](https://github.com/PurrNet/PurrNet/commit/37a49ec0279393a6a5330d6407f1f57fdc8d286c))
+
+## [1.12.3-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.5...v1.12.3-beta.6) (2025-06-28)
+
+
+### Bug Fixes
+
+* introduce disposable dictionary delta packers ([086c701](https://github.com/PurrNet/PurrNet/commit/086c701df10263ce47423aaf4b8aa20b023d8f51))
+
+## [1.12.3-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.4...v1.12.3-beta.5) (2025-06-28)
+
+
+### Bug Fixes
+
+* add DisposableDictionary along side it's pool ([baa2c99](https://github.com/PurrNet/PurrNet/commit/baa2c9962539222ae62a203499712db0285321ce))
+
+## [1.12.3-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.3...v1.12.3-beta.4) (2025-06-27)
+
+
+### Bug Fixes
+
+* ping calculations ([cd7cfd7](https://github.com/PurrNet/PurrNet/commit/cd7cfd70c1427c0d58dfe5e3601dd58ff79d2cb8))
+* Statistics for steam transport ([c1c16ff](https://github.com/PurrNet/PurrNet/commit/c1c16fff1692dd56c0db009e468ac87970d11adf))
+
+## [1.12.3-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.2...v1.12.3-beta.3) (2025-06-27)
+
+
+### Bug Fixes
+
+* whitelist dirty wasn't being executed ([7bb9351](https://github.com/PurrNet/PurrNet/commit/7bb93511c5afe551dfa5c73efa29aaad5161120c))
+
+## [1.12.3-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.1...v1.12.3-beta.2) (2025-06-27)
+
+
+### Bug Fixes
+
+* still prefer to call empty constructor instead of always initializing it to 0 ([5c667ac](https://github.com/PurrNet/PurrNet/commit/5c667ace880ba56b0a7b2aeb01066fcb60330fe0))
+
+## [1.12.3-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.12.2...v1.12.3-beta.1) (2025-06-27)
+
+
+### Bug Fixes
+
+* records ([983728a](https://github.com/PurrNet/PurrNet/commit/983728a6befc13b375ae4b8e5bbde8ed63c2cdbe))
+
 ## [1.12.2](https://github.com/PurrNet/PurrNet/compare/v1.12.1...v1.12.2) (2025-06-26)
 
 

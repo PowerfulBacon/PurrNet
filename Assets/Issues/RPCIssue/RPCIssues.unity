@@ -419,7 +419,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1930042370}
-  - component: {fileID: 1930042369}
+  - component: {fileID: 1930042371}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -427,19 +427,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1930042369
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1930042368}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 83635ed829ed2ce46aead4fe140c6a68, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: PurrNet.Issues.RpcIssue::SpawnAndCallRpc
-  _prefab: {fileID: -7367664194843112013, guid: 9b1f4f3ee74681e46ab99d928dfa5841, type: 3}
 --- !u!4 &1930042370
 Transform:
   m_ObjectHideFlags: 0
@@ -455,6 +442,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1930042371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1930042368}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70b82c667138195418700db341faddab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Examples::TestScriptNB
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
