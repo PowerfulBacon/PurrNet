@@ -1,3 +1,10 @@
+## [1.12.3-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.7...v1.12.3-beta.8) (2025-06-28)
+
+
+### Bug Fixes
+
+* always prepare the hash for `System.Object` ([5315b82](https://github.com/PurrNet/PurrNet/commit/5315b823ccb6edc1119b640c669b41538e711c8e))
+
 ## [1.12.3-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.6...v1.12.3-beta.7) (2025-06-28)
 
 
