@@ -63,6 +63,25 @@ namespace PurrNet.Packing
         }
 
         [UsedByIL]
+        public static void Write(this BitPacker packer, Ray2D value)
+        {
+            Packer<Vector2>.Write(packer, value.origin);
+            Packer<Vector2>.Write(packer, value.direction);
+        }
+
+        [UsedByIL]
+        public static void Read(this BitPacker packer, ref Ray2D value)
+        {
+            Vector2 origin = default;
+            Vector2 direction = default;
+
+            Packer<Vector2>.Read(packer, ref origin);
+            Packer<Vector2>.Read(packer, ref direction);
+
+            value = new Ray2D(origin, direction);
+        }
+
+        [UsedByIL]
         public static unsafe void Write(this BitPacker packer, Vector3 value)
         {
             var x = value.x;
