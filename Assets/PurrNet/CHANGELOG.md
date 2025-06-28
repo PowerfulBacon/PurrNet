@@ -1,3 +1,18 @@
+## [1.12.3-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.3...v1.12.3-beta.4) (2025-06-27)
+
+
+### Bug Fixes
+
+* ping calculations ([cd7cfd7](https://github.com/PurrNet/PurrNet/commit/cd7cfd70c1427c0d58dfe5e3601dd58ff79d2cb8))
+* Statistics for steam transport ([c1c16ff](https://github.com/PurrNet/PurrNet/commit/c1c16fff1692dd56c0db009e468ac87970d11adf))
+
+## [1.12.3-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.2...v1.12.3-beta.3) (2025-06-27)
+
+
+### Bug Fixes
+
+* whitelist dirty wasn't being executed ([7bb9351](https://github.com/PurrNet/PurrNet/commit/7bb93511c5afe551dfa5c73efa29aaad5161120c))
+
 ## [1.12.3-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.12.3-beta.1...v1.12.3-beta.2) (2025-06-27)
 
 
