@@ -60,7 +60,7 @@ namespace PurrNet.Editor
             var obj = new GameObject("PurrNetSceneHelper");
 
             if (report == null)
-                obj.hideFlags = HideFlags.HideAndDontSave;
+                obj.hideFlags = HideFlags.HideInHierarchy;
 
             var sceneInfo = obj.AddComponent<PurrSceneInfo>();
             sceneInfo.rootGameObjects = new System.Collections.Generic.List<GameObject>();
