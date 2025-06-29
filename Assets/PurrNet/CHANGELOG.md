@@ -1,3 +1,10 @@
+## [1.12.4-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.12.3...v1.12.4-beta.1) (2025-06-29)
+
+
+### Bug Fixes
+
+* hide in hierarchy only ([da99e58](https://github.com/PurrNet/PurrNet/commit/da99e58c17221bef61364cb9940159cdf06512c7))
+
 ## [1.12.3](https://github.com/PurrNet/PurrNet/compare/v1.12.2...v1.12.3) (2025-06-28)
 
 
