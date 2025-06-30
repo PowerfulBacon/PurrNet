@@ -1,3 +1,10 @@
+## [1.12.4-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.3...v1.12.4-beta.4) (2025-06-30)
+
+
+### Bug Fixes
+
+* old value was wrong for dic delta packer ([539c760](https://github.com/PurrNet/PurrNet/commit/539c7607415c493a881e0d676c5f90d068cd41f8))
+
 ## [1.12.4-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.2...v1.12.4-beta.3) (2025-06-30)
 
 
