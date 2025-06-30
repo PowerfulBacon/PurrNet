@@ -1,3 +1,10 @@
+## [1.12.4-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.4...v1.12.4-beta.5) (2025-06-30)
+
+
+### Bug Fixes
+
+* ulong delta packer ([01445ae](https://github.com/PurrNet/PurrNet/commit/01445ae5c0cd1ae2147337a6ee7d8eb90a4f51a0))
+
 ## [1.12.4-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.3...v1.12.4-beta.4) (2025-06-30)
 
 
