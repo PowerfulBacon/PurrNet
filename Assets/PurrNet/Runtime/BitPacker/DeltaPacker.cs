@@ -75,13 +75,15 @@ namespace PurrNet.Packing
 
         public static bool FallbackWriter<T>(BitPacker packer, T oldValue, T value)
         {
-            return Write(packer, typeof(T), oldValue, value);
+            var type = oldValue != null ? oldValue.GetType() : value != null ? value.GetType() : typeof(T);
+            return Write(packer, type, oldValue, value);
         }
 
         public static void FallbackReader<T>(BitPacker packer, T oldValue, ref T value)
         {
+            var type = oldValue != null ? oldValue.GetType() : value != null ? value.GetType() : typeof(T);
             object oldValueObj = oldValue;
-            Read(packer, typeof(T), oldValue, ref oldValueObj);
+            Read(packer, type, oldValue, ref oldValueObj);
             if (oldValueObj is T newValue)
                 value = newValue;
         }
