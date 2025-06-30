@@ -1,3 +1,10 @@
+## [1.12.4-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.1...v1.12.4-beta.2) (2025-06-30)
+
+
+### Bug Fixes
+
+* disposable dic delta writer ([73b7561](https://github.com/PurrNet/PurrNet/commit/73b75611d35929139324ca707e164e3e7588f3e0))
+
 ## [1.12.4-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.12.3...v1.12.4-beta.1) (2025-06-29)
 
 
