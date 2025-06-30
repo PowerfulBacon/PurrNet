@@ -8,8 +8,9 @@ namespace PurrNet.Pooling
     {
         private readonly bool _shouldDispose;
 
-        public List<T> list { get; }
+        public List<T> list { get; private set; }
 
+        [Obsolete("Use DisposableList<T>.Create instead")]
         public DisposableList(int capacity)
         {
             var newList = ListPool<T>.Instantiate();
@@ -22,6 +23,14 @@ namespace PurrNet.Pooling
             _shouldDispose = true;
         }
 
+        public static DisposableList<T> Create()
+        {
+            var val = new DisposableList<T>();
+            val.list = ListPool<T>.Instantiate();
+            val._isAllocated = true;
+            return val;
+        }
+        
         public void AddRange(IEnumerable<T> collection)
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
