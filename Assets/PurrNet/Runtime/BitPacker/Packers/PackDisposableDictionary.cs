@@ -85,10 +85,13 @@ namespace PurrNet.Packing
                 using var oldValuesList = new DisposableList<TValue>(newCount.value);
                 using var newValuesList = new DisposableList<TValue>(newCount.value);
 
-                oldKeysList.AddRange(old.Keys);
-                newKeysList.AddRange(value.Keys);
+                if (!old.isDisposed)
+                {
+                    oldKeysList.AddRange(old.Keys);
+                    oldValuesList.AddRange(old.Values);
+                }
 
-                oldValuesList.AddRange(old.Values);
+                newKeysList.AddRange(value.Keys);
                 newValuesList.AddRange(value.Values);
 
                 hasChanged = packer.WriteDisposableDeltaList(oldKeysList, newKeysList) || hasChanged;
@@ -139,8 +142,11 @@ namespace PurrNet.Packing
             using var oldKeysList = new DisposableList<TKey>(oldCount.value);
             using var oldValuesList = new DisposableList<TValue>(oldCount.value);
 
-            oldKeysList.AddRange(oldvalue.Keys);
-            oldValuesList.AddRange(oldvalue.Values);
+            if (!oldvalue.isDisposed)
+            {
+                oldKeysList.AddRange(oldvalue.Keys);
+                oldValuesList.AddRange(oldvalue.Values);
+            }
 
             var keysList = new DisposableList<TKey>(newCount.value);
             var valuesList = new DisposableList<TValue>(newCount.value);
