@@ -1,3 +1,10 @@
+## [1.12.4-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.5...v1.12.4-beta.6) (2025-06-30)
+
+
+### Bug Fixes
+
+* better fallback serializers for delta compression ([2276832](https://github.com/PurrNet/PurrNet/commit/2276832f3f2ade89177e0550663aa4964361cd67))
+
 ## [1.12.4-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.4...v1.12.4-beta.5) (2025-06-30)
 
 
