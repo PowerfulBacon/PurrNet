@@ -1,3 +1,10 @@
+## [1.12.4-beta.9](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.8...v1.12.4-beta.9) (2025-06-30)
+
+
+### Bug Fixes
+
+* fallback reader for delta didnt use new object serializer ([9541da6](https://github.com/PurrNet/PurrNet/commit/9541da68f9f5d96567578cf439c7be6d650ccbb8))
+
 ## [1.12.4-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.7...v1.12.4-beta.8) (2025-06-30)
 
 
