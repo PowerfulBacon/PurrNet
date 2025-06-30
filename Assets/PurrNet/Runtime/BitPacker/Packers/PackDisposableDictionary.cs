@@ -120,7 +120,7 @@ namespace PurrNet.Packing
                 return;
             }
 
-            PackedInt oldCount = default;
+            PackedInt oldCount = oldvalue.isDisposed ? -1 : oldvalue.Count;
             PackedInt newCount = default;
 
             DeltaPacker<PackedInt>.Read(packer, oldCount, ref newCount);
