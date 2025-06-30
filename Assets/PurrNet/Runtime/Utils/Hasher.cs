@@ -36,7 +36,7 @@ namespace PurrNet.Utils
         static readonly Dictionary<Type, uint> _hashes = new Dictionary<Type, uint>();
         static readonly Dictionary<uint, Type> _decoder = new Dictionary<uint, Type>();
 
-        static uint _hashCounter;
+        static uint _hashCounter = 1;
 
         public static uint hashCounter => _hashCounter;
 
@@ -96,6 +96,9 @@ namespace PurrNet.Utils
 
         public static uint GetStableHashU32(Type type)
         {
+            if (type == null)
+                return 0;
+
             return _hashes.TryGetValue(type, out var hash)
                 ? hash
                 : throw new InvalidOperationException(
@@ -147,7 +150,7 @@ namespace PurrNet.Utils
         {
             _hashes.Clear();
             _decoder.Clear();
-            _hashCounter = 0;
+            _hashCounter = 1;
         }
 
         public static void FinishLoad(int linesLength)
