@@ -2385,70 +2385,38 @@ namespace PurrNet.Codegen
             }
         }
 
-        private static void AddNestedFields(AssemblyDefinition assembly, TypeReference reference,
-            HashSet<TypeReference> typesToHandle, HashSet<TypeReference> visited)
+        private static void AddNestedFields(
+            AssemblyDefinition assembly,
+            TypeReference reference,
+            HashSet<TypeReference> typesToHandle,
+            HashSet<TypeReference> visited)
         {
-            AddNestedFields(assembly, reference, typesToHandle, visited, 0);
-        }
+            var stack = new Stack<TypeReference>();
+            stack.Push(reference);
 
-        private static void AddNestedFields(AssemblyDefinition assembly, TypeReference reference,
-            HashSet<TypeReference> typesToHandle, HashSet<TypeReference> visited, int depth)
-        {
-            // Prevent infinite recursion with depth limit
-            const int maxDepth = 10;
-            if (depth > maxDepth)
-                return;
-
-            var fields = GetConcreteFields(reference);
-
-            foreach (var field in fields)
+            while (stack.Count > 0)
             {
-                if (!visited.Add(field))
+                var current = stack.Pop();
+                if (!visited.Add(current))
                     continue;
 
-                if (field is GenericInstanceType genericInstance)
+                var fields = GetConcreteFields(current);
+                foreach (var field in fields)
                 {
-                    bool containsRelevantTypes = false;
+                    if (!visited.Contains(field))
+                        stack.Push(field);
 
-                    // Add the GenericInstanceType itself if fully concrete
-                    if (genericInstance.GenericArguments.All(IsResolved))
+                    if (field is GenericInstanceType genericInstance)
                     {
-                        typesToHandle.Add(field);
-                        containsRelevantTypes = true;
-                    }
-
-                    // Check the generic arguments
-                    for (int i = 0; i < genericInstance.GenericArguments.Count; i++)
-                    {
-                        var argument = genericInstance.GenericArguments[i];
-                        var resolvedArg = argument.Resolve();
-
-                        if (resolvedArg != null)
+                        foreach (var arg in genericInstance.GenericArguments)
                         {
-                            typesToHandle.Add(argument);
-                            containsRelevantTypes = true;
+                            if (!visited.Contains(arg))
+                                stack.Push(arg);
                         }
-
-                        AddNestedFields(assembly, argument, typesToHandle, visited, depth + 1);
                     }
 
-                    // If the GenericInstanceType contains relevant arguments, add it
-                    if (containsRelevantTypes)
-                    {
-                        typesToHandle.Add(field);
-                    }
-
-                    // Only recurse if we haven't visited this field type before
                     if (IsTypeInOwnModule(field, assembly.MainModule))
-                    {
-                        AddNestedFields(assembly, field, typesToHandle, visited, depth + 1);
-                    }
-                }
-                else if (IsTypeInOwnModule(field, assembly.MainModule))
-                {
-                    // Handle non-generic field types
-                    typesToHandle.Add(field);
-                    AddNestedFields(assembly, field, typesToHandle, visited, depth + 1);
+                        typesToHandle.Add(field);
                 }
             }
         }
