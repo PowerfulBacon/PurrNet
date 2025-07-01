@@ -1,3 +1,10 @@
+## [1.12.4-beta.15](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.14...v1.12.4-beta.15) (2025-07-01)
+
+
+### Bug Fixes
+
+* rigidbody moving weirdly if pooled ([5cc8524](https://github.com/PurrNet/PurrNet/commit/5cc85245aabcb458a5b793eb6f1cde9b64424565))
+
 ## [1.12.4-beta.14](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.13...v1.12.4-beta.14) (2025-07-01)
 
 
