@@ -59,14 +59,23 @@ namespace PurrNet.Codegen
 
         private static int GetIDOffset(TypeDefinition type, ICollection<DiagnosticMessage> messages)
         {
+            return GetIDOffset(type, messages, new HashSet<TypeDefinition>());
+        }
+
+        private static int GetIDOffset(TypeDefinition type, ICollection<DiagnosticMessage> messages, HashSet<TypeDefinition> visited)
+        {
             try
             {
+                if (visited.Contains(type))
+                    return 0;
+
+                visited.Add(type);
                 var baseType = type.BaseType?.Resolve();
 
                 if (baseType == null)
                     return 0;
 
-                return GetIDOffset(baseType, messages) +
+                return GetIDOffset(baseType, messages, visited) +
                        baseType.Methods.Count(m => GetMethodRPCType(m, messages).HasValue);
             }
             catch (Exception e)
@@ -83,6 +92,11 @@ namespace PurrNet.Codegen
 
         public static bool InheritsFrom(TypeDefinition type, string baseTypeName)
         {
+            return InheritsFrom(type, baseTypeName, new HashSet<TypeDefinition>());
+        }
+
+        public static bool InheritsFrom(TypeDefinition type, string baseTypeName, HashSet<TypeDefinition> visited)
+        {
             try
             {
                 if (type?.FullName == baseTypeName)
@@ -94,8 +108,15 @@ namespace PurrNet.Codegen
                 if (type.BaseType.FullName == baseTypeName)
                     return true;
 
+                if (visited.Contains(type))
+                {
+                    // Circular inheritance detected
+                    return false;
+                }
+
+                visited.Add(type);
                 var btype = type.BaseType.Resolve();
-                return btype != null && InheritsFrom(btype, baseTypeName);
+                return btype != null && InheritsFrom(btype, baseTypeName, visited);
             }
             catch (Exception e)
             {
