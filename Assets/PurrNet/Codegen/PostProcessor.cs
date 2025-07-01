@@ -59,23 +59,14 @@ namespace PurrNet.Codegen
 
         private static int GetIDOffset(TypeDefinition type, ICollection<DiagnosticMessage> messages)
         {
-            return GetIDOffset(type, messages, new HashSet<TypeDefinition>());
-        }
-
-        private static int GetIDOffset(TypeDefinition type, ICollection<DiagnosticMessage> messages, HashSet<TypeDefinition> visited)
-        {
             try
             {
-                if (visited.Contains(type))
-                    return 0;
-
-                visited.Add(type);
                 var baseType = type.BaseType?.Resolve();
 
                 if (baseType == null)
                     return 0;
 
-                return GetIDOffset(baseType, messages, visited) +
+                return GetIDOffset(baseType, messages) +
                        baseType.Methods.Count(m => GetMethodRPCType(m, messages).HasValue);
             }
             catch (Exception e)
@@ -92,11 +83,6 @@ namespace PurrNet.Codegen
 
         public static bool InheritsFrom(TypeDefinition type, string baseTypeName)
         {
-            return InheritsFrom(type, baseTypeName, new HashSet<TypeDefinition>());
-        }
-
-        public static bool InheritsFrom(TypeDefinition type, string baseTypeName, HashSet<TypeDefinition> visited)
-        {
             try
             {
                 if (type?.FullName == baseTypeName)
@@ -108,15 +94,8 @@ namespace PurrNet.Codegen
                 if (type.BaseType.FullName == baseTypeName)
                     return true;
 
-                if (visited.Contains(type))
-                {
-                    // Circular inheritance detected
-                    return false;
-                }
-
-                visited.Add(type);
                 var btype = type.BaseType.Resolve();
-                return btype != null && InheritsFrom(btype, baseTypeName, visited);
+                return btype != null && InheritsFrom(btype, baseTypeName);
             }
             catch (Exception e)
             {
@@ -2385,38 +2364,55 @@ namespace PurrNet.Codegen
             }
         }
 
-        private static void AddNestedFields(
-            AssemblyDefinition assembly,
-            TypeReference reference,
-            HashSet<TypeReference> typesToHandle,
-            HashSet<TypeReference> visited)
+        private static void AddNestedFields(AssemblyDefinition assembly, TypeReference reference,
+            HashSet<TypeReference> typesToHandle, HashSet<TypeReference> visited)
         {
-            var stack = new Stack<TypeReference>();
-            stack.Push(reference);
+            var fields = GetConcreteFields(reference);
 
-            while (stack.Count > 0)
+            foreach (var field in fields)
             {
-                var current = stack.Pop();
-                if (!visited.Add(current))
+                if (!visited.Add(field))
                     continue;
 
-                var fields = GetConcreteFields(current);
-                foreach (var field in fields)
+                if (field is GenericInstanceType genericInstance)
                 {
-                    if (!visited.Contains(field))
-                        stack.Push(field);
+                    bool containsRelevantTypes = false;
 
-                    if (field is GenericInstanceType genericInstance)
+                    // Add the GenericInstanceType itself if fully concrete
+                    if (genericInstance.GenericArguments.All(IsResolved))
                     {
-                        foreach (var arg in genericInstance.GenericArguments)
-                        {
-                            if (!visited.Contains(arg))
-                                stack.Push(arg);
-                        }
+                        typesToHandle.Add(field);
+                        containsRelevantTypes = true;
                     }
 
-                    if (IsTypeInOwnModule(field, assembly.MainModule))
+                    // Check the generic arguments
+                    for (int i = 0; i < genericInstance.GenericArguments.Count; i++)
+                    {
+                        var argument = genericInstance.GenericArguments[i];
+                        var resolvedArg = argument.Resolve();
+
+                        if (resolvedArg != null)
+                        {
+                            typesToHandle.Add(argument);
+                            containsRelevantTypes = true;
+                        }
+
+                        AddNestedFields(assembly, argument, typesToHandle, visited);
+                    }
+
+                    // If the GenericInstanceType contains relevant arguments, add it
+                    if (containsRelevantTypes)
+                    {
                         typesToHandle.Add(field);
+                    }
+
+                    AddNestedFields(assembly, field, typesToHandle, visited);
+                }
+                else if (IsTypeInOwnModule(field, assembly.MainModule))
+                {
+                    // Handle non-generic field types
+                    typesToHandle.Add(field);
+                    AddNestedFields(assembly, field, typesToHandle, visited);
                 }
             }
         }
@@ -2425,52 +2421,43 @@ namespace PurrNet.Codegen
         {
             List<TypeReference> concreteFields = new List<TypeReference>();
 
-            try
+            if (typeReference is GenericInstanceType genericInstance)
             {
-                if (typeReference is GenericInstanceType genericInstance)
+                // Resolve the type definition
+                TypeDefinition typeDef = typeReference.Resolve();
+                if (typeDef == null)
                 {
-                    // Resolve the type definition
-                    TypeDefinition typeDef = typeReference.Resolve();
-                    if (typeDef == null)
-                    {
-                        // Instead of throwing, return empty list to prevent crashes
-                        return concreteFields;
-                    }
-
-                    // Map generic parameters to concrete arguments
-                    Dictionary<string, TypeReference> genericMapping = new Dictionary<string, TypeReference>();
-                    for (int i = 0; i < genericInstance.GenericArguments.Count && i < typeDef.GenericParameters.Count; i++)
-                    {
-                        string paramName = typeDef.GenericParameters[i].Name;
-                        TypeReference concreteType = genericInstance.GenericArguments[i];
-                        genericMapping[paramName] = concreteType;
-                    }
-
-                    // Process each field
-                    foreach (var field in typeDef.Fields)
-                    {
-                        TypeReference fieldType = field.FieldType;
-
-                        // Substitute generic parameters with concrete arguments
-                        TypeReference concreteFieldType = SubstituteGenericParameters(fieldType, genericMapping);
-                        concreteFields.Add(concreteFieldType);
-                    }
+                    throw new InvalidOperationException($"Could not resolve type: {typeReference.FullName}");
                 }
-                else
-                {
-                    TypeDefinition typeDef = typeReference.Resolve();
 
-                    if (typeDef != null)
-                    {
-                        foreach (var field in typeDef.Fields)
-                            concreteFields.Add(field.FieldType);
-                    }
+                // Map generic parameters to concrete arguments
+                Dictionary<string, TypeReference> genericMapping = new Dictionary<string, TypeReference>();
+                for (int i = 0; i < genericInstance.GenericArguments.Count; i++)
+                {
+                    string paramName = typeDef.GenericParameters[i].Name;
+                    TypeReference concreteType = genericInstance.GenericArguments[i];
+                    genericMapping[paramName] = concreteType;
+                }
+
+                // Process each field
+                foreach (var field in typeDef.Fields)
+                {
+                    TypeReference fieldType = field.FieldType;
+
+                    // Substitute generic parameters with concrete arguments
+                    TypeReference concreteFieldType = SubstituteGenericParameters(fieldType, genericMapping);
+                    concreteFields.Add(concreteFieldType);
                 }
             }
-            catch (Exception)
+            else
             {
-                // Return empty list on any exception to prevent crashes
-                return new List<TypeReference>();
+                TypeDefinition typeDef = typeReference.Resolve();
+
+                if (typeDef != null)
+                {
+                    foreach (var field in typeDef.Fields)
+                        concreteFields.Add(field.FieldType);
+                }
             }
 
             return concreteFields;
@@ -2479,24 +2466,13 @@ namespace PurrNet.Codegen
         static TypeReference SubstituteGenericParameters(TypeReference type,
             Dictionary<string, TypeReference> genericMapping)
         {
-            return SubstituteGenericParameters(type, genericMapping, 0);
-        }
-
-        static TypeReference SubstituteGenericParameters(TypeReference type,
-            Dictionary<string, TypeReference> genericMapping, int depth)
-        {
-            // Prevent stack overflow with depth limit
-            const int maxDepth = 20;
-            if (depth > maxDepth)
-                return type;
-
             if (type is GenericInstanceType genericInstance)
             {
                 // Substitute each generic argument recursively
                 GenericInstanceType concreteGenericInstance = new GenericInstanceType(genericInstance.ElementType);
                 foreach (var argument in genericInstance.GenericArguments)
                 {
-                    concreteGenericInstance.GenericArguments.Add(SubstituteGenericParameters(argument, genericMapping, depth + 1));
+                    concreteGenericInstance.GenericArguments.Add(SubstituteGenericParameters(argument, genericMapping));
                 }
 
                 return concreteGenericInstance;
@@ -2632,9 +2608,6 @@ namespace PurrNet.Codegen
             var broadcastModuleSubscribe = module.GetTypeDefinition<BroadcastModule>();
             var networkModule = module.GetTypeDefinition<NetworkModule>();
 
-            // Add safety limit to prevent excessive processing
-            const int maxInstructionsPerMethod = 10000;
-
             for (int i = 0; i < allTypes.Count; i++)
             {
                 var type = allTypes[i];
@@ -2655,10 +2628,7 @@ namespace PurrNet.Codegen
 
                     var body = method.Body;
 
-                    // Limit the number of instructions processed to prevent hanging
-                    int instructionCount = Math.Min(body.Instructions.Count, maxInstructionsPerMethod);
-
-                    for (int k = 0; k < instructionCount; k++)
+                    for (int k = 0; k < body.Instructions.Count; k++)
                     {
                         var instruction = body.Instructions[k];
 
