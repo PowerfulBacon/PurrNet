@@ -1,3 +1,10 @@
+## [1.12.4-beta.14](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.13...v1.12.4-beta.14) (2025-07-01)
+
+
+### Bug Fixes
+
+* just dont process NuGetForUnity ([0140920](https://github.com/PurrNet/PurrNet/commit/0140920a19800fe4512210fdfb1f79e2660f35b3))
+
 ## [1.12.4-beta.13](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.12...v1.12.4-beta.13) (2025-07-01)
 
 
