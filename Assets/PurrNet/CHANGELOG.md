@@ -1,3 +1,10 @@
+## [1.12.4-beta.16](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.15...v1.12.4-beta.16) (2025-07-01)
+
+
+### Bug Fixes
+
+* introduce the `Create(capacity)` variant for DisposableList ([4d1fab3](https://github.com/PurrNet/PurrNet/commit/4d1fab33107353af379cae204924f2c59795bdf7))
+
 ## [1.12.4-beta.15](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.14...v1.12.4-beta.15) (2025-07-01)
 
 
