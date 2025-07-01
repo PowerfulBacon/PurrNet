@@ -51,9 +51,6 @@ namespace PurrNet.Codegen
             if (name.Contains("NuGetForUnity"))
                 return false;
 
-            if (name.Contains("PurrNet"))
-                return false;
-
             if (name.StartsWith("Unity."))
                 return false;
 
