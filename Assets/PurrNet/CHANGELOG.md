@@ -1,3 +1,10 @@
+## [1.12.4-beta.19](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.18...v1.12.4-beta.19) (2025-07-03)
+
+
+### Bug Fixes
+
+* possible fix for network reflection buld ([3bbf58e](https://github.com/PurrNet/PurrNet/commit/3bbf58e46da52d62add19f4fe10e78ad72052c85))
+
 ## [1.12.4-beta.18](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.17...v1.12.4-beta.18) (2025-07-03)
 
 
