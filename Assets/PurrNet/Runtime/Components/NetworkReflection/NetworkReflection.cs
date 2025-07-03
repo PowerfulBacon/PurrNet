@@ -29,6 +29,8 @@ namespace PurrNet
         /// </summary>
         public Type trackedType => _trackedBehaviour ? _trackedBehaviour.GetType() : null;
 
+        private bool _initialized;
+
         /// <summary>
         /// The fields/properties to track and sync on the behaviour
         /// </summary>
@@ -40,6 +42,10 @@ namespace PurrNet
 
         private void Awake()
         {
+            if (_initialized)
+                return;
+            _initialized = true;
+            
             if (_trackedBehaviour == null)
             {
                 PurrLogger.LogError("Tracked behaviour is null, aborting", this);
@@ -57,6 +63,9 @@ namespace PurrNet
 
         protected override void OnObserverAdded(PlayerID player)
         {
+            if(_reflectedValues == null)
+                Awake();
+            
             for (var i = 0; i < _reflectedValues.Length; i++)
             {
                 var reflectedValue = _reflectedValues[i];
