@@ -207,7 +207,8 @@ namespace PurrNet
                 var all = AssetDatabase.LoadAllAssetsAtPath(assetPath);
                 foreach (var obj in all)
                 {
-                    if (obj.name == "(Asset Version)")
+                    var ns = obj.GetType().Namespace;
+                    if (ns != null && ns.Contains("UnityEditor"))
                         continue;
                     
                     if (obj && enabledTypes.Any(t => t.IsAssignableFrom(obj.GetType())) && !_target.assets.Contains(obj))
