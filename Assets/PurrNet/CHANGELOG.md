@@ -1,3 +1,10 @@
+## [1.12.4-beta.18](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.17...v1.12.4-beta.18) (2025-07-03)
+
+
+### Bug Fixes
+
+* Network asset exclude editor namespace ([11b45f6](https://github.com/PurrNet/PurrNet/commit/11b45f67388ada773138a21c6e830a38cd20cf08))
+
 ## [1.12.4-beta.17](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.16...v1.12.4-beta.17) (2025-07-03)
 
 
