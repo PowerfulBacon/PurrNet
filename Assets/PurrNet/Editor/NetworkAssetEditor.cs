@@ -207,7 +207,10 @@ namespace PurrNet
                 var all = AssetDatabase.LoadAllAssetsAtPath(assetPath);
                 foreach (var obj in all)
                 {
-                    if (obj && enabledTypes.Contains(obj.GetType()) && !_target.assets.Contains(obj))
+                    if (obj.name == "(Asset Version)")
+                        continue;
+                    
+                    if (obj && enabledTypes.Any(t => t.IsAssignableFrom(obj.GetType())) && !_target.assets.Contains(obj))
                         _target.assets.Add(obj);
                 }
             }
