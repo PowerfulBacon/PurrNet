@@ -1,3 +1,10 @@
+## [1.12.4-beta.20](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.19...v1.12.4-beta.20) (2025-07-06)
+
+
+### Bug Fixes
+
+* State machine double enter and exit fix ([1b5fbc8](https://github.com/PurrNet/PurrNet/commit/1b5fbc8b5a51ad6fa4ebf56711a8cd8b24b22cb5))
+
 ## [1.12.4-beta.19](https://github.com/PurrNet/PurrNet/compare/v1.12.4-beta.18...v1.12.4-beta.19) (2025-07-03)
 
 
