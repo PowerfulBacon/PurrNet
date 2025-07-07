@@ -134,7 +134,13 @@ namespace PurrNet.Modules
             {
                 var col = _colliders3D[i];
 
-                if (!col) continue;
+                if (!col)
+                {
+                    _colliders3D.RemoveAt(i--);
+                    _collider3DStates.Remove(col);
+                    _trackedColliders.Remove(col);
+                    continue;
+                }
 
                 if (!_collider3DStates.TryGetValue(col, out var history))
                 {
@@ -152,7 +158,13 @@ namespace PurrNet.Modules
             {
                 var col = _colliders2D[i];
 
-                if (!col) continue;
+                if (!col)
+                {
+                    _colliders2D.RemoveAt(i--);
+                    _collider2DStates.Remove(col);
+                    _trackedColliders.Remove(col);
+                    continue;
+                }
 
                 if (!_collider2DStates.TryGetValue(col, out var history))
                 {
@@ -209,6 +221,9 @@ namespace PurrNet.Modules
 #if UNITY_PHYSICS_3D
         public void Register(Collider collider, float storeHistoryInSeconds)
         {
+            if (!collider)
+                return;
+
             if (_trackedColliders.Contains(collider))
                 return;
 
@@ -220,6 +235,9 @@ namespace PurrNet.Modules
 
         public void Unregister(Collider collider)
         {
+            if (!collider)
+                return;
+
             if (!_trackedColliders.Contains(collider))
                 return;
 
@@ -232,6 +250,9 @@ namespace PurrNet.Modules
 #if UNITY_PHYSICS_2D
         public void Register(Collider2D collider, float storeHistoryInSeconds)
         {
+            if (!collider)
+                return;
+
             if (_trackedColliders.Contains(collider))
                 return;
 
@@ -243,6 +264,9 @@ namespace PurrNet.Modules
 
         public void Unregister(Collider2D collider)
         {
+            if (!collider)
+                return;
+
             if (!_trackedColliders.Contains(collider))
                 return;
 
