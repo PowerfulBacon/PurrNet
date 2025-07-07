@@ -88,18 +88,26 @@ namespace PurrNet
         /// Registers a 3D collider for rollback.
         /// Duplicate registrations are ignored.
         /// </summary>
-        public void RegisterCollider(Collider collider)
+        /// <param name="collider">The collider to register.</param>
+        /// <param name="asServer">Whether to register on the server or client.</param>
+        public void RegisterCollider(Collider collider, bool asServer)
         {
-            _moduleServer?.Register(collider, _storeHistoryInSeconds);
+            if (asServer)
+                _moduleServer?.Register(collider, _storeHistoryInSeconds);
+            else _moduleClient?.Register(collider, _storeHistoryInSeconds);
         }
 
         /// <summary>
         /// Unregisters a 3D collider from rollback.
         /// Duplicate unregistrations are ignored.
         /// </summary>
-        public void UnregisterCollider(Collider collider)
+        /// <param name="collider">The collider to unregister.</param>
+        /// <param name="asServer">Whether to unregister on the server or client.</param>
+        public void UnregisterCollider(Collider collider, bool asServer)
         {
-            _moduleServer?.Unregister(collider);
+            if (asServer)
+                _moduleServer?.Unregister(collider);
+            else _moduleClient?.Unregister(collider);
         }
 #endif
 
@@ -108,18 +116,26 @@ namespace PurrNet
         /// Registers a 2D collider for rollback.
         /// Duplicate registrations are ignored.
         /// </summary>
-        public void RegisterCollider(Collider2D collider)
+        /// <param name="collider">The collider to register.</param>
+        /// <param name="asServer">Whether to register on the server or client.</param>
+        public void RegisterCollider(Collider2D collider, bool asServer)
         {
-            _moduleServer?.Register(collider, _storeHistoryInSeconds);
+            if (asServer)
+                _moduleServer?.Register(collider, _storeHistoryInSeconds);
+            else _moduleClient?.Register(collider, _storeHistoryInSeconds);
         }
 
         /// <summary>
         /// Unregisters a 2D collider from rollback.
         /// Duplicate unregistrations are ignored.
         /// </summary>
-        public void UnregisterCollider(Collider2D collider)
+        /// <param name="collider">The collider to unregister.</param>
+        /// <param name="asServer">Whether to unregister on the server or client.</param>
+        public void UnregisterCollider(Collider2D collider, bool asServer)
         {
-            _moduleServer?.Unregister(collider);
+            if (asServer)
+                _moduleServer?.Unregister(collider);
+            else _moduleClient?.Unregister(collider);
         }
 #endif
     }
