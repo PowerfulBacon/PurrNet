@@ -245,7 +245,7 @@ namespace PurrNet.Transports
 
         private void OnHostConnected()
         {
-            ClientAuthenticate authenticate = new ClientAuthenticate()
+            var authenticate = new ClientAuthenticate()
             {
                 roomName = _roomName,
                 clientSecret = _hostJoinInfo.secret
@@ -395,12 +395,11 @@ namespace PurrNet.Transports
 #if UNITASK_PURRNET_SUPPORT
                     await UniTask.DelayFrame(1);
 #else
-                    await System.Threading.Tasks.Task.Yield();
+                    await Awaitable.FixedUpdateAsync();
 #endif
                 }
 
                 _client = SimpleWebClient.Create(ushort.MaxValue, 5000, _tcpConfig);
-
                 _client.onConnect += OnClientConnected;
                 _client.onData += OnClientData;
                 _client.onDisconnect += OnClientDisconnected;
