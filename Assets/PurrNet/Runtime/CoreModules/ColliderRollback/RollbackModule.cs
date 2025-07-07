@@ -203,7 +203,54 @@ namespace PurrNet.Modules
                 }
             }
 #endif
+
         }
+
+#if UNITY_PHYSICS_3D
+        public void Register(Collider collider, float storeHistoryInSeconds)
+        {
+            if (_trackedColliders.Contains(collider))
+                return;
+
+            int maxEntries = Mathf.CeilToInt(_tickManager.tickRate * storeHistoryInSeconds);
+            _trackedColliders.Add(collider);
+            _collider3DStates.Add(collider, new SimpleHistory<Collider3DState>(maxEntries));
+            _colliders3D.Add(collider);
+        }
+
+        public void Unregister(Collider collider)
+        {
+            if (!_trackedColliders.Contains(collider))
+                return;
+
+            _trackedColliders.Remove(collider);
+            _collider3DStates.Remove(collider);
+            _colliders3D.Remove(collider);
+        }
+#endif
+
+#if UNITY_PHYSICS_2D
+        public void Register(Collider2D collider, float storeHistoryInSeconds)
+        {
+            if (_trackedColliders.Contains(collider))
+                return;
+
+            int maxEntries = Mathf.CeilToInt(_tickManager.tickRate * storeHistoryInSeconds);
+            _trackedColliders.Add(collider);
+            _collider2DStates.Add(collider, new SimpleHistory<Collider2DState>(maxEntries));
+            _colliders2D.Add(collider);
+        }
+
+        public void Unregister(Collider2D collider)
+        {
+            if (!_trackedColliders.Contains(collider))
+                return;
+
+            _trackedColliders.Remove(collider);
+            _collider2DStates.Remove(collider);
+            _colliders2D.Remove(collider);
+        }
+#endif
 
         public void Unregister(ColliderRollback component)
         {

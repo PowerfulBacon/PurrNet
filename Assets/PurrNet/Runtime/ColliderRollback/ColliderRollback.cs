@@ -82,5 +82,45 @@ namespace PurrNet
                 _moduleClient = null;
             }
         }
+
+#if UNITY_PHYSICS_3D
+        /// <summary>
+        /// Registers a 3D collider for rollback.
+        /// Duplicate registrations are ignored.
+        /// </summary>
+        public void RegisterCollider(Collider collider)
+        {
+            _moduleServer?.Register(collider, _storeHistoryInSeconds);
+        }
+
+        /// <summary>
+        /// Unregisters a 3D collider from rollback.
+        /// Duplicate unregistrations are ignored.
+        /// </summary>
+        public void UnregisterCollider(Collider collider)
+        {
+            _moduleServer?.Unregister(collider);
+        }
+#endif
+
+#if UNITY_PHYSICS_2D
+        /// <summary>
+        /// Registers a 2D collider for rollback.
+        /// Duplicate registrations are ignored.
+        /// </summary>
+        public void RegisterCollider(Collider2D collider)
+        {
+            _moduleServer?.Register(collider, _storeHistoryInSeconds);
+        }
+
+        /// <summary>
+        /// Unregisters a 2D collider from rollback.
+        /// Duplicate unregistrations are ignored.
+        /// </summary>
+        public void UnregisterCollider(Collider2D collider)
+        {
+            _moduleServer?.Unregister(collider);
+        }
+#endif
     }
 }
