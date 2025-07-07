@@ -18,7 +18,7 @@ namespace PurrNet.Modules
 
             var go = collider.gameObject;
             var scene = go.scene.GetPhysicsScene();
-            var myLayer = go.layer;
+            var myLayer = 1 << go.layer;
             int count = scene.SphereCast(ray.origin, radius, ray.direction, _raycastHits, maxDistance, myLayer, QueryTriggerInteraction.Collide);
             for (int i = 0; i < count; i++)
             {
@@ -43,7 +43,7 @@ namespace PurrNet.Modules
 
             var go = collider.gameObject;
             var scene = go.scene.GetPhysicsScene();
-            var myLayer = go.layer;
+            var myLayer = 1 << go.layer;
             int count = scene.BoxCast(ray.origin, halfExtents, ray.direction, _raycastHits, orientation, maxDistance, myLayer, QueryTriggerInteraction.Collide);
             for (int i = 0; i < count; i++)
             {
@@ -58,7 +58,7 @@ namespace PurrNet.Modules
             return false;
         }
 
-        public static bool CapsuleCast(this Collider collider, Vector3 point1, Vector3 point2, float radius, Ray ray, out RaycastHit hitInfo, float maxDistance)
+        public static bool CapsuleCast(this Collider collider, Vector3 point1, Vector3 point2, float radius, Vector3 direction, out RaycastHit hitInfo, float maxDistance)
         {
             if (!collider)
             {
@@ -68,8 +68,8 @@ namespace PurrNet.Modules
 
             var go = collider.gameObject;
             var scene = go.scene.GetPhysicsScene();
-            var myLayer = go.layer;
-            int count = scene.CapsuleCast(point1, point2, radius, ray.direction, _raycastHits, maxDistance, myLayer, QueryTriggerInteraction.Collide);
+            var myLayer = 1 << go.layer;
+            int count = scene.CapsuleCast(point1, point2, radius, direction, _raycastHits, maxDistance, myLayer, QueryTriggerInteraction.Collide);
             for (int i = 0; i < count; i++)
             {
                 if (_raycastHits[i].collider == collider)
@@ -90,7 +90,7 @@ namespace PurrNet.Modules
 
             var go = collider.gameObject;
             var scene = go.scene.GetPhysicsScene();
-            var myLayer = go.layer;
+            var myLayer = 1 << go.layer;
             int count = scene.OverlapSphere(position, radius, results, myLayer, QueryTriggerInteraction.Collide);
 
             for (int i = 0; i < count; i++)
@@ -109,7 +109,7 @@ namespace PurrNet.Modules
 
             var go = collider.gameObject;
             var scene = go.scene.GetPhysicsScene();
-            var myLayer = go.layer;
+            var myLayer = 1 << go.layer;
             int count = scene.OverlapBox(position, halfExtents, results, orientation, myLayer, QueryTriggerInteraction.Collide);
 
             for (int i = 0; i < count; i++)
@@ -128,7 +128,7 @@ namespace PurrNet.Modules
 
             var go = collider.gameObject;
             var scene = go.scene.GetPhysicsScene();
-            var myLayer = go.layer;
+            var myLayer = 1 << go.layer;
             int count = scene.OverlapCapsule(point1, point2, radius, results, myLayer, QueryTriggerInteraction.Collide);
 
             for (int i = 0; i < count; i++)

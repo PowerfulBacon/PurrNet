@@ -55,8 +55,13 @@ namespace PurrNet
             if (!manager.TryGetModule<ScenesModule>(asServer, out var scenesModule))
                 return;
 
+            scenesModule.onSceneLoaded -= SceneLoaded;
+
             if (!scenesModule.TryGetSceneID(gameObject.scene, out var sceneID))
+            {
+                scenesModule.onSceneLoaded += SceneLoaded;
                 return;
+            }
 
             if (manager.TryGetModule<ColliderRollbackFactory>(asServer, out var factory) &&
                 factory.TryGetModule(sceneID, out var module))
@@ -68,8 +73,16 @@ namespace PurrNet
             }
         }
 
+        private void SceneLoaded(SceneID scene, bool asServer)
+        {
+            Subscribe(manager, asServer);
+        }
+
         public override void Unsubscribe(NetworkManager manager, bool asServer)
         {
+            if (manager.TryGetModule<ScenesModule>(asServer, out var scenesModule))
+                scenesModule.onSceneLoaded -= SceneLoaded;
+
             if (_moduleServer != null)
             {
                 _moduleServer.Unregister(this);

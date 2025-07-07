@@ -15,7 +15,7 @@ public class ShootTargetTests : NetworkBehaviour
             transform.localRotation = Quaternion.LookRotation(ray.direction);
 
 #if UNITY_PHYSICS_3D
-            if (Physics.Raycast(ray, out var hit))
+            if (Physics.SphereCast(ray, 1f, out var hit))
                 Debug.DrawLine(hit.point, hit.point + hit.normal, Color.red, 5f);
 #endif
 
@@ -33,7 +33,7 @@ public class ShootTargetTests : NetworkBehaviour
     private void Shoot(double preciseTick, Ray ray)
     {
 #if UNITY_PHYSICS_3D
-        if (rollbackModule.Raycast(preciseTick, ray, out var hit))
+        if (rollbackModule.SphereCast(preciseTick, ray, 1f, out var hit))
             Debug.DrawLine(hit.point, hit.point + hit.normal, Color.green, 5f);
 #endif
 
