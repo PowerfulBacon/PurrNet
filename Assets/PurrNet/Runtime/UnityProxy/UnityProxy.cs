@@ -50,6 +50,9 @@ namespace PurrNet
                 return instance;
             }
 
+            prototype.position = instantiateData.position;
+            prototype.rotation = instantiateData.rotation;
+
             var result = hierarchy.CreatePrototype(prototype, null);
 
             if (!result)

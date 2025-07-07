@@ -231,7 +231,7 @@ namespace PurrNet.Packing
         }
 
         [UsedByIL]
-        private static void WriteUInt64(BitPacker packer, ulong oldvalue, ulong newvalue)
+        private static bool WriteUInt64(BitPacker packer, ulong oldvalue, ulong newvalue)
         {
             bool hasChanged = oldvalue != newvalue;
             Packer<bool>.Write(packer, hasChanged);
@@ -241,6 +241,8 @@ namespace PurrNet.Packing
                 PackedULong diff = newvalue - oldvalue;
                 Packer<PackedULong>.Write(packer, diff);
             }
+
+            return hasChanged;
         }
 
         [UsedByIL]

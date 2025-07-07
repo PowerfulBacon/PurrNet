@@ -1,3 +1,4 @@
+using PurrNet;
 using PurrNet.StateMachine;
 using UnityEngine;
 
@@ -19,18 +20,27 @@ public class StateOne : StateNode
         //Debug.Log($"Changed from state {previousState} to state {newState}");
     }
 
+    public override void Enter()
+    {
+        base.Enter();
+        //Debug.Log($"Entered state {this}");
+    }
     public override void Enter(bool asServer)
     {
         base.Enter(asServer);
+        Debug.Log($"Entered state {this} | asServer: {asServer}");
+    }
 
-        //Debug.Log($"Entered state {this} asServer: {asServer}");
+    public override void Exit()
+    {
+        base.Exit();
+        //Debug.Log($"Exited state {this}");
     }
 
     public override void Exit(bool asServer)
     {
         base.Exit(asServer);
-        
-        //Debug.Log($"Exited state {this} asServer: {asServer}");
+        Debug.Log($"Exited state {this} | asServer: {asServer}");
     }
 
     [ContextMenu("Next state")]

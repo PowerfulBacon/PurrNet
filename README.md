@@ -16,6 +16,10 @@ You can install PurrNet through Unity's Package Manager by adding a package thro
 https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#release
 ```
 
+Or through OpenUM [![openupm](https://img.shields.io/npm/v/dev.purrnet.purrnet?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/dev.purrnet.purrnet/)
+
+`openupm add dev.purrnet.purrnet`
+
 You can also fallback to the asset store but versions will be behind.
 
 [*Asset store link.*](https://assetstore.unity.com/packages/tools/network/purrnet-297320)

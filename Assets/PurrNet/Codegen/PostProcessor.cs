@@ -48,6 +48,9 @@ namespace PurrNet.Codegen
         {
             var name = compiledAssembly.Name;
 
+            if (name.Contains("NuGetForUnity"))
+                return false;
+
             if (name.StartsWith("Unity."))
                 return false;
 

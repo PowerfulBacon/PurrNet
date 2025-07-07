@@ -303,26 +303,6 @@ namespace PurrNet.StateMachine
         private void RpcStateChange<T>(StateMachineState state, bool hasData, T data)
         {
             if (IsController(_ownerAuth)) return;
-
-            var activeState = _currentState.stateId < 0 || _currentState.stateId >= _syncedStates.Count
-                ? null
-                : _syncedStates[_currentState.stateId];
-
-            try
-            {
-                if (activeState != null)
-                {
-                    if (isServer)
-                        activeState.Exit(true);
-                    if (isClient)
-                        activeState.Exit(false);
-                    activeState.Exit();
-                }
-            }
-            catch(Exception e)
-            {
-                PurrLogger.LogException(e);
-            }
             
             if(_currentState.stateId > -1 && _syncedStates.Count > _currentState.stateId)
                 UpdateStateId(_syncedStates[_currentState.stateId]);
@@ -390,32 +370,6 @@ namespace PurrNet.StateMachine
 
             if (_currentState.stateId < 0 || _currentState.stateId >= _syncedStates.Count)
                 return;
-
-            var newState = _syncedStates[_currentState.stateId];
-            var prevState = previousStateNode;
-
-            try
-            {
-                _stateChangeQueue.Enqueue(() =>
-                {
-                    onStateChanged?.Invoke(prevState, newState);
-                });
-                
-                if (hasData && newState is StateNode<T> node)
-                {
-                    node.Enter(data, false);
-                    node.Enter(data);
-                }
-                else
-                {
-                    newState.Enter(false);
-                    newState.Enter();
-                }
-            }
-            catch(Exception e)
-            {
-                PurrLogger.LogException(e);
-            }
 
             HandleStateChangeQueue();
             onReceivedNewData?.Invoke();

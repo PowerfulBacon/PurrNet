@@ -24,26 +24,25 @@
             bool hasChanged = default;
             Packer<bool>.Read(packer, ref hasChanged);
 
-            if (hasChanged)
+            if (!hasChanged)
             {
-                bool hasValue = default;
-                T readValue = default;
+                value = Packer.Copy(oldvalue);
+                return;
+            }
 
-                DeltaPacker<bool>.Read(packer, oldvalue.HasValue, ref hasValue);
+            bool hasValue = default;
+            T readValue = default;
 
-                if (hasValue)
-                {
-                    DeltaPacker<T>.Read(packer, oldvalue.GetValueOrDefault(), ref readValue);
-                    value = readValue;
-                }
-                else
-                {
-                    value = null;
-                }
+            DeltaPacker<bool>.Read(packer, oldvalue.HasValue, ref hasValue);
+
+            if (hasValue)
+            {
+                DeltaPacker<T>.Read(packer, oldvalue.GetValueOrDefault(), ref readValue);
+                value = readValue;
             }
             else
             {
-                value = oldvalue;
+                value = null;
             }
         }
 
