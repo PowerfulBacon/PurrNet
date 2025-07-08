@@ -133,6 +133,16 @@ namespace PurrNet
 #endif
         }
 
+        private void OnEnable()
+        {
+            UnityLatestUpdate.onLatestUpdate += LateLateUpdate;
+        }
+
+        private void OnDisable()
+        {
+            UnityLatestUpdate.onLatestUpdate -= LateLateUpdate;
+        }
+
         protected override void OnEarlySpawn()
         {
             _trs = transform;
@@ -363,6 +373,12 @@ namespace PurrNet
         private void LateUpdate()
         {
             if (_interpolationTiming == InterpolationTiming.LateUpdate)
+                UpdateNT();
+        }
+
+        private void LateLateUpdate()
+        {
+            if (_interpolationTiming == InterpolationTiming.LateLateUpdate)
                 UpdateNT();
 
             if (_parentChanged)
