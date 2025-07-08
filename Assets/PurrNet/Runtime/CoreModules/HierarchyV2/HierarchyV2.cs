@@ -13,6 +13,8 @@ namespace PurrNet.Modules
 
     public delegate void SpawnedAction(PlayerID player, SceneID scene, NetworkID identity);
 
+    public delegate bool ValidateSpawnAction(PlayerID player, SpawnPacket data);
+
     public class HierarchyV2
     {
         private readonly NetworkManager _manager;
@@ -32,6 +34,8 @@ namespace PurrNet.Modules
         private ulong _nextId;
 
         private bool _areSceneObjectsReady;
+
+        public event ValidateSpawnAction onClientSpawnValidate;
 
         public event IdentityAction onEarlyIdentityAdded;
 
@@ -504,20 +508,45 @@ namespace PurrNet.Modules
 
         private void HandleSpawn(PlayerID player, SpawnPacket data, bool flushData)
         {
-            if (_asServer && !_manager.networkRules.HasSpawnAuthority(_manager, false))
-            {
-                PurrLogger.LogError($"Spawn failed from client due to lack of permissions.");
-                return;
-            }
-
             if (data.sceneId != _sceneId)
                 return;
 
-            // when in host mode, let the server handle the spawning on their module
-            if (!_asServer && _manager.isServer)
-                return;
+            switch (_asServer)
+            {
+                case true when !_manager.networkRules.HasSpawnAuthority(_manager, false):
+                    PurrLogger.LogError($"Spawn failed from client due to lack of permissions.");
+                    RollbackSpawnOnClient(player, data);
+                    return;
+                // when in host mode, let the server handle the spawning on their module
+                case false when _manager.isServer:
+                    return;
+            }
 
-            var createdNids = new DisposableList<NetworkIdentity>(16);
+            if (_asServer && onClientSpawnValidate != null)
+            {
+                foreach (var @delegate in onClientSpawnValidate.GetInvocationList())
+                {
+                    var validator = (ValidateSpawnAction)@delegate;
+                    if (!validator(player, data))
+                    {
+                        var declaring = validator.Method.DeclaringType;
+                        var methodName = validator.Method.Name;
+                        if (data.prototype.framework.Count > 0 &&
+                            _manager.prefabProvider.TryGetPrefabData(data.prototype.framework[0].pid.prefabId, out var pdata) &&
+                            pdata.prefab)
+                        {
+                            PurrLogger.LogError($"Spawn validation of `{pdata.prefab.name}` failed for player `{player}` by `{declaring?.Name}.{methodName}`");
+                        }
+                        else PurrLogger.LogError($"Spawn validation failed for player `{player}` by `{declaring?.Name}.{methodName}`");
+
+                        // send despawn packet to the player
+                        RollbackSpawnOnClient(player, data);
+                        return;
+                    }
+                }
+            }
+
+            var createdNids =  DisposableList<NetworkIdentity>.Create(16);
             CreatePrototype(data.prototype, createdNids.list);
 
             if (_asServer)
@@ -564,6 +593,19 @@ namespace PurrNet.Modules
 
             if (flushData)
                 FlushSpawnPackets();
+        }
+
+        private void RollbackSpawnOnClient(PlayerID player, SpawnPacket data)
+        {
+            if (data.prototype.framework.Count > 0)
+            {
+                var packet = new DespawnPacket
+                {
+                    sceneId = _sceneId,
+                    parentId = data.prototype.framework[0].id
+                };
+                _playersManager.Send(player, packet);
+            }
         }
 
         private void OnDespawnPacket(PlayerID player, DespawnPacket data, bool asServer)
@@ -926,8 +968,7 @@ namespace PurrNet.Modules
                 ListPool<NetworkIdentity>.Destroy(children);
                 return;
             }
-
-            using var directChildren = new DisposableList<TransformIdentityPair>(16);
+            using var directChildren = DisposableList<TransformIdentityPair>.Create(16);
             HierarchyPool.GetDirectChildrenWithRoot(gameObject.transform, directChildren);
 
             foreach (var idPair in directChildren)
@@ -977,8 +1018,7 @@ namespace PurrNet.Modules
         private void SetupIdsLocally(NetworkIdentity root, ref NetworkID baseNid)
         {
             bool isHost = IsServerHost();
-
-            using var siblings = new DisposableList<NetworkIdentity>(16);
+            using var siblings = DisposableList<NetworkIdentity>.Create(16);
             root.GetComponents(siblings.list);
 
             // handle root

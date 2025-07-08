@@ -799,6 +799,24 @@ namespace PurrNet
 
         private bool _isServerTicking;
 
+        event ValidateSpawnAction _onClientSpawnValidate;
+
+        public event ValidateSpawnAction onClientSpawnValidate
+        {
+            add
+            {
+                _onClientSpawnValidate += value;
+                if (TryGetModule<HierarchyFactory>(true, out var hierarchyFactory))
+                    hierarchyFactory.onClientSpawnValidate += value;
+            }
+            remove
+            {
+                _onClientSpawnValidate -= value;
+                if (TryGetModule<HierarchyFactory>(true, out var hierarchyFactory))
+                    hierarchyFactory.onClientSpawnValidate -= value;
+            }
+        }
+
         internal void RegisterModules(ModulesCollection modules, bool asServer)
         {
             var tickManager = new TickManager(_tickRate, this);
@@ -943,6 +961,15 @@ namespace PurrNet
             var rpcModule = new RPCModule(this, playersManager, hierarchyV2, ownershipModule, scenesModule);
             var networkTransform = new NetworkTransformFactory(scenesModule, scenePlayers, playersBroadcast, this, hierarchyV2);
             var colliderRollback = new ColliderRollbackFactory(tickManager, scenesModule);
+
+            if (asServer)
+            {
+                if (_onClientSpawnValidate != null)
+                {
+                    foreach (var del in _onClientSpawnValidate.GetInvocationList())
+                        hierarchyV2.onClientSpawnValidate += (ValidateSpawnAction)del;
+                }
+            }
 
             modules.AddModule(networkTransform);
             modules.AddModule(hierarchyV2);

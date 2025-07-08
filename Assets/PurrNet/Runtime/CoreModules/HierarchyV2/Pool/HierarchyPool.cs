@@ -95,7 +95,7 @@ namespace PurrNet.Modules
                 var current = queue.Dequeue();
                 properNids.Add(current);
 
-                var directChildren = new DisposableList<TransformIdentityPair>(16);
+                var directChildren = DisposableList<TransformIdentityPair>.Create(16);
                 GetDirectChildren(current.transform, directChildren);
 
                 for (var i = 0; i < current.directChildren.Count; i++)
@@ -119,7 +119,7 @@ namespace PurrNet.Modules
                 var current = queue.Dequeue();
                 properNids.Add(current);
 
-                var directChildren = new DisposableList<TransformIdentityPair>(16);
+                var directChildren = DisposableList<TransformIdentityPair>.Create(16);
                 GetDirectChildren(current.transform, directChildren);
 
                 for (var i = 0; i < directChildren.Count; i++)
@@ -320,7 +320,7 @@ namespace PurrNet.Modules
 
         public static DisposableList<int> GetInvPath(Transform parent, Transform transform)
         {
-            var depth = new DisposableList<int>(16);
+            var depth = DisposableList<int>.Create(16);
             var current = transform;
 
             if (parent == null)
@@ -356,10 +356,23 @@ namespace PurrNet.Modules
             return _prefabPrototypes.TryGetValue(prefab, out prototype);
         }
 
+        public static bool TryGetOrCreatePrefabPrototype(PrefabData prefabData, out GameObjectPrototype prototype)
+        {
+            if (_prefabPrototypes.TryGetValue(prefabData.prefab, out prototype))
+                return true;
+
+            var copy = UnityProxy.InstantiateDirectly(prefabData.prefab);
+            NetworkManager.SetupPrefabInfo(copy, prefabData.prefabId, prefabData.pooled);
+            prototype = GetFullPrototype(copy.transform);
+            _prefabPrototypes.Add(prefabData.prefab, prototype);
+            UnityProxy.DestroyDirectly(copy);
+            return true;
+        }
+
         public static bool TryGetPrototype(Transform transform, PlayerID scope, List<NetworkIdentity> allChildren,
             out GameObjectPrototype prototype)
         {
-            var framework = new DisposableList<GameObjectFrameworkPiece>(16);
+            var framework = DisposableList<GameObjectFrameworkPiece>.Create(16);
 
             if (!transform.TryGetComponent<NetworkIdentity>(out var rootId))
             {
@@ -427,7 +440,7 @@ namespace PurrNet.Modules
 
         public static GameObjectPrototype GetFullPrototype(Transform transform)
         {
-            var framework = new DisposableList<GameObjectFrameworkPiece>(16);
+            var framework = DisposableList<GameObjectFrameworkPiece>.Create(16);
             if (!transform.TryGetComponent<NetworkIdentity>(out var rootId))
                 return new GameObjectPrototype(transform.localPosition, transform.localRotation, transform.localScale, null, null, framework,
                     null);
@@ -615,7 +628,7 @@ namespace PurrNet.Modules
 
         private static GameObjectRuntimePair GetRuntimePair(Transform parent, NetworkIdentity rootId)
         {
-            var children = new DisposableList<TransformIdentityPair>(rootId.directChildren.Count);
+            var children = DisposableList<TransformIdentityPair>.Create(rootId.directChildren.Count);
             var pair = new GameObjectRuntimePair(parent, rootId, children);
 
             foreach (var c in rootId.directChildren)
