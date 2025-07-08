@@ -1,3 +1,10 @@
+## [1.12.5-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.12.5-beta.4...v1.12.5-beta.5) (2025-07-08)
+
+
+### Bug Fixes
+
+* more raycast types for rollback module ([975ab10](https://github.com/PurrNet/PurrNet/commit/975ab103da67a36097f36517ec6255e96f9f6a83))
+
 ## [1.12.5-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.12.5-beta.3...v1.12.5-beta.4) (2025-07-07)
 
 
