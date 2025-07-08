@@ -535,9 +535,9 @@ namespace PurrNet.Modules
                             _manager.prefabProvider.TryGetPrefabData(data.prototype.framework[0].pid.prefabId, out var pdata) &&
                             pdata.prefab)
                         {
-                            PurrLogger.LogError($"Spawn validation of `{pdata.prefab.name}` failed for player `{player}` by `{declaring?.Name}.{methodName}`");
+                            PurrLogger.LogWarning($"Spawn validation of `{pdata.prefab.name}` failed for player `{player}` by `{declaring?.Name}.{methodName}`");
                         }
-                        else PurrLogger.LogError($"Spawn validation failed for player `{player}` by `{declaring?.Name}.{methodName}`");
+                        else PurrLogger.LogWarning($"Spawn validation failed for player `{player}` by `{declaring?.Name}.{methodName}`");
 
                         // send despawn packet to the player
                         RollbackSpawnOnClient(player, data);
