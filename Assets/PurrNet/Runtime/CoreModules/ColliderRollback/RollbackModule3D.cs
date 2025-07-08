@@ -189,7 +189,7 @@ namespace PurrNet.Modules
         /// <summary>
         /// Performs a sphere overlap check at the given position with the given radius.
         /// </summary>
-        public bool SphereOverlap(double preciseTick, Vector3 origin, float radius, int layerMask = Physics.AllLayers,
+        public bool CheckSphere(double preciseTick, Vector3 origin, float radius, int layerMask = Physics.AllLayers,
             QueryTriggerInteraction queryTriggers = QueryTriggerInteraction.UseGlobal)
         {
             if (!_physicsScene.IsValid())
@@ -224,7 +224,7 @@ namespace PurrNet.Modules
             return hitCount;
         }
 
-        public bool BoxOverlap(double preciseTick, Vector3 origin, Vector3 halfExtents, Quaternion orientation,
+        public bool CheckBox(double preciseTick, Vector3 origin, Vector3 halfExtents, Quaternion orientation,
             int layerMask = Physics.AllLayers,
             QueryTriggerInteraction queryTriggers = QueryTriggerInteraction.UseGlobal)
         {
@@ -261,7 +261,7 @@ namespace PurrNet.Modules
             return hitCount;
         }
 
-        public bool CapsuleOverlap(double preciseTick, Vector3 point1, Vector3 point2, float radius,
+        public bool CheckCapsule(double preciseTick, Vector3 point1, Vector3 point2, float radius,
             int layerMask = Physics.AllLayers,
             QueryTriggerInteraction queryTriggers = QueryTriggerInteraction.UseGlobal)
         {
@@ -686,21 +686,6 @@ namespace PurrNet.Modules
             // Transform historical local ray to current world space for the actual raycast
             var currentWorldMatrix = trs.localToWorldMatrix;
             transformedOrigin = currentWorldMatrix.MultiplyPoint3x4(rayHistoricalLocal);
-        }
-
-        private static Matrix4x4 TransformDirection(Vector3 direction, Collider3DState state, Transform trs, out Vector3 transformedDirection)
-        {
-            // Get the transform matrix for the historical position
-            var historicalWorldMatrix = Matrix4x4.TRS(state.position, state.rotation, state.scale);
-            var worldToHistorical = historicalWorldMatrix.inverse;
-
-            // Transform world ray to historical local space
-            var rayHistoricalLocalDirection = worldToHistorical.MultiplyVector(direction);
-
-            // Transform historical local ray to current world space for the actual raycast
-            var currentWorldMatrix = trs.localToWorldMatrix;
-            transformedDirection = currentWorldMatrix.MultiplyVector(rayHistoricalLocalDirection);
-            return historicalWorldMatrix;
         }
 
         private static Matrix4x4 TransformCapsule(Vector3 point1, Vector3 point2, Vector3 direction, Collider3DState state, Transform trs, out Vector3 p1, out Vector3 p2, out Vector3 dir)
