@@ -1169,6 +1169,7 @@ namespace PurrNet.Modules
                     continue;
 
                 identity.SetIsSpawned(true, false);
+                identity.TriggerEarlySpawnEvent(false);
                 identity.TriggerSpawnEvent(false);
                 onIdentityAdded?.Invoke(identity);
             }
