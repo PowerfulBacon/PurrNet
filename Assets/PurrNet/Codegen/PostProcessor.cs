@@ -963,18 +963,26 @@ namespace PurrNet.Codegen
 
         public static bool IsConcreteType(TypeReference type, out TypeReference concreteType)
         {
-            concreteType = type;
-
-            if (type.ContainsGenericParameter)
-                return false;
-
-            if (IsTaskOrInheritsFromTask(type) && type is GenericInstanceType genericInstanceType)
+            try
             {
-                concreteType = genericInstanceType.GenericArguments[0];
+                concreteType = type;
+
+                if (type.ContainsGenericParameter)
+                    return false;
+
+                if (IsTaskOrInheritsFromTask(type) && type is GenericInstanceType genericInstanceType)
+                {
+                    concreteType = genericInstanceType.GenericArguments[0];
+                    return true;
+                }
+
                 return true;
             }
-
-            return true;
+            catch
+            {
+                concreteType = type;
+                return false;
+            }
         }
 
         static StripCodeMode GetMode(PurrNetSettings settings, StripCodeModeOverride overrideMode)
@@ -2679,24 +2687,27 @@ namespace PurrNet.Codegen
             TypeDefinition networkModule)
         {
             bool inheritsNetworkModule = InheritsFrom(resolved, networkModule.FullName);
-
-            if (inheritsNetworkModule)
+            if (inheritsNetworkModule && type is GenericInstanceType genericInstance)
             {
-                if (type is GenericInstanceType genericInstance)
-                {
-                    bool allConcrete = true;
-                    foreach (var genericArg in genericInstance.GenericArguments)
-                    {
-                        if (IsConcreteType(genericArg, out var concreteType))
-                        {
-                            types.Add(concreteType);
-                        }
-                        else allConcrete = false;
-                    }
+                bool allConcrete = true;
 
-                    if (allConcrete)
-                        types.Add(type);
+                if (genericInstance.GenericArguments == null)
+                    return;
+
+                foreach (var genericArg in genericInstance.GenericArguments)
+                {
+                    if (genericArg == null)
+                        continue;
+
+                    if (IsConcreteType(genericArg, out var concreteType))
+                    {
+                        types.Add(concreteType);
+                    }
+                    else allConcrete = false;
                 }
+
+                if (allConcrete)
+                    types.Add(type);
             }
         }
 
