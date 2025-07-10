@@ -1313,6 +1313,9 @@ namespace PurrNet.Modules
         /// </summary>
         public void ManualEarlySpawn(NetworkIdentity identity, NetworkID id)
         {
+            _spawnedIdentities.Add(identity);
+            _spawnedIdentitiesMap.Add(id, identity);
+
             bool isHost = IsServerHost();
 
             identity.SetID(id);
@@ -1322,6 +1325,27 @@ namespace PurrNet.Modules
             if (isHost) identity.TriggerEarlySpawnEvent(false);
 
             onEarlyIdentityAdded?.Invoke(identity);
+        }
+
+        /// <summary>
+        /// For manual despawning of identities.
+        /// </summary>
+        public void ManualDespawn(NetworkIdentity identity)
+        {
+            if (!_asServer)
+                return;
+
+            var observersCopy = ListPool<PlayerID>.Instantiate();
+            observersCopy.AddRange(identity.observers);
+            for (var i = 0; i < observersCopy.Count; i++)
+                ManualRemoveObserver(identity, observersCopy[i]);
+            ListPool<PlayerID>.Destroy(observersCopy);
+
+            TriggerDespawnEvent(identity);
+            UnregisterIdentity(identity);
+
+            identity.SetIsSpawned(false, false);
+            onIdentityRemoved?.Invoke(identity);
         }
 
         /// <summary>
