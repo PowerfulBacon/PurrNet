@@ -343,7 +343,7 @@ namespace PurrNet.Modules
 
             for (var j = 0; j < idCount; j++)
             {
-                if (!HandleOwnershipChange(player, change, change.identities[j]))
+                if (!HandleOwnershipChange(player, change, change.identities[j], true))
                 {
                     change.identities.RemoveAt(j--);
                     idCount--;
@@ -731,12 +731,23 @@ namespace PurrNet.Modules
                 identity.TriggerOnOwnerChanged(oldOwner, change.player, _asServer, false);
         }
 
-        private bool HandleOwnershipChange(PlayerID actor, OwnershipChange change, NetworkID id)
+        private bool HandleOwnershipChange(PlayerID actor, OwnershipChange change, NetworkID id, bool addToPending)
         {
             string verb = change.isAdding ? "give" : "remove";
 
             if (!_hierarchy.TryGetIdentity(change.sceneId, id, out var identity))
+            {
+                if (addToPending)
+                {
+                    _pendingOwnership.Add(new PendingOwnershipChanges
+                    {
+                        scene = change.sceneId,
+                        change = new OwnershipInfo { identity = id, player = change.player },
+                        timeAdded = Time.time
+                    });
+                }
                 return false;
+            }
 
             if (!_sceneOwnerships.TryGetValue(change.sceneId, out var module))
             {
