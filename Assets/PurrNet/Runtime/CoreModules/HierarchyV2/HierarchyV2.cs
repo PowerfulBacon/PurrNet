@@ -1044,6 +1044,13 @@ namespace PurrNet.Modules
             }
         }
 
+        public NetworkID ReserveNetworkID()
+        {
+            if (_asServer)
+                return new NetworkID(_nextId++, default);
+            return new NetworkID(_nextId++, _playersManager.localPlayerId ?? default);
+        }
+
         private void SpawnSceneObject(List<NetworkIdentity> children)
         {
             bool isHost = IsServerHost();
@@ -1298,6 +1305,70 @@ namespace PurrNet.Modules
         HashSet<NetworkIdentity> _toSpawnNextFrameBuffer = new HashSet<NetworkIdentity>();
 
         readonly List<SpawnID> _toCompleteNextFrame = new List<SpawnID>();
+
+        /// <summary>
+        /// For manual spawning of identities.
+        /// After this call, you should call <see cref="ManualFinalizeSpawn(NetworkIdentity)"/> to finalize the spawning.
+        /// This needs to be called manually on all conserned clients.
+        /// </summary>
+        public void ManualEarlySpawn(NetworkIdentity identity, NetworkID id)
+        {
+            bool isHost = IsServerHost();
+
+            identity.SetID(id);
+            identity.SetIdentity(_manager, this, _sceneId, _asServer, isHost);
+
+            identity.TriggerEarlySpawnEvent(_asServer);
+            if (isHost) identity.TriggerEarlySpawnEvent(false);
+
+            onEarlyIdentityAdded?.Invoke(identity);
+        }
+
+        /// <summary>
+        /// For manual finalization of spawning an identity.
+        /// This needs to be called manually on all conserned clients.
+        /// </summary>
+        public void ManualFinalizeSpawn(NetworkIdentity identity)
+        {
+            bool isHost = IsServerHost();
+
+            identity.TriggerSpawnEvent(_asServer);
+            if (isHost) identity.TriggerSpawnEvent(false);
+
+            onIdentityAdded?.Invoke(identity);
+        }
+
+        /// <summary>
+        /// Once the identity is created, you should call this method to refresh visibility for all players in the scene.
+        /// This will send visibility updates to all players in the scene.
+        /// </summary>
+        public void ManualAddObserver(NetworkIdentity identity, PlayerID player)
+        {
+            if (!_asServer)
+                return;
+
+            if (identity.TryAddObserver(player))
+            {
+                onObserverAdded?.Invoke(player, identity);
+                identity.TriggerOnPreObserverAdded(player, true);
+                _triggerLateObserverAdded.Add(new PlayerNid { player = player, nid = identity, isSpawner = true});
+            }
+        }
+
+        /// <summary>
+        /// Manually remove an observer from the identity.
+        /// </summary>
+        public void ManualRemoveObserver(NetworkIdentity identity, PlayerID player)
+        {
+            if (!_asServer)
+                return;
+
+            if (identity.TryRemoveObserver(player))
+            {
+                identity.TriggerOnObserverRemoved(player);
+                onObserverRemoved?.Invoke(player, identity);
+            }
+        }
 
         /// <summary>
         /// Local spawn will trigger the spawn event next frame immediately after the identity is registered.
