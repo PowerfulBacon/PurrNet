@@ -525,6 +525,18 @@ namespace PurrNet.Modules
                     return;
             }
 
+            if (data.prototype.framework.Count > 0)
+            {
+                foreach (var piece in data.prototype.framework)
+                {
+                    if (TryGetIdentity(piece.id, out var existing))
+                    {
+                        PurrLogger.LogError($"Spawn failed for player `{player}`. Identity with id `{piece.id}` already exists: `{existing.gameObject.name}`", existing);
+                        return;
+                    }
+                }
+            }
+
             if (_asServer && onClientSpawnValidate != null)
             {
                 foreach (var @delegate in onClientSpawnValidate.GetInvocationList())
