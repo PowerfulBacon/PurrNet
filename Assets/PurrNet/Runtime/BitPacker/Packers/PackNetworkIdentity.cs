@@ -10,51 +10,6 @@ namespace PurrNet
     public static class PackNetworkIdentity
     {
         [UsedByIL]
-        public static bool PackNetworkIDNullableDelta(this BitPacker stream, NetworkID? old, NetworkID? nid)
-        {
-            int flagPos = stream.AdvanceBits(1);
-            bool wasChanged = default(bool);
-            if (stream.HandleNullScenarios(old, nid, ref wasChanged))
-            {
-                wasChanged = DeltaPacker<PackedULong>.Write(stream, old!.Value.id, nid!.Value.id);
-                wasChanged = DeltaPacker<PlayerID>.Write(stream, old.Value.scope, nid.Value.scope) || wasChanged;
-            }
-            stream.WriteAt(flagPos, wasChanged);
-            if (!wasChanged)
-            {
-                stream.SetBitPosition(flagPos + 1);
-            }
-            return wasChanged;
-        }
-
-        [UsedByIL]
-        public static void PackNetworkIDNullableDelta(this BitPacker stream, NetworkID? oldValue, ref NetworkID? value)
-        {
-            bool value2 = default(bool);
-            Packer<bool>.Read(stream, ref value2);
-            if (value2)
-            {
-                if (stream.ReadIsNull(ref value))
-                {
-                    var oldId = oldValue!.Value.id;
-                    var oldScope = oldValue.Value.scope;
-
-                    PackedULong newId = default;
-                    PlayerID newScope = default;
-
-                    DeltaPacker<PackedULong>.Read(stream, oldId, ref newId);
-                    DeltaPacker<PlayerID>.Read(stream, oldScope, ref newScope);
-
-                    value = new NetworkID(newId, newScope);
-                }
-            }
-            else
-            {
-                value = oldValue;
-            }
-        }
-
-        [UsedByIL]
         public static void WriteIdentityConcrete(this BitPacker packer, NetworkIdentity identity)
         {
             WriteIdentity(packer, identity);
