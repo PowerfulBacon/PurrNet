@@ -268,10 +268,6 @@ namespace PurrNet.Steam
         public void Stop()
         {
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
-            _connections.Clear();
-            _connectionById.Clear();
-            _idByConnection.Clear();
-
             if (_connectionStatusChanged != null)
             {
                 _connectionStatusChanged.Dispose();
@@ -295,6 +291,10 @@ namespace PurrNet.Steam
             {
                 // ignored
             }
+
+            _connections.Clear();
+            _connectionById.Clear();
+            _idByConnection.Clear();
 
             try
             {
