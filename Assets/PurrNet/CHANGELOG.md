@@ -1,3 +1,10 @@
+# [1.13.0-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.13.0-beta.4...v1.13.0-beta.5) (2025-07-10)
+
+
+### Features
+
+* introduce api to HierarchyV2 module that allows to manually manage spawning and observability events for lower level control ([9825580](https://github.com/PurrNet/PurrNet/commit/982558000c56142ed472b205e38a6a96e4aff96e))
+
 # [1.13.0-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.13.0-beta.3...v1.13.0-beta.4) (2025-07-10)
 
 
