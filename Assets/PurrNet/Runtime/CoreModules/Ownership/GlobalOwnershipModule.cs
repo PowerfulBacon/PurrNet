@@ -820,11 +820,12 @@ namespace PurrNet.Modules
 
         private void HandleAsyncPendingChanges()
         {
+            const float TIMEOUT = 5f;
             for (var i = 0; i < _pendingOwnership.Count; ++i)
             {
                 var change = _pendingOwnership[i];
 
-                if (Time.time - change.timeAdded > 1f)
+                if (Time.time - change.timeAdded > TIMEOUT)
                 {
                     PurrLogger.LogError(
                         $"Pending ownership change for identity {change.change.identity} in scene {change.scene} took too long to process, removing it.");
