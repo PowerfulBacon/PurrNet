@@ -223,7 +223,10 @@ namespace PurrNet.Modules
             }
 
             foreach (var r in hash)
+            {
+                if (!r) continue;
                 Despawn(r.gameObject, true, true);
+            }
 
             foreach (var defaultPrototype in _defaultPrototypes)
             {
