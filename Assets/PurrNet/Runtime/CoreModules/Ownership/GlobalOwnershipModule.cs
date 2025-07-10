@@ -832,6 +832,9 @@ namespace PurrNet.Modules
                     continue;
                 }
 
+                if (!_hierarchy.TryGetIdentity(change.scene, change.change.identity, out _))
+                    continue;
+
                 HandleOwnershipBatch(change.scene, change.change, false);
                 _pendingOwnership.RemoveAt(i);
             }
