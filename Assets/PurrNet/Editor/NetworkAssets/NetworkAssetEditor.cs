@@ -40,9 +40,6 @@ namespace PurrNet
             _folderProp = serializedObject.FindProperty("folder");
             _autoGenerateProp = serializedObject.FindProperty("autoGenerate");
             _assetsProp = serializedObject.FindProperty("assets");
-
-            if (_autoGenerateProp.boolValue)
-                Generate(); 
             
             _cachedTypes = _target.AvailableTypeNames
                 .Select(Type.GetType)
