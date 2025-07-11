@@ -1,26 +1,29 @@
 #if UNITY_EDITOR
+using System.Linq;
 using UnityEditor;
+using UnityEngine;
 
 namespace PurrNet.Editor
 {
-    [InitializeOnLoad]
-    public static class NetworkAssetsAutoGenerator
+    public class NetworkAssetsPostprocessor : AssetPostprocessor
     {
-        static NetworkAssetsAutoGenerator()
+        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
         {
-            EditorApplication.delayCall += GenerateAll;
-        }
+            var all = AssetDatabase.FindAssets("t:NetworkAssets")
+                .Select(guid => AssetDatabase.LoadAssetAtPath<NetworkAssets>(AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(n => n && n.autoGenerate && n.folder)
+                .ToArray();
 
-        private static void GenerateAll()
-        {
-            var guids = AssetDatabase.FindAssets("t:NetworkAssets");
-            foreach (var guid in guids)
+            foreach (var netAsset in all)
             {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                var asset = AssetDatabase.LoadAssetAtPath<NetworkAssets>(path);
-                if (!asset || !asset.autoGenerate) continue;
+                string folderPath = AssetDatabase.GetAssetPath(netAsset.folder);
+                bool relevantChange = importedAssets.Any(p => p.StartsWith(folderPath)) ||
+                                      deletedAssets.Any(p => p.StartsWith(folderPath)) ||
+                                      movedAssets.Any(p => p.StartsWith(folderPath)) ||
+                                      movedFromAssetPaths.Any(p => p.StartsWith(folderPath));
 
-                asset.GenerateAssets();
+                if (relevantChange)
+                    netAsset.GenerateAssets();
             }
         }
     }

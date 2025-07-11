@@ -164,6 +164,14 @@ namespace PurrNet
                 UnityEditor.EditorUtility.SetDirty(this);
                 UnityEditor.AssetDatabase.SaveAssets();
             }
+
+            CleanupNullEntries();
+        }
+
+        private void CleanupNullEntries()
+        {
+            assets.RemoveAll(a => a == null);
+            Refresh();
         }
 #endif
 
