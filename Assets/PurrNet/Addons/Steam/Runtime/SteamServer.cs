@@ -212,10 +212,13 @@ namespace PurrNet.Steam
 #endif
         }
 
+
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
+        private int _nextConnectionId;
+
         private void AddConnection(HSteamNetConnection connection)
         {
-            int id = _connections.Count;
+            int id = _nextConnectionId++;
             _connections.Add(connection);
             _connectionById.Add(id, connection);
             _idByConnection.Add(connection, id);
@@ -277,19 +280,19 @@ namespace PurrNet.Steam
             if (_listenSocket == HSteamListenSocket.Invalid)
                 return;
 
-            try
+            for (var o = 0; o < _connections.Count; o++)
             {
-                for (var o = 0; o < _connections.Count; o++)
+                try
                 {
                     var conn = _connections[o];
                     if (_isDedicated)
                          SteamGameServerNetworkingSockets.CloseConnection(conn, 0, null, false);
                     else SteamNetworkingSockets.CloseConnection(conn, 0, null, false);
                 }
-            }
-            catch
-            {
-                // ignored
+                catch
+                {
+                    // ignored
+                }
             }
 
             _connections.Clear();
