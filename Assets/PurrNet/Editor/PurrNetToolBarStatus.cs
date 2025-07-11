@@ -36,9 +36,13 @@ namespace PurrNet.Editor
             ToolbarExtender.RequestToolbarRepaint();
         }
 
-        private static bool IsTransitioning(NetworkManager? manager) =>
-            manager?.serverState is ConnectionState.Connecting or ConnectionState.Disconnecting ||
-            manager?.clientState is ConnectionState.Connecting or ConnectionState.Disconnecting;
+        private static bool IsTransitioning(NetworkManager? manager)
+        {
+            if (manager == null) return false;
+            
+            return manager.serverState is ConnectionState.Connecting or ConnectionState.Disconnecting ||
+                   manager.clientState is ConnectionState.Connecting or ConnectionState.Disconnecting;
+        }
 
         static void OnToolbarGUI()
         {
@@ -58,10 +62,10 @@ namespace PurrNet.Editor
             GUILayout.Space(20);
         }
 
-        private static void DrawConnectionButton(NetworkManager manager, bool isServer)
+        private static void DrawConnectionButton(NetworkManager? manager, bool isServer)
         {
-            var state = isServer ? manager?.serverState : manager?.clientState;
-            var isActive = isServer ? manager?.isServer == true : manager?.isClient == true;
+            ConnectionState? state = manager != null ? (isServer ? manager.serverState : manager.clientState) : null;
+            var isActive = manager != null && (isServer ? manager.isServer : manager.isClient);
             var isTransitioning = state is ConnectionState.Connecting or ConnectionState.Disconnecting;
             
             string buttonText = isTransitioning ? state.ToString() : 
@@ -73,17 +77,18 @@ namespace PurrNet.Editor
             {
                 if (isServer)
                 {
-                    if (manager.isServer) manager.StopServer();
+                    if (isActive) manager.StopServer();
                     else manager.StartServer();
                 }
                 else
                 {
-                    if (manager.isClient) manager.StopClient();
+                    if (isActive) manager.StopClient();
                     else manager.StartClient();
                 }
             }
 
             TransportInspector.DrawLed(state);
+            GUI.enabled = true;
         }
     }
 }
