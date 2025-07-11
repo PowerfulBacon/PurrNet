@@ -827,8 +827,6 @@ namespace PurrNet.Modules
 
                 if (Time.time - change.timeAdded > TIMEOUT)
                 {
-                    PurrLogger.LogError(
-                        $"Pending ownership change for identity {change.change.identity} in scene {change.scene} took too long to process, removing it.");
                     _pendingOwnership.RemoveAt(i);
                     continue;
                 }
