@@ -9,7 +9,7 @@ namespace PurrNet.Editor
 {
     public static class PurrNetToolBarStatus
     {
-        private static GUIContent pebblesIcon;
+        private static GUIContent _pebblesIcon;
 
         [InitializeOnLoadMethod]
         static void Init()
@@ -20,7 +20,7 @@ namespace PurrNet.Editor
             
             var pebblesTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(
                 "Assets/PurrNet/Editor/Editor Default Resources/Pebbles.png");
-            pebblesIcon = new GUIContent(pebblesTexture);
+            _pebblesIcon = new GUIContent(pebblesTexture);
         }
 
         private static void OnConnectionStateChanged(ConnectionState state)
@@ -52,7 +52,7 @@ namespace PurrNet.Editor
 
             GUILayout.BeginHorizontal();
             
-            GUILayout.Label(pebblesIcon, GUILayout.Width(22), GUILayout.Height(22));
+            GUILayout.Label(_pebblesIcon, GUILayout.Width(22), GUILayout.Height(22));
             GUILayout.Label("PurrNet", GUILayout.ExpandWidth(false));
             
             DrawConnectionButton(manager, true);  // Server
@@ -78,12 +78,12 @@ namespace PurrNet.Editor
                 if (isServer)
                 {
                     if (isActive) manager.StopServer();
-                    else manager.StartServer();
+                    else manager?.StartServer();
                 }
                 else
                 {
                     if (isActive) manager.StopClient();
-                    else manager.StartClient();
+                    else manager?.StartClient();
                 }
             }
 
