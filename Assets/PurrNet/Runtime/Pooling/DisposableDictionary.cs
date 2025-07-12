@@ -20,6 +20,14 @@ namespace PurrNet.Pooling
             val._isAllocated = true;
             return val;
         }
+        
+        public static DisposableDictionary<TKey, TValue> Create()
+        {
+            var val = new DisposableDictionary<TKey, TValue>();
+            val.dictionary = DictionaryPool<TKey, TValue>.Instantiate();
+            val._isAllocated = true;
+            return val;
+        }
 
         public void Dispose()
         {

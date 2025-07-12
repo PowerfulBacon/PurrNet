@@ -32,6 +32,15 @@ namespace PurrNet.Pooling
             val._isAllocated = true;
             return val;
         }
+        
+        public static DisposableList<T> Create(IEnumerable<T> copyFrom)
+        {
+            var val = new DisposableList<T>();
+            val.list = ListPool<T>.Instantiate();
+            val.list.AddRange(copyFrom);
+            val._isAllocated = true;
+            return val;
+        }
 
         public static DisposableList<T> Create()
         {
