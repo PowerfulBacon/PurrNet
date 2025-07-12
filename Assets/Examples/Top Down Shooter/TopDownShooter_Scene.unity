@@ -1096,7 +1096,6 @@ GameObject:
   m_Component:
   - component: {fileID: 550669885}
   - component: {fileID: 550669886}
-  - component: {fileID: 550669887}
   m_Layer: 0
   m_Name: PlayerSpawn
   m_TagString: Untagged
@@ -1140,30 +1139,6 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
---- !u!114 &550669887
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 550669884}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00618773ad814134fb6df0e166ad0b0e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: PurrNet.Issues.RpcIssue::PrintNetworklife
-  _isSetup: 0
-  _prefabId: -2147483648
-  _componentIndex: -2147483648
-  _shouldBePooled: 0
-  _parent: {fileID: 0}
-  _invertedPathToNearestParent: 
-  _directChildren: []
-  _networkRules: {fileID: 0}
-  _visitiblityRules: {fileID: 0}
-  _earlySpawnPrint: 1
-  _spawnPrint: 1
-  _ownerPrint: 0
 --- !u!1001 &575050556
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1708,7 +1683,6 @@ MonoBehaviour:
   _visitiblityRules: {fileID: 0}
   _testTexture: {fileID: 2800000, guid: c045e762b92c03044978d319c6d672db, type: 3}
   _testSprite: {fileID: 21300000, guid: 1aa0a06e1bb4a894d9df83b31ed47345, type: 3}
-  _testMaterial: {fileID: 2100000, guid: 6faca5c2b42f4c94b86de38880aafbad, type: 2}
 --- !u!114 &634351201
 MonoBehaviour:
   m_ObjectHideFlags: 0

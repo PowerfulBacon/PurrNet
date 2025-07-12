@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using PurrNet;
 using PurrNet.Logging;
 using PurrNet.Modules;
@@ -10,6 +11,13 @@ public class TestValidator : MonoBehaviour
     private void Awake()
     {
         _networkManager.onClientSpawnValidate += ValidateSpawn;
+        Test();
+    }
+
+    [ServerOnly]
+    void Test()
+    {
+        PurrLogger.Log("Test", this);
     }
 
     private void OnDestroy()
@@ -21,11 +29,7 @@ public class TestValidator : MonoBehaviour
     private bool ValidateSpawn(PlayerID player, SpawnPacket data)
     {
         if (data.TryGetRawPrefab(_networkManager, out var prefab))
-        {
-            PurrLogger.Log($"Spawn validated for player {player}: {data.prototype}\nPrefab: {prefab.name}");
             return true;
-        }
-
         return false;
     }
 }

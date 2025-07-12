@@ -1098,7 +1098,9 @@ namespace PurrNet.Codegen
                 case MetadataType.ByReference:
                     il.Append(il.Create(OpCodes.Ldnull));
                     break;
+                case MetadataType.GenericInstance:
                 case MetadataType.ValueType:
+                {
                     // For structs, emit a local, initobj, ldloc
                     var varDef = new VariableDefinition(type);
                     method.Body.Variables.Add(varDef);
@@ -1106,10 +1108,10 @@ namespace PurrNet.Codegen
                     il.Append(il.Create(OpCodes.Initobj, type));
                     il.Append(il.Create(OpCodes.Ldloc, varDef));
                     break;
+                }
                 case MetadataType.Void:
                 case MetadataType.Pointer:
                 case MetadataType.Var:
-                case MetadataType.GenericInstance:
                 case MetadataType.TypedByReference:
                 case MetadataType.FunctionPointer:
                 case MetadataType.MVar:
