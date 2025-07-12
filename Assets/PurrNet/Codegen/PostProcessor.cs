@@ -1772,7 +1772,7 @@ namespace PurrNet.Codegen
         private static bool UpdateMethodReferences(ModuleDefinition module, MethodReference old, MethodReference @new,
             [UsedImplicitly] List<DiagnosticMessage> messages)
         {
-            using var types = new DisposableList<TypeDefinition>(32);
+            using var types =  DisposableList<TypeDefinition>.Create(32);
             var startLocalExecutionFlag = module.GetTypeDefinition(typeof(PurrCompilerFlags))
                 .GetMethod("EnterLocalExecution").FullName;
             var exitLocalExecutionFlag = module.GetTypeDefinition(typeof(PurrCompilerFlags))
@@ -1919,7 +1919,7 @@ namespace PurrNet.Codegen
 
         static DisposableList<TypeDefinition> GetAllTypes(ModuleDefinition module)
         {
-            var types = new DisposableList<TypeDefinition>(32);
+            var types = DisposableList<TypeDefinition>.Create(32);
 
             types.AddRange(module.Types);
             foreach (var type in module.Types)
@@ -2061,7 +2061,7 @@ namespace PurrNet.Codegen
                         bool inheritsFromNetworkClass =
                             type.FullName == classFullName || InheritsFrom(type, classFullName);
 
-                        using var _rpcMethods = new DisposableList<RPCMethod>(32);
+                        using var _rpcMethods = DisposableList<RPCMethod>.Create(32);
 
                         int idOffset = GetIDOffset(type, messages);
 
