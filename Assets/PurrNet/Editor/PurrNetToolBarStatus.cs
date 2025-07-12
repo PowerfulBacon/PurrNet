@@ -2,8 +2,6 @@ using PurrNet.Transports;
 using UnityEditor;
 using UnityEngine;
 using UnityToolbarExtender;
-using Unity.EditorCoroutines.Editor;
-using System.Collections;
 
 namespace PurrNet.Editor
 {
@@ -18,30 +16,12 @@ namespace PurrNet.Editor
             NetworkManager.onAnyServerConnectionState += OnConnectionStateChanged;
             NetworkManager.onAnyClientConnectionState += OnConnectionStateChanged;
             
-            var pebblesTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(
-                "Assets/PurrNet/Editor/Editor Default Resources/Pebbles.png");
-            _pebblesIcon = new GUIContent(pebblesTexture);
+            _pebblesIcon = new GUIContent(Resources.Load<Texture2D>("purrlogo"));
         }
 
         private static void OnConnectionStateChanged(ConnectionState state)
         {
-            EditorCoroutineUtility.StartCoroutineOwnerless(AutoRefreshCoroutine());
-        }
-
-        private static IEnumerator AutoRefreshCoroutine()
-        {
-            while (IsTransitioning(NetworkManager.main)) {
-                yield return new EditorWaitForSeconds(0.5f);
-            }
             ToolbarExtender.RequestToolbarRepaint();
-        }
-
-        private static bool IsTransitioning(NetworkManager? manager)
-        {
-            if (manager == null) return false;
-            
-            return manager.serverState is ConnectionState.Connecting or ConnectionState.Disconnecting ||
-                   manager.clientState is ConnectionState.Connecting or ConnectionState.Disconnecting;
         }
 
         static void OnToolbarGUI()
@@ -60,6 +40,10 @@ namespace PurrNet.Editor
             
             GUILayout.EndHorizontal();
             GUILayout.Space(20);
+
+            if (IsClientOrServerTransitioning(manager)) {
+                ToolbarExtender.RequestToolbarRepaint();
+            }
         }
 
         private static void DrawConnectionButton(NetworkManager? manager, bool isServer)
@@ -89,6 +73,14 @@ namespace PurrNet.Editor
 
             TransportInspector.DrawLed(state);
             GUI.enabled = true;
+        }
+        
+        private static bool IsClientOrServerTransitioning(NetworkManager? manager)
+        {
+            if (manager == null) return false;
+            
+            return manager.serverState is ConnectionState.Connecting or ConnectionState.Disconnecting ||
+                   manager.clientState is ConnectionState.Connecting or ConnectionState.Disconnecting;
         }
     }
 }
