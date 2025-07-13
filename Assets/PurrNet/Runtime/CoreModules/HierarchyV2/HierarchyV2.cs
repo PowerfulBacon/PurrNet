@@ -257,7 +257,7 @@ namespace PurrNet.Modules
             if (!_asServer && _manager.TryGetModule<HierarchyFactory>(true, out var factory) &&
                 factory.TryGetHierarchy(_sceneId, out var other))
             {
-                other.CatchupClient();
+                other.CatchupClient(player);
             }
         }
 
@@ -1178,7 +1178,7 @@ namespace PurrNet.Modules
             _toCompleteNextFrame.Clear();
         }
 
-        private void CatchupClient()
+        private void CatchupClient(PlayerID playerId)
         {
             for (var i = 0; i < _spawnedIdentities.Count; i++)
             {
@@ -1187,11 +1187,24 @@ namespace PurrNet.Modules
                 if (!identity.isSpawned)
                     continue;
 
+                if (!identity.id.HasValue)
+                    continue;
+
                 if (_toSpawnNextFrame.Contains(identity))
                     continue;
 
                 identity.SetIsSpawned(true, false);
                 identity.TriggerEarlySpawnEvent(false);
+
+                onSentSpawnPacket?.Invoke(playerId, _sceneId, identity.id.Value);
+
+                if (identity.TryAddObserver(playerId))
+                {
+                    onObserverAdded?.Invoke(playerId, identity);
+                    identity.TriggerOnPreObserverAdded(playerId, false);
+                    _triggerLateObserverAdded.Add(new PlayerNid { player = playerId, nid = identity, isSpawner = false});
+                }
+
                 identity.TriggerSpawnEvent(false);
                 onIdentityAdded?.Invoke(identity);
             }

@@ -306,10 +306,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _stopPlayingOnDisconnect: 0
   _startServerFlags: 9
-  _startClientFlags: 6
+  _startClientFlags: 7
   _cookieScope: 1
   _dontDestroyOnLoad: 0
-  _transport: {fileID: 999871915}
+  _transport: {fileID: 999871912}
   _networkPrefabs: {fileID: 11400000, guid: 44629c9ddffa3d347944a4335df094e0, type: 2}
   _networkAssets: {fileID: 0}
   _networkRules: {fileID: 11400000, guid: d8799083b96579a42b8b2d03e4ceae98, type: 2}
