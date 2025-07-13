@@ -66,10 +66,18 @@ namespace PurrNet
             if (isSpawnEvent)
                 return;
 
-            if (_ownerAuth && asServer)
+            /*if (_ownerAuth && asServer)
             {
                 _id = 0;
                 SendLatestStateToAll(_id, _value);
+            }*/
+
+            if (_ownerAuth)
+            {
+                _id = 0;
+
+                if (isOwner)
+                    _isDirty = true;
             }
         }
 
