@@ -33,6 +33,9 @@ namespace PurrNet
 
         public event Action<T> onChanged;
 
+        public delegate void ActionWithOld(T oldValue, T newValue);
+        public event ActionWithOld onChangedWithOld;
+
         public bool isControllingSyncVar => parent.IsController(_ownerAuth);
 
         public T value
@@ -54,10 +57,12 @@ namespace PurrNet
                     return;
                 }
 
+                var oldValue = _value;
                 _value = value;
                 _isDirty = true;
 
                 onChanged?.Invoke(value);
+                onChangedWithOld?.Invoke(oldValue, value);
             }
         }
 
@@ -175,8 +180,10 @@ namespace PurrNet
             if (bothNull || bothEqual)
                 return;
 
+            var oldValue = value;
             _value = newValue;
             onChanged?.Invoke(value);
+            onChangedWithOld?.Invoke(oldValue, value);
         }
 
         [TargetRpc, UsedImplicitly]
@@ -192,8 +199,10 @@ namespace PurrNet
             if (bothNull || bothEqual)
                 return;
 
+            var oldValue = value;
             _value = newValue;
             onChanged?.Invoke(value);
+            onChangedWithOld?.Invoke(oldValue, value);
         }
 
         [ServerRpc(Channel.Unreliable, requireOwnership: true)]
@@ -259,9 +268,11 @@ namespace PurrNet
 
             if (bothNull || bothEqual)
                 return;
-
+            
+            var oldValue = value;
             _value = newValue;
             onChanged?.Invoke(value);
+            onChangedWithOld?.Invoke(oldValue, value);
         }
 
         public static implicit operator T(SyncVar<T> syncVar)
