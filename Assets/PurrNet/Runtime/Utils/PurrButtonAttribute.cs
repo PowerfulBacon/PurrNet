@@ -1,6 +1,7 @@
 using System;
 using JetBrains.Annotations;
 #if UNITY_EDITOR && PURR_BUTTONS
+using System.Collections.Generic;
 using System.Reflection;
 using PurrNet.Logging;
 using UnityEditor;
@@ -31,35 +32,28 @@ namespace PurrNet
 
             MonoBehaviour targetMB = (MonoBehaviour)target;
 
-            MethodInfo[] methods = targetMB.GetType().GetMethods(
-                BindingFlags.Instance |
-                BindingFlags.Static |
-                BindingFlags.Public |
-                BindingFlags.NonPublic);
+            var allMethods = new List<MethodInfo>();
+            var current = target.GetType();
 
-            foreach (MethodInfo method in methods)
+            while (current != null && current != typeof(MonoBehaviour))
             {
-                PurrButtonAttribute buttonAttr = method.GetCustomAttribute<PurrButtonAttribute>();
+                allMethods.AddRange(current.GetMethods(BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.NonPublic | BindingFlags.Public));
+                current = current.BaseType;
+            }
 
-                if (buttonAttr != null)
+            foreach (var method in allMethods)
+            {
+                var attr = method.GetCustomAttribute<PurrButtonAttribute>();
+                if (attr == null) continue;
+    
+                var buttonName = !string.IsNullOrEmpty(attr.ButtonName) ? attr.ButtonName : ObjectNames.NicifyVariableName(method.Name);
+
+                if (GUILayout.Button(buttonName))
                 {
-                    string buttonName = !string.IsNullOrEmpty(buttonAttr.ButtonName)
-                        ? buttonAttr.ButtonName
-                        : ObjectNames.NicifyVariableName(method.Name);
-
-                    if (GUILayout.Button(buttonName))
-                    {
-                        ParameterInfo[] parameters = method.GetParameters();
-
-                        if (parameters.Length == 0)
-                        {
-                            method.Invoke(targetMB, null);
-                        }
-                        else
-                        {
-                            PurrLogger.LogWarning($"Cannot invoke method '{method.Name}' with PurrButton attribute because it has parameters. PurrButton only works with parameterless methods.");
-                        }
-                    }
+                    if (method.GetParameters().Length == 0)
+                        method.Invoke(target, null);
+                    else
+                        PurrLogger.LogWarning($"Cannot invoke method '{method.Name}' with PurrButton because it has parameters.");
                 }
             }
         }
