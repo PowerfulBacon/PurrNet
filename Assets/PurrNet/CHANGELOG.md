@@ -1,3 +1,10 @@
+# [1.13.0-beta.21](https://github.com/PurrNet/PurrNet/compare/v1.13.0-beta.20...v1.13.0-beta.21) (2025-07-16)
+
+
+### Bug Fixes
+
+* NetworkAssetsEditor and null assets ([c30cc95](https://github.com/PurrNet/PurrNet/commit/c30cc95decee22b1cbd4825b77584b55725ece1a))
+
 # [1.13.0-beta.20](https://github.com/PurrNet/PurrNet/compare/v1.13.0-beta.19...v1.13.0-beta.20) (2025-07-16)
 
 
