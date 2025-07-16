@@ -1,4 +1,6 @@
+using Cysharp.Threading.Tasks;
 using PurrNet;
+using PurrNet.Logging;
 using UnityEngine;
 
 public class TrySimpleSpawner : NetworkBehaviour
@@ -9,16 +11,21 @@ public class TrySimpleSpawner : NetworkBehaviour
 
     protected override void OnSpawned(bool asServer)
     {
-        Debug.Log(
-            "Test OnSpawned; "
-            + $"I am: *{this.localPlayer}*; "
-            + $"as server: *{asServer}*; "
-            + $"is server: *{this.isServer}*; "
-            + $"is client: *{this.isClient}*; "
-            + $"is client+obs: *{this.isClientAndObserving}*"
-        );
+        if (!asServer)
+            _ = HandleDefendPhase();
+    }
 
-        this.SomeRpc();
+    public async UniTask HandleDefendPhase()
+    {
+        Debug.Log("HandleDefendPhase.");
+
+        this?.EnterHang();
+    }
+
+    [ObserversRpc(PurrNet.Transports.Channel.ReliableOrdered)]
+    public void EnterHang()
+    {
+        PurrLogger.Log($"Player {owner} is entering hang state.", this);
     }
 
     [ObserversRpc(bufferLast: true)]

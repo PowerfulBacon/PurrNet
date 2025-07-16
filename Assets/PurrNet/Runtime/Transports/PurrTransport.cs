@@ -395,7 +395,7 @@ namespace PurrNet.Transports
 #if UNITASK_PURRNET_SUPPORT
                     await UniTask.DelayFrame(1);
 #else
-                    await Awaitable.FixedUpdateAsync();
+                    await UnityLatestUpdate.Yield();
 #endif
                 }
 
