@@ -21,10 +21,10 @@ namespace PurrNet
         private List<Type> _cachedTypes;
         private int _typePage = 0;
         private const int TypesPerPage = 10;
-        
+
         private const int AssetsPerPage = 20;
         private int _assetPage = 0;
-        
+
         private static GUIStyle DescriptionStyle()
         {
             return new GUIStyle(GUI.skin.label)
@@ -40,7 +40,7 @@ namespace PurrNet
             _folderProp = serializedObject.FindProperty("folder");
             _autoGenerateProp = serializedObject.FindProperty("autoGenerate");
             _assetsProp = serializedObject.FindProperty("assets");
-            
+
             _cachedTypes = _target.AvailableTypeNames
                 .Select(Type.GetType)
                 .Where(t => t != null)
@@ -75,21 +75,21 @@ namespace PurrNet
             {
                 _cachedTypes = GetTypesWithAssetsSorted(_target);
             }
-            
+
             DrawTypeToggleFoldout();
-            GUILayout.Space(10); 
+            GUILayout.Space(10);
 
             DrawAssetList();
 
             serializedObject.ApplyModifiedProperties();
-            
+
             if (GUI.changed)
             {
                 _target.Refresh();
                 EditorUtility.SetDirty(_target);
             }
         }
-        
+
         private void DrawToggleButton(string label, ref bool value)
         {
             GUI.color = value ? Color.green : Color.white;
@@ -150,7 +150,7 @@ namespace PurrNet
                     var type = filtered[i];
                     string typeName = type.AssemblyQualifiedName;
                     bool enabled = _target.enabledTypeNames.Contains(typeName);
-                    bool newValue = EditorGUILayout.ToggleLeft(type.Name, enabled); 
+                    bool newValue = EditorGUILayout.ToggleLeft(type.Name, enabled);
 
                     if (newValue != enabled)
                     {
@@ -200,14 +200,16 @@ namespace PurrNet
 
                 if (assetPath.EndsWith(".unity"))
                     continue;
-                
+
                 var all = AssetDatabase.LoadAllAssetsAtPath(assetPath);
                 foreach (var obj in all)
                 {
+                    if (!obj) continue;
+
                     var ns = obj.GetType().Namespace;
                     if (ns != null && ns.Contains("UnityEditor"))
                         continue;
-                    
+
                     if (obj && enabledTypes.Any(t => t.IsAssignableFrom(obj.GetType())) && !_target.assets.Contains(obj))
                         _target.assets.Add(obj);
                 }
@@ -247,7 +249,7 @@ namespace PurrNet
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 if (string.IsNullOrEmpty(path) || path.StartsWith("Assets/") == false || path.EndsWith(".unity"))
                     continue;
-                
+
                 var all = AssetDatabase.LoadAllAssetsAtPath(path);
 
                 foreach (var obj in all)
