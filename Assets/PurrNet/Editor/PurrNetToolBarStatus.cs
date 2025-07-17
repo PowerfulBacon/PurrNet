@@ -14,10 +14,17 @@ namespace PurrNet.Editor
         static void Init()
         {
             ToolbarExtender.RightToolbarGUI.Add(OnToolbarGUI);
+
+            PurrNetSettings.onSettingsChanged += OnSettingsChanged;
             NetworkManager.onAnyServerConnectionState += OnConnectionStateChanged;
             NetworkManager.onAnyClientConnectionState += OnConnectionStateChanged;
 
             _pebblesIcon = new GUIContent(Resources.Load<Texture2D>("purrlogo"));
+        }
+
+        private static void OnSettingsChanged(PurrNetSettings obj)
+        {
+            ToolbarExtender.RequestToolbarRepaint();
         }
 
         private static void OnConnectionStateChanged(ConnectionState state)
@@ -45,6 +52,9 @@ namespace PurrNet.Editor
 
         static void OnToolbarGUI()
         {
+            var settings = PurrNetSettings.GetOrCreateSettings();
+            if (settings.toolbarMode == ToolbarMode.None)
+                return;
             _version ??= TryFindVersion();
 
             GUILayout.FlexibleSpace();
@@ -53,11 +63,19 @@ namespace PurrNet.Editor
 
             GUILayout.BeginHorizontal();
 
-            GUILayout.Label(_pebblesIcon, GUILayout.Width(22), GUILayout.Height(22));
-            GUILayout.Label("PurrNet " + _version, GUILayout.ExpandWidth(false));
+            if (settings.toolbarMode == ToolbarMode.Compact)
+            {
+                GUILayout.Label(_pebblesIcon, GUILayout.Width(22), GUILayout.Height(22));
+                GUILayout.Label(_version, GUILayout.ExpandWidth(false));
+            }
+            else
+            {
+                GUILayout.Label(_pebblesIcon, GUILayout.Width(22), GUILayout.Height(22));
+                GUILayout.Label("PurrNet " + _version, GUILayout.ExpandWidth(false));
+            }
 
-            DrawConnectionButton(manager, true);  // Server
-            DrawConnectionButton(manager, false); // Client
+            DrawConnectionButton(settings, manager, true);  // Server
+            DrawConnectionButton(settings, manager, false); // Client
 
             GUILayout.EndHorizontal();
             GUILayout.Space(20);
@@ -67,7 +85,7 @@ namespace PurrNet.Editor
             }
         }
 
-        private static void DrawConnectionButton(NetworkManager manager, bool isServer)
+        private static void DrawConnectionButton(PurrNetSettings settings, NetworkManager manager, bool isServer)
         {
             ConnectionState? state = manager != null ? (isServer ? manager.serverState : manager.clientState) : null;
             var isActive = manager != null && (isServer ? manager.isServer : manager.isClient);
@@ -81,13 +99,26 @@ namespace PurrNet.Editor
                 _ => Color.white
             };
 
-            string buttonText = isTransitioning ? state.ToString() :
+            if (settings.toolbarMode == ToolbarMode.Compact)
+            {
+            }
+
+            string buttonText;
+
+            if (settings.toolbarMode == ToolbarMode.Compact)
+            {
+                buttonText = isServer ? "S" : "C";
+            }
+            else
+            {
+                buttonText = isTransitioning ? state.ToString() :
                                isActive ? $"Stop {(isServer ? "Server" : "Client")}" :
                                $"Start {(isServer ? "Server" : "Client")}";
+            }
 
             GUI.enabled = manager != null && !isTransitioning;
             GUI.color = color;
-            if (GUILayout.Button(buttonText, GUILayout.Width(100)))
+            if (GUILayout.Button(buttonText, settings.toolbarMode == ToolbarMode.Compact ? GUILayout.Width(25) : GUILayout.Width(100)))
             {
                 if (isServer)
                 {
