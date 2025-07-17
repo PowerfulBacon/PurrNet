@@ -105,10 +105,9 @@ namespace PurrNet.Codegen
                 var btype = type.BaseType.Resolve();
                 return btype != null && InheritsFrom(btype, baseTypeName);
             }
-            catch (Exception e)
+            catch
             {
-                throw new Exception(
-                    $"InheritsFrom : Failed to resolve base type of {type?.FullName}, {e.Message} \n {e.StackTrace}");
+                return false;
             }
         }
 
@@ -976,10 +975,7 @@ namespace PurrNet.Codegen
                     return false;
 
                 if (IsTaskOrInheritsFromTask(type) && type is GenericInstanceType genericInstanceType)
-                {
                     concreteType = genericInstanceType.GenericArguments[0];
-                    return true;
-                }
 
                 return true;
             }
@@ -1986,6 +1982,7 @@ namespace PurrNet.Codegen
                 for (var m = 0; m < assemblyDefinition.Modules.Count; m++)
                 {
                     var module = assemblyDefinition.Modules[m];
+                    var hasPurrNetAsReference = HasPurrNetAsReference(compiledAssembly.Name, module);
 
                     using var types = GetAllTypes(module);
                     var usedTypes = new HashSet<TypeReference>(TypeReferenceEqualityComparer.Default);
@@ -2035,6 +2032,8 @@ namespace PurrNet.Codegen
                         if (type.Name == "TopView" && type.Namespace == "Unity.Multiplayer.Playmode.Workflow.Editor")
                             UnityPlaymodePatch.Patch(type);
 #endif
+                        if (!hasPurrNetAsReference)
+                            continue;
 
                         // check if it has RegisterNetworkTypeAttribute
                         foreach (var customAttribute in type.CustomAttributes)
@@ -2185,23 +2184,26 @@ namespace PurrNet.Codegen
                         }
                     }
 
-                    try
+                    if (hasPurrNetAsReference)
                     {
-                        FindUsedTypes(module, types, usedTypes);
+                        try
+                        {
+                            FindUsedTypes(module, types, usedTypes);
 
-                        foreach (var usedType in usedTypes)
-                        {
-                            if (IsTypeInOwnModule(usedType, module))
-                                typesToGenerateSerializer.Add(usedType);
+                            foreach (var usedType in usedTypes)
+                            {
+                                if (IsTypeInOwnModule(usedType, module))
+                                    typesToGenerateSerializer.Add(usedType);
+                            }
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        messages.Add(new DiagnosticMessage
+                        catch (Exception e)
                         {
-                            DiagnosticType = DiagnosticType.Error,
-                            MessageData = $"FindUsedTypes {e.Message}\n{e.StackTrace}"
-                        });
+                            messages.Add(new DiagnosticMessage
+                            {
+                                DiagnosticType = DiagnosticType.Error,
+                                MessageData = $"FindUsedTypes {e.Message}\n{e.StackTrace}"
+                            });
+                        }
                     }
                 }
 
@@ -2257,6 +2259,25 @@ namespace PurrNet.Codegen
 
                 return new ILPostProcessResult(compiledAssembly.InMemoryAssembly, messages);
             }
+        }
+
+        private static bool HasPurrNetAsReference(string myName, ModuleDefinition module)
+        {
+            if (myName == "PurrNet.Runtime")
+                return true;
+
+            bool hasPurrNetAsReference = false;
+
+            foreach (var reference in module.AssemblyReferences)
+            {
+                if (reference.Name == "PurrNet.Runtime")
+                {
+                    hasPurrNetAsReference = true;
+                    break;
+                }
+            }
+
+            return hasPurrNetAsReference;
         }
 
         private static void ProcessServerOnlyMethods(MethodDefinition method, PurrNetSettings settings, bool serverBuild, bool isEditor)
@@ -2699,6 +2720,9 @@ namespace PurrNet.Codegen
             TypeDefinition resolved,
             TypeDefinition networkModule)
         {
+            if (networkModule == null)
+                return;
+
             bool inheritsNetworkModule = InheritsFrom(resolved, networkModule.FullName);
             if (inheritsNetworkModule && type is GenericInstanceType genericInstance)
             {
