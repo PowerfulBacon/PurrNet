@@ -128,7 +128,7 @@ namespace PurrNet
 
         internal void RecalculateDirectChildren()
         {
-            using var dChildren = new DisposableList<TransformIdentityPair>(16);
+            using var dChildren = DisposableList<TransformIdentityPair>.Create(16);
             HierarchyPool.GetDirectChildren(transform, dChildren);
 
             _directChildren ??= new List<NetworkIdentity>(dChildren.Count);
@@ -963,7 +963,7 @@ namespace PurrNet
                 return;
             }
 
-            using var identities = new DisposableList<TransformIdentityPair>(16);
+            using var identities = DisposableList<TransformIdentityPair>.Create(16);
             HierarchyPool.GetDirectChildren(go.transform, identities);
 
             for (var i = 0; i < identities.Count; i++)
@@ -984,7 +984,7 @@ namespace PurrNet
                 return;
             }
 
-            using var identities = new DisposableList<TransformIdentityPair>(16);
+            using var identities = DisposableList<TransformIdentityPair>.Create(16);
             HierarchyPool.GetDirectChildren(go.transform, identities);
 
             for (var i = 0; i < identities.Count; i++)
