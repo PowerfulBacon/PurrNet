@@ -25,11 +25,13 @@ namespace PurrNet.Editor
         private static void OnSettingsChanged(PurrNetSettings obj)
         {
             ToolbarExtender.RequestToolbarRepaint();
+            PlayModePatch.Repaint();
         }
 
         private static void OnConnectionStateChanged(ConnectionState state)
         {
             ToolbarExtender.RequestToolbarRepaint();
+            PlayModePatch.Repaint();
         }
 
         static string TryFindVersion()
@@ -50,7 +52,7 @@ namespace PurrNet.Editor
 
         static string _version;
 
-        static void OnToolbarGUI()
+        public static void OnToolbarGUI()
         {
             var settings = PurrNetSettings.GetOrCreateSettings();
             if (settings.toolbarMode == ToolbarMode.None)
@@ -82,6 +84,7 @@ namespace PurrNet.Editor
 
             if (IsClientOrServerTransitioning(manager)) {
                 ToolbarExtender.RequestToolbarRepaint();
+                PlayModePatch.Repaint();
             }
         }
 

@@ -48,6 +48,11 @@ namespace PurrNet.Codegen
         {
             var name = compiledAssembly.Name;
 
+#if UNITY_PLAYMODE
+            if (name.Contains("Unity.Multiplayer.Playmode.Workflow.Editor"))
+                return true;
+#endif
+
             if (name.Contains("NuGetForUnity"))
                 return false;
 
@@ -1981,6 +1986,7 @@ namespace PurrNet.Codegen
                 for (var m = 0; m < assemblyDefinition.Modules.Count; m++)
                 {
                     var module = assemblyDefinition.Modules[m];
+
                     using var types = GetAllTypes(module);
                     var usedTypes = new HashSet<TypeReference>(TypeReferenceEqualityComparer.Default);
 
@@ -2024,6 +2030,11 @@ namespace PurrNet.Codegen
                             typesToIgnoreForSerialization);
 
                         var type = types[t];
+
+#if UNITY_PLAYMODE
+                        if (type.Name == "TopView" && type.Namespace == "Unity.Multiplayer.Playmode.Workflow.Editor")
+                            UnityPlaymodePatch.Patch(type);
+#endif
 
                         // check if it has RegisterNetworkTypeAttribute
                         foreach (var customAttribute in type.CustomAttributes)

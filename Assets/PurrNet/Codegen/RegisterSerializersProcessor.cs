@@ -108,8 +108,8 @@ namespace PurrNet.Codegen
             if (!isStatic)
                 return;
 
-            using var writeTypes = new DisposableList<PackType>(32);
-            using var readTypes = new DisposableList<PackType>(32);
+            using var writeTypes = DisposableList<PackType>.Create(32);
+            using var readTypes = DisposableList<PackType>.Create(32);
 
             var mcount = type.Methods.Count;
             for (var i = 0; i < mcount; i++)
