@@ -72,6 +72,7 @@ namespace PurrNet.Modules
 
     public class PlayersManager : INetworkModule, IConnectionListener, IPlayerBroadcaster
     {
+        private readonly NetworkManager _networkManager;
         private readonly AuthModule _authModule;
         private readonly BroadcastModule _broadcastModule;
         private readonly ITransport _transport;
@@ -166,6 +167,7 @@ namespace PurrNet.Modules
 
         public PlayersManager(NetworkManager nm, AuthModule auth, BroadcastModule broadcaster)
         {
+            _networkManager = nm;
             _transport = nm.transport.transport;
             _authModule = auth;
             _broadcastModule = broadcaster;
@@ -326,8 +328,8 @@ namespace PurrNet.Modules
             }
 
             var lastNidId = new NetworkID(0, playerId);
-            if (_lastNidId.TryGetValue(playerId, out var lastNid))
-                lastNidId = lastNid;
+            if (_lastNidId.TryGetValue(playerId, out var lastNidRes))
+                lastNidId = lastNidRes;
 
             _broadcastModule.Send(conn, new ServerLoginResponse(playerId, lastNidId));
 
@@ -335,6 +337,15 @@ namespace PurrNet.Modules
             if (RegisterPlayer(conn, playerId, out var isReconnect))
             {
                 SendNewUserToAllClients(conn, playerId);
+                if (conn == _networkManager.localClientConnection)
+                {
+                    localPlayerId = playerId;
+                    if (_networkManager.TryGetModule<PlayersManager>(false, out var playersManager))
+                    {
+                        playersManager.localPlayerId = playerId;
+                        playersManager.lastNid = lastNidId;
+                    }
+                }
                 TriggerOnJoinedEvent(playerId, isReconnect);
             }
         }
