@@ -1241,7 +1241,10 @@ namespace PurrNet.Modules
                 toSpawn.TriggerSpawnEvent(_asServer);
 
                 if (_asServer && isHost)
+                {
+                    toSpawn.SetIsSpawned(true, false);
                     toSpawn.TriggerSpawnEvent(false);
+                }
 
                 onIdentityAdded?.Invoke(toSpawn);
             }
