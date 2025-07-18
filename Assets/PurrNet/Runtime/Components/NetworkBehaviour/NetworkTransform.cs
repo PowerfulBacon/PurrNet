@@ -189,6 +189,10 @@ namespace PurrNet
 
         protected override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
         {
+            if (!enabled) {
+                return;
+            }
+            
             if (!_wasOnSpawnedCalled)
                 return;
 
@@ -263,6 +267,10 @@ namespace PurrNet
 
         protected override void OnObserverAdded(PlayerID player)
         {
+            if (!enabled) {
+                return;
+            }
+            
             if (player == localPlayer)
                 return;
 
