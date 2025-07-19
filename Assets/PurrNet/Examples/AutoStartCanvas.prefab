@@ -192,6 +192,7 @@ MonoBehaviour:
   _disappearAfterClientStart: 0
   _serverButtonImage: {fileID: 4497043080644738075}
   _clientButtonImage: {fileID: 5016356667933783871}
+  _alreadyInitialized: 0
 --- !u!223 &6784912101669386921
 Canvas:
   m_ObjectHideFlags: 0
@@ -289,9 +290,9 @@ RectTransform:
   - {fileID: 1184248517861157266}
   m_Father: {fileID: 8620645569177711213}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 150, y: -66.00003}
   m_SizeDelta: {x: 230.09338, y: 65.04669}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6319334207170859467
@@ -422,9 +423,9 @@ RectTransform:
   - {fileID: 7958877975742807366}
   m_Father: {fileID: 8620645569177711213}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -90}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 150, y: -156}
   m_SizeDelta: {x: 230.09338, y: 65.04669}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1127416346708849749
