@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using PurrNet.Transports;
 using UnityEditor;
@@ -52,6 +54,32 @@ namespace PurrNet.Editor
 
         static string _version;
 
+        static readonly List<GenericTransport> _transports = new ();
+
+        static string[] _transportNames = Array.Empty<string>();
+
+        static int _transportIndex;
+
+        static void RefreshPossibleTransports()
+        {
+            _transports.Clear();
+
+            if (NetworkManager.main == null)
+                return;
+
+            NetworkManager.main.GetComponentsInChildren<GenericTransport>(true, _transports);
+
+            if (_transportNames.Length != _transports.Count)
+                _transportNames = new string[_transports.Count];
+
+            for (var i = 0; i < _transports.Count; i++)
+            {
+                if (NetworkManager.main.transport == _transports[i])
+                    _transportIndex = i;
+                _transportNames[i] = $"{i}: {_transports[i].GetType().Name}";
+            }
+        }
+
         public static void OnToolbarGUI()
         {
             var settings = PurrNetSettings.GetOrCreateSettings();
@@ -78,6 +106,29 @@ namespace PurrNet.Editor
 
             DrawConnectionButton(settings, manager, true);  // Server
             DrawConnectionButton(settings, manager, false); // Client
+
+            if (settings.toolbarTransportDropDown)
+            {
+                bool valid = Application.isPlaying && NetworkManager.main && NetworkManager.main.isOffline;
+
+                bool wasEnabled = GUI.enabled;
+                if (!valid)
+                    GUI.enabled = false;
+                RefreshPossibleTransports();
+
+                var newidx = EditorGUILayout.Popup(_transportIndex, _transportNames, GUILayout.Width(130));
+                if (_transportIndex != newidx)
+                {
+                    var transport = _transports[newidx];
+                    if (transport)
+                    {
+                        NetworkManager.main.transport = transport;
+                        _transportIndex = newidx;
+                    }
+                }
+
+                GUI.enabled = wasEnabled;
+            }
 
             GUILayout.EndHorizontal();
             GUILayout.Space(20);

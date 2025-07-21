@@ -61,7 +61,7 @@ namespace PurrNet.Steam.Editor
 #if STEAMWORKS_NET_PACKAGE
                 if (Application.isPlaying)
                 {
-                    if (GUILayout.Button("Copy my SteamID to clipboard"))
+                    if (GUILayout.Button("Copy my SteamID to Clipboard"))
                     {
                         string content = SteamUser.GetSteamID().ToString();
                         EditorGUIUtility.systemCopyBuffer = content;

@@ -36,6 +36,12 @@ namespace PurrNet.Editor
                 settings.toolbarMode);
             settings.toolbarMode = (ToolbarMode)toolbarResult;
 
+            settings.toolbarTransportDropDown = EditorGUILayout.Toggle(
+                new GUIContent("Toolbar Transport"),
+                settings.toolbarTransportDropDown);
+
+            GUILayout.Space(10f);
+
             var result = EditorGUILayout.EnumPopup(
                 new GUIContent("Strip Code Mode",
                     "Defines how PurrNet will handle unused RPCs and SyncVars in builds. " +

@@ -3097,6 +3097,7 @@ GameObject:
   - component: {fileID: 1216416906}
   - component: {fileID: 1216416907}
   - component: {fileID: 1216416908}
+  - component: {fileID: 1216416910}
   - component: {fileID: 1216416909}
   m_Layer: 0
   m_Name: Network
@@ -3119,7 +3120,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _stopPlayingOnDisconnect: 0
   _startServerFlags: 9
-  _startClientFlags: 6
+  _startClientFlags: 7
   _cookieScope: 1
   _dontDestroyOnLoad: 0
   _transport: {fileID: 1216416908}
@@ -3260,6 +3261,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f20505c835b1f4945ac3cd8c6809bbc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SteamManager
+--- !u!114 &1216416910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1216416895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfcb920b5e3b7924ea4f2b8a047e2edf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.LocalTransport
 --- !u!1 &1284249959
 GameObject:
   m_ObjectHideFlags: 0

@@ -21,6 +21,7 @@ namespace PurrNet.Editor
         public StripCodeMode stripCodeMode = StripCodeMode.DoNotStrip;
 
         public ToolbarMode toolbarMode = ToolbarMode.Full;
+        public bool toolbarTransportDropDown;
 
         public bool stripServerCode => stripCodeMode != StripCodeMode.DoNotStrip;
 
