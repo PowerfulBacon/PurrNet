@@ -2,9 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-#if UNITASK_PURRNET_SUPPORT
-using Cysharp.Threading.Tasks;
-#endif
 using JamesFrowen.SimpleWeb;
 using JetBrains.Annotations;
 using PurrNet.Logging;
