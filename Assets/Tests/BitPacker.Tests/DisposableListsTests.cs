@@ -27,8 +27,8 @@ public class DisposableListsTests
     [Test]
     public void TestDeltaDisposableList()
     {
-        var oldList = new DisposableList<int>(5);
-        var newList = new DisposableList<int>(5);
+        var oldList = DisposableList<int>.Create(5);
+        var newList = DisposableList<int>.Create(5);
 
         for (int i = 0; i < 5; i++)
         {
@@ -51,8 +51,8 @@ public class DisposableListsTests
     [Test]
     public void TestDeltaSameLength()
     {
-        var old = new DisposableList<int>(5);
-        var @new = new DisposableList<int>(5);
+        var old = DisposableList<int>.Create(5);
+        var @new = DisposableList<int>.Create(5);
 
         for (int i = 0; i < 5; i++)
         {

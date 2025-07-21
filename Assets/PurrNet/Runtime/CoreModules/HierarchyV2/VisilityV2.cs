@@ -68,7 +68,7 @@ namespace PurrNet.Modules
 
         private static bool RefreshVisibilityForGameObject(Transform transform, PlayerID player)
         {
-            using var identities = new DisposableList<NetworkIdentity>(16);
+            using var identities = DisposableList<NetworkIdentity>.Create(16);
             transform.GetComponents(identities.list);
 
             bool removed = false;
@@ -94,7 +94,7 @@ namespace PurrNet.Modules
 
         private static void ClearVisibilityForGameObject(Transform transform, HashSet<PlayerID> players)
         {
-            using var identities = new DisposableList<NetworkIdentity>(16);
+            using var identities = DisposableList<NetworkIdentity>.Create(16);
             transform.GetComponents(identities.list);
 
             int ccount = identities.Count;
@@ -116,7 +116,7 @@ namespace PurrNet.Modules
         private void RefreshVisibilityForGameObject(PlayerID player, Transform transform,
             NetworkVisibilityRuleSet rules, bool isParentVisible, bool wasParentDirtied)
         {
-            using var identities = new DisposableList<NetworkIdentity>(16);
+            using var identities = DisposableList<NetworkIdentity>.Create(16);
 
             transform.GetComponents(identities.list);
 

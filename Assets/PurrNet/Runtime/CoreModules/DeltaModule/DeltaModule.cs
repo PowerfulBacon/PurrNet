@@ -315,7 +315,7 @@ namespace PurrNet.Modules
                 return;
             }
 
-            var entries = new DisposableList<DeltaAcknowledge>(16);
+            var entries = DisposableList<DeltaAcknowledge>.Create(16);
             entries.Add(acknowledge);
             _acknowledgements.Add(new DeltaAcknowledgeBatch
             {

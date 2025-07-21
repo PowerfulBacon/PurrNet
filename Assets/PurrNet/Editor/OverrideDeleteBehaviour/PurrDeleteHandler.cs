@@ -52,7 +52,7 @@ namespace PurrNet.Editor
                         }
                         else
                         {
-                            using var children = new DisposableList<TransformIdentityPair>(16);
+                            using var children = DisposableList<TransformIdentityPair>.Create(16);
                             HierarchyPool.GetDirectChildren(go.transform, children);
                             foreach (var child in children)
                                 child.identity.Despawn();
