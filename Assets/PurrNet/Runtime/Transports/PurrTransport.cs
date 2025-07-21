@@ -383,29 +383,23 @@ namespace PurrNet.Transports
 
         public async void Connect(string ip, ushort port)
         {
-            try
+            for (int i = 0; i < 10; i++)
             {
-                if (clientState != ConnectionState.Disconnected)
-                    Disconnect();
-
-                clientState = ConnectionState.Connecting;
-
-                while (listenerState == ConnectionState.Connecting)
-                {
-#if UNITASK_PURRNET_SUPPORT
-                    await UniTask.DelayFrame(1);
-#else
-                    await UnityLatestUpdate.Yield();
-#endif
-                }
-
-                _client = SimpleWebClient.Create(ushort.MaxValue, 5000, _tcpConfig);
-                _client.onConnect += OnClientConnected;
-                _client.onData += OnClientData;
-                _client.onDisconnect += OnClientDisconnected;
-
                 try
                 {
+                    if (clientState != ConnectionState.Disconnected)
+                        Disconnect();
+
+                    clientState = ConnectionState.Connecting;
+
+                    while (listenerState == ConnectionState.Connecting)
+                        await UnityLatestUpdate.Yield();
+
+                    _client = SimpleWebClient.Create(ushort.MaxValue, 5000, _tcpConfig);
+                    _client.onConnect += OnClientConnected;
+                    _client.onData += OnClientData;
+                    _client.onDisconnect += OnClientDisconnected;
+
                     var token = new CancellationTokenSource();
                     AddCancellation(token, false);
 
@@ -419,17 +413,22 @@ namespace PurrNet.Transports
                     };
 
                     _client.Connect(builder.Uri);
+                    break;
                 }
                 catch (Exception e)
                 {
                     Disconnect();
-                    PurrLogger.LogWarning(e.Message[(e.Message.IndexOf('\n') + 1)..]);
+
+                    if (i == 9)
+                    {
+                        PurrLogger.LogException(e.Message);
+                    }
+                    else
+                    {
+                        await UnityLatestUpdate.WaitSeconds(i);
+                        PurrLogger.LogWarning(e.Message);
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                Disconnect();
-                PurrLogger.LogException(e.Message);
             }
         }
 

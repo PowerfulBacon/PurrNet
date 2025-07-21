@@ -96,7 +96,7 @@ namespace PurrNet
         private void OnValidate()
         {
 #if UNITY_EDITOR
-            if (!Application.isPlaying) 
+            if (!Application.isPlaying)
                 UpdateLabelStyle();
 #endif
         }
@@ -284,7 +284,9 @@ namespace PurrNet
 
         private void OnClientConnectionState(ConnectionState state)
         {
-            _tickManager = _networkManager.GetModule<TickManager>(false);
+            if (!_networkManager.TryGetModule<TickManager>(false, out _tickManager))
+                return;
+
             _playersClientBroadcaster = _networkManager.GetModule<PlayersBroadcaster>(false);
             _pingHistorySize = Mathf.RoundToInt(_networkManager.tickModule.tickRate * PING_HISTORY_TIME);
             _pingStats = new int[_pingHistorySize];

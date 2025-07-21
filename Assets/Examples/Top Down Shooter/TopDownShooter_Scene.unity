@@ -3120,7 +3120,7 @@ MonoBehaviour:
   _startClientFlags: 7
   _cookieScope: 1
   _dontDestroyOnLoad: 0
-  _transport: {fileID: 1216416902}
+  _transport: {fileID: 1216416907}
   _networkPrefabs: {fileID: 11400000, guid: 37af97d33ef8d9747b965053a79d21f4, type: 2}
   _networkAssets: {fileID: 11400000, guid: a519d78740d8b804e80cc0fd8da9b0cd, type: 2}
   _networkRules: {fileID: 11400000, guid: d8799083b96579a42b8b2d03e4ceae98, type: 2}
@@ -3227,8 +3227,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.PurrTransport
   _masterServer: https://purrbalancer.riten.dev:8080/
   _roomName: d183be76477d40b5b16d5df51ffec9ff
-  _region: eu-central
-  _host: eu1.purrlay.riten.dev
+  _region: asia-southeast
+  _host: asia.purrlay.riten.dev
   _pollEventsInUpdate: 0
 --- !u!1 &1284249959
 GameObject:

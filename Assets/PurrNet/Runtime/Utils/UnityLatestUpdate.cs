@@ -30,6 +30,23 @@ namespace PurrNet
             }
         }
 
+        public static Task WaitSeconds(float seconds)
+        {
+            var promise = new TaskCompletionSource<bool>();
+            float timer = 0f;
+
+            onUpdate += OnUpdate;
+
+            return promise.Task;
+
+            void OnUpdate()
+            {
+                timer += Time.deltaTime;
+                if (timer >= seconds && promise.TrySetResult(true))
+                    onUpdate -= OnUpdate;
+            }
+        }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void OnSubsystemRegistration()
         {
