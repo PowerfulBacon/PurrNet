@@ -136,6 +136,20 @@ namespace PurrNet
         private void OnEnable()
         {
             UnityLatestUpdate.onLatestUpdate += LateLateUpdate;
+            
+            if (_trs == null)
+                return;
+            
+            // Reset delta compression state to prevent stale reference points
+            _currentData = GetCurrentTransformData();
+            _latestData = _currentData;
+            _lastReadData = _currentData;
+            _lastSentDelta = _currentData;
+            
+            // Force sync if we're the controller and spawned
+            if (_wasOnSpawnedCalled && isController) {
+                ForceSync();
+            }
         }
 
         private void OnDisable()
@@ -189,6 +203,10 @@ namespace PurrNet
 
         protected override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
         {
+            if (!enabled) {
+                return;
+            }
+            
             if (!_wasOnSpawnedCalled)
                 return;
 
@@ -263,6 +281,10 @@ namespace PurrNet
 
         protected override void OnObserverAdded(PlayerID player)
         {
+            if (!enabled) {
+                return;
+            }
+            
             if (player == localPlayer)
                 return;
 
