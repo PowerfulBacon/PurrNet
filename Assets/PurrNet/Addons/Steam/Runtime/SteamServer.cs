@@ -209,9 +209,17 @@ namespace PurrNet.Steam
                 _ => 0
             };
 
-            if (_isDedicated)
-                 SteamGameServerNetworkingSockets.SendMessageToConnection(conn, ptr, (uint)data.length, sendFlag, out _);
-            else SteamNetworkingSockets.SendMessageToConnection(conn, ptr, (uint)data.length, sendFlag, out _);
+            try
+            {
+                if (_isDedicated)
+                    SteamGameServerNetworkingSockets.SendMessageToConnection(conn, ptr, (uint)data.length, sendFlag,
+                        out _);
+                else SteamNetworkingSockets.SendMessageToConnection(conn, ptr, (uint)data.length, sendFlag, out _);
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogException(e);
+            }
 #endif
         }
 
