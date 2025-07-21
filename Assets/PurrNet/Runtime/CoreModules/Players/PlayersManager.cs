@@ -337,15 +337,6 @@ namespace PurrNet.Modules
             if (RegisterPlayer(conn, playerId, out var isReconnect))
             {
                 SendNewUserToAllClients(conn, playerId);
-                if (conn == _networkManager.localClientConnection)
-                {
-                    localPlayerId = playerId;
-                    if (_networkManager.TryGetModule<PlayersManager>(false, out var playersManager))
-                    {
-                        playersManager.localPlayerId = playerId;
-                        playersManager.lastNid = lastNidId;
-                    }
-                }
                 TriggerOnJoinedEvent(playerId, isReconnect);
             }
         }

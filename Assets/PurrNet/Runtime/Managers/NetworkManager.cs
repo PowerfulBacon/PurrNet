@@ -78,7 +78,7 @@ namespace PurrNet
         /// The local client connection.
         /// Null if the client is not connected.
         /// </summary>
-        public Connection? localClientConnection { [UsedImplicitly] get; private set; }
+        public Connection? clientToServerConn { [UsedImplicitly] get; private set; }
 
         /// <summary>
         /// The cookie scope of the network manager.
@@ -1269,7 +1269,7 @@ namespace PurrNet
         /// </summary>
         public void StartClient()
         {
-            localClientConnection = null;
+            clientToServerConn = null;
             if (!_transport)
                 PurrLogger.Throw<InvalidOperationException>("Transport is not set (null).");
 
@@ -1296,7 +1296,7 @@ namespace PurrNet
                 _serverModules.OnNewConnection(conn, true);
             else
             {
-                localClientConnection = conn;
+                clientToServerConn = conn;
                 _clientModules.OnNewConnection(conn, false);
             }
         }
@@ -1307,7 +1307,7 @@ namespace PurrNet
                 _serverModules.OnLostConnection(conn, true);
             else
             {
-                localClientConnection = null;
+                clientToServerConn = null;
                 _clientModules.OnLostConnection(conn, false);
             }
 #if UNITY_EDITOR
