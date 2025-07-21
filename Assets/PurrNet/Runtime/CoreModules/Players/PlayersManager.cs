@@ -72,7 +72,6 @@ namespace PurrNet.Modules
 
     public class PlayersManager : INetworkModule, IConnectionListener, IPlayerBroadcaster
     {
-        private readonly NetworkManager _networkManager;
         private readonly AuthModule _authModule;
         private readonly BroadcastModule _broadcastModule;
         private readonly ITransport _transport;
@@ -167,7 +166,6 @@ namespace PurrNet.Modules
 
         public PlayersManager(NetworkManager nm, AuthModule auth, BroadcastModule broadcaster)
         {
-            _networkManager = nm;
             _transport = nm.transport.transport;
             _authModule = auth;
             _broadcastModule = broadcaster;
