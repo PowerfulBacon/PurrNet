@@ -197,6 +197,9 @@ namespace PurrNet.Modules
         {
             try
             {
+                if (_networkManager.isOffline)
+                    return;
+
                 float requestSendTime = Time.unscaledTime;
                 var rawServerTick = await RPCClass.RequestServerTick();
                 rtt = Time.unscaledTime - requestSendTime;

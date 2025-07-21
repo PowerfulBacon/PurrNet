@@ -102,6 +102,9 @@ namespace PurrNet.Steam
         public void Send(ByteData data, Channel channel)
         {
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
+            if (_connection == HSteamNetConnection.Invalid)
+                return;
+
             MakeSureBufferCanFit(data.length);
 
             var pinnedArray = GCHandle.Alloc(data.data, GCHandleType.Pinned);

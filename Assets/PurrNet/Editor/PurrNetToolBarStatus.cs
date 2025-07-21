@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using PurrNet.Transports;
 using UnityEditor;
@@ -109,7 +110,7 @@ namespace PurrNet.Editor
 
             if (settings.toolbarTransportDropDown)
             {
-                bool valid = Application.isPlaying && NetworkManager.main && NetworkManager.main.isOffline;
+                bool valid = Application.isPlaying && NetworkManager.main;
 
                 bool wasEnabled = GUI.enabled;
                 if (!valid)
@@ -122,7 +123,7 @@ namespace PurrNet.Editor
                     var transport = _transports[newidx];
                     if (transport)
                     {
-                        NetworkManager.main.transport = transport;
+                        ChangeTransport(transport);
                         _transportIndex = newidx;
                     }
                 }
@@ -136,6 +137,24 @@ namespace PurrNet.Editor
             if (IsClientOrServerTransitioning(manager)) {
                 ToolbarExtender.RequestToolbarRepaint();
                 PlayModePatch.Repaint();
+            }
+        }
+
+        private static async void ChangeTransport(GenericTransport transport)
+        {
+            try
+            {
+                if (!NetworkManager.main.isOffline)
+                    NetworkManager.main.StopServer();
+                while (NetworkManager.main.serverState != ConnectionState.Disconnected ||
+                       NetworkManager.main.clientState != ConnectionState.Disconnected)
+                    await Task.Yield();
+                NetworkManager.main.transport = transport;
+                NetworkManager.main.StartHost();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
             }
         }
 

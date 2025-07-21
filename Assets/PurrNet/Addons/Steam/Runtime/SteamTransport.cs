@@ -7,6 +7,7 @@
 #endif
 
 using System.Collections.Generic;
+using PurrNet.Logging;
 using PurrNet.Transports;
 using UnityEngine;
 

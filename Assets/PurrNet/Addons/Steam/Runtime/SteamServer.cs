@@ -128,6 +128,9 @@ namespace PurrNet.Steam
             {
                 var conn = _connections[i];
 
+                if (conn == HSteamNetConnection.Invalid)
+                    continue;
+
                 if (_isDedicated)
                      SteamGameServerNetworkingSockets.FlushMessagesOnConnection(conn);
                 else SteamNetworkingSockets.FlushMessagesOnConnection(conn);
