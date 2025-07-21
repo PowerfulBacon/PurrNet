@@ -74,8 +74,15 @@ namespace PurrNet.Steam
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
             if (ulong.TryParse(steamId, out var id) == false)
             {
-                PurrLogger.LogError("Invalid Steam ID provided as address to connect");
-                yield break;
+                if (steamId is "localhost" or "127.0.0.1")
+                {
+                    id = SteamUser.GetSteamID().m_SteamID;
+                }
+                else
+                {
+                    PurrLogger.LogError("Invalid Steam ID provided as address to connect");
+                    yield break;
+                }
             }
 
             _isDedicated = dedicated;
