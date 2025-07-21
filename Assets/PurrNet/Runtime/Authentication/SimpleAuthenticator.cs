@@ -9,7 +9,7 @@ namespace PurrNet.Authentication
         [Tooltip("The password required to authenticate the client.")] [SerializeField]
         private string _password = "PurrNet";
 
-        protected override Task<AuthenticationRequest<string>> GetClientPlayload()
+        protected override Task<AuthenticationRequest<string>> GetClientPayload()
         {
             return Task.FromResult(new AuthenticationRequest<string>(_password));
         }

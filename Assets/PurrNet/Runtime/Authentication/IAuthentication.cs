@@ -130,7 +130,7 @@ namespace PurrNet.Authentication
         {
             try
             {
-                var payload = await GetClientPlayload();
+                var payload = await GetClientPayload();
                 payload.cookie ??= cookies.GetOrSet("client_connection_session", Guid.NewGuid().ToString());
                 using var packer = BitPackerPool.Get();
                 Packer<T>.Write(packer, payload.payload);
@@ -172,7 +172,7 @@ namespace PurrNet.Authentication
         /// This gets called when a new client connects and is then sent to the server for validation.
         /// </summary>
         /// <returns>The client payload to be validated.</returns>
-        protected abstract Task<AuthenticationRequest<T>> GetClientPlayload();
+        protected abstract Task<AuthenticationRequest<T>> GetClientPayload();
 
         /// <summary>
         /// Once the client payload is received, this method is called to validate the payload.
