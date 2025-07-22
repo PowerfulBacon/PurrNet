@@ -324,10 +324,14 @@ namespace PurrNet.Transports
 
                     _server.Connect(builder.Uri);
                 }
+                catch (OperationCanceledException)
+                {
+                    // ignore
+                }
                 catch (Exception e)
                 {
                     StopListening();
-                    PurrLogger.LogWarning(e.Message[(e.Message.IndexOf('\n') + 1)..]);
+                    PurrLogger.LogError(e.Message);
                 }
             }
             catch (Exception e)

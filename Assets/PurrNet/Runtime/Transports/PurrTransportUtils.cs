@@ -128,6 +128,10 @@ namespace PurrNet.Transports
             request.SetRequestHeader("region", region);
             request.SetRequestHeader("name", roomName);
             var response = await request.SendWebRequest();
+
+            if (response.webRequest.result != UnityWebRequest.Result.Success)
+                throw new Exception($"Failed to allocate room: {response.webRequest.error}");
+
             var text = response.webRequest.downloadHandler.text;
             var res = JsonUtility.FromJson<HostJoinInfo>(text);
 #if USE_LOCAL_MASTER

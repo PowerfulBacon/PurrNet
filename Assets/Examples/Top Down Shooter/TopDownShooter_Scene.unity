@@ -3211,9 +3211,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.PurrTransport
   _masterServer: https://purrbalancer.riten.dev:8080/
-  _roomName: opfsjkfopsejfoepsjf
-  _region: eu-france
-  _host: fr.purrlay.riten.dev
+  _roomName: 'fesfesfsefesfesf g tdfgh tfh tfhtf '
+  _region: us-west
+  _host: us-west.purrlay.riten.dev
   _pollEventsInUpdate: 0
 --- !u!114 &1216416908
 MonoBehaviour:

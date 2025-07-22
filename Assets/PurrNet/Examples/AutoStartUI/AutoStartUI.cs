@@ -2,7 +2,7 @@ using PurrNet.Logging;
 using PurrNet.Transports;
 using UnityEngine;
 using UnityEngine.UI;
-        
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -29,11 +29,11 @@ namespace PurrNet.Examples
         {
             if (!NetworkManager.main)
                 return;
-            
+
             NetworkManager.main.onServerConnectionState += OnServerConnectionStateChanged;
             NetworkManager.main.onClientConnectionState += OnClientConnectionStateChanged;
         }
-        
+
         private void OnValidate()
         {
 #if UNITY_EDITOR
@@ -89,7 +89,7 @@ namespace PurrNet.Examples
         {
             if (!this || !gameObject)
                 return;
-            
+
             var color = state == ConnectionState.Connected ? Color.green : Color.white;
             color = state == ConnectionState.Connecting || state == ConnectionState.Disconnecting ? Color.yellow : color;
             if(_clientButtonImage)
@@ -105,13 +105,13 @@ namespace PurrNet.Examples
         {
             if (!CanStart())
                 return;
-            
-            if (NetworkManager.main.isServer)
+
+            if (NetworkManager.main.serverState != ConnectionState.Disconnected)
             {
                 NetworkManager.main.StopServer();
                 return;
             }
-            
+
             NetworkManager.main.StartServer();
         }
 
@@ -120,12 +120,12 @@ namespace PurrNet.Examples
             if (!CanStart())
                 return;
 
-            if (NetworkManager.main.isClient)
+            if (NetworkManager.main.clientState != ConnectionState.Disconnected)
             {
                 NetworkManager.main.StopClient();
                 return;
             }
-            
+
             NetworkManager.main.StartClient();
         }
 
