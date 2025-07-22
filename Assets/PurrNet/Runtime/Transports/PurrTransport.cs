@@ -292,6 +292,7 @@ namespace PurrNet.Transports
                 _server.onConnect += OnHostConnected;
                 _server.onData += OnHostData;
                 _server.onDisconnect += OnHostDisconnected;
+                _server.onError += OnError;
 
                 try
                 {
@@ -341,6 +342,11 @@ namespace PurrNet.Transports
             }
         }
 
+        private static void OnError(Exception obj)
+        {
+            PurrLogger.LogException(obj);
+        }
+
         public void StopListening()
         {
             _connections.Clear();
@@ -351,6 +357,7 @@ namespace PurrNet.Transports
                 _server.onConnect -= OnHostConnected;
                 _server.onData -= OnHostData;
                 _server.onDisconnect -= OnHostDisconnected;
+                _server.onError -= OnError;
                 _server.Disconnect();
             }
 
@@ -373,6 +380,7 @@ namespace PurrNet.Transports
                 _client.onConnect -= OnClientConnected;
                 _client.onData -= OnClientData;
                 _client.onDisconnect -= OnClientDisconnected;
+                _client.onError -= OnError;
                 _client.Disconnect();
             }
 
@@ -406,6 +414,7 @@ namespace PurrNet.Transports
                 _client.onConnect += OnClientConnected;
                 _client.onData += OnClientData;
                 _client.onDisconnect += OnClientDisconnected;
+                _client.onError += OnError;
 
                 AddCancellation(token, false);
 
