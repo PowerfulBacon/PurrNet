@@ -56,6 +56,7 @@ namespace PurrNet.Transports
         {
 #if UNITY_WEB
             var request = UnityWebRequest.Get(url);
+            request.useHttpContinue = false;
             var response = await request.SendWebRequest();
             return response.webRequest.downloadHandler.text;
 
@@ -99,6 +100,7 @@ namespace PurrNet.Transports
 #if UNITY_WEB
             var url = $"{server}join";
             var request = UnityWebRequest.Get(url);
+            request.useHttpContinue = false;
             request.SetRequestHeader("name", roomName);
             var response = await request.SendWebRequest();
             var text = response.webRequest.downloadHandler.text;
@@ -125,6 +127,7 @@ namespace PurrNet.Transports
             var url = $"{server}allocate_ws";
 
             var request = UnityWebRequest.Get(url);
+            request.useHttpContinue = false;
             request.SetRequestHeader("region", region);
             request.SetRequestHeader("name", roomName);
             var response = await request.SendWebRequest();
@@ -154,6 +157,7 @@ namespace PurrNet.Transports
         {
 #if UNITY_WEB
             var request = UnityWebRequest.Get(url);
+            request.useHttpContinue = false;
             var sent = DateTime.Now;
             await request.SendWebRequest();
             var received = DateTime.Now;
