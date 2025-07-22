@@ -130,7 +130,7 @@ namespace PurrNet.Transports
             var response = await request.SendWebRequest();
 
             if (response.webRequest.result != UnityWebRequest.Result.Success)
-                throw new Exception($"Failed to allocate room: {response.webRequest.error}");
+                throw new Exception($"Failed to allocate room: {response.webRequest.downloadHandler.text}");
 
             var text = response.webRequest.downloadHandler.text;
             var res = JsonUtility.FromJson<HostJoinInfo>(text);
