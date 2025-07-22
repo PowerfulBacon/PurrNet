@@ -380,52 +380,39 @@ namespace PurrNet.Transports
 
         public async void Connect(string ip, ushort port)
         {
-            for (int i = 0; i < 10; i++)
+            try
             {
-                try
-                {
-                    if (clientState != ConnectionState.Disconnected)
-                        Disconnect();
-
-                    clientState = ConnectionState.Connecting;
-
-                    while (listenerState == ConnectionState.Connecting)
-                        await UnityLatestUpdate.Yield();
-
-                    _client = SimpleWebClient.Create(ushort.MaxValue, 5000, _tcpConfig);
-                    _client.onConnect += OnClientConnected;
-                    _client.onData += OnClientData;
-                    _client.onDisconnect += OnClientDisconnected;
-
-                    var token = new CancellationTokenSource();
-                    AddCancellation(token, false);
-
-                    _clientJoinInfo = await PurrTransportUtils.Join(_masterServer, _roomName);
-
-                    var builder = new UriBuilder
-                    {
-                        Scheme = _clientJoinInfo.ssl ? "wss" : "ws",
-                        Host = _clientJoinInfo.host,
-                        Port = _clientJoinInfo.port
-                    };
-
-                    _client.Connect(builder.Uri);
-                    break;
-                }
-                catch (Exception e)
-                {
+                if (clientState != ConnectionState.Disconnected)
                     Disconnect();
 
-                    if (i == 9)
-                    {
-                        PurrLogger.LogException(e.Message);
-                    }
-                    else
-                    {
-                        await UnityLatestUpdate.WaitSeconds(i);
-                        PurrLogger.LogWarning(e.Message);
-                    }
-                }
+                clientState = ConnectionState.Connecting;
+
+                while (listenerState == ConnectionState.Connecting)
+                    await UnityLatestUpdate.Yield();
+
+                _client = SimpleWebClient.Create(ushort.MaxValue, 5000, _tcpConfig);
+                _client.onConnect += OnClientConnected;
+                _client.onData += OnClientData;
+                _client.onDisconnect += OnClientDisconnected;
+
+                var token = new CancellationTokenSource();
+                AddCancellation(token, false);
+
+                _clientJoinInfo = await PurrTransportUtils.Join(_masterServer, _roomName);
+
+                var builder = new UriBuilder
+                {
+                    Scheme = _clientJoinInfo.ssl ? "wss" : "ws",
+                    Host = _clientJoinInfo.host,
+                    Port = _clientJoinInfo.port
+                };
+
+                _client.Connect(builder.Uri);
+            }
+            catch (Exception e)
+            {
+                Disconnect();
+                PurrLogger.LogException(e.Message);
             }
         }
 

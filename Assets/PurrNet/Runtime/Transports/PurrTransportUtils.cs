@@ -63,7 +63,34 @@ namespace PurrNet.Transports
 #endif
         }
 
+        public static async Task<T> Retry<T>(int count, Func<Task<T>> action)
+        {
+            Exception lastException = null;
+            for (var i = 0; i < count; i++)
+            {
+                if (i > 0)
+                    await UnityLatestUpdate.WaitSeconds(1f);
+                try
+                {
+                    return await action();
+                }
+                catch (Exception e)
+                {
+                    lastException = e;
+                }
+            }
+
+            if (lastException == null)
+                throw new Exception("Failed to retry.");
+            throw lastException;
+        }
+
         internal static async Task<ClientJoinInfo> Join(string server, string roomName)
+        {
+            return await Retry<ClientJoinInfo>(10, () => ActualClientJoinInfo(server, roomName));
+        }
+
+        private static async Task<ClientJoinInfo> ActualClientJoinInfo(string server, string roomName)
         {
 #if UNITY_WEB
             var url = $"{server}join";
@@ -84,6 +111,11 @@ namespace PurrNet.Transports
         }
 
         internal static async Task<HostJoinInfo> Alloc(string server, string region, string roomName)
+        {
+            return await Retry<HostJoinInfo>(10, () => ActualAlloc(server, region, roomName));
+        }
+
+        private static async Task<HostJoinInfo> ActualAlloc(string server, string region, string roomName)
         {
 #if UNITY_WEB
             var url = $"{server}allocate_ws";
@@ -107,6 +139,11 @@ namespace PurrNet.Transports
 
         static async Task<float> PingInMS([UsedImplicitly] string url)
         {
+            return await Retry<float>(10, () => ActualPing(url));
+        }
+
+        private static async Task<float> ActualPing(string url)
+        {
 #if UNITY_WEB
             var request = UnityWebRequest.Get(url);
             var sent = DateTime.Now;
@@ -120,12 +157,22 @@ namespace PurrNet.Transports
 
         public static async Task<Relayers> GetRelayServersAsync(string server)
         {
+            return await Retry<Relayers>(10, () => ActualGetRelayServersAsync(server));
+        }
+
+        private static async Task<Relayers> ActualGetRelayServersAsync(string server)
+        {
             string master = $"{server}servers";
             var response = await Get(master);
             return JsonUtility.FromJson<Relayers>(response);
         }
 
         public static async Task<RelayServer> GetRelayServerAsync(string masterServer)
+        {
+            return await Retry<RelayServer>(10, () => ActualGetRelayServerAsync(masterServer));
+        }
+
+        private static async Task<RelayServer> ActualGetRelayServerAsync(string masterServer)
         {
             var servers = await GetRelayServersAsync(masterServer);
             float minPing = float.MaxValue;
