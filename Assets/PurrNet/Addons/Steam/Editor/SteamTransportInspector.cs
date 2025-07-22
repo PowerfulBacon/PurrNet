@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using PurrNet.Editor;
 using PurrNet.Transports;
-#if STEAMWORKS_NET_PACKAGE
+#if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
 using Steamworks;
 #endif
 using UnityEditor;
