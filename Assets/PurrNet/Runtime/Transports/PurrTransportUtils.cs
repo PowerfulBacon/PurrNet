@@ -56,6 +56,7 @@ namespace PurrNet.Transports
         {
 #if UNITY_WEB
             var request = UnityWebRequest.Get(url);
+            request.SetRequestHeader("Cache-Control", "no-cache");
             request.useHttpContinue = false;
             var response = await request.SendWebRequest();
             return response.webRequest.downloadHandler.text;
@@ -102,6 +103,7 @@ namespace PurrNet.Transports
             var request = UnityWebRequest.Get(url);
             request.useHttpContinue = false;
             request.SetRequestHeader("name", roomName);
+            request.SetRequestHeader("Cache-Control", "no-cache");
             var response = await request.SendWebRequest();
             var text = response.webRequest.downloadHandler.text;
             var res = JsonUtility.FromJson<ClientJoinInfo>(text);
@@ -128,6 +130,7 @@ namespace PurrNet.Transports
 
             var request = UnityWebRequest.Get(url);
             request.useHttpContinue = false;
+            request.SetRequestHeader("Cache-Control", "no-cache");
             request.SetRequestHeader("region", region);
             request.SetRequestHeader("name", roomName);
             var response = await request.SendWebRequest();
@@ -157,6 +160,7 @@ namespace PurrNet.Transports
         {
 #if UNITY_WEB
             var request = UnityWebRequest.Get(url);
+            request.SetRequestHeader("Cache-Control", "no-cache");
             request.useHttpContinue = false;
             var sent = DateTime.Now;
             await request.SendWebRequest();
