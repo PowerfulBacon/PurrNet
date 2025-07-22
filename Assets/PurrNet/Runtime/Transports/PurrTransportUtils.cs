@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -63,11 +64,14 @@ namespace PurrNet.Transports
 #endif
         }
 
-        public static async Task<T> Retry<T>(int count, Func<Task<T>> action)
+        public static async Task<T> Retry<T>(int count, Func<Task<T>> action, CancellationTokenSource cts = null)
         {
             Exception lastException = null;
             for (var i = 0; i < count; i++)
             {
+                if (cts is { IsCancellationRequested: true })
+                    return Task.FromCanceled<T>(cts.Token).Result;
+
                 if (i > 0)
                     await UnityLatestUpdate.WaitSeconds(1f);
                 try
@@ -85,9 +89,9 @@ namespace PurrNet.Transports
             throw lastException;
         }
 
-        internal static async Task<ClientJoinInfo> Join(string server, string roomName)
+        internal static async Task<ClientJoinInfo> Join(string server, string roomName, CancellationTokenSource cts)
         {
-            return await Retry<ClientJoinInfo>(10, () => ActualClientJoinInfo(server, roomName));
+            return await Retry<ClientJoinInfo>(10, () => ActualClientJoinInfo(server, roomName), cts);
         }
 
         private static async Task<ClientJoinInfo> ActualClientJoinInfo(string server, string roomName)
@@ -110,9 +114,9 @@ namespace PurrNet.Transports
 #endif
         }
 
-        internal static async Task<HostJoinInfo> Alloc(string server, string region, string roomName)
+        internal static async Task<HostJoinInfo> Alloc(string server, string region, string roomName, CancellationTokenSource cts)
         {
-            return await Retry<HostJoinInfo>(10, () => ActualAlloc(server, region, roomName));
+            return await Retry<HostJoinInfo>(10, () => ActualAlloc(server, region, roomName), cts);
         }
 
         private static async Task<HostJoinInfo> ActualAlloc(string server, string region, string roomName)
@@ -167,9 +171,9 @@ namespace PurrNet.Transports
             return JsonUtility.FromJson<Relayers>(response);
         }
 
-        public static async Task<RelayServer> GetRelayServerAsync(string masterServer)
+        public static async Task<RelayServer> GetRelayServerAsync(string masterServer, CancellationTokenSource cts)
         {
-            return await Retry<RelayServer>(10, () => ActualGetRelayServerAsync(masterServer));
+            return await Retry<RelayServer>(10, () => ActualGetRelayServerAsync(masterServer), cts);
         }
 
         private static async Task<RelayServer> ActualGetRelayServerAsync(string masterServer)

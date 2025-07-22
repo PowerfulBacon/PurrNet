@@ -300,7 +300,7 @@ namespace PurrNet.Transports
 
                     if (!hasRegionAndHost)
                     {
-                        var relayServer = await PurrTransportUtils.GetRelayServerAsync(_masterServer);
+                        var relayServer = await PurrTransportUtils.GetRelayServerAsync(_masterServer, token);
                         _region = relayServer.region;
                         _host = relayServer.host;
                     }
@@ -308,7 +308,10 @@ namespace PurrNet.Transports
                     if (token.IsCancellationRequested)
                         return;
 
-                    _hostJoinInfo = await PurrTransportUtils.Alloc(_masterServer, _region, _roomName);
+                    _hostJoinInfo = await PurrTransportUtils.Alloc(_masterServer, _region, _roomName, token);
+
+                    if (token.IsCancellationRequested)
+                        return;
 
                     var builder = new UriBuilder
                     {
@@ -387,18 +390,25 @@ namespace PurrNet.Transports
 
                 clientState = ConnectionState.Connecting;
 
+                var token = new CancellationTokenSource();
+
                 while (listenerState == ConnectionState.Connecting)
                     await UnityLatestUpdate.Yield();
+
+                if (token.IsCancellationRequested)
+                    return;
 
                 _client = SimpleWebClient.Create(ushort.MaxValue, 5000, _tcpConfig);
                 _client.onConnect += OnClientConnected;
                 _client.onData += OnClientData;
                 _client.onDisconnect += OnClientDisconnected;
 
-                var token = new CancellationTokenSource();
                 AddCancellation(token, false);
 
-                _clientJoinInfo = await PurrTransportUtils.Join(_masterServer, _roomName);
+                _clientJoinInfo = await PurrTransportUtils.Join(_masterServer, _roomName, token);
+
+                if (token.IsCancellationRequested)
+                    return;
 
                 var builder = new UriBuilder
                 {

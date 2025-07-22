@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using PurrNet;
 using PurrNet.Logging;
 using PurrNet.Modules;
+using PurrNet.Transports;
 using UnityEngine;
 
 public class TestValidator : MonoBehaviour
@@ -12,6 +14,12 @@ public class TestValidator : MonoBehaviour
     {
         _networkManager.onClientSpawnValidate += ValidateSpawn;
         Test();
+    }
+
+    private void OnGUI()
+    {
+        if (_networkManager.transport is PurrTransport transport)
+            GUILayout.Label(transport.region);
     }
 
     [ServerOnly]
