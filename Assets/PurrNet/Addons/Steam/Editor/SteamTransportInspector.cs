@@ -58,7 +58,7 @@ namespace PurrNet.Steam.Editor
             {
                 base.OnInspectorGUI();
                 TransportInspector.DrawTransportStatus(generic);
-#if STEAMWORKS_NET_PACKAGE
+#if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
                 if (Application.isPlaying)
                 {
                     if (GUILayout.Button("Copy my SteamID to Clipboard"))
