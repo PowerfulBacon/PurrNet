@@ -19,8 +19,10 @@ using UnityEngine.SceneManagement;
 
 namespace PurrNet
 {
+    public delegate void OnTickDelegate(bool asServer);
+
     [DefaultExecutionOrder(-999)]
-    public sealed partial class NetworkManager : MonoBehaviour
+    public sealed partial class NetworkManager : MonoBehaviour, IRegisterModules, INetworkManager
     {
         /// <summary>
         /// The main instance of the network manager.
@@ -159,6 +161,8 @@ namespace PurrNet
         /// Occurs when the client connection state changes.
         /// </summary>
         public static event  Action<ConnectionState> onAnyClientConnectionState;
+
+        public ITransport rawTransport => _transport ? _transport.transport : null;
 
         /// <summary>
         /// The transport of the network manager.
@@ -552,6 +556,17 @@ namespace PurrNet
             transport = gameObject.AddComponent<UDPTransport>();
         }
 
+        public bool HasModule<T>() where T : INetworkModule
+        {
+            if (!_serverModules.TryGetModule<T>(out _))
+                return false;
+
+            if (!_clientModules.TryGetModule<T>(out _))
+                return false;
+
+            return true;
+        }
+
         /// <summary>
         /// Gets the module of the given type.
         /// Throws an exception if the module is not found.
@@ -714,7 +729,6 @@ namespace PurrNet
         private DeltaModule _clientDeltaModule;
         private DeltaModule _serverDeltaModule;
 
-        public delegate void OnTickDelegate(bool asServer);
 
         /// <summary>
         /// This event is triggered before the tick.
@@ -817,7 +831,7 @@ namespace PurrNet
             }
         }
 
-        internal void RegisterModules(ModulesCollection modules, bool asServer)
+        public void RegisterModules(ModulesCollection modules, bool asServer)
         {
             var tickManager = new TickManager(_tickRate, this);
 
@@ -1002,7 +1016,7 @@ namespace PurrNet
 
         private void OnClientPostTick() => onPostTick?.Invoke(false);
 
-        static bool ShouldStart(StartFlags flags)
+        public static bool ShouldStart(StartFlags flags)
         {
             return (flags.HasFlag(StartFlags.Editor) && ApplicationContext.isMainEditor) ||
                    (flags.HasFlag(StartFlags.Clone) && ApplicationContext.isClone) ||

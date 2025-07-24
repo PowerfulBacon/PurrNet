@@ -49,9 +49,9 @@ namespace PurrNet.Modules
 
         internal event Action<Connection, uint, object> onRawDataReceived;
 
-        public BroadcastModule(NetworkManager manager, bool asServer)
+        public BroadcastModule(INetworkManager manager, bool asServer)
         {
-            _transport = manager.transport.transport;
+            _transport = manager.rawTransport;
             _asServer = asServer;
         }
 
