@@ -111,9 +111,11 @@ namespace PurrNet.Modules
                 return;
 
             var rules = _networkManager.networkRules;
-            float interval = rules ? rules.GetSyncedTickUpdateInterval() : 1;
 
-            if (_lastSyncTime + interval < Time.unscaledTime)
+            if (!rules)
+                return;
+
+            if (_lastSyncTime + rules.GetSyncedTickUpdateInterval() < Time.unscaledTime)
             {
                 _lastSyncTime = Time.unscaledTime;
                 HandleTickSync();

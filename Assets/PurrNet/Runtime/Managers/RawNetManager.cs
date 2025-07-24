@@ -21,7 +21,6 @@ namespace PurrNet
 
         [Header("Network Settings")]
         [SerializeField] private GenericTransport _transport;
-        [SerializeField] private NetworkRules _networkRules;
 
 
         [Tooltip("Number of target ticks per second.")]
@@ -100,7 +99,7 @@ namespace PurrNet
         public bool isOffline => !isServer && !isClient;
         public bool isServer => _transport && _transport.transport.listenerState == ConnectionState.Connected;
         public bool isClient => _transport && _transport.transport.clientState == ConnectionState.Connected;
-        public NetworkRules networkRules => _networkRules;
+        public NetworkRules networkRules => null;
         public TickManager tickModule => _serverTickManager ?? _clientTickManager;
 
         /// <summary>
