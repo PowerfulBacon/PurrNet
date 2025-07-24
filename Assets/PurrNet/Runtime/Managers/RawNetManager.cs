@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Transports;
@@ -21,7 +22,6 @@ namespace PurrNet
 
         [Header("Network Settings")]
         [SerializeField] private GenericTransport _transport;
-
 
         [Tooltip("Number of target ticks per second.")]
         [Range(1, 128)]
@@ -102,6 +102,12 @@ namespace PurrNet
         public NetworkRules networkRules => null;
         public TickManager tickModule => _serverTickManager ?? _clientTickManager;
 
+        private readonly Dictionary<uint, List<IBroadcastCallback>> _serverActions =
+            new Dictionary<uint, List<IBroadcastCallback>>();
+
+        private readonly Dictionary<uint, List<IBroadcastCallback>> _clientActions =
+            new Dictionary<uint, List<IBroadcastCallback>>();
+
         /// <summary>
         /// This event is triggered before the tick.
         /// It may be triggered multiple times if you are both a server and a client.
@@ -166,6 +172,57 @@ namespace PurrNet
 #endif
                 StartClient();
             }
+        }
+
+        public void Subscribe<T>(BroadcastDelegate<T> callback) where T : new()
+        {
+            Subscribe(callback, true);
+            Subscribe(callback, false);
+        }
+
+        public void Subscribe<T>(BroadcastDelegate<T> callback, bool asServer)
+        {
+            var pendingDict = asServer ? _serverActions : _clientActions;
+            var type = Hasher.GetStableHashU32<T>();
+
+            if (!pendingDict.TryGetValue(type, out var subscriptions))
+            {
+                subscriptions = new List<IBroadcastCallback>();
+                pendingDict[type] = subscriptions;
+            }
+
+            subscriptions.Add(new BroadcastCallback<T>(callback));
+
+            if (TryGetModule(out BroadcastModule broadcaster, asServer))
+                broadcaster.Subscribe(callback);
+        }
+
+        public void Unsubscribe<T>(BroadcastDelegate<T> callback)
+        {
+            Unsubscribe(callback, true);
+            Unsubscribe(callback, false);
+        }
+
+        public void Unsubscribe<T>(BroadcastDelegate<T> callback, bool asServer)
+        {
+            var pendingDict = asServer ? _serverActions : _clientActions;
+            var type = Hasher.GetStableHashU32<T>();
+
+            if (pendingDict.TryGetValue(type, out var actions))
+            {
+                object boxed = callback;
+                for (int i = 0; i < actions.Count; i++)
+                {
+                    if (actions[i].IsSame(boxed))
+                    {
+                        actions.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+
+            if (TryGetModule(out BroadcastModule broadcaster, asServer))
+                broadcaster.Unsubscribe(callback);
         }
 
         /// <summary>
@@ -261,6 +318,16 @@ namespace PurrNet
 
         }
 
+        /// <summary>
+        /// Tries to get the module of the given type.
+        /// </summary>
+        /// <param name="module">The module if found, otherwise the default value of the type.</param>
+        /// <param name="asServer">Whether to get the server module or the client module.</param>
+        public bool TryGetModule<T>(out T module, bool asServer) where T : INetworkModule
+        {
+            return asServer ? _serverModules.TryGetModule(out module) : _clientModules.TryGetModule(out module);
+        }
+
         public bool HasModule<T>() where T : INetworkModule
         {
             if (!_serverModules.TryGetModule<T>(out _))
@@ -323,6 +390,22 @@ namespace PurrNet
 
             modules.AddModule(tickManager);
             modules.AddModule(broadcasting);
+
+            RenewSubscriptions(asServer);
+        }
+
+        private void RenewSubscriptions(bool asServer)
+        {
+            if (!TryGetModule(out BroadcastModule broadcaster, asServer))
+                return;
+
+            var pendingDict = asServer ? _serverActions : _clientActions;
+
+            foreach (var subscriptionList in pendingDict.Values)
+            {
+                for (var i = 0; i < subscriptionList.Count; i++)
+                    subscriptionList[i].Subscribe(broadcaster);
+            }
         }
 
         private void OnTick()

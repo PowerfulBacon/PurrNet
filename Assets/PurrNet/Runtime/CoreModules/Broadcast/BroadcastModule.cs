@@ -10,11 +10,13 @@ namespace PurrNet.Modules
 {
     public delegate void BroadcastDelegate<in T>(Connection conn, T data, bool asServer);
 
-    internal interface IBroadcastCallback
+    public interface IBroadcastCallback
     {
         bool IsSame(object callback);
 
         void TriggerCallback(Connection conn, object data, bool asServer);
+
+        void Subscribe(BroadcastModule module);
     }
 
     internal readonly struct BroadcastCallback<T> : IBroadcastCallback
@@ -35,6 +37,11 @@ namespace PurrNet.Modules
         {
             if (data is T value)
                 callback?.Invoke(conn, value, asServer);
+        }
+
+        public void Subscribe(BroadcastModule module)
+        {
+            module.Subscribe(callback);
         }
     }
 
