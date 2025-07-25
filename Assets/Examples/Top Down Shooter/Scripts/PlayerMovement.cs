@@ -99,6 +99,8 @@ namespace PurrNet.Examples.TopDownShooter
 
         private void LateUpdate()
         {
+            if (_visuals == null || _visuals.value == null)
+                return;
             _visuals.value.position = transform.position;
             _visuals.value.rotation = transform.rotation;
         }

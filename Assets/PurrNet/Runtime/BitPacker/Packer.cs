@@ -256,16 +256,8 @@ namespace PurrNet.Packing
                 if (!hasValue) return;
 
                 object obj = value;
-                var nassets = NetworkManager.main.networkAssets;
-                int index = nassets && obj is Object unityObj ? nassets.GetIndex(unityObj) : -1;
-                bool isNetworkAsset = index != -1;
-                Packer<bool>.Write(packer, isNetworkAsset);
-
-                if (isNetworkAsset)
-                {
-                    Packer<PackedInt>.Write(packer, index);
+                if (obj is Object unityObj && WriteAsNetworkAsset(packer, unityObj))
                     return;
-                }
 
                 PackedUInt typeHash = Hasher.GetStableHashU32(obj.GetType());
                 Packer<PackedUInt>.Write(packer, typeHash);
@@ -276,6 +268,22 @@ namespace PurrNet.Packing
                 PurrLogger.LogError(
                     $"Failed to write value of type '{typeof(T)}' when using fallback writer.\n{e.Message}\n{e.StackTrace}");
             }
+        }
+
+        public static bool WriteAsNetworkAsset(BitPacker packer, Object unityObj)
+        {
+            var nassets = NetworkManager.main.networkAssets;
+            int index = nassets && unityObj ? nassets.GetIndex(unityObj) : -1;
+            bool isNetworkAsset = index != -1;
+            Packer<bool>.Write(packer, isNetworkAsset);
+
+            if (isNetworkAsset)
+            {
+                Packer<PackedInt>.Write(packer, index);
+                return true;
+            }
+
+            return false;
         }
 
         public static void FallbackReader<T>(BitPacker packer, ref T value)
@@ -291,14 +299,8 @@ namespace PurrNet.Packing
                     return;
                 }
 
-                bool isNetworkAsset = Packer<bool>.Read(packer);
-
-                if (isNetworkAsset)
-                {
-                    int index = Packer<PackedInt>.Read(packer);
-                    value = NetworkManager.main.networkAssets.GetAsset(index) is T cast ? cast : default;
+                if (ReadAsNetworkAsset(packer, ref value))
                     return;
-                }
 
                 var typeHash = Packer<PackedUInt>.Read(packer);
                 var type = Hasher.ResolveType(typeHash);
@@ -315,6 +317,20 @@ namespace PurrNet.Packing
                 PurrLogger.LogError(
                     $"Failed to read value of type '{typeof(T)}' when using fallback reader.\n{e.Message}\n{e.StackTrace}");
             }
+        }
+
+        public static bool ReadAsNetworkAsset<T>(BitPacker packer, ref T value)
+        {
+            bool isNetworkAsset = Packer<bool>.Read(packer);
+
+            if (isNetworkAsset)
+            {
+                int index = Packer<PackedInt>.Read(packer);
+                value = NetworkManager.main.networkAssets.GetAsset(index) is T cast ? cast : default;
+                return true;
+            }
+
+            return false;
         }
 
         public static void Write(BitPacker packer, Type type, object value)

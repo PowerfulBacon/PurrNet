@@ -1,4 +1,5 @@
-﻿using PurrNet.Logging;
+﻿using System;
+using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Pooling;
@@ -51,7 +52,10 @@ namespace PurrNet
                 if (!trs)
                     return null;
 
-                var parent = trs.GetComponentInParent<NetworkIdentity>(true);
+                if (!trs.parent)
+                    return null;
+
+                var parent = trs.parent.GetComponentInParent<NetworkIdentity>(true);
 
                 if (!parent)
                     return null;
@@ -99,10 +103,32 @@ namespace PurrNet
 
             if (!parent || !parent.isSpawned || !parent.id.HasValue)
             {
+                Packer<bool>.Write(packer, true);
                 Packer<bool>.Write(packer, false);
+                
+                if (!NetworkManager.main.prefabProvider.TryGetPrefabData(trs.gameObject, out var data))
+                {
+                    Packer<bool>.Write(packer, true);
+                    if (NetworkManager.main.networkAssets.TryGetId(trs, out var tid))
+                    {
+                        Packer<bool>.Write(packer, true);
+                        Packer.WriteAsNetworkAsset(packer, trs);
+                    }
+                    else if(NetworkManager.main.networkAssets.TryGetId(trs.gameObject, out var gid))
+                    {
+                        Packer<bool>.Write(packer, false);
+                        Packer.WriteAsNetworkAsset(packer, trs.gameObject);
+                    }
+                    
+                    return;
+                }
+                
+                Packer<bool>.Write(packer, false);
+                Packer<int>.Write(packer, data.prefabId);
                 return;
             }
 
+            Packer<bool>.Write(packer, true);
             Packer<bool>.Write(packer, true);
             using var invPath = HierarchyPool.GetInvPath(parent.transform, trs);
 
@@ -121,6 +147,32 @@ namespace PurrNet
             if (!hasValue)
             {
                 trs = null;
+                return;
+            }
+            var isSpawned = Packer<bool>.Read(packer);
+
+            if (!isSpawned)
+            {
+                var useFallback = Packer<bool>.Read(packer);
+                if (useFallback)
+                {
+                    var isTrs = Packer<bool>.Read(packer);
+                    if (isTrs)
+                    {
+                        Packer.ReadAsNetworkAsset(packer, ref trs);
+                        return;
+                    }
+
+                    GameObject g = null;
+                    Packer.ReadAsNetworkAsset(packer, ref g);
+                    if (g)
+                        trs = g.transform;
+                    return;
+                }
+                
+                var prefabId = Packer<int>.Read(packer);
+                if (NetworkManager.main.prefabProvider.TryGetPrefabData(prefabId, out var prefabData))
+                    trs = prefabData.prefab.transform;
                 return;
             }
 
