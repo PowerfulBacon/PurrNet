@@ -323,7 +323,7 @@ namespace PurrNet.Packing
         {
             bool isNetworkAsset = Packer<bool>.Read(packer);
 
-            if (isNetworkAsset)
+            if (isNetworkAsset && NetworkManager.main && NetworkManager.main.networkAssets)
             {
                 int index = Packer<PackedInt>.Read(packer);
                 value = NetworkManager.main.networkAssets.GetAsset(index) is T cast ? cast : default;

@@ -106,15 +106,15 @@ namespace PurrNet
                 Packer<bool>.Write(packer, true);
                 Packer<bool>.Write(packer, false);
                 
-                if (!NetworkManager.main.prefabProvider.TryGetPrefabData(trs.gameObject, out var data))
+                if (NetworkManager.main == null || NetworkManager.main.prefabProvider == null || !NetworkManager.main.prefabProvider.TryGetPrefabData(trs.gameObject, out var data))
                 {
                     Packer<bool>.Write(packer, true);
-                    if (NetworkManager.main.networkAssets.TryGetId(trs, out var tid))
+                    if (NetworkManager.main != null && NetworkManager.main.networkAssets != null && NetworkManager.main.networkAssets.TryGetId(trs, out var tid))
                     {
                         Packer<bool>.Write(packer, true);
                         Packer.WriteAsNetworkAsset(packer, trs);
                     }
-                    else if(NetworkManager.main.networkAssets.TryGetId(trs.gameObject, out var gid))
+                    else if (NetworkManager.main != null && NetworkManager.main.networkAssets != null && NetworkManager.main.networkAssets.TryGetId(trs.gameObject, out var gid))
                     {
                         Packer<bool>.Write(packer, false);
                         Packer.WriteAsNetworkAsset(packer, trs.gameObject);
@@ -171,7 +171,7 @@ namespace PurrNet
                 }
                 
                 var prefabId = Packer<int>.Read(packer);
-                if (NetworkManager.main.prefabProvider.TryGetPrefabData(prefabId, out var prefabData))
+                if (NetworkManager.main && NetworkManager.main.prefabProvider != null && NetworkManager.main.prefabProvider.TryGetPrefabData(prefabId, out var prefabData))
                     trs = prefabData.prefab.transform;
                 return;
             }
