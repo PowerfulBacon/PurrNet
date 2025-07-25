@@ -27,14 +27,14 @@ namespace PurrNet
             Transform trs = null;
             if (go)
                 trs = go.transform;
-            WriteTrasform(packer, trs);
+            WriteTransform(packer, trs);
         }
 
         [UsedByIL]
         public static void ReadGameObject(this BitPacker packer, ref GameObject go)
         {
             Transform trs = null;
-            ReadTrasform(packer, ref trs);
+            ReadTransform(packer, ref trs);
             go = trs ? trs.gameObject : null;
         }
 
@@ -93,7 +93,7 @@ namespace PurrNet
         }
 
         [UsedByIL]
-        public static void WriteTrasform(this BitPacker packer, Transform trs)
+        public static void WriteTransform(this BitPacker packer, Transform trs)
         {
             var parent = GetSpawnedParent(trs);
 
@@ -112,7 +112,7 @@ namespace PurrNet
         }
 
         [UsedByIL]
-        public static void ReadTrasform(this BitPacker packer, ref Transform trs)
+        public static void ReadTransform(this BitPacker packer, ref Transform trs)
         {
             bool hasValue = false;
 
