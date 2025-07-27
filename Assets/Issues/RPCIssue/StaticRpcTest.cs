@@ -49,7 +49,7 @@ public class StaticRpcTest : NetworkIdentity
     }
 
     [ObserversRpc(bufferLast: true)]
-    public void SendObserverRpcM(int a, SomeBaseData someData, int b)
+    public void SendObserverRpcM<T>(int a, T someData, int b) where T : SomeBaseData
     {
         Debug.Log($"SendObserverRpcM: {a}");
         Debug.Log($"SendObserverRpcM: {someData} {someData?.GetType().Name}");

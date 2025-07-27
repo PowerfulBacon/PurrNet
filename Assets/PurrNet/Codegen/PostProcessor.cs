@@ -1425,7 +1425,6 @@ namespace PurrNet.Codegen
             for (var i = 0; i < paramCount; i++)
             {
                 var param = newMethod.Parameters[i];
-                bool isGeneric = param.ParameterType.IsGenericParameter;
 
                 if (methodRpc.Signature.type == RPCType.TargetRPC && i == 0)
                 {
@@ -1443,24 +1442,11 @@ namespace PurrNet.Codegen
                     continue;
 
                 // if isGeneric, write the type hash
-                if (isGeneric && param.ParameterType is GenericParameter { Type: GenericParameterType.Method })
-                {
-                    var writeGen = packerType.GetMethod("WriteGeneric", true).Import(module);
-                    var writeMethod = new GenericInstanceMethod(writeGen);
-                    writeMethod.GenericArguments.Add(param.ParameterType);
+                var serializeGenericMethod = CreateSerializer(module, param.ParameterType, true);
 
-                    code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
-                    code.Append(Instruction.Create(OpCodes.Ldarg, param));
-                    code.Append(Instruction.Create(OpCodes.Call, writeMethod));
-                }
-                else
-                {
-                    var serializeGenericMethod = CreateSerializer(module, param.ParameterType, true);
-
-                    code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
-                    code.Append(Instruction.Create(OpCodes.Ldarg, param));
-                    code.Append(Instruction.Create(OpCodes.Call, serializeGenericMethod));
-                }
+                code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
+                code.Append(Instruction.Create(OpCodes.Ldarg, param));
+                code.Append(Instruction.Create(OpCodes.Call, serializeGenericMethod));
             }
 
             if (methodRpc.Signature.isStatic)

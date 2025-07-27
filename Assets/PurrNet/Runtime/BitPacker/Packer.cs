@@ -491,47 +491,6 @@ namespace PurrNet.Packing
             }
         }
 
-        [UsedByIL]
-        public static void WriteGeneric<T>(BitPacker packer, T value)
-        {
-            var type = value == null ? typeof(T) : value.GetType();
-            Packer<PackedUInt>.Write(packer, Hasher.GetStableHashU32(type));
-            Write(packer, type, value);
-        }
-
-        [UsedByIL]
-        public static void ReadGeneric(BitPacker packer, ref object value)
-        {
-            PackedUInt hash = default;
-            Packer<PackedUInt>.Read(packer, ref hash);
-            if (!Hasher.TryGetType(hash, out var type))
-                throw new Exception($"Type with hash '{hash}' not found.");
-
-            Read(packer, type, ref value);
-        }
-
-        public static void WriteAsExactType(BitPacker packer, object value)
-        {
-            var type = value.GetType();
-
-            if (!_writeExactMethods.TryGetValue(type, out var method))
-            {
-                FallbackWriter(packer, value);
-                return;
-            }
-
-            try
-            {
-                _args[0] = packer;
-                _args[1] = value;
-                method.Invoke(null, _args);
-            }
-            catch (Exception e)
-            {
-                PurrLogger.LogError($"Failed to write value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
-            }
-        }
-
         public static void Write(BitPacker packer, object value)
         {
             var type = value.GetType();
