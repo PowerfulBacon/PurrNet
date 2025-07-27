@@ -289,7 +289,8 @@ namespace PurrNet.StateMachine
                 change.operation == SyncListOperation.Added || 
                 change.operation == SyncListOperation.Set)
             {
-                change.value.Setup(this);
+                if(change.value)
+                    change.value.Setup(this);
             }
         }
 
