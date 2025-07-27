@@ -104,21 +104,46 @@ namespace PurrNet.Packing
     public static class Packer<T>
     {
         static WriteFunc<T> _write;
+        static WriteFunc<T> _writeWrapper;
         static ReadFunc<T> _read;
+        static ReadFunc<T> _readWrapper;
+
+        private static readonly bool _isClass;
+
+        static Packer()
+        {
+            _isClass = typeof(T).IsClass;
+        }
 
         public static void RegisterWriter(WriteFunc<T> a)
         {
+            if (_write != null)
+                return;
+
             Packer.RegisterWriter(typeof(T), a.Method);
-            _write ??= a;
+            _write = a;
+
+            if (_isClass)
+                _writeWrapper = WriteClass;
+            else _writeWrapper = WriteAsExactType;
         }
 
         public static void RegisterReader(ReadFunc<T> b)
         {
+            if (_read != null)
+                return;
+
             Packer.RegisterReader(typeof(T), b.Method);
-            _read ??= b;
+
+            _read = b;
+
+            if (_isClass)
+                _readWrapper = ReadClass;
+            else _readWrapper = ReadAsExactType;
         }
 
-        public static void Write(BitPacker packer, T value)
+        [UsedByIL]
+        public static void WriteAsExactType(BitPacker packer, T value)
         {
             try
             {
@@ -136,7 +161,8 @@ namespace PurrNet.Packing
             }
         }
 
-        public static void Read(BitPacker packer, ref T value)
+        [UsedByIL]
+        public static void ReadAsExactType(BitPacker packer, ref T value)
         {
             try
             {
@@ -154,18 +180,88 @@ namespace PurrNet.Packing
             }
         }
 
+        [UsedByIL]
+        public static void Write(BitPacker packer, T value)
+        {
+            try
+            {
+                if (_writeWrapper == null)
+                {
+                    Packer.FallbackWriter(packer, value);
+                    return;
+                }
+
+                _writeWrapper(packer, value);
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to write value of type '{typeof(T)}'.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        [UsedByIL]
+        public static void Read(BitPacker packer, ref T value)
+        {
+            try
+            {
+                if (_readWrapper == null)
+                {
+                    Packer.FallbackReader(packer, ref value);
+                    return;
+                }
+
+                _readWrapper(packer, ref value);
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to read value of type '{typeof(T)}'.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        static void WriteClass(BitPacker packer, T value)
+        {
+            var type = value == null ? typeof(T) : value.GetType();
+            bool isTypeSameAsGeneric = type == typeof(T);
+
+            Packer<bool>.WriteAsExactType(packer, isTypeSameAsGeneric);
+
+            if (!isTypeSameAsGeneric)
+                Packer<PackedUInt>.WriteAsExactType(packer, Hasher.GetStableHashU32(type));
+
+            Packer.Write(packer, type, value);
+        }
+
+        static void ReadClass(BitPacker packer, ref T value)
+        {
+            bool isTypeSameAsGeneric = Packer<bool>.Read(packer);
+
+            if (isTypeSameAsGeneric)
+            {
+                ReadAsExactType(packer, ref value);
+                return;
+            }
+
+            var hash = Packer<PackedUInt>.Read(packer);
+
+            if (!Hasher.TryGetType(hash, out var type))
+                throw new Exception($"Type with hash '{hash}' not found.");
+
+            object result = value;
+            Packer.Read(packer, type, ref result);
+        }
+
         public static T Read(BitPacker packer)
         {
             var value = default(T);
-            Read(packer, ref value);
+            ReadAsExactType(packer, ref value);
             return value;
         }
 
         public static void Serialize(BitPacker packer, ref T value)
         {
             if (packer.isWriting)
-                Write(packer, value);
-            else Read(packer, ref value);
+                WriteAsExactType(packer, value);
+            else ReadAsExactType(packer, ref value);
         }
     }
 

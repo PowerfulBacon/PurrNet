@@ -60,6 +60,17 @@ public class StaticRpcTest : NetworkIdentity
     }
 }
 
+public class SomeBaseDataB : SomeBaseData, IPackedAuto
+{
+    public int someInt2;
+    public string someString2;
+
+    public override string ToString()
+    {
+        return $"{nameof(SomeBaseDataB)}: {nameof(someInt2)}: {someInt2}, {nameof(someString2)}: {someString2}";
+    }
+}
+
 public class SomeBaseData : IPackedAuto
 {
     public int someInt;
