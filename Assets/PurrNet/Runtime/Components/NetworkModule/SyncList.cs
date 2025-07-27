@@ -178,33 +178,52 @@ namespace PurrNet
         [TargetRpc(Channel.ReliableOrdered), Preserve]
         private void SendInitialToTarget(PlayerID player, List<T> items)
         {
-            HandleInitialState(items);
+            HandleFullState(items);
         }
 
         [ObserversRpc(Channel.ReliableOrdered)]
         private void SendInitialStateToAll(List<T> items)
         {
-            HandleInitialState(items);
+            HandleFullState(items);
         }
 
-        private void HandleInitialState(List<T> items)
+        private void HandleFullState(List<T> newList)
         {
-            if (!isHost)
+            if (isHost) return;
+
+            bool listChanged = false;
+
+            if (_list.Count > newList.Count)
             {
-                if (items == null)
-                    return;
-                _list.Clear();
-                _list.AddRange(items);
-
-                var change = SyncListChange<T>.Cleared();
-                InvokeChange(change);
-
-                for (int i = 0; i < items.Count; i++)
+                for (int i = _list.Count - 1; i >= newList.Count; i--)
                 {
-                    var changeI = SyncListChange<T>.Added(items[i], i);
-                    InvokeChange(changeI);
+                    var removed = _list[i];
+                    _list.RemoveAt(i);
+                    InvokeChange(SyncListChange<T>.Removed(removed, removed, i));
+                }
+
+                listChanged = true;
+            }
+
+            for (int i = 0; i < newList.Count; i++)
+            {
+                if (i >= _list.Count)
+                {
+                    _list.Add(newList[i]);
+                    InvokeChange(SyncListChange<T>.Added(newList[i], i));
+                    listChanged = true;
+                }
+                else if (!_list[i]?.Equals(newList[i]) ?? newList[i] != null)
+                {
+                    var old = _list[i];
+                    _list[i] = newList[i];
+                    InvokeChange(SyncListChange<T>.Set(newList[i], old, i));
+                    listChanged = true;
                 }
             }
+
+            if (listChanged && newList.Count == 0)
+                InvokeChange(SyncListChange<T>.Cleared());
         }
 
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
