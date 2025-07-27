@@ -120,12 +120,13 @@ namespace PurrNet.Packing
             if (_write != null)
                 return;
 
-            Packer.RegisterWriter(typeof(T), a.Method);
             _write = a;
 
             if (_isClass)
                 _writeWrapper = WriteClass;
             else _writeWrapper = WriteAsExactType;
+
+            Packer.RegisterWriter(typeof(T), _writeWrapper.Method);
         }
 
         public static void RegisterReader(ReadFunc<T> b)
@@ -133,13 +134,13 @@ namespace PurrNet.Packing
             if (_read != null)
                 return;
 
-            Packer.RegisterReader(typeof(T), b.Method);
-
             _read = b;
 
             if (_isClass)
                 _readWrapper = ReadClass;
             else _readWrapper = ReadAsExactType;
+
+            Packer.RegisterReader(typeof(T), _readWrapper.Method);
         }
 
         [UsedByIL]
