@@ -253,7 +253,7 @@ namespace PurrNet.Packing
                 throw new Exception($"Type with hash '{hash}' not found.");
 
             object result = value;
-            Packer.Read(packer, type, ref result);
+            Packer.ReadAsExactType(packer, type, ref result);
         }
 
         public static T Read(BitPacker packer)
@@ -572,6 +572,27 @@ namespace PurrNet.Packing
         public static void Read(BitPacker packer, Type type, ref object value)
         {
             if (!_readWrappedMethods.TryGetValue(type, out var method))
+            {
+                FallbackReader(packer, ref value);
+                return;
+            }
+
+            try
+            {
+                _args[0] = packer;
+                _args[1] = value;
+                method.Invoke(null, _args);
+                value = _args[1];
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to read value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        public static void ReadAsExactType(BitPacker packer, Type type, ref object value)
+        {
+            if (!_readExactMethods.TryGetValue(type, out var method))
             {
                 FallbackReader(packer, ref value);
                 return;
