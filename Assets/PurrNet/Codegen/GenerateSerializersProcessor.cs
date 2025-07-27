@@ -426,7 +426,15 @@ namespace PurrNet.Codegen
 
         public static bool HasInterface(TypeDefinition def, Type interfaceType)
         {
-            return def.Interfaces.Any(i => i.InterfaceType.FullName == interfaceType.FullName);
+            bool selfHas = def.Interfaces.Any(i => i.InterfaceType.FullName == interfaceType.FullName);
+            if (selfHas)
+                return true;
+
+            if (def.BaseType == null)
+                return false;
+
+            var baseType = def.BaseType.Resolve();
+            return baseType != null && HasInterface(baseType, interfaceType);
         }
 
         private static MethodReference CreateSetterMethod(TypeDefinition parent, FieldDefinition field)
