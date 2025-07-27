@@ -108,12 +108,6 @@ namespace PurrNet.Packing
         static ReadFunc<T> _read;
         static ReadFunc<T> _readWrapper;
 
-        private static readonly bool _isClass;
-
-        static Packer()
-        {
-            _isClass = typeof(T).IsClass;
-        }
 
         public static void RegisterWriter(WriteFunc<T> a)
         {
@@ -122,7 +116,9 @@ namespace PurrNet.Packing
 
             _write = a;
 
-            if (_isClass)
+            bool isStructOrSealed = typeof(T).IsValueType || typeof(T).IsSealed;
+
+            if (!isStructOrSealed)
                 _writeWrapper = WriteClass;
             else _writeWrapper = WriteAsExactType;
 
@@ -136,7 +132,9 @@ namespace PurrNet.Packing
 
             _read = b;
 
-            if (_isClass)
+            bool isStructOrSealed = typeof(T).IsValueType || typeof(T).IsSealed;
+
+            if (!isStructOrSealed)
                 _readWrapper = ReadClass;
             else _readWrapper = ReadAsExactType;
 
@@ -226,15 +224,14 @@ namespace PurrNet.Packing
 
             Packer<bool>.WriteAsExactType(packer, isTypeSameAsGeneric);
 
-            if (!isTypeSameAsGeneric)
-            {
-                Packer<PackedUInt>.WriteAsExactType(packer, Hasher.GetStableHashU32(type));
-                Packer.WriteAsExactType(packer, type, value);
-            }
-            else
+            if (isTypeSameAsGeneric)
             {
                 WriteAsExactType(packer, value);
+                return;
             }
+
+            Packer<PackedUInt>.WriteAsExactType(packer, Hasher.GetStableHashU32(type));
+            Packer.WriteAsExactType(packer, type, value);
         }
 
         static void ReadClass(BitPacker packer, ref T value)
@@ -254,6 +251,16 @@ namespace PurrNet.Packing
 
             object result = value;
             Packer.ReadAsExactType(packer, type, ref result);
+
+            if (result is T cast)
+            {
+                value = cast;
+            }
+            else
+            {
+                PurrLogger.LogError($"Type '{type}' does not match expected type '{typeof(T)}'.");
+                value = default;
+            }
         }
 
         public static T Read(BitPacker packer)
@@ -586,7 +593,9 @@ namespace PurrNet.Packing
             }
             catch (Exception e)
             {
-                PurrLogger.LogError($"Failed to read value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
+                PurrLogger.LogError(e.InnerException != null
+                    ? $"Failed to read value of type '{type}'.\n{e.InnerException.Message}\n{e.InnerException.StackTrace}"
+                    : $"Failed to read value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
             }
         }
 
@@ -607,7 +616,9 @@ namespace PurrNet.Packing
             }
             catch (Exception e)
             {
-                PurrLogger.LogError($"Failed to read value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
+                PurrLogger.LogError(e.InnerException != null
+                    ? $"Failed to read value of type '{type}'.\n{e.InnerException.Message}\n{e.InnerException.StackTrace}"
+                    : $"Failed to read value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
             }
         }
 

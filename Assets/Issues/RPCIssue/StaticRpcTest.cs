@@ -18,13 +18,15 @@ public class StaticRpcTest : NetworkIdentity
     [PurrButton("SendObserverRpc"), UsedImplicitly]
     public void SendRpc()
     {
-        var someData = new SomeBaseData
+        var someData = new SomeBaseDataB
         {
             someInt = 1,
-            someString = "Hello"
+            someString = "Hello",
+            someInt2 = 5,
+            someString2 = "World"
         };
 
-        SendObserverRpcM(0, someData);
+        SendObserverRpcM(72, someData, 42);
     }
 
     [PurrButton("SendTargetRpc"), UsedImplicitly]
@@ -47,9 +49,11 @@ public class StaticRpcTest : NetworkIdentity
     }
 
     [ObserversRpc(bufferLast: true)]
-    public void SendObserverRpcM<T>(int a, T someData) where T : SomeBaseData
+    public void SendObserverRpcM(int a, SomeBaseData someData, int b)
     {
-        Debug.Log($"SendObserverRpcM: {someData} {someData.GetType().Name} {typeof(T).Name}");
+        Debug.Log($"SendObserverRpcM: {a}");
+        Debug.Log($"SendObserverRpcM: {someData} {someData?.GetType().Name}");
+        Debug.Log($"SendObserverRpcM: {b}");
     }
 
     [TargetRpc(requireServer: false)]
@@ -60,7 +64,7 @@ public class StaticRpcTest : NetworkIdentity
     }
 }
 
-public class SomeBaseDataB : SomeBaseData, IPackedAuto
+public class SomeBaseDataB : SomeBaseData
 {
     public int someInt2;
     public string someString2;
