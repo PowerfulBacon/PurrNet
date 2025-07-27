@@ -179,10 +179,12 @@ namespace PurrNet.Codegen
 
                 var packerType = mainmodule.GetTypeDefinition(typeof(Packer<>)).Import(mainmodule);
                 var readMethodP = packerType.GetMethod("Read").Import(mainmodule);
+                var readDirectP = packerType.GetMethod("ReadAsExactType").Import(mainmodule);
                 var writeMethodP = packerType.GetMethod("Write").Import(mainmodule);
+                var writeDirectP = packerType.GetMethod("WriteAsExactType").Import(mainmodule);
 
                 var write = writeMethod.Body.GetILProcessor();
-                GenerateMethod(true, writeMethod, writeMethodP, type, write, mainmodule, valueArg);
+                GenerateMethod(true, writeMethod, writeMethodP, writeDirectP, type, write, mainmodule, valueArg);
                 serializerClass.Methods.Add(writeMethod);
 
                 // create static read method
@@ -198,7 +200,7 @@ namespace PurrNet.Codegen
                 };
 
                 var read = readMethod.Body.GetILProcessor();
-                GenerateMethod(false, readMethod, readMethodP, type, read, mainmodule, valueArg);
+                GenerateMethod(false, readMethod, readMethodP, readDirectP, type, read, mainmodule, valueArg);
                 serializerClass.Methods.Add(readMethod);
             }
 
@@ -424,7 +426,15 @@ namespace PurrNet.Codegen
 
         public static bool HasInterface(TypeDefinition def, Type interfaceType)
         {
-            return def.Interfaces.Any(i => i.InterfaceType.FullName == interfaceType.FullName);
+            bool selfHas = def.Interfaces.Any(i => i.InterfaceType.FullName == interfaceType.FullName);
+            if (selfHas)
+                return true;
+
+            if (def.BaseType == null)
+                return false;
+
+            var baseType = def.BaseType.Resolve();
+            return baseType != null && HasInterface(baseType, interfaceType);
         }
 
         private static MethodReference CreateSetterMethod(TypeDefinition parent, FieldDefinition field)
@@ -520,7 +530,7 @@ namespace PurrNet.Codegen
         }
 
         private static void GenerateMethod(
-            bool isWriting, MethodDefinition method, MethodReference serialize, TypeReference typeRef, ILProcessor il,
+            bool isWriting, MethodDefinition method, MethodReference serialize, MethodReference serializeDirect, TypeReference typeRef, ILProcessor il,
             ModuleDefinition mainmodule, ParameterDefinition valueArg)
         {
             var bitPackerType = mainmodule.GetTypeDefinition(typeof(BitPacker)).Import(mainmodule);
@@ -587,7 +597,7 @@ namespace PurrNet.Codegen
 
                 if (baseType is { IsValueType: false })
                 {
-                    var genericM = CreateGenericMethod(packerType, baseType, serialize, mainmodule);
+                    var genericM = CreateGenericMethod(packerType, baseType, serializeDirect, mainmodule);
 
                     if (isWriting)
                     {

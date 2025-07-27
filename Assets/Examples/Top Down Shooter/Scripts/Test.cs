@@ -1,6 +1,5 @@
 using System;
 using PurrNet;
-using PurrNet.Packing;
 using UnityEngine;
 
 [RegisterNetworkType(typeof(Texture))]
@@ -10,7 +9,6 @@ public class Test : NetworkIdentity
     [SerializeField] private GameObject spawnedObject;
     [SerializeField] private GameObject networkPrefab;
     [SerializeField] private GameObject singleplayerPrefab;
-    
 
     [PurrButton]
     private void RunSpawned()

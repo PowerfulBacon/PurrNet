@@ -28,16 +28,7 @@ namespace PurrNet
         [UsedImplicitly]
         public void Read(int genericIndex, int index)
         {
-            PackedUInt hash = default;
-            Packer<PackedUInt>.Read(stream, ref hash);
-
-            if (!Hasher.TryGetType(hash, out var type))
-            {
-                throw new InvalidOperationException(
-                    PurrLogger.FormatMessage($"Type with hash '{hash}' not found.")
-                );
-            }
-
+            var type = types[genericIndex];
             Packer.Read(stream, type, ref values[index]);
         }
 

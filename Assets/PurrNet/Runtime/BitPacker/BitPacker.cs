@@ -276,8 +276,6 @@ namespace PurrNet.Packing
             }
 
             WriteBits(0, 1);
-            Type type = value.GetType();
-            WriteString(Encoding.UTF8, type.AssemblyQualifiedName);
             return true;
         }
 
@@ -293,19 +291,14 @@ namespace PurrNet.Packing
             if (value != null)
                 return true;
 
-            string typeName = ReadString(Encoding.UTF8);
-            var type = Type.GetType(typeName);
-
-            if (type == null)
-                throw new Exception($"[Packer] Unknown type '{typeName}'");
-
-            if (typeof(T).IsAssignableFrom(type))
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
-                value = (T)FormatterServices.GetUninitializedObject(type);
-                return true;
+                if (typeof(T).GetConstructor(Type.EmptyTypes) != null)
+                     value = Activator.CreateInstance<T>();
+                else value = (T)FormatterServices.GetUninitializedObject(typeof(T));
             }
 
-            throw new Exception($"[Packer] Type mismatch. Cannot cast {type} to {typeof(T)}");
+            return true;
         }
 
         public void WriteBits(BitPacker packer)

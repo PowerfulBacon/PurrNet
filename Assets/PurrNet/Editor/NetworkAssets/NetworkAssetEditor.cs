@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using UnityEditorInternal;
+using JetBrains.Annotations;
 
 namespace PurrNet
 {
@@ -13,16 +13,19 @@ namespace PurrNet
     {
         private NetworkAssets _target;
         private SerializedProperty _folderProp;
+        [UsedImplicitly]
         private SerializedProperty _autoGenerateProp;
         private SerializedProperty _assetsProp;
 
-        private bool _showTypeList = false;
+        private bool _showTypeList;
         private string _typeSearch = "";
         private List<Type> _cachedTypes;
         private int _typePage = 0;
         private const int TypesPerPage = 10;
 
+        [UsedImplicitly]
         private const int AssetsPerPage = 20;
+        [UsedImplicitly]
         private int _assetPage = 0;
 
         private static GUIStyle DescriptionStyle()
