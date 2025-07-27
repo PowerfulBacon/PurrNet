@@ -253,15 +253,15 @@ namespace PurrNet.Packing
         public static T Read(BitPacker packer)
         {
             var value = default(T);
-            ReadAsExactType(packer, ref value);
+            Read(packer, ref value);
             return value;
         }
 
         public static void Serialize(BitPacker packer, ref T value)
         {
             if (packer.isWriting)
-                WriteAsExactType(packer, value);
-            else ReadAsExactType(packer, ref value);
+                Write(packer, value);
+            else Read(packer, ref value);
         }
     }
 
@@ -352,8 +352,13 @@ namespace PurrNet.Packing
                 if (!hasValue) return;
 
                 object obj = value;
-                if (obj is Object unityObj && WriteAsNetworkAsset(packer, unityObj))
-                    return;
+
+                if (obj is Object unityObj)
+                {
+                    if (WriteAsNetworkAsset(packer, unityObj))
+                        return;
+                }
+                else Packer<bool>.Write(packer, false);
 
                 PackedUInt typeHash = Hasher.GetStableHashU32(obj.GetType());
                 Packer<PackedUInt>.Write(packer, typeHash);
