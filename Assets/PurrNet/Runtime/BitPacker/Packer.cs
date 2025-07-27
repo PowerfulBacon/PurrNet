@@ -126,7 +126,7 @@ namespace PurrNet.Packing
                 _writeWrapper = WriteClass;
             else _writeWrapper = WriteAsExactType;
 
-            Packer.RegisterWriter(typeof(T), _writeWrapper.Method);
+            Packer.RegisterWriter(typeof(T), _write.Method, _writeWrapper.Method);
         }
 
         public static void RegisterReader(ReadFunc<T> b)
@@ -140,7 +140,7 @@ namespace PurrNet.Packing
                 _readWrapper = ReadClass;
             else _readWrapper = ReadAsExactType;
 
-            Packer.RegisterReader(typeof(T), _readWrapper.Method);
+            Packer.RegisterReader(typeof(T), _read.Method, _readWrapper.Method);
         }
 
         [UsedByIL]
@@ -227,9 +227,14 @@ namespace PurrNet.Packing
             Packer<bool>.WriteAsExactType(packer, isTypeSameAsGeneric);
 
             if (!isTypeSameAsGeneric)
+            {
                 Packer<PackedUInt>.WriteAsExactType(packer, Hasher.GetStableHashU32(type));
-
-            Packer.Write(packer, type, value);
+                Packer.WriteAsExactType(packer, type, value);
+            }
+            else
+            {
+                WriteAsExactType(packer, value);
+            }
         }
 
         static void ReadClass(BitPacker packer, ref T value)
@@ -327,18 +332,22 @@ namespace PurrNet.Packing
             return AreEqual(a, b);
         }
 
-        static readonly Dictionary<Type, MethodInfo> _writeMethods = new Dictionary<Type, MethodInfo>();
-        static readonly Dictionary<Type, MethodInfo> _readMethods = new Dictionary<Type, MethodInfo>();
+        static readonly Dictionary<Type, MethodInfo> _writeExactMethods = new Dictionary<Type, MethodInfo>();
+        static readonly Dictionary<Type, MethodInfo> _writeWrappedMethods = new Dictionary<Type, MethodInfo>();
+        static readonly Dictionary<Type, MethodInfo> _readExactMethods = new Dictionary<Type, MethodInfo>();
+        static readonly Dictionary<Type, MethodInfo> _readWrappedMethods = new Dictionary<Type, MethodInfo>();
 
-        public static void RegisterWriter(Type type, MethodInfo method)
+        public static void RegisterWriter(Type type, MethodInfo exact, MethodInfo wrapper)
         {
-            _writeMethods.TryAdd(type, method);
+            _writeWrappedMethods.TryAdd(type, wrapper);
+            _writeExactMethods.TryAdd(type, exact);
         }
 
-        public static void RegisterReader(Type type, MethodInfo method)
+        public static void RegisterReader(Type type, MethodInfo exact, MethodInfo wrapper)
         {
             Hasher.PrepareType(type);
-            _readMethods.TryAdd(type, method);
+            _readWrappedMethods.TryAdd(type, wrapper);
+            _readExactMethods.TryAdd(type, exact);
         }
 
         static readonly object[] _args = new object[2];
@@ -435,9 +444,29 @@ namespace PurrNet.Packing
             return false;
         }
 
+        public static void WriteAsExactType<T>(BitPacker packer, Type type, T value)
+        {
+            if (!_writeExactMethods.TryGetValue(type, out var method))
+            {
+                PurrLogger.LogError($"No writer for type '{type}' is registered.");
+                return;
+            }
+
+            try
+            {
+                _args[0] = packer;
+                _args[1] = value;
+                method.Invoke(null, _args);
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to write value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
         public static void Write(BitPacker packer, Type type, object value)
         {
-            if (!_writeMethods.TryGetValue(type, out var method))
+            if (!_writeWrappedMethods.TryGetValue(type, out var method))
             {
                 PurrLogger.LogError($"No writer for type '{type}' is registered.");
                 return;
@@ -474,11 +503,33 @@ namespace PurrNet.Packing
             Read(packer, type, ref value);
         }
 
+        public static void WriteAsExactType(BitPacker packer, object value)
+        {
+            var type = value.GetType();
+
+            if (!_writeExactMethods.TryGetValue(type, out var method))
+            {
+                FallbackWriter(packer, value);
+                return;
+            }
+
+            try
+            {
+                _args[0] = packer;
+                _args[1] = value;
+                method.Invoke(null, _args);
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to write value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
         public static void Write(BitPacker packer, object value)
         {
             var type = value.GetType();
 
-            if (!_writeMethods.TryGetValue(type, out var method))
+            if (!_writeWrappedMethods.TryGetValue(type, out var method))
             {
                 FallbackWriter(packer, value);
                 return;
@@ -500,7 +551,7 @@ namespace PurrNet.Packing
         {
             var type = value.GetType();
 
-            if (!_writeMethods.TryGetValue(type, out var method))
+            if (!_writeExactMethods.TryGetValue(type, out var method))
             {
                 PurrLogger.LogError($"No writer for type '{type}' is registered.");
                 return;
@@ -520,7 +571,7 @@ namespace PurrNet.Packing
 
         public static void Read(BitPacker packer, Type type, ref object value)
         {
-            if (!_readMethods.TryGetValue(type, out var method))
+            if (!_readWrappedMethods.TryGetValue(type, out var method))
             {
                 FallbackReader(packer, ref value);
                 return;
@@ -541,7 +592,7 @@ namespace PurrNet.Packing
 
         public static void ReadRawObject(Type type, BitPacker packer, ref object value)
         {
-            if (!_readMethods.TryGetValue(type, out var method))
+            if (!_readExactMethods.TryGetValue(type, out var method))
             {
                 PurrLogger.LogError($"No reader for type '{type}' is registered.");
                 return;
