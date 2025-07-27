@@ -179,6 +179,7 @@ namespace PurrNet.Codegen
 
                 var packerType = mainmodule.GetTypeDefinition(typeof(Packer<>)).Import(mainmodule);
                 var readMethodP = packerType.GetMethod("Read").Import(mainmodule);
+                var readDirectP = packerType.GetMethod("ReadAsExactType").Import(mainmodule);
                 var writeMethodP = packerType.GetMethod("Write").Import(mainmodule);
                 var writeDirectP = packerType.GetMethod("WriteAsExactType").Import(mainmodule);
 
@@ -188,8 +189,6 @@ namespace PurrNet.Codegen
 
                 // create static read method
                 var readMethod = new MethodDefinition("Read", MethodAttributes.Public | MethodAttributes.Static,
-                    assembly.MainModule.TypeSystem.Void);
-                var readDirectMethod = new MethodDefinition("ReadAsExactType", MethodAttributes.Public | MethodAttributes.Static,
                     assembly.MainModule.TypeSystem.Void);
                 readMethod.Parameters.Add(new ParameterDefinition("stream", ParameterAttributes.None, bitStreamType));
                 readMethod.Parameters.Add(new ParameterDefinition("value", ParameterAttributes.None,
@@ -201,7 +200,7 @@ namespace PurrNet.Codegen
                 };
 
                 var read = readMethod.Body.GetILProcessor();
-                GenerateMethod(false, readMethod, readMethodP, readDirectMethod, type, read, mainmodule, valueArg);
+                GenerateMethod(false, readMethod, readMethodP, readDirectP, type, read, mainmodule, valueArg);
                 serializerClass.Methods.Add(readMethod);
             }
 
