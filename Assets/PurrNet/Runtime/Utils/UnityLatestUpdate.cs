@@ -1,5 +1,8 @@
 using System;
 using System.Threading.Tasks;
+#if UNITY_EDITOR && PURR_LEAKS_CHECK
+using PurrNet.Pooling;
+#endif
 using UnityEngine;
 
 namespace PurrNet
@@ -62,9 +65,22 @@ namespace PurrNet
             _instance = go.AddComponent<UnityLatestUpdate>();
         }
 
+#if UNITY_EDITOR && PURR_LEAKS_CHECK
+        private float _sweep;
+#endif
+
         private void Update()
         {
             onUpdate?.Invoke();
+#if UNITY_EDITOR && PURR_LEAKS_CHECK
+            _sweep += Time.deltaTime;
+
+            if (_sweep >= 1f)
+            {
+                _sweep = 0f;
+                AllocationTracker.CheckForLeaks();
+            }
+#endif
         }
 
         private void FixedUpdate()

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using JetBrains.Annotations;
-using PurrNet.Collections;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Pooling;
@@ -222,7 +221,7 @@ namespace PurrNet
 
         public bool isClient => isSpawned && networkManager.isClient;
 
-        public bool isClientAndObserving => isClient && observers.Contains(localPlayerForced);
+        public bool isClientAndObserving => isClient && _observers.Contains(localPlayerForced);
 
         public bool isHost => isSpawned && networkManager.isHost;
 
@@ -338,9 +337,11 @@ namespace PurrNet
         [UsedByIL]
         public PlayerID localPlayerForced => localPlayer ?? default;
 
-        private readonly PurrHashSet<PlayerID> _observers = new PurrHashSet<PlayerID>(4);
+        private readonly List<PlayerID> _observers = new List<PlayerID>(4);
 
-        public IReadonlyHashSet<PlayerID> observers => _observers;
+        public IReadOnlyList<PlayerID> observers => _observers;
+
+        public bool IsObserver(PlayerID player) => _observers.Contains(player);
 
         [UsedImplicitly]
         public void QueueOnSpawned(Action action)

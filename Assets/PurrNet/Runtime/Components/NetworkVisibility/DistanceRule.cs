@@ -14,7 +14,7 @@ namespace PurrNet
         public override bool CanSee(PlayerID player, NetworkIdentity networkIdentity)
         {
             var myPos = networkIdentity.transform.position;
-            bool wasPreviouslyVisible = networkIdentity.observers.Contains(player);
+            bool wasPreviouslyVisible = networkIdentity.IsObserver(player);
 
             foreach (var playerIdentity in manager.EnumerateAllPlayerOwnedIds(player, true))
             {

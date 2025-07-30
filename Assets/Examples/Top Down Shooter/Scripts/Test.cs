@@ -10,6 +10,23 @@ public class Test : NetworkIdentity
     [SerializeField] private GameObject networkPrefab;
     [SerializeField] private GameObject singleplayerPrefab;
 
+    private void Update()
+    {
+        TestReceive(5);
+    }
+
+    [ServerRpc]
+    private void TestReceive(int data)
+    {
+        TestReceiveObservers(data);
+    }
+
+    [ObserversRpc]
+    private void TestReceiveObservers(int data)
+    {
+
+    }
+
     [PurrButton]
     private void RunSpawned()
     {

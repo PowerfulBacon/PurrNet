@@ -142,7 +142,7 @@ namespace PurrNet.Modules
             _transport.SendToClient(conn, byteData, method);
         }
 
-        public void Send<T>(IEnumerable<Connection> conn, T data, Channel method = Channel.ReliableOrdered)
+        public void Send<T>(IReadOnlyList<Connection> conn, T data, Channel method = Channel.ReliableOrdered)
         {
             AssertIsServer("Cannot send data to player from client.");
 
@@ -152,8 +152,9 @@ namespace PurrNet.Modules
             var shouldTrack = ShouldTrackType(type);
 #endif
 
-            foreach (var connection in conn)
+            for (var i = 0; i < conn.Count; i++)
             {
+                var connection = conn[i];
 #if UNITY_EDITOR
                 if (shouldTrack)
                     Statistics.SentBroadcast(type, byteData.segment);
@@ -162,12 +163,13 @@ namespace PurrNet.Modules
             }
         }
 
-        public void Send(IEnumerable<Connection> conn, ByteData byteData, Channel method = Channel.ReliableOrdered)
+        public void Send(IReadOnlyList<Connection> conn, ByteData byteData, Channel method = Channel.ReliableOrdered)
         {
             AssertIsServer("Cannot send data to player from client.");
 
-            foreach (var connection in conn)
+            for (var i = 0; i < conn.Count; i++)
             {
+                var connection = conn[i];
 #if UNITY_EDITOR
                 Statistics.ForwardedBytes(byteData.length);
 #endif

@@ -25,7 +25,7 @@ namespace PurrNet.Modules
 
             for (var i = 0; i < count; i++)
             {
-                if (components[i].observers.Contains(playerID))
+                if (components[i].IsObserver(playerID))
                 {
                     observed.Add(components[i]);
                     hasObserver = true;

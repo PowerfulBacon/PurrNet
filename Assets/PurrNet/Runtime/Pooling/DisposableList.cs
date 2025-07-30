@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace PurrNet.Pooling
 {
-    public struct DisposableList<T> : IList<T>, IDisposable
+    public struct DisposableList<T> : IList<T>, IDisposable, IReadOnlyList<T>
     {
-        private readonly bool _shouldDispose;
+        private bool _shouldDispose;
 
         public List<T> list { get; private set; }
 
@@ -25,20 +25,18 @@ namespace PurrNet.Pooling
 
         public static DisposableList<T> Create(int capacity)
         {
-            var val = new DisposableList<T>();
-            val.list = ListPool<T>.Instantiate();
-            if (val.list.Capacity < capacity)
-                val.list.Capacity = capacity;
-            val._isAllocated = true;
-            return val;
+#pragma warning disable CS0618 // Type or member is obsolete
+            return new DisposableList<T>(capacity);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
-        
+
         public static DisposableList<T> Create(IEnumerable<T> copyFrom)
         {
             var val = new DisposableList<T>();
             val.list = ListPool<T>.Instantiate();
             val.list.AddRange(copyFrom);
             val._isAllocated = true;
+            val._shouldDispose = true;
             return val;
         }
 
@@ -47,6 +45,7 @@ namespace PurrNet.Pooling
             var val = new DisposableList<T>();
             val.list = ListPool<T>.Instantiate();
             val._isAllocated = true;
+            val._shouldDispose = true;
             return val;
         }
 

@@ -45,6 +45,7 @@ namespace PurrNet.Collections
 
         public bool Remove(T item)
         {
+
             return set.Remove(item);
         }
 

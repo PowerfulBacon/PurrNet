@@ -228,7 +228,7 @@ namespace PurrNet.Modules
 
         static readonly List<PlayerID> _observers = new List<PlayerID>();
 
-        static IEnumerable<PlayerID> GetImmediateExcept(PlayersManager players, PlayerID except)
+        static IReadOnlyList<PlayerID> GetImmediateExcept(PlayersManager players, PlayerID except)
         {
             _observers.Clear();
             _observers.AddRange(players.players);

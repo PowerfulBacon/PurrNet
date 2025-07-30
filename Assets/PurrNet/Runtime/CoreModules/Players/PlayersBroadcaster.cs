@@ -119,12 +119,13 @@ namespace PurrNet
                 _broadcastModule.SendRaw(conn, data, method);
         }
 
-        public void SendRaw(IEnumerable<PlayerID> players, ByteData data, Channel method = Channel.ReliableOrdered)
+        public void SendRaw(IReadOnlyList<PlayerID> players, ByteData data, Channel method = Channel.ReliableOrdered)
         {
             _connections.Clear();
 
-            foreach (var player in players)
+            for (var i = 0; i < players.Count; i++)
             {
+                var player = players[i];
                 if (player.isBot)
                     continue;
 
@@ -144,12 +145,13 @@ namespace PurrNet
                 _broadcastModule.Send(conn, data, method);
         }
 
-        public void Send<T>(IEnumerable<PlayerID> players, T data, Channel method = Channel.ReliableOrdered)
+        public void Send<T>(IReadOnlyList<PlayerID> players, T data, Channel method = Channel.ReliableOrdered)
         {
             _connections.Clear();
 
-            foreach (var player in players)
+            for (var index = 0; index < players.Count; index++)
             {
+                var player = players[index];
                 if (player.isBot)
                     continue;
 

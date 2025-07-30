@@ -116,7 +116,7 @@ namespace PurrNet.Modules
                     if (!nt.IsSpawned(_asServer) || !nt.id.HasValue)
                         continue;
 
-                    if (!nt.IsControlling(player, false) && nt.observers.Contains(player))
+                    if (!nt.IsControlling(player, false) && nt.IsObserver(player))
                         controlled.Add(nt);
                 }
             }

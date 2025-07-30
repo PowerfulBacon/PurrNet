@@ -37,7 +37,7 @@ namespace PurrNet.Modules
             if (!transform)
                 return;
 
-            bool isParentVisible = !parent || parent.observers.Contains(player);
+            bool isParentVisible = !parent || parent.IsObserver(player);
 
             RefreshVisibilityForGameObject(player, transform, _defaultRuleSet, isParentVisible, false);
         }
@@ -139,7 +139,7 @@ namespace PurrNet.Modules
                 visibilityChanged?.Invoke(player, transform, isVisible);
         }
 
-        public void EvaluateAll(IReadonlyHashSet<PlayerID> players, List<NetworkIdentity> identities)
+        public void EvaluateAll(IReadOnlyList<PlayerID> players, List<NetworkIdentity> identities)
         {
             var hash = HashSetPool<NetworkIdentity>.Instantiate();
 
@@ -155,9 +155,14 @@ namespace PurrNet.Modules
             }
 
 
-            foreach (var player in players)
-            foreach (var root in hash)
-                RefreshVisibilityForGameObject(player, root.transform);
+            for (var i = 0; i < players.Count; i++)
+            {
+                var player = players[i];
+                foreach (var root in hash)
+                {
+                    RefreshVisibilityForGameObject(player, root.transform);
+                }
+            }
 
             HashSetPool<NetworkIdentity>.Destroy(hash);
         }

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using PurrNet.Collections;
 using PurrNet.Logging;
 
 namespace PurrNet.Modules
@@ -13,11 +12,8 @@ namespace PurrNet.Modules
 
     public class ScenePlayersModule : INetworkModule
     {
-        private readonly Dictionary<SceneID, PurrHashSet<PlayerID>> _scenePlayers =
-            new Dictionary<SceneID, PurrHashSet<PlayerID>>();
-
-        private readonly Dictionary<SceneID, PurrHashSet<PlayerID>> _sceneLoadedPlayers =
-            new Dictionary<SceneID, PurrHashSet<PlayerID>>();
+        private readonly Dictionary<SceneID, List<PlayerID>> _scenePlayers = new ();
+        private readonly Dictionary<SceneID, List<PlayerID>> _sceneLoadedPlayers = new ();
 
         readonly ScenesModule _scenes;
         readonly PlayersManager _players;
@@ -164,7 +160,8 @@ namespace PurrNet.Modules
 
             if (_sceneLoadedPlayers.TryGetValue(data.scene, out var loadedPlayers))
             {
-                loadedPlayers.Add(player);
+                if (!loadedPlayers.Contains(player))
+                    loadedPlayers.Add(player);
             }
             else
             {
@@ -179,7 +176,7 @@ namespace PurrNet.Modules
         /// <summary>
         /// Get all players that are both part of the scene and have finished loading the scene
         /// </summary>
-        public bool TryGetPlayersInScene(SceneID scene, out IReadonlyHashSet<PlayerID> players)
+        public bool TryGetPlayersInScene(SceneID scene, out IReadOnlyList<PlayerID> players)
         {
             if (_sceneLoadedPlayers.TryGetValue(scene, out var data))
             {
@@ -194,7 +191,7 @@ namespace PurrNet.Modules
         /// <summary>
         /// Get all players attached to a scene, regardless of whether they have finished loading the scene or not
         /// </summary>
-        public bool TryGetPlayersAttachedToScene(SceneID scene, out ISet<PlayerID> players)
+        public bool TryGetPlayersAttachedToScene(SceneID scene, out IReadOnlyList<PlayerID> players)
         {
             if (_scenePlayers.TryGetValue(scene, out var data))
             {
@@ -219,7 +216,9 @@ namespace PurrNet.Modules
             for (int i = 0; i < connectedPlayersCount; i++)
             {
                 var player = _players.players[i];
-                playersInScene.Add(player);
+
+                if (!playersInScene.Contains(player))
+                    playersInScene.Add(player);
 
                 onPlayerJoinedScene?.Invoke(player, scene, asServer);
             }
@@ -306,8 +305,11 @@ namespace PurrNet.Modules
                 return;
             }
 
-            if (playersInScene.Add(player))
+            if (!playersInScene.Contains(player))
+            {
+                playersInScene.Add(player);
                 onPlayerJoinedScene?.Invoke(player, scene, _asServer);
+            }
         }
 
         public bool TryGetScenesForPlayer(PlayerID playerId, out SceneID[] scenes)
@@ -371,8 +373,8 @@ namespace PurrNet.Modules
                 return;
             }
 
-            _scenePlayers.Add(scene, new PurrHashSet<PlayerID>());
-            _sceneLoadedPlayers.Add(scene, new PurrHashSet<PlayerID>());
+            _scenePlayers.Add(scene, new List<PlayerID>());
+            _sceneLoadedPlayers.Add(scene, new List<PlayerID>());
 
             OnSceneVisibilityChanged(scene, state.settings.isPublic, asServer);
         }
