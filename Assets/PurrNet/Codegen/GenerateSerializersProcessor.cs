@@ -590,6 +590,37 @@ namespace PurrNet.Codegen
                 return;
             }
 
+            if (isClass && type.BaseType != null && type.BaseType.FullName != typeof(object).FullName)
+            {
+                var baseType = type.BaseType;
+
+                if (baseType is { IsValueType: false })
+                {
+                    var genericM = CreateGenericMethod(packerType, baseType, serializeDirect, mainmodule);
+
+                    if (isWriting)
+                    {
+                        il.Emit(OpCodes.Ldarg_0);
+                        il.Emit(OpCodes.Ldarg_1);
+                    }
+                    else
+                    {
+                        var variable = new VariableDefinition(baseType);
+                        method.Body.Variables.Add(variable);
+
+                        // variable = this
+                        il.Emit(OpCodes.Ldarg_1);
+                        il.Emit(OpCodes.Ldind_Ref);
+                        il.Emit(OpCodes.Stloc, variable);
+
+                        il.Emit(OpCodes.Ldarg_0);
+                        il.Emit(OpCodes.Ldloca, variable);
+                    }
+
+                    il.Emit(OpCodes.Call, genericM);
+                }
+            }
+
             foreach (var field in type.Fields)
             {
                 if (field.IsStatic)
@@ -687,38 +718,6 @@ namespace PurrNet.Codegen
                     var fieldRef = new FieldReference(field.Name, field.FieldType, typeRef).Import(mainmodule);
 
                     il.Emit(isWriting ? OpCodes.Ldfld : OpCodes.Ldflda, fieldRef);
-                    il.Emit(OpCodes.Call, genericM);
-                }
-            }
-
-            // if it inherits from a class, write/read the base class
-            if (isClass && type.BaseType != null && type.BaseType.FullName != typeof(object).FullName)
-            {
-                var baseType = type.BaseType;
-
-                if (baseType is { IsValueType: false })
-                {
-                    var genericM = CreateGenericMethod(packerType, baseType, serializeDirect, mainmodule);
-
-                    if (isWriting)
-                    {
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldarg_1);
-                    }
-                    else
-                    {
-                        var variable = new VariableDefinition(baseType);
-                        method.Body.Variables.Add(variable);
-
-                        // variable = this
-                        il.Emit(OpCodes.Ldarg_1);
-                        il.Emit(OpCodes.Ldind_Ref);
-                        il.Emit(OpCodes.Stloc, variable);
-
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldloca, variable);
-                    }
-
                     il.Emit(OpCodes.Call, genericM);
                 }
             }

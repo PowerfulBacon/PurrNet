@@ -104,6 +104,31 @@ namespace PurrNet.Codegen
             }
             else
             {
+                if (isClass && type.BaseType != null && type.BaseType.FullName != typeof(object).FullName)
+                {
+                    var baseType = type.BaseType;
+
+                    if (baseType is { IsValueType: false })
+                    {
+                        var genericM =
+                            GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, baseType, deltaSerializer,
+                                module);
+
+                        var variable = new VariableDefinition(baseType);
+                        method.Body.Variables.Add(variable);
+
+                        // variable = this
+                        il.Emit(OpCodes.Ldarg_2);
+                        il.Emit(OpCodes.Ldind_Ref);
+                        il.Emit(OpCodes.Stloc, variable);
+
+                        il.Emit(OpCodes.Ldarg_0);
+                        il.Emit(OpCodes.Ldarg_1);
+                        il.Emit(OpCodes.Ldloca, variable);
+                        il.Emit(OpCodes.Call, genericM);
+                    }
+                }
+
                 foreach (var field in type.Fields)
                 {
                     if (field.IsStatic)
@@ -180,31 +205,6 @@ namespace PurrNet.Codegen
                     il.Emit(OpCodes.Ldflda, fieldRef);
 
                     il.Emit(OpCodes.Call, packer);
-                }
-
-                if (isClass && type.BaseType != null && type.BaseType.FullName != typeof(object).FullName)
-                {
-                    var baseType = type.BaseType;
-
-                    if (baseType is { IsValueType: false })
-                    {
-                        var genericM =
-                            GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, baseType, deltaSerializer,
-                                module);
-
-                        var variable = new VariableDefinition(baseType);
-                        method.Body.Variables.Add(variable);
-
-                        // variable = this
-                        il.Emit(OpCodes.Ldarg_2);
-                        il.Emit(OpCodes.Ldind_Ref);
-                        il.Emit(OpCodes.Stloc, variable);
-
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldarg_1);
-                        il.Emit(OpCodes.Ldloca, variable);
-                        il.Emit(OpCodes.Call, genericM);
-                    }
                 }
             }
 
@@ -293,6 +293,31 @@ namespace PurrNet.Codegen
             else
             {
 
+                if (isClass && type.BaseType != null && type.BaseType.FullName != typeof(object).FullName)
+                {
+                    var baseType = type.BaseType;
+
+                    if (baseType is { IsValueType: false })
+                    {
+                        var genericM =
+                            GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, baseType, deltaSerializer,
+                                module);
+
+                        il.Emit(OpCodes.Ldarg_0);
+                        il.Emit(OpCodes.Ldarg_1);
+                        il.Emit(OpCodes.Ldarg_2);
+
+                        il.Emit(OpCodes.Call, genericM);
+                        if (type.Fields.Count > 0)
+                        {
+                            il.Emit(OpCodes.Ldloc_1);
+                            il.Emit(OpCodes.Or);
+                        }
+
+                        il.Emit(OpCodes.Stloc_1);
+                    }
+                }
+
                 for (var i = 0; i < type.Fields.Count; i++)
                 {
                     var field = type.Fields[i];
@@ -366,31 +391,6 @@ namespace PurrNet.Codegen
                     }
 
                     il.Emit(OpCodes.Stloc_1);
-                }
-
-                if (isClass && type.BaseType != null && type.BaseType.FullName != typeof(object).FullName)
-                {
-                    var baseType = type.BaseType;
-
-                    if (baseType is { IsValueType: false })
-                    {
-                        var genericM =
-                            GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, baseType, deltaSerializer,
-                                module);
-
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldarg_1);
-                        il.Emit(OpCodes.Ldarg_2);
-
-                        il.Emit(OpCodes.Call, genericM);
-                        if (type.Fields.Count > 0)
-                        {
-                            il.Emit(OpCodes.Ldloc_1);
-                            il.Emit(OpCodes.Or);
-                        }
-
-                        il.Emit(OpCodes.Stloc_1);
-                    }
                 }
             }
 
