@@ -598,6 +598,8 @@ namespace PurrNet.Codegen
                 {
                     var genericM = CreateGenericMethod(packerType, baseType, serializeDirect, mainmodule);
 
+                    var variable = new VariableDefinition(baseType);
+
                     if (isWriting)
                     {
                         il.Emit(OpCodes.Ldarg_0);
@@ -605,10 +607,9 @@ namespace PurrNet.Codegen
                     }
                     else
                     {
-                        var variable = new VariableDefinition(baseType);
+                        // variable = this
                         method.Body.Variables.Add(variable);
 
-                        // variable = this
                         il.Emit(OpCodes.Ldarg_1);
                         il.Emit(OpCodes.Ldind_Ref);
                         il.Emit(OpCodes.Stloc, variable);
@@ -618,6 +619,14 @@ namespace PurrNet.Codegen
                     }
 
                     il.Emit(OpCodes.Call, genericM);
+
+                    if (!isWriting)
+                    {
+                        il.Emit(OpCodes.Ldarg_1);
+                        il.Emit(OpCodes.Ldloc, variable);
+                        il.Emit(OpCodes.Castclass, type);
+                        il.Emit(OpCodes.Stind_Ref);
+                    }
                 }
             }
 

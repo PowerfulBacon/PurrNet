@@ -126,6 +126,11 @@ namespace PurrNet.Codegen
                         il.Emit(OpCodes.Ldarg_1);
                         il.Emit(OpCodes.Ldloca, variable);
                         il.Emit(OpCodes.Call, genericM);
+
+                        il.Emit(OpCodes.Ldarg_2);
+                        il.Emit(OpCodes.Ldloc, variable);
+                        il.Emit(OpCodes.Castclass, type);
+                        il.Emit(OpCodes.Stind_Ref);
                     }
                 }
 

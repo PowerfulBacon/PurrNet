@@ -69,6 +69,12 @@ public class SomeBaseDataB : SomeBaseData
     public int someInt2;
     public string someString2;
 
+    public void FUCKU(ref SomeBaseDataB fef)
+    {
+        SomeBaseData a = new SomeBaseData();
+        fef = (SomeBaseDataB)a;
+    }
+
     public override string ToString()
     {
         return $"{nameof(SomeBaseDataB)}: {nameof(someInt2)}: {someInt2}, {nameof(someString2)}: {someString2}";
