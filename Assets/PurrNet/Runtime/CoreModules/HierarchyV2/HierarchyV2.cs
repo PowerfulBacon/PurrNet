@@ -189,6 +189,7 @@ namespace PurrNet.Modules
             for (var i = 0; i < count; ++i)
                 OnDespawnPacket(player, data.despawnPackets[i], asServer);
             FlushSpawnPackets();
+            data.Dispose();
         }
 
         bool _isDisposed;
@@ -766,8 +767,8 @@ namespace PurrNet.Modules
                 if (!_spawnPackets.TryGetValue(player, out var batch))
                 {
                     batch = new SpawnPacketBatch(
-                        ListPool<SpawnPacket>.Instantiate(),
-                        ListPool<DespawnPacket>.Instantiate()
+                        DisposableList<SpawnPacket>.Create(),
+                        DisposableList<DespawnPacket>.Create()
                     );
                     batch.despawnPackets.Add(packet);
                     _spawnPackets.Add(player, batch);
@@ -801,8 +802,8 @@ namespace PurrNet.Modules
                 if (!_spawnPackets.TryGetValue(player, out var batch))
                 {
                     batch = new SpawnPacketBatch(
-                        ListPool<SpawnPacket>.Instantiate(),
-                        ListPool<DespawnPacket>.Instantiate()
+                        DisposableList<SpawnPacket>.Create(),
+                        DisposableList<DespawnPacket>.Create()
                     );
                     batch.spawnPackets.Add(packet);
                     _spawnPackets.Add(player, batch);

@@ -7,12 +7,12 @@ using UnityEngine;
 
 namespace PurrNet.Modules
 {
-    public readonly struct SpawnPacketBatch : IPackedAuto, IDisposable
+    public struct SpawnPacketBatch : IPackedAuto, IDisposable
     {
-        public readonly List<SpawnPacket> spawnPackets;
-        public readonly List<DespawnPacket> despawnPackets;
+        public DisposableList<SpawnPacket> spawnPackets;
+        public DisposableList<DespawnPacket> despawnPackets;
 
-        public SpawnPacketBatch(List<SpawnPacket> spawnPackets, List<DespawnPacket> despawnPackets)
+        public SpawnPacketBatch(DisposableList<SpawnPacket> spawnPackets, DisposableList<DespawnPacket> despawnPackets)
         {
             this.despawnPackets = despawnPackets;
             this.spawnPackets = spawnPackets;
@@ -23,8 +23,8 @@ namespace PurrNet.Modules
             for (var i = 0; i < c; ++i)
                 spawnPackets[i].Dispose();
 
-            ListPool<SpawnPacket>.Destroy(spawnPackets);
-            ListPool<DespawnPacket>.Destroy(despawnPackets);
+            spawnPackets.Dispose();
+            despawnPackets.Dispose();
         }
 
         public override string ToString()
@@ -33,12 +33,13 @@ namespace PurrNet.Modules
         }
     }
 
-    public struct SpawnPacket : IPackedSimple, IDisposable
+    public struct SpawnPacket : IDisposable
     {
         public SceneID sceneId;
         public SpawnID packetIdx;
         public GameObjectPrototype prototype;
 
+        [DontPack]
         internal List<NetworkIdentity> localcache;
 
         /// <summary>
@@ -97,13 +98,6 @@ namespace PurrNet.Modules
         public override string ToString()
         {
             return $"SpawnPacket: {{ sceneId: {sceneId}, packetIdx: {packetIdx}, prototype: {prototype} }}";
-        }
-
-        public void Serialize(BitPacker packer)
-        {
-            Packer<SceneID>.Serialize(packer, ref sceneId);
-            Packer<SpawnID>.Serialize(packer, ref packetIdx);
-            Packer<GameObjectPrototype>.Serialize(packer, ref prototype);
         }
 
         public void Dispose()

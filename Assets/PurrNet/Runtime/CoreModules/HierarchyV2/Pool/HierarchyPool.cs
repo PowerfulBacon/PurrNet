@@ -95,9 +95,6 @@ namespace PurrNet.Modules
                 var current = queue.Dequeue();
                 properNids.Add(current);
 
-                var directChildren = DisposableList<TransformIdentityPair>.Create(16);
-                GetDirectChildren(current.transform, directChildren);
-
                 for (var i = 0; i < current.directChildren.Count; i++)
                 {
                     var child = current.directChildren[i];
@@ -119,7 +116,7 @@ namespace PurrNet.Modules
                 var current = queue.Dequeue();
                 properNids.Add(current);
 
-                var directChildren = DisposableList<TransformIdentityPair>.Create(16);
+                using var directChildren = DisposableList<TransformIdentityPair>.Create(16);
                 GetDirectChildren(current.transform, directChildren);
 
                 for (var i = 0; i < directChildren.Count; i++)
@@ -386,6 +383,7 @@ namespace PurrNet.Modules
             if (!rootPair.HasObserver(scope, allChildren))
             {
                 prototype = default;
+                framework.Dispose();
                 return false;
             }
 
@@ -442,8 +440,11 @@ namespace PurrNet.Modules
         {
             var framework = DisposableList<GameObjectFrameworkPiece>.Create(16);
             if (!transform.TryGetComponent<NetworkIdentity>(out var rootId))
+            {
                 return new GameObjectPrototype(transform.localPosition, transform.localRotation, transform.localScale, null, null, framework,
                     null);
+
+            }
 
             bool isDefaultParent = transform.parent == rootId.defaultParent;
             var queue = QueuePool<GameObjectRuntimePair>.Instantiate();

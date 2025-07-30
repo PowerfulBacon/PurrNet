@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using PurrNet.Logging;
 
 namespace PurrNet.Pooling
@@ -34,7 +35,23 @@ namespace PurrNet.Pooling
                 if (!allocation.reference.TryGetTarget(out _))
                 {
                     _allocations.RemoveAt(i--);
-                    PurrLogger.LogError($"Object of type {allocation.targetType} was leaked.\n{allocation.allocationTrace}");
+                    PurrLogger.LogError($"Object of type {allocation.targetType} was leaked.\n\nAllocation StackTrace: \n{allocation.allocationTrace}\n\n" +
+                                        $"Last Usage StackTrace: \n{allocation.lastUsageTrace}\n\n");
+                }
+            }
+        }
+
+        public static void UpdateUsage(object list)
+        {
+            if (_allocations == null) return;
+            for (var i = 0; i < _allocations.Count; i++)
+            {
+                var allocation = _allocations[i];
+                if (allocation.reference.TryGetTarget(out var obj) && obj == list)
+                {
+                    var val = _allocations[i];
+                    val.lastUsageTrace = new StackTrace(true);
+                    _allocations[i] = val;
                 }
             }
         }
