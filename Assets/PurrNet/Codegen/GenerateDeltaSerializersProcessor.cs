@@ -292,8 +292,10 @@ namespace PurrNet.Codegen
             }
             else
             {
+                bool isInheritedClass = isClass && type.BaseType != null &&
+                                    type.BaseType.FullName != typeof(object).FullName;
 
-                if (isClass && type.BaseType != null && type.BaseType.FullName != typeof(object).FullName)
+                if (isInheritedClass)
                 {
                     var baseType = type.BaseType;
 
@@ -308,11 +310,8 @@ namespace PurrNet.Codegen
                         il.Emit(OpCodes.Ldarg_2);
 
                         il.Emit(OpCodes.Call, genericM);
-                        if (type.Fields.Count > 0)
-                        {
-                            il.Emit(OpCodes.Ldloc_1);
-                            il.Emit(OpCodes.Or);
-                        }
+                        il.Emit(OpCodes.Ldloc_1);
+                        il.Emit(OpCodes.Or);
 
                         il.Emit(OpCodes.Stloc_1);
                     }
@@ -384,7 +383,7 @@ namespace PurrNet.Codegen
 
                     il.Emit(OpCodes.Call, packer);
 
-                    if (i > 0)
+                    if (i > 0 || isInheritedClass)
                     {
                         il.Emit(OpCodes.Ldloc_1);
                         il.Emit(OpCodes.Or);
