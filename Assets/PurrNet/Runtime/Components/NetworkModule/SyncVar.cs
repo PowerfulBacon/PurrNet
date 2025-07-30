@@ -103,6 +103,11 @@ namespace PurrNet
             }
         }
 
+        public void SetDirty()
+        {
+            _isDirty = true;
+        }
+
         private float _lastSendTime;
 
         private void ForceSendUnreliable()
@@ -268,7 +273,7 @@ namespace PurrNet
 
             if (bothNull || bothEqual)
                 return;
-            
+
             var oldValue = value;
             _value = newValue;
             onChanged?.Invoke(value);
