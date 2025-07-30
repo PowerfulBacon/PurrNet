@@ -6,7 +6,7 @@ namespace PurrNet.Pooling
 {
     public struct DisposableHashSet<T> : ISet<T>, IDisposable
     {
-        private readonly HashSet<T> _set;
+        private HashSet<T> _set;
 
         public HashSet<T> set => _set;
 
@@ -19,6 +19,14 @@ namespace PurrNet.Pooling
 
             _set = newSet;
             isDisposed = false;
+        }
+        
+        public static DisposableHashSet<T> Create()
+        {
+            var val = new DisposableHashSet<T>();
+            val._set = HashSetPool<T>.Instantiate();
+            val.isDisposed = false;
+            return val;
         }
 
         public void Dispose()
