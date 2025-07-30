@@ -374,6 +374,7 @@ namespace PurrNet.Modules
             if (!transform.TryGetComponent<NetworkIdentity>(out var rootId))
             {
                 prototype = default;
+                framework.Dispose();
                 return false;
             }
 
