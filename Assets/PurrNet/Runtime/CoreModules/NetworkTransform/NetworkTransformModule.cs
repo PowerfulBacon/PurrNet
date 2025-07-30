@@ -199,8 +199,9 @@ namespace PurrNet.Modules
             }
             else if (_scenePlayers.TryGetPlayersInScene(_scene, out var players))
             {
-                foreach (var player in players)
+                for (var i = 0; i < players.Count; i++)
                 {
+                    var player = players[i];
                     if (player == localPlayer)
                         continue;
 
