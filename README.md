@@ -42,7 +42,7 @@ You can also fallback to the asset store but versions will be behind.
 - Composite (Allows multiple transports)
 
 ### Spawning and Despawning
-
+ 
 ```csharp
 [SerializedField] GameObject playerPrefab;
 
