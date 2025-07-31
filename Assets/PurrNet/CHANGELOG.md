@@ -1,3 +1,98 @@
+# [2.0.0](https://github.com/PurrNet/PurrNet/compare/v1.12.4...v2.0.0) (2025-07-31)
+
+
+### Bug Fixes
+
+* `isIk` wasn't checking enough cases thx @OverGast ([4dd1c01](https://github.com/PurrNet/PurrNet/commit/4dd1c0133428365101c3bb28f087c9345ae0cc1e))
+* add asServer for collider registration (rollback) ([92390cf](https://github.com/PurrNet/PurrNet/commit/92390cfda5053c55d005d28bd6c901ad6ee9af7b))
+* Added connection UI example ([36be104](https://github.com/PurrNet/PurrNet/commit/36be104386c6237c5c6222a33b362906f30b4f32))
+* Added create overloads for disposable types ([6650be1](https://github.com/PurrNet/PurrNet/commit/6650be1301666f0c87fa68d4a0bc6c7f0d9fcb4e))
+* Added Disposable HashSet creation ([9f1b2e3](https://github.com/PurrNet/PurrNet/commit/9f1b2e3dfdf30cc56960b631dd56147ae7563671))
+* Added proper asset post processing to network assets ([c10f7fe](https://github.com/PurrNet/PurrNet/commit/c10f7feade5ad191f5fea8b1d1a3f2d32a3f64ef))
+* Additional safety added to packer of gameobject and transform ([20f3623](https://github.com/PurrNet/PurrNet/commit/20f36236b4d6929a8bf1956ae52175ce09ad7824))
+* allow for manual despawning too ([0a01be8](https://github.com/PurrNet/PurrNet/commit/0a01be8322a43085da4a0e8b9a9f22de16033ee5))
+* allow to dynamically register colliders for rollback history ([2d2762b](https://github.com/PurrNet/PurrNet/commit/2d2762b493afcc604c9e7e3e7fa3a24c50c42125))
+* also render purrnet toolbar on clones ([c3dbb1c](https://github.com/PurrNet/PurrNet/commit/c3dbb1cd127403cba11f5a9c415a82e6679b38e4))
+* attempt at fixing steam issue ([6c96b84](https://github.com/PurrNet/PurrNet/commit/6c96b8432ce3b6a94f29da7d01f06110bea646b4))
+* attempt to circumvent caching ([de0c54b](https://github.com/PurrNet/PurrNet/commit/de0c54b1f1c33ab3c7fac9d607b2d97bf83699d0))
+* Awaitable error on older versions ([7cd6ad9](https://github.com/PurrNet/PurrNet/commit/7cd6ad923ecfd4af2658728b2d0b337d8902b380))
+* base writing replace old pointer ([23573a4](https://github.com/PurrNet/PurrNet/commit/23573a43b0e024f68c6694d323b33c7f07694bdf))
+* Better button placement ([26d2e12](https://github.com/PurrNet/PurrNet/commit/26d2e12f883553d39ad82c7721bc4b6cf6541af1))
+* better cancellation for purrtransport ([e7bbc5f](https://github.com/PurrNet/PurrNet/commit/e7bbc5f8b105edc0e81564900922f21858ebc6f2))
+* better interface checking ([45cce33](https://github.com/PurrNet/PurrNet/commit/45cce33dd652e46113c1670911767211b720ea0c))
+* Bitpacker updated for improved class handling ([9c42b92](https://github.com/PurrNet/PurrNet/commit/9c42b926e5404b7b5ed453fe31052a4467923549))
+* BREAKING CHANGE fixed type in `AuthenticationBehaviour<T>`, renamed `GetClientPlayload` to `GetClientPayload` ([b03e333](https://github.com/PurrNet/PurrNet/commit/b03e333c40c3e637b67806041136c29df4ff3276))
+* cleanup can run into destroyed identities ([539dd76](https://github.com/PurrNet/PurrNet/commit/539dd768b28e26c6db09ef676dd40e543ea66e62))
+* Collider3DExtensions for other casting methods ([dfeac1f](https://github.com/PurrNet/PurrNet/commit/dfeac1f088ce9fb1f79d18d58fb43472fa2801d4))
+* Compare synclist delta when receiving full state ([24aca2f](https://github.com/PurrNet/PurrNet/commit/24aca2f5efa6f3c4595e9baed3effe3561a5bc6f))
+* Correct push ([a2bbc9b](https://github.com/PurrNet/PurrNet/commit/a2bbc9baa8c852c6bd1492df12c9f45e012da8f5))
+* custom dela packer for NetworkID? is obsolete now ([353082c](https://github.com/PurrNet/PurrNet/commit/353082cbf300138b5f6d30dfd14d741e93fe3ab1))
+* disposable list leak detection and GC reduction ([02be3c5](https://github.com/PurrNet/PurrNet/commit/02be3c5e8508d8eca16297f9288f9005ec3f8edc))
+* disposing stuff ([6b74e68](https://github.com/PurrNet/PurrNet/commit/6b74e68801f1ca3667c26504b893482c82c35b63))
+* dont use System.Threading.Tasks.Task.Yield due to webgl ([8c358bb](https://github.com/PurrNet/PurrNet/commit/8c358bb4739aa546a859cf28803553c2070329fb))
+* Extended SyncVar callback to also include old value ([ffee19e](https://github.com/PurrNet/PurrNet/commit/ffee19ec610fb645ff97608bd718d9f854aa6267))
+* for steam if localhost or local ip just connect to self ([43e9019](https://github.com/PurrNet/PurrNet/commit/43e9019e03e8efa916dc96abaa6d60c0b3fcbb3b))
+* if parent type doesn't have a writer, use the specified type one ([e8df49a](https://github.com/PurrNet/PurrNet/commit/e8df49a1296e2082c3368d7fc60d4ccc1d026f2a))
+* Improved purr buttons to work with inheritance ([d7363bb](https://github.com/PurrNet/PurrNet/commit/d7363bb889d5b75bc99d18ee75ec507f158becce))
+* include Cache-Control header too ([86badfa](https://github.com/PurrNet/PurrNet/commit/86badfac77a023d7ca67aad322816fdca0ca0f70))
+* include purrnet version and color buttons insteasd of showing LEDs ([9612890](https://github.com/PurrNet/PurrNet/commit/9612890fbee45da9f795ef4574894c25f9dcbefe))
+* introduce `SetDirty` for syncvars ([dcd8f86](https://github.com/PurrNet/PurrNet/commit/dcd8f86d22a451d4128b5d3b5661e9a19e568c04))
+* introduce LateLateUpdate for nt ([86c3d87](https://github.com/PurrNet/PurrNet/commit/86c3d87e49fce11e572261df6cbd6c22c8ec06d2))
+* leak checker; removing some GC for rpcs ([3578dcf](https://github.com/PurrNet/PurrNet/commit/3578dcf1e6faee1a5c3eca086f406b15065fa98a))
+* make sure client has the isSpawned boolean set to true ([568e256](https://github.com/PurrNet/PurrNet/commit/568e2563be49450e2339bfd61b7f10fd25cde4f4))
+* make sure to apply the changed value ([83822be](https://github.com/PurrNet/PurrNet/commit/83822be32cef9a66ff712268291734ad2030e2d9))
+* make sure we don't create something that is already registered ([78a6907](https://github.com/PurrNet/PurrNet/commit/78a69075603bf4248681989dbeba00edd0176898))
+* make syncvar change existing value instead of creating a new one ([e9a7336](https://github.com/PurrNet/PurrNet/commit/e9a7336e1d8ecdb36c2ba420113158ee20eeb9eb))
+* more purr transport tweaks ([a6da989](https://github.com/PurrNet/PurrNet/commit/a6da9895d9f511fb00566d4afaaa0cadbb562498))
+* more raycast types for rollback module ([975ab10](https://github.com/PurrNet/PurrNet/commit/975ab103da67a36097f36517ec6255e96f9f6a83))
+* move retry logic to purrtransport api level ([5d209a8](https://github.com/PurrNet/PurrNet/commit/5d209a8942838cbc797a3fa6e0bb85baaefc2759))
+* Network assets post asset processing proper push ([b383377](https://github.com/PurrNet/PurrNet/commit/b3833779d77bbc2ab3b23e78960c7cebd53db359))
+* NetworkAssetsEditor and null assets ([c30cc95](https://github.com/PurrNet/PurrNet/commit/c30cc95decee22b1cbd4825b77584b55725ece1a))
+* Packer handling of unspawned gameobjects and transforms ([cc68315](https://github.com/PurrNet/PurrNet/commit/cc6831536deabda40ee8f7cce69d204692ab78fb))
+* packer rework ([9630787](https://github.com/PurrNet/PurrNet/commit/9630787b9ba57066fd59cf84673d777d2ef756db))
+* populate local player id as soon as server has it ([7fddf9d](https://github.com/PurrNet/PurrNet/commit/7fddf9dde5de0b03edd729ce3fb021b97c69567d))
+* push `IsRegistered` ([b72a193](https://github.com/PurrNet/PurrNet/commit/b72a1931cf3cbe922a058c0bfd41cb4a58cae197))
+* Quick stupid fix ([8804efe](https://github.com/PurrNet/PurrNet/commit/8804efed49cc42de997b7dc66f2923d64dde4bd1))
+* remove readonly from ApplyTo method ([b3a0d13](https://github.com/PurrNet/PurrNet/commit/b3a0d131c731061a3c284caeb76ca03b4384fe8e))
+* rename rollback methods and further test them ([5f10efd](https://github.com/PurrNet/PurrNet/commit/5f10efd7fa8f4e2ce3694cc755d4e03202bd69b1))
+* retry for purr transport if first fails ([8330de0](https://github.com/PurrNet/PurrNet/commit/8330de02f989757d0d10c6855dce717c3166a90c))
+* Scene objects spawn issue for HOST ([6cf0b02](https://github.com/PurrNet/PurrNet/commit/6cf0b0209b02fb50f20e5d2f1f926f5d99c56a15))
+* simplify generic logic ([2a48bf3](https://github.com/PurrNet/PurrNet/commit/2a48bf37b8af52891d69508af835e46d29951dee))
+* skip deep processing of certain assemblies ([6fe1411](https://github.com/PurrNet/PurrNet/commit/6fe1411d39b54221f168a80f26b335e9e5153063))
+* some missed cases for dispose here ([1e751ee](https://github.com/PurrNet/PurrNet/commit/1e751ee8c278f6b936fa5ef713027c4ccd817d14))
+* some serialization intricacies ([d8973f9](https://github.com/PurrNet/PurrNet/commit/d8973f9d0833793bb153c0fe69cd634c2c0c00e4))
+* stopping steam server didn't properly close existing client connections ([ea36cb5](https://github.com/PurrNet/PurrNet/commit/ea36cb5e883ab159fd2866ab5f12c4ca8638a84f))
+* syncvar let client decide instead of server for ownerauth stuff ([5b4cb65](https://github.com/PurrNet/PurrNet/commit/5b4cb65e423378f28e6e228832a5e2d3a18ea73a))
+* trigger OnEarlySpawn when catching up ([9443c97](https://github.com/PurrNet/PurrNet/commit/9443c97afb637a497bbbc3e0ed11b8d1993f2f73))
+* try to be more careful with errors here ([3beb8d5](https://github.com/PurrNet/PurrNet/commit/3beb8d548a90d3ab5f2d9b3d7644f7eeacaaa624))
+* tuples were breaking code stripping ([2ec1406](https://github.com/PurrNet/PurrNet/commit/2ec14060bafb072877facca8b3949d475d292f1c))
+* undo early client id setting as it was incorrect ([285268b](https://github.com/PurrNet/PurrNet/commit/285268b7390c2d9c9affe09dd04180f4b1fcb3b2))
+* undo serialization order of base type ([d8c8560](https://github.com/PurrNet/PurrNet/commit/d8c85601e8f5f886a24d999e453c1c8bc5732e3f))
+* use unscaledDeltaTime for NetworkTransform.cs ([77c23c9](https://github.com/PurrNet/PurrNet/commit/77c23c9bfc3279c435cc665e4db9f4bd2fae9172))
+* webgl builds ([4dccfa5](https://github.com/PurrNet/PurrNet/commit/4dccfa56f567a24f881b14585082a0eb29113bc7))
+* when adding connection make sure it's a new ID ([a61f451](https://github.com/PurrNet/PurrNet/commit/a61f4511b519e0d65af8e57b63973358c92e3bfd))
+
+
+### Continuous Integration
+
+* **release:** 1.13.0-beta.31 [skip ci] ([b1a396c](https://github.com/PurrNet/PurrNet/commit/b1a396c72e2313680f9adbc7ca46add33be67282))
+
+
+### Features
+
+* add toolbar display settings ([f289470](https://github.com/PurrNet/PurrNet/commit/f289470cb3f40623bc434c16afd79b4fc9cd98a7))
+* client/server purrnet version missmatch checker ([3387274](https://github.com/PurrNet/PurrNet/commit/3387274f24a8e1e9a33aaf502d3e81afc6d35b4d))
+* Copy my SteamID to clipboard ([8d504e4](https://github.com/PurrNet/PurrNet/commit/8d504e43a9df6d5c5da622b61457362d7730782a))
+* Enable Pool Debug menu item ([c53c455](https://github.com/PurrNet/PurrNet/commit/c53c455b5265b74fd1a46e0975e1b505d7457b10))
+* introduce `RawNetManager` ([59aa743](https://github.com/PurrNet/PurrNet/commit/59aa743f1f366431135b0846ceb8c63ddbad4937))
+* introduce api to HierarchyV2 module that allows to manually manage spawning and observability events for lower level control ([9825580](https://github.com/PurrNet/PurrNet/commit/982558000c56142ed472b205e38a6a96e4aff96e))
+* spawn validator for client spawning ([569ef7a](https://github.com/PurrNet/PurrNet/commit/569ef7a38a6b136f13d725ac993162d547e51e51))
+
+
+### BREAKING CHANGES
+
+* **release:** fixed type in `AuthenticationBehaviour<T>`, renamed `GetClientPlayload` to `GetClientPayload` ([b03e333](https://github.com/PurrNet/PurrNet/commit/b03e333c40c3e637b67806041136c29df4ff3276))
+
 # [1.13.0-beta.62](https://github.com/PurrNet/PurrNet/compare/v1.13.0-beta.61...v1.13.0-beta.62) (2025-07-31)
 
 
