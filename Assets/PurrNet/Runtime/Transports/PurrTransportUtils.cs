@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -55,6 +56,8 @@ namespace PurrNet.Transports
         {
 #if UNITY_WEB
             var request = UnityWebRequest.Get(url);
+            request.SetRequestHeader("Cache-Control", "no-cache");
+            request.useHttpContinue = false;
             var response = await request.SendWebRequest();
             return response.webRequest.downloadHandler.text;
 
@@ -63,13 +66,49 @@ namespace PurrNet.Transports
 #endif
         }
 
-        internal static async Task<ClientJoinInfo> Join(string server, string roomName)
+        public static async Task<T> Retry<T>(int count, Func<Task<T>> action, CancellationTokenSource cts = null)
+        {
+            Exception lastException = null;
+            for (var i = 0; i < count; i++)
+            {
+                if (cts is { IsCancellationRequested: true })
+                    return Task.FromCanceled<T>(cts.Token).Result;
+
+                if (i > 0)
+                    await UnityLatestUpdate.WaitSeconds(1f);
+                try
+                {
+                    return await action();
+                }
+                catch (Exception e)
+                {
+                    lastException = e;
+                }
+            }
+
+            if (lastException == null)
+                throw new Exception("Failed to retry.");
+            throw lastException;
+        }
+
+        internal static async Task<ClientJoinInfo> Join(string server, string roomName, CancellationTokenSource cts)
+        {
+            return await Retry<ClientJoinInfo>(10, () => ActualClientJoinInfo(server, roomName), cts);
+        }
+
+        private static async Task<ClientJoinInfo> ActualClientJoinInfo(string server, string roomName)
         {
 #if UNITY_WEB
             var url = $"{server}join";
             var request = UnityWebRequest.Get(url);
+            request.useHttpContinue = false;
             request.SetRequestHeader("name", roomName);
+            request.SetRequestHeader("Cache-Control", "no-cache");
             var response = await request.SendWebRequest();
+
+            if (response.webRequest.result != UnityWebRequest.Result.Success)
+                throw new Exception($"Failed to allocate room: {response.webRequest.downloadHandler.text}");
+
             var text = response.webRequest.downloadHandler.text;
             var res = JsonUtility.FromJson<ClientJoinInfo>(text);
 #if USE_LOCAL_MASTER
@@ -83,15 +122,26 @@ namespace PurrNet.Transports
 #endif
         }
 
-        internal static async Task<HostJoinInfo> Alloc(string server, string region, string roomName)
+        internal static async Task<HostJoinInfo> Alloc(string server, string region, string roomName, CancellationTokenSource cts)
+        {
+            return await Retry<HostJoinInfo>(10, () => ActualAlloc(server, region, roomName), cts);
+        }
+
+        private static async Task<HostJoinInfo> ActualAlloc(string server, string region, string roomName)
         {
 #if UNITY_WEB
             var url = $"{server}allocate_ws";
 
             var request = UnityWebRequest.Get(url);
+            request.useHttpContinue = false;
+            request.SetRequestHeader("Cache-Control", "no-cache");
             request.SetRequestHeader("region", region);
             request.SetRequestHeader("name", roomName);
             var response = await request.SendWebRequest();
+
+            if (response.webRequest.result != UnityWebRequest.Result.Success)
+                throw new Exception($"Failed to allocate room: {response.webRequest.downloadHandler.text}");
+
             var text = response.webRequest.downloadHandler.text;
             var res = JsonUtility.FromJson<HostJoinInfo>(text);
 #if USE_LOCAL_MASTER
@@ -107,10 +157,18 @@ namespace PurrNet.Transports
 
         static async Task<float> PingInMS([UsedImplicitly] string url)
         {
+            return await Retry<float>(10, () => ActualPing(url));
+        }
+
+        private static async Task<float> ActualPing(string url)
+        {
 #if UNITY_WEB
             var request = UnityWebRequest.Get(url);
+            request.SetRequestHeader("Cache-Control", "no-cache");
+            request.useHttpContinue = false;
             var sent = DateTime.Now;
             await request.SendWebRequest();
+
             var received = DateTime.Now;
             return (float)(received - sent).TotalSeconds;
 #else
@@ -120,12 +178,22 @@ namespace PurrNet.Transports
 
         public static async Task<Relayers> GetRelayServersAsync(string server)
         {
+            return await Retry<Relayers>(10, () => ActualGetRelayServersAsync(server));
+        }
+
+        private static async Task<Relayers> ActualGetRelayServersAsync(string server)
+        {
             string master = $"{server}servers";
             var response = await Get(master);
             return JsonUtility.FromJson<Relayers>(response);
         }
 
-        public static async Task<RelayServer> GetRelayServerAsync(string masterServer)
+        public static async Task<RelayServer> GetRelayServerAsync(string masterServer, CancellationTokenSource cts)
+        {
+            return await Retry<RelayServer>(10, () => ActualGetRelayServerAsync(masterServer), cts);
+        }
+
+        private static async Task<RelayServer> ActualGetRelayServerAsync(string masterServer)
         {
             var servers = await GetRelayServersAsync(masterServer);
             float minPing = float.MaxValue;

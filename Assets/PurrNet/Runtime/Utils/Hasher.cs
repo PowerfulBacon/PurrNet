@@ -94,6 +94,11 @@ namespace PurrNet.Utils
         [UsedByIL]
         public static void PrepareType<T>() => PrepareType(typeof(T));
 
+        public static bool IsRegistered(Type type)
+        {
+            return _hashes.ContainsKey(type);
+        }
+
         public static uint GetStableHashU32(Type type)
         {
             if (type == null)

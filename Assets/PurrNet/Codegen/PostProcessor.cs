@@ -48,6 +48,11 @@ namespace PurrNet.Codegen
         {
             var name = compiledAssembly.Name;
 
+#if UNITY_PLAYMODE
+            if (name.Contains("Unity.Multiplayer.Playmode.Workflow.Editor"))
+                return true;
+#endif
+
             if (name.Contains("NuGetForUnity"))
                 return false;
 
@@ -100,10 +105,9 @@ namespace PurrNet.Codegen
                 var btype = type.BaseType.Resolve();
                 return btype != null && InheritsFrom(btype, baseTypeName);
             }
-            catch (Exception e)
+            catch
             {
-                throw new Exception(
-                    $"InheritsFrom : Failed to resolve base type of {type?.FullName}, {e.Message} \n {e.StackTrace}");
+                return false;
             }
         }
 
@@ -963,18 +967,23 @@ namespace PurrNet.Codegen
 
         public static bool IsConcreteType(TypeReference type, out TypeReference concreteType)
         {
-            concreteType = type;
-
-            if (type.ContainsGenericParameter)
-                return false;
-
-            if (IsTaskOrInheritsFromTask(type) && type is GenericInstanceType genericInstanceType)
+            try
             {
-                concreteType = genericInstanceType.GenericArguments[0];
+                concreteType = type;
+
+                if (type.ContainsGenericParameter)
+                    return false;
+
+                if (IsTaskOrInheritsFromTask(type) && type is GenericInstanceType genericInstanceType)
+                    concreteType = genericInstanceType.GenericArguments[0];
+
                 return true;
             }
-
-            return true;
+            catch
+            {
+                concreteType = type;
+                return false;
+            }
         }
 
         static StripCodeMode GetMode(PurrNetSettings settings, StripCodeModeOverride overrideMode)
@@ -1090,7 +1099,9 @@ namespace PurrNet.Codegen
                 case MetadataType.ByReference:
                     il.Append(il.Create(OpCodes.Ldnull));
                     break;
+                case MetadataType.GenericInstance:
                 case MetadataType.ValueType:
+                {
                     // For structs, emit a local, initobj, ldloc
                     var varDef = new VariableDefinition(type);
                     method.Body.Variables.Add(varDef);
@@ -1098,10 +1109,10 @@ namespace PurrNet.Codegen
                     il.Append(il.Create(OpCodes.Initobj, type));
                     il.Append(il.Create(OpCodes.Ldloc, varDef));
                     break;
+                }
                 case MetadataType.Void:
                 case MetadataType.Pointer:
                 case MetadataType.Var:
-                case MetadataType.GenericInstance:
                 case MetadataType.TypedByReference:
                 case MetadataType.FunctionPointer:
                 case MetadataType.MVar:
@@ -1414,7 +1425,6 @@ namespace PurrNet.Codegen
             for (var i = 0; i < paramCount; i++)
             {
                 var param = newMethod.Parameters[i];
-                bool isGeneric = param.ParameterType.IsGenericParameter;
 
                 if (methodRpc.Signature.type == RPCType.TargetRPC && i == 0)
                 {
@@ -1432,24 +1442,11 @@ namespace PurrNet.Codegen
                     continue;
 
                 // if isGeneric, write the type hash
-                if (isGeneric && param.ParameterType is GenericParameter { Type: GenericParameterType.Method })
-                {
-                    var writeGen = packerType.GetMethod("WriteGeneric", true).Import(module);
-                    var writeMethod = new GenericInstanceMethod(writeGen);
-                    writeMethod.GenericArguments.Add(param.ParameterType);
+                var serializeGenericMethod = CreateSerializer(module, param.ParameterType, true);
 
-                    code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
-                    code.Append(Instruction.Create(OpCodes.Ldarg, param));
-                    code.Append(Instruction.Create(OpCodes.Call, writeMethod));
-                }
-                else
-                {
-                    var serializeGenericMethod = CreateSerializer(module, param.ParameterType, true);
-
-                    code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
-                    code.Append(Instruction.Create(OpCodes.Ldarg, param));
-                    code.Append(Instruction.Create(OpCodes.Call, serializeGenericMethod));
-                }
+                code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
+                code.Append(Instruction.Create(OpCodes.Ldarg, param));
+                code.Append(Instruction.Create(OpCodes.Call, serializeGenericMethod));
             }
 
             if (methodRpc.Signature.isStatic)
@@ -1762,7 +1759,7 @@ namespace PurrNet.Codegen
         private static bool UpdateMethodReferences(ModuleDefinition module, MethodReference old, MethodReference @new,
             [UsedImplicitly] List<DiagnosticMessage> messages)
         {
-            using var types = new DisposableList<TypeDefinition>(32);
+            using var types =  DisposableList<TypeDefinition>.Create(32);
             var startLocalExecutionFlag = module.GetTypeDefinition(typeof(PurrCompilerFlags))
                 .GetMethod("EnterLocalExecution").FullName;
             var exitLocalExecutionFlag = module.GetTypeDefinition(typeof(PurrCompilerFlags))
@@ -1909,7 +1906,7 @@ namespace PurrNet.Codegen
 
         static DisposableList<TypeDefinition> GetAllTypes(ModuleDefinition module)
         {
-            var types = new DisposableList<TypeDefinition>(32);
+            var types = DisposableList<TypeDefinition>.Create(32);
 
             types.AddRange(module.Types);
             foreach (var type in module.Types)
@@ -1971,6 +1968,8 @@ namespace PurrNet.Codegen
                 for (var m = 0; m < assemblyDefinition.Modules.Count; m++)
                 {
                     var module = assemblyDefinition.Modules[m];
+                    var hasPurrNetAsReference = HasPurrNetAsReference(compiledAssembly.Name, module);
+
                     using var types = GetAllTypes(module);
                     var usedTypes = new HashSet<TypeReference>(TypeReferenceEqualityComparer.Default);
 
@@ -2015,6 +2014,13 @@ namespace PurrNet.Codegen
 
                         var type = types[t];
 
+#if UNITY_PLAYMODE
+                        if (type.Name == "TopView" && type.Namespace == "Unity.Multiplayer.Playmode.Workflow.Editor")
+                            UnityPlaymodePatch.Patch(type);
+#endif
+                        if (!hasPurrNetAsReference)
+                            continue;
+
                         // check if it has RegisterNetworkTypeAttribute
                         foreach (var customAttribute in type.CustomAttributes)
                         {
@@ -2051,7 +2057,7 @@ namespace PurrNet.Codegen
                         bool inheritsFromNetworkClass =
                             type.FullName == classFullName || InheritsFrom(type, classFullName);
 
-                        using var _rpcMethods = new DisposableList<RPCMethod>(32);
+                        using var _rpcMethods = DisposableList<RPCMethod>.Create(32);
 
                         int idOffset = GetIDOffset(type, messages);
 
@@ -2164,23 +2170,26 @@ namespace PurrNet.Codegen
                         }
                     }
 
-                    try
+                    if (hasPurrNetAsReference)
                     {
-                        FindUsedTypes(module, types, usedTypes);
+                        try
+                        {
+                            FindUsedTypes(module, types, usedTypes);
 
-                        foreach (var usedType in usedTypes)
-                        {
-                            if (IsTypeInOwnModule(usedType, module))
-                                typesToGenerateSerializer.Add(usedType);
+                            foreach (var usedType in usedTypes)
+                            {
+                                if (IsTypeInOwnModule(usedType, module))
+                                    typesToGenerateSerializer.Add(usedType);
+                            }
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        messages.Add(new DiagnosticMessage
+                        catch (Exception e)
                         {
-                            DiagnosticType = DiagnosticType.Error,
-                            MessageData = $"FindUsedTypes {e.Message}\n{e.StackTrace}"
-                        });
+                            messages.Add(new DiagnosticMessage
+                            {
+                                DiagnosticType = DiagnosticType.Error,
+                                MessageData = $"FindUsedTypes {e.Message}\n{e.StackTrace}"
+                            });
+                        }
                     }
                 }
 
@@ -2236,6 +2245,25 @@ namespace PurrNet.Codegen
 
                 return new ILPostProcessResult(compiledAssembly.InMemoryAssembly, messages);
             }
+        }
+
+        private static bool HasPurrNetAsReference(string myName, ModuleDefinition module)
+        {
+            if (myName == "PurrNet.Runtime")
+                return true;
+
+            bool hasPurrNetAsReference = false;
+
+            foreach (var reference in module.AssemblyReferences)
+            {
+                if (reference.Name == "PurrNet.Runtime")
+                {
+                    hasPurrNetAsReference = true;
+                    break;
+                }
+            }
+
+            return hasPurrNetAsReference;
         }
 
         private static void ProcessServerOnlyMethods(MethodDefinition method, PurrNetSettings settings, bool serverBuild, bool isEditor)
@@ -2678,25 +2706,31 @@ namespace PurrNet.Codegen
             TypeDefinition resolved,
             TypeDefinition networkModule)
         {
+            if (networkModule == null)
+                return;
+
             bool inheritsNetworkModule = InheritsFrom(resolved, networkModule.FullName);
-
-            if (inheritsNetworkModule)
+            if (inheritsNetworkModule && type is GenericInstanceType genericInstance)
             {
-                if (type is GenericInstanceType genericInstance)
-                {
-                    bool allConcrete = true;
-                    foreach (var genericArg in genericInstance.GenericArguments)
-                    {
-                        if (IsConcreteType(genericArg, out var concreteType))
-                        {
-                            types.Add(concreteType);
-                        }
-                        else allConcrete = false;
-                    }
+                bool allConcrete = true;
 
-                    if (allConcrete)
-                        types.Add(type);
+                if (genericInstance.GenericArguments == null)
+                    return;
+
+                foreach (var genericArg in genericInstance.GenericArguments)
+                {
+                    if (genericArg == null)
+                        continue;
+
+                    if (IsConcreteType(genericArg, out var concreteType))
+                    {
+                        types.Add(concreteType);
+                    }
+                    else allConcrete = false;
                 }
+
+                if (allConcrete)
+                    types.Add(type);
             }
         }
 

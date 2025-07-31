@@ -13,6 +13,8 @@ namespace PurrNet.Modules
 
     public delegate void SpawnedAction(PlayerID player, SceneID scene, NetworkID identity);
 
+    public delegate bool ValidateSpawnAction(PlayerID player, SpawnPacket data);
+
     public class HierarchyV2
     {
         private readonly NetworkManager _manager;
@@ -32,6 +34,8 @@ namespace PurrNet.Modules
         private ulong _nextId;
 
         private bool _areSceneObjectsReady;
+
+        public event ValidateSpawnAction onClientSpawnValidate;
 
         public event IdentityAction onEarlyIdentityAdded;
 
@@ -178,13 +182,19 @@ namespace PurrNet.Modules
 
         private void OnSpawnPacketBatch(PlayerID player, SpawnPacketBatch data, bool asServer)
         {
+            if (data.sceneId != _sceneId)
+                return;
+
             int count = data.spawnPackets.Count;
             for (var i = 0; i < count; ++i)
                 HandleSpawn(player, data.spawnPackets[i], false);
+
             count = data.despawnPackets.Count;
             for (var i = 0; i < count; ++i)
                 OnDespawnPacket(player, data.despawnPackets[i], asServer);
+
             FlushSpawnPackets();
+            data.Dispose();
         }
 
         bool _isDisposed;
@@ -219,7 +229,10 @@ namespace PurrNet.Modules
             }
 
             foreach (var r in hash)
+            {
+                if (!r) continue;
                 Despawn(r.gameObject, true, true);
+            }
 
             foreach (var defaultPrototype in _defaultPrototypes)
             {
@@ -250,7 +263,7 @@ namespace PurrNet.Modules
             if (!_asServer && _manager.TryGetModule<HierarchyFactory>(true, out var factory) &&
                 factory.TryGetHierarchy(_sceneId, out var other))
             {
-                other.CatchupClient();
+                other.CatchupClient(player);
             }
         }
 
@@ -504,20 +517,57 @@ namespace PurrNet.Modules
 
         private void HandleSpawn(PlayerID player, SpawnPacket data, bool flushData)
         {
-            if (_asServer && !_manager.networkRules.HasSpawnAuthority(_manager, false))
-            {
-                PurrLogger.LogError($"Spawn failed from client due to lack of permissions.");
-                return;
-            }
-
             if (data.sceneId != _sceneId)
                 return;
 
-            // when in host mode, let the server handle the spawning on their module
-            if (!_asServer && _manager.isServer)
-                return;
+            switch (_asServer)
+            {
+                case true when !_manager.networkRules.HasSpawnAuthority(_manager, false):
+                    PurrLogger.LogError($"Spawn failed from client due to lack of permissions.");
+                    RollbackSpawnOnClient(player, data);
+                    return;
+                // when in host mode, let the server handle the spawning on their module
+                case false when _manager.isServer:
+                    return;
+            }
 
-            var createdNids = new DisposableList<NetworkIdentity>(16);
+            if (data.prototype.framework.Count > 0)
+            {
+                foreach (var piece in data.prototype.framework)
+                {
+                    if (TryGetIdentity(piece.id, out var existing))
+                    {
+                        PurrLogger.LogError($"Spawn failed for player `{player}`. Identity with id `{piece.id}` already exists: `{existing.gameObject.name}`", existing);
+                        return;
+                    }
+                }
+            }
+
+            if (_asServer && onClientSpawnValidate != null)
+            {
+                foreach (var @delegate in onClientSpawnValidate.GetInvocationList())
+                {
+                    var validator = (ValidateSpawnAction)@delegate;
+                    if (!validator(player, data))
+                    {
+                        var declaring = validator.Method.DeclaringType;
+                        var methodName = validator.Method.Name;
+                        if (data.prototype.framework.Count > 0 &&
+                            _manager.prefabProvider.TryGetPrefabData(data.prototype.framework[0].pid.prefabId, out var pdata) &&
+                            pdata.prefab)
+                        {
+                            PurrLogger.LogWarning($"Spawn validation of `{pdata.prefab.name}` failed for player `{player}` by `{declaring?.Name}.{methodName}`");
+                        }
+                        else PurrLogger.LogWarning($"Spawn validation failed for player `{player}` by `{declaring?.Name}.{methodName}`");
+
+                        // send despawn packet to the player
+                        RollbackSpawnOnClient(player, data);
+                        return;
+                    }
+                }
+            }
+
+            var createdNids =  DisposableList<NetworkIdentity>.Create(16);
             CreatePrototype(data.prototype, createdNids.list);
 
             if (_asServer)
@@ -564,6 +614,19 @@ namespace PurrNet.Modules
 
             if (flushData)
                 FlushSpawnPackets();
+        }
+
+        private void RollbackSpawnOnClient(PlayerID player, SpawnPacket data)
+        {
+            if (data.prototype.framework.Count > 0)
+            {
+                var packet = new DespawnPacket
+                {
+                    sceneId = _sceneId,
+                    parentId = data.prototype.framework[0].id
+                };
+                _playersManager.Send(player, packet);
+            }
         }
 
         private void OnDespawnPacket(PlayerID player, DespawnPacket data, bool asServer)
@@ -709,8 +772,9 @@ namespace PurrNet.Modules
                 if (!_spawnPackets.TryGetValue(player, out var batch))
                 {
                     batch = new SpawnPacketBatch(
-                        ListPool<SpawnPacket>.Instantiate(),
-                        ListPool<DespawnPacket>.Instantiate()
+                        _sceneId,
+                        DisposableList<SpawnPacket>.Create(),
+                        DisposableList<DespawnPacket>.Create()
                     );
                     batch.despawnPackets.Add(packet);
                     _spawnPackets.Add(player, batch);
@@ -744,8 +808,9 @@ namespace PurrNet.Modules
                 if (!_spawnPackets.TryGetValue(player, out var batch))
                 {
                     batch = new SpawnPacketBatch(
-                        ListPool<SpawnPacket>.Instantiate(),
-                        ListPool<DespawnPacket>.Instantiate()
+                        _sceneId,
+                        DisposableList<SpawnPacket>.Create(),
+                        DisposableList<DespawnPacket>.Create()
                     );
                     batch.spawnPackets.Add(packet);
                     _spawnPackets.Add(player, batch);
@@ -926,8 +991,7 @@ namespace PurrNet.Modules
                 ListPool<NetworkIdentity>.Destroy(children);
                 return;
             }
-
-            using var directChildren = new DisposableList<TransformIdentityPair>(16);
+            using var directChildren = DisposableList<TransformIdentityPair>.Create(16);
             HierarchyPool.GetDirectChildrenWithRoot(gameObject.transform, directChildren);
 
             foreach (var idPair in directChildren)
@@ -977,8 +1041,7 @@ namespace PurrNet.Modules
         private void SetupIdsLocally(NetworkIdentity root, ref NetworkID baseNid)
         {
             bool isHost = IsServerHost();
-
-            using var siblings = new DisposableList<NetworkIdentity>(16);
+            using var siblings = DisposableList<NetworkIdentity>.Create(16);
             root.GetComponents(siblings.list);
 
             // handle root
@@ -1002,6 +1065,13 @@ namespace PurrNet.Modules
             {
                 SetupIdsLocally(root.directChildren[i], ref baseNid);
             }
+        }
+
+        public NetworkID ReserveNetworkID()
+        {
+            if (_asServer)
+                return new NetworkID(_nextId++, default);
+            return new NetworkID(_nextId++, _playersManager.localPlayerId ?? default);
         }
 
         private void SpawnSceneObject(List<NetworkIdentity> children)
@@ -1028,43 +1098,44 @@ namespace PurrNet.Modules
         {
             foreach (var (player, batch) in _spawnPackets)
             {
-                int count = batch.spawnPackets.Count;
-                if (player.isServer)
-                     _playersManager.SendToServer(batch);
-                else
+                using (batch)
                 {
-                    _playersManager.Send(player, batch);
-
-                    for (var i = 0; i < count; i++)
+                    int count = batch.spawnPackets.Count;
+                    if (player.isServer)
+                        _playersManager.SendToServer(batch);
+                    else
                     {
-                        var packet = batch.spawnPackets[i];
+                        _playersManager.Send(player, batch);
 
-                        if (packet.localcache != null)
+                        for (var i = 0; i < count; i++)
                         {
-                            for (var j = 0; j < packet.localcache.Count; j++)
+                            var packet = batch.spawnPackets[i];
+
+                            if (packet.localcache != null)
                             {
-                                var piece = packet.localcache[j];
-                                if (!piece) continue;
-                                var pieceid = piece.id;
-                                if (!pieceid.HasValue) continue;
-                                onSentSpawnPacket?.Invoke(player, _sceneId, pieceid.Value);
+                                for (var j = 0; j < packet.localcache.Count; j++)
+                                {
+                                    var piece = packet.localcache[j];
+                                    if (!piece) continue;
+                                    var pieceid = piece.id;
+                                    if (!pieceid.HasValue) continue;
+                                    onSentSpawnPacket?.Invoke(player, _sceneId, pieceid.Value);
+                                }
                             }
-                        }
-                        else if (packet.prototype.framework.Count > 0)
-                        {
-                            for (var j = 0; j < packet.prototype.framework.Count; j++)
+                            else if (packet.prototype.framework.Count > 0)
                             {
-                                var piece = packet.prototype.framework[j];
-                                onSentSpawnPacket?.Invoke(player, _sceneId, piece.id);
+                                for (var j = 0; j < packet.prototype.framework.Count; j++)
+                                {
+                                    var piece = packet.prototype.framework[j];
+                                    onSentSpawnPacket?.Invoke(player, _sceneId, piece.id);
+                                }
                             }
                         }
                     }
+
+                    for (var i = 0; i < count; i++)
+                        _toCompleteNextFrame.Add(batch.spawnPackets[i].packetIdx);
                 }
-
-                for (var i = 0; i < count; i++)
-                    _toCompleteNextFrame.Add(batch.spawnPackets[i].packetIdx);
-
-                batch.Dispose();
             }
 
             _spawnPackets.Clear();
@@ -1116,7 +1187,7 @@ namespace PurrNet.Modules
             _toCompleteNextFrame.Clear();
         }
 
-        private void CatchupClient()
+        private void CatchupClient(PlayerID playerId)
         {
             for (var i = 0; i < _spawnedIdentities.Count; i++)
             {
@@ -1125,10 +1196,24 @@ namespace PurrNet.Modules
                 if (!identity.isSpawned)
                     continue;
 
+                if (!identity.id.HasValue)
+                    continue;
+
                 if (_toSpawnNextFrame.Contains(identity))
                     continue;
 
                 identity.SetIsSpawned(true, false);
+                identity.TriggerEarlySpawnEvent(false);
+
+                onSentSpawnPacket?.Invoke(playerId, _sceneId, identity.id.Value);
+
+                if (identity.TryAddObserver(playerId))
+                {
+                    onObserverAdded?.Invoke(playerId, identity);
+                    identity.TriggerOnPreObserverAdded(playerId, false);
+                    _triggerLateObserverAdded.Add(new PlayerNid { player = playerId, nid = identity, isSpawner = false});
+                }
+
                 identity.TriggerSpawnEvent(false);
                 onIdentityAdded?.Invoke(identity);
             }
@@ -1165,7 +1250,10 @@ namespace PurrNet.Modules
                 toSpawn.TriggerSpawnEvent(_asServer);
 
                 if (_asServer && isHost)
+                {
+                    toSpawn.SetIsSpawned(true, false);
                     toSpawn.TriggerSpawnEvent(false);
+                }
 
                 onIdentityAdded?.Invoke(toSpawn);
             }
@@ -1257,6 +1345,94 @@ namespace PurrNet.Modules
         HashSet<NetworkIdentity> _toSpawnNextFrameBuffer = new HashSet<NetworkIdentity>();
 
         readonly List<SpawnID> _toCompleteNextFrame = new List<SpawnID>();
+
+        /// <summary>
+        /// For manual spawning of identities.
+        /// After this call, you should call <see cref="ManualFinalizeSpawn(NetworkIdentity)"/> to finalize the spawning.
+        /// This needs to be called manually on all conserned clients.
+        /// </summary>
+        public void ManualEarlySpawn(NetworkIdentity identity, NetworkID id)
+        {
+            _spawnedIdentities.Add(identity);
+            _spawnedIdentitiesMap.Add(id, identity);
+
+            bool isHost = IsServerHost();
+
+            identity.SetID(id);
+            identity.SetIdentity(_manager, this, _sceneId, _asServer, isHost);
+
+            identity.TriggerEarlySpawnEvent(_asServer);
+            if (isHost) identity.TriggerEarlySpawnEvent(false);
+
+            onEarlyIdentityAdded?.Invoke(identity);
+        }
+
+        /// <summary>
+        /// For manual despawning of identities.
+        /// </summary>
+        public void ManualDespawn(NetworkIdentity identity)
+        {
+            if (!_asServer)
+                return;
+
+            var observersCopy = ListPool<PlayerID>.Instantiate();
+            observersCopy.AddRange(identity.observers);
+            for (var i = 0; i < observersCopy.Count; i++)
+                ManualRemoveObserver(identity, observersCopy[i]);
+            ListPool<PlayerID>.Destroy(observersCopy);
+
+            TriggerDespawnEvent(identity);
+            UnregisterIdentity(identity);
+
+            identity.SetIsSpawned(false, false);
+            onIdentityRemoved?.Invoke(identity);
+        }
+
+        /// <summary>
+        /// For manual finalization of spawning an identity.
+        /// This needs to be called manually on all conserned clients.
+        /// </summary>
+        public void ManualFinalizeSpawn(NetworkIdentity identity)
+        {
+            bool isHost = IsServerHost();
+
+            identity.TriggerSpawnEvent(_asServer);
+            if (isHost) identity.TriggerSpawnEvent(false);
+
+            onIdentityAdded?.Invoke(identity);
+        }
+
+        /// <summary>
+        /// Once the identity is created, you should call this method to refresh visibility for all players in the scene.
+        /// This will send visibility updates to all players in the scene.
+        /// </summary>
+        public void ManualAddObserver(NetworkIdentity identity, PlayerID player)
+        {
+            if (!_asServer)
+                return;
+
+            if (identity.TryAddObserver(player))
+            {
+                onObserverAdded?.Invoke(player, identity);
+                identity.TriggerOnPreObserverAdded(player, true);
+                _triggerLateObserverAdded.Add(new PlayerNid { player = player, nid = identity, isSpawner = true});
+            }
+        }
+
+        /// <summary>
+        /// Manually remove an observer from the identity.
+        /// </summary>
+        public void ManualRemoveObserver(NetworkIdentity identity, PlayerID player)
+        {
+            if (!_asServer)
+                return;
+
+            if (identity.TryRemoveObserver(player))
+            {
+                identity.TriggerOnObserverRemoved(player);
+                onObserverRemoved?.Invoke(player, identity);
+            }
+        }
 
         /// <summary>
         /// Local spawn will trigger the spawn event next frame immediately after the identity is registered.

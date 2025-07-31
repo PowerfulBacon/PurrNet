@@ -5,19 +5,31 @@ using UnityEngine;
 [RegisterNetworkType(typeof(Sprite))]
 public class Test : NetworkIdentity
 {
-    [SerializeField] private Texture _testTexture;
-    [SerializeField] private Sprite _testSprite;
+    [SerializeField] private GameObject spawnedObject;
+    [SerializeField] private GameObject networkPrefab;
+    [SerializeField] private GameObject singleplayerPrefab;
 
     [PurrButton]
-    private void SendMat()
+    private void RunSpawned()
     {
-        TestRpc(_testTexture);
-        TestRpc(_testSprite);
+        Spawned(spawnedObject.transform);
+    }
+
+    [PurrButton]
+    private void RunNetwork()
+    {
+        Spawned(networkPrefab.transform);
+    }
+
+    [PurrButton]
+    private void RunSingle()
+    {
+        Spawned(singleplayerPrefab.transform);
     }
 
     [ObserversRpc]
-    private void TestRpc(object receivedTexture)
+    private void Spawned(Transform obj)
     {
-        Debug.Log($"Received: {receivedTexture.GetType().Name}");
+        Debug.Log($"Received from sender: {obj}");
     }
 }

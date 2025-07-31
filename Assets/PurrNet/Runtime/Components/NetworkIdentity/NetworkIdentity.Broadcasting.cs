@@ -9,6 +9,7 @@ using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
+using PurrNet.Pooling;
 using PurrNet.Profiler;
 using PurrNet.Transports;
 using PurrNet.Utils;
@@ -310,7 +311,29 @@ namespace PurrNet
                 case RPCType.ObserversRPC:
                 {
                     if (isServer)
-                        SendToObservers(packet, ShouldSend, signature.channel);
+                    {
+                        using var players = DisposableList<PlayerID>.Create();
+                        for (var i = 0; i < observers.Count; i++)
+                        {
+                            var player = observers[i];
+                            bool isLocalPlayer = player == networkManager.localPlayer;
+
+                            if (signature.runLocally && isLocalPlayer)
+                                continue;
+
+                            if (signature.excludeSender && isLocalPlayer)
+                                continue;
+
+                            if (signature.excludeOwner && !IsNotOwnerPredicate(player))
+                                continue;
+#if UNITY_EDITOR
+                            Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment,
+                                this);
+#endif
+                            players.Add(player);
+                        }
+                        Send(players, packet, signature.channel);
+                    }
                     else
                     {
 #if UNITY_EDITOR
@@ -333,29 +356,6 @@ namespace PurrNet
                     }
                     break;
                 default: throw new ArgumentOutOfRangeException();
-            }
-
-            return;
-
-            bool ShouldSend(PlayerID player)
-            {
-                bool isLocalPlayer = player == networkManager.localPlayer;
-
-                if (signature.runLocally && isLocalPlayer)
-                    return false;
-
-                if (signature.excludeSender && isLocalPlayer)
-                    return false;
-
-                if (!signature.excludeOwner || IsNotOwnerPredicate(player))
-                {
-#if UNITY_EDITOR
-                    Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
-#endif
-                    return true;
-                }
-
-                return false;
             }
         }
 
@@ -403,7 +403,7 @@ namespace PurrNet
                     return false;
                 }
 
-                if (!idObservers.Contains(info.sender) && signature.channel == Channel.ReliableOrdered)
+                if (!IsObserver(info.sender) && signature.channel == Channel.ReliableOrdered)
                 {
                     PurrLogger.LogError(
                         $"Trying to receive server RPC '{signature.rpcName}' from '{name}' by player '{info.sender}' which is not an observer. Aborting RPC call.",
@@ -529,7 +529,7 @@ namespace PurrNet
         [Preserve]
         public void SendToTarget(PlayerID player, ByteData data, Channel method = Channel.ReliableOrdered)
         {
-            if (!observers.Contains(player))
+            if (!IsObserver(player))
             {
                 PurrLogger.LogError($"Trying to send TargetRPC to player '{player}' which is not observing '{name}'.",
                     this);
@@ -542,7 +542,7 @@ namespace PurrNet
         [Preserve]
         public void SendToTarget<T>(PlayerID player, T packet, Channel method = Channel.ReliableOrdered)
         {
-            if (!observers.Contains(player))
+            if (!IsObserver(player))
             {
                 PurrLogger.LogError($"Trying to send TargetRPC to player '{player}' which is not observing '{name}'.",
                     this);
@@ -552,13 +552,13 @@ namespace PurrNet
             Send(player, packet, method);
         }
 
-        public void Send<T>(IEnumerable<PlayerID> players, T data, Channel method = Channel.ReliableOrdered)
+        public void Send<T>(IReadOnlyList<PlayerID> players, T data, Channel method = Channel.ReliableOrdered)
         {
             if (networkManager.isServer)
                 networkManager.GetModule<PlayersManager>(true).Send(players, data, method);
         }
 
-        public void Send(IEnumerable<PlayerID> players, ByteData data, Channel method = Channel.ReliableOrdered)
+        public void Send(IReadOnlyList<PlayerID> players, ByteData data, Channel method = Channel.ReliableOrdered)
         {
             if (networkManager.isServer)
                 networkManager.GetModule<PlayersManager>(true).SendRaw(players, data, method);

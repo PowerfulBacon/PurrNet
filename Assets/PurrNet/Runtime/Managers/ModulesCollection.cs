@@ -4,7 +4,7 @@ using PurrNet.Transports;
 
 namespace PurrNet
 {
-    internal readonly struct ModulesCollection
+    public readonly struct ModulesCollection
     {
         private readonly List<INetworkModule> _modules;
         private readonly List<IConnectionListener> _connectionListeners;
@@ -17,10 +17,10 @@ namespace PurrNet
         private readonly List<IUpdate> _updateListeners;
         private readonly List<ICleanup> _cleanupListeners;
 
-        private readonly NetworkManager _manager;
+        private readonly IRegisterModules _manager;
         private readonly bool _asServer;
 
-        public ModulesCollection(NetworkManager manager, bool asServer)
+        public ModulesCollection(IRegisterModules manager, bool asServer)
         {
             _modules = new List<INetworkModule>();
             _connectionListeners = new List<IConnectionListener>();

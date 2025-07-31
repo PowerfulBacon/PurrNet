@@ -74,8 +74,15 @@ namespace PurrNet.Steam
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
             if (ulong.TryParse(steamId, out var id) == false)
             {
-                PurrLogger.LogError("Invalid Steam ID provided as address to connect");
-                yield break;
+                if (steamId is "localhost" or "127.0.0.1")
+                {
+                    id = SteamUser.GetSteamID().m_SteamID;
+                }
+                else
+                {
+                    PurrLogger.LogError("Invalid Steam ID provided as address to connect");
+                    yield break;
+                }
             }
 
             _isDedicated = dedicated;
@@ -95,6 +102,9 @@ namespace PurrNet.Steam
         public void Send(ByteData data, Channel channel)
         {
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
+            if (_connection == HSteamNetConnection.Invalid)
+                return;
+
             MakeSureBufferCanFit(data.length);
 
             var pinnedArray = GCHandle.Alloc(data.data, GCHandleType.Pinned);
@@ -108,9 +118,19 @@ namespace PurrNet.Steam
                 _ => 0
             };
 
-            if (_isDedicated)
-                SteamGameServerNetworkingSockets.SendMessageToConnection(_connection, ptr, (uint)data.length, sendFlag, out _);
-            else SteamNetworkingSockets.SendMessageToConnection(_connection, ptr, (uint)data.length, sendFlag, out _);
+            try
+            {
+                if (_isDedicated)
+                    SteamGameServerNetworkingSockets.SendMessageToConnection(_connection, ptr, (uint)data.length,
+                        sendFlag, out _);
+                else
+                    SteamNetworkingSockets.SendMessageToConnection(_connection, ptr, (uint)data.length, sendFlag,
+                        out _);
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogException(e);
+            }
 #endif
         }
 

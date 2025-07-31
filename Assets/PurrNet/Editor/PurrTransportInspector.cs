@@ -85,7 +85,7 @@ namespace PurrNet.Editor
 
                 _lookingForBestRegion = true;
 
-                var server = await PurrTransportUtils.GetRelayServerAsync(_masterServer.stringValue);
+                var server = await PurrTransportUtils.GetRelayServerAsync(_masterServer.stringValue, null);
 
                 _region.stringValue = server.region;
                 _bestRegion = server.region;

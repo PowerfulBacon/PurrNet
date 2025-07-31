@@ -3,8 +3,21 @@ using UnityEngine;
 
 public class PrintNetworklife : NetworkIdentity
 {
+    [SerializeField] private bool _earlySpawnPrint = true;
     [SerializeField] private bool _spawnPrint = true;
     [SerializeField] private bool _ownerPrint = true;
+
+    protected override void OnEarlySpawn()
+    {
+        if (_earlySpawnPrint)
+            Debug.Log($"OnEarlySpawn {this}", this);
+    }
+
+    protected override void OnEarlySpawn(bool asServer)
+    {
+        if (_earlySpawnPrint)
+            Debug.Log($"OnEarlySpawn {this} {asServer}", this);
+    }
 
     protected override void OnSpawned()
     {

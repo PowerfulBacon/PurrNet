@@ -130,6 +130,50 @@ namespace PurrNet
 
             _enabledTypeLookup = null;
         }
+        
+#if UNITY_EDITOR
+        public void GenerateAssets()
+        {
+            if (!folder) return;
+
+            var enabledTypes = enabledTypeNames.Select(System.Type.GetType).Where(t => t != null).ToArray();
+            string path = UnityEditor.AssetDatabase.GetAssetPath(folder);
+            string[] guids = UnityEditor.AssetDatabase.FindAssets("", new[] { path });
+
+            var found = new HashSet<UnityEngine.Object>();
+            foreach (var guid in guids)
+            {
+                string assetPath = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                if (assetPath.EndsWith(".unity")) continue;
+
+                var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(assetPath);
+                foreach (var obj in all)
+                {
+                    if (!obj || obj.GetType().Namespace?.Contains("UnityEditor") == true) continue;
+                    if (enabledTypes.Any(t => t.IsAssignableFrom(obj.GetType())) && !assets.Contains(obj))
+                        found.Add(obj);
+                }
+            }
+
+            foreach (var obj in found)
+                assets.Add(obj);
+
+            if (found.Count > 0)
+            {
+                Refresh();
+                UnityEditor.EditorUtility.SetDirty(this);
+                UnityEditor.AssetDatabase.SaveAssets();
+            }
+
+            CleanupNullEntries();
+        }
+
+        private void CleanupNullEntries()
+        {
+            assets.RemoveAll(a => a == null);
+            Refresh();
+        }
+#endif
 
         public bool TryGetAsset(int id, out Object obj) => idToAsset.TryGetValue(id, out obj);
         public bool TryGetId(Object obj, out int id) => assetToId.TryGetValue(obj, out id);

@@ -134,7 +134,13 @@ namespace PurrNet.Modules
             {
                 var col = _colliders3D[i];
 
-                if (!col) continue;
+                if (!col)
+                {
+                    _colliders3D.RemoveAt(i--);
+                    _collider3DStates.Remove(col);
+                    _trackedColliders.Remove(col);
+                    continue;
+                }
 
                 if (!_collider3DStates.TryGetValue(col, out var history))
                 {
@@ -152,7 +158,13 @@ namespace PurrNet.Modules
             {
                 var col = _colliders2D[i];
 
-                if (!col) continue;
+                if (!col)
+                {
+                    _colliders2D.RemoveAt(i--);
+                    _collider2DStates.Remove(col);
+                    _trackedColliders.Remove(col);
+                    continue;
+                }
 
                 if (!_collider2DStates.TryGetValue(col, out var history))
                 {
@@ -203,7 +215,66 @@ namespace PurrNet.Modules
                 }
             }
 #endif
+
         }
+
+#if UNITY_PHYSICS_3D
+        public void Register(Collider collider, float storeHistoryInSeconds)
+        {
+            if (!collider)
+                return;
+
+            if (_trackedColliders.Contains(collider))
+                return;
+
+            int maxEntries = Mathf.CeilToInt(_tickManager.tickRate * storeHistoryInSeconds);
+            _trackedColliders.Add(collider);
+            _collider3DStates.Add(collider, new SimpleHistory<Collider3DState>(maxEntries));
+            _colliders3D.Add(collider);
+        }
+
+        public void Unregister(Collider collider)
+        {
+            if (!collider)
+                return;
+
+            if (!_trackedColliders.Contains(collider))
+                return;
+
+            _trackedColliders.Remove(collider);
+            _collider3DStates.Remove(collider);
+            _colliders3D.Remove(collider);
+        }
+#endif
+
+#if UNITY_PHYSICS_2D
+        public void Register(Collider2D collider, float storeHistoryInSeconds)
+        {
+            if (!collider)
+                return;
+
+            if (_trackedColliders.Contains(collider))
+                return;
+
+            int maxEntries = Mathf.CeilToInt(_tickManager.tickRate * storeHistoryInSeconds);
+            _trackedColliders.Add(collider);
+            _collider2DStates.Add(collider, new SimpleHistory<Collider2DState>(maxEntries));
+            _colliders2D.Add(collider);
+        }
+
+        public void Unregister(Collider2D collider)
+        {
+            if (!collider)
+                return;
+
+            if (!_trackedColliders.Contains(collider))
+                return;
+
+            _trackedColliders.Remove(collider);
+            _collider2DStates.Remove(collider);
+            _colliders2D.Remove(collider);
+        }
+#endif
 
         public void Unregister(ColliderRollback component)
         {

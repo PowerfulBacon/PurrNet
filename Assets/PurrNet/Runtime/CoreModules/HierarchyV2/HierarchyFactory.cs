@@ -27,6 +27,24 @@ namespace PurrNet.Modules
             _playersManager = playersManager;
         }
 
+        event ValidateSpawnAction _onClientSpawnValidate;
+
+        public event ValidateSpawnAction onClientSpawnValidate
+        {
+            add
+            {
+                _onClientSpawnValidate += value;
+                foreach (var hierarchy in _rawHierarchies)
+                    hierarchy.onClientSpawnValidate += value;
+            }
+            remove
+            {
+                _onClientSpawnValidate -= value;
+                foreach (var hierarchy in _rawHierarchies)
+                    hierarchy.onClientSpawnValidate -= value;
+            }
+        }
+
         public event IdentityAction onEarlyIdentityAdded;
 
         public event IdentityAction onIdentityAdded;
@@ -87,6 +105,12 @@ namespace PurrNet.Modules
             hierarchy.onIdentityRemoved += OnIdentityRemoved;
             hierarchy.onSentSpawnPacket += OnSentSpawnPacket;
 
+            if (_onClientSpawnValidate != null)
+            {
+                foreach (var del in _onClientSpawnValidate.GetInvocationList())
+                    hierarchy.onClientSpawnValidate += (ValidateSpawnAction)del;
+            }
+
             hierarchy.Enable();
 
             _rawHierarchies.Add(hierarchy);
@@ -127,6 +151,12 @@ namespace PurrNet.Modules
             hierarchy.onIdentityAdded -= OnIdentityAdded;
             hierarchy.onIdentityRemoved -= OnIdentityRemoved;
             hierarchy.onSentSpawnPacket -= OnSentSpawnPacket;
+
+            if (_onClientSpawnValidate != null)
+            {
+                foreach (var del in _onClientSpawnValidate.GetInvocationList())
+                    hierarchy.onClientSpawnValidate -= (ValidateSpawnAction)del;
+            }
 
             _rawHierarchies.Remove(hierarchy);
             _hierarchies.Remove(scene);

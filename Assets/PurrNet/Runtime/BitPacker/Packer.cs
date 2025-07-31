@@ -104,21 +104,45 @@ namespace PurrNet.Packing
     public static class Packer<T>
     {
         static WriteFunc<T> _write;
+        static WriteFunc<T> _writeWrapper;
         static ReadFunc<T> _read;
+        static ReadFunc<T> _readWrapper;
+
 
         public static void RegisterWriter(WriteFunc<T> a)
         {
-            Packer.RegisterWriter(typeof(T), a.Method);
-            _write ??= a;
+            if (_write != null)
+                return;
+
+            _write = a;
+
+            bool isStructOrSealed = typeof(T).IsValueType || typeof(T).IsSealed;
+
+            if (!isStructOrSealed)
+                _writeWrapper = WriteClass;
+            else _writeWrapper = WriteAsExactType;
+
+            Packer.RegisterWriter(typeof(T), _write.Method, _writeWrapper.Method);
         }
 
         public static void RegisterReader(ReadFunc<T> b)
         {
-            Packer.RegisterReader(typeof(T), b.Method);
-            _read ??= b;
+            if (_read != null)
+                return;
+
+            _read = b;
+
+            bool isStructOrSealed = typeof(T).IsValueType || typeof(T).IsSealed;
+
+            if (!isStructOrSealed)
+                _readWrapper = ReadClass;
+            else _readWrapper = ReadAsExactType;
+
+            Packer.RegisterReader(typeof(T), _read.Method, _readWrapper.Method);
         }
 
-        public static void Write(BitPacker packer, T value)
+        [UsedByIL]
+        public static void WriteAsExactType(BitPacker packer, T value)
         {
             try
             {
@@ -136,7 +160,8 @@ namespace PurrNet.Packing
             }
         }
 
-        public static void Read(BitPacker packer, ref T value)
+        [UsedByIL]
+        public static void ReadAsExactType(BitPacker packer, ref T value)
         {
             try
             {
@@ -151,6 +176,101 @@ namespace PurrNet.Packing
             catch (Exception e)
             {
                 PurrLogger.LogError($"Failed to read value of type '{typeof(T)}'.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        [UsedByIL]
+        public static void Write(BitPacker packer, T value)
+        {
+            try
+            {
+                if (_writeWrapper == null)
+                {
+                    Packer.FallbackWriter(packer, value);
+                    return;
+                }
+
+                _writeWrapper(packer, value);
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to write value of type '{typeof(T)}'.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        [UsedByIL]
+        public static void Read(BitPacker packer, ref T value)
+        {
+            try
+            {
+                if (_readWrapper == null)
+                {
+                    Packer.FallbackReader(packer, ref value);
+                    return;
+                }
+
+                _readWrapper(packer, ref value);
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to read value of type '{typeof(T)}'.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        static void WriteClass(BitPacker packer, T value)
+        {
+            Type type;
+
+            if (value == null)
+            {
+                type = typeof(T);
+            }
+            else
+            {
+                var vtype = value.GetType();
+                type = Hasher.IsRegistered(vtype) ? vtype : typeof(T);
+            }
+
+            bool isTypeSameAsGeneric = type == typeof(T);
+
+            Packer<bool>.WriteAsExactType(packer, isTypeSameAsGeneric);
+
+            if (isTypeSameAsGeneric)
+            {
+                WriteAsExactType(packer, value);
+                return;
+            }
+
+            Packer<PackedUInt>.WriteAsExactType(packer, Hasher.GetStableHashU32(type));
+            Packer.WriteAsExactType(packer, type, value);
+        }
+
+        static void ReadClass(BitPacker packer, ref T value)
+        {
+            bool isTypeSameAsGeneric = Packer<bool>.Read(packer);
+
+            if (isTypeSameAsGeneric)
+            {
+                ReadAsExactType(packer, ref value);
+                return;
+            }
+
+            var hash = Packer<PackedUInt>.Read(packer);
+
+            if (!Hasher.TryGetType(hash, out var type))
+                throw new Exception($"Type with hash '{hash}' not found.");
+
+            object result = value;
+            Packer.ReadAsExactType(packer, type, ref result);
+
+            if (result is T cast)
+            {
+                value = cast;
+            }
+            else
+            {
+                PurrLogger.LogError($"Type '{type}' does not match expected type '{typeof(T)}'.");
+                value = default;
             }
         }
 
@@ -230,18 +350,22 @@ namespace PurrNet.Packing
             return AreEqual(a, b);
         }
 
-        static readonly Dictionary<Type, MethodInfo> _writeMethods = new Dictionary<Type, MethodInfo>();
-        static readonly Dictionary<Type, MethodInfo> _readMethods = new Dictionary<Type, MethodInfo>();
+        static readonly Dictionary<Type, MethodInfo> _writeExactMethods = new Dictionary<Type, MethodInfo>();
+        static readonly Dictionary<Type, MethodInfo> _writeWrappedMethods = new Dictionary<Type, MethodInfo>();
+        static readonly Dictionary<Type, MethodInfo> _readExactMethods = new Dictionary<Type, MethodInfo>();
+        static readonly Dictionary<Type, MethodInfo> _readWrappedMethods = new Dictionary<Type, MethodInfo>();
 
-        public static void RegisterWriter(Type type, MethodInfo method)
+        public static void RegisterWriter(Type type, MethodInfo exact, MethodInfo wrapper)
         {
-            _writeMethods.TryAdd(type, method);
+            _writeWrappedMethods.TryAdd(type, wrapper);
+            _writeExactMethods.TryAdd(type, exact);
         }
 
-        public static void RegisterReader(Type type, MethodInfo method)
+        public static void RegisterReader(Type type, MethodInfo exact, MethodInfo wrapper)
         {
             Hasher.PrepareType(type);
-            _readMethods.TryAdd(type, method);
+            _readWrappedMethods.TryAdd(type, wrapper);
+            _readExactMethods.TryAdd(type, exact);
         }
 
         static readonly object[] _args = new object[2];
@@ -256,16 +380,13 @@ namespace PurrNet.Packing
                 if (!hasValue) return;
 
                 object obj = value;
-                var nassets = NetworkManager.main.networkAssets;
-                int index = nassets && obj is Object unityObj ? nassets.GetIndex(unityObj) : -1;
-                bool isNetworkAsset = index != -1;
-                Packer<bool>.Write(packer, isNetworkAsset);
 
-                if (isNetworkAsset)
+                if (obj is Object unityObj)
                 {
-                    Packer<PackedInt>.Write(packer, index);
-                    return;
+                    if (WriteAsNetworkAsset(packer, unityObj))
+                        return;
                 }
+                else Packer<bool>.Write(packer, false);
 
                 PackedUInt typeHash = Hasher.GetStableHashU32(obj.GetType());
                 Packer<PackedUInt>.Write(packer, typeHash);
@@ -276,6 +397,22 @@ namespace PurrNet.Packing
                 PurrLogger.LogError(
                     $"Failed to write value of type '{typeof(T)}' when using fallback writer.\n{e.Message}\n{e.StackTrace}");
             }
+        }
+
+        public static bool WriteAsNetworkAsset(BitPacker packer, Object unityObj)
+        {
+            var nassets = NetworkManager.main.networkAssets;
+            int index = nassets && unityObj ? nassets.GetIndex(unityObj) : -1;
+            bool isNetworkAsset = index != -1;
+            Packer<bool>.Write(packer, isNetworkAsset);
+
+            if (isNetworkAsset)
+            {
+                Packer<PackedInt>.Write(packer, index);
+                return true;
+            }
+
+            return false;
         }
 
         public static void FallbackReader<T>(BitPacker packer, ref T value)
@@ -291,14 +428,8 @@ namespace PurrNet.Packing
                     return;
                 }
 
-                bool isNetworkAsset = Packer<bool>.Read(packer);
-
-                if (isNetworkAsset)
-                {
-                    int index = Packer<PackedInt>.Read(packer);
-                    value = NetworkManager.main.networkAssets.GetAsset(index) is T cast ? cast : default;
+                if (ReadAsNetworkAsset(packer, ref value))
                     return;
-                }
 
                 var typeHash = Packer<PackedUInt>.Read(packer);
                 var type = Hasher.ResolveType(typeHash);
@@ -317,9 +448,23 @@ namespace PurrNet.Packing
             }
         }
 
-        public static void Write(BitPacker packer, Type type, object value)
+        public static bool ReadAsNetworkAsset<T>(BitPacker packer, ref T value)
         {
-            if (!_writeMethods.TryGetValue(type, out var method))
+            bool isNetworkAsset = Packer<bool>.Read(packer);
+
+            if (isNetworkAsset && NetworkManager.main && NetworkManager.main.networkAssets)
+            {
+                int index = Packer<PackedInt>.Read(packer);
+                value = NetworkManager.main.networkAssets.GetAsset(index) is T cast ? cast : default;
+                return true;
+            }
+
+            return false;
+        }
+
+        public static void WriteAsExactType<T>(BitPacker packer, Type type, T value)
+        {
+            if (!_writeExactMethods.TryGetValue(type, out var method))
             {
                 PurrLogger.LogError($"No writer for type '{type}' is registered.");
                 return;
@@ -337,30 +482,31 @@ namespace PurrNet.Packing
             }
         }
 
-        [UsedByIL]
-        public static void WriteGeneric<T>(BitPacker packer, T value)
+        public static void Write(BitPacker packer, Type type, object value)
         {
-            var type = value == null ? typeof(T) : value.GetType();
-            Packer<PackedUInt>.Write(packer, Hasher.GetStableHashU32(type));
-            Write(packer, type, value);
-        }
+            if (!_writeWrappedMethods.TryGetValue(type, out var method))
+            {
+                PurrLogger.LogError($"No writer for type '{type}' is registered.");
+                return;
+            }
 
-        [UsedByIL]
-        public static void ReadGeneric(BitPacker packer, ref object value)
-        {
-            PackedUInt hash = default;
-            Packer<PackedUInt>.Read(packer, ref hash);
-            if (!Hasher.TryGetType(hash, out var type))
-                throw new Exception($"Type with hash '{hash}' not found.");
-
-            Read(packer, type, ref value);
+            try
+            {
+                _args[0] = packer;
+                _args[1] = value;
+                method.Invoke(null, _args);
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to write value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
+            }
         }
 
         public static void Write(BitPacker packer, object value)
         {
             var type = value.GetType();
 
-            if (!_writeMethods.TryGetValue(type, out var method))
+            if (!_writeWrappedMethods.TryGetValue(type, out var method))
             {
                 FallbackWriter(packer, value);
                 return;
@@ -382,7 +528,7 @@ namespace PurrNet.Packing
         {
             var type = value.GetType();
 
-            if (!_writeMethods.TryGetValue(type, out var method))
+            if (!_writeExactMethods.TryGetValue(type, out var method))
             {
                 PurrLogger.LogError($"No writer for type '{type}' is registered.");
                 return;
@@ -402,7 +548,7 @@ namespace PurrNet.Packing
 
         public static void Read(BitPacker packer, Type type, ref object value)
         {
-            if (!_readMethods.TryGetValue(type, out var method))
+            if (!_readWrappedMethods.TryGetValue(type, out var method))
             {
                 FallbackReader(packer, ref value);
                 return;
@@ -417,13 +563,38 @@ namespace PurrNet.Packing
             }
             catch (Exception e)
             {
-                PurrLogger.LogError($"Failed to read value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
+                PurrLogger.LogError(e.InnerException != null
+                    ? $"Failed to read value of type '{type}'.\n{e.InnerException.Message}\n{e.InnerException.StackTrace}"
+                    : $"Failed to read value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        public static void ReadAsExactType(BitPacker packer, Type type, ref object value)
+        {
+            if (!_readExactMethods.TryGetValue(type, out var method))
+            {
+                FallbackReader(packer, ref value);
+                return;
+            }
+
+            try
+            {
+                _args[0] = packer;
+                _args[1] = value;
+                method.Invoke(null, _args);
+                value = _args[1];
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError(e.InnerException != null
+                    ? $"Failed to read value of type '{type}'.\n{e.InnerException.Message}\n{e.InnerException.StackTrace}"
+                    : $"Failed to read value of type '{type}'.\n{e.Message}\n{e.StackTrace}");
             }
         }
 
         public static void ReadRawObject(Type type, BitPacker packer, ref object value)
         {
-            if (!_readMethods.TryGetValue(type, out var method))
+            if (!_readExactMethods.TryGetValue(type, out var method))
             {
                 PurrLogger.LogError($"No reader for type '{type}' is registered.");
                 return;

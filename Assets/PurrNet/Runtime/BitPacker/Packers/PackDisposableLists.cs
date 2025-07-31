@@ -37,7 +37,7 @@ namespace PurrNet.Packing
 
             PackedUInt length = default;
             Packer<PackedUInt>.Read(packer, ref length);
-            value = new DisposableList<T>((int)length.value);
+            value = DisposableList<T>.Create((int)length.value);
 
             for (int i = 0; i < length; i++)
             {
@@ -101,7 +101,7 @@ namespace PurrNet.Packing
             }
 
             if (value.isDisposed)
-                value = new DisposableList<T>(count.value);
+                value = DisposableList<T>.Create(count.value);
             else value.Clear();
 
             for (int i = 0; i < count; i++)

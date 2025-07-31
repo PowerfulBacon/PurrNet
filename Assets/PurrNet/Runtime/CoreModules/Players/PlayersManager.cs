@@ -143,13 +143,13 @@ namespace PurrNet.Modules
         public void SendRaw(PlayerID player, ByteData data, Channel method = Channel.ReliableOrdered)
             => _playerBroadcaster.SendRaw(player, data, method);
 
-        public void SendRaw(IEnumerable<PlayerID> player, ByteData data, Channel method = Channel.ReliableOrdered)
+        public void SendRaw(IReadOnlyList<PlayerID> player, ByteData data, Channel method = Channel.ReliableOrdered)
             => _playerBroadcaster.SendRaw(player, data, method);
 
         public void Send<T>(PlayerID player, T data, Channel method = Channel.ReliableOrdered)
             => _playerBroadcaster.Send(player, data, method);
 
-        public void Send<T>(IEnumerable<PlayerID> collection, T data, Channel method = Channel.ReliableOrdered)
+        public void Send<T>(IReadOnlyList<PlayerID> collection, T data, Channel method = Channel.ReliableOrdered)
             => _playerBroadcaster.Send(collection, data, method);
 
         public void SendToServer<T>(T data, Channel method = Channel.ReliableOrdered)
@@ -326,8 +326,8 @@ namespace PurrNet.Modules
             }
 
             var lastNidId = new NetworkID(0, playerId);
-            if (_lastNidId.TryGetValue(playerId, out var lastNid))
-                lastNidId = lastNid;
+            if (_lastNidId.TryGetValue(playerId, out var lastNidRes))
+                lastNidId = lastNidRes;
 
             _broadcastModule.Send(conn, new ServerLoginResponse(playerId, lastNidId));
 

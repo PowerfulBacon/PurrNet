@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using JetBrains.Annotations;
 using PurrNet.Collections;
 using PurrNet.Logging;
@@ -210,7 +209,10 @@ namespace PurrNet
 
         internal bool TryAddObserver(PlayerID player)
         {
-            return _observers.Add(player);
+            if (_observers.Contains(player))
+                return false;
+            _observers.Add(player);
+            return true;
         }
 
         internal bool TryRemoveObserver(PlayerID player)

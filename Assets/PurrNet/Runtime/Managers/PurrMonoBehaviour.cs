@@ -6,6 +6,8 @@ namespace PurrNet
     {
         NetworkManager _networkManager;
 
+        protected NetworkManager manager => _networkManager;
+
         private bool _isSubscribedClient;
         private bool _isSubscribedServer;
 

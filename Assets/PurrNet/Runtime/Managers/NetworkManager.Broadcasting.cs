@@ -187,7 +187,7 @@ namespace PurrNet
                 pendingDict[type] = subscriptions;
             }
 
-            var subscription = new PendingSubscription<T>(callback, asServer);
+            var subscription = new PendingSubscription<T>(callback);
             subscriptions.Add(subscription);
 
             if (TryGetModule(out PlayersBroadcaster broadcaster, asServer))
@@ -284,7 +284,7 @@ namespace PurrNet
         /// <param name="method">The channel to use for broadcasting</param>
         /// <typeparam name="T">The data type to send with the broadcast</typeparam>
         [UsedImplicitly]
-        public void Send<T>(IEnumerable<PlayerID> playersCollection, T data, Channel method = Channel.ReliableOrdered)
+        public void Send<T>(IReadOnlyList<PlayerID> playersCollection, T data, Channel method = Channel.ReliableOrdered)
         {
             var broadcaster = GetModule<PlayersBroadcaster>(true);
             broadcaster.Send(playersCollection, data, method);
@@ -349,12 +349,10 @@ namespace PurrNet
         private class PendingSubscription<T> : IPendingSubscription where T : new()
         {
             public PlayerBroadcastDelegate<T> Callback { get; }
-            public bool AsServer { get; }
 
-            public PendingSubscription(PlayerBroadcastDelegate<T> callback, bool asServer)
+            public PendingSubscription(PlayerBroadcastDelegate<T> callback)
             {
                 Callback = callback;
-                AsServer = asServer;
             }
 
             public void Subscribe(PlayersBroadcaster broadcaster)

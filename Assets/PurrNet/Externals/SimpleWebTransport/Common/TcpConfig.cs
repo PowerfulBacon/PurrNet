@@ -16,7 +16,7 @@ namespace JamesFrowen.SimpleWeb
             this.receiveTimeout = receiveTimeout;
         }
 
-        public readonly void ApplyTo(TcpClient client)
+        public void ApplyTo(TcpClient client)
         {
             client.SendTimeout = sendTimeout;
             client.ReceiveTimeout = receiveTimeout;

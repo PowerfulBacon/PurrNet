@@ -33,6 +33,9 @@ namespace PurrNet
 
         public event Action<T> onChanged;
 
+        public delegate void ActionWithOld(T oldValue, T newValue);
+        public event ActionWithOld onChangedWithOld;
+
         public bool isControllingSyncVar => parent.IsController(_ownerAuth);
 
         public T value
@@ -54,10 +57,12 @@ namespace PurrNet
                     return;
                 }
 
+                var oldValue = _value;
                 _value = value;
                 _isDirty = true;
 
                 onChanged?.Invoke(value);
+                onChangedWithOld?.Invoke(oldValue, value);
             }
         }
 
@@ -66,11 +71,26 @@ namespace PurrNet
             if (isSpawnEvent)
                 return;
 
-            if (_ownerAuth && asServer)
+            /*if (_ownerAuth && asServer)
             {
                 _id = 0;
                 SendLatestStateToAll(_id, _value);
+            }*/
+
+            if (_ownerAuth)
+            {
+                _id = 0;
+
+                if (isOwner)
+                    _isDirty = true;
             }
+        }
+
+        BitPacker GetValue()
+        {
+            var packer = BitPackerPool.Get();
+            Packer<T>.Write(packer, _value);
+            return packer;
         }
 
         public override void OnObserverAdded(PlayerID player, bool isSpawner)
@@ -78,7 +98,8 @@ namespace PurrNet
             if (isSpawner && ownerAuth && owner == player)
                 return;
 
-            SendLatestState(player, _id, _value);
+            using var v = GetValue();
+            SendLatestState(player, _id, v);
         }
 
         public override void OnDespawned()
@@ -90,20 +111,29 @@ namespace PurrNet
             }
         }
 
+        public void SetDirty()
+        {
+            _isDirty = true;
+        }
+
         private float _lastSendTime;
 
         private void ForceSendUnreliable()
         {
+            using var v = GetValue();
+
             if (isServer)
-                SendToAll(_id++, _value);
-            else SendToServer(_id++, _value);
+                SendToAll(_id++, v);
+            else SendToServer(_id++, v);
         }
 
         private void ForceSendReliable()
         {
+            using var v = GetValue();
+
             if (isServer)
-                SendToAllReliably(_id++, _value);
-            else SendToServerReliably(_id++, _value);
+                SendToAllReliably(_id++, v);
+            else SendToServerReliably(_id++, v);
         }
 
         public void FlushImmediately()
@@ -154,83 +184,89 @@ namespace PurrNet
             _ownerAuth = ownerAuth;
         }
 
-        [ObserversRpc, UsedImplicitly]
-        private void SendLatestStateToAll(PackedULong packetId, T newValue)
-        {
-            if (isServer) return;
-
-            _id = packetId;
-
-            bool bothNull = _value == null && newValue == null;
-            bool bothEqual = _value != null && _value.Equals(newValue);
-
-            if (bothNull || bothEqual)
-                return;
-
-            _value = newValue;
-            onChanged?.Invoke(value);
-        }
-
         [TargetRpc, UsedImplicitly]
-        private void SendLatestState(PlayerID player, PackedULong packetId, T newValue)
+        private void SendLatestState(PlayerID player, PackedULong packetId, BitPacker newValue)
         {
-            if (isServer) return;
+            using (newValue)
+            {
+                if (isServer) return;
 
-            _id = packetId;
+                _id = packetId;
 
-            bool bothNull = _value == null && newValue == null;
-            bool bothEqual = _value != null && _value.Equals(newValue);
+                bool bothNull = _value == null && newValue == null;
+                bool bothEqual = _value != null && _value.Equals(newValue);
 
-            if (bothNull || bothEqual)
-                return;
+                if (bothNull || bothEqual)
+                    return;
 
-            _value = newValue;
-            onChanged?.Invoke(value);
+                var oldValue = value;
+                Packer<T>.Read(newValue, ref _value);
+                onChanged?.Invoke(value);
+                onChangedWithOld?.Invoke(oldValue, value);
+            }
         }
 
         [ServerRpc(Channel.Unreliable, requireOwnership: true)]
-        private void SendToServer(PackedULong packetId, T newValue)
+        private void SendToServer(PackedULong packetId, BitPacker newValue)
         {
-            if (!_ownerAuth) return;
+            using (newValue)
+            {
+                if (!_ownerAuth) return;
 
-            OnReceivedValue(packetId, newValue);
-            SendToOthers(packetId, newValue);
+                OnReceivedValue(packetId, newValue);
+                SendToOthers(packetId, newValue);
+            }
         }
 
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
-        private void SendToServerReliably(PackedULong packetId, T newValue)
+        private void SendToServerReliably(PackedULong packetId, BitPacker newValue)
         {
-            if (!_ownerAuth) return;
+            using (newValue)
+            {
+                if (!_ownerAuth) return;
 
-            OnReceivedValue(packetId, newValue);
-            SendToOthersReliably(packetId, newValue);
+                OnReceivedValue(packetId, newValue);
+                SendToOthersReliably(packetId, newValue);
+            }
         }
 
         [ObserversRpc(Channel.Unreliable, excludeOwner: true)]
-        private void SendToOthers(PackedULong packetId, T newValue)
+        private void SendToOthers(PackedULong packetId, BitPacker newValue)
         {
-            if (!isServer) OnReceivedValue(packetId, newValue);
+            using (newValue)
+            {
+                if (!isServer) OnReceivedValue(packetId, newValue);
+            }
         }
 
         [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true)]
-        private void SendToOthersReliably(PackedULong packetId, T newValue)
+        private void SendToOthersReliably(PackedULong packetId, BitPacker newValue)
         {
-            if (!isHost) OnReceivedValue(packetId, newValue);
+            using (newValue)
+            {
+                if (!isHost) OnReceivedValue(packetId, newValue);
+            }
         }
 
         [ObserversRpc(Channel.Unreliable)]
-        private void SendToAll(PackedULong packetId, T newValue)
+        private void SendToAll(PackedULong packetId, BitPacker newValue)
         {
-            if (!isHost) OnReceivedValue(packetId, newValue);
+            using (newValue)
+            {
+                if (!isHost) OnReceivedValue(packetId, newValue);
+            }
         }
 
         [ObserversRpc(Channel.ReliableOrdered)]
-        private void SendToAllReliably(PackedULong packetId, T newValue)
+        private void SendToAllReliably(PackedULong packetId, BitPacker newValue)
         {
-            if (!isHost) OnReceivedValue(packetId, newValue);
+            using (newValue)
+            {
+                if (!isHost) OnReceivedValue(packetId, newValue);
+            }
         }
 
-        private void OnReceivedValue(PackedULong packetId, T newValue)
+        private void OnReceivedValue(PackedULong packetId, BitPacker newValue)
         {
             bool isControlling = parent.IsController(_ownerAuth);
 
@@ -252,8 +288,10 @@ namespace PurrNet
             if (bothNull || bothEqual)
                 return;
 
-            _value = newValue;
+            var oldValue = value;
+            Packer<T>.Read(newValue, ref _value);
             onChanged?.Invoke(value);
+            onChangedWithOld?.Invoke(oldValue, value);
         }
 
         public static implicit operator T(SyncVar<T> syncVar)

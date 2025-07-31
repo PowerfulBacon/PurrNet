@@ -7,7 +7,7 @@ namespace PurrNet
     {
         public void Send<T>(PlayerID player, T data, Channel method = Channel.ReliableOrdered);
 
-        public void Send<T>(IEnumerable<PlayerID> players, T data, Channel method = Channel.ReliableOrdered);
+        public void Send<T>(IReadOnlyList<PlayerID> players, T data, Channel method = Channel.ReliableOrdered);
 
         public void SendToServer<T>(T data, Channel method = Channel.ReliableOrdered);
 

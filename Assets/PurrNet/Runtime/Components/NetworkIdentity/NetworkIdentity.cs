@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using JetBrains.Annotations;
-using PurrNet.Collections;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Pooling;
@@ -128,7 +127,7 @@ namespace PurrNet
 
         internal void RecalculateDirectChildren()
         {
-            using var dChildren = new DisposableList<TransformIdentityPair>(16);
+            using var dChildren = DisposableList<TransformIdentityPair>.Create(16);
             HierarchyPool.GetDirectChildren(transform, dChildren);
 
             _directChildren ??= new List<NetworkIdentity>(dChildren.Count);
@@ -222,7 +221,7 @@ namespace PurrNet
 
         public bool isClient => isSpawned && networkManager.isClient;
 
-        public bool isClientAndObserving => isClient && observers.Contains(localPlayerForced);
+        public bool isClientAndObserving => isClient && _observers.Contains(localPlayerForced);
 
         public bool isHost => isSpawned && networkManager.isHost;
 
@@ -338,9 +337,11 @@ namespace PurrNet
         [UsedByIL]
         public PlayerID localPlayerForced => localPlayer ?? default;
 
-        private readonly PurrHashSet<PlayerID> _observers = new PurrHashSet<PlayerID>(4);
+        private readonly List<PlayerID> _observers = new List<PlayerID>(4);
 
-        public IReadonlyHashSet<PlayerID> observers => _observers;
+        public IReadOnlyList<PlayerID> observers => _observers;
+
+        public bool IsObserver(PlayerID player) => _observers.Contains(player);
 
         [UsedImplicitly]
         public void QueueOnSpawned(Action action)
@@ -638,9 +639,9 @@ namespace PurrNet
         /// </summary>
         /// <param name="oldOwner">The old owner of this object</param>
         /// <param name="newOwner">The new owner of this object</param>
-        /// <param name="isSpawnEvent">If this object was just spawned and the newOwner is the spawner</param>
+        /// <param name="selfRequest">If this object was just spawned and the newOwner is the spawner</param>
         /// <param name="asServer">Is this on the server</param>
-        protected virtual void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool isSpawnEvent, bool asServer)
+        protected virtual void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool selfRequest, bool asServer)
         {
         }
 
@@ -963,7 +964,7 @@ namespace PurrNet
                 return;
             }
 
-            using var identities = new DisposableList<TransformIdentityPair>(16);
+            using var identities = DisposableList<TransformIdentityPair>.Create(16);
             HierarchyPool.GetDirectChildren(go.transform, identities);
 
             for (var i = 0; i < identities.Count; i++)
@@ -984,7 +985,7 @@ namespace PurrNet
                 return;
             }
 
-            using var identities = new DisposableList<TransformIdentityPair>(16);
+            using var identities = DisposableList<TransformIdentityPair>.Create(16);
             HierarchyPool.GetDirectChildren(go.transform, identities);
 
             for (var i = 0; i < identities.Count; i++)

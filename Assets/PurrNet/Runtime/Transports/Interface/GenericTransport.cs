@@ -19,28 +19,28 @@ namespace PurrNet.Transports
         /// </summary>
         public abstract ITransport transport { get; }
 
-        bool TryGetNetworkManager(NetworkManager manager, out NetworkManager networkManager)
+        bool TryGetNetworkManager(INetworkManager manager, out INetworkManager networkManager)
         {
-            if (manager)
+            if (manager != null)
             {
                 networkManager = manager;
                 return true;
             }
 
-            if (TryGetComponent(out networkManager))
+            if (TryGetComponent<INetworkManager>(out networkManager))
                 return true;
 
-            var parentNm = GetComponentInParent<NetworkManager>();
+            var parentNm = GetComponentInParent<INetworkManager>();
 
-            if (parentNm)
+            if (parentNm != null)
             {
                 networkManager = parentNm;
                 return true;
             }
 
-            var childNm = GetComponentInChildren<NetworkManager>();
+            var childNm = GetComponentInChildren<INetworkManager>();
 
-            if (childNm)
+            if (childNm != null)
             {
                 networkManager = childNm;
                 return true;
@@ -67,7 +67,7 @@ namespace PurrNet.Transports
                 networkManager.StartServer();
         }
 
-        internal void StartServer(NetworkManager manager)
+        internal void StartServer(INetworkManager manager)
         {
             if (TryGetNetworkManager(manager, out var networkManager))
             {
@@ -92,7 +92,7 @@ namespace PurrNet.Transports
                 networkManager.StopServer();
         }
 
-        internal void StopServer(NetworkManager manager)
+        internal void StopServer(INetworkManager manager)
         {
             if (TryGetNetworkManager(manager, out var networkManager))
                 networkManager.InternalUnregisterServerModules();
@@ -111,7 +111,7 @@ namespace PurrNet.Transports
                 networkManager.StartClient();
         }
 
-        internal void StartClient(NetworkManager manager)
+        internal void StartClient(INetworkManager manager)
         {
             if (TryGetNetworkManager(manager, out var networkManager))
             {
@@ -138,7 +138,7 @@ namespace PurrNet.Transports
                 networkManager.StopClient();
         }
 
-        internal void StopClient(NetworkManager manager)
+        internal void StopClient(INetworkManager manager)
         {
             if (TryGetNetworkManager(manager, out var networkManager))
                 networkManager.InternalUnregisterClientModules();

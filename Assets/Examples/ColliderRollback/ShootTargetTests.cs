@@ -15,8 +15,14 @@ public class ShootTargetTests : NetworkBehaviour
             transform.localRotation = Quaternion.LookRotation(ray.direction);
 
 #if UNITY_PHYSICS_3D
-            if (Physics.Raycast(ray, out var hit))
+            var mouseWorldPoint = _camera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 5));
+            mouseWorldPoint.z = 0f; // Ensure the z-coordinate is zero for 2D physics
+
+            if (Physics.BoxCast(ray.origin, new Vector3(0.1f, 0.1f, 1f), ray.direction, out var hit, transform.rotation))
                 Debug.DrawLine(hit.point, hit.point + hit.normal, Color.red, 5f);
+
+            if (Physics.CheckSphere(mouseWorldPoint, 0.1f))
+                Debug.DrawLine(mouseWorldPoint, Vector3.up, Color.red, 5f);
 #endif
 
 #if UNITY_PHYSICS_2D
@@ -25,16 +31,19 @@ public class ShootTargetTests : NetworkBehaviour
                 Debug.DrawLine(hit2D.point, hit2D.point + hit2D.normal, Color.blue, 5f);
 #endif
 
-            Shoot(rollbackTick, ray);
+            Shoot(rollbackTick, ray, transform.rotation, mouseWorldPoint);
         }
     }
 
     [ServerRpc(requireOwnership: false)]
-    private void Shoot(double preciseTick, Ray ray)
+    private void Shoot(double preciseTick, Ray ray, Quaternion rot, Vector3 mousePos)
     {
 #if UNITY_PHYSICS_3D
-        if (rollbackModule.Raycast(preciseTick, ray, out var hit))
+        if (rollbackModule.BoxCast(preciseTick, ray, new Vector3(0.1f, 0.1f, 1f), rot, out var hit))
             Debug.DrawLine(hit.point, hit.point + hit.normal, Color.green, 5f);
+
+        if (rollbackModule.CheckSphere(preciseTick, mousePos, 0.1f))
+            Debug.DrawLine(mousePos, Vector3.up, Color.red, 5f);
 #endif
 
 #if UNITY_PHYSICS_2D

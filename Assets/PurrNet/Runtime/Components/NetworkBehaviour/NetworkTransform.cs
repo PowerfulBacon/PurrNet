@@ -133,6 +133,30 @@ namespace PurrNet
 #endif
         }
 
+        private void OnEnable()
+        {
+            UnityLatestUpdate.onLatestUpdate += LateLateUpdate;
+
+            if (_trs == null)
+                return;
+
+            // Reset delta compression state to prevent stale reference points
+            _currentData = GetCurrentTransformData();
+            _latestData = _currentData;
+            _lastReadData = _currentData;
+            _lastSentDelta = _currentData;
+
+            // Force sync if we're the controller and spawned
+            if (_wasOnSpawnedCalled && isController) {
+                ForceSync();
+            }
+        }
+
+        private void OnDisable()
+        {
+            UnityLatestUpdate.onLatestUpdate -= LateLateUpdate;
+        }
+
         protected override void OnEarlySpawn()
         {
             _trs = transform;
@@ -179,6 +203,10 @@ namespace PurrNet
 
         protected override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
         {
+            if (!enabled) {
+                return;
+            }
+
             if (!_wasOnSpawnedCalled)
                 return;
 
@@ -253,6 +281,10 @@ namespace PurrNet
 
         protected override void OnObserverAdded(PlayerID player)
         {
+            if (!enabled) {
+                return;
+            }
+
             if (player == localPlayer)
                 return;
 
@@ -364,6 +396,12 @@ namespace PurrNet
         {
             if (_interpolationTiming == InterpolationTiming.LateUpdate)
                 UpdateNT();
+        }
+
+        private void LateLateUpdate()
+        {
+            if (_interpolationTiming == InterpolationTiming.LateLateUpdate)
+                UpdateNT();
 
             if (_parentChanged)
             {
@@ -415,21 +453,21 @@ namespace PurrNet
 
             if (syncPosition)
             {
-                var worldPos = _position.Advance(Time.deltaTime).position;
+                var worldPos = _position.Advance(Time.unscaledDeltaTime).position;
                 _trs.position = worldPos;
                 position = worldPos;
             }
 
             if (syncRotation)
             {
-                var worldRot = _rotation.Advance(Time.deltaTime).rotation;
+                var worldRot = _rotation.Advance(Time.unscaledDeltaTime).rotation;
                 _trs.rotation = worldRot;
                 rotation = worldRot;
             }
 
             if (syncScale)
             {
-                var worldScale = _scale.Advance(Time.deltaTime).scale;
+                var worldScale = _scale.Advance(Time.unscaledDeltaTime).scale;
                 var parentTrs = _trs.parent;
                 var ls = parentTrs ? parentTrs.GetLocalScale(worldScale) : worldScale;
                 _trs.localScale = ls;

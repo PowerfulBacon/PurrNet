@@ -82,13 +82,13 @@ namespace PurrNet.Packing
                 DisposableList<TKey> oldKeysList = default;
                 DisposableList<TValue> oldValuesList = default;
 
-                using var newKeysList = new DisposableList<TKey>(newCount.value);
-                using var newValuesList = new DisposableList<TValue>(newCount.value);
+                using var newKeysList = DisposableList<TKey>.Create(newCount.value);
+                using var newValuesList = DisposableList<TValue>.Create(newCount.value);
 
                 if (oldCount.value >= 0)
                 {
-                    oldKeysList = new DisposableList<TKey>(oldCount.value);
-                    oldValuesList = new DisposableList<TValue>(oldCount.value);
+                    oldKeysList = DisposableList<TKey>.Create(oldCount.value);
+                    oldValuesList = DisposableList<TValue>.Create(oldCount.value);
                     oldKeysList.AddRange(old.Keys);
                     oldValuesList.AddRange(old.Values);
                 }
@@ -161,14 +161,14 @@ namespace PurrNet.Packing
 
             if (oldCount.value >= 0)
             {
-                oldKeysList = new DisposableList<TKey>(oldCount.value);
-                oldValuesList = new DisposableList<TValue>(oldCount.value);
+                oldKeysList = DisposableList<TKey>.Create(oldCount.value);
+                oldValuesList = DisposableList<TValue>.Create(oldCount.value);
                 oldKeysList.AddRange(oldvalue.Keys);
                 oldValuesList.AddRange(oldvalue.Values);
             }
 
-            var keysList = new DisposableList<TKey>(newCount.value);
-            var valuesList = new DisposableList<TValue>(newCount.value);
+            var keysList = DisposableList<TKey>.Create(newCount.value);
+            var valuesList = DisposableList<TValue>.Create(newCount.value);
 
             packer.ReadDisposableDeltaList(oldKeysList, ref keysList);
             packer.ReadDisposableDeltaList(oldValuesList, ref valuesList);

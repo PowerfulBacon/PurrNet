@@ -120,10 +120,10 @@ namespace PurrNet.Editor
 
             serializedObject.Update();
 
-            DrawHeaderSection();
+            DrawHeaderSection(_networkManager, _scriptProp);
 
             if (Application.isPlaying)
-                RenderStartStopButtons();
+                RenderStartStopButtons(_networkManager);
             DrawConfigurationSection();
 
             DrawRuntimeSettings();
@@ -145,17 +145,20 @@ namespace PurrNet.Editor
             serializedObject.ApplyModifiedProperties();
         }
 
-        private void DrawHeaderSection()
+        public static void DrawHeaderSection(INetworkManager manager, SerializedProperty scriptProp)
         {
-            bool willStartServer = _networkManager.shouldAutoStartServer;
-            bool willStartClient = _networkManager.shouldAutoStartClient;
+            bool willStartServer = manager.shouldAutoStartServer;
+            bool willStartClient = manager.shouldAutoStartClient;
             string status = willStartClient && willStartServer ? "HOST" :
                 willStartClient ? "CLIENT" :
                 willStartServer ? "SERVER" : "NONE";
 
-            GUI.enabled = false;
-            EditorGUILayout.PropertyField(_scriptProp, true);
-            GUI.enabled = true;
+            if (scriptProp != null)
+            {
+                GUI.enabled = false;
+                EditorGUILayout.PropertyField(scriptProp, true);
+                GUI.enabled = true;
+            }
 
             GUI.color = willStartClient && willStartServer ? Color.green :
                 willStartClient ? Color.blue :
@@ -331,13 +334,13 @@ namespace PurrNet.Editor
             EditorGUILayout.IntSlider(_tickRate, 1, 128, new GUIContent("Tick Rate"));
         }
 
-        private void RenderStartStopButtons()
+        public static void RenderStartStopButtons(INetworkManager manager)
         {
             GUILayout.BeginHorizontal();
             GUI.enabled = Application.isPlaying;
 
-            RenderServerButton();
-            RenderClientButton();
+            RenderServerButton(manager);
+            RenderClientButton(manager);
 
             GUI.color = Color.white;
             GUI.enabled = true;
@@ -348,29 +351,29 @@ namespace PurrNet.Editor
 
             // draw buttons for all actions, independnt of state
             if (GUILayout.Button("Start Server", GUILayout.Width(10), GUILayout.ExpandWidth(true)))
-                _networkManager.StartServer();
+                manager.StartServer();
 
             if (GUILayout.Button("Stop Server", GUILayout.Width(10), GUILayout.ExpandWidth(true)))
-                _networkManager.StopServer();
+                manager.StopServer();
 
             if (GUILayout.Button("Start Client", GUILayout.Width(10), GUILayout.ExpandWidth(true)))
-                _networkManager.StartClient();
+                manager.StartClient();
 
             if (GUILayout.Button("Stop Client", GUILayout.Width(10), GUILayout.ExpandWidth(true)))
-                _networkManager.StopClient();
+                manager.StopClient();
 
             GUILayout.EndHorizontal();
 #endif
         }
 
-        private void RenderServerButton()
+        private static void RenderServerButton(INetworkManager manager)
         {
-            switch (_networkManager.serverState)
+            switch (manager.serverState)
             {
                 case ConnectionState.Disconnected:
                     GUI.color = Color.white;
                     if (GUILayout.Button("Start Server", GUILayout.Width(10), GUILayout.ExpandWidth(true)))
-                        _networkManager.StartServer();
+                        manager.StartServer();
                     break;
                 case ConnectionState.Disconnecting:
                     GUI.color = new Color(1f, 0.5f, 0f);
@@ -385,21 +388,21 @@ namespace PurrNet.Editor
                 case ConnectionState.Connected:
                     GUI.color = Color.green;
                     if (GUILayout.Button("Stop Server", GUILayout.Width(10), GUILayout.ExpandWidth(true)))
-                        _networkManager.StopServer();
+                        manager.StopServer();
                     break;
             }
 
 
         }
 
-        private void RenderClientButton()
+        private static void RenderClientButton(INetworkManager manager)
         {
-            switch (_networkManager.clientState)
+            switch (manager.clientState)
             {
                 case ConnectionState.Disconnected:
                     GUI.color = Color.white;
                     if (GUILayout.Button("Start Client", GUILayout.Width(10), GUILayout.ExpandWidth(true)))
-                        _networkManager.StartClient();
+                        manager.StartClient();
                     break;
                 case ConnectionState.Disconnecting:
                     GUI.color = new Color(1f, 0.5f, 0f);
@@ -414,7 +417,7 @@ namespace PurrNet.Editor
                 case ConnectionState.Connected:
                     GUI.color = Color.green;
                     if (GUILayout.Button("Stop Client", GUILayout.Width(10), GUILayout.ExpandWidth(true)))
-                        _networkManager.StopClient();
+                        manager.StopClient();
                     break;
             }
         }

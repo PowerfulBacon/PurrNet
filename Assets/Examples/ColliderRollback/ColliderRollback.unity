@@ -182,6 +182,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -203,6 +205,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -256,8 +259,11 @@ MonoBehaviour:
   _syncScale: 1
   _syncParent: 1
   _interpolateSettings: 7
-  _ownerAuth: 1
+  _minBufferSize: 1
+  _maxBufferSize: 2
   _characterControllerPatch: 0
+  _ownerAuth: 1
+  _interpolationTiming: 0
 --- !u!114 &515781177
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,7 +276,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15780e97d72f9104db84d77a763c6fe6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _storeHistoryInSeconds: 5
+  _storeHistoryInSeconds: 10
   _autoAddAllChildren: 1
   _colliders3D:
   - {fileID: 515781172}
@@ -348,6 +354,7 @@ MonoBehaviour:
   _maxConnections: 100
   _address: 127.0.0.1
   _timeoutInSeconds: 5
+  _pollEventsInUpdate: 0
 --- !u!114 &585767674
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -364,13 +371,15 @@ MonoBehaviour:
   _startServerFlags: 9
   _startClientFlags: 6
   _cookieScope: 1
-  _dontDestroyOnLoad: 1
+  _dontDestroyOnLoad: 0
   _transport: {fileID: 585767673}
   _networkPrefabs: {fileID: 0}
+  _networkAssets: {fileID: 0}
   _networkRules: {fileID: 11400000, guid: d8799083b96579a42b8b2d03e4ceae98, type: 2}
   _visibilityRules: {fileID: 11400000, guid: 8f014a5bd8dc68646a2a3c0b18c5bbd8, type: 2}
   _authenticator: {fileID: 0}
-  _tickRate: 60
+  _tickRate: 20
+  _patchLingeringProcessBug: 0
 --- !u!114 &585767675
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -387,6 +396,7 @@ MonoBehaviour:
   _roomName: 68686868
   _region: brazil
   _host: br.purrlay.riten.dev
+  _pollEventsInUpdate: 0
 --- !u!1 &756628019
 GameObject:
   m_ObjectHideFlags: 0
@@ -425,6 +435,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -446,6 +458,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -580,6 +593,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -601,6 +616,7 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -752,8 +768,11 @@ MonoBehaviour:
   _syncScale: 1
   _syncParent: 1
   _interpolateSettings: 7
-  _ownerAuth: 1
+  _minBufferSize: 1
+  _maxBufferSize: 2
   _characterControllerPatch: 0
+  _ownerAuth: 1
+  _interpolationTiming: 2
 --- !u!1 &1595659337
 GameObject:
   m_ObjectHideFlags: 0
@@ -809,7 +828,6 @@ MonoBehaviour:
   m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
-  m_Version: 2
   m_TaaSettings:
     m_Quality: 3
     m_FrameInfluence: 0.1
@@ -817,6 +835,7 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!81 &1595659339
 AudioListener:
   m_ObjectHideFlags: 0

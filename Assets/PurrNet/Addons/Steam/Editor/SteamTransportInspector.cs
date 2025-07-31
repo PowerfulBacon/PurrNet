@@ -7,8 +7,12 @@
 #endif
 
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using PurrNet.Editor;
 using PurrNet.Transports;
+#if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
+using Steamworks;
+#endif
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.PackageManager;
@@ -54,9 +58,20 @@ namespace PurrNet.Steam.Editor
             {
                 base.OnInspectorGUI();
                 TransportInspector.DrawTransportStatus(generic);
+#if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
+                if (Application.isPlaying)
+                {
+                    if (GUILayout.Button("Copy my SteamID to Clipboard"))
+                    {
+                        string content = SteamUser.GetSteamID().ToString();
+                        EditorGUIUtility.systemCopyBuffer = content;
+                    }
+                }
+#endif
             }
         }
 
+        [UsedImplicitly]
         static void RemoveDefineSymbols(string symbol)
         {
             string currentDefines;

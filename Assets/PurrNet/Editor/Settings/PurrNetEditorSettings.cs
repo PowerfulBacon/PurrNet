@@ -7,12 +7,12 @@ namespace PurrNet.Editor
     public static class PurrNetEditorSettings
     {
         static readonly HashSet<string> _keywords =
-            new HashSet<string>(new[] { "PurrNet", "Networking", "Strip" });
+            new HashSet<string>(new[] { "PurrNet", "Networking", "Strip", "Multiplayer" });
 
         [SettingsProvider]
         public static SettingsProvider CreatePurrNetSettingsProvider()
         {
-            var provider = new SettingsProvider("Project/Networking/PurrNet", SettingsScope.Project)
+            var provider = new SettingsProvider("Project/Multiplayer/PurrNet", SettingsScope.Project)
             {
                 keywords = _keywords,
                 label = "PurrNet",
@@ -28,6 +28,19 @@ namespace PurrNet.Editor
             var settings = PurrNetSettings.GetOrCreateSettings();
 
             EditorGUI.BeginChangeCheck();
+
+            var toolbarResult = EditorGUILayout.EnumPopup(
+                new GUIContent("Toolbar Mode",
+                    "Defines how the PurrNet toolbar will be displayed in the Unity Editor. " +
+                    "This can help customize your workflow."),
+                settings.toolbarMode);
+            settings.toolbarMode = (ToolbarMode)toolbarResult;
+
+            settings.toolbarTransportDropDown = EditorGUILayout.Toggle(
+                new GUIContent("Toolbar Transport"),
+                settings.toolbarTransportDropDown);
+
+            GUILayout.Space(10f);
 
             var result = EditorGUILayout.EnumPopup(
                 new GUIContent("Strip Code Mode",

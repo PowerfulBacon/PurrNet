@@ -104,6 +104,36 @@ namespace PurrNet.Codegen
             }
             else
             {
+                if (isClass && type.BaseType != null && type.BaseType.FullName != typeof(object).FullName)
+                {
+                    var baseType = type.BaseType;
+
+                    if (baseType is { IsValueType: false })
+                    {
+                        var genericM =
+                            GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, baseType, deltaSerializer,
+                                module);
+
+                        var variable = new VariableDefinition(baseType);
+                        method.Body.Variables.Add(variable);
+
+                        // variable = this
+                        il.Emit(OpCodes.Ldarg_2);
+                        il.Emit(OpCodes.Ldind_Ref);
+                        il.Emit(OpCodes.Stloc, variable);
+
+                        il.Emit(OpCodes.Ldarg_0);
+                        il.Emit(OpCodes.Ldarg_1);
+                        il.Emit(OpCodes.Ldloca, variable);
+                        il.Emit(OpCodes.Call, genericM);
+
+                        il.Emit(OpCodes.Ldarg_2);
+                        il.Emit(OpCodes.Ldloc, variable);
+                        il.Emit(OpCodes.Castclass, type);
+                        il.Emit(OpCodes.Stind_Ref);
+                    }
+                }
+
                 foreach (var field in type.Fields)
                 {
                     if (field.IsStatic)
@@ -267,6 +297,30 @@ namespace PurrNet.Codegen
             }
             else
             {
+                bool isInheritedClass = isClass && type.BaseType != null &&
+                                    type.BaseType.FullName != typeof(object).FullName;
+
+                if (isInheritedClass)
+                {
+                    var baseType = type.BaseType;
+
+                    if (baseType is { IsValueType: false })
+                    {
+                        var genericM =
+                            GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, baseType, deltaSerializer,
+                                module);
+
+                        il.Emit(OpCodes.Ldarg_0);
+                        il.Emit(OpCodes.Ldarg_1);
+                        il.Emit(OpCodes.Ldarg_2);
+
+                        il.Emit(OpCodes.Call, genericM);
+                        il.Emit(OpCodes.Ldloc_1);
+                        il.Emit(OpCodes.Or);
+
+                        il.Emit(OpCodes.Stloc_1);
+                    }
+                }
 
                 for (var i = 0; i < type.Fields.Count; i++)
                 {
@@ -334,7 +388,7 @@ namespace PurrNet.Codegen
 
                     il.Emit(OpCodes.Call, packer);
 
-                    if (i > 0)
+                    if (i > 0 || isInheritedClass)
                     {
                         il.Emit(OpCodes.Ldloc_1);
                         il.Emit(OpCodes.Or);

@@ -3,6 +3,7 @@
     public enum InterpolationTiming
     {
         Update,
-        LateUpdate
+        LateUpdate,
+        LateLateUpdate,
     }
 }

@@ -128,6 +128,9 @@ namespace PurrNet.Steam
             {
                 var conn = _connections[i];
 
+                if (conn == HSteamNetConnection.Invalid)
+                    continue;
+
                 if (_isDedicated)
                      SteamGameServerNetworkingSockets.FlushMessagesOnConnection(conn);
                 else SteamNetworkingSockets.FlushMessagesOnConnection(conn);
@@ -206,16 +209,27 @@ namespace PurrNet.Steam
                 _ => 0
             };
 
-            if (_isDedicated)
-                 SteamGameServerNetworkingSockets.SendMessageToConnection(conn, ptr, (uint)data.length, sendFlag, out _);
-            else SteamNetworkingSockets.SendMessageToConnection(conn, ptr, (uint)data.length, sendFlag, out _);
+            try
+            {
+                if (_isDedicated)
+                    SteamGameServerNetworkingSockets.SendMessageToConnection(conn, ptr, (uint)data.length, sendFlag,
+                        out _);
+                else SteamNetworkingSockets.SendMessageToConnection(conn, ptr, (uint)data.length, sendFlag, out _);
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogException(e);
+            }
 #endif
         }
 
+
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
+        private int _nextConnectionId;
+
         private void AddConnection(HSteamNetConnection connection)
         {
-            int id = _connections.Count;
+            int id = _nextConnectionId++;
             _connections.Add(connection);
             _connectionById.Add(id, connection);
             _idByConnection.Add(connection, id);
@@ -268,10 +282,6 @@ namespace PurrNet.Steam
         public void Stop()
         {
 #if STEAMWORKS_NET_PACKAGE && !DISABLESTEAMWORKS
-            _connections.Clear();
-            _connectionById.Clear();
-            _idByConnection.Clear();
-
             if (_connectionStatusChanged != null)
             {
                 _connectionStatusChanged.Dispose();
@@ -281,20 +291,24 @@ namespace PurrNet.Steam
             if (_listenSocket == HSteamListenSocket.Invalid)
                 return;
 
-            try
+            for (var o = 0; o < _connections.Count; o++)
             {
-                for (var o = 0; o < _connections.Count; o++)
+                try
                 {
                     var conn = _connections[o];
                     if (_isDedicated)
                          SteamGameServerNetworkingSockets.CloseConnection(conn, 0, null, false);
                     else SteamNetworkingSockets.CloseConnection(conn, 0, null, false);
                 }
+                catch
+                {
+                    // ignored
+                }
             }
-            catch
-            {
-                // ignored
-            }
+
+            _connections.Clear();
+            _connectionById.Clear();
+            _idByConnection.Clear();
 
             try
             {

@@ -1,4 +1,5 @@
-﻿using PurrNet.Logging;
+﻿using System;
+using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Pooling;
@@ -9,51 +10,6 @@ namespace PurrNet
     [RegisterNetworkType(typeof(DisposableList<int>))]
     public static class PackNetworkIdentity
     {
-        [UsedByIL]
-        public static bool PackNetworkIDNullableDelta(this BitPacker stream, NetworkID? old, NetworkID? nid)
-        {
-            int flagPos = stream.AdvanceBits(1);
-            bool wasChanged = default(bool);
-            if (stream.HandleNullScenarios(old, nid, ref wasChanged))
-            {
-                wasChanged = DeltaPacker<PackedULong>.Write(stream, old!.Value.id, nid!.Value.id);
-                wasChanged = DeltaPacker<PlayerID>.Write(stream, old.Value.scope, nid.Value.scope) || wasChanged;
-            }
-            stream.WriteAt(flagPos, wasChanged);
-            if (!wasChanged)
-            {
-                stream.SetBitPosition(flagPos + 1);
-            }
-            return wasChanged;
-        }
-
-        [UsedByIL]
-        public static void PackNetworkIDNullableDelta(this BitPacker stream, NetworkID? oldValue, ref NetworkID? value)
-        {
-            bool value2 = default(bool);
-            Packer<bool>.Read(stream, ref value2);
-            if (value2)
-            {
-                if (stream.ReadIsNull(ref value))
-                {
-                    var oldId = oldValue!.Value.id;
-                    var oldScope = oldValue.Value.scope;
-
-                    PackedULong newId = default;
-                    PlayerID newScope = default;
-
-                    DeltaPacker<PackedULong>.Read(stream, oldId, ref newId);
-                    DeltaPacker<PlayerID>.Read(stream, oldScope, ref newScope);
-
-                    value = new NetworkID(newId, newScope);
-                }
-            }
-            else
-            {
-                value = oldValue;
-            }
-        }
-
         [UsedByIL]
         public static void WriteIdentityConcrete(this BitPacker packer, NetworkIdentity identity)
         {
@@ -72,14 +28,14 @@ namespace PurrNet
             Transform trs = null;
             if (go)
                 trs = go.transform;
-            WriteTrasform(packer, trs);
+            WriteTransform(packer, trs);
         }
 
         [UsedByIL]
         public static void ReadGameObject(this BitPacker packer, ref GameObject go)
         {
             Transform trs = null;
-            ReadTrasform(packer, ref trs);
+            ReadTransform(packer, ref trs);
             go = trs ? trs.gameObject : null;
         }
 
@@ -96,7 +52,10 @@ namespace PurrNet
                 if (!trs)
                     return null;
 
-                var parent = trs.GetComponentInParent<NetworkIdentity>(true);
+                if (!trs.parent)
+                    return null;
+
+                var parent = trs.parent.GetComponentInParent<NetworkIdentity>(true);
 
                 if (!parent)
                     return null;
@@ -138,16 +97,38 @@ namespace PurrNet
         }
 
         [UsedByIL]
-        public static void WriteTrasform(this BitPacker packer, Transform trs)
+        public static void WriteTransform(this BitPacker packer, Transform trs)
         {
             var parent = GetSpawnedParent(trs);
 
             if (!parent || !parent.isSpawned || !parent.id.HasValue)
             {
+                Packer<bool>.Write(packer, true);
                 Packer<bool>.Write(packer, false);
+                
+                if (NetworkManager.main == null || NetworkManager.main.prefabProvider == null || !NetworkManager.main.prefabProvider.TryGetPrefabData(trs.gameObject, out var data))
+                {
+                    Packer<bool>.Write(packer, true);
+                    if (NetworkManager.main != null && NetworkManager.main.networkAssets != null && NetworkManager.main.networkAssets.TryGetId(trs, out var tid))
+                    {
+                        Packer<bool>.Write(packer, true);
+                        Packer.WriteAsNetworkAsset(packer, trs);
+                    }
+                    else if (NetworkManager.main != null && NetworkManager.main.networkAssets != null && NetworkManager.main.networkAssets.TryGetId(trs.gameObject, out var gid))
+                    {
+                        Packer<bool>.Write(packer, false);
+                        Packer.WriteAsNetworkAsset(packer, trs.gameObject);
+                    }
+                    
+                    return;
+                }
+                
+                Packer<bool>.Write(packer, false);
+                Packer<int>.Write(packer, data.prefabId);
                 return;
             }
 
+            Packer<bool>.Write(packer, true);
             Packer<bool>.Write(packer, true);
             using var invPath = HierarchyPool.GetInvPath(parent.transform, trs);
 
@@ -157,7 +138,7 @@ namespace PurrNet
         }
 
         [UsedByIL]
-        public static void ReadTrasform(this BitPacker packer, ref Transform trs)
+        public static void ReadTransform(this BitPacker packer, ref Transform trs)
         {
             bool hasValue = false;
 
@@ -166,6 +147,32 @@ namespace PurrNet
             if (!hasValue)
             {
                 trs = null;
+                return;
+            }
+            var isSpawned = Packer<bool>.Read(packer);
+
+            if (!isSpawned)
+            {
+                var useFallback = Packer<bool>.Read(packer);
+                if (useFallback)
+                {
+                    var isTrs = Packer<bool>.Read(packer);
+                    if (isTrs)
+                    {
+                        Packer.ReadAsNetworkAsset(packer, ref trs);
+                        return;
+                    }
+
+                    GameObject g = null;
+                    Packer.ReadAsNetworkAsset(packer, ref g);
+                    if (g)
+                        trs = g.transform;
+                    return;
+                }
+                
+                var prefabId = Packer<int>.Read(packer);
+                if (NetworkManager.main && NetworkManager.main.prefabProvider != null && NetworkManager.main.prefabProvider.TryGetPrefabData(prefabId, out var prefabData))
+                    trs = prefabData.prefab.transform;
                 return;
             }
 

@@ -20,6 +20,26 @@ namespace PurrNet.Modules
             this.isActive = isActive;
         }
 
+        public bool AreEqual(GameObjectFrameworkPiece other)
+        {
+            return pid.Equals(other.pid) && childCount == other.childCount &&
+                   isActive == other.isActive && ArePathsEqual(inversedRelativePath, other.inversedRelativePath);
+        }
+
+        private static bool ArePathsEqual(int[] ints, int[] otherInversedRelativePath)
+        {
+            if (ints.Length != otherInversedRelativePath.Length)
+                return false;
+
+            for (int i = 0; i < ints.Length; i++)
+            {
+                if (ints[i] != otherInversedRelativePath[i])
+                    return false;
+            }
+
+            return true;
+        }
+
         public override string ToString()
         {
             StringBuilder builder = new();

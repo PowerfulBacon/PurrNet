@@ -79,13 +79,13 @@ namespace PurrNet.Modules
         public event Action onPreTick, onTick, onPostTick;
         public event Action onReliablePreTick, onReliableTick, onReliablePostTick;
 
-        private readonly NetworkManager _networkManager;
+        private readonly INetworkManager _networkManager;
         private uint _syncedTick;
         private float _lastSyncTime = -99;
         private float _lastTickTime;
         private const int MaxTickPerFrame = 5;
 
-        public TickManager(int tickRate, NetworkManager nm)
+        public TickManager(int tickRate, INetworkManager nm)
         {
             _lastTickTime = Time.unscaledTime;
             _networkManager = nm;
@@ -109,7 +109,13 @@ namespace PurrNet.Modules
 
             if (_networkManager.isServer || !_networkManager.isClient)
                 return;
-            if (_lastSyncTime + _networkManager.networkRules.GetSyncedTickUpdateInterval() < Time.unscaledTime)
+
+            var rules = _networkManager.networkRules;
+
+            if (!rules)
+                return;
+
+            if (_lastSyncTime + rules.GetSyncedTickUpdateInterval() < Time.unscaledTime)
             {
                 _lastSyncTime = Time.unscaledTime;
                 HandleTickSync();
@@ -197,6 +203,12 @@ namespace PurrNet.Modules
         {
             try
             {
+                if (_networkManager.isOffline)
+                    return;
+
+                if (!_networkManager.HasModule<RPCModule>())
+                    return;
+
                 float requestSendTime = Time.unscaledTime;
                 var rawServerTick = await RPCClass.RequestServerTick();
                 rtt = Time.unscaledTime - requestSendTime;

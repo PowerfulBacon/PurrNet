@@ -10,11 +10,13 @@ namespace PurrNet.Modules
 {
     public delegate void BroadcastDelegate<in T>(Connection conn, T data, bool asServer);
 
-    internal interface IBroadcastCallback
+    public interface IBroadcastCallback
     {
         bool IsSame(object callback);
 
         void TriggerCallback(Connection conn, object data, bool asServer);
+
+        void Subscribe(BroadcastModule module);
     }
 
     internal readonly struct BroadcastCallback<T> : IBroadcastCallback
@@ -36,6 +38,11 @@ namespace PurrNet.Modules
             if (data is T value)
                 callback?.Invoke(conn, value, asServer);
         }
+
+        public void Subscribe(BroadcastModule module)
+        {
+            module.Subscribe(callback);
+        }
     }
 
     public class BroadcastModule : INetworkModule, IDataListener
@@ -49,9 +56,9 @@ namespace PurrNet.Modules
 
         internal event Action<Connection, uint, object> onRawDataReceived;
 
-        public BroadcastModule(NetworkManager manager, bool asServer)
+        public BroadcastModule(INetworkManager manager, bool asServer)
         {
-            _transport = manager.transport.transport;
+            _transport = manager.rawTransport;
             _asServer = asServer;
         }
 
@@ -135,7 +142,7 @@ namespace PurrNet.Modules
             _transport.SendToClient(conn, byteData, method);
         }
 
-        public void Send<T>(IEnumerable<Connection> conn, T data, Channel method = Channel.ReliableOrdered)
+        public void Send<T>(IReadOnlyList<Connection> conn, T data, Channel method = Channel.ReliableOrdered)
         {
             AssertIsServer("Cannot send data to player from client.");
 
@@ -145,8 +152,9 @@ namespace PurrNet.Modules
             var shouldTrack = ShouldTrackType(type);
 #endif
 
-            foreach (var connection in conn)
+            for (var i = 0; i < conn.Count; i++)
             {
+                var connection = conn[i];
 #if UNITY_EDITOR
                 if (shouldTrack)
                     Statistics.SentBroadcast(type, byteData.segment);
@@ -155,12 +163,13 @@ namespace PurrNet.Modules
             }
         }
 
-        public void Send(IEnumerable<Connection> conn, ByteData byteData, Channel method = Channel.ReliableOrdered)
+        public void Send(IReadOnlyList<Connection> conn, ByteData byteData, Channel method = Channel.ReliableOrdered)
         {
             AssertIsServer("Cannot send data to player from client.");
 
-            foreach (var connection in conn)
+            for (var i = 0; i < conn.Count; i++)
             {
+                var connection = conn[i];
 #if UNITY_EDITOR
                 Statistics.ForwardedBytes(byteData.length);
 #endif

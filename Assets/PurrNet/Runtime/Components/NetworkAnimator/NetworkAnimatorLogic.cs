@@ -222,7 +222,9 @@ namespace PurrNet
                 bool isIk = actions.actions[i].type is
                     NetAnimatorAction.SetIKPosition or NetAnimatorAction.SetIKRotation or
                     NetAnimatorAction.SetIKHintPosition or NetAnimatorAction.SetLookAtPosition or
-                    NetAnimatorAction.SetBoneLocalRotation;
+                    NetAnimatorAction.SetBoneLocalRotation or NetAnimatorAction.SetIKHintPositionWeight or
+                    NetAnimatorAction.SetIKPositionWeight or NetAnimatorAction.SetIKRotationWeight or
+                    NetAnimatorAction.SetBodyPosition or NetAnimatorAction.SetBodyRotation;
 
                 if (!isIk)
                     actions.actions[i].Apply(_animator);

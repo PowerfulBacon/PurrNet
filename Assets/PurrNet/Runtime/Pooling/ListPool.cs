@@ -27,11 +27,18 @@ namespace PurrNet.Pooling
 #if UNITY_EDITOR
             _instance ??= new ListPool<T>();
 #endif
-            return _instance.Allocate();
+            var allocated =  _instance.Allocate();
+#if UNITY_EDITOR && PURR_LEAKS_CHECK
+            AllocationTracker.Track(allocated);
+#endif
+            return allocated;
         }
 
         public static void Destroy(List<T> list)
         {
+#if UNITY_EDITOR && PURR_LEAKS_CHECK
+            AllocationTracker.UnTrack(list);
+#endif
             _instance.Delete(list);
         }
     }

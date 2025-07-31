@@ -1,4 +1,6 @@
 {
   "stripCodeMode": 0,
+  "toolbarMode": 1,
+  "toolbarTransportDropDown": true,
   "stripServerCode": false
 }

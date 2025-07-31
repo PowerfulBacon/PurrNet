@@ -2,9 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-#if UNITASK_PURRNET_SUPPORT
-using Cysharp.Threading.Tasks;
-#endif
 using JamesFrowen.SimpleWeb;
 using JetBrains.Annotations;
 using PurrNet.Logging;
@@ -245,7 +242,7 @@ namespace PurrNet.Transports
 
         private void OnHostConnected()
         {
-            ClientAuthenticate authenticate = new ClientAuthenticate()
+            var authenticate = new ClientAuthenticate()
             {
                 roomName = _roomName,
                 clientSecret = _hostJoinInfo.secret
@@ -295,6 +292,7 @@ namespace PurrNet.Transports
                 _server.onConnect += OnHostConnected;
                 _server.onData += OnHostData;
                 _server.onDisconnect += OnHostDisconnected;
+                _server.onError += OnError;
 
                 try
                 {
@@ -303,7 +301,7 @@ namespace PurrNet.Transports
 
                     if (!hasRegionAndHost)
                     {
-                        var relayServer = await PurrTransportUtils.GetRelayServerAsync(_masterServer);
+                        var relayServer = await PurrTransportUtils.GetRelayServerAsync(_masterServer, token);
                         _region = relayServer.region;
                         _host = relayServer.host;
                     }
@@ -311,7 +309,10 @@ namespace PurrNet.Transports
                     if (token.IsCancellationRequested)
                         return;
 
-                    _hostJoinInfo = await PurrTransportUtils.Alloc(_masterServer, _region, _roomName);
+                    _hostJoinInfo = await PurrTransportUtils.Alloc(_masterServer, _region, _roomName, token);
+
+                    if (token.IsCancellationRequested)
+                        return;
 
                     var builder = new UriBuilder
                     {
@@ -324,10 +325,14 @@ namespace PurrNet.Transports
 
                     _server.Connect(builder.Uri);
                 }
+                catch (OperationCanceledException)
+                {
+                    // ignore
+                }
                 catch (Exception e)
                 {
                     StopListening();
-                    PurrLogger.LogWarning(e.Message[(e.Message.IndexOf('\n') + 1)..]);
+                    PurrLogger.LogError(e.Message);
                 }
             }
             catch (Exception e)
@@ -335,6 +340,11 @@ namespace PurrNet.Transports
                 StopListening();
                 PurrLogger.LogException(e.Message);
             }
+        }
+
+        private static void OnError(Exception obj)
+        {
+            PurrLogger.LogException(obj);
         }
 
         public void StopListening()
@@ -347,6 +357,7 @@ namespace PurrNet.Transports
                 _server.onConnect -= OnHostConnected;
                 _server.onData -= OnHostData;
                 _server.onDisconnect -= OnHostDisconnected;
+                _server.onError -= OnError;
                 _server.Disconnect();
             }
 
@@ -369,6 +380,7 @@ namespace PurrNet.Transports
                 _client.onConnect -= OnClientConnected;
                 _client.onData -= OnClientData;
                 _client.onDisconnect -= OnClientDisconnected;
+                _client.onError -= OnError;
                 _client.Disconnect();
             }
 
@@ -390,42 +402,35 @@ namespace PurrNet.Transports
 
                 clientState = ConnectionState.Connecting;
 
+                var token = new CancellationTokenSource();
+
                 while (listenerState == ConnectionState.Connecting)
-                {
-#if UNITASK_PURRNET_SUPPORT
-                    await UniTask.DelayFrame(1);
-#else
-                    await System.Threading.Tasks.Task.Yield();
-#endif
-                }
+                    await UnityLatestUpdate.Yield();
+
+                if (token.IsCancellationRequested)
+                    return;
 
                 _client = SimpleWebClient.Create(ushort.MaxValue, 5000, _tcpConfig);
-
                 _client.onConnect += OnClientConnected;
                 _client.onData += OnClientData;
                 _client.onDisconnect += OnClientDisconnected;
+                _client.onError += OnError;
 
-                try
+                AddCancellation(token, false);
+
+                _clientJoinInfo = await PurrTransportUtils.Join(_masterServer, _roomName, token);
+
+                if (token.IsCancellationRequested)
+                    return;
+
+                var builder = new UriBuilder
                 {
-                    var token = new CancellationTokenSource();
-                    AddCancellation(token, false);
+                    Scheme = _clientJoinInfo.ssl ? "wss" : "ws",
+                    Host = _clientJoinInfo.host,
+                    Port = _clientJoinInfo.port
+                };
 
-                    _clientJoinInfo = await PurrTransportUtils.Join(_masterServer, _roomName);
-
-                    var builder = new UriBuilder
-                    {
-                        Scheme = _clientJoinInfo.ssl ? "wss" : "ws",
-                        Host = _clientJoinInfo.host,
-                        Port = _clientJoinInfo.port
-                    };
-
-                    _client.Connect(builder.Uri);
-                }
-                catch (Exception e)
-                {
-                    Disconnect();
-                    PurrLogger.LogWarning(e.Message[(e.Message.IndexOf('\n') + 1)..]);
-                }
+                _client.Connect(builder.Uri);
             }
             catch (Exception e)
             {

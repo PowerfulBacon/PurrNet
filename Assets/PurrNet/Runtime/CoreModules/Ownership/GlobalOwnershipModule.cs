@@ -246,7 +246,7 @@ namespace PurrNet.Modules
             }
             else
             {
-                list = new DisposableList<OwnershipInfo>(16);
+                list = DisposableList<OwnershipInfo>.Create(16);
                 list.Add(info);
                 _pendingOwnershipChanges.Add(key, list);
             }
@@ -326,11 +326,11 @@ namespace PurrNet.Modules
             var stateCount = data.state.Count;
 
             for (var j = 0; j < stateCount; j++)
-                HandleOwnershipBatch(data.scene, data.state[j]);
+                HandleOwnershipBatch(data.scene, data.state[j], true);
 
             if (asServer && _scenePlayers.TryGetPlayersInScene(data.scene, out var players))
             {
-                using var copy = new DisposableList<PlayerID>(players.Count);
+                using var copy = DisposableList<PlayerID>.Create(players.Count);
                 copy.AddRange(players);
                 copy.Remove(player);
                 _playersManager.Send(copy, data);
@@ -343,7 +343,7 @@ namespace PurrNet.Modules
 
             for (var j = 0; j < idCount; j++)
             {
-                if (!HandleOwnershipChange(player, change, change.identities[j]))
+                if (!HandleOwnershipChange(player, change, change.identities[j], true))
                 {
                     change.identities.RemoveAt(j--);
                     idCount--;
@@ -352,7 +352,7 @@ namespace PurrNet.Modules
 
             if (asServer && _scenePlayers.TryGetPlayersInScene(change.sceneId, out var players))
             {
-                using var copy = new DisposableList<PlayerID>(players.Count);
+                using var copy = DisposableList<PlayerID>.Create(players.Count);
                 copy.AddRange(players);
                 copy.Remove(player);
                 _playersManager.Send(copy, change);
@@ -680,10 +680,30 @@ namespace PurrNet.Modules
             _pendingOwnershipChanges.Clear();
         }
 
-        private void HandleOwnershipBatch(SceneID scene, OwnershipInfo change)
+        struct PendingOwnershipChanges
+        {
+            public SceneID scene;
+            public OwnershipInfo change;
+            public float timeAdded;
+        }
+
+        readonly List<PendingOwnershipChanges> _pendingOwnership = new ();
+
+        private void HandleOwnershipBatch(SceneID scene, OwnershipInfo change, bool addToPending)
         {
             if (!_hierarchy.TryGetIdentity(scene, change.identity, out var identity))
+            {
+                if (addToPending)
+                {
+                    _pendingOwnership.Add(new PendingOwnershipChanges
+                    {
+                        scene = scene,
+                        change = change,
+                        timeAdded = Time.time
+                    });
+                }
                 return;
+            }
 
             if (!identity.id.HasValue)
                 return;
@@ -711,12 +731,23 @@ namespace PurrNet.Modules
                 identity.TriggerOnOwnerChanged(oldOwner, change.player, _asServer, false);
         }
 
-        private bool HandleOwnershipChange(PlayerID actor, OwnershipChange change, NetworkID id)
+        private bool HandleOwnershipChange(PlayerID actor, OwnershipChange change, NetworkID id, bool addToPending)
         {
             string verb = change.isAdding ? "give" : "remove";
 
             if (!_hierarchy.TryGetIdentity(change.sceneId, id, out var identity))
+            {
+                if (addToPending)
+                {
+                    _pendingOwnership.Add(new PendingOwnershipChanges
+                    {
+                        scene = change.sceneId,
+                        change = new OwnershipInfo { identity = id, player = change.player },
+                        timeAdded = Time.time
+                    });
+                }
                 return false;
+            }
 
             if (!_sceneOwnerships.TryGetValue(change.sceneId, out var module))
             {
@@ -787,14 +818,37 @@ namespace PurrNet.Modules
             }
         }
 
+        private void HandleAsyncPendingChanges()
+        {
+            const float TIMEOUT = 5f;
+            for (var i = 0; i < _pendingOwnership.Count; ++i)
+            {
+                var change = _pendingOwnership[i];
+
+                if (Time.time - change.timeAdded > TIMEOUT)
+                {
+                    _pendingOwnership.RemoveAt(i);
+                    continue;
+                }
+
+                if (!_hierarchy.TryGetIdentity(change.scene, change.change.identity, out _))
+                    continue;
+
+                HandleOwnershipBatch(change.scene, change.change, false);
+                _pendingOwnership.RemoveAt(i);
+            }
+        }
+
         public void FixedUpdate()
         {
             HandlePendingChanges();
+            HandleAsyncPendingChanges();
         }
 
         public void PreFixedUpdate()
         {
             HandlePendingChanges();
+            HandleAsyncPendingChanges();
         }
     }
 
