@@ -22,8 +22,12 @@ namespace PurrNet.Pooling
             for (int i = 0; i < _allocations.Count; i++)
             {
                 if (_allocations[i].reference.TryGetTarget(out var obj) && obj == target)
-                    _allocations.RemoveAt(i--);
+                {
+                    _allocations.RemoveAt(i);
+                    return;
+                }
             }
+            PurrLogger.LogError($"Object of type `{target.GetType()}` was not tracked but we are freeing it?");
         }
 
         public static void CheckForLeaks()

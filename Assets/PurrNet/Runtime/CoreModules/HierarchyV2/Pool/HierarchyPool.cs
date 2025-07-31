@@ -444,7 +444,6 @@ namespace PurrNet.Modules
             {
                 return new GameObjectPrototype(transform.localPosition, transform.localRotation, transform.localScale, null, null, framework,
                     null);
-
             }
 
             bool isDefaultParent = transform.parent == rootId.defaultParent;
@@ -537,8 +536,8 @@ namespace PurrNet.Modules
             }
 
             var trs = instance.transform;
-            var siblings = ListPool<NetworkIdentity>.Instantiate();
-            instance.GetComponents(siblings);
+            using var siblings = DisposableList<NetworkIdentity>.Create(16);
+            instance.GetComponents(siblings.list);
             var nid = siblings.Count > 0 ? siblings[0] : null;
 
             shouldBeActive = current.isActive;

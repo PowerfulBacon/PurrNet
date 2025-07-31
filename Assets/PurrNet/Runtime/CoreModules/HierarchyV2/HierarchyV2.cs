@@ -182,12 +182,17 @@ namespace PurrNet.Modules
 
         private void OnSpawnPacketBatch(PlayerID player, SpawnPacketBatch data, bool asServer)
         {
+            if (data.sceneId != _sceneId)
+                return;
+
             int count = data.spawnPackets.Count;
             for (var i = 0; i < count; ++i)
                 HandleSpawn(player, data.spawnPackets[i], false);
+
             count = data.despawnPackets.Count;
             for (var i = 0; i < count; ++i)
                 OnDespawnPacket(player, data.despawnPackets[i], asServer);
+
             FlushSpawnPackets();
             data.Dispose();
         }
@@ -767,6 +772,7 @@ namespace PurrNet.Modules
                 if (!_spawnPackets.TryGetValue(player, out var batch))
                 {
                     batch = new SpawnPacketBatch(
+                        _sceneId,
                         DisposableList<SpawnPacket>.Create(),
                         DisposableList<DespawnPacket>.Create()
                     );
@@ -802,6 +808,7 @@ namespace PurrNet.Modules
                 if (!_spawnPackets.TryGetValue(player, out var batch))
                 {
                     batch = new SpawnPacketBatch(
+                        _sceneId,
                         DisposableList<SpawnPacket>.Create(),
                         DisposableList<DespawnPacket>.Create()
                     );
@@ -1091,43 +1098,44 @@ namespace PurrNet.Modules
         {
             foreach (var (player, batch) in _spawnPackets)
             {
-                int count = batch.spawnPackets.Count;
-                if (player.isServer)
-                     _playersManager.SendToServer(batch);
-                else
+                using (batch)
                 {
-                    _playersManager.Send(player, batch);
-
-                    for (var i = 0; i < count; i++)
+                    int count = batch.spawnPackets.Count;
+                    if (player.isServer)
+                        _playersManager.SendToServer(batch);
+                    else
                     {
-                        var packet = batch.spawnPackets[i];
+                        _playersManager.Send(player, batch);
 
-                        if (packet.localcache != null)
+                        for (var i = 0; i < count; i++)
                         {
-                            for (var j = 0; j < packet.localcache.Count; j++)
+                            var packet = batch.spawnPackets[i];
+
+                            if (packet.localcache != null)
                             {
-                                var piece = packet.localcache[j];
-                                if (!piece) continue;
-                                var pieceid = piece.id;
-                                if (!pieceid.HasValue) continue;
-                                onSentSpawnPacket?.Invoke(player, _sceneId, pieceid.Value);
+                                for (var j = 0; j < packet.localcache.Count; j++)
+                                {
+                                    var piece = packet.localcache[j];
+                                    if (!piece) continue;
+                                    var pieceid = piece.id;
+                                    if (!pieceid.HasValue) continue;
+                                    onSentSpawnPacket?.Invoke(player, _sceneId, pieceid.Value);
+                                }
                             }
-                        }
-                        else if (packet.prototype.framework.Count > 0)
-                        {
-                            for (var j = 0; j < packet.prototype.framework.Count; j++)
+                            else if (packet.prototype.framework.Count > 0)
                             {
-                                var piece = packet.prototype.framework[j];
-                                onSentSpawnPacket?.Invoke(player, _sceneId, piece.id);
+                                for (var j = 0; j < packet.prototype.framework.Count; j++)
+                                {
+                                    var piece = packet.prototype.framework[j];
+                                    onSentSpawnPacket?.Invoke(player, _sceneId, piece.id);
+                                }
                             }
                         }
                     }
+
+                    for (var i = 0; i < count; i++)
+                        _toCompleteNextFrame.Add(batch.spawnPackets[i].packetIdx);
                 }
-
-                for (var i = 0; i < count; i++)
-                    _toCompleteNextFrame.Add(batch.spawnPackets[i].packetIdx);
-
-                batch.Dispose();
             }
 
             _spawnPackets.Clear();

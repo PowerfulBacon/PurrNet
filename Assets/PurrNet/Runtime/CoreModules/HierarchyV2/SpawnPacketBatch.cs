@@ -6,14 +6,17 @@ namespace PurrNet.Modules
 {
     public struct SpawnPacketBatch : IPackedAuto, IDisposable
     {
+        public SceneID sceneId;
         public DisposableList<SpawnPacket> spawnPackets;
         public DisposableList<DespawnPacket> despawnPackets;
 
-        public SpawnPacketBatch(DisposableList<SpawnPacket> spawnPackets, DisposableList<DespawnPacket> despawnPackets)
+        public SpawnPacketBatch(SceneID scene, DisposableList<SpawnPacket> spawnPackets, DisposableList<DespawnPacket> despawnPackets)
         {
+            this.sceneId = scene;
             this.despawnPackets = despawnPackets;
             this.spawnPackets = spawnPackets;
         }
+
         public void Dispose()
         {
             int c = spawnPackets.Count;
