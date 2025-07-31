@@ -219,7 +219,18 @@ namespace PurrNet.Packing
 
         static void WriteClass(BitPacker packer, T value)
         {
-            var type = value == null ? typeof(T) : value.GetType();
+            Type type;
+
+            if (value == null)
+            {
+                type = typeof(T);
+            }
+            else
+            {
+                var vtype = value.GetType();
+                type = Hasher.IsRegistered(vtype) ? vtype : typeof(T);
+            }
+
             bool isTypeSameAsGeneric = type == typeof(T);
 
             Packer<bool>.WriteAsExactType(packer, isTypeSameAsGeneric);
