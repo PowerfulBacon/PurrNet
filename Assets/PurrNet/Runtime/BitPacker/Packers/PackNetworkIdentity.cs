@@ -99,13 +99,19 @@ namespace PurrNet
         [UsedByIL]
         public static void WriteTransform(this BitPacker packer, Transform trs)
         {
+            if (!trs)
+            {
+                Packer<bool>.Write(packer, false);
+                return;
+            }
+
             var parent = GetSpawnedParent(trs);
 
             if (!parent || !parent.isSpawned || !parent.id.HasValue)
             {
                 Packer<bool>.Write(packer, true);
                 Packer<bool>.Write(packer, false);
-                
+
                 if (NetworkManager.main == null || NetworkManager.main.prefabProvider == null || !NetworkManager.main.prefabProvider.TryGetPrefabData(trs.gameObject, out var data))
                 {
                     Packer<bool>.Write(packer, true);
@@ -119,10 +125,10 @@ namespace PurrNet
                         Packer<bool>.Write(packer, false);
                         Packer.WriteAsNetworkAsset(packer, trs.gameObject);
                     }
-                    
+
                     return;
                 }
-                
+
                 Packer<bool>.Write(packer, false);
                 Packer<int>.Write(packer, data.prefabId);
                 return;
@@ -169,7 +175,7 @@ namespace PurrNet
                         trs = g.transform;
                     return;
                 }
-                
+
                 var prefabId = Packer<int>.Read(packer);
                 if (NetworkManager.main && NetworkManager.main.prefabProvider != null && NetworkManager.main.prefabProvider.TryGetPrefabData(prefabId, out var prefabData))
                     trs = prefabData.prefab.transform;
