@@ -1,3 +1,10 @@
+## [1.13.1](https://github.com/PurrNet/PurrNet/compare/v1.13.0...v1.13.1) (2025-07-31)
+
+
+### Bug Fixes
+
+* forceing release ([43af913](https://github.com/PurrNet/PurrNet/commit/43af913f3051249721557030abafbb926eec2ede))
+
 ## [1.13.1-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.13.0...v1.13.1-beta.1) (2025-07-31)
 
 
