@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using JetBrains.Annotations;
+using Newtonsoft.Json.Linq;
 using PurrNet.Authentication;
 using PurrNet.Logging;
 using PurrNet.Modules;
@@ -75,6 +76,8 @@ namespace PurrNet
 
         [SerializeField, UsedImplicitly]
         private bool _patchLingeringProcessBug;
+
+        [SerializeField, HideInInspector] private TextAsset _packageInfo;
 
         /// <summary>
         /// The local client connection.
@@ -302,6 +305,23 @@ namespace PurrNet
 
         private bool _subscribed;
 
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (!_packageInfo)
+            {
+                var packagePath = AssetDatabase.GUIDToAssetPath("0ec978dbed50a6f4b9a57580867f1fae");
+
+                if (string.IsNullOrEmpty(packagePath))
+                    return;
+
+                _packageInfo = AssetDatabase.LoadAssetAtPath<TextAsset>(packagePath);
+                EditorUtility.SetDirty(this);
+                AssetDatabase.SaveAssets();
+            }
+        }
+#endif
+
         /// <summary>
         /// Sets the main instance of the network manager.
         /// This is used for convinience but also for static RPCs and other static functionality.
@@ -492,8 +512,16 @@ namespace PurrNet
         }
 #endif
 
+        public static string version { get; private set; }
+
         private void Awake()
         {
+            if (version == null && _packageInfo)
+            {
+                var json = JObject.Parse(_packageInfo.text);
+                version = 'v' + (json["version"]?.ToString() ?? "?");
+            }
+
             if (main && main != this)
             {
                 if (main.isOffline)
@@ -549,12 +577,16 @@ namespace PurrNet
                 DontDestroyOnLoad(gameObject);
         }
 
+#if UNITY_EDITOR
         private void Reset()
         {
+            OnValidate();
+
             if (TryGetComponent(out GenericTransport _) || transport)
                 return;
             transport = gameObject.AddComponent<UDPTransport>();
         }
+#endif
 
         public bool HasModule<T>() where T : INetworkModule
         {

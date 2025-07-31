@@ -80,7 +80,8 @@ namespace PurrNet.Modules
                     var cookie = _cookiesModule.GetOrSet("client_connection_session", Guid.NewGuid().ToString());
                     _broadcastModule.SendToServer(new AuthenticationRequest
                     {
-                        cookie = cookie
+                        cookie = cookie,
+                        version = NetworkManager.version
                     });
                 }
 
@@ -108,6 +109,13 @@ namespace PurrNet.Modules
             if (_authenticator)
             {
                 PurrLogger.LogError("Authenticator is enabled, but non-auth request received");
+                _manager.CloseConnection(conn);
+                return;
+            }
+
+            if (data.version != NetworkManager.version)
+            {
+                PurrLogger.LogError($"Client version mismatch. Client version: {data.version}, Server version: {NetworkManager.version}");
                 _manager.CloseConnection(conn);
                 return;
             }

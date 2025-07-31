@@ -11,6 +11,7 @@ namespace PurrNet.Authentication
 {
     public struct AuthenticationRequest : IPackedAuto
     {
+        [CanBeNull] public string version;
         [CanBeNull] public string cookie;
     }
 
@@ -133,6 +134,7 @@ namespace PurrNet.Authentication
                 var payload = await GetClientPayload();
                 payload.cookie ??= cookies.GetOrSet("client_connection_session", Guid.NewGuid().ToString());
                 using var packer = BitPackerPool.Get();
+                Packer<string>.Write(packer, NetworkManager.version);
                 Packer<T>.Write(packer, payload.payload);
                 var data = new AuthenticationRequestData
                 {
@@ -153,7 +155,12 @@ namespace PurrNet.Authentication
             {
                 using var packer = BitPackerPool.Get(data.payload);
                 T payload = default;
+                string clientVersion = default;
+                Packer<string>.Read(packer, ref clientVersion);
                 Packer<T>.Read(packer, ref payload);
+
+                if (clientVersion != NetworkManager.version)
+                    throw new Exception($"Client version mismatch. Client version: {clientVersion}, Server version: {NetworkManager.version}");
 
                 var result = await ValidateClientPayload(conn, payload);
                 if (result.cookie == null && data.cookie != null)
