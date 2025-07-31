@@ -1,3 +1,10 @@
+## [1.13.2-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.13.1...v1.13.2-beta.1) (2025-07-31)
+
+
+### Bug Fixes
+
+* handle the case where Transform is null when packing it ([51cc083](https://github.com/PurrNet/PurrNet/commit/51cc08347ac8da4c3fd361b455a5862f83d2c253))
+
 ## [1.13.1](https://github.com/PurrNet/PurrNet/compare/v1.13.0...v1.13.1) (2025-07-31)
 
 
