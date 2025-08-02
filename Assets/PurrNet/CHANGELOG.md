@@ -1,3 +1,10 @@
+## [1.13.3-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.13.2...v1.13.3-beta.1) (2025-08-02)
+
+
+### Bug Fixes
+
+* Dictionary pool domain reload safety added ([11c1c68](https://github.com/PurrNet/PurrNet/commit/11c1c68f366e955234e51730b1c35f5dc9d216dd))
+
 ## [1.13.2](https://github.com/PurrNet/PurrNet/compare/v1.13.1...v1.13.2) (2025-07-31)
 
 
