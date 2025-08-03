@@ -317,7 +317,8 @@ namespace PurrNet
 
                 _packageInfo = AssetDatabase.LoadAssetAtPath<TextAsset>(packagePath);
                 EditorUtility.SetDirty(this);
-                AssetDatabase.SaveAssets();
+                EditorUtility.SetDirty(this.gameObject);
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gameObject.scene);
             }
         }
 #endif
