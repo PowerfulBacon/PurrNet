@@ -390,8 +390,9 @@ namespace PurrNet
         {
             var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            foreach (var assembly in allAssemblies)
+            for (var index = 0; index < allAssemblies.Length; index++)
             {
+                var assembly = allAssemblies[index];
                 Type[] types;
 
                 try
@@ -403,8 +404,9 @@ namespace PurrNet
                     types = ex.Types;
                 }
 
-                foreach (var type in types)
+                for (var j = 0; j < types.Length; j++)
                 {
+                    var type = types[j];
                     if (type == null)
                         continue;
 
@@ -415,8 +417,9 @@ namespace PurrNet
                                                   BindingFlags.Public |
                                                   BindingFlags.NonPublic);
 
-                    foreach (var method in methods)
+                    for (var m = 0; m < methods.Length; m++)
                     {
+                        var method = methods[m];
                         if (!method.IsStatic)
                             continue;
 

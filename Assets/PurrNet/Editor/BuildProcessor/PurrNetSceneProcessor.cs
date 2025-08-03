@@ -26,8 +26,11 @@ namespace PurrNet.Editor
 
             if (Directory.Exists("Assets/Resources"))
             {
-                bool isResourcesFolderEmpty = Directory.GetFiles("Assets/Resources").Length == 0 &&
-                                              Directory.GetDirectories("Assets/Resources").Length == 0;
+                var files = Directory.GetFiles("Assets/Resources");
+                var dirs = Directory.GetDirectories("Assets/Resources");
+
+                bool isResourcesFolderEmpty = files.Length == 0 &&
+                                              dirs.Length == 0;
 
                 if (isResourcesFolderEmpty)
                 {
@@ -38,6 +41,20 @@ namespace PurrNet.Editor
             }
 
             AssetDatabase.Refresh();
+        }
+
+        [MenuItem("Tools/PurrNet/Debug/Hasher/Simulate Build")]
+        static void SimulateBuild()
+        {
+            Hasher.ClearState();
+            NetworkManager.CallAllRegisters();
+        }
+
+        [MenuItem("Tools/PurrNet/Debug/Hasher/Print Hashes")]
+        static void PrintHashes()
+        {
+            var hashes = Hasher.GetAllHashesAsText();
+            Debug.Log(hashes);
         }
 
         public void OnPreprocessBuild(BuildReport report)
@@ -64,7 +81,6 @@ namespace PurrNet.Editor
 
             var sceneInfo = obj.AddComponent<PurrSceneInfo>();
             sceneInfo.rootGameObjects = new System.Collections.Generic.List<GameObject>();
-
 
             var total = ListPool<NetworkIdentity>.Instantiate();
             var local = ListPool<NetworkIdentity>.Instantiate();
