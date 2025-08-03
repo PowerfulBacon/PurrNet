@@ -159,7 +159,7 @@ namespace PurrNet.Authentication
                 Packer<string>.Read(packer, ref clientVersion);
                 Packer<T>.Read(packer, ref payload);
 
-                if (clientVersion != NetworkManager.version)
+                if (!NetworkManager.VerifyVersion(clientVersion))
                     throw new Exception($"Client version mismatch. Client version: {clientVersion}, Server version: {NetworkManager.version}");
 
                 var result = await ValidateClientPayload(conn, payload);

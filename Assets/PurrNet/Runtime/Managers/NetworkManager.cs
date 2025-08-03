@@ -517,12 +517,27 @@ namespace PurrNet
 
         public static string version { get; private set; }
 
+        public static bool VerifyVersion(string va)
+        {
+            if (va == "v?" || version == "v?")
+                return true;
+            return va == version;
+        }
+
         private void Awake()
         {
-            if (version == null && _packageInfo)
+            if (version == null)
             {
-                var json = JObject.Parse(_packageInfo.text);
-                version = 'v' + (json["version"]?.ToString() ?? "?");
+                if (_packageInfo)
+                {
+                    var json = JObject.Parse(_packageInfo.text);
+                    version = 'v' + (json["version"]?.ToString() ?? "?");
+                }
+                else
+                {
+                    var versionFile = Resources.Load<TextAsset>("PurrVersion");
+                    version = versionFile?.text ?? "v?";
+                }
             }
 
             if (main && main != this)

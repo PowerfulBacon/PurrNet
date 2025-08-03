@@ -113,7 +113,7 @@ namespace PurrNet.Modules
                 return;
             }
 
-            if (data.version != NetworkManager.version)
+            if (!NetworkManager.VerifyVersion(data.version))
             {
                 PurrLogger.LogError($"Client version mismatch. Client version: {data.version}, Server version: {NetworkManager.version}");
                 _manager.CloseConnection(conn);

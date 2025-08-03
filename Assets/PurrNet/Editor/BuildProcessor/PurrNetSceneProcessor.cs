@@ -17,12 +17,19 @@ namespace PurrNet.Editor
         public void OnPostprocessBuild(BuildReport report)
         {
             const string PATH = "Assets/Resources/PurrHashes.json";
+            const string VERSION = "Assets/Resources/PurrVersion.json";
 
             if (File.Exists(PATH))
                 File.Delete(PATH);
 
+            if (File.Exists(VERSION))
+                File.Delete(VERSION);
+
             if (File.Exists(PATH + ".meta"))
                 File.Delete(PATH + ".meta");
+
+            if (File.Exists(VERSION + ".meta"))
+                File.Delete(VERSION + ".meta");
 
             if (Directory.Exists("Assets/Resources"))
             {
@@ -67,6 +74,10 @@ namespace PurrNet.Editor
 
             var hashes = Hasher.GetAllHashesAsText();
             File.WriteAllText(PATH, hashes);
+
+            const string VERSION = "Assets/Resources/PurrVersion.json";
+            var version = NetworkManager.version;
+            File.WriteAllText(VERSION, version);
 
             AssetDatabase.Refresh();
         }
