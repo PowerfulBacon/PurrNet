@@ -367,13 +367,47 @@ namespace PurrNet
             ListPool<NetworkIdentity>.Destroy(children);
         }
 
+        static bool ReferencesAssembly(Assembly asm, string targetSimpleName)
+        {
+            try
+            {
+                if (asm == null) return false;
+
+                // If it's the same assembly
+                if (string.Equals(asm.GetName().Name, targetSimpleName,
+                        StringComparison.Ordinal)) return true;
+
+                // Check direct references
+                var refs = asm.GetReferencedAssemblies();
+                for (int i = 0; i < refs.Length; i++)
+                {
+                    if (string.Equals(refs[i].Name, targetSimpleName,
+                            StringComparison.Ordinal))
+                        return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        static string GetSimpleNameOf(Type t) => t.Assembly.GetName().Name;
+
         public static void CallAllRegisters()
         {
             var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var attrAssemblyName = GetSimpleNameOf(typeof(RegisterPackersAttribute));
 
             for (var index = 0; index < allAssemblies.Length; index++)
             {
                 var assembly = allAssemblies[index];
+
+                if (!ReferencesAssembly(assembly, attrAssemblyName))
+                    continue;
+
                 Type[] types;
 
                 try
@@ -382,7 +416,11 @@ namespace PurrNet
                 }
                 catch (ReflectionTypeLoadException ex)
                 {
-                    types = ex.Types;
+                    types = ex.Types ?? Array.Empty<Type>();
+                }
+                catch
+                {
+                    continue;
                 }
 
                 for (var j = 0; j < types.Length; j++)
@@ -394,9 +432,18 @@ namespace PurrNet
                     if (!type.IsAbstract || !type.IsSealed)
                         continue;
 
-                    var methods = type.GetMethods(BindingFlags.Static |
+                    MethodInfo[] methods;
+
+                    try
+                    {
+                        methods = type.GetMethods(BindingFlags.Static |
                                                   BindingFlags.Public |
                                                   BindingFlags.NonPublic);
+                    }
+                    catch
+                    {
+                        continue; // skip bad type
+                    }
 
                     for (var m = 0; m < methods.Length; m++)
                     {
