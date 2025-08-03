@@ -1,3 +1,10 @@
+## [1.13.3-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.13.3-beta.2...v1.13.3-beta.3) (2025-08-03)
+
+
+### Bug Fixes
+
+* packer caching problems ([878e7b9](https://github.com/PurrNet/PurrNet/commit/878e7b94b0389ec37b115b6c60f96ccc31a4f266))
+
 ## [1.13.3-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.13.3-beta.1...v1.13.3-beta.2) (2025-08-03)
 
 
