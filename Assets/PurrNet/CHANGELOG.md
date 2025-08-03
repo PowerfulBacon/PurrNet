@@ -1,3 +1,10 @@
+## [1.13.4-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.13.3...v1.13.4-beta.1) (2025-08-03)
+
+
+### Bug Fixes
+
+* more robust register calling and skipping of assemblies that don't refrence the purrnet assembly ([5daec62](https://github.com/PurrNet/PurrNet/commit/5daec625ecb0c3cb405162afc2bcdb772f170d81))
+
 ## [1.13.3](https://github.com/PurrNet/PurrNet/compare/v1.13.2...v1.13.3) (2025-08-03)
 
 
