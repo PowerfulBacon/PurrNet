@@ -150,7 +150,7 @@ namespace PurrNet
 
             var position = GetPosition();
             float currentY = position.y;
-            float labelWidth = 200;
+            const float labelWidth = 200;
             Rect rect = new(position.x, currentY, labelWidth, LineHeight);
             if (_displayType.HasFlag(StatisticsDisplayType.Ping))
             {
@@ -179,6 +179,12 @@ namespace PurrNet
                 GUI.Label(rect, _cachedServerAvgFpsText, _labelStyle);
                 rect.y += LineHeight;
                 GUI.Label(rect, _cachedServerMinFpsText, _labelStyle);
+            }
+
+            if (_displayType.HasFlag(StatisticsDisplayType.Version))
+            {
+                GUI.Label(rect, "Version: " + NetworkManager.version, _labelStyle);
+                rect.y += LineHeight;
             }
         }
 
@@ -562,6 +568,7 @@ namespace PurrNet
             Ping = 1 << 0,
             Usage = 1 << 1,
             ServerStats = 1 << 2,
+            Version = 1 << 3,
         }
     }
 }

@@ -328,15 +328,9 @@ namespace PurrNet
             return asServer ? _serverModules.TryGetModule(out module) : _clientModules.TryGetModule(out module);
         }
 
-        public bool HasModule<T>() where T : INetworkModule
+        public bool HasModule<T>(bool asServer) where T : INetworkModule
         {
-            if (!_serverModules.TryGetModule<T>(out _))
-                return false;
-
-            if (!_clientModules.TryGetModule<T>(out _))
-                return false;
-
-            return true;
+            return TryGetModule<T>(out _, asServer);
         }
 
         private void Update()

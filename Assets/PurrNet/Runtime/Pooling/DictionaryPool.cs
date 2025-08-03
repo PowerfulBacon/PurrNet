@@ -28,8 +28,8 @@ namespace PurrNet.Pooling
 
         public static void Destroy(Dictionary<TKey, TValue> list)
         {
+            _instance ??= new DictionaryPool<TKey, TValue>();
             _instance.Delete(list);
         }
-
     }
 }

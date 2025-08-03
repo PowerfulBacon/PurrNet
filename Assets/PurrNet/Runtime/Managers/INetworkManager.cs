@@ -36,6 +36,6 @@ namespace PurrNet
         void InternalUnregisterClientModules();
         void InternalUnregisterServerModules();
 
-        bool HasModule<T>() where T : INetworkModule;
+        bool HasModule<T>(bool asServer) where T : INetworkModule;
     }
 }

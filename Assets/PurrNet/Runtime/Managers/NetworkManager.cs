@@ -77,8 +77,6 @@ namespace PurrNet
         [SerializeField, UsedImplicitly]
         private bool _patchLingeringProcessBug;
 
-        [SerializeField, HideInInspector] private TextAsset _packageInfo;
-
         /// <summary>
         /// The local client connection.
         /// Null if the client is not connected.
@@ -305,23 +303,6 @@ namespace PurrNet
 
         private bool _subscribed;
 
-#if UNITY_EDITOR
-        private void OnValidate()
-        {
-            if (!_packageInfo)
-            {
-                var packagePath = AssetDatabase.GUIDToAssetPath("0ec978dbed50a6f4b9a57580867f1fae");
-
-                if (string.IsNullOrEmpty(packagePath))
-                    return;
-
-                _packageInfo = AssetDatabase.LoadAssetAtPath<TextAsset>(packagePath);
-                EditorUtility.SetDirty(this);
-                AssetDatabase.SaveAssets();
-            }
-        }
-#endif
-
         /// <summary>
         /// Sets the main instance of the network manager.
         /// This is used for convinience but also for static RPCs and other static functionality.
@@ -390,8 +371,9 @@ namespace PurrNet
         {
             var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            foreach (var assembly in allAssemblies)
+            for (var index = 0; index < allAssemblies.Length; index++)
             {
+                var assembly = allAssemblies[index];
                 Type[] types;
 
                 try
@@ -403,8 +385,9 @@ namespace PurrNet
                     types = ex.Types;
                 }
 
-                foreach (var type in types)
+                for (var j = 0; j < types.Length; j++)
                 {
+                    var type = types[j];
                     if (type == null)
                         continue;
 
@@ -415,8 +398,9 @@ namespace PurrNet
                                                   BindingFlags.Public |
                                                   BindingFlags.NonPublic);
 
-                    foreach (var method in methods)
+                    for (var m = 0; m < methods.Length; m++)
                     {
+                        var method = methods[m];
                         if (!method.IsStatic)
                             continue;
 
@@ -514,13 +498,40 @@ namespace PurrNet
 
         public static string version { get; private set; }
 
+        public static bool VerifyVersion(string va)
+        {
+            if (va == "v?" || version == "v?")
+                return true;
+            return va == version;
+        }
+
         private void Awake()
         {
-            if (version == null && _packageInfo)
+#if UNITY_EDITOR
+            static string TryFindVersion()
             {
-                var json = JObject.Parse(_packageInfo.text);
-                version = 'v' + (json["version"]?.ToString() ?? "?");
+                var packagePath = AssetDatabase.GUIDToAssetPath("0ec978dbed50a6f4b9a57580867f1fae");
+
+                if (string.IsNullOrEmpty(packagePath))
+                    return "v?";
+
+                var textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(packagePath);
+
+                if (textAsset == null)
+                    return "v?";
+
+                var json = JObject.Parse(textAsset.text);
+                return 'v' + (json["version"]?.ToString() ?? "?");
             }
+
+            version ??= TryFindVersion();
+#else
+            if (version == null)
+            {
+                var versionJson = Resources.Load<TextAsset>("PurrVersion");
+                version = versionJson ? versionJson.text : "v?";
+            }
+#endif
 
             if (main && main != this)
             {
@@ -580,23 +591,15 @@ namespace PurrNet
 #if UNITY_EDITOR
         private void Reset()
         {
-            OnValidate();
-
             if (TryGetComponent(out GenericTransport _) || transport)
                 return;
             transport = gameObject.AddComponent<UDPTransport>();
         }
 #endif
 
-        public bool HasModule<T>() where T : INetworkModule
+        public bool HasModule<T>(bool asServer) where T : INetworkModule
         {
-            if (!_serverModules.TryGetModule<T>(out _))
-                return false;
-
-            if (!_clientModules.TryGetModule<T>(out _))
-                return false;
-
-            return true;
+            return TryGetModule<T>(out _, asServer);
         }
 
         /// <summary>

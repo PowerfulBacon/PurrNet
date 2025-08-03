@@ -3125,6 +3125,7 @@ GameObject:
   - component: {fileID: 1216416907}
   - component: {fileID: 1216416908}
   - component: {fileID: 1216416910}
+  - component: {fileID: 1216416911}
   m_Layer: 0
   m_Name: Network
   m_TagString: Untagged
@@ -3146,7 +3147,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _stopPlayingOnDisconnect: 0
   _startServerFlags: 1
-  _startClientFlags: 3
+  _startClientFlags: 7
   _cookieScope: 1
   _dontDestroyOnLoad: 0
   _transport: {fileID: 1216416902}
@@ -3157,6 +3158,7 @@ MonoBehaviour:
   _authenticator: {fileID: 1216416905}
   _tickRate: 20
   _patchLingeringProcessBug: 1
+  _packageInfo: {fileID: 4900000, guid: 0ec978dbed50a6f4b9a57580867f1fae, type: 3}
 --- !u!4 &1216416898
 Transform:
   m_ObjectHideFlags: 0
@@ -3270,6 +3272,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfcb920b5e3b7924ea4f2b8a047e2edf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.LocalTransport
+--- !u!114 &1216416911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1216416895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef882a0e84c58df4885b0e1e59320b49, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.StatisticsManager
+  checkInterval: 0.33
+  placement: 1
+  _displayType: 11
+  fontSize: 13
+  textColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1284249959
 GameObject:
   m_ObjectHideFlags: 0

@@ -127,6 +127,8 @@ namespace PurrNet.Packing
 
         public static void RegisterReader(ReadFunc<T> b)
         {
+            Hasher.PrepareType(typeof(T));
+
             if (_read != null)
                 return;
 
@@ -363,7 +365,6 @@ namespace PurrNet.Packing
 
         public static void RegisterReader(Type type, MethodInfo exact, MethodInfo wrapper)
         {
-            Hasher.PrepareType(type);
             _readWrappedMethods.TryAdd(type, wrapper);
             _readExactMethods.TryAdd(type, exact);
         }
