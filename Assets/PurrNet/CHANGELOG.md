@@ -1,3 +1,10 @@
+## [1.13.3-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.13.3-beta.4...v1.13.3-beta.5) (2025-08-03)
+
+
+### Bug Fixes
+
+* properly set scene as dirty ([15476e8](https://github.com/PurrNet/PurrNet/commit/15476e826b6a986dc51a1a9448b80e6a770b9943))
+
 ## [1.13.3-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.13.3-beta.3...v1.13.3-beta.4) (2025-08-03)
 
 
