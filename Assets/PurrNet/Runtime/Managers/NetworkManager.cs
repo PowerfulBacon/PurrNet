@@ -588,15 +588,9 @@ namespace PurrNet
         }
 #endif
 
-        public bool HasModule<T>() where T : INetworkModule
+        public bool HasModule<T>(bool asServer) where T : INetworkModule
         {
-            if (!_serverModules.TryGetModule<T>(out _))
-                return false;
-
-            if (!_clientModules.TryGetModule<T>(out _))
-                return false;
-
-            return true;
+            return TryGetModule<T>(out _, asServer);
         }
 
         /// <summary>

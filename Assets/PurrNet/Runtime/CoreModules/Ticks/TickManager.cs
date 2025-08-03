@@ -206,7 +206,7 @@ namespace PurrNet.Modules
                 if (_networkManager.isOffline)
                     return;
 
-                if (!_networkManager.HasModule<RPCModule>())
+                if (!_networkManager.HasModule<RPCModule>(_networkManager.isServer))
                     return;
 
                 float requestSendTime = Time.unscaledTime;
