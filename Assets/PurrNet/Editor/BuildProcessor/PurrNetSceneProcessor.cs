@@ -1,4 +1,5 @@
 using System.IO;
+using Newtonsoft.Json.Linq;
 using PurrNet.Pooling;
 using PurrNet.Utils;
 using UnityEditor;
@@ -64,6 +65,22 @@ namespace PurrNet.Editor
             Debug.Log(hashes);
         }
 
+        static string TryFindVersion()
+        {
+            var packagePath = AssetDatabase.GUIDToAssetPath("0ec978dbed50a6f4b9a57580867f1fae");
+
+            if (string.IsNullOrEmpty(packagePath))
+                return "v?";
+
+            var textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(packagePath);
+
+            if (textAsset == null)
+                return "v?";
+
+            var json = JObject.Parse(textAsset.text);
+            return 'v' + (json["version"]?.ToString() ?? "?");
+        }
+
         public void OnPreprocessBuild(BuildReport report)
         {
             Hasher.ClearState();
@@ -76,8 +93,7 @@ namespace PurrNet.Editor
             File.WriteAllText(PATH, hashes);
 
             const string VERSION = "Assets/Resources/PurrVersion.json";
-            var version = NetworkManager.version;
-            File.WriteAllText(VERSION, version);
+            File.WriteAllText(VERSION, TryFindVersion());
 
             AssetDatabase.Refresh();
         }
