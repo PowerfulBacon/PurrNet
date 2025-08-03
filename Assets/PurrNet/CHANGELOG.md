@@ -1,3 +1,10 @@
+## [1.13.3-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.13.3-beta.3...v1.13.3-beta.4) (2025-08-03)
+
+
+### Bug Fixes
+
+* build version info missing ([7befbe1](https://github.com/PurrNet/PurrNet/commit/7befbe1c4579a7ca3799d3d931a09860944af004))
+
 ## [1.13.3-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.13.3-beta.2...v1.13.3-beta.3) (2025-08-03)
 
 
