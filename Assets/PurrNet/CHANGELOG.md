@@ -1,3 +1,10 @@
+## [1.13.3-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.13.3-beta.1...v1.13.3-beta.2) (2025-08-03)
+
+
+### Bug Fixes
+
+* Merge pull request [#153](https://github.com/PurrNet/PurrNet/issues/153) from bookdude13/HasModule-Client-Fix ([b531534](https://github.com/PurrNet/PurrNet/commit/b5315344a4778626b039ea22fe7823bd9e74b834))
+
 ## [1.13.3-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.13.2...v1.13.3-beta.1) (2025-08-02)
 
 
