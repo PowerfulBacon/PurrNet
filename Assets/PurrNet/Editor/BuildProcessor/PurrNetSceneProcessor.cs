@@ -15,7 +15,18 @@ namespace PurrNet.Editor
     {
         public int callbackOrder => 0;
 
+        [MenuItem("Tools/PurrNet/Debug/Hasher/Simulate Post Build")]
+        static void SimulatePostBuild()
+        {
+            Cleanup();
+        }
+
         public void OnPostprocessBuild(BuildReport report)
+        {
+            Cleanup();
+        }
+
+        private static void Cleanup()
         {
             const string PATH = "Assets/Resources/PurrHashes.json";
             const string VERSION = "Assets/Resources/PurrVersion.json";
