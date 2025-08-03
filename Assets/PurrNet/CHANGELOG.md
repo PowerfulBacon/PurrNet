@@ -1,3 +1,10 @@
+## [1.13.3-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.13.3-beta.5...v1.13.3-beta.6) (2025-08-03)
+
+
+### Bug Fixes
+
+* version mismatch issue editor/build ([2ebe5a8](https://github.com/PurrNet/PurrNet/commit/2ebe5a8d841a3499fa9cb540ca1079f0fda48b4b))
+
 ## [1.13.3-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.13.3-beta.4...v1.13.3-beta.5) (2025-08-03)
 
 
