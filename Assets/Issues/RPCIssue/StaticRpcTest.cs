@@ -1,8 +1,34 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using PurrNet;
+using PurrNet.Logging;
 using PurrNet.Packing;
 using UnityEngine;
+
+public class CustomClass : IPackedAuto
+{
+    public string data1;
+    public string data2;
+
+    /*[DontPack]*/ public List<CustomClass> Neighbours;
+    /*[DontPack]*/ public List<CustomClass> NeighboursNull;
+
+    public override string ToString()
+    {
+        string result = $"data1: {data1}, data2: {data2}\n";
+        if (Neighbours != null)
+        {
+            foreach (var n in Neighbours)
+            {
+                result += n + "\n";
+            }
+        }
+
+        return result;
+    }
+}
 
 public static class StaticRpcTest2<T>
 {
@@ -15,6 +41,32 @@ public static class StaticRpcTest2<T>
 
 public class StaticRpcTest : NetworkIdentity
 {
+    SyncList<CustomClass> _list = new ();
+
+    private void Awake()
+    {
+        var test = new CustomClass
+        {
+            data1 = "Hello",
+            data2 = "World",
+            Neighbours = new List<CustomClass>
+            {
+                new CustomClass
+                {
+                    data1 = "Hello2",
+                    data2 = "World2"
+                },
+                new CustomClass
+                {
+                    data1 = "Hello3",
+                    data2 = "World3"
+                }
+            }
+        };
+
+        _list.Add(test);
+    }
+
     [PurrButton("SendObserverRpc"), UsedImplicitly]
     public void SendRpc()
     {
@@ -39,13 +91,32 @@ public class StaticRpcTest : NetworkIdentity
     [PurrButton("SendServerRpc"), UsedImplicitly]
     public void SendServerRpcNoOwner()
     {
-        ServerRpc();
+        CustomClass test = new CustomClass
+        {
+            data1 = "Hello",
+            data2 = "World",
+            Neighbours = new List<CustomClass>
+            {
+                new CustomClass
+                {
+                    data1 = "Hello2",
+                    data2 = "World2"
+                },
+                new CustomClass
+                {
+                    data1 = "Hello3",
+                    data2 = "World3"
+                }
+            }
+        };
+
+        ServerRpc(test);
     }
 
     [ServerRpc(requireOwnership: false)]
-    public static void ServerRpc()
+    public static void ServerRpc(CustomClass classy)
     {
-        Debug.Log($"ServerRpc");
+        PurrLogger.Log(classy.ToString());
     }
 
     [ObserversRpc(bufferLast: true)]
