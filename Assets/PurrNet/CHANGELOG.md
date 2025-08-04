@@ -1,3 +1,10 @@
+## [1.13.4-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.13.4-beta.2...v1.13.4-beta.3) (2025-08-04)
+
+
+### Bug Fixes
+
+* rework how RPC are called ([0f3c4f1](https://github.com/PurrNet/PurrNet/commit/0f3c4f1cfe992a89ca719afe53fd6e167c840d72))
+
 ## [1.13.4-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.13.4-beta.1...v1.13.4-beta.2) (2025-08-04)
 
 
