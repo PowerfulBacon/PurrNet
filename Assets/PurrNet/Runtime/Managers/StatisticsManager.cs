@@ -183,8 +183,8 @@ namespace PurrNet
 
             if (_displayType.HasFlag(StatisticsDisplayType.Version))
             {
-                GUI.Label(rect, "Version: " + NetworkManager.version, _labelStyle);
                 rect.y += LineHeight;
+                GUI.Label(rect, "Version: " + NetworkManager.version, _labelStyle);
             }
         }
 
