@@ -1,6 +1,7 @@
 #if UNITY_MONO_CECIL
 
 using System;
+using JetBrains.Annotations;
 using Mono.Cecil;
 
 namespace PurrNet.Codegen
@@ -106,6 +107,11 @@ namespace PurrNet.Codegen
             return GetMethod(type.Resolve(), name, isGeneric);
         }
 
+        public static MethodDefinition TryGetMethodWihtStatic(this TypeReference type, string name, bool isGeneric = false, bool isStatic = false)
+        {
+            return TryGetMethodWihtStatic(type.Resolve(), name, isGeneric, isStatic);
+        }
+
         public static FieldDefinition GetField(this TypeDefinition type, string name)
         {
             for (var i = 0; i < type.Fields.Count; i++)
@@ -120,6 +126,17 @@ namespace PurrNet.Codegen
         public static FieldDefinition GetField(this TypeReference type, string name)
         {
             return GetField(type.Resolve(), name);
+        }
+
+        public static MethodDefinition TryGetMethodWihtStatic(this TypeDefinition type, string name, bool isGeneric = false, bool isStatic = false)
+        {
+            for (var i = 0; i < type.Methods.Count; i++)
+            {
+                if (type.Methods[i].Name == name && type.Methods[i].HasGenericParameters == isGeneric && type.Methods[i].IsStatic == isStatic)
+                    return type.Methods[i];
+            }
+
+            return null;
         }
 
         public static MethodDefinition GetMethod(this TypeDefinition type, string name, bool isGeneric = false)

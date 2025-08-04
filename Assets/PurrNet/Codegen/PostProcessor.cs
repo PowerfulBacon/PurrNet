@@ -385,6 +385,120 @@ namespace PurrNet.Codegen
             }
         }
 
+        private static void HandleRPCReceiverHandler(ModuleDefinition module, TypeDefinition type,
+            DisposableList<RPCMethod> originalRpcs, bool isNetworkModule, int offset, bool isStaticPass)
+        {
+            var streamType = module.GetTypeDefinition<BitPacker>().Import(module);
+            var rpcInfoType = module.GetTypeDefinition<RPCInfo>().Import(module);
+
+            var packetType = isStaticPass
+                ? module.GetTypeDefinition<StaticRPCPacket>().Import(module)
+                : isNetworkModule
+                    ? module.GetTypeDefinition<ChildRPCPacket>().Import(module)
+                    : module.GetTypeDefinition<RPCPacket>().Import(module);
+
+            var attributes = isStaticPass ?
+                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Static :
+                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.ReuseSlot;
+
+            var newMethod = new MethodDefinition($"OnReceivedRpc", attributes,
+                module.TypeSystem.Void)
+            {
+                IsPublic = true,
+                HasThis = !isStaticPass
+            };
+
+            var id = new ParameterDefinition("id", ParameterAttributes.None, module.TypeSystem.Int32);
+            var stream = new ParameterDefinition("stream", ParameterAttributes.None, streamType);
+            var packet = new ParameterDefinition("packet", ParameterAttributes.None, packetType);
+            var info = new ParameterDefinition("info", ParameterAttributes.None, rpcInfoType);
+            var asServer = new ParameterDefinition("asServer", ParameterAttributes.None, module.TypeSystem.Boolean);
+
+            // int id, BitPacker stream, StaticRPCPacket packet, RPCInfo info, bool asServer
+            newMethod.Parameters.Add(id);
+            newMethod.Parameters.Add(stream);
+            newMethod.Parameters.Add(packet);
+            newMethod.Parameters.Add(info);
+            newMethod.Parameters.Add(asServer);
+
+            type.Methods.Add(newMethod);
+
+            var body = newMethod.Body.GetILProcessor();
+
+            for (int i = 0; i < originalRpcs.Count; i++)
+            {
+                var rpc = originalRpcs[i];
+
+                if (rpc.Signature.isStatic != isStaticPass)
+                    continue;
+
+                var next = Instruction.Create(OpCodes.Nop);
+
+                // if (id == $i)
+                body.Append(Instruction.Create(OpCodes.Ldarg_S, id));
+                body.Append(Instruction.Create(OpCodes.Ldc_I4, offset + i));
+                body.Append(Instruction.Create(OpCodes.Bne_Un, next));
+
+                // HandleRPCGenerated_$i(packer, packet, info, asServer);
+                string methodName = $"HandleRPCGenerated_{offset + i}";
+
+                var methodReference = new MethodReference(methodName, module.TypeSystem.Void, type);
+
+                methodReference.Parameters.Add(new ParameterDefinition(streamType));
+                methodReference.Parameters.Add(new ParameterDefinition(packetType));
+                methodReference.Parameters.Add(new ParameterDefinition(rpcInfoType));
+                methodReference.Parameters.Add(new ParameterDefinition(module.TypeSystem.Boolean));
+
+                methodReference.HasThis = !isStaticPass;
+                methodReference = GetOriginalMethod(methodReference);
+
+                if (!isStaticPass)
+                    body.Append(Instruction.Create(OpCodes.Ldarg_0)); // this
+
+                body.Append(Instruction.Create(OpCodes.Ldarg_S, stream));
+                body.Append(Instruction.Create(OpCodes.Ldarg_S, packet));
+                body.Append(Instruction.Create(OpCodes.Ldarg_S, info));
+                body.Append(Instruction.Create(OpCodes.Ldarg_S, asServer));
+                body.Append(Instruction.Create(OpCodes.Call, methodReference));
+                body.Append(Instruction.Create(OpCodes.Ret));
+
+                body.Append(next);
+            }
+
+            if (type.BaseType != null)
+            {
+                var parent = type.BaseType;
+                string methodName = $"OnReceivedRpc";
+                var reference = new MethodReference(methodName, module.TypeSystem.Void, parent);
+
+                reference.Parameters.Add(new ParameterDefinition(module.TypeSystem.Int32));
+                reference.Parameters.Add(new ParameterDefinition(streamType));
+                reference.Parameters.Add(new ParameterDefinition(packetType));
+                reference.Parameters.Add(new ParameterDefinition(rpcInfoType));
+                reference.Parameters.Add(new ParameterDefinition(module.TypeSystem.Boolean));
+
+                reference.HasThis = !isStaticPass;
+
+                if (!isStaticPass)
+                    body.Append(Instruction.Create(OpCodes.Ldarg_0)); // this
+
+
+                body.Append(Instruction.Create(OpCodes.Ldarg_S, id));
+                body.Append(Instruction.Create(OpCodes.Ldarg_S, stream));
+                body.Append(Instruction.Create(OpCodes.Ldarg_S, packet));
+                body.Append(Instruction.Create(OpCodes.Ldarg_S, info));
+                body.Append(Instruction.Create(OpCodes.Ldarg_S, asServer));
+
+                body.Append(Instruction.Create(OpCodes.Call, reference));
+
+                if (!isStaticPass)
+                    newMethod.Overrides.Add(reference);
+            }
+
+
+            body.Append(Instruction.Create(OpCodes.Ret));
+        }
+
         private static void ValidateReceivingRPC(ModuleDefinition module, bool isNetworkClass, RPCMethod originalRpc,
             ILProcessor code, ParameterDefinition info, ParameterDefinition data, ParameterDefinition asServer,
             Instruction end)
@@ -2156,9 +2270,17 @@ namespace PurrNet.Codegen
                         try
                         {
                             if (_rpcMethods.Count > 0)
-                            {
                                 HandleRPCReceiver(module, type, _rpcMethods, inheritsFromNetworkClass, idOffset);
+
+                            if (type.FullName != typeof(NetworkIdentity).FullName &&
+                                type.FullName != typeof(NetworkModule).FullName &&
+                                (inheritsFromNetworkIdentity || inheritsFromNetworkClass))
+                            {
+                                HandleRPCReceiverHandler(module, type, _rpcMethods, inheritsFromNetworkClass,
+                                    idOffset,
+                                    false);
                             }
+
                         }
                         catch (Exception e)
                         {

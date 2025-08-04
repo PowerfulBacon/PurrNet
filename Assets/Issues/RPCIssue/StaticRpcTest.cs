@@ -43,13 +43,13 @@ public class StaticRpcTest : NetworkIdentity
     }
 
     [ServerRpc(requireOwnership: false)]
-    public void ServerRpc()
+    public static void ServerRpc()
     {
         Debug.Log($"ServerRpc");
     }
 
     [ObserversRpc(bufferLast: true)]
-    public void SendObserverRpcM<T>(int a, T someData, int b) where T : SomeBaseData
+    public static void SendObserverRpcM<T>(int a, T someData, int b) where T : SomeBaseData
     {
         Debug.Log($"SendObserverRpcM: {a}");
         Debug.Log($"SendObserverRpcM: {someData} {someData?.GetType().Name}");

@@ -4,6 +4,7 @@ using System.Reflection;
 using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Modules;
+using PurrNet.Packing;
 using PurrNet.Pooling;
 using PurrNet.Utils;
 using UnityEngine;
@@ -342,6 +343,10 @@ namespace PurrNet
         public IReadOnlyList<PlayerID> observers => _observers;
 
         public bool IsObserver(PlayerID player) => _observers.Contains(player);
+
+        public virtual void OnReceivedRpc(int id, BitPacker stream, RPCPacket packet, RPCInfo info, bool asServer) { }
+
+        public static void OnReceivedRpc(int id, BitPacker stream, StaticRPCPacket packet, RPCInfo info, bool asServer) { }
 
         [UsedImplicitly]
         public void QueueOnSpawned(Action action)

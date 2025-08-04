@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace PurrNet.Examples.TopDownShooter
 {
-    public class PlayerHealth : NetworkIdentity
+    public class PlayerHealth : NetworkBehaviour
     {
         [SerializeField] private int maxHealth = 100;
         [SerializeField] private Reference<TextMesh> _healthText;

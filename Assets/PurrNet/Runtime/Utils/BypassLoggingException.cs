@@ -4,6 +4,6 @@ namespace PurrNet
 {
     public class BypassLoggingException : Exception
     {
-        public static BypassLoggingException instance = new BypassLoggingException();
+        public static readonly BypassLoggingException instance = new BypassLoggingException();
     }
 }

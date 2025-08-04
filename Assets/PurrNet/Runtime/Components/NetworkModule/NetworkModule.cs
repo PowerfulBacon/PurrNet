@@ -62,6 +62,10 @@ namespace PurrNet
                                   $"You can initialize it on Awake or override OnInitializeModules.", parent);
         }
 
+        public virtual void OnReceivedRpc(int id, BitPacker stream, ChildRPCPacket packet, RPCInfo info, bool asServer) { }
+
+        public static void OnReceivedRpc(int id, BitPacker stream, StaticRPCPacket packet, RPCInfo info, bool asServer) { }
+
         public virtual void OnSpawn()
         {
         }
