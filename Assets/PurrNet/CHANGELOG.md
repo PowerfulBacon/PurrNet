@@ -1,3 +1,10 @@
+# [1.14.0-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.2...v1.14.0-beta.3) (2025-08-05)
+
+
+### Features
+
+* add Packer.HasPacker and DeltaPacker.HasPacker ([a643b7b](https://github.com/PurrNet/PurrNet/commit/a643b7b30895e2f3be34c925d77b2282a456be8d))
+
 # [1.14.0-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.1...v1.14.0-beta.2) (2025-08-05)
 
 
