@@ -41,6 +41,11 @@ namespace PurrNet.Packing
             Packer.RegisterWriter(typeof(T), _write.Method, _writeWrapper.Method);
         }
 
+        public static bool HasPacker()
+        {
+            return _write != null;
+        }
+
         public static void RegisterReader(ReadFunc<T> b)
         {
             Hasher.PrepareType(typeof(T));

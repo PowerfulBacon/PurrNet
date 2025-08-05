@@ -31,6 +31,11 @@ namespace PurrNet.Packing
             RegisterReader(read);
         }
 
+        public static bool HasPacker()
+        {
+            return _write != null;
+        }
+
         public static void RegisterWriter(DeltaWriteFunc<T> a)
         {
             if (_write != null)
