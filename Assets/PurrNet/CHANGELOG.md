@@ -1,3 +1,10 @@
+# [1.14.0-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.13.4-beta.4...v1.14.0-beta.1) (2025-08-05)
+
+
+### Features
+
+* allow to not delta compress certain fields ([f320274](https://github.com/PurrNet/PurrNet/commit/f32027485614946ff34d65e8cfc5f730304fe402))
+
 ## [1.13.4-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.13.4-beta.3...v1.13.4-beta.4) (2025-08-05)
 
 
