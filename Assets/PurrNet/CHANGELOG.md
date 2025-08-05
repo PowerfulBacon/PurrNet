@@ -1,3 +1,10 @@
+# [1.14.0-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.3...v1.14.0-beta.4) (2025-08-05)
+
+
+### Bug Fixes
+
+* UnityProxy fails if manager doesn't have prefab provider ([fd2e674](https://github.com/PurrNet/PurrNet/commit/fd2e6746c5c4798430c55c4e41d1ee1fe3806a04))
+
 # [1.14.0-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.2...v1.14.0-beta.3) (2025-08-05)
 
 
