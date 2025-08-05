@@ -1,3 +1,10 @@
+# [1.14.0-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.6...v1.14.0-beta.7) (2025-08-05)
+
+
+### Bug Fixes
+
+* syncvar equality check regression ([d280ed5](https://github.com/PurrNet/PurrNet/commit/d280ed58bb1109a4f4622ff393271edc4da4e9ed))
+
 # [1.14.0-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.5...v1.14.0-beta.6) (2025-08-05)
 
 
