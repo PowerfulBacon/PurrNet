@@ -10,6 +10,7 @@ using UnityEngine;
 public class CustomClass : IPackedAuto
 {
     public string data1;
+    [DontDeltaCompress]
     public string data2;
 
     /*[DontPack]*/ public List<CustomClass> Neighbours;

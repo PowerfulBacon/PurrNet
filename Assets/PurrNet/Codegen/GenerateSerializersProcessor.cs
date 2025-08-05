@@ -529,14 +529,14 @@ namespace PurrNet.Codegen
             return method;
         }
 
-        public static bool DoesTypeHaveDontPackAttribute(TypeDefinition type)
+        public static bool DoesTypeHaveAttribute(TypeDefinition type, Type attribute)
         {
             while (true)
             {
                 if (type == null)
                     return false;
 
-                if (type.CustomAttributes.Any(a => a.AttributeType.FullName == typeof(DontPackAttribute).FullName))
+                if (type.CustomAttributes.Any(a => a.AttributeType.FullName == attribute.FullName))
                     return true;
 
                 if (type.BaseType != null)
@@ -549,6 +549,11 @@ namespace PurrNet.Codegen
             }
 
             return false;
+        }
+
+        public static bool DoesTypeHaveDontPackAttribute(TypeDefinition type)
+        {
+            return DoesTypeHaveAttribute(type, typeof(DontPackAttribute));
         }
 
         private static void GenerateMethod(
@@ -662,11 +667,7 @@ namespace PurrNet.Codegen
                 if (isDelegate)
                     continue;
 
-                bool ignore = field.CustomAttributes.Any(a =>
-                    a.AttributeType.FullName == typeof(DontPackAttribute).FullName);
-
-                if (DoesTypeHaveDontPackAttribute(field.FieldType.Resolve()))
-                    ignore = true;
+                var ignore = ShouldIgnoreField(field);
 
                 if (ignore)
                     continue;
@@ -762,6 +763,16 @@ namespace PurrNet.Codegen
             il.Emit(OpCodes.Call, readData);*/
 
             il.Append(ret);
+        }
+
+        private static bool ShouldIgnoreField(FieldDefinition field)
+        {
+            bool ignore = field.CustomAttributes.Any(a =>
+                a.AttributeType.FullName == typeof(DontPackAttribute).FullName);
+
+            if (DoesTypeHaveDontPackAttribute(field.FieldType.Resolve()))
+                ignore = true;
+            return ignore;
         }
 
         public static TypeReference ResolveGenericFieldType(FieldDefinition field, TypeReference declaringType)
