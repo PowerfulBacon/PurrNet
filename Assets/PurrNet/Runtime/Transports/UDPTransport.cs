@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using LiteNetLib;
 using PurrNet.Logging;
@@ -310,7 +309,6 @@ namespace PurrNet.Transports
                 Channel.ReliableUnordered => DeliveryMethod.ReliableUnordered,
                 Channel.UnreliableSequenced => DeliveryMethod.Sequenced,
                 Channel.ReliableOrdered => DeliveryMethod.ReliableOrdered,
-                Channel.Unreliable => DeliveryMethod.Unreliable,
                 _ => DeliveryMethod.Unreliable
             };
         }

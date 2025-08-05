@@ -10,6 +10,7 @@ namespace PurrNet.Transports
     {
         [Header("Server Settings")] [SerializeField]
         private ushort _serverPort = 5001;
+        [SerializeField] private bool _forceIpv4;
 
         [SerializeField] private int _maxConnections = 100;
 
@@ -225,7 +226,7 @@ namespace PurrNet.Transports
             listenerState = ConnectionState.Connecting;
             TriggerConnectionStateEvent(true);
 
-            _server.Start(port);
+            _server.Start(port, _forceIpv4);
 
             listenerState = ConnectionState.Connected;
             TriggerConnectionStateEvent(true);

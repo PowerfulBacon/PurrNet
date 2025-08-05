@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -33,9 +34,9 @@ namespace JamesFrowen.SimpleWeb
             handShake = new ServerHandshake(this.bufferPool, handshakeMaxSize);
         }
 
-        public void Listen(int port)
+        public void Listen(int port, bool forceIpv4)
         {
-            listener = TcpListener.Create(port);
+            listener = forceIpv4 ? new TcpListener(IPAddress.Parse("0.0.0.0"), port) : TcpListener.Create(port);
             listener.Start();
 
             Log.Info($"Server has started on port {port}");
