@@ -529,6 +529,28 @@ namespace PurrNet.Codegen
             return method;
         }
 
+        public static bool DoesTypeHaveDontPackAttribute(TypeDefinition type)
+        {
+            while (true)
+            {
+                if (type == null)
+                    return false;
+
+                if (type.CustomAttributes.Any(a => a.AttributeType.FullName == typeof(DontPackAttribute).FullName))
+                    return true;
+
+                if (type.BaseType != null)
+                {
+                    type = type.BaseType.Resolve();
+                    continue;
+                }
+
+                break;
+            }
+
+            return false;
+        }
+
         private static void GenerateMethod(
             bool isWriting, MethodDefinition method, MethodReference serialize, MethodReference serializeDirect, TypeReference typeRef, ILProcessor il,
             ModuleDefinition mainmodule, ParameterDefinition valueArg)
@@ -642,6 +664,9 @@ namespace PurrNet.Codegen
 
                 bool ignore = field.CustomAttributes.Any(a =>
                     a.AttributeType.FullName == typeof(DontPackAttribute).FullName);
+
+                if (DoesTypeHaveDontPackAttribute(field.FieldType.Resolve()))
+                    ignore = true;
 
                 if (ignore)
                     continue;

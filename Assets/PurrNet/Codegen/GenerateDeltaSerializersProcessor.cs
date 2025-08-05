@@ -152,6 +152,9 @@ namespace PurrNet.Codegen
                     bool ignore = field.CustomAttributes.Any(a =>
                         a.AttributeType.FullName == typeof(DontPackAttribute).FullName);
 
+                    if (GenerateSerializersProcessor.DoesTypeHaveDontPackAttribute(field.FieldType.Resolve()))
+                        ignore = true;
+
                     if (ignore)
                         continue;
 
@@ -340,6 +343,9 @@ namespace PurrNet.Codegen
 
                     bool ignore = field.CustomAttributes.Any(a =>
                         a.AttributeType.FullName == typeof(DontPackAttribute).FullName);
+
+                    if (GenerateSerializersProcessor.DoesTypeHaveDontPackAttribute(field.FieldType.Resolve()))
+                        ignore = true;
 
                     if (ignore)
                         continue;
