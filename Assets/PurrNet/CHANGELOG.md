@@ -1,3 +1,10 @@
+## [1.13.4-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.13.4-beta.3...v1.13.4-beta.4) (2025-08-05)
+
+
+### Bug Fixes
+
+* allow DontPack to be at the type level ([354f271](https://github.com/PurrNet/PurrNet/commit/354f27178bc420b279c50c79a01e7c02fb09e2b5))
+
 ## [1.13.4-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.13.4-beta.2...v1.13.4-beta.3) (2025-08-04)
 
 
