@@ -1,7 +1,8 @@
 using System;
-using System.Threading.Tasks;
 #if UNITASK_PURRNET_SUPPORT
 using Cysharp.Threading.Tasks;
+#else
+using System.Threading.Tasks;
 #endif
 using PurrNet.Logging;
 using PurrNet.Modules;
@@ -115,7 +116,7 @@ namespace PurrNet
 
             var manager = NetworkManager.main;
 
-            if (!manager)
+            if (!manager || manager.prefabProvider == null)
             {
                 prefabData = default;
                 return false;
