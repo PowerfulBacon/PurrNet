@@ -1,3 +1,10 @@
+# [1.14.0-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.5...v1.14.0-beta.6) (2025-08-05)
+
+
+### Features
+
+* allow to force ipv4 for web transport ([83756ea](https://github.com/PurrNet/PurrNet/commit/83756eae66255ae2e1abac7e0009690876f1e59b))
+
 # [1.14.0-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.4...v1.14.0-beta.5) (2025-08-05)
 
 
