@@ -1922,6 +1922,7 @@ namespace PurrNet.Codegen
                 {
                     bool isStatic = rpc.Signature.isStatic;
                     PushLocalPlayerProp(module, code, isNetworkModule, isStatic);
+                    ConvertPlayerIDToNullable(module, code);
                     code.Append(Instruction.Create(OpCodes.Ldnull));
                     code.Append(Instruction.Create(OpCodes.Ldnull));
                 }
