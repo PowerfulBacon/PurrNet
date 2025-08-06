@@ -33,7 +33,7 @@ public class StaticRpcTest : NetworkIdentity
     }
 
     [TargetRpc(bufferLast: true)]
-    public void SendObserverRpcM(IReadOnlyList<PlayerID> players, int data)
+    public void SendObserverRpcM<T>(IReadOnlyList<PlayerID> players, T data)
     {
         Debug.Log($"SendObserverRpcM: {data}");
     }
