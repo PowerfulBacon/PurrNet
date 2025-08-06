@@ -264,7 +264,7 @@ namespace PurrNet.Codegen
                 return true;
             }
 
-            if (index == 0 && rpcType == RPCType.TargetRPC && param.ParameterType.FullName == typeof(PlayerID).FullName)
+            if (index == 0 && rpcType == RPCType.TargetRPC && GetArgType(param.ParameterType) != TargetArgType.None)
             {
                 type = SpecialParamType.SenderId;
                 return true;
@@ -617,19 +617,23 @@ namespace PurrNet.Codegen
                             code.Append(Instruction.Create(OpCodes.Stloc, variable));
                             break;
                         case SpecialParamType.SenderId:
-                            if (!rpcMethod.Signature.isStatic)
+                            if (GetArgType(param.ParameterType) == TargetArgType.Player)
                             {
-                                code.Append(Instruction.Create(OpCodes.Ldarg_0));
-                                code.Append(isNetworkClass
-                                    ? Instruction.Create(OpCodes.Call, localPlayerGetterModule)
-                                    : Instruction.Create(OpCodes.Call, localPlayerGetter));
-                            }
-                            else
-                            {
-                                code.Append(Instruction.Create(OpCodes.Call, getLocalPlayer));
+                                if (!rpcMethod.Signature.isStatic)
+                                {
+                                    code.Append(Instruction.Create(OpCodes.Ldarg_0));
+                                    code.Append(isNetworkClass
+                                        ? Instruction.Create(OpCodes.Call, localPlayerGetterModule)
+                                        : Instruction.Create(OpCodes.Call, localPlayerGetter));
+                                }
+                                else
+                                {
+                                    code.Append(Instruction.Create(OpCodes.Call, getLocalPlayer));
+                                }
+
+                                code.Append(Instruction.Create(OpCodes.Stloc, variable));
                             }
 
-                            code.Append(Instruction.Create(OpCodes.Stloc, variable));
                             break;
                     }
 
@@ -862,21 +866,24 @@ namespace PurrNet.Codegen
                             code.Append(Instruction.Create(OpCodes.Call, setInfo));
                             break;
                         case SpecialParamType.SenderId:
-                            code.Append(Instruction.Create(OpCodes.Ldloca, headerValue));
-
-                            if (!rpcMethod.Signature.isStatic)
+                            if (GetArgType(param.ParameterType) == TargetArgType.Player)
                             {
-                                code.Append(Instruction.Create(OpCodes.Ldarg_0));
-                                code.Append(Instruction.Create(OpCodes.Call, localPlayerGetter));
-                            }
-                            else
-                            {
-                                var getLocalPlayer = rpcModule.GetMethod("GetLocalPlayer").Import(module);
-                                code.Append(Instruction.Create(OpCodes.Call, getLocalPlayer));
-                            }
+                                code.Append(Instruction.Create(OpCodes.Ldloca, headerValue));
 
-                            code.Append(Instruction.Create(OpCodes.Ldc_I4, p));
-                            code.Append(Instruction.Create(OpCodes.Call, setPlayerId));
+                                if (!rpcMethod.Signature.isStatic)
+                                {
+                                    code.Append(Instruction.Create(OpCodes.Ldarg_0));
+                                    code.Append(Instruction.Create(OpCodes.Call, localPlayerGetter));
+                                }
+                                else
+                                {
+                                    var getLocalPlayer = rpcModule.GetMethod("GetLocalPlayer").Import(module);
+                                    code.Append(Instruction.Create(OpCodes.Call, getLocalPlayer));
+                                }
+
+                                code.Append(Instruction.Create(OpCodes.Ldc_I4, p));
+                                code.Append(Instruction.Create(OpCodes.Call, setPlayerId));
+                            }
                             break;
                     }
 
@@ -1397,7 +1404,7 @@ namespace PurrNet.Codegen
                 PutIsServerOnStack(module, methodRpc, isNetworkClass, code, moduleType, identityType);
                 code.Append(Instruction.Create(OpCodes.Brtrue, executeRunLocally));
             }
-            else if (methodRpc.Signature.type == RPCType.TargetRPC)
+            else if (methodRpc.Signature.type == RPCType.TargetRPC && GetArgType(newMethod.Parameters[0].ParameterType) == TargetArgType.Player)
             {
                 PushLocalPlayerProp(module, code, isNetworkClass, methodRpc.Signature.isStatic);
                 code.Append(Instruction.Create(OpCodes.Ldarg_S, newMethod.Parameters[0]));
@@ -1542,8 +1549,8 @@ namespace PurrNet.Codegen
 
                 if (methodRpc.Signature.type == RPCType.TargetRPC && i == 0)
                 {
-                    if (param.ParameterType.IsGenericParameter ||
-                        param.ParameterType.FullName != typeof(PlayerID).FullName)
+                    var argType = GetArgType(param.ParameterType);
+                    if (argType == TargetArgType.None)
                     {
                         Error(messages, "TargetRPC method must have a 'PlayerID' as the first parameter", method);
                         return null;
@@ -1805,6 +1812,42 @@ namespace PurrNet.Codegen
             }
         }
 
+        enum TargetArgType
+        {
+            None,
+            Player,
+            Enumerator,
+            List
+        }
+
+        static TargetArgType GetArgType(TypeReference type)
+        {
+            if (type == null)
+                return TargetArgType.None;
+
+            if (type.FullName == typeof(PlayerID).FullName)
+                return TargetArgType.Player;
+
+            if (type.IsArray && type.GetElementType().FullName == typeof(PlayerID).FullName)
+                return TargetArgType.List;
+
+            if (!(type is GenericInstanceType { HasGenericArguments: true } genType) ||
+                genType.GenericArguments[0].FullName != typeof(PlayerID).FullName)
+            {
+                return TargetArgType.None;
+            }
+
+            var resolved = type.Resolve();
+
+            if (GenerateSerializersProcessor.HasInterfaceRaw(resolved, typeof(IList<>)))
+                return TargetArgType.List;
+
+            if (GenerateSerializersProcessor.HasInterfaceRaw(resolved, typeof(IEnumerable<>)))
+                return TargetArgType.Enumerator;
+
+            return TargetArgType.None;
+        }
+
         private static void PushRPCSignature(ModuleDefinition module, ILProcessor code, RPCMethod rpc,
             bool isReceiving, bool isNetworkModule)
         {
@@ -1830,14 +1873,55 @@ namespace PurrNet.Codegen
             {
                 if (!isReceiving)
                 {
-                    code.Append(rpc.Signature.isStatic
-                        ? Instruction.Create(OpCodes.Ldarg_0)
-                        : Instruction.Create(OpCodes.Ldarg_1));
+                    var argType = rpc.originalMethod.Parameters[0].ParameterType;
+
+                    var type = GetArgType(argType);
+
+                    switch (type)
+                    {
+                        case TargetArgType.Player:
+                        {
+                            code.Append(rpc.Signature.isStatic
+                                ? Instruction.Create(OpCodes.Ldarg_0)
+                                : Instruction.Create(OpCodes.Ldarg_1));
+                            code.Append(Instruction.Create(OpCodes.Ldnull));
+                            code.Append(Instruction.Create(OpCodes.Ldnull));
+                            break;
+                        }
+                        case TargetArgType.List:
+                        {
+                            LoadDefaultPlayerId(module, code);
+                            code.Append(Instruction.Create(OpCodes.Ldnull));
+                            code.Append(rpc.Signature.isStatic
+                                ? Instruction.Create(OpCodes.Ldarg_0)
+                                : Instruction.Create(OpCodes.Ldarg_1));
+                            break;
+                        }
+                        case TargetArgType.Enumerator:
+                        {
+                            LoadDefaultPlayerId(module, code);
+                            code.Append(rpc.Signature.isStatic
+                                ? Instruction.Create(OpCodes.Ldarg_0)
+                                : Instruction.Create(OpCodes.Ldarg_1));
+                            code.Append(Instruction.Create(OpCodes.Ldnull));
+                            break;
+                        }
+                        case TargetArgType.None:
+                        default:
+                        {
+                            LoadDefaultPlayerId(module, code);
+                            code.Append(Instruction.Create(OpCodes.Ldnull));
+                            code.Append(Instruction.Create(OpCodes.Ldnull));
+                            break;
+                        }
+                    }
                 }
                 else
                 {
                     bool isStatic = rpc.Signature.isStatic;
                     PushLocalPlayerProp(module, code, isNetworkModule, isStatic);
+                    code.Append(Instruction.Create(OpCodes.Ldnull));
+                    code.Append(Instruction.Create(OpCodes.Ldnull));
                 }
 
                 code.Append(Instruction.Create(OpCodes.Call, makeRpcDetailsTarget));
@@ -1846,6 +1930,14 @@ namespace PurrNet.Codegen
             {
                 code.Append(Instruction.Create(OpCodes.Call, makeRpcDetails));
             }
+        }
+
+        private static void LoadDefaultPlayerId(ModuleDefinition module, ILProcessor code)
+        {
+            var playdIdType = module.GetTypeDefinition<PlayerID>();
+            playdIdType.Import(module);
+            var getNullableMethod = playdIdType.GetMethod("GetDefaultNullable").Import(module);
+            code.Append(Instruction.Create(OpCodes.Call, getNullableMethod));
         }
 
         private static void PushLocalPlayerProp(ModuleDefinition module, ILProcessor code, bool isNetworkModule, bool isStatic)

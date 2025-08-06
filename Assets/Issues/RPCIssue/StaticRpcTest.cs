@@ -31,15 +31,6 @@ public class CustomClass : IPackedAuto
     }
 }
 
-public static class StaticRpcTest2<T>
-{
-    [ObserversRpc(bufferLast: true)]
-    public static void StaticMethod(T data)
-    {
-        Debug.Log($"StaticMethod called with data: {data}");
-    }
-}
-
 public class StaticRpcTest : NetworkIdentity
 {
     SyncList<CustomClass> _list = new ();
