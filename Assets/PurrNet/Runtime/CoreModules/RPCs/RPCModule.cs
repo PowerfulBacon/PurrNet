@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using K4os.Compression.LZ4;
 using PurrNet.Logging;
 using PurrNet.Packing;
+using PurrNet.Pooling;
 using PurrNet.Transports;
 using PurrNet.Utils;
 
@@ -205,7 +206,7 @@ namespace PurrNet.Modules
                         if (signature.excludeSender && nm.isClient)
                             _observers.Remove(GetLocalPlayer(nm));
 
-                        players.Send(_observers, packet, signature.channel);
+                        players.SendList(_observers, packet, signature.channel);
                     }
                     else nm.GetModule<PlayersManager>(false).SendToServer(packet, signature.channel);
 
@@ -214,12 +215,21 @@ namespace PurrNet.Modules
                 case RPCType.TargetRPC:
                 {
                     if (nm.isServer)
-                        nm.GetModule<PlayersManager>(true)
-                            .Send(signature.targetPlayer!.Value, packet, signature.channel);
+                    {
+                        var players = nm.GetModule<PlayersManager>(true);
+                        using var targets = signature.GetTargets();
+                        players.SendList(targets, packet, signature.channel);
+                    }
                     else
                     {
-                        packet.targetPlayerId = signature.targetPlayer!.Value;
-                        nm.GetModule<PlayersManager>(false).SendToServer(packet, signature.channel);
+                        using var players = signature.GetTargets();
+
+                        // TODO: We should batch this into one packet... but hey, too lazy rn
+                        for (var i = 0; i < players.Count; i++)
+                        {
+                            packet.targetPlayerId = players[i];
+                            nm.GetModule<PlayersManager>(false).SendToServer(packet, signature.channel);
+                        }
                     }
                     break;
                 }

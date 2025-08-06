@@ -424,6 +424,29 @@ namespace PurrNet.Codegen
             il.Emit(OpCodes.Ret);
         }
 
+        public static bool HasInterfaceRaw(TypeDefinition def, Type interfaceType)
+        {
+            bool selfHas = false;
+            foreach (var i in def.Interfaces)
+            {
+                var resolved = i.InterfaceType.Resolve();
+                if (resolved != null && resolved.FullName == interfaceType.FullName)
+                {
+                    selfHas = true;
+                    break;
+                }
+            }
+
+            if (selfHas)
+                return true;
+
+            if (def.BaseType == null)
+                return false;
+
+            var baseType = def.BaseType.Resolve();
+            return baseType != null && HasInterface(baseType, interfaceType);
+        }
+
         public static bool HasInterface(TypeDefinition def, Type interfaceType)
         {
             bool selfHas = def.Interfaces.Any(i => i.InterfaceType.FullName == interfaceType.FullName);

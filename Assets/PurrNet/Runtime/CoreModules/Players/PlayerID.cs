@@ -1,4 +1,5 @@
 using System;
+using PurrNet.Modules;
 using PurrNet.Packing;
 
 namespace PurrNet
@@ -6,6 +7,12 @@ namespace PurrNet
     [Serializable]
     public readonly struct PlayerID : IPackedAuto, IEquatable<PlayerID>
     {
+        [UsedByIL]
+        public static PlayerID? GetDefaultNullable() => null;
+
+        [UsedByIL]
+        public static PlayerID? GetNullable(PlayerID player) => player;
+
         private PackedULong _id { get; }
 
         public bool isBot { get; }

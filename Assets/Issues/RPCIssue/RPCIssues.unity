@@ -278,6 +278,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
+  _players: []
 --- !u!1 &999871911
 GameObject:
   m_ObjectHideFlags: 0

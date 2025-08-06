@@ -152,6 +152,12 @@ namespace PurrNet.Modules
         public void Send<T>(IReadOnlyList<PlayerID> collection, T data, Channel method = Channel.ReliableOrdered)
             => _playerBroadcaster.Send(collection, data, method);
 
+        public void SendList<T>(IList<PlayerID> collection, T data, Channel method = Channel.ReliableOrdered)
+            => _playerBroadcaster.Send(collection, data, method);
+
+        public void Send<T>(IEnumerable<PlayerID> collection, T data, Channel method = Channel.ReliableOrdered)
+            => _playerBroadcaster.Send(collection, data, method);
+
         public void SendToServer<T>(T data, Channel method = Channel.ReliableOrdered)
             => _playerBroadcaster.SendToServer(data, method);
 
