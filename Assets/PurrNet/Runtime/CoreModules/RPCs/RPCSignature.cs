@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
 using PurrNet.Modules;
+using PurrNet.Pooling;
 using PurrNet.Transports;
 
 namespace PurrNet
@@ -39,6 +40,20 @@ namespace PurrNet
         public IEnumerable<PlayerID> targetPlayerEnumerable;
         public IList<PlayerID> targetPlayerList;
         public StripCodeModeOverride stripCodeMode;
+
+        public DisposableList<PlayerID> GetTargets()
+        {
+            var players = DisposableList<PlayerID>.Create();
+
+            if (targetPlayer.HasValue)
+                players.Add(targetPlayer.Value);
+            else if (targetPlayerList != null)
+                players.AddRange(targetPlayerList);
+            else if (targetPlayerEnumerable != null)
+                players.AddRange(targetPlayerEnumerable);
+
+            return players;
+        }
 
         [UsedImplicitly]
         public static RPCSignature Make(RPCType type, Channel channel, bool runLocally, bool requireOwnership,

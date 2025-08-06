@@ -229,11 +229,20 @@ namespace PurrNet
                 }
                 case RPCType.TargetRPC:
                     if (isServer)
-                        parent.SendToTarget(signature.targetPlayer!.Value, packet, signature.channel);
+                    {
+                        using var targets = signature.GetTargets();
+                        parent.Send(targets, packet, signature.channel);
+                    }
                     else
                     {
-                        packet.targetPlayerId = signature.targetPlayer!.Value;
-                        parent.SendToServer(packet, signature.channel);
+                        using var targets = signature.GetTargets();
+
+                        // TODO: we should batch this into one packet to the server instead of N
+                        for (int i = 0; i < targets.Count; i++)
+                        {
+                            packet.targetPlayerId = targets[i];
+                            parent.SendToServer(packet, signature.channel);
+                        }
                     }
                     break;
                 default: throw new ArgumentOutOfRangeException();
