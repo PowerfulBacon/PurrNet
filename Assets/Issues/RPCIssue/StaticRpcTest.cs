@@ -1,77 +1,14 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using PurrNet;
-using PurrNet.Logging;
 using PurrNet.Packing;
+using PurrNet.Pooling;
 using UnityEngine;
-
-public class CustomClass : IPackedAuto
-{
-    public string data1;
-    [DontDeltaCompress]
-    public string data2;
-
-    /*[DontPack]*/ public List<CustomClass> Neighbours;
-    /*[DontPack]*/ public List<CustomClass> NeighboursNull;
-
-    public override string ToString()
-    {
-        string result = $"data1: {data1}, data2: {data2}\n";
-        if (Neighbours != null)
-        {
-            foreach (var n in Neighbours)
-            {
-                result += n + "\n";
-            }
-        }
-
-        return result;
-    }
-}
 
 public class StaticRpcTest : NetworkIdentity
 {
-    SyncList<CustomClass> _list = new ();
-
-    private void Awake()
-    {
-        var test = new CustomClass
-        {
-            data1 = "Hello",
-            data2 = "World",
-            Neighbours = new List<CustomClass>
-            {
-                new CustomClass
-                {
-                    data1 = "Hello2",
-                    data2 = "World2"
-                },
-                new CustomClass
-                {
-                    data1 = "Hello3",
-                    data2 = "World3"
-                }
-            }
-        };
-
-        _list.Add(test);
-    }
-
-    [PurrButton("SendObserverRpc"), UsedImplicitly]
-    public void SendRpc()
-    {
-        var someData = new SomeBaseDataB
-        {
-            someInt = 1,
-            someString = "Hello",
-            someInt2 = 5,
-            someString2 = "World"
-        };
-
-        SendObserverRpcM(72, someData, 42);
-    }
+    [SerializeField] List<ulong> _players;
 
     [PurrButton("SendTargetRpc"), UsedImplicitly]
     public void SendTargetRpc()
@@ -80,43 +17,25 @@ public class StaticRpcTest : NetworkIdentity
             TargetRpc(owner.Value);
     }
 
-    [PurrButton("SendServerRpc"), UsedImplicitly]
+    [PurrButton("Send to list"), UsedImplicitly]
+    public void SendServerRpcList()
+    {
+        using var players = DisposableList<PlayerID>.Create();
+        foreach (var player in _players)
+            players.Add(new PlayerID(player, false));
+        SendObserverRpcM(players, 123456789);
+    }
+
+    [PurrButton("Send to all observer"), UsedImplicitly]
     public void SendServerRpcNoOwner()
     {
-        CustomClass test = new CustomClass
-        {
-            data1 = "Hello",
-            data2 = "World",
-            Neighbours = new List<CustomClass>
-            {
-                new CustomClass
-                {
-                    data1 = "Hello2",
-                    data2 = "World2"
-                },
-                new CustomClass
-                {
-                    data1 = "Hello3",
-                    data2 = "World3"
-                }
-            }
-        };
-
-        ServerRpc(test);
+        SendObserverRpcM(observers, 123456789);
     }
 
-    [ServerRpc(requireOwnership: false)]
-    public static void ServerRpc(CustomClass classy)
+    [TargetRpc(bufferLast: true)]
+    public void SendObserverRpcM(IReadOnlyList<PlayerID> players, int data)
     {
-        PurrLogger.Log(classy.ToString());
-    }
-
-    [ObserversRpc(bufferLast: true)]
-    public static void SendObserverRpcM<T>(int a, T someData, int b) where T : SomeBaseData
-    {
-        Debug.Log($"SendObserverRpcM: {a}");
-        Debug.Log($"SendObserverRpcM: {someData} {someData?.GetType().Name}");
-        Debug.Log($"SendObserverRpcM: {b}");
+        Debug.Log($"SendObserverRpcM: {data}");
     }
 
     [TargetRpc(requireServer: false)]

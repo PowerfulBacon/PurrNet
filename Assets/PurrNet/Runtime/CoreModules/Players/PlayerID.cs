@@ -1,7 +1,6 @@
 using System;
 using PurrNet.Modules;
 using PurrNet.Packing;
-using UnityEngine;
 
 namespace PurrNet
 {
@@ -10,6 +9,9 @@ namespace PurrNet
     {
         [UsedByIL]
         public static PlayerID? GetDefaultNullable() => null;
+
+        [UsedByIL]
+        public static PlayerID? GetNullable(PlayerID player) => player;
 
         private PackedULong _id { get; }
 

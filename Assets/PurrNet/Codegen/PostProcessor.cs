@@ -1884,6 +1884,8 @@ namespace PurrNet.Codegen
                             code.Append(rpc.Signature.isStatic
                                 ? Instruction.Create(OpCodes.Ldarg_0)
                                 : Instruction.Create(OpCodes.Ldarg_1));
+                            ConvertPlayerIDToNullable(module, code);
+
                             code.Append(Instruction.Create(OpCodes.Ldnull));
                             code.Append(Instruction.Create(OpCodes.Ldnull));
                             break;
@@ -1937,6 +1939,14 @@ namespace PurrNet.Codegen
             var playdIdType = module.GetTypeDefinition<PlayerID>();
             playdIdType.Import(module);
             var getNullableMethod = playdIdType.GetMethod("GetDefaultNullable").Import(module);
+            code.Append(Instruction.Create(OpCodes.Call, getNullableMethod));
+        }
+
+        private static void ConvertPlayerIDToNullable(ModuleDefinition module, ILProcessor code)
+        {
+            var playdIdType = module.GetTypeDefinition<PlayerID>();
+            playdIdType.Import(module);
+            var getNullableMethod = playdIdType.GetMethod("GetNullable").Import(module);
             code.Append(Instruction.Create(OpCodes.Call, getNullableMethod));
         }
 
