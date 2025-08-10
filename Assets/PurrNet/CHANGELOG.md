@@ -1,3 +1,10 @@
+# [1.14.0-beta.12](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.11...v1.14.0-beta.12) (2025-08-10)
+
+
+### Bug Fixes
+
+* make `DontPack` attribute skip creating generators entirely if at the class level ([e18bf9c](https://github.com/PurrNet/PurrNet/commit/e18bf9c2e77658f33e9d8b1756dffd050306e33e))
+
 # [1.14.0-beta.11](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.10...v1.14.0-beta.11) (2025-08-10)
 
 
