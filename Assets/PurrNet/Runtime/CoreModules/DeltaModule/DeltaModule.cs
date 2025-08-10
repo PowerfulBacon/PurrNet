@@ -9,7 +9,7 @@ using PurrNet.Utils;
 
 namespace PurrNet.Modules
 {
-    public delegate bool ValueModifier<T>(ref T oldValue);
+    public delegate void ValueModifier<T>(ref T oldValue);
 
     public class DeltaModule : INetworkModule, IPostFixedUpdate
     {
