@@ -1,3 +1,10 @@
+# [1.14.0-beta.11](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.10...v1.14.0-beta.11) (2025-08-10)
+
+
+### Bug Fixes
+
+* return value of ValueModifier wasnt necessary ([ed0d668](https://github.com/PurrNet/PurrNet/commit/ed0d668b7ade468ca9024527d7bae92a2c5980d0))
+
 # [1.14.0-beta.10](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.9...v1.14.0-beta.10) (2025-08-10)
 
 
