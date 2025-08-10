@@ -1,3 +1,10 @@
+# [1.14.0-beta.9](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.8...v1.14.0-beta.9) (2025-08-10)
+
+
+### Bug Fixes
+
+* Sync List null handling issue ([5704d83](https://github.com/PurrNet/PurrNet/commit/5704d83add83ced6dbab7138cfb3ea0d8f09fe8e))
+
 # [1.14.0-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.7...v1.14.0-beta.8) (2025-08-06)
 
 
