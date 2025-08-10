@@ -112,6 +112,11 @@ namespace PurrNet.Codegen
             if (resolvedType == null)
                 return;
 
+            bool hasDontPack = DoesTypeHaveDontPackAttribute(resolvedType);
+
+            if (hasDontPack)
+                return;
+
             if (resolvedType.IsInterface)
                 return;
 
