@@ -136,7 +136,7 @@ namespace PurrNet
 
                 var oldValue = _list[idx];
 
-                if (oldValue.Equals(value))
+                if (oldValue != null && oldValue.Equals(value) || oldValue == null && value == null)
                     return;
 
                 _list[idx] = value;
