@@ -673,6 +673,9 @@ namespace PurrNet.Modules
 
                 if (!id) continue;
 
+                if (id.isManualSpawn)
+                    continue;
+
                 var root = id.GetRootIdentity();
 
                 if (!roots.Add(root))
@@ -1358,6 +1361,7 @@ namespace PurrNet.Modules
 
             bool isHost = IsServerHost();
 
+            identity.isManualSpawn = true;
             identity.SetID(id);
             identity.SetIdentity(_manager, this, _sceneId, _asServer, isHost);
 

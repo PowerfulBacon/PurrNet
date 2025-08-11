@@ -814,6 +814,7 @@ namespace PurrNet
             _tickRegisteredServer = 0;
             _tickRegisteredClient = 0;
             _whiteBlackDirty = false;
+            isManualSpawn = false;
         }
 
         private void OnChildDespawned(NetworkIdentity networkIdentity)
@@ -1055,6 +1056,8 @@ namespace PurrNet
         private bool _wasEarlySpawned;
 
         public bool isFullySpawned => _spawnedCount > 0;
+
+        public bool isManualSpawn { get; internal set; }
 
         internal void TriggerSpawnEvent(bool asServer)
         {
