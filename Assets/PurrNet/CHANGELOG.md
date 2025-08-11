@@ -1,3 +1,10 @@
+# [1.14.0-beta.14](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.13...v1.14.0-beta.14) (2025-08-11)
+
+
+### Bug Fixes
+
+* mark manual spawns such that we handle them differently (like not populating observers automatically) ([2dc77b8](https://github.com/PurrNet/PurrNet/commit/2dc77b8d8bc358902a5d407ddd8dcc5475de91f6))
+
 # [1.14.0-beta.13](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.12...v1.14.0-beta.13) (2025-08-11)
 
 
