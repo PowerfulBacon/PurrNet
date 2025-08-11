@@ -1,3 +1,10 @@
+# [1.14.0-beta.13](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.12...v1.14.0-beta.13) (2025-08-11)
+
+
+### Bug Fixes
+
+* IL generic resolving ([9f04291](https://github.com/PurrNet/PurrNet/commit/9f042912b8628a53384195d30c051f8974fa1af9))
+
 # [1.14.0-beta.12](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.11...v1.14.0-beta.12) (2025-08-10)
 
 
