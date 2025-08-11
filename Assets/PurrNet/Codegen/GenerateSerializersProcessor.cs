@@ -807,42 +807,44 @@ namespace PurrNet.Codegen
         {
             var fieldType = field.FieldType;
 
-            // If the declaring type is a generic instance
             if (declaringType is GenericInstanceType genericDeclaringType)
             {
-                // If the field type has generic parameters
-                if (fieldType.IsGenericParameter)
-                {
-                    // Map the generic parameter to the actual type argument
-                    var genericParam = (GenericParameter)fieldType;
-                    int position = genericParam.Position;
-                    return genericDeclaringType.GenericArguments[position];
-                }
-
-                // If the field type is itself a generic instance
-                if (fieldType is GenericInstanceType fieldGenericInstance)
-                {
-                    var resolvedInstance = new GenericInstanceType(fieldGenericInstance.ElementType);
-                    foreach (var arg in fieldGenericInstance.GenericArguments)
-                    {
-                        if (arg.IsGenericParameter)
-                        {
-                            var genericParam = (GenericParameter)arg;
-                            int position = genericParam.Position;
-                            resolvedInstance.GenericArguments.Add(genericDeclaringType.GenericArguments[position]);
-                        }
-                        else
-                        {
-                            resolvedInstance.GenericArguments.Add(arg);
-                        }
-                    }
-
-                    return resolvedInstance;
-                }
+                return SubstituteDeclaringTypeGenerics(fieldType, genericDeclaringType);
             }
 
-            // Return the original field type if no generics are involved
             return fieldType;
+        }
+
+        private static TypeReference SubstituteDeclaringTypeGenerics(TypeReference type, GenericInstanceType declaringGeneric)
+        {
+            // Direct mapping for generic parameter T from the declaring type
+            if (type.IsGenericParameter)
+            {
+                var gp = (GenericParameter)type;
+                return declaringGeneric.GenericArguments[gp.Position];
+            }
+
+            // Rebuild nested generic instances recursively: e.g., List<Blah<T>>, Dictionary<K, Blah<T>>
+            if (type is GenericInstanceType gi)
+            {
+                var rebuilt = new GenericInstanceType(gi.ElementType);
+                for (int i = 0; i < gi.GenericArguments.Count; i++)
+                {
+                    var arg = gi.GenericArguments[i];
+                    rebuilt.GenericArguments.Add(SubstituteDeclaringTypeGenerics(arg, declaringGeneric));
+                }
+                return rebuilt;
+            }
+
+            // Support arrays with generic element types: T[] or Blah<T>[]
+            if (type is ArrayType arrayType)
+            {
+                var substitutedElement = SubstituteDeclaringTypeGenerics(arrayType.ElementType, declaringGeneric);
+                return new ArrayType(substitutedElement, arrayType.Rank);
+            }
+
+            // Non-generic type: return as-is
+            return type;
         }
 
         private static void HandleIData(bool isWriting, TypeDefinition type,

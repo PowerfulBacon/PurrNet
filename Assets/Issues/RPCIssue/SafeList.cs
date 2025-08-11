@@ -1,10 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using PurrNet;
-using UnityEngine;
 
-[DontPack]
 public class SafeList<T> : IEnumerable<T>
 {
     private List<T> _list = new();
