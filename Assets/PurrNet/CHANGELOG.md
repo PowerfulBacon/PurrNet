@@ -1,3 +1,10 @@
+# [1.14.0-beta.15](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.14...v1.14.0-beta.15) (2025-08-13)
+
+
+### Bug Fixes
+
+* write/read with modifier bad history ([b8a7e3c](https://github.com/PurrNet/PurrNet/commit/b8a7e3c2ee6fc04f49279fbbed66db7783793749))
+
 # [1.14.0-beta.14](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.13...v1.14.0-beta.14) (2025-08-11)
 
 
