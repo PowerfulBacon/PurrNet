@@ -304,6 +304,7 @@ namespace PurrNet.Modules
                 var oldValue = Packer.Copy(tracker.GetLastValue());
                 modifier(ref oldValue);
                 newValue = oldValue;
+                tracker.Set(oldValue);
             }
         }
 
