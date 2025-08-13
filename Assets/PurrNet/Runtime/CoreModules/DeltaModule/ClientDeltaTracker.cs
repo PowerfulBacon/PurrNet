@@ -216,6 +216,12 @@ namespace PurrNet.Modules
             return false;
         }
 
+        public void SetWithoutCopy(T oldValue)
+        {
+            _history.Clear();
+            _history.Add(new Entry { key = 0, value = oldValue, enterTime = Time.unscaledTime });
+        }
+
         public void Set(T oldValue)
         {
             _history.Clear();
