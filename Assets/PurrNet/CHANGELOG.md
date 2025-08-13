@@ -1,3 +1,10 @@
+# [1.14.0-beta.17](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.16...v1.14.0-beta.17) (2025-08-13)
+
+
+### Bug Fixes
+
+* delta list packing ([7392b4b](https://github.com/PurrNet/PurrNet/commit/7392b4b6e276ae91cde72dd2b3c509194cc1e1ab))
+
 # [1.14.0-beta.16](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.15...v1.14.0-beta.16) (2025-08-13)
 
 
