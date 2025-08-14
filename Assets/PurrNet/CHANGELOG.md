@@ -1,3 +1,10 @@
+# [1.14.0-beta.18](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.17...v1.14.0-beta.18) (2025-08-14)
+
+
+### Bug Fixes
+
+* type error deeper error message ([06904ef](https://github.com/PurrNet/PurrNet/commit/06904ef17432e96fb2ea86705a0bfcbf3f173e46))
+
 # [1.14.0-beta.17](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.16...v1.14.0-beta.17) (2025-08-13)
 
 
