@@ -343,11 +343,6 @@ namespace PurrNet.Transports
             peer?.Disconnect();
         }
 
-        private void OnDestroy()
-        {
-            Cleanup();
-        }
-
         private void OnDisable()
         {
             Cleanup();
@@ -356,7 +351,7 @@ namespace PurrNet.Transports
         private void Cleanup()
         {
             _client?.Stop();
-            _server?.Stop();
+            _server?.Stop(false);
 
             listenerState = ConnectionState.Disconnected;
             clientState = ConnectionState.Disconnected;
