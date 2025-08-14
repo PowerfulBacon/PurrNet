@@ -1,3 +1,10 @@
+# [1.14.0-beta.20](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.19...v1.14.0-beta.20) (2025-08-14)
+
+
+### Bug Fixes
+
+* dont create a server object until we need it since it causes issues ([801db42](https://github.com/PurrNet/PurrNet/commit/801db425600b41bf6eb0b9fc295edb9d082324b2))
+
 # [1.14.0-beta.19](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.18...v1.14.0-beta.19) (2025-08-14)
 
 
