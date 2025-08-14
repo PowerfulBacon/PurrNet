@@ -122,8 +122,7 @@ namespace PurrNet.Transports
 
         private void Awake()
         {
-            ReconstructServer();
-
+            CleanupServer();
             _client = SimpleWebClient.Create(ushort.MaxValue, 5000, _tcpConfig);
             _client.onConnect += OnClientConnected;
             _client.onDisconnect += OnClientDisconnected;
@@ -141,11 +140,21 @@ namespace PurrNet.Transports
             onDataSent?.Invoke(conn, data, asServer);
         }
 
-        private void ReconstructServer()
+        private void ConstructServer()
         {
-            _connections.Clear();
+            CleanupServer();
 
             var sslConfig = new SslConfig(_enableSSL, _certPath, _certPassword, _sslProtocols);
+            _server = new SimpleWebServer(5000, _tcpConfig, ushort.MaxValue, 5000, sslConfig);
+            _server.onConnect += OnClientConnectedToServer;
+            _server.onDisconnect += OnClientDisconnectedFromServer;
+            _server.onData += OnServerReceivedData;
+            _server.onError += OnServerError;
+        }
+
+        private void CleanupServer()
+        {
+            _connections.Clear();
 
             if (_server != null)
             {
@@ -158,11 +167,7 @@ namespace PurrNet.Transports
                 _server.onError -= OnServerError;
             }
 
-            _server = new SimpleWebServer(5000, _tcpConfig, ushort.MaxValue, 5000, sslConfig);
-            _server.onConnect += OnClientConnectedToServer;
-            _server.onDisconnect += OnClientDisconnectedFromServer;
-            _server.onData += OnServerReceivedData;
-            _server.onError += OnServerError;
+            _server = null;
         }
 
         private void OnClientReceivedData(ArraySegment<byte> data)
@@ -226,6 +231,7 @@ namespace PurrNet.Transports
             listenerState = ConnectionState.Connecting;
             TriggerConnectionStateEvent(true);
 
+            ConstructServer();
             _server.Start(port, _forceIpv4);
 
             listenerState = ConnectionState.Connected;
@@ -292,7 +298,7 @@ namespace PurrNet.Transports
             listenerState = ConnectionState.Disconnected;
             TriggerConnectionStateEvent(true);
 
-            ReconstructServer();
+            CleanupServer();
         }
 
         public void Connect(string ip, ushort port)
