@@ -97,6 +97,29 @@ namespace PurrNet.Packing
             }
         }
 
+        public static T ReadSimple(BitPacker packer, T oldValue)
+        {
+            T newValue = default;
+
+            try
+            {
+                if (_read == null)
+                {
+                    DeltaPacker.FallbackReader(packer, oldValue, ref newValue);
+                    return newValue;
+                }
+
+                _read(packer, oldValue, ref newValue);
+                return newValue;
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogError($"Failed to delta read value of type '{typeof(T)}'.\n{e.Message}\n{e.StackTrace}");
+            }
+
+            return newValue;
+        }
+
         public static void Read(BitPacker packer, T oldValue, ref T value)
         {
             try
