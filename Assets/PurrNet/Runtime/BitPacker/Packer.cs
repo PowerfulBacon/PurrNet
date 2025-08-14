@@ -192,7 +192,9 @@ namespace PurrNet.Packing
             }
             else
             {
-                PurrLogger.LogError($"Type '{type}' does not match expected type '{typeof(T)}'.");
+                PurrLogger.LogError(result != null
+                    ? $"While reaing `{type}`, we got `{result.GetType()}` which does not match expected type `{typeof(T)}`."
+                    : $"Type `{type}` does not match expected type `{typeof(T)}`.");
                 value = default;
             }
         }
