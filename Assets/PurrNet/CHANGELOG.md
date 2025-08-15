@@ -1,3 +1,40 @@
+# [1.14.0](https://github.com/PurrNet/PurrNet/compare/v1.13.3...v1.14.0) (2025-08-15)
+
+
+### Bug Fixes
+
+* actual il fixes ([6a8176e](https://github.com/PurrNet/PurrNet/commit/6a8176e99ebb8ae73c7a6cd99d98001cadfe2248))
+* allow DontPack to be at the type level ([354f271](https://github.com/PurrNet/PurrNet/commit/354f27178bc420b279c50c79a01e7c02fb09e2b5))
+* allow for null values when reading classes with inheritance ([86db192](https://github.com/PurrNet/PurrNet/commit/86db1929d3d81367e362effb6537fa28abc511ac))
+* allow for value modifiers for the delta module ([c0ddf66](https://github.com/PurrNet/PurrNet/commit/c0ddf665067973d5d28c2c63ad01a4a8c941ce1f))
+* also cleanup on destroy ([2d47451](https://github.com/PurrNet/PurrNet/commit/2d47451772812bf5caf09c6c7af4e69d602c3485))
+* delta list packing ([7392b4b](https://github.com/PurrNet/PurrNet/commit/7392b4b6e276ae91cde72dd2b3c509194cc1e1ab))
+* disposable list packer issue ([23598b9](https://github.com/PurrNet/PurrNet/commit/23598b9192b0f0402d1487d7e84644d14b4f97f4))
+* dont create a server object until we need it since it causes issues ([801db42](https://github.com/PurrNet/PurrNet/commit/801db425600b41bf6eb0b9fc295edb9d082324b2))
+* if we hit cleanup from `OnDisable` force close the connection ([318c5ed](https://github.com/PurrNet/PurrNet/commit/318c5edfd59fe0af734821cdd23c7dadde524b69))
+* il error ([5e27ed6](https://github.com/PurrNet/PurrNet/commit/5e27ed62c9bfdfe0d3644e2e6dd5ae14d09018b7))
+* IL generic resolving ([9f04291](https://github.com/PurrNet/PurrNet/commit/9f042912b8628a53384195d30c051f8974fa1af9))
+* make `DontPack` attribute skip creating generators entirely if at the class level ([e18bf9c](https://github.com/PurrNet/PurrNet/commit/e18bf9c2e77658f33e9d8b1756dffd050306e33e))
+* mark manual spawns such that we handle them differently (like not populating observers automatically) ([2dc77b8](https://github.com/PurrNet/PurrNet/commit/2dc77b8d8bc358902a5d407ddd8dcc5475de91f6))
+* more modifier delta packing fixes ([c604c50](https://github.com/PurrNet/PurrNet/commit/c604c50fd946ff5460fe63e7921e455885ea42eb))
+* more robust register calling and skipping of assemblies that don't refrence the purrnet assembly ([5daec62](https://github.com/PurrNet/PurrNet/commit/5daec625ecb0c3cb405162afc2bcdb772f170d81))
+* return value of ValueModifier wasnt necessary ([ed0d668](https://github.com/PurrNet/PurrNet/commit/ed0d668b7ade468ca9024527d7bae92a2c5980d0))
+* rework how RPC are called ([0f3c4f1](https://github.com/PurrNet/PurrNet/commit/0f3c4f1cfe992a89ca719afe53fd6e167c840d72))
+* Statistics manager versioning position fix ([1539c54](https://github.com/PurrNet/PurrNet/commit/1539c54a46659045893b82665387e52c6bfaca51))
+* Sync List null handling issue ([5704d83](https://github.com/PurrNet/PurrNet/commit/5704d83add83ced6dbab7138cfb3ea0d8f09fe8e))
+* syncvar equality check regression ([d280ed5](https://github.com/PurrNet/PurrNet/commit/d280ed58bb1109a4f4622ff393271edc4da4e9ed))
+* testing NetworkBones component ([7bcd4d5](https://github.com/PurrNet/PurrNet/commit/7bcd4d598cfca35fbfd19d569fd3ebe2cfdfe40b))
+* type error deeper error message ([06904ef](https://github.com/PurrNet/PurrNet/commit/06904ef17432e96fb2ea86705a0bfcbf3f173e46))
+* UnityProxy fails if manager doesn't have prefab provider ([fd2e674](https://github.com/PurrNet/PurrNet/commit/fd2e6746c5c4798430c55c4e41d1ee1fe3806a04))
+* write/read with modifier bad history ([b8a7e3c](https://github.com/PurrNet/PurrNet/commit/b8a7e3c2ee6fc04f49279fbbed66db7783793749))
+
+
+### Features
+
+* add Packer.HasPacker and DeltaPacker.HasPacker ([a643b7b](https://github.com/PurrNet/PurrNet/commit/a643b7b30895e2f3be34c925d77b2282a456be8d))
+* allow to force ipv4 for web transport ([83756ea](https://github.com/PurrNet/PurrNet/commit/83756eae66255ae2e1abac7e0009690876f1e59b))
+* allow to not delta compress certain fields ([f320274](https://github.com/PurrNet/PurrNet/commit/f32027485614946ff34d65e8cfc5f730304fe402))
+
 # [1.14.0-beta.22](https://github.com/PurrNet/PurrNet/compare/v1.14.0-beta.21...v1.14.0-beta.22) (2025-08-14)
 
 
