@@ -184,6 +184,8 @@ namespace PurrNet
             _ownerAuth = ownerAuth;
         }
 
+        private static T _cache;
+
         [TargetRpc, UsedImplicitly]
         private void SendLatestState(PlayerID player, PackedULong packetId, BitPacker newValue)
         {
@@ -193,8 +195,11 @@ namespace PurrNet
 
                 _id = packetId;
 
-                bool bothNull = _value == null && newValue == null;
-                bool bothEqual = _value != null && _value.Equals(newValue);
+                Packer<T>.Read(newValue, ref _cache);
+                newValue.SetBitPosition(0);
+
+                bool bothNull = _value == null && _cache == null;
+                bool bothEqual = _value != null && _value.Equals(_cache);
 
                 if (bothNull || bothEqual)
                     return;
@@ -282,8 +287,11 @@ namespace PurrNet
 
             _id = packetId;
 
-            bool bothNull = _value == null && newValue == null;
-            bool bothEqual = _value != null && _value.Equals(newValue);
+            Packer<T>.Read(newValue, ref _cache);
+            newValue.SetBitPosition(0);
+
+            bool bothNull = _value == null && _cache == null;
+            bool bothEqual = _value != null && _value.Equals(_cache);
 
             if (bothNull || bothEqual)
                 return;

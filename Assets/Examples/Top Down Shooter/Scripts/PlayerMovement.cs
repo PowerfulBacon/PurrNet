@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace PurrNet.Examples.TopDownShooter
 {
-    public class PlayerMovement : NetworkIdentity
+    public class PlayerMovement : NetworkBehaviour
     {
         [SerializeField] private Reference<Transform> _visuals;
         [SerializeField] private float moveSpeed = 4f;

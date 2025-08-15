@@ -17,90 +17,6 @@ namespace PurrNet.Packing
 
     public delegate void ReadFunc<T>(BitPacker packer, ref T value);
 
-    public static class DeltaPacker<T>
-    {
-        static DeltaWriteFunc<T> _write;
-        static DeltaReadFunc<T> _read;
-
-        public static int GetNecessaryBitsToWrite(in T oldValue, in T newValue)
-        {
-            if (_write == null)
-            {
-                PurrLogger.LogError($"No delta writer for type '{typeof(T)}' is registered.");
-                return 0;
-            }
-
-            using var packer = BitPackerPool.Get();
-            if (_write(packer, oldValue, newValue))
-                return packer.positionInBits;
-            return 0;
-        }
-
-        public static void Register(DeltaWriteFunc<T> write, DeltaReadFunc<T> read)
-        {
-            RegisterWriter(write);
-            RegisterReader(read);
-        }
-
-        public static void RegisterWriter(DeltaWriteFunc<T> a)
-        {
-            if (_write != null)
-                return;
-
-            DeltaPacker.RegisterWriter(typeof(T), a.Method);
-            _write = a;
-        }
-
-        public static void RegisterReader(DeltaReadFunc<T> b)
-        {
-            if (_read != null)
-                return;
-
-            DeltaPacker.RegisterReader(typeof(T), b.Method);
-            _read = b;
-        }
-
-        public static bool Write(BitPacker packer, T oldValue, T newValue)
-        {
-            try
-            {
-                if (_write == null)
-                    return DeltaPacker.FallbackWriter(packer, oldValue, newValue);
-                return _write(packer, oldValue, newValue);
-            }
-            catch (Exception e)
-            {
-                PurrLogger.LogError($"Failed to delta write value of type '{typeof(T)}'.\n{e.Message}\n{e.StackTrace}");
-                return false;
-            }
-        }
-
-        public static void Read(BitPacker packer, T oldValue, ref T value)
-        {
-            try
-            {
-                if (_read == null)
-                {
-                    DeltaPacker.FallbackReader(packer, oldValue, ref value);
-                    return;
-                }
-
-                _read(packer, oldValue, ref value);
-            }
-            catch (Exception e)
-            {
-                PurrLogger.LogError($"Failed to delta read value of type '{typeof(T)}'.\n{e.Message}\n{e.StackTrace}");
-            }
-        }
-
-        public static void Serialize(BitPacker packer, T oldValue, ref T value)
-        {
-            if (packer.isWriting)
-                Write(packer, oldValue, value);
-            else Read(packer, oldValue, ref value);
-        }
-    }
-
     public static class Packer<T>
     {
         static WriteFunc<T> _write;
@@ -123,6 +39,11 @@ namespace PurrNet.Packing
             else _writeWrapper = WriteAsExactType;
 
             Packer.RegisterWriter(typeof(T), _write.Method, _writeWrapper.Method);
+        }
+
+        public static bool HasPacker()
+        {
+            return _write != null;
         }
 
         public static void RegisterReader(ReadFunc<T> b)
@@ -265,14 +186,18 @@ namespace PurrNet.Packing
             object result = value;
             Packer.ReadAsExactType(packer, type, ref result);
 
-            if (result is T cast)
+            switch (result)
             {
-                value = cast;
-            }
-            else
-            {
-                PurrLogger.LogError($"Type '{type}' does not match expected type '{typeof(T)}'.");
-                value = default;
+                case null:
+                    value = default;
+                    break;
+                case T cast:
+                    value = cast;
+                    break;
+                default:
+                    PurrLogger.LogError($"While reading `{type}`, we got `{result.GetType()}` which does not match expected type `{typeof(T)}`.");
+                    value = default;
+                    break;
             }
         }
 

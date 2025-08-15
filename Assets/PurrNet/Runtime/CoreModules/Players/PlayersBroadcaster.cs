@@ -145,7 +145,40 @@ namespace PurrNet
                 _broadcastModule.Send(conn, data, method);
         }
 
+        public void Send<T>(IEnumerable<PlayerID> players, T data, Channel method = Channel.ReliableOrdered)
+        {
+            _connections.Clear();
+
+            foreach (var player in players)
+            {
+                if (player.isBot)
+                    continue;
+
+                if (_playersManager.TryGetConnection(player, out var conn))
+                    _connections.Add(conn);
+            }
+
+            _broadcastModule.Send(_connections, data, method);
+        }
+
         public void Send<T>(IReadOnlyList<PlayerID> players, T data, Channel method = Channel.ReliableOrdered)
+        {
+            _connections.Clear();
+
+            for (var index = 0; index < players.Count; index++)
+            {
+                var player = players[index];
+                if (player.isBot)
+                    continue;
+
+                if (_playersManager.TryGetConnection(player, out var conn))
+                    _connections.Add(conn);
+            }
+
+            _broadcastModule.Send(_connections, data, method);
+        }
+
+        public void Send<T>(IList<PlayerID> players, T data, Channel method = Channel.ReliableOrdered)
         {
             _connections.Clear();
 

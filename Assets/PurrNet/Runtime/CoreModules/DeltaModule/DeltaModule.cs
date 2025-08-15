@@ -9,6 +9,8 @@ using PurrNet.Utils;
 
 namespace PurrNet.Modules
 {
+    public delegate void ValueModifier<T>(ref T oldValue);
+
     public class DeltaModule : INetworkModule, IPostFixedUpdate
     {
         private readonly PlayersManager _players;
@@ -121,8 +123,51 @@ namespace PurrNet.Modules
             return Write(packer, player, key, newValue, ref cache);
         }
 
-        public bool WriteReliable<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue)
-            where Key : struct, IStableHashable
+        public bool WriteReliableWithModifier<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue, ValueModifier<T> modifier) where Key : struct, IStableHashable
+        {
+            var hash = GetKeyHash(key);
+            var tracker = GetOrCreateTracker<T>(player, hash, true);
+
+            T oldValue = default;
+
+            int id = tracker.GetLastMatch();
+
+            if (id >= 0)
+            {
+                if (tracker.TryGetValueAtIndex(id, out var confirmedValue))
+                {
+                    oldValue = Packer.Copy(confirmedValue);
+                }
+                else
+                {
+                    PurrLogger.LogError($"Confirmed value not found for key {hash} and {id} and player {player}");
+                    oldValue = default;
+                }
+            }
+
+            var pos = packer.positionInBits;
+            Packer<bool>.Write(packer, false);
+            modifier(ref oldValue);
+            bool changed = DeltaPacker<T>.Write(packer, oldValue, newValue);
+
+            packer.WriteAt(pos, changed);
+
+            if (changed)
+            {
+                tracker.Set(newValue);
+                if (oldValue is IDisposable disposable)
+                    disposable.Dispose();
+            }
+            else
+            {
+                tracker.SetWithoutCopy(oldValue);
+                packer.SetBitPosition(pos + 1);
+            }
+
+            return changed;
+        }
+
+        public bool WriteReliable<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue) where Key : struct, IStableHashable
         {
             var hash = GetKeyHash(key);
             var tracker = GetOrCreateTracker<T>(player, hash, true);
@@ -229,6 +274,37 @@ namespace PurrNet.Modules
             else
             {
                 newValue = Packer.Copy(tracker.GetLastValue());
+            }
+        }
+
+        public void ReadReliableWithModifier<Key, T>(BitPacker packer, Key key, ref T newValue, ValueModifier<T> modifier) where Key : struct, IStableHashable
+        {
+            var player = _players.localPlayerId ?? default;
+
+            var keyHash = GetKeyHash(key);
+            var tracker = GetOrCreateTracker<T>(player, keyHash, false);
+
+            bool changed = false;
+
+            Packer<bool>.Read(packer, ref changed);
+
+            if (changed)
+            {
+                var oldValue = Packer.Copy(tracker.GetLastValue());
+
+                modifier(ref oldValue);
+                DeltaPacker<T>.Read(packer, oldValue, ref newValue);
+                tracker.Set(newValue);
+
+                if (oldValue is IDisposable disposable)
+                    disposable.Dispose();
+            }
+            else
+            {
+                var oldValue = Packer.Copy(tracker.GetLastValue());
+                modifier(ref oldValue);
+                newValue = oldValue;
+                tracker.Set(oldValue);
             }
         }
 

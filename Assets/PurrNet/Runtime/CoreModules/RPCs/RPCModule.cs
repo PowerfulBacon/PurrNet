@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using K4os.Compression.LZ4;
 using PurrNet.Logging;
 using PurrNet.Packing;
+using PurrNet.Pooling;
 using PurrNet.Transports;
 using PurrNet.Utils;
 
@@ -204,7 +206,7 @@ namespace PurrNet.Modules
                         if (signature.excludeSender && nm.isClient)
                             _observers.Remove(GetLocalPlayer(nm));
 
-                        players.Send(_observers, packet, signature.channel);
+                        players.SendList(_observers, packet, signature.channel);
                     }
                     else nm.GetModule<PlayersManager>(false).SendToServer(packet, signature.channel);
 
@@ -213,12 +215,21 @@ namespace PurrNet.Modules
                 case RPCType.TargetRPC:
                 {
                     if (nm.isServer)
-                        nm.GetModule<PlayersManager>(true)
-                            .Send(signature.targetPlayer!.Value, packet, signature.channel);
+                    {
+                        var players = nm.GetModule<PlayersManager>(true);
+                        using var targets = signature.GetTargets();
+                        players.SendList(targets, packet, signature.channel);
+                    }
                     else
                     {
-                        packet.targetPlayerId = signature.targetPlayer!.Value;
-                        nm.GetModule<PlayersManager>(false).SendToServer(packet, signature.channel);
+                        using var players = signature.GetTargets();
+
+                        // TODO: We should batch this into one packet... but hey, too lazy rn
+                        for (var i = 0; i < players.Count; i++)
+                        {
+                            packet.targetPlayerId = players[i];
+                            nm.GetModule<PlayersManager>(false).SendToServer(packet, signature.channel);
+                        }
                     }
                     break;
                 }
@@ -650,9 +661,11 @@ namespace PurrNet.Modules
             }
         }
 
-        static readonly Dictionary<RPCKey, IntPtr> _rpcHandlers = new Dictionary<RPCKey, IntPtr>();
+        static readonly Dictionary<RPCKey, StaticRPCHandler> _rpcHandlers = new ();
 
-        static IntPtr GetRPCHandler(IReflect type, byte rpcId)
+        delegate void StaticRPCHandler(BitPacker stream, StaticRPCPacket packet, RPCInfo info, bool asServer);
+
+        static StaticRPCHandler GetStaticRPCHandler(Type type, byte rpcId)
         {
             var rpcKey = new RPCKey(type, rpcId);
 
@@ -662,13 +675,21 @@ namespace PurrNet.Modules
             string methodName = $"HandleRPCGenerated_{rpcId}";
             var method = type.GetMethod(methodName,
                 BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
-            var ptr = method != null ? method.MethodHandle.GetFunctionPointer() : IntPtr.Zero;
 
-            if (ptr != IntPtr.Zero)
-                _rpcHandlers[rpcKey] = ptr;
+            if (method != null)
+            {
+                var d = Delegate.CreateDelegate(typeof(StaticRPCHandler), method);
+                if (d is StaticRPCHandler staticDel)
+                {
+                    _rpcHandlers[rpcKey] = staticDel;
+                    return staticDel;
+                }
+            }
 
-            return ptr;
+            _rpcHandlers[rpcKey] = null;
+            return null;
         }
+
 
         unsafe void ReceiveStaticRPC(PlayerID player, StaticRPCPacket data, bool asServer)
         {
@@ -680,7 +701,7 @@ namespace PurrNet.Modules
 
             using var stream = BitPackerPool.Get(data.data);
 
-            var rpcHandlerPtr = GetRPCHandler(type, data.rpcId);
+            var rpcHandlerPtr = GetStaticRPCHandler(type, data.rpcId);
             var info = new RPCInfo
             {
                 manager = _manager,
@@ -688,13 +709,11 @@ namespace PurrNet.Modules
                 asServer = asServer
             };
 
-            if (rpcHandlerPtr != IntPtr.Zero)
+            if (rpcHandlerPtr != null)
             {
                 try
                 {
-                    // Call the RPC handler
-                    ((delegate* managed<BitPacker, StaticRPCPacket, RPCInfo, bool, void>)
-                        rpcHandlerPtr)(stream, data, info, asServer);
+                    rpcHandlerPtr(stream, data, info, asServer);
                 }
                 catch (BypassLoggingException)
                 {
@@ -708,7 +727,7 @@ namespace PurrNet.Modules
             else PurrLogger.LogError($"Can't find RPC handler for id {data.rpcId} on '{type.Name}'.");
         }
 
-        unsafe void ReceiveChildRPC(PlayerID player, ChildRPCPacket packet, bool asServer)
+        void ReceiveChildRPC(PlayerID player, ChildRPCPacket packet, bool asServer)
         {
             using var stream = BitPackerPool.Get(packet.data);
 
@@ -731,33 +750,24 @@ namespace PurrNet.Modules
                 }
                 else
                 {
-                    var rpcHandlerPtr = GetRPCHandler(networkClass.GetType(), packet.rpcId);
-
-                    if (rpcHandlerPtr != IntPtr.Zero)
+                    try
                     {
-                        try
-                        {
-                            // Call the RPC handler
-                            ((delegate* managed<NetworkModule, BitPacker, ChildRPCPacket, RPCInfo, bool, void>)
-                                rpcHandlerPtr)(networkClass, stream, packet, info, asServer);
-                        }
-                        catch (BypassLoggingException)
-                        {
-                            // ignore
-                        }
-                        catch (Exception e)
-                        {
-                            PurrLogger.LogException(e);
-                        }
+                        networkClass.OnReceivedRpc(packet.rpcId, stream, packet, info, asServer);
                     }
-                    else
-                        PurrLogger.LogError(
-                            $"Can't find RPC handler for id {packet.rpcId} in identity {identity.GetType().Name}.");
+                    catch (BypassLoggingException)
+                    {
+                        // ignore
+                    }
+                    catch (Exception e)
+                    {
+                        PurrLogger.LogException(e);
+                        PurrLogger.LogError($"{identity.GetType().Name} - {networkClass.GetType().Name} - {packet.rpcId}");
+                    }
                 }
             }
         }
 
-        unsafe void ReceiveRPC(PlayerID player, RPCPacket packet, bool asServer)
+        void ReceiveRPC(PlayerID player, RPCPacket packet, bool asServer)
         {
             using var stream = BitPackerPool.Get(packet.data);
 
@@ -775,27 +785,18 @@ namespace PurrNet.Modules
                     return;
                 }
 
-                var rpcHandlerPtr = GetRPCHandler(identity.GetType(), packet.rpcId);
-                if (rpcHandlerPtr != IntPtr.Zero)
+                try
                 {
-                    try
-                    {
-                        // Call the RPC handler
-                        ((delegate* managed<NetworkIdentity, BitPacker, RPCPacket, RPCInfo, bool, void>)
-                            rpcHandlerPtr)(identity, stream, packet, info, asServer);
-                    }
-                    catch (BypassLoggingException)
-                    {
-                        // ignore
-                    }
-                    catch (Exception e)
-                    {
-                        PurrLogger.LogException(e);
-                    }
+                    identity.OnReceivedRpc(packet.rpcId, stream, packet, info, asServer);
                 }
-                else
-                    PurrLogger.LogError(
-                        $"Can't find RPC handler for id {packet.rpcId} in identity {identity.GetType().Name}.");
+                catch (BypassLoggingException)
+                {
+                    // ignore
+                }
+                catch (Exception e)
+                {
+                    PurrLogger.LogException(e);
+                }
             }
         }
 

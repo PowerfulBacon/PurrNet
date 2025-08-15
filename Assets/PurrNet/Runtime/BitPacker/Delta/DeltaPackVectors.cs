@@ -69,6 +69,38 @@ namespace PurrNet.Packing
         }
 
         [UsedByIL]
+        private static bool WriteVector3(BitPacker packer, Vector3Int oldvalue, Vector3Int newvalue)
+        {
+            int flagPos = packer.AdvanceBits(1);
+            bool hasChanged;
+
+            hasChanged = DeltaPacker<int>.Write(packer, oldvalue.x, newvalue.x);
+            hasChanged = DeltaPacker<int>.Write(packer, oldvalue.y, newvalue.y) || hasChanged;
+            hasChanged = DeltaPacker<int>.Write(packer, oldvalue.z, newvalue.z) || hasChanged;
+
+            packer.WriteAt(flagPos, hasChanged);
+
+            if (!hasChanged)
+                packer.SetBitPosition(flagPos + 1);
+            return hasChanged;
+        }
+
+        [UsedByIL]
+        private static void ReadVector3(BitPacker packer, Vector3Int oldvalue, ref Vector3Int value)
+        {
+            bool hasChanged = default;
+            Packer<bool>.Read(packer, ref hasChanged);
+
+            if (hasChanged)
+            {
+                value.x = DeltaPacker<int>.ReadSimple(packer, oldvalue.x);
+                value.y = DeltaPacker<int>.ReadSimple(packer, oldvalue.y);
+                value.z = DeltaPacker<int>.ReadSimple(packer, oldvalue.z);
+            }
+            else value = oldvalue;
+        }
+
+        [UsedByIL]
         private static bool WriteVector4(BitPacker packer, Vector4 oldvalue, Vector4 newvalue)
         {
             int flagPos = packer.AdvanceBits(1);

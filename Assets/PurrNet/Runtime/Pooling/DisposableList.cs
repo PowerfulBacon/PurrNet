@@ -57,6 +57,14 @@ namespace PurrNet.Pooling
             return val;
         }
 
+        public void AddRange(IList<T> collection)
+        {
+            if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
+            for (var i = 0; i < collection.Count; i++)
+                list.Add(collection[i]);
+            NotifyUsage();
+        }
+
         public void AddRange(IEnumerable<T> collection)
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));

@@ -348,11 +348,19 @@ namespace PurrNet
                     Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
 #endif
                     if (isServer)
-                        SendToTarget(signature.targetPlayer!.Value, packet, signature.channel);
+                    {
+                        using var targets = signature.GetTargets();
+                        Send(targets, packet, signature.channel);
+                    }
                     else
                     {
-                        packet.targetPlayerId = signature.targetPlayer!.Value;
-                        SendToServer(packet, signature.channel);
+                        using var targets = signature.GetTargets();
+                        // TODO: we should batch this into one packet to the server instead of N
+                        for (int i = 0; i < targets.Count; i++)
+                        {
+                            packet.targetPlayerId = targets[i];
+                            SendToServer(packet, signature.channel);
+                        }
                     }
                     break;
                 default: throw new ArgumentOutOfRangeException();

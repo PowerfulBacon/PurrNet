@@ -309,7 +309,6 @@ namespace PurrNet.Transports
                 Channel.ReliableUnordered => DeliveryMethod.ReliableUnordered,
                 Channel.UnreliableSequenced => DeliveryMethod.Sequenced,
                 Channel.ReliableOrdered => DeliveryMethod.ReliableOrdered,
-                Channel.Unreliable => DeliveryMethod.Unreliable,
                 _ => DeliveryMethod.Unreliable
             };
         }
@@ -344,10 +343,20 @@ namespace PurrNet.Transports
             peer?.Disconnect();
         }
 
+        private void OnDestroy()
+        {
+            Cleanup();
+        }
+
         private void OnDisable()
         {
-            _client.Stop();
-            _server.Stop();
+            Cleanup();
+        }
+
+        private void Cleanup()
+        {
+            _client?.Stop();
+            _server?.Stop();
 
             listenerState = ConnectionState.Disconnected;
             clientState = ConnectionState.Disconnected;

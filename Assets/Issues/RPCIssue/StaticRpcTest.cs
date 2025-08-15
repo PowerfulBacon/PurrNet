@@ -1,33 +1,14 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using PurrNet;
 using PurrNet.Packing;
+using PurrNet.Pooling;
 using UnityEngine;
-
-public static class StaticRpcTest2<T>
-{
-    [ObserversRpc(bufferLast: true)]
-    public static void StaticMethod(T data)
-    {
-        Debug.Log($"StaticMethod called with data: {data}");
-    }
-}
 
 public class StaticRpcTest : NetworkIdentity
 {
-    [PurrButton("SendObserverRpc"), UsedImplicitly]
-    public void SendRpc()
-    {
-        var someData = new SomeBaseDataB
-        {
-            someInt = 1,
-            someString = "Hello",
-            someInt2 = 5,
-            someString2 = "World"
-        };
-
-        SendObserverRpcM(72, someData, 42);
-    }
+    [SerializeField] List<ulong> _players;
 
     [PurrButton("SendTargetRpc"), UsedImplicitly]
     public void SendTargetRpc()
@@ -36,24 +17,25 @@ public class StaticRpcTest : NetworkIdentity
             TargetRpc(owner.Value);
     }
 
-    [PurrButton("SendServerRpc"), UsedImplicitly]
+    [PurrButton("Send to list"), UsedImplicitly]
+    public void SendServerRpcList()
+    {
+        using var players = DisposableList<PlayerID>.Create();
+        foreach (var player in _players)
+            players.Add(new PlayerID(player, false));
+        SendObserverRpcM(players, 123456789);
+    }
+
+    [PurrButton("Send to all observer"), UsedImplicitly]
     public void SendServerRpcNoOwner()
     {
-        ServerRpc();
+        SendObserverRpcM(observers, 123456789);
     }
 
-    [ServerRpc(requireOwnership: false)]
-    public void ServerRpc()
+    [TargetRpc(bufferLast: true)]
+    public void SendObserverRpcM<T>(IReadOnlyList<PlayerID> players, T data)
     {
-        Debug.Log($"ServerRpc");
-    }
-
-    [ObserversRpc(bufferLast: true)]
-    public void SendObserverRpcM<T>(int a, T someData, int b) where T : SomeBaseData
-    {
-        Debug.Log($"SendObserverRpcM: {a}");
-        Debug.Log($"SendObserverRpcM: {someData} {someData?.GetType().Name}");
-        Debug.Log($"SendObserverRpcM: {b}");
+        Debug.Log($"SendObserverRpcM: {data}");
     }
 
     [TargetRpc(requireServer: false)]

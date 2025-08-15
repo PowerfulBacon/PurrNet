@@ -12,6 +12,9 @@ namespace PurrNet
         }
     }
 
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = true), Preserve]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum), Preserve]
     public class DontPackAttribute : Attribute { }
+
+    [AttributeUsage(AttributeTargets.Field), Preserve]
+    public class DontDeltaCompressAttribute : Attribute { }
 }

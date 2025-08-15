@@ -28,9 +28,9 @@ namespace JamesFrowen.SimpleWeb
             server = new WebSocketServer(tcpConfig, maxMessageSize, handshakeMaxSize, sslConfig, bufferPool);
         }
 
-        public void Start(ushort port)
+        public void Start(ushort port, bool forceIpv4)
         {
-            server.Listen(port);
+            server.Listen(port, forceIpv4);
             Active = true;
         }
 

@@ -33,6 +33,7 @@ namespace PurrNet.Codegen
 
             var serializer = packerGenType.GetMethod("Read").Import(module);
             var deltaSerializer = deltaPackerGenType.GetMethod("Read").Import(module);
+            var deltaBypassSerializer = deltaPackerGenType.GetMethod("ReadUnpacked").Import(module);
             var packerTypeBoolean =
                 GenerateSerializersProcessor.CreateGenericMethod(packerGenType, module.TypeSystem.Boolean, serializer,
                     module);
@@ -149,15 +150,16 @@ namespace PurrNet.Codegen
                     if (fieldType == null)
                         continue;
 
-                    bool ignore = field.CustomAttributes.Any(a =>
-                        a.AttributeType.FullName == typeof(DontPackAttribute).FullName);
+                    bool ignore = ShouldIgnoreField(field);
 
                     if (ignore)
                         continue;
 
-                    var packer =
-                        GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, fieldType, deltaSerializer,
-                            module);
+                    bool shouldSkipDelta = ShouldNotDeltaPackField(field);
+
+                    var packer = GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, fieldType,
+                        shouldSkipDelta ? deltaBypassSerializer : deltaSerializer,
+                        module);
 
                     if (!field.IsPublic)
                     {
@@ -231,6 +233,7 @@ namespace PurrNet.Codegen
             var deltaPackerGenType = module.GetTypeDefinition(typeof(DeltaPacker<>)).Import(module);
 
             var deltaSerializer = deltaPackerGenType.GetMethod("Write").Import(module);
+            var deltaBypassSerializer = deltaPackerGenType.GetMethod("WriteUnpacked").Import(module);
             var advanceBits = bitPackerType.GetMethod("AdvanceBits", false).Import(module);
             var writeAt = bitPackerType.GetMethod("WriteAt", false).Import(module);
             var setBitPosition = bitPackerType.GetMethod("SetBitPosition", false).Import(module);
@@ -338,14 +341,16 @@ namespace PurrNet.Codegen
                     if (fieldType == null)
                         continue;
 
-                    bool ignore = field.CustomAttributes.Any(a =>
-                        a.AttributeType.FullName == typeof(DontPackAttribute).FullName);
+                    var ignore = ShouldIgnoreField(field);
 
                     if (ignore)
                         continue;
 
+                    bool shouldSkipDelta = ShouldNotDeltaPackField(field);
+
                     var packer =
-                        GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, fieldType, deltaSerializer,
+                        GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, fieldType,
+                            shouldSkipDelta ? deltaBypassSerializer : deltaSerializer,
                             module);
 
                     if (!field.IsPublic)
@@ -426,6 +431,24 @@ namespace PurrNet.Codegen
                 new ScopeDebugInformation(method.Body.Instructions[0], method.Body.Instructions[^1]);
             method.DebugInformation.Scope.Variables.Add(new VariableDebugInformation(flagPos, "flagPos"));
             method.DebugInformation.Scope.Variables.Add(new VariableDebugInformation(isEqualVar, "wasChanged"));
+        }
+
+        private static bool ShouldIgnoreField(FieldDefinition field)
+        {
+            bool ignore = field.CustomAttributes.Any(a =>
+                a.AttributeType.FullName == typeof(DontPackAttribute).FullName) || GenerateSerializersProcessor.DoesTypeHaveDontPackAttribute(field.FieldType.Resolve());
+
+            return ignore;
+        }
+
+        private static bool ShouldNotDeltaPackField(FieldDefinition field)
+        {
+            bool ignore = field.CustomAttributes.Any(a =>
+                a.AttributeType.FullName == typeof(DontDeltaCompressAttribute).FullName);
+
+            if (GenerateSerializersProcessor.DoesTypeHaveAttribute(field.FieldType.Resolve(), typeof(DontDeltaCompressAttribute)))
+                ignore = true;
+            return ignore;
         }
 
         public static void HandleGenericType(AssemblyDefinition assembly, TypeReference type,
