@@ -1,3 +1,10 @@
+## [1.14.1-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.14.1-beta.1...v1.14.1-beta.2) (2025-08-16)
+
+
+### Bug Fixes
+
+* buffer settings for bones ([f4af0eb](https://github.com/PurrNet/PurrNet/commit/f4af0ebbace94885acd8c51e5b9c20ad32d1ce6b))
+
 ## [1.14.1-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.14.0...v1.14.1-beta.1) (2025-08-16)
 
 
