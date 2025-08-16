@@ -17,6 +17,9 @@ namespace PurrNet
         [SerializeField, PurrLock] private float _positionAccuracy = 0.01f;
         [SerializeField, PurrLock] private float _angleAccuracy = 0.5f;
         [SerializeField, PurrLock] private float _scaleAccuracy = 0.05f;
+        [Space]
+        [SerializeField, PurrLock, Min(1)] private int _minBufferSize = 2;
+        [SerializeField, PurrLock, Min(1)] private int _maxBufferSize = 3;
 
         private DisposableList<Transform> _bones = DisposableList<Transform>.Create(512);
         private BoneInfo[] _bonesInfo;
@@ -95,9 +98,9 @@ namespace PurrNet
                     rotHash = new NetworkBoneID(sceneId, nid, bIdx, BoneInfoType.Rotation),
                     scaleHash = new NetworkBoneID(sceneId, nid, bIdx, BoneInfoType.Scale)
                 };
-                _positions[bIdx] = new Interpolated<Vector3>(Vector3.Lerp, _sendDelta, _bones[bIdx].localPosition);
-                _rotations[bIdx] = new Interpolated<Quaternion>(Quaternion.Slerp, _sendDelta, _bones[bIdx].localRotation);
-                _scales[bIdx] = new Interpolated<Vector3>(Vector3.Lerp, _sendDelta, _bones[bIdx].localScale);
+                _positions[bIdx] = new Interpolated<Vector3>(Vector3.Lerp, _sendDelta, _bones[bIdx].localPosition, _maxBufferSize, _minBufferSize);
+                _rotations[bIdx] = new Interpolated<Quaternion>(Quaternion.Slerp, _sendDelta, _bones[bIdx].localRotation, _maxBufferSize, _minBufferSize);
+                _scales[bIdx] = new Interpolated<Vector3>(Vector3.Lerp, _sendDelta, _bones[bIdx].localScale, _maxBufferSize, _minBufferSize);
             }
         }
 
