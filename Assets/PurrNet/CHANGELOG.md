@@ -1,3 +1,13 @@
+## [1.14.1](https://github.com/PurrNet/PurrNet/compare/v1.14.0...v1.14.1) (2025-08-16)
+
+
+### Bug Fixes
+
+* Addon library fixed for manifest handling ([7b13f01](https://github.com/PurrNet/PurrNet/commit/7b13f013218777dc32b4536539915a21411e8e2c))
+* Addon library image request handling improved ([49eccf7](https://github.com/PurrNet/PurrNet/commit/49eccf794307569694ad47d794a70ccca02cd322))
+* buffer settings for bones ([f4af0eb](https://github.com/PurrNet/PurrNet/commit/f4af0ebbace94885acd8c51e5b9c20ad32d1ce6b))
+* NetworkBones adjustments ([5a61a86](https://github.com/PurrNet/PurrNet/commit/5a61a869a55c057609b05773acc9594908ea433c))
+
 ## [1.14.1-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.14.1-beta.3...v1.14.1-beta.4) (2025-08-16)
 
 
