@@ -1,4 +1,3 @@
-using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Pooling;
@@ -17,7 +16,7 @@ namespace PurrNet
         [SerializeField, PurrLock] private float _positionAccuracy = 0.01f;
         [SerializeField, PurrLock] private float _angleAccuracy = 0.5f;
         [SerializeField, PurrLock] private float _scaleAccuracy = 0.05f;
-        [Space]
+        [Header("Interpolation")]
         [SerializeField, PurrLock, Min(1)] private int _minBufferSize = 2;
         [SerializeField, PurrLock, Min(1)] private int _maxBufferSize = 3;
 

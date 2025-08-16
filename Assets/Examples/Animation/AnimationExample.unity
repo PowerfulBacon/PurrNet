@@ -2004,7 +2004,7 @@ MonoBehaviour:
   _ownerAuth: 1
   _sendRatePerSecond: 10
   _positionAccuracy: 0.001
-  _angleAccuracy: 1
+  _angleAccuracy: 0.3
   _scaleAccuracy: 1
   _minBufferSize: 2
   _maxBufferSize: 3
