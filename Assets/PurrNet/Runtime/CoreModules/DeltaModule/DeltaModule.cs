@@ -150,17 +150,17 @@ namespace PurrNet.Modules
             modifier(ref oldValue);
             bool changed = DeltaPacker<T>.Write(packer, oldValue, newValue);
 
-            if (oldValue is IDisposable disposable)
-                disposable.Dispose();
-
             packer.WriteAt(pos, changed);
 
             if (changed)
             {
                 tracker.Set(newValue);
+                if (oldValue is IDisposable disposable)
+                    disposable.Dispose();
             }
             else
             {
+                tracker.SetWithoutCopy(oldValue);
                 packer.SetBitPosition(pos + 1);
             }
 
@@ -301,7 +301,10 @@ namespace PurrNet.Modules
             }
             else
             {
-                newValue = Packer.Copy(tracker.GetLastValue());
+                var oldValue = Packer.Copy(tracker.GetLastValue());
+                modifier(ref oldValue);
+                newValue = oldValue;
+                tracker.Set(oldValue);
             }
         }
 

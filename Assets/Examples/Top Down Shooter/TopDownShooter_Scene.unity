@@ -1732,6 +1732,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
+  _players: 
 --- !u!1 &667181803
 GameObject:
   m_ObjectHideFlags: 0
@@ -3142,11 +3143,11 @@ GameObject:
   - component: {fileID: 1216416898}
   - component: {fileID: 1216416897}
   - component: {fileID: 1216416902}
-  - component: {fileID: 1216416903}
   - component: {fileID: 1216416905}
   - component: {fileID: 1216416907}
   - component: {fileID: 1216416908}
   - component: {fileID: 1216416910}
+  - component: {fileID: 1216416911}
   m_Layer: 0
   m_Name: Network
   m_TagString: Untagged
@@ -3211,29 +3212,6 @@ MonoBehaviour:
   _address: 127.0.0.1
   _timeoutInSeconds: 5
   _pollEventsInUpdate: 0
---- !u!114 &1216416903
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1216416895}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de4778b5edf2476448bcb3ac3d9c35d5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _serverPort: 5001
-  _forceIpv4: 0
-  _maxConnections: 100
-  _address: localhost
-  _query: 
-  _path: 
-  _pollEventsInUpdate: 0
-  _enableSSL: 0
-  _certPath: 
-  _certPassword: 
-  _sslProtocols: 0
 --- !u!114 &1216416905
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3293,6 +3271,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfcb920b5e3b7924ea4f2b8a047e2edf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.LocalTransport
+--- !u!114 &1216416911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1216416895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de4778b5edf2476448bcb3ac3d9c35d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.WebTransport
+  _serverPort: 5001
+  _forceIpv4: 0
+  _maxConnections: 100
+  _address: 127.0.0.1
+  _query: 
+  _path: 
+  _pollEventsInUpdate: 0
+  _enableSSL: 1
+  _certPath: fesfes
+  _certPassword: fesfes
+  _sslProtocols: 0
 --- !u!1 &1284249959
 GameObject:
   m_ObjectHideFlags: 0
@@ -3844,6 +3845,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
+  _players: 
 --- !u!114 &1353588536
 MonoBehaviour:
   m_ObjectHideFlags: 0

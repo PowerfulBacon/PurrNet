@@ -59,15 +59,18 @@ namespace PurrNet.Packing
 
             hasChanged = DeltaPacker<PackedInt>.Write(packer, oldCount, newCount);
 
-            T oldValue = default;
+            T oldNewValue = default;
 
             if (newCount > 0)
             {
                 for (int i = 0; i < newCount.value; i++)
                 {
+                    bool isNewIndex = i >= oldCount.value;
+                    var oldValue = isNewIndex ? oldNewValue : old[i];
+
                     var newValue = value[i];
                     hasChanged = DeltaPacker<T>.Write(packer, oldValue, newValue) || hasChanged;
-                    oldValue = newValue;
+                    oldNewValue = newValue;
                 }
             }
 
@@ -106,13 +109,15 @@ namespace PurrNet.Packing
                 value = DisposableList<T>.Create(count.value);
             else value.Clear();
 
-            T oldValue = default;
+            T oldNewValue = default;
 
             for (int i = 0; i < count; i++)
             {
+                bool isNewIndex = i >= oldCount;
+                var oldValue = isNewIndex ? oldNewValue : old[i];
                 T newValue = default;
                 DeltaPacker<T>.Read(packer, oldValue, ref newValue);
-                oldValue = newValue;
+                oldNewValue = newValue;
                 value.Add(newValue);
             }
         }

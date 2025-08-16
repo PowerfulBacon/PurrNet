@@ -186,14 +186,18 @@ namespace PurrNet.Packing
             object result = value;
             Packer.ReadAsExactType(packer, type, ref result);
 
-            if (result is T cast)
+            switch (result)
             {
-                value = cast;
-            }
-            else
-            {
-                PurrLogger.LogError($"Type '{type}' does not match expected type '{typeof(T)}'.");
-                value = default;
+                case null:
+                    value = default;
+                    break;
+                case T cast:
+                    value = cast;
+                    break;
+                default:
+                    PurrLogger.LogError($"While reading `{type}`, we got `{result.GetType()}` which does not match expected type `{typeof(T)}`.");
+                    value = default;
+                    break;
             }
         }
 
