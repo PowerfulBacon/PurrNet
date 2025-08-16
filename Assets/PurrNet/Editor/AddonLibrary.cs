@@ -288,16 +288,12 @@ namespace PurrNet.Editor
 
         private bool ExistsInProject(Addon addon)
         {
-            if (addon.asManifest)
-            {
-                string manifestPath = "Packages/manifest.json";
-                var manifest = JObject.Parse(File.ReadAllText(manifestPath));
-                var dependencies = manifest["dependencies"] as JObject;
-
-                string parsedName = "com.purrnet." + addon.name.Replace(" ", "").ToLower();
-                return dependencies.ContainsKey(parsedName) && dependencies[parsedName].ToString() == addon.projectUrl;
-            }
-
+            string manifestPath = "Packages/manifest.json";
+            var manifest = JObject.Parse(File.ReadAllText(manifestPath));
+            var dependencies = manifest["dependencies"] as JObject;
+            foreach (var prop in dependencies.Properties())
+                if (prop.Value.Type == JTokenType.String && prop.Value.ToString() == addon.projectUrl)
+                    return true;
             return false;
         }
 
@@ -307,25 +303,31 @@ namespace PurrNet.Editor
             var manifest = JObject.Parse(File.ReadAllText(manifestPath));
             var dependencies = manifest["dependencies"] as JObject;
 
-            string parsedName = "com.purrnet." + addon.name.Replace(" ", "").ToLower();
+            var toRemove = new List<JProperty>();
+            foreach (var prop in dependencies.Properties())
+                if (prop.Value.Type == JTokenType.String && prop.Value.ToString() == addon.projectUrl)
+                    toRemove.Add(prop);
 
-            if (dependencies.ContainsKey(parsedName))
+            if (toRemove.Count > 0)
             {
-                dependencies.Remove(parsedName);
+                foreach (var p in toRemove) p.Remove();
                 File.WriteAllText(manifestPath, manifest.ToString());
+                UnityEditor.PackageManager.Client.Resolve();
+                UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
                 AssetDatabase.Refresh();
             }
         }
 
         private void AddAddon_Manifest(Addon addon)
         {
-            string manifestPath = "Packages/manifest.json";
+            UnityEditor.PackageManager.Client.Add(addon.projectUrl);
+            /*string manifestPath = "Packages/manifest.json";
             var manifest = JObject.Parse(File.ReadAllText(manifestPath));
             var dependencies = manifest["dependencies"] as JObject;
 
             string parsedName = addon.name.Replace(" ", "").ToLower();
             dependencies["com.purrnet." + parsedName] = addon.projectUrl;
-            File.WriteAllText(manifestPath, manifest.ToString());
+            File.WriteAllText(manifestPath, manifest.ToString());*/
             AssetDatabase.Refresh();
         }
 
