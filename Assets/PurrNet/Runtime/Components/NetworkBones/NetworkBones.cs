@@ -16,6 +16,9 @@ namespace PurrNet
         [SerializeField, PurrLock] private float _positionAccuracy = 0.01f;
         [SerializeField, PurrLock] private float _angleAccuracy = 0.5f;
         [SerializeField, PurrLock] private float _scaleAccuracy = 0.05f;
+        [Header("Interpolation")]
+        [SerializeField, PurrLock, Min(1)] private int _minBufferSize = 2;
+        [SerializeField, PurrLock, Min(1)] private int _maxBufferSize = 3;
 
         private DisposableList<Transform> _bones = DisposableList<Transform>.Create(512);
         private BoneInfo[] _bonesInfo;
@@ -42,6 +45,8 @@ namespace PurrNet
 
         private void OnEnable()
         {
+            UnityLatestUpdate.onLatestUpdate += LateLateUpdate;
+
             if (!isSpawned)
                 return;
 
@@ -51,6 +56,11 @@ namespace PurrNet
                 _rotations[bIdx].Teleport(_bones[bIdx].localRotation);
                 _scales[bIdx].Teleport(_bones[bIdx].localScale);
             }
+        }
+
+        private void OnDisable()
+        {
+            UnityLatestUpdate.onLatestUpdate -= LateLateUpdate;
         }
 
         private void GatherBones()
@@ -77,36 +87,36 @@ namespace PurrNet
             _scales = new Interpolated<Vector3>[_bones.Count];
             _bonesInfo = new BoneInfo[_bones.Count];
 
+            var nid = id!.Value;
+
             for (var bIdx = 0; bIdx < _bones.Count; bIdx++)
             {
-                _positions[bIdx] = new Interpolated<Vector3>(Vector3.Lerp, _sendDelta, _bones[bIdx].localPosition);
-                _rotations[bIdx] = new Interpolated<Quaternion>(Quaternion.Slerp, _sendDelta, _bones[bIdx].localRotation);
-                _scales[bIdx] = new Interpolated<Vector3>(Vector3.Lerp, _sendDelta, _bones[bIdx].localScale);
+                _bonesInfo[bIdx] = new BoneInfo
+                {
+                    posHash = new NetworkBoneID(sceneId, nid, bIdx, BoneInfoType.Position),
+                    rotHash = new NetworkBoneID(sceneId, nid, bIdx, BoneInfoType.Rotation),
+                    scaleHash = new NetworkBoneID(sceneId, nid, bIdx, BoneInfoType.Scale)
+                };
+                _positions[bIdx] = new Interpolated<Vector3>(Vector3.Lerp, _sendDelta, _bones[bIdx].localPosition, _maxBufferSize, _minBufferSize);
+                _rotations[bIdx] = new Interpolated<Quaternion>(Quaternion.Slerp, _sendDelta, _bones[bIdx].localRotation, _maxBufferSize, _minBufferSize);
+                _scales[bIdx] = new Interpolated<Vector3>(Vector3.Lerp, _sendDelta, _bones[bIdx].localScale, _maxBufferSize, _minBufferSize);
             }
         }
 
         private void GatherBonesInfo(ref BoneInfo[] info)
         {
-            var nid = id!.Value;
             for (var i = 0; i < _bones.Count; i++)
             {
                 var bone = _bones[i];
-                var boneInfo = new BoneInfo
-                {
-                    localScale = bone.localScale,
-                    posHash = new NetworkBoneID(sceneId, nid, i, BoneInfoType.Position),
-                    rotHash = new NetworkBoneID(sceneId, nid, i, BoneInfoType.Rotation),
-                    scaleHash = new NetworkBoneID(sceneId, nid, i, BoneInfoType.Scale)
-                };
-
+                ref var boneInfo = ref info[i];
+                boneInfo.localScale = bone.localScale;
                 bone.GetLocalPositionAndRotation(out boneInfo.localPosition, out boneInfo.localRotation);
-                info[i] = boneInfo;
             }
         }
 
         private float _accumulateTime;
 
-        private void LateUpdate()
+        private void LateLateUpdate()
         {
             if (!isSpawned)
                 return;
@@ -114,28 +124,38 @@ namespace PurrNet
             if (_bones.Count == 0)
                 return;
 
+            bool asServer = isServer;
+
+            _accumulateTime += Time.deltaTime;
+
             // if we dont control it, update from incoming data
             if (!IsController(_ownerAuth))
             {
                 UpdateVisuals();
 
                 // if we are server we still need to propagate it to the rest
-                if (!isServer)
-                    return;
+                if (asServer && ConsumeTick())
+                    SendTransforms(_serverDeltaModule, true);
+                return;
             }
 
-            _accumulateTime += Time.deltaTime;
-            if (_accumulateTime < _sendDelta)
+            if (!ConsumeTick())
                 return;
+
+            var module = asServer ? _serverDeltaModule : _clientDeltaModule;
+
+            GatherBonesInfo(ref _bonesInfo);
+            SendTransforms(module, asServer);
+        }
+
+        private bool ConsumeTick()
+        {
+            if (_accumulateTime < _sendDelta)
+                return false;
 
             int deltasNeeded = (int)(_accumulateTime / _sendDelta);
             _accumulateTime -= _sendDelta * deltasNeeded;
-
-            bool asServer = isServer;
-            var module = asServer ? _serverDeltaModule : _clientDeltaModule;
-
-            for (int i = 0; i < deltasNeeded; i++)
-                InternalTick(module, asServer);
+            return true;
         }
 
         private void UpdateVisuals()
@@ -143,29 +163,44 @@ namespace PurrNet
             for (var i = 0; i < _bones.Count; i++)
             {
                 var bone = _bones[i];
-                bone.SetLocalPositionAndRotation(
-                    _positions[i].Advance(Time.unscaledDeltaTime),
-                    _rotations[i].Advance(Time.unscaledDeltaTime));
-                bone.localScale = _scales[i].Advance(Time.unscaledDeltaTime);
+                ref var boneInfo = ref _bonesInfo[i];
+
+                var locPos = _positions[i].Advance(Time.unscaledDeltaTime);
+                var locRot = _rotations[i].Advance(Time.unscaledDeltaTime);
+                var locScale = _scales[i].Advance(Time.unscaledDeltaTime);
+
+                bone.SetLocalPositionAndRotation(locPos, locRot);
+                bone.localScale = locScale;
+
+                boneInfo.localPosition = locPos;
+                boneInfo.localRotation = locRot;
+                boneInfo.localScale = locScale;
             }
         }
 
-        void InternalTick(DeltaModule module, bool asServer)
+        void SendTransforms(DeltaModule module, bool asServer)
         {
-            GatherBonesInfo(ref _bonesInfo);
-
             if (asServer)
             {
+                bool checkOwner = _ownerAuth && hasConnectedOwner;
+                var localPlayerCached = localPlayer;
                 for (var i = 0; i < observers.Count; i++)
                 {
-                    SendPositions(observers[i], module);
-                    SendRotations(observers[i], module);
-                    SendScales(observers[i], module);
+                    var observer = observers[i];
+
+                    if ((checkOwner && observer == owner) || observer == localPlayerCached)
+                        continue;
+
+                    SendPositions(observer, module);
+                    SendRotations(observer, module);
+                    SendScales(observer, module);
                 }
             }
-            else
+            else if (!isServer)
             {
                 SendPositions(default, module);
+                SendRotations(default, module);
+                SendScales(default, module);
             }
         }
 
@@ -278,17 +313,18 @@ namespace PurrNet
             RPCInfo info = default)
         {
             using (data)
-                ReadPositions(info.sender, startingIdx, count, data, _clientDeltaModule);
+                ReadPositions(default, startingIdx, count, data, _clientDeltaModule);
         }
 
         [ServerRpc(channel: Channel.Unreliable)]
         private void RpcPositionsToServer(PackedUInt startingIdx, PackedUInt count, BitPacker data, RPCInfo info = default)
         {
-            if (!_ownerAuth)
-                return;
-
             using (data)
+            {
+                if (!_ownerAuth)
+                    return;
                 ReadPositions(info.sender, startingIdx, count, data, _serverDeltaModule);
+            }
         }
 
         private void ReadPositions(PlayerID sender, PackedUInt startingIdx, PackedUInt count, BitPacker packer, DeltaModule module)
@@ -332,11 +368,12 @@ namespace PurrNet
         [ServerRpc(channel: Channel.Unreliable)]
         private void RpcRotationsToServer(PackedUInt startingIdx, PackedUInt count, BitPacker data, RPCInfo info = default)
         {
-            if (!_ownerAuth)
-                return;
-
             using (data)
+            {
+                if (!_ownerAuth)
+                    return;
                 ReadRotations(info.sender, startingIdx, count, data, _serverDeltaModule);
+            }
         }
 
         private void ReadRotations(PlayerID sender, PackedUInt startingIdx, PackedUInt count, BitPacker packer, DeltaModule module)
@@ -380,11 +417,13 @@ namespace PurrNet
         [ServerRpc(channel: Channel.Unreliable)]
         private void RpcScalesToServer(PackedUInt startingIdx, PackedUInt count, BitPacker data, RPCInfo info = default)
         {
-            if (!_ownerAuth)
-                return;
-
             using (data)
+            {
+                if (!_ownerAuth)
+                    return;
+
                 ReadScales(info.sender, startingIdx, count, data, _serverDeltaModule);
+            }
         }
 
         private void ReadScales(PlayerID sender, PackedUInt startingIdx, PackedUInt count, BitPacker packer, DeltaModule module)

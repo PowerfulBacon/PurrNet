@@ -16,7 +16,6 @@ namespace PurrNet.Editor
         private static readonly List<Addon> _transportAddons = new List<Addon>();
         private static readonly List<Addon> _toolAddons = new List<Addon>();
         private static readonly List<Addon> _systemAddons = new List<Addon>();
-        private static readonly List<UnityWebRequest> _imageRequests = new List<UnityWebRequest>();
 
         private static bool _fetchedAddons;
         private UnityWebRequest _request;
@@ -33,7 +32,6 @@ namespace PurrNet.Editor
         public static void ShowWindow()
         {
             _fetchedAddons = false;
-            _imageRequests.Clear();
 
             var window = GetWindow<AddonLibrary>("PurrNet Addon Library");
             window.minSize = new Vector2(350, 300);
@@ -51,27 +49,18 @@ namespace PurrNet.Editor
                 return;
             }
 
-            foreach (var imageRequest in _imageRequests)
+            bool anyError = false, anyPending = false;
+            foreach (var a in _addons)
             {
-                if (!imageRequest.isDone)
-                {
-                    if (imageRequest.result == UnityWebRequest.Result.ConnectionError ||
-                        imageRequest.result == UnityWebRequest.Result.ProtocolError)
-                    {
-                        HandleError(imageRequest.result.ToString());
-                        return;
-                    }
-                }
+                if (a.imageRequest == null) continue;
+                if (!a.imageRequest.isDone) { anyPending = true; continue; }
+                if (a.imageRequest.result == UnityWebRequest.Result.ConnectionError || a.imageRequest.result == UnityWebRequest.Result.ProtocolError) { HandleError(a.imageRequest.error); anyError = true; break; }
+                a.icon = DownloadHandlerTexture.GetContent(a.imageRequest);
+                a.imageRequest.Dispose();
+                a.imageRequest = null;
             }
-
-            foreach (var request in _imageRequests)
-            {
-                if (!request.isDone)
-                {
-                    HandleWaiting("Loading images...");
-                    return;
-                }
-            }
+            if (anyError) return;
+            if (anyPending) { HandleWaiting("Loading images..."); return; }
 
             List<string> availableTabs = new List<string>();
 
@@ -122,54 +111,46 @@ namespace PurrNet.Editor
             {
                 _request = UnityWebRequest.Get("https://pebblesgames.com/wp-content/PurrNet/PurrNetAddons.json");
                 _request.SendWebRequest();
+                return;
             }
-            else if (_request.isDone)
+
+            if (!_request.isDone) return;
+
+            if (_request.result != UnityWebRequest.Result.Success)
             {
-                if (_request.result != UnityWebRequest.Result.Success)
-                {
-                    Debug.LogError(_request.error);
-                }
-                else
-                {
-                    string json = _request.downloadHandler.text;
-                    AddonsWrapper wrapper = JsonUtility.FromJson<AddonsWrapper>(json);
-                    if (wrapper == null || wrapper.addons == null)
-                    {
-                        HandleError("Failed to parse JSON");
-                        return;
-                    }
-
-                    if (wrapper.addons.Count <= 0)
-                    {
-                        HandleError("No addons found");
-                        return;
-                    }
-
-                    _addons.Clear();
-
-                    foreach (var addon in wrapper.addons)
-                    {
-                        var imageRequest = UnityWebRequestTexture.GetTexture(addon.imageUrl);
-                        imageRequest.SendWebRequest();
-                        _imageRequests.Add(imageRequest);
-                        addon.icon = defaultIcon;
-                        _addons.Add(addon);
-
-                        string category = addon.category.ToLower();
-
-                        if (category.Contains("example"))
-                            _exampleAddons.Add(addon);
-                        if (category.Contains("transport"))
-                            _transportAddons.Add(addon);
-                        if (category.Contains("tool"))
-                            _toolAddons.Add(addon);
-                        if (category.Contains("system"))
-                            _systemAddons.Add(addon);
-                    }
-
-                    _fetchedAddons = true;
-                }
+                Debug.LogError(_request.error);
+                return;
             }
+
+            string json = _request.downloadHandler.text;
+            AddonsWrapper wrapper = JsonUtility.FromJson<AddonsWrapper>(json);
+            if (wrapper == null || wrapper.addons == null || wrapper.addons.Count <= 0)
+            {
+                HandleError("No addons found or failed to parse JSON");
+                return;
+            }
+
+            _addons.Clear();
+            _exampleAddons.Clear();
+            _transportAddons.Clear();
+            _toolAddons.Clear();
+            _systemAddons.Clear();
+
+            foreach (var addon in wrapper.addons)
+            {
+                addon.icon = defaultIcon;
+                addon.imageRequest = UnityWebRequestTexture.GetTexture(addon.imageUrl);
+                addon.imageRequest.SendWebRequest();
+                _addons.Add(addon);
+
+                string category = addon.category.ToLower();
+                if (category.Contains("example")) _exampleAddons.Add(addon);
+                if (category.Contains("transport")) _transportAddons.Add(addon);
+                if (category.Contains("tool")) _toolAddons.Add(addon);
+                if (category.Contains("system")) _systemAddons.Add(addon);
+            }
+
+            _fetchedAddons = true;
         }
 
         private void HandleAddons(List<Addon> addonsToHandle)
@@ -288,16 +269,12 @@ namespace PurrNet.Editor
 
         private bool ExistsInProject(Addon addon)
         {
-            if (addon.asManifest)
-            {
-                string manifestPath = "Packages/manifest.json";
-                var manifest = JObject.Parse(File.ReadAllText(manifestPath));
-                var dependencies = manifest["dependencies"] as JObject;
-
-                string parsedName = "com.purrnet." + addon.name.Replace(" ", "").ToLower();
-                return dependencies.ContainsKey(parsedName) && dependencies[parsedName].ToString() == addon.projectUrl;
-            }
-
+            string manifestPath = "Packages/manifest.json";
+            var manifest = JObject.Parse(File.ReadAllText(manifestPath));
+            var dependencies = manifest["dependencies"] as JObject;
+            foreach (var prop in dependencies.Properties())
+                if (prop.Value.Type == JTokenType.String && prop.Value.ToString() == addon.projectUrl)
+                    return true;
             return false;
         }
 
@@ -307,25 +284,31 @@ namespace PurrNet.Editor
             var manifest = JObject.Parse(File.ReadAllText(manifestPath));
             var dependencies = manifest["dependencies"] as JObject;
 
-            string parsedName = "com.purrnet." + addon.name.Replace(" ", "").ToLower();
+            var toRemove = new List<JProperty>();
+            foreach (var prop in dependencies.Properties())
+                if (prop.Value.Type == JTokenType.String && prop.Value.ToString() == addon.projectUrl)
+                    toRemove.Add(prop);
 
-            if (dependencies.ContainsKey(parsedName))
+            if (toRemove.Count > 0)
             {
-                dependencies.Remove(parsedName);
+                foreach (var p in toRemove) p.Remove();
                 File.WriteAllText(manifestPath, manifest.ToString());
+                UnityEditor.PackageManager.Client.Resolve();
+                UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
                 AssetDatabase.Refresh();
             }
         }
 
         private void AddAddon_Manifest(Addon addon)
         {
-            string manifestPath = "Packages/manifest.json";
+            UnityEditor.PackageManager.Client.Add(addon.projectUrl);
+            /*string manifestPath = "Packages/manifest.json";
             var manifest = JObject.Parse(File.ReadAllText(manifestPath));
             var dependencies = manifest["dependencies"] as JObject;
 
             string parsedName = addon.name.Replace(" ", "").ToLower();
             dependencies["com.purrnet." + parsedName] = addon.projectUrl;
-            File.WriteAllText(manifestPath, manifest.ToString());
+            File.WriteAllText(manifestPath, manifest.ToString());*/
             AssetDatabase.Refresh();
         }
 
@@ -364,6 +347,7 @@ namespace PurrNet.Editor
             public string projectUrl;
             public string category;
             public string imageUrl;
+            public UnityWebRequest imageRequest;
             public Texture2D icon;
         }
 

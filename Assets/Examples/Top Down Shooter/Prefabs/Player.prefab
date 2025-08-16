@@ -547,7 +547,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7466e9f056b782b48962f518d5d71a84, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5014570908379591855}
   m_SourcePrefab: {fileID: 100100000, guid: 7466e9f056b782b48962f518d5d71a84, type: 3}
 --- !u!4 &1599962796381844036 stripped
 Transform:
@@ -559,6 +562,32 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 7466e9f056b782b48962f518d5d71a84, type: 3}
   m_PrefabInstance: {fileID: 1278614181189473711}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &5014570908379591855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2125669350971959550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b2213188c66e534489205d559c59594, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.NetworkBones
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _ownerAuth: 1
+  _sendRatePerSecond: 10
+  _positionAccuracy: 0.01
+  _angleAccuracy: 0.5
+  _scaleAccuracy: 0.05
 --- !u!1001 &2879680269106758047
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -630,7 +659,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ddad5d64925931347aa31413bde8db52, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8892276505283531076}
   m_SourcePrefab: {fileID: 100100000, guid: ddad5d64925931347aa31413bde8db52, type: 3}
 --- !u!4 &2340768514705598068 stripped
 Transform:
@@ -642,6 +674,32 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: ddad5d64925931347aa31413bde8db52, type: 3}
   m_PrefabInstance: {fileID: 2879680269106758047}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8892276505283531076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3114173323945344206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b2213188c66e534489205d559c59594, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.NetworkBones
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _ownerAuth: 1
+  _sendRatePerSecond: 10
+  _positionAccuracy: 0.01
+  _angleAccuracy: 0.5
+  _scaleAccuracy: 0.05
 --- !u!1001 &8593810812524289271
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -709,7 +767,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7f83227e5100f204a9a3bd0589b57301, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 227676357989557117}
   m_SourcePrefab: {fileID: 100100000, guid: 7f83227e5100f204a9a3bd0589b57301, type: 3}
 --- !u!4 &8127273411649387292 stripped
 Transform:
@@ -721,6 +782,32 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 7f83227e5100f204a9a3bd0589b57301, type: 3}
   m_PrefabInstance: {fileID: 8593810812524289271}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &227676357989557117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8899729376433070502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b2213188c66e534489205d559c59594, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.NetworkBones
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _ownerAuth: 1
+  _sendRatePerSecond: 10
+  _positionAccuracy: 0.01
+  _angleAccuracy: 0.5
+  _scaleAccuracy: 0.05
 --- !u!1001 &8607107901277641316
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -792,7 +879,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7e9b074bc414e0541a053457b5043ddf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4197097989196747206}
   m_SourcePrefab: {fileID: 100100000, guid: 7e9b074bc414e0541a053457b5043ddf, type: 3}
 --- !u!4 &8140307410169494927 stripped
 Transform:
@@ -804,3 +894,29 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 7e9b074bc414e0541a053457b5043ddf, type: 3}
   m_PrefabInstance: {fileID: 8607107901277641316}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4197097989196747206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8913748296582932277}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b2213188c66e534489205d559c59594, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.NetworkBones
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _ownerAuth: 1
+  _sendRatePerSecond: 10
+  _positionAccuracy: 0.01
+  _angleAccuracy: 0.5
+  _scaleAccuracy: 0.05
