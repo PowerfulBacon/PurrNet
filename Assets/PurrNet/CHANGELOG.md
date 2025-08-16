@@ -1,3 +1,10 @@
+## [1.14.1-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.14.0...v1.14.1-beta.1) (2025-08-16)
+
+
+### Bug Fixes
+
+* NetworkBones adjustments ([5a61a86](https://github.com/PurrNet/PurrNet/commit/5a61a869a55c057609b05773acc9594908ea433c))
+
 # [1.14.0](https://github.com/PurrNet/PurrNet/compare/v1.13.3...v1.14.0) (2025-08-15)
 
 
