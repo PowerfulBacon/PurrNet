@@ -1,3 +1,10 @@
+## [1.14.1-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.14.1-beta.3...v1.14.1-beta.4) (2025-08-16)
+
+
+### Bug Fixes
+
+* Addon library image request handling improved ([49eccf7](https://github.com/PurrNet/PurrNet/commit/49eccf794307569694ad47d794a70ccca02cd322))
+
 ## [1.14.1-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.14.1-beta.2...v1.14.1-beta.3) (2025-08-16)
 
 
