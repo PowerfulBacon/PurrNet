@@ -1,3 +1,10 @@
+## [1.14.1-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.14.1-beta.2...v1.14.1-beta.3) (2025-08-16)
+
+
+### Bug Fixes
+
+* Addon library fixed for manifest handling ([7b13f01](https://github.com/PurrNet/PurrNet/commit/7b13f013218777dc32b4536539915a21411e8e2c))
+
 ## [1.14.1-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.14.1-beta.1...v1.14.1-beta.2) (2025-08-16)
 
 
