@@ -32,6 +32,12 @@ namespace PurrNet
 
         private float _sendDelta;
 
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            _bones.Dispose();
+        }
+
         protected override void OnSpawned()
         {
             _sendDelta = 1f / _sendRatePerSecond;

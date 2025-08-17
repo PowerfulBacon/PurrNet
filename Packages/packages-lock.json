@@ -498,6 +498,13 @@
       "dependencies": {},
       "hash": "d1ef610e9fe3ad0b490cce91594449fc0af809a6"
     },
+    "dev.purrnet.purrdiction": {
+      "version": "https://github.com/PurrNet/PurrDiction.git?path=/Assets/PurrDiction#release",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "2c97d153ca6f9cfc096146679cd881e7e2af4c27"
+    },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
       "depth": 0,
