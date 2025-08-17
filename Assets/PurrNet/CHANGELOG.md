@@ -1,3 +1,10 @@
+## [1.14.2-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.14.1...v1.14.2-beta.1) (2025-08-17)
+
+
+### Bug Fixes
+
+* dispose bones when destroying object ([f92b774](https://github.com/PurrNet/PurrNet/commit/f92b774e412c93c6c4c051bc23744ad66d84fd8e))
+
 ## [1.14.1](https://github.com/PurrNet/PurrNet/compare/v1.14.0...v1.14.1) (2025-08-16)
 
 
