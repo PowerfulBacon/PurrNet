@@ -119,7 +119,19 @@ namespace PurrNet
 
         public bool isInitialized => _animator.isInitialized;
 
-        public Transform avatarRoot => _animator.avatarRoot;
+        private Transform _avatarRoot;
+
+        public Transform avatarRoot
+        {
+            get
+            {
+                if (_avatarRoot == null)
+                {
+                    _avatarRoot = _animator.GetAvatarRoot();
+                }
+                return _avatarRoot;
+            }
+        }
 
         public Vector3 deltaPosition => _animator.deltaPosition;
 
