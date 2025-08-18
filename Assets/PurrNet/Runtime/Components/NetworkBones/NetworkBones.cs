@@ -1,3 +1,4 @@
+using PurrNet.Contributors;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Pooling;
@@ -7,6 +8,7 @@ using UnityEngine;
 
 namespace PurrNet
 {
+    [CourtesyOf("Resolute Games", "https://resolutegames.com/")]
     public class NetworkBones : NetworkIdentity
     {
         [Header("Settings")]
