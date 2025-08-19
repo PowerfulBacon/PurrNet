@@ -1,3 +1,10 @@
+## [1.14.2-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.1...v1.14.2-beta.2) (2025-08-18)
+
+
+### Bug Fixes
+
+* networkbones courtesy of Resolute Games ([896a018](https://github.com/PurrNet/PurrNet/commit/896a01876af0d372c6b3723004e1e78bf99fa9e3))
+
 ## [1.14.2-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.14.1...v1.14.2-beta.1) (2025-08-17)
 
 
