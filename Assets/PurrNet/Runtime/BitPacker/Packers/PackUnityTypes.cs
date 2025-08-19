@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using PurrNet.Modules;
 using UnityEngine;
+using UnityEngine.Android;
 using UnityEngine.SceneManagement;
 
 namespace PurrNet.Packing
@@ -27,6 +28,20 @@ namespace PurrNet.Packing
         static float UnpackHalf(ushort value)
         {
             return value / 65535f * 2f - 1f;
+        }
+
+        [UsedByIL]
+        public static void Write(this BitPacker packer, LayerMask value)
+        {
+            packer.Write((int)value);
+        }
+
+        [UsedByIL]
+        public static void Read(this BitPacker packer, ref LayerMask value)
+        {
+            int val = default;
+            packer.Read(ref val);
+            value = val;
         }
 
         [UsedByIL]
