@@ -258,6 +258,7 @@ namespace PurrNet.Transports
             _client.DisconnectAll();
             _client.Stop();
 
+
             clientState = ConnectionState.Disconnected;
             TriggerConnectionStateEvent(false);
         }

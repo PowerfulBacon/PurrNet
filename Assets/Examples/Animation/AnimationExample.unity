@@ -395,6 +395,7 @@ GameObject:
   - component: {fileID: 1216416897}
   - component: {fileID: 1216416896}
   - component: {fileID: 1216416899}
+  - component: {fileID: 1216416900}
   m_Layer: 0
   m_Name: Network
   m_TagString: Untagged
@@ -432,8 +433,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _stopPlayingOnDisconnect: 0
-  _startServerFlags: 9
-  _startClientFlags: 7
+  _startServerFlags: 1
+  _startClientFlags: 3
   _cookieScope: 1
   _dontDestroyOnLoad: 0
   _transport: {fileID: 1216416896}
@@ -476,6 +477,19 @@ MonoBehaviour:
   _displayType: 3
   fontSize: 13
   textColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &1216416900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1216416895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b3aee62cf1b70642938541d829fb394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Issues.RpcIssue::Reconnect
+  _manager: {fileID: 1216416897}
 --- !u!1 &1326095568
 GameObject:
   m_ObjectHideFlags: 0

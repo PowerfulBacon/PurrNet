@@ -1380,9 +1380,9 @@ namespace PurrNet
 
         IEnumerator StartClientCoroutine()
         {
-            while (serverState is ConnectionState.Disconnecting or ConnectionState.Connecting)
+            yield return null;
+            while (clientState is ConnectionState.Disconnecting or ConnectionState.Connecting)
                 yield return null;
-
             _transport.StartClient(this);
         }
 
