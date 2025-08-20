@@ -1,3 +1,10 @@
+## [1.14.2-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.3...v1.14.2-beta.4) (2025-08-20)
+
+
+### Bug Fixes
+
+* unity 6 color thingy ([4344e4e](https://github.com/PurrNet/PurrNet/commit/4344e4e3026351967944c00c19a98c5fac29d3aa))
+
 ## [1.14.2-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.2...v1.14.2-beta.3) (2025-08-19)
 
 
