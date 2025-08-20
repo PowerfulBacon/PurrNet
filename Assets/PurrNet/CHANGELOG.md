@@ -1,3 +1,10 @@
+## [1.14.2-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.2...v1.14.2-beta.3) (2025-08-19)
+
+
+### Bug Fixes
+
+* pack unity LayerMask ([a23e8dd](https://github.com/PurrNet/PurrNet/commit/a23e8ddc64b88ed17142b63eb07449f89f88ef1a))
+
 ## [1.14.2-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.1...v1.14.2-beta.2) (2025-08-18)
 
 
