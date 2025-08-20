@@ -118,7 +118,7 @@ namespace PurrNet.Editor
                     GUILayout.BeginHorizontal();
                     if (GUILayout.Button("Courtesy of", EditorStyles.label, GUILayout.ExpandWidth(false)))
                         Application.OpenURL(contributor.url);
-                    GUI.color = Color.powderBlue;
+                    GUI.color = new Color(0.6901961f, 0.8784314f, 0.9019608f, 1f);
                     if (GUILayout.Button(contributor.name, EditorStyles.label, GUILayout.ExpandWidth(false)))
                         Application.OpenURL(contributor.url);
                     GUI.color = Color.white;
