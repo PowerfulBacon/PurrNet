@@ -1,18 +1,17 @@
 using System;
 using System.Collections.Generic;
 using PurrNet.Logging;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace PurrNet.Modules
 {
     public static class SceneObjectsModule
     {
-        public static event Func<GameObject, bool> onFilterSceneObjects;
+        public static event Func<NetworkIdentity, bool> onFilterSceneObjects;
 
         private static readonly List<NetworkIdentity> _sceneIdentities = new List<NetworkIdentity>();
 
-        static bool PassesFilters(GameObject go)
+        static bool PassesFilters(NetworkIdentity id)
         {
             if (onFilterSceneObjects == null)
                 return true;
@@ -24,8 +23,8 @@ namespace PurrNet.Modules
                 var @delegate = list[i];
                 try
                 {
-                    var filter = (Func<GameObject, bool>)@delegate;
-                    if (!filter(go))
+                    var filter = (Func<NetworkIdentity, bool>)@delegate;
+                    if (!filter(id))
                         return false;
                 }
                 catch (Exception e)
@@ -60,14 +59,19 @@ namespace PurrNet.Modules
                 var rootObject = rootGameObjects[i];
 
                 if (!rootObject || rootObject.scene.handle != scene.handle) continue;
-                if (!PassesFilters(rootObject)) continue;
 
                 rootObject.gameObject.GetComponentsInChildren(true, _sceneIdentities);
 
                 if (_sceneIdentities.Count == 0) continue;
 
                 rootObject.gameObject.MakeSureAwakeIsCalled();
-                networkIdentities.AddRange(_sceneIdentities);
+
+                for (var index = 0; index < _sceneIdentities.Count; index++)
+                {
+                    var id = _sceneIdentities[index];
+                    if (!PassesFilters(id)) continue;
+                    networkIdentities.Add(id);
+                }
             }
         }
     }
