@@ -1,3 +1,10 @@
+## [1.14.2-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.5...v1.14.2-beta.6) (2025-08-21)
+
+
+### Bug Fixes
+
+* allow to filter purrnet's scene object discovery ([522ef9d](https://github.com/PurrNet/PurrNet/commit/522ef9d042983d83d886c63d05342a7a704d0f50))
+
 ## [1.14.2-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.4...v1.14.2-beta.5) (2025-08-20)
 
 
