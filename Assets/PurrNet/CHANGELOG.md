@@ -1,3 +1,10 @@
+## [1.14.2-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.4...v1.14.2-beta.5) (2025-08-20)
+
+
+### Bug Fixes
+
+* UDP transport reconnection ([c15c6a5](https://github.com/PurrNet/PurrNet/commit/c15c6a5704c4fc83f990de0b42533fae77b7fb3c))
+
 ## [1.14.2-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.3...v1.14.2-beta.4) (2025-08-20)
 
 
