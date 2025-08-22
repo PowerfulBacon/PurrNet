@@ -1,3 +1,10 @@
+## [1.14.2-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.6...v1.14.2-beta.7) (2025-08-21)
+
+
+### Bug Fixes
+
+* filter shouldn't be as broad as a GO ([9c1597f](https://github.com/PurrNet/PurrNet/commit/9c1597faadb2e7c208d1a3e3c2e835ce24e9114b))
+
 ## [1.14.2-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.5...v1.14.2-beta.6) (2025-08-21)
 
 
