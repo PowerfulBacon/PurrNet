@@ -25,6 +25,9 @@ namespace PurrNet.Packing
         public static implicit operator CompressedVector3(Vector3 value) => new CompressedVector3(value.x, value.y, value.z);
         public static implicit operator Vector3(CompressedVector3 vector) => new Vector3(vector.x.value, vector.y.value, vector.z.value);
 
+        public static implicit operator Vector2(CompressedVector3 vector) => new Vector2(vector.x.value, vector.y.value);
+        public static implicit operator CompressedVector3(Vector2 value) => new CompressedVector3(value.x, value.y, 0f);
+
         public bool Equals(CompressedVector3 other)
         {
             return x.Equals(other.x) && y.Equals(other.y) && z.Equals(other.z);
