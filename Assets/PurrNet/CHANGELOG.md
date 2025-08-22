@@ -1,3 +1,10 @@
+## [1.14.2-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.7...v1.14.2-beta.8) (2025-08-22)
+
+
+### Bug Fixes
+
+* avoid reading data if bones aren't ready ([fca1a62](https://github.com/PurrNet/PurrNet/commit/fca1a62a2bba25bf840853afdf3bc7915e5d569d))
+
 ## [1.14.2-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.6...v1.14.2-beta.7) (2025-08-21)
 
 
