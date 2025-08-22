@@ -1,3 +1,11 @@
+# [1.15.0-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.8...v1.15.0-beta.1) (2025-08-22)
+
+
+### Features
+
+* add CompressedVector2 for 2D vector compression ([57a0213](https://github.com/PurrNet/PurrNet/commit/57a021325b3734f60ba37ed4ab1eee4703594501))
+* Add implicit conversion operators for CompressedVector3 <-> Vector2 ([b44f7b5](https://github.com/PurrNet/PurrNet/commit/b44f7b5a2463aa7ea50affd6339244d1196f6885))
+
 ## [1.14.2-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.7...v1.14.2-beta.8) (2025-08-22)
 
 
