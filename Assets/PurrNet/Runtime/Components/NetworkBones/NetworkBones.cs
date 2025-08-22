@@ -337,6 +337,9 @@ namespace PurrNet
 
         private void ReadPositions(PlayerID sender, PackedUInt startingIdx, PackedUInt count, BitPacker packer, DeltaModule module)
         {
+            if (_bonesInfo == null)
+                return;
+
             uint lastIndex = startingIdx + count;
             PackedUInt cache = default;
 
@@ -386,6 +389,9 @@ namespace PurrNet
 
         private void ReadRotations(PlayerID sender, PackedUInt startingIdx, PackedUInt count, BitPacker packer, DeltaModule module)
         {
+            if (_bonesInfo == null)
+                return;
+
             uint lastIndex = startingIdx + count;
             PackedUInt cache = default;
 
@@ -436,6 +442,9 @@ namespace PurrNet
 
         private void ReadScales(PlayerID sender, PackedUInt startingIdx, PackedUInt count, BitPacker packer, DeltaModule module)
         {
+            if (_bonesInfo == null)
+                return;
+
             uint lastIndex = startingIdx + count;
             PackedUInt cache = default;
 
