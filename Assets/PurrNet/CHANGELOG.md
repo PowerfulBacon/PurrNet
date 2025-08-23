@@ -1,3 +1,10 @@
+# [1.15.0-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.4...v1.15.0-beta.5) (2025-08-23)
+
+
+### Features
+
+* endian checks ([5ebbe9f](https://github.com/PurrNet/PurrNet/commit/5ebbe9f220b9790413f42e72151629ec4788ce40))
+
 # [1.15.0-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.3...v1.15.0-beta.4) (2025-08-23)
 
 
