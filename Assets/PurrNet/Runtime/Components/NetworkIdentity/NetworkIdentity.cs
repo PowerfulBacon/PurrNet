@@ -94,6 +94,8 @@ namespace PurrNet
 
         public bool isSetup => _isSetup;
 
+        public bool skipSceneAutoSpawning { get; set; } = false;
+
         /// <summary>
         /// Used for internal cleanup, avoid using this.
         /// </summary>
@@ -104,6 +106,9 @@ namespace PurrNet
 
         public void PreparePrefabInfo(int prefabId, int componentIndex, bool shouldBePooled, bool isSceneObject)
         {
+            if (isSceneObject && skipSceneAutoSpawning)
+                return;
+
             _isSetup = true;
 
             if (isSceneObject)
@@ -130,6 +135,16 @@ namespace PurrNet
         {
             using var dChildren = DisposableList<TransformIdentityPair>.Create(16);
             HierarchyPool.GetDirectChildren(transform, dChildren);
+
+            if (isSceneObject)
+            {
+                for (var i = 0; i < dChildren.Count; i++)
+                {
+                    var child = dChildren[i];
+                    if (child.identity.skipSceneAutoSpawning)
+                        dChildren.RemoveAt(i--);
+                }
+            }
 
             _directChildren ??= new List<NetworkIdentity>(dChildren.Count);
             _directChildren.Clear();
