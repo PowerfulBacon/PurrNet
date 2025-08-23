@@ -1,3 +1,10 @@
+# [1.15.0-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.5...v1.15.0-beta.6) (2025-08-23)
+
+
+### Bug Fixes
+
+* better internal packer resizing calc ([ea6f39d](https://github.com/PurrNet/PurrNet/commit/ea6f39df6c0f66e242e183c083de1c6788f586db))
+
 # [1.15.0-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.4...v1.15.0-beta.5) (2025-08-23)
 
 
