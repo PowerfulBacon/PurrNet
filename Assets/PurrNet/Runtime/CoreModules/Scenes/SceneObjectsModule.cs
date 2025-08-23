@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
@@ -5,10 +6,16 @@ namespace PurrNet.Modules
 {
     public static class SceneObjectsModule
     {
+        public static event Action onPreSceneLoad;
+
+        public static event Action onPostSceneLoad;
+
         private static readonly List<NetworkIdentity> _sceneIdentities = new List<NetworkIdentity>();
 
         public static void GetSceneIdentities(Scene scene, List<NetworkIdentity> networkIdentities)
         {
+            onPreSceneLoad?.Invoke();
+
             var rootGameObjects = scene.GetRootGameObjects();
 
             PurrSceneInfo sceneInfo = null;
@@ -38,6 +45,8 @@ namespace PurrNet.Modules
                 rootObject.gameObject.MakeSureAwakeIsCalled();
                 networkIdentities.AddRange(_sceneIdentities);
             }
+
+            onPostSceneLoad?.Invoke();
         }
     }
 }
