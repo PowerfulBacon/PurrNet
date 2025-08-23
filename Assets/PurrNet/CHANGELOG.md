@@ -1,3 +1,10 @@
+# [1.15.0-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.3...v1.15.0-beta.4) (2025-08-23)
+
+
+### Features
+
+* allow to enable/disable purr buttons ([7d37c56](https://github.com/PurrNet/PurrNet/commit/7d37c5693171ce82217cdd978a4084c53323effa))
+
 # [1.15.0-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.2...v1.15.0-beta.3) (2025-08-23)
 
 
