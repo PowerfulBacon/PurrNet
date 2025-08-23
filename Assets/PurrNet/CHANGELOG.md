@@ -1,3 +1,10 @@
+# [1.15.0-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.1...v1.15.0-beta.2) (2025-08-23)
+
+
+### Bug Fixes
+
+* allow to skip scene auto spawning ([204987c](https://github.com/PurrNet/PurrNet/commit/204987c50ded5d0b76dc5a83a6c7a8e264a95c80))
+
 # [1.15.0-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.8...v1.15.0-beta.1) (2025-08-22)
 
 
