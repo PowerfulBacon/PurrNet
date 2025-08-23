@@ -6,15 +6,15 @@ namespace PurrNet.Modules
 {
     public static class SceneObjectsModule
     {
-        public static event Action onPreSceneLoad;
+        public static event Action<Scene> onPreSceneLoad;
 
-        public static event Action onPostSceneLoad;
+        public static event Action<Scene> onPostSceneLoad;
 
         private static readonly List<NetworkIdentity> _sceneIdentities = new List<NetworkIdentity>();
 
         public static void GetSceneIdentities(Scene scene, List<NetworkIdentity> networkIdentities)
         {
-            onPreSceneLoad?.Invoke();
+            onPreSceneLoad?.Invoke(scene);
 
             var rootGameObjects = scene.GetRootGameObjects();
 
@@ -46,7 +46,7 @@ namespace PurrNet.Modules
                 networkIdentities.AddRange(_sceneIdentities);
             }
 
-            onPostSceneLoad?.Invoke();
+            onPostSceneLoad?.Invoke(scene);
         }
     }
 }
