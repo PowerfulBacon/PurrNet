@@ -1,3 +1,10 @@
+# [1.15.0-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.2...v1.15.0-beta.3) (2025-08-23)
+
+
+### Bug Fixes
+
+* scene load events ([63dbc5c](https://github.com/PurrNet/PurrNet/commit/63dbc5cbbc306c9175230b37209a98c3397cc07c))
+
 # [1.15.0-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.1...v1.15.0-beta.2) (2025-08-23)
 
 
