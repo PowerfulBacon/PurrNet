@@ -100,7 +100,7 @@ namespace PurrNet.Editor
             EnableLeakDetector.AddSymbol("PURR_BUTTONS");
         }
 #endif
-/*
+
 #if PURR_ENDIAN
         [MenuItem("Tools/PurrNet/Packages/Disable Endianness Check", priority = 100)]
         public static void UninstallEndianness()
@@ -113,6 +113,6 @@ namespace PurrNet.Editor
         {
             EnableLeakDetector.AddSymbol("PURR_ENDIAN");
         }
-#endif*/
+#endif
     }
 }
