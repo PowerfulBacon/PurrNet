@@ -222,7 +222,8 @@ namespace PurrNet.Packing
             {
                 if (_isReading)
                     throw new IndexOutOfRangeException($"Not enough bits in the buffer. | {targetPos} > {_buffer.Length << 3}");
-                Array.Resize(ref _buffer, (_buffer.Length + bits) * 2);
+                int newSize = Math.Max(_buffer.Length * 2, (targetPos + 7) / 8);
+                Array.Resize(ref _buffer, newSize);
             }
         }
 
