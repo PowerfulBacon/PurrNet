@@ -919,13 +919,6 @@ namespace PurrNet
 
             if (asServer)
             {
-                if (_serverTickManager != null)
-                {
-                    _serverTickManager.onPreTick -= OnServerPreTick;
-                    _serverTickManager.onTick -= OnServerTick;
-                    _serverTickManager.onPostTick -= OnServerPostTick;
-                }
-
                 _serverTickManager = tickManager;
                 _isServerTicking = true;
 
@@ -1186,6 +1179,7 @@ namespace PurrNet
             if (_isCleaningClient && _clientModules.Cleanup())
             {
                 _clientModules.UnregisterModules();
+                CleanupClientModules();
                 _isCleaningClient = false;
             }
 
@@ -1193,6 +1187,7 @@ namespace PurrNet
             {
                 _isServerTicking = false;
                 _serverModules.UnregisterModules();
+                CleanupServerModules();
                 _isCleaningServer = false;
             }
 
@@ -1348,6 +1343,25 @@ namespace PurrNet
             TriggerUnsubscribeEvents(true);
         }
 
+        private void CleanupServerModules()
+        {
+            if (_serverTickManager != null)
+            {
+                _serverTickManager.onPreTick -= OnServerPreTick;
+                _serverTickManager.onTick -= OnServerTick;
+                _serverTickManager.onPostTick -= OnServerPostTick;
+                _serverTickManager = null;
+            }
+
+            if (_serverPlayersManager != null)
+            {
+                _serverPlayersManager.onPlayerJoined -= OnPlayerJoined;
+                _serverPlayersManager.onPlayerLeft -= OnPlayerLeft;
+                _serverPlayersManager.onLocalPlayerReceivedID -= OnLocalPlayerReceivedID;
+                _serverPlayersManager = null;
+            }
+        }
+
         public void InternalUnregisterClientModules()
         {
             if (!_isSubscribedClient)
@@ -1355,6 +1369,25 @@ namespace PurrNet
 
             _isSubscribedClient = false;
             TriggerUnsubscribeEvents(false);
+        }
+
+        private void CleanupClientModules()
+        {
+            if (_clientTickManager != null)
+            {
+                _clientTickManager.onPreTick -= OnServerPreTick;
+                _clientTickManager.onTick -= OnServerTick;
+                _clientTickManager.onPostTick -= OnServerPostTick;
+                _clientTickManager = null;
+            }
+
+            if (_clientPlayersManager != null)
+            {
+                _clientPlayersManager.onPlayerJoined -= OnPlayerJoined;
+                _clientPlayersManager.onPlayerLeft -= OnPlayerLeft;
+                _clientPlayersManager.onLocalPlayerReceivedID -= OnLocalPlayerReceivedID;
+                _clientPlayersManager = null;
+            }
         }
 
         private Coroutine _clientCoroutine;
