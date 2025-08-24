@@ -1,3 +1,10 @@
+# [1.15.0-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.6...v1.15.0-beta.7) (2025-08-23)
+
+
+### Bug Fixes
+
+* don't put `skipSceneAutoSpawning` in the pool ([e84f639](https://github.com/PurrNet/PurrNet/commit/e84f639b77fcea0922f252768de8812bf8f77857))
+
 # [1.15.0-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.5...v1.15.0-beta.6) (2025-08-23)
 
 
