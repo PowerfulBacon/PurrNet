@@ -1,3 +1,10 @@
+# [1.15.0-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.7...v1.15.0-beta.8) (2025-08-24)
+
+
+### Bug Fixes
+
+* cleanup modules ([729fc3a](https://github.com/PurrNet/PurrNet/commit/729fc3a8330aef563fe1c4d2d15f583999506403))
+
 # [1.15.0-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.6...v1.15.0-beta.7) (2025-08-23)
 
 
