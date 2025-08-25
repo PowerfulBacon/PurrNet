@@ -34,7 +34,7 @@ namespace PurrNet.Editor
         }
 #endif
 
-        private static void RemoveSymbol(string symbol)
+        public static void RemoveSymbol(string symbol)
         {
             var activeBuildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
             var namedTarget = NamedBuildTarget.FromBuildTargetGroup(activeBuildTargetGroup);
@@ -46,9 +46,11 @@ namespace PurrNet.Editor
                 idxOf++;
             content = content.Remove(idxOf, symbol.Length);
             PlayerSettings.SetScriptingDefineSymbols(namedTarget, content);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
 
-        private static void AddSymbol(string symbol)
+        public static void AddSymbol(string symbol)
         {
             var activeBuildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
             var namedTarget = NamedBuildTarget.FromBuildTargetGroup(activeBuildTargetGroup);
@@ -58,6 +60,8 @@ namespace PurrNet.Editor
             content += needsSemicolon ? ";" : "";
             content += symbol;
             PlayerSettings.SetScriptingDefineSymbols(namedTarget, content);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
     }
 
@@ -80,6 +84,34 @@ namespace PurrNet.Editor
             {
                 UnityEditor.PackageManager.Client.Add("https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask");
             }
+        }
+#endif
+
+#if PURR_BUTTONS
+        [MenuItem("Tools/PurrNet/Packages/Disable PurrButtons", priority = 100)]
+        public static void UninstallPurrButtons()
+        {
+            EnableLeakDetector.RemoveSymbol("PURR_BUTTONS");
+        }
+#else
+        [MenuItem("Tools/PurrNet/Packages/Enable PurrButtons", priority = 100)]
+        public static void InstallPurrButtons()
+        {
+            EnableLeakDetector.AddSymbol("PURR_BUTTONS");
+        }
+#endif
+
+#if PURR_ENDIAN
+        [MenuItem("Tools/PurrNet/Packages/Disable Endianness Check", priority = 100)]
+        public static void UninstallEndianness()
+        {
+            EnableLeakDetector.RemoveSymbol("PURR_ENDIAN");
+        }
+#else
+        [MenuItem("Tools/PurrNet/Packages/Enable Endianness Check", priority = 100)]
+        public static void InstallEndianness()
+        {
+            EnableLeakDetector.AddSymbol("PURR_ENDIAN");
         }
 #endif
     }

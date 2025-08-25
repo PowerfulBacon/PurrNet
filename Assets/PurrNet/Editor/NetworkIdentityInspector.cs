@@ -26,6 +26,7 @@ namespace PurrNet.Editor
         private SerializedProperty _networkRules;
         private SerializedProperty _visitiblityRules;
         private readonly List<Contributor> _contributors = new ();
+        private readonly List<Contributor> _courtesyOf = new ();
 
 #if TRI_INSPECTOR_PACKAGE || ODIN_INSPECTOR
         protected override void OnEnable()
@@ -50,6 +51,7 @@ namespace PurrNet.Editor
             {
                 var targetType = target.GetType();
                 var attributes = targetType.GetCustomAttributes(typeof(ContributorAttribute), true);
+                var courtesy = targetType.GetCustomAttributes(typeof(CourtesyOfAttribute), true);
 
                 for (var i = 0; i < attributes.Length; i++)
                 {
@@ -59,6 +61,18 @@ namespace PurrNet.Editor
                         continue;
 
                     _contributors.Add(new Contributor
+                    {
+                        name = attr.name,
+                        url = attr.url
+                    });
+                }
+
+                for (var i = 0; i < courtesy.Length; i++)
+                {
+                    var attr = (CourtesyOfAttribute)courtesy[i];
+                    if (attr == null)
+                        continue;
+                    _courtesyOf.Add(new Contributor
                     {
                         name = attr.name,
                         url = attr.url
@@ -93,6 +107,26 @@ namespace PurrNet.Editor
 
         private void DrawContributors()
         {
+            if (_courtesyOf.Count > 0)
+            {
+                GUILayout.BeginVertical("helpbox");
+
+                foreach (var contributor in _courtesyOf)
+                {
+                    if (string.IsNullOrEmpty(contributor.url))
+                        continue;
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("Courtesy of", EditorStyles.label, GUILayout.ExpandWidth(false)))
+                        Application.OpenURL(contributor.url);
+                    GUI.color = new Color(0.6901961f, 0.8784314f, 0.9019608f, 1f);
+                    if (GUILayout.Button(contributor.name, EditorStyles.label, GUILayout.ExpandWidth(false)))
+                        Application.OpenURL(contributor.url);
+                    GUI.color = Color.white;
+                    EditorGUILayout.EndHorizontal();
+                }
+                EditorGUILayout.EndVertical();
+            }
+
             if (_contributors.Count == 0)
                 return;
 

@@ -1,6 +1,6 @@
 using System;
 using System.Buffers;
-using System.Collections.Generic;
+using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
@@ -222,7 +222,8 @@ namespace PurrNet.Packing
             {
                 if (_isReading)
                     throw new IndexOutOfRangeException($"Not enough bits in the buffer. | {targetPos} > {_buffer.Length << 3}");
-                Array.Resize(ref _buffer, (_buffer.Length + bits) * 2);
+                int newSize = Math.Max(_buffer.Length * 2, (targetPos + 7) / 8);
+                Array.Resize(ref _buffer, newSize);
             }
         }
 
@@ -352,12 +353,24 @@ namespace PurrNet.Packing
                             *b = (byte)data;
                             break;
                         case 16:
+#if PURR_ENDIAN
+                            if (!BitConverter.IsLittleEndian)
+                                data = BinaryPrimitives.ReverseEndianness((ushort)data);
+#endif
                             *(ushort*)b = (ushort)data;
                             break;
                         case 32:
+#if PURR_ENDIAN
+                            if (!BitConverter.IsLittleEndian)
+                                data = BinaryPrimitives.ReverseEndianness((uint)data);
+#endif
                             *(uint*)b = (uint)data;
                             break;
                         case 64:
+#if PURR_ENDIAN
+                            if (!BitConverter.IsLittleEndian)
+                                data = BinaryPrimitives.ReverseEndianness(data);
+#endif
                             *(ulong*)b = data;
                             break;
                         default:
@@ -368,7 +381,7 @@ namespace PurrNet.Packing
                             }
                             else
                             {
-                                // Write full bytes + remainder
+                                // Write full bytes + remainder (always little-endian order)
                                 int fullBytes = bits >> 3;
                                 int remainderBits = bits & 7;
 
@@ -398,6 +411,11 @@ namespace PurrNet.Packing
 
                     ulong mask = ((1UL << bits) - 1) << bitOffset;
                     ulong combined = (existing) | (shifted & mask);
+
+#if PURR_ENDIAN
+                    if (!BitConverter.IsLittleEndian)
+                        combined = BinaryPrimitives.ReverseEndianness(combined);
+#endif
 
                     if (totalBits <= 64)
                     {
@@ -447,7 +465,7 @@ namespace PurrNet.Packing
         public unsafe ulong ReadBits(byte bits)
         {
             if (bits > 64)
-                throw new ArgumentOutOfRangeException(nameof(bits), "Cannot read more than 64 bits at a time.");
+                throw new ArgumentOutOfRangeException(nameof(bits));
 
             int bytePos = _positionInBits >> 3;
             int bitOffset = _positionInBits & 7;
@@ -466,12 +484,24 @@ namespace PurrNet.Packing
                             break;
                         case 16:
                             result = *(ushort*)b;
+#if PURR_ENDIAN
+                            if (!BitConverter.IsLittleEndian)
+                                result = BinaryPrimitives.ReverseEndianness((ushort)result);
+#endif
                             break;
                         case 32:
                             result = *(uint*)b;
+#if PURR_ENDIAN
+                            if (!BitConverter.IsLittleEndian)
+                                result = BinaryPrimitives.ReverseEndianness((uint)result);
+#endif
                             break;
                         case 64:
                             result = *(ulong*)b;
+#if PURR_ENDIAN
+                            if (!BitConverter.IsLittleEndian)
+                                result = BinaryPrimitives.ReverseEndianness(result);
+#endif
                             break;
                         default:
                             if (bits <= 8)
@@ -481,7 +511,7 @@ namespace PurrNet.Packing
                             }
                             else
                             {
-                                // Read full bytes + remainder
+                                // Read full bytes + remainder (always little-endian order)
                                 int fullBytes = bits >> 3;
                                 int remainderBits = bits & 7;
 
@@ -506,12 +536,15 @@ namespace PurrNet.Packing
                     if (totalBits <= 64)
                     {
                         ulong data = *(ulong*)b;
+#if PURR_ENDIAN
+                        if (!BitConverter.IsLittleEndian)
+                            data = BinaryPrimitives.ReverseEndianness(data);
+#endif
                         ulong mask = (1UL << bits) - 1;
                         result = (data >> bitOffset) & mask;
                     }
                     else
                     {
-                        // Fallback for edge cases
                         goto SlowPath;
                     }
                 }
@@ -521,7 +554,7 @@ namespace PurrNet.Packing
             return result;
 
         SlowPath:
-            // Original implementation as fallback
+            // Fallback: manual bit-by-bit read (already little-endian safe)
             result = 0;
             int bitsLeft = bits;
 
@@ -561,35 +594,27 @@ namespace PurrNet.Packing
                 target.WriteBits(ReadBits(64), 64);
         }
 
-        public void ReadBytes(IList<byte> bytes)
+        public void ReadBytes(Span<byte> destination)
         {
-            int count = bytes.Count;
-
-            EnsureBitsExist(count * 8);
-
-            int excess = count % 8;
+            int count = destination.Length;
             int fullChunks = count / 8;
-
+            int excess = count % 8;
             int index = 0;
-
-            // Process excess bytes (remaining bytes before full 64-bit chunks)
-            for (int i = 0; i < excess; i++)
-            {
-                bytes[index++] = (byte)ReadBits(8);
-            }
 
             // Process full 64-bit chunks
             for (int i = 0; i < fullChunks; i++)
             {
-                var longValue = ReadBits(64);
+                ulong longValue = ReadBits(64);
 
-                for (int j = 0; j < 8; j++)
-                {
-                    if (index < count)
-                    {
-                        bytes[index++] = (byte)(longValue >> (j * 8));
-                    }
-                }
+                // Write back as little-endian
+                BinaryPrimitives.WriteUInt64LittleEndian(destination.Slice(index, 8), longValue);
+                index += 8;
+            }
+
+            // Process remaining excess bytes
+            for (int i = 0; i < excess; i++)
+            {
+                destination[index++] = (byte)ReadBits(8);
             }
         }
 
@@ -619,22 +644,16 @@ namespace PurrNet.Packing
             EnsureBitsExist(bytes.Length * 8);
 
             int count = bytes.Length;
-            int fullChunks = count / 8; // Number of full 64-bit chunks
-            int excess = count % 8; // Remaining bytes after full chunks
-
+            int fullChunks = count / 8;
+            int excess = count % 8;
             int index = 0;
 
             // Process full 64-bit chunks
             for (int i = 0; i < fullChunks; i++)
             {
-                ulong longValue = 0;
-
-                // Combine 8 bytes into a single 64-bit value
-                for (int j = 0; j < 8; j++)
-                    longValue |= (ulong)bytes[index++] << (j * 8);
-
-                // Write the 64-bit chunk
+                ulong longValue = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(index, 8));
                 WriteBitsWithoutChecks(longValue, 64);
+                index += 8;
             }
 
             // Process remaining excess bytes
@@ -649,31 +668,39 @@ namespace PurrNet.Packing
             _positionInBits += skip;
         }
 
-        public void WriteString(Encoding utf8, string valueValue)
+        public void WriteString(Encoding encoding, string value)
         {
-            if (valueValue == null)
-            {
-                WriteBits(0, 1);
+            // Null flag
+            WriteBits(value != null ? 1UL : 0UL, 1);
+            if (value == null)
                 return;
-            }
 
-            WriteBits(1, 1);
+            // Encode string into a temporary buffer
+            int byteCount = encoding.GetByteCount(value);
+            EnsureBitsExist(1 + 31 + byteCount * 8);
 
-            byte[] bytes = utf8.GetBytes(valueValue);
-            WriteBits((ulong)bytes.Length, 31);
-            WriteBytes(bytes);
+            // Write length (31 bits)
+            WriteBits((ulong)byteCount, 31);
+
+            // Encode directly into buffer
+            var temp = byteCount <= 256 ? stackalloc byte[byteCount] : new byte[byteCount];
+            encoding.GetBytes(value, temp);
+            WriteBytes(temp);
         }
 
-        public string ReadString(Encoding utf8)
+        public string ReadString(Encoding encoding)
         {
+            // Null flag
             if (ReadBits(1) == 0)
                 return null;
 
-            int byteCount = (int)ReadBits(31);
-            byte[] bytes = new byte[byteCount];
+            // Length
+            int len = (int)ReadBits(31);
 
-            ReadBytes(bytes);
-            return utf8.GetString(bytes);
+            // Read bytes
+            var temp = len <= 256 ? stackalloc byte[len] : new byte[len];
+            ReadBytes(temp);
+            return encoding.GetString(temp);
         }
 
         public char ReadChar()

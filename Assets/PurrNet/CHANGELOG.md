@@ -1,3 +1,116 @@
+# [1.15.0-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.7...v1.15.0-beta.8) (2025-08-24)
+
+
+### Bug Fixes
+
+* cleanup modules ([729fc3a](https://github.com/PurrNet/PurrNet/commit/729fc3a8330aef563fe1c4d2d15f583999506403))
+
+# [1.15.0-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.6...v1.15.0-beta.7) (2025-08-23)
+
+
+### Bug Fixes
+
+* don't put `skipSceneAutoSpawning` in the pool ([e84f639](https://github.com/PurrNet/PurrNet/commit/e84f639b77fcea0922f252768de8812bf8f77857))
+
+# [1.15.0-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.5...v1.15.0-beta.6) (2025-08-23)
+
+
+### Bug Fixes
+
+* better internal packer resizing calc ([ea6f39d](https://github.com/PurrNet/PurrNet/commit/ea6f39df6c0f66e242e183c083de1c6788f586db))
+
+# [1.15.0-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.4...v1.15.0-beta.5) (2025-08-23)
+
+
+### Features
+
+* endian checks ([5ebbe9f](https://github.com/PurrNet/PurrNet/commit/5ebbe9f220b9790413f42e72151629ec4788ce40))
+
+# [1.15.0-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.3...v1.15.0-beta.4) (2025-08-23)
+
+
+### Features
+
+* allow to enable/disable purr buttons ([7d37c56](https://github.com/PurrNet/PurrNet/commit/7d37c5693171ce82217cdd978a4084c53323effa))
+
+# [1.15.0-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.2...v1.15.0-beta.3) (2025-08-23)
+
+
+### Bug Fixes
+
+* scene load events ([63dbc5c](https://github.com/PurrNet/PurrNet/commit/63dbc5cbbc306c9175230b37209a98c3397cc07c))
+
+# [1.15.0-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.15.0-beta.1...v1.15.0-beta.2) (2025-08-23)
+
+
+### Bug Fixes
+
+* allow to skip scene auto spawning ([204987c](https://github.com/PurrNet/PurrNet/commit/204987c50ded5d0b76dc5a83a6c7a8e264a95c80))
+
+# [1.15.0-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.8...v1.15.0-beta.1) (2025-08-22)
+
+
+### Features
+
+* add CompressedVector2 for 2D vector compression ([57a0213](https://github.com/PurrNet/PurrNet/commit/57a021325b3734f60ba37ed4ab1eee4703594501))
+* Add implicit conversion operators for CompressedVector3 <-> Vector2 ([b44f7b5](https://github.com/PurrNet/PurrNet/commit/b44f7b5a2463aa7ea50affd6339244d1196f6885))
+
+## [1.14.2-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.7...v1.14.2-beta.8) (2025-08-22)
+
+
+### Bug Fixes
+
+* avoid reading data if bones aren't ready ([fca1a62](https://github.com/PurrNet/PurrNet/commit/fca1a62a2bba25bf840853afdf3bc7915e5d569d))
+
+## [1.14.2-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.6...v1.14.2-beta.7) (2025-08-21)
+
+
+### Bug Fixes
+
+* filter shouldn't be as broad as a GO ([9c1597f](https://github.com/PurrNet/PurrNet/commit/9c1597faadb2e7c208d1a3e3c2e835ce24e9114b))
+
+## [1.14.2-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.5...v1.14.2-beta.6) (2025-08-21)
+
+
+### Bug Fixes
+
+* allow to filter purrnet's scene object discovery ([522ef9d](https://github.com/PurrNet/PurrNet/commit/522ef9d042983d83d886c63d05342a7a704d0f50))
+
+## [1.14.2-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.4...v1.14.2-beta.5) (2025-08-20)
+
+
+### Bug Fixes
+
+* UDP transport reconnection ([c15c6a5](https://github.com/PurrNet/PurrNet/commit/c15c6a5704c4fc83f990de0b42533fae77b7fb3c))
+
+## [1.14.2-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.3...v1.14.2-beta.4) (2025-08-20)
+
+
+### Bug Fixes
+
+* unity 6 color thingy ([4344e4e](https://github.com/PurrNet/PurrNet/commit/4344e4e3026351967944c00c19a98c5fac29d3aa))
+
+## [1.14.2-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.2...v1.14.2-beta.3) (2025-08-19)
+
+
+### Bug Fixes
+
+* pack unity LayerMask ([a23e8dd](https://github.com/PurrNet/PurrNet/commit/a23e8ddc64b88ed17142b63eb07449f89f88ef1a))
+
+## [1.14.2-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.14.2-beta.1...v1.14.2-beta.2) (2025-08-18)
+
+
+### Bug Fixes
+
+* networkbones courtesy of Resolute Games ([896a018](https://github.com/PurrNet/PurrNet/commit/896a01876af0d372c6b3723004e1e78bf99fa9e3))
+
+## [1.14.2-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.14.1...v1.14.2-beta.1) (2025-08-17)
+
+
+### Bug Fixes
+
+* dispose bones when destroying object ([f92b774](https://github.com/PurrNet/PurrNet/commit/f92b774e412c93c6c4c051bc23744ad66d84fd8e))
+
 ## [1.14.1](https://github.com/PurrNet/PurrNet/compare/v1.14.0...v1.14.1) (2025-08-16)
 
 

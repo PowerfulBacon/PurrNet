@@ -107,6 +107,13 @@ namespace PurrNet.Modules
                 var children = ListPool<NetworkIdentity>.Instantiate();
                 root.GetComponentsInChildren(true, children);
 
+                // don't spawn scene objects that don't pass the filters
+                for (int j = 0; j < children.Count; j++)
+                {
+                    if (children[j].skipSceneAutoSpawning)
+                        children.RemoveAt(j--);
+                }
+
                 var cc = children.Count;
                 var pid = -i - 2;
 

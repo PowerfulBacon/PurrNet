@@ -73,7 +73,7 @@ namespace PurrNet.Transports
             {
                 if (networkManager.serverState != ConnectionState.Disconnected)
                 {
-                    Debug.LogError($"[{GetType().Name}] Cannot start server since it is already running.");
+                    Debug.LogError($"[{GetType().Name}] Cannot start server since it is already running ({networkManager.serverState}).");
                     return;
                 }
                 networkManager.InternalRegisterServerModules();
@@ -117,7 +117,7 @@ namespace PurrNet.Transports
             {
                 if (networkManager.clientState != ConnectionState.Disconnected)
                 {
-                    Debug.LogError($"[{GetType().Name}] Cannot start client since it is already running.");
+                    Debug.LogError($"[{GetType().Name}] Cannot start client since it is already running ({networkManager.clientState}).");
                     return;
                 }
                 networkManager.InternalRegisterClientModules();

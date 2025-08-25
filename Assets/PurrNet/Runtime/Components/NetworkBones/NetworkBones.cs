@@ -1,3 +1,4 @@
+using PurrNet.Contributors;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Pooling;
@@ -7,6 +8,7 @@ using UnityEngine;
 
 namespace PurrNet
 {
+    [CourtesyOf("Resolute Games", "https://resolutegames.com/")]
     public class NetworkBones : NetworkIdentity
     {
         [Header("Settings")]
@@ -31,6 +33,12 @@ namespace PurrNet
         private DeltaModule _serverDeltaModule;
 
         private float _sendDelta;
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            _bones.Dispose();
+        }
 
         protected override void OnSpawned()
         {
@@ -329,6 +337,9 @@ namespace PurrNet
 
         private void ReadPositions(PlayerID sender, PackedUInt startingIdx, PackedUInt count, BitPacker packer, DeltaModule module)
         {
+            if (_bonesInfo == null)
+                return;
+
             uint lastIndex = startingIdx + count;
             PackedUInt cache = default;
 
@@ -378,6 +389,9 @@ namespace PurrNet
 
         private void ReadRotations(PlayerID sender, PackedUInt startingIdx, PackedUInt count, BitPacker packer, DeltaModule module)
         {
+            if (_bonesInfo == null)
+                return;
+
             uint lastIndex = startingIdx + count;
             PackedUInt cache = default;
 
@@ -428,6 +442,9 @@ namespace PurrNet
 
         private void ReadScales(PlayerID sender, PackedUInt startingIdx, PackedUInt count, BitPacker packer, DeltaModule module)
         {
+            if (_bonesInfo == null)
+                return;
+
             uint lastIndex = startingIdx + count;
             PackedUInt cache = default;
 

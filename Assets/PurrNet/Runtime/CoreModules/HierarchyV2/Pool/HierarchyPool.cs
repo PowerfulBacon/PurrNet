@@ -205,7 +205,7 @@ namespace PurrNet.Modules
             {
                 var child = children[i];
 
-                if (!child)
+                if (!child || child.skipSceneAutoSpawning)
                     continue;
 
                 var pid = new PrefabPieceID(child.prefabId, child.componentIndex);
