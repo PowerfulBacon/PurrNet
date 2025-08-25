@@ -919,9 +919,15 @@ namespace PurrNet
 
             if (asServer)
             {
+                if (_serverTickManager != null)
+                {
+                    _serverTickManager.onPreTick -= OnServerPreTick;
+                    _serverTickManager.onTick -= OnServerTick;
+                    _serverTickManager.onPostTick -= OnServerPostTick;
+                }
+
                 _serverTickManager = tickManager;
                 _isServerTicking = true;
-
                 _serverTickManager.onPreTick += OnServerPreTick;
                 _serverTickManager.onTick += OnServerTick;
                 _serverTickManager.onPostTick += OnServerPostTick;
@@ -1149,6 +1155,7 @@ namespace PurrNet
 
         private void OnTick()
         {
+            var delta = tickModule?.tickDelta ?? Time.fixedUnscaledDeltaTime;
             bool serverConnected = serverState == ConnectionState.Connected;
             bool clientConnected = clientState == ConnectionState.Connected;
 
@@ -1159,7 +1166,7 @@ namespace PurrNet
                 _clientModules.TriggerOnPreFixedUpdate();
 
             if (_transport)
-                _transport.transport.ReceiveMessages(tickModule.tickDelta);
+                _transport.transport.ReceiveMessages(delta);
 
             if (serverConnected)
                 _serverModules.TriggerOnFixedUpdate();
@@ -1174,7 +1181,7 @@ namespace PurrNet
                 _clientModules.TriggerOnPostFixedUpdate();
 
             if (_transport)
-                _transport.transport.SendMessages(tickModule.tickDelta);
+                _transport.transport.SendMessages(delta);
 
             if (_isCleaningClient && _clientModules.Cleanup())
             {
