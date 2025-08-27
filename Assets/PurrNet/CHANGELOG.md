@@ -1,3 +1,10 @@
+## [1.15.1-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.15.0...v1.15.1-beta.1) (2025-08-25)
+
+
+### Bug Fixes
+
+* cleanup issues ([36abd59](https://github.com/PurrNet/PurrNet/commit/36abd590f60caa6e79d7788e4871805b1014ab0e))
+
 # [1.15.0](https://github.com/PurrNet/PurrNet/compare/v1.14.1...v1.15.0) (2025-08-25)
 
 
