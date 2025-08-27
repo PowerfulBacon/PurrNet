@@ -34,7 +34,7 @@ namespace PurrNet.Transports
             public string clientSecret;
         }
 
-        [SerializeField, HideInInspector] private string _masterServer = "https://purrbalancer.riten.dev:8080/";
+        [SerializeField, HideInInspector] private string _masterServer = "https://purrtransport.purrservers.com/";
         [SerializeField, HideInInspector] private string _roomName;
         [SerializeField, HideInInspector] private string _region = "eu-central";
         [SerializeField, HideInInspector] private string _host;

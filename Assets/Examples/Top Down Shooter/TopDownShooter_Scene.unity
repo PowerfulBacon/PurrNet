@@ -3291,8 +3291,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.PurrTransport
   _masterServer: https://purrtransport.purrservers.com/
   _roomName: 224c70eace844d1e90b92767e72dced9
-  _region: ewr-1
-  _host: resolute-games-ewr-1.purrservers.com
+  _region: france
+  _host: purrtransport-france.purrservers.com
   _pollEventsInUpdate: 0
 --- !u!1 &1284249959
 GameObject:
