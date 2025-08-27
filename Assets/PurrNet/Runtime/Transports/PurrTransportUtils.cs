@@ -98,6 +98,9 @@ namespace PurrNet.Transports
 
         private static async Task<ClientJoinInfo> ActualClientJoinInfo(string server, string roomName)
         {
+            if (!server.EndsWith("/"))
+                server += "/";
+
 #if UNITY_WEB
             var url = $"{server}join";
             var request = UnityWebRequest.Get(url);
@@ -129,6 +132,8 @@ namespace PurrNet.Transports
 
         private static async Task<HostJoinInfo> ActualAlloc(string server, string region, string roomName)
         {
+            if (!server.EndsWith("/"))
+                server += "/";
 #if UNITY_WEB
             var url = $"{server}allocate_ws";
 
@@ -181,10 +186,15 @@ namespace PurrNet.Transports
             return await Retry<Relayers>(10, () => ActualGetRelayServersAsync(server));
         }
 
-        private static async Task<Relayers> ActualGetRelayServersAsync(string server)
+        public static async Task<Relayers> ActualGetRelayServersAsync(string server)
         {
+            if (!server.EndsWith("/"))
+                server += "/";
+
             string master = $"{server}servers";
             var response = await Get(master);
+            if (response == null)
+                return default;
             return JsonUtility.FromJson<Relayers>(response);
         }
 
@@ -193,8 +203,11 @@ namespace PurrNet.Transports
             return await Retry<RelayServer>(10, () => ActualGetRelayServerAsync(masterServer), cts);
         }
 
-        private static async Task<RelayServer> ActualGetRelayServerAsync(string masterServer)
+        public static async Task<RelayServer> ActualGetRelayServerAsync(string masterServer)
         {
+            if (!masterServer.EndsWith("/"))
+                masterServer += "/";
+
             var servers = await GetRelayServersAsync(masterServer);
             float minPing = float.MaxValue;
             RelayServer result = default;
