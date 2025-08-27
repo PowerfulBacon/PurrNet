@@ -1,3 +1,10 @@
+## [1.15.1-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.15.1-beta.1...v1.15.1-beta.2) (2025-08-27)
+
+
+### Bug Fixes
+
+* PurrTransport cache made changing master server a pain ([f642aff](https://github.com/PurrNet/PurrNet/commit/f642aff74b635176dcb1036b2a54f5909f42874b))
+
 ## [1.15.1-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.15.0...v1.15.1-beta.1) (2025-08-25)
 
 
