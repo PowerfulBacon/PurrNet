@@ -419,7 +419,7 @@ namespace PurrNet
                 factory.TryGetHierarchy(sceneId, out var hierarchy))
             {
                 var go = hierarchy.CreatePrototype(prototype, new List<NetworkIdentity>());
-                hierarchy.Spawn(go);
+                hierarchy.InternalSpawn(go);
                 return go;
             }
 
@@ -963,7 +963,7 @@ namespace PurrNet
             if (manager.TryGetModule(manager.isServer, out HierarchyFactory module) &&
                 module.TryGetHierarchy(gameObject.scene, out var hierarchy))
             {
-                hierarchy.Spawn(gameObject);
+                hierarchy.InternalSpawn(gameObject);
             }
         }
 

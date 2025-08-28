@@ -1547,7 +1547,7 @@ namespace PurrNet
                 TryGetSceneID(entry.scene, out var sceneID) &&
                 factory.TryGetHierarchy(sceneID, out var hierarchy))
             {
-                hierarchy.Spawn(entry);
+                hierarchy.InternalSpawn(entry);
             }
         }
 
