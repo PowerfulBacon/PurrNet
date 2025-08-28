@@ -1,3 +1,10 @@
+## [1.15.1-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.15.1-beta.4...v1.15.1-beta.5) (2025-08-28)
+
+
+### Bug Fixes
+
+* add `HierarchyV2.onPreSpawn` static event ([0c02749](https://github.com/PurrNet/PurrNet/commit/0c0274922d2cfb1db576c4bb4fbfa4d1e73f50f6))
+
 ## [1.15.1-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.15.1-beta.3...v1.15.1-beta.4) (2025-08-28)
 
 
