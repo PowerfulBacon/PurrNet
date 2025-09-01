@@ -1,3 +1,10 @@
+# [1.16.0-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.15.1-beta.5...v1.16.0-beta.1) (2025-09-01)
+
+
+### Features
+
+* IStandaloneSerializable ([27e1733](https://github.com/PurrNet/PurrNet/commit/27e17337811855f0b0e5d486416bb1713cffe333))
+
 ## [1.15.1-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.15.1-beta.4...v1.15.1-beta.5) (2025-08-28)
 
 
