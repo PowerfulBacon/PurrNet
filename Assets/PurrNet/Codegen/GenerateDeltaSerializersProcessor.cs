@@ -60,6 +60,36 @@ namespace PurrNet.Codegen
             var endOfFunction = il.Create(OpCodes.Ret);
             var elseBlock = il.Create(OpCodes.Ldarg_2);
 
+            var standaloneType = GenerateSerializersProcessor.HasInterfaceExtra(type, typeof(IStandaloneSerializable));
+
+            if (standaloneType != null && standaloneType.FullName != type.FullName)
+            {
+                var genericM =
+                    GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, standaloneType, deltaSerializer,
+                        module);
+
+                var variable = new VariableDefinition(standaloneType);
+                method.Body.Variables.Add(variable);
+
+                // variable = this
+                il.Emit(OpCodes.Ldarg_2);
+                il.Emit(OpCodes.Ldind_Ref);
+                il.Emit(OpCodes.Stloc, variable);
+
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Ldloca, variable);
+                il.Emit(OpCodes.Call, genericM);
+
+                il.Emit(OpCodes.Ldarg_2);
+                il.Emit(OpCodes.Ldloc, variable);
+                il.Emit(OpCodes.Castclass, type);
+                il.Emit(OpCodes.Stind_Ref);
+
+                il.Emit(OpCodes.Ret);
+                return;
+            }
+
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldloca_S, isEqualVar);
             il.Emit(OpCodes.Call, packerTypeBoolean);
@@ -261,6 +291,22 @@ namespace PurrNet.Codegen
 
             var il = method.Body.GetILProcessor();
             var endOfFunction = il.Create(OpCodes.Nop);
+
+            var standaloneType = GenerateSerializersProcessor.HasInterfaceExtra(type, typeof(IStandaloneSerializable));
+
+            if (standaloneType != null && standaloneType.FullName != type.FullName)
+            {
+                var genericM =
+                    GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, standaloneType, deltaSerializer,
+                        module);
+
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Ldarg_2);
+                il.Emit(OpCodes.Call, genericM);
+                il.Emit(OpCodes.Ret);
+                return;
+            }
 
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldc_I4_1);
