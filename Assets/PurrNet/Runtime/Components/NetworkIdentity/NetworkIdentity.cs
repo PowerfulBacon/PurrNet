@@ -96,6 +96,8 @@ namespace PurrNet
 
         public bool skipSceneAutoSpawning { get; set; } = false;
 
+        public bool hasInitializedModules { get; private set; } = false;
+
         /// <summary>
         /// Used for internal cleanup, avoid using this.
         /// </summary>
@@ -916,6 +918,7 @@ namespace PurrNet
                 _visitiblityRules.Setup(manager);
             }
             _isInitializing = false;
+            hasInitializedModules = true;
         }
 
         /// <summary>
