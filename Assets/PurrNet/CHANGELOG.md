@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/PowerfulBacon/PurrNet/compare/v1.1.1...v1.1.2) (2025-09-01)
+
+
+### Bug Fixes
+
+* Fixes local module initialization order ([34d9c54](https://github.com/PowerfulBacon/PurrNet/commit/34d9c54663c398f930b7776d8e0cfd6bf7d25f75))
+
 ## [1.1.1](https://github.com/PowerfulBacon/PurrNet/compare/v1.1.0...v1.1.1) (2025-09-01)
 
 
