@@ -61,6 +61,7 @@ namespace PurrNet
             // Do we need to create it?
             if (isDynamic)
             {
+
                 T instantiated = (T)Activator.CreateInstance(typeof(T), true);
                 instantiated.LateInitialize(identity, null, index);
                 module = instantiated;

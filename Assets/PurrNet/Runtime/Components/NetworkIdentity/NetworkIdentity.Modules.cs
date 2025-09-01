@@ -85,11 +85,14 @@ namespace PurrNet
                     "allowed. When an ID is provided, the module is assumed to be existing.");
             }
 
-            if (_moduleId <= moduleId)
-            {
-                _moduleId = moduleId;
-                _moduleId++;
-            }
+            // This will cause the module ID to go backwards in some cases, but that behaviour
+            // is necessary for the client; which this can only be called on. If something is created
+            // at position 9, any network modules inside of its constructor will be named from 10, 11, etc.
+            // and 9 may be delivered after 18, so we want to revert backwards.
+            // The client should never be making its own network modules outside of the constructor, and
+            // they wouldn't work or affect this if they did anyway.
+            _moduleId = moduleId;
+            _moduleId++;
 
             module.SetComponentParent(this, moduleId, moduleName);
 
