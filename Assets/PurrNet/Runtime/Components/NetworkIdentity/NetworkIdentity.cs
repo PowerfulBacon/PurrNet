@@ -924,7 +924,8 @@ namespace PurrNet
         /// <param name="module"></param>
         public void LateInitializeModule(NetworkModule parentModule)
         {
-            int externalModuleStart = _externalModulesView.Count;
+            // Assume that the module passed in has just been added and hasn't been initialized yet
+            int externalModuleStart = _externalModulesView.Count - 1;
             // Initialize the module
             CallInitMethodFor(parentModule.GetType(), parentModule);
             // If we are initializing, then OnInitializeModules and RegisterEvents is yet
