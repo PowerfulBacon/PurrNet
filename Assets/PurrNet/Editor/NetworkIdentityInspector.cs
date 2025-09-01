@@ -1,6 +1,6 @@
+using PurrNet.Contributors;
 using System.Collections.Generic;
 using System.Reflection;
-using PurrNet.Contributors;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -49,13 +49,13 @@ namespace PurrNet.Editor
 
             if (target)
             {
-                var targetType = target.GetType();
-                var attributes = targetType.GetCustomAttributes(typeof(ContributorAttribute), true);
-                var courtesy = targetType.GetCustomAttributes(typeof(CourtesyOfAttribute), true);
+                System.Type targetType = target.GetType();
+                object[] attributes = targetType.GetCustomAttributes(typeof(ContributorAttribute), true);
+                object[] courtesy = targetType.GetCustomAttributes(typeof(CourtesyOfAttribute), true);
 
-                for (var i = 0; i < attributes.Length; i++)
+                for (int i = 0; i < attributes.Length; i++)
                 {
-                    var attr = (ContributorAttribute)attributes[i];
+                    ContributorAttribute attr = (ContributorAttribute)attributes[i];
 
                     if (attr == null)
                         continue;
@@ -67,9 +67,9 @@ namespace PurrNet.Editor
                     });
                 }
 
-                for (var i = 0; i < courtesy.Length; i++)
+                for (int i = 0; i < courtesy.Length; i++)
                 {
-                    var attr = (CourtesyOfAttribute)courtesy[i];
+                    CourtesyOfAttribute attr = (CourtesyOfAttribute)courtesy[i];
                     if (attr == null)
                         continue;
                     _courtesyOf.Add(new Contributor
@@ -88,7 +88,7 @@ namespace PurrNet.Editor
 
         public override void OnInspectorGUI()
         {
-            var identity = (NetworkIdentity)target;
+            NetworkIdentity identity = (NetworkIdentity)target;
             bool hasNetworkManagerAsChild = identity && identity.GetComponentInChildren<NetworkManager>();
 
             if (hasNetworkManagerAsChild)
@@ -111,7 +111,7 @@ namespace PurrNet.Editor
             {
                 GUILayout.BeginVertical("helpbox");
 
-                foreach (var contributor in _courtesyOf)
+                foreach (Contributor contributor in _courtesyOf)
                 {
                     if (string.IsNullOrEmpty(contributor.url))
                         continue;
@@ -134,7 +134,7 @@ namespace PurrNet.Editor
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Contributors");
             GUILayout.FlexibleSpace();
-            foreach (var contributor in _contributors)
+            foreach (Contributor contributor in _contributors)
             {
                 if (string.IsNullOrEmpty(contributor.url))
                     continue;
@@ -150,8 +150,8 @@ namespace PurrNet.Editor
         {
             GUILayout.Space(5);
 
-            var identities = targets.Length;
-            var identity = (NetworkIdentity)target;
+            int identities = targets.Length;
+            NetworkIdentity identity = (NetworkIdentity)target;
 
             if (!identity)
             {
@@ -199,7 +199,7 @@ namespace PurrNet.Editor
                 label += " (...)";
             }
 
-            var old = GUI.enabled;
+            bool old = GUI.enabled;
             GUI.enabled = !multi;
             _foldoutVisible = EditorGUILayout.BeginFoldoutHeaderGroup(_foldoutVisible, label);
             GUI.enabled = old;
@@ -229,7 +229,7 @@ namespace PurrNet.Editor
             {
                 if (identity.isServer)
                 {
-                    var old = GUI.enabled;
+                    bool old = GUI.enabled;
                     GUI.enabled = true;
                     PrintObserversDropdown(identity);
                     GUI.enabled = old;
@@ -254,7 +254,7 @@ namespace PurrNet.Editor
             }
 
 #if PURRNET_DEBUG_NETWORK_IDENTITY
-            var old2 = GUI.enabled;
+            bool old2 = GUI.enabled;
             GUI.enabled = false;
 
             EditorGUILayout.BeginVertical("box", GUILayout.ExpandWidth(false));
@@ -268,9 +268,9 @@ namespace PurrNet.Editor
 
             if (identity.invertedPathToNearestParent != null)
             {
-                for (var index = 0; index < identity.invertedPathToNearestParent.Length; index++)
+                for (int index = 0; index < identity.invertedPathToNearestParent.Length; index++)
                 {
-                    var parent = identity.invertedPathToNearestParent[index];
+                    int parent = identity.invertedPathToNearestParent[index];
                     bool isLast = index == identity.invertedPathToNearestParent.Length - 1;
                     path += parent + (isLast ? ";" : " -> ");
                 }
@@ -282,12 +282,21 @@ namespace PurrNet.Editor
             if (identity.directChildren != null)
             {
                 EditorGUI.indentLevel++;
-                foreach (var child in identity.directChildren)
+                foreach (NetworkIdentity child in identity.directChildren)
                 {
                     EditorGUILayout.ObjectField(child, typeof(NetworkIdentity), true);
                 }
                 EditorGUI.indentLevel--;
             }
+
+            EditorGUILayout.LabelField($"Modules ({identity.modules.Count}):");
+
+            EditorGUI.indentLevel++;
+            foreach (NetworkModule child in identity.modules)
+            {
+                EditorGUILayout.LabelField($"{child.index}: {child.name} ({child.GetType().Name})");
+            }
+            EditorGUI.indentLevel--;
 
             EditorGUILayout.EndVertical();
             GUI.enabled = old2;
@@ -302,7 +311,7 @@ namespace PurrNet.Editor
             if (_observersVisible)
             {
                 EditorGUI.indentLevel++;
-                foreach (var observer in identity.observers)
+                foreach (PlayerID observer in identity.observers)
                 {
                     EditorGUILayout.BeginHorizontal("box");
                     EditorGUILayout.LabelField(observer.ToString());
@@ -322,7 +331,7 @@ namespace PurrNet.Editor
 
             GUILayout.Space(5);
 
-            var methods = targetIdentity.GetType().GetMethods(
+            MethodInfo[] methods = targetIdentity.GetType().GetMethods(
                 BindingFlags.Instance |
                 BindingFlags.Static |
                 BindingFlags.Public |
@@ -330,9 +339,9 @@ namespace PurrNet.Editor
 
             bool foundAnyButtons = false;
 
-            foreach (var method in methods)
+            foreach (MethodInfo method in methods)
             {
-                var buttonAttr = method.GetCustomAttribute<PurrButtonAttribute>();
+                PurrButtonAttribute buttonAttr = method.GetCustomAttribute<PurrButtonAttribute>();
 
                 if (buttonAttr != null)
                 {
@@ -348,7 +357,7 @@ namespace PurrNet.Editor
 
                     if (GUILayout.Button(buttonName))
                     {
-                        var parameters = method.GetParameters();
+                        ParameterInfo[] parameters = method.GetParameters();
 
                         if (parameters.Length == 0)
                         {
