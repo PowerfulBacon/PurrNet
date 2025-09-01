@@ -35,15 +35,15 @@ public class SyncVarTester : NetworkIdentity
 public class Foo : NetworkModule
 {
 
-    public SyncList<Bar> test = new SyncList<Bar>(new List<Bar>() { new Bar() } );
+    public SyncVar<Bar> test = new SyncVar<Bar>(new Bar());
 
     public SyncVar<int> shallowSyncVar = new SyncVar<int>(7);
 
     // Non standard constructor prevents PurrNet from instantiating this instantly
     public Foo(int example)
     {
-        test[0].test = example;
-        test[0].deepSyncVar.value = example;
+        test.value.test = example;
+        test.value.deepSyncVar.value = example;
         shallowSyncVar.value = example;
     }
 

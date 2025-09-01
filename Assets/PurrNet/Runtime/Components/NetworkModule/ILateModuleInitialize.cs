@@ -6,7 +6,7 @@ using PurrNet;
 /// Implemented on all network modules so that they can initialize when attached to a parent
 /// module, such as a SyncVar.
 /// </summary>
-internal interface ILateModuleInitialize
+public interface ILateModuleInitialize
 {
 
     /// <summary>

@@ -1,9 +1,9 @@
-using UnityEngine;
+using PurrNet.Logging;
+using PurrNet.Transports;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using PurrNet.Transports;
-using PurrNet.Logging;
+using UnityEngine;
 
 namespace PurrNet
 {
@@ -90,7 +90,7 @@ namespace PurrNet
                 return;
 
             _queue.Enqueue(item);
-            var change = new SyncQueueChange<T>(SyncQueueOperation.Enqueued, item);
+            SyncQueueChange<T> change = new SyncQueueChange<T>(SyncQueueOperation.Enqueued, item);
             InvokeChange(change);
 
             if (isSpawned)
@@ -111,7 +111,7 @@ namespace PurrNet
                 throw new InvalidOperationException("Queue is empty");
 
             T item = _queue.Dequeue();
-            var change = new SyncQueueChange<T>(SyncQueueOperation.Dequeued, item);
+            SyncQueueChange<T> change = new SyncQueueChange<T>(SyncQueueOperation.Dequeued, item);
             InvokeChange(change);
 
             if (isSpawned)
@@ -143,7 +143,7 @@ namespace PurrNet
                 return;
 
             _queue.Clear();
-            var change = new SyncQueueChange<T>(SyncQueueOperation.Cleared);
+            SyncQueueChange<T> change = new SyncQueueChange<T>(SyncQueueOperation.Cleared);
             InvokeChange(change);
 
             if (isSpawned)
@@ -207,13 +207,13 @@ namespace PurrNet
                     return;
 
                 _queue.Clear();
-                foreach (var item in items)
+                foreach (T item in items)
                 {
                     _queue.Enqueue(item);
                 }
 
                 InvokeChange(new SyncQueueChange<T>(SyncQueueOperation.Cleared));
-                foreach (var item in items)
+                foreach (T item in items)
                 {
                     InvokeChange(new SyncQueueChange<T>(SyncQueueOperation.Enqueued, item));
                 }
@@ -233,13 +233,13 @@ namespace PurrNet
             if (!isServer || isHost)
             {
                 _queue.Clear();
-                foreach (var item in items)
+                foreach (T item in items)
                 {
                     _queue.Enqueue(item);
                 }
 
                 InvokeChange(new SyncQueueChange<T>(SyncQueueOperation.Cleared));
-                foreach (var item in items)
+                foreach (T item in items)
                 {
                     InvokeChange(new SyncQueueChange<T>(SyncQueueOperation.Enqueued, item));
                 }
@@ -379,18 +379,18 @@ namespace PurrNet
 
         public Queue<T> ToQueue()
         {
-            var queue = new Queue<T>();
+            Queue<T> queue = new Queue<T>();
 
             if (_isValueSerializable)
             {
-                foreach (var value in _values)
+                foreach (T value in _values)
                 {
                     queue.Enqueue(value);
                 }
             }
             else
             {
-                foreach (var _ in _stringValues)
+                foreach (string _ in _stringValues)
                 {
                     queue.Enqueue(default);
                 }
@@ -404,7 +404,7 @@ namespace PurrNet
             _values.Clear();
             _stringValues.Clear();
 
-            foreach (var value in queue)
+            foreach (T value in queue)
             {
                 if (_isValueSerializable)
                 {

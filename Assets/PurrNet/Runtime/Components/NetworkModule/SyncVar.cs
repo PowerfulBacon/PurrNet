@@ -1,11 +1,11 @@
-using UnityEngine;
+using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Modules;
-using System;
-using JetBrains.Annotations;
 using PurrNet.Packing;
 using PurrNet.Transports;
 using PurrNet.Utils;
+using System;
+using UnityEngine;
 
 namespace PurrNet
 {
@@ -57,9 +57,14 @@ namespace PurrNet
                     return;
                 }
 
-                var oldValue = _value;
+                T oldValue = _value;
                 _value = value;
                 _isDirty = true;
+
+                if (oldValue is NetworkModule detachedModule)
+                    Detatch(detachedModule);
+                if (_value is NetworkModule attachedModule)
+                    Attach(attachedModule);
 
                 onChanged?.Invoke(value);
                 onChangedWithOld?.Invoke(oldValue, value);
@@ -88,9 +93,18 @@ namespace PurrNet
 
         BitPacker GetValue()
         {
-            var packer = BitPackerPool.Get();
+            BitPacker packer = BitPackerPool.Get();
             Packer<T>.Write(packer, _value);
             return packer;
+        }
+
+        /// <summary>
+        /// Attach our value if it is a network module
+        /// </summary>
+        public override void OnInitializeModules()
+        {
+            if (value is NetworkModule initialModule)
+                Attach(initialModule);
         }
 
         public override void OnObserverAdded(PlayerID player, bool isSpawner)
@@ -98,7 +112,7 @@ namespace PurrNet
             if (isSpawner && ownerAuth && owner == player)
                 return;
 
-            using var v = GetValue();
+            using BitPacker v = GetValue();
             SendLatestState(player, _id, v);
         }
 
@@ -120,7 +134,7 @@ namespace PurrNet
 
         private void ForceSendUnreliable()
         {
-            using var v = GetValue();
+            using BitPacker v = GetValue();
 
             if (isServer)
                 SendToAll(_id++, v);
@@ -129,7 +143,7 @@ namespace PurrNet
 
         private void ForceSendReliable()
         {
-            using var v = GetValue();
+            using BitPacker v = GetValue();
 
             if (isServer)
                 SendToAllReliably(_id++, v);
@@ -204,7 +218,7 @@ namespace PurrNet
                 if (bothNull || bothEqual)
                     return;
 
-                var oldValue = value;
+                T oldValue = value;
                 Packer<T>.Read(newValue, ref _value);
                 onChanged?.Invoke(value);
                 onChangedWithOld?.Invoke(oldValue, value);
@@ -296,7 +310,7 @@ namespace PurrNet
             if (bothNull || bothEqual)
                 return;
 
-            var oldValue = value;
+            T oldValue = value;
             Packer<T>.Read(newValue, ref _value);
             onChanged?.Invoke(value);
             onChangedWithOld?.Invoke(oldValue, value);

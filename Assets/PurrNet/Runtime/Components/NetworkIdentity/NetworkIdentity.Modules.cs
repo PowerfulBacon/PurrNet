@@ -1,6 +1,7 @@
 using PurrNet.Logging;
 using PurrNet.Modules;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PurrNet
 {
@@ -26,8 +27,17 @@ namespace PurrNet
         {
             if (_moduleId >= byte.MaxValue)
             {
-                throw new System.Exception($"Too many modules in {GetType().Name}! Max is {byte.MaxValue}.\n" +
-                                           $"This could also happen with circular dependencies.");
+                if (_modules.Any(x => x?.isDynamic ?? false))
+                {
+                    throw new System.Exception($"Too many modules in {GetType().Name}! Max is {byte.MaxValue}.\n" +
+                                               $"This can be caused by dynamically created modules which are not " +
+                                               $"being detached correctly when references to them are removed.");
+                }
+                else
+                {
+                    throw new System.Exception($"Too many modules in {GetType().Name}! Max is {byte.MaxValue}.\n" +
+                                               $"This could also happen with circular dependencies.");
+                }
             }
 
             if (module == null)

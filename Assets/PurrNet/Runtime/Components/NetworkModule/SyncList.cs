@@ -136,10 +136,20 @@ namespace PurrNet
 
                 T oldValue = _list[idx];
 
+                if (oldValue is NetworkModule detachedModule)
+                {
+                    Detatch(detachedModule);
+                }
+
                 if (oldValue != null && oldValue.Equals(value) || oldValue == null && value == null)
                     return;
 
                 _list[idx] = value;
+
+                if (value is NetworkModule attachedModule)
+                {
+                    Attach(attachedModule);
+                }
 
                 SyncListChange<T> change = SyncListChange<T>.Set(value, oldValue, idx);
                 QueueChange(change);
@@ -172,13 +182,9 @@ namespace PurrNet
         {
             foreach (T item in _list)
             {
-                // If we haven't yet been initialized, then the contents will
-                // be initialized when we initialize.
-                if (item is ILateModuleInitialize module)
+                if (item is NetworkModule attachedModule)
                 {
-                    if (parent == null)
-                        throw new Exception($"Types deriving from NetworkModule may only be added to the contents of a SyncList<> once the SyncList<> has been initialized.");
-                    module.LateInitialize(parent, this);
+                    Attach(attachedModule);
                 }
             }
         }
@@ -263,13 +269,9 @@ namespace PurrNet
                 _list.Clear();
                 foreach (T item in items)
                 {
-                    // If we haven't yet been initialized, then the contents will
-                    // be initialized when we initialize.
-                    if (item is ILateModuleInitialize module)
+                    if (item is NetworkModule attachedModule)
                     {
-                        if (parent == null)
-                            throw new Exception($"Types deriving from NetworkModule may only be added to the contents of a SyncList<> once the SyncList<> has been initialized.");
-                        module.LateInitialize(parent, this);
+                        Attach(attachedModule);
                     }
                 }
 
@@ -295,13 +297,9 @@ namespace PurrNet
             if (!ValidateAuthority())
                 return;
 
-            // If we haven't yet been initialized, then the contents will
-            // be initialized when we initialize.
-            if (item is ILateModuleInitialize module)
+            if (item is NetworkModule attachedModule)
             {
-                if (parent == null)
-                    throw new Exception($"Types deriving from NetworkModule may only be added to the contents of a SyncList<> once the SyncList<> has been initialized.");
-                module.LateInitialize(parent, this);
+                Attach(attachedModule);
             }
 
             _list.Add(item);
@@ -317,6 +315,14 @@ namespace PurrNet
         {
             if (!ValidateAuthority())
                 return;
+
+            foreach (T item in _list)
+            {
+                if (item is NetworkModule detachedModule)
+                {
+                    Detatch(detachedModule);
+                }
+            }
 
             _list.Clear();
             SyncListChange<T> change = SyncListChange<T>.Cleared();
@@ -354,6 +360,10 @@ namespace PurrNet
             if (idx < 0) return false;
 
             T oldValue = _list[idx];
+            if (oldValue is NetworkModule detachedModule)
+            {
+                Detatch(detachedModule);
+            }
             _list.RemoveAt(idx);
             SyncListChange<T> change = SyncListChange<T>.Removed(item, oldValue, idx);
             QueueChange(change);
@@ -373,6 +383,10 @@ namespace PurrNet
 
             T oldValue = _list[index];
             T item = _list[index];
+            if (item is NetworkModule detachedModule)
+            {
+                Detatch(detachedModule);
+            }
             _list.RemoveAt(index);
             SyncListChange<T> change = SyncListChange<T>.Removed(item, oldValue, index);
             QueueChange(change);

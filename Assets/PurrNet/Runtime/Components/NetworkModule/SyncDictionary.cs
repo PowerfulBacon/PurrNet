@@ -1,9 +1,9 @@
-using UnityEngine;
 using PurrNet.Logging;
+using PurrNet.Transports;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using PurrNet.Transports;
+using UnityEngine;
 
 namespace PurrNet
 {
@@ -112,8 +112,8 @@ namespace PurrNet
                 bool isNewKey = !_dict.ContainsKey(key);
                 _dict[key] = value;
 
-                var operation = isNewKey ? SyncDictionaryOperation.Added : SyncDictionaryOperation.Set;
-                var change = new SyncDictionaryChange<TKey, TValue>(operation, key, value);
+                SyncDictionaryOperation operation = isNewKey ? SyncDictionaryOperation.Added : SyncDictionaryOperation.Set;
+                SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(operation, key, value);
                 QueueChange(change);
                 InvokeChange(change);
             }
@@ -171,12 +171,12 @@ namespace PurrNet
             {
                 _dict = initialState;
 
-                var initialChang = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
+                SyncDictionaryChange<TKey, TValue> initialChang = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
                 InvokeChange(initialChang);
 
-                foreach (var kvp in _dict)
+                foreach (KeyValuePair<TKey, TValue> kvp in _dict)
                 {
-                    var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, kvp.Key, kvp.Value);
+                    SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, kvp.Key, kvp.Value);
                     InvokeChange(change);
                 }
             }
@@ -191,12 +191,12 @@ namespace PurrNet
 
                 _dict = initialState;
 
-                var initialChange = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
+                SyncDictionaryChange<TKey, TValue> initialChange = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
                 InvokeChange(initialChange);
 
-                foreach (var kvp in _dict)
+                foreach (KeyValuePair<TKey, TValue> kvp in _dict)
                 {
-                    var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, kvp.Key, kvp.Value);
+                    SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, kvp.Key, kvp.Value);
                     InvokeChange(change);
                 }
             }
@@ -221,8 +221,11 @@ namespace PurrNet
             if (!ValidateAuthority())
                 return;
 
+            if (value is NetworkModule attachedModule)
+                Attach(attachedModule);
+
             _dict.Add(key, value);
-            var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, key, value);
+            SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, key, value);
             QueueChange(change);
             InvokeChange(change);
         }
@@ -240,10 +243,13 @@ namespace PurrNet
             if (!ValidateAuthority())
                 return false;
 
-            if (!_dict.Remove(key, out var value))
+            if (!_dict.Remove(key, out TValue value))
                 return false;
 
-            var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Removed, key, value);
+            if (value is NetworkModule removedModule)
+                Detatch(removedModule);
+
+            SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Removed, key, value);
             QueueChange(change);
             InvokeChange(change);
 
@@ -254,6 +260,9 @@ namespace PurrNet
         {
             if (!Contains(item))
                 return false;
+
+            if (item.Value is NetworkModule removedModule)
+                Detatch(removedModule);
 
             return Remove(item.Key);
         }
@@ -266,8 +275,14 @@ namespace PurrNet
             if (!ValidateAuthority())
                 return;
 
+            foreach (TValue item in _dict.Values)
+            {
+                if (item is NetworkModule removedModule)
+                    Detatch(removedModule);
+            }
+
             _dict.Clear();
-            var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
+            SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
             QueueChange(change);
             InvokeChange(change);
         }
@@ -329,7 +344,7 @@ namespace PurrNet
 
             if (_isDirty)
             {
-                foreach (var change in _pendingChanges)
+                foreach (SyncDictionaryChange<TKey, TValue> change in _pendingChanges)
                 {
                     switch (change.operation)
                     {
@@ -390,7 +405,7 @@ namespace PurrNet
             if (!isServer || isHost)
             {
                 _dict[key] = value;
-                var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, key, value);
+                SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, key, value);
                 InvokeChange(change);
             }
         }
@@ -401,7 +416,7 @@ namespace PurrNet
             if (!isHost)
             {
                 _dict[key] = value;
-                var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, key, value);
+                SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, key, value);
                 InvokeChange(change);
             }
         }
@@ -421,7 +436,7 @@ namespace PurrNet
                 if (_dict.TryGetValue(key, out TValue value))
                 {
                     _dict.Remove(key);
-                    var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Removed, key, value);
+                    SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Removed, key, value);
                     InvokeChange(change);
                 }
             }
@@ -434,7 +449,7 @@ namespace PurrNet
             {
                 if (_dict.Remove(key, out TValue value))
                 {
-                    var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Removed, key, value);
+                    SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Removed, key, value);
                     InvokeChange(change);
                 }
             }
@@ -453,7 +468,7 @@ namespace PurrNet
             if (!isServer || isHost)
             {
                 _dict.Clear();
-                var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
+                SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
                 InvokeChange(change);
             }
         }
@@ -464,7 +479,7 @@ namespace PurrNet
             if (!isHost)
             {
                 _dict.Clear();
-                var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
+                SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
                 InvokeChange(change);
             }
         }
@@ -482,8 +497,8 @@ namespace PurrNet
             if (!isServer || isHost)
             {
                 _dict[key] = value;
-                var operation = isNewKey ? SyncDictionaryOperation.Added : SyncDictionaryOperation.Set;
-                var change = new SyncDictionaryChange<TKey, TValue>(operation, key, value);
+                SyncDictionaryOperation operation = isNewKey ? SyncDictionaryOperation.Added : SyncDictionaryOperation.Set;
+                SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(operation, key, value);
                 InvokeChange(change);
             }
         }
@@ -494,8 +509,8 @@ namespace PurrNet
             if (!isHost)
             {
                 _dict[key] = value;
-                var operation = isNewKey ? SyncDictionaryOperation.Added : SyncDictionaryOperation.Set;
-                var change = new SyncDictionaryChange<TKey, TValue>(operation, key, value);
+                SyncDictionaryOperation operation = isNewKey ? SyncDictionaryOperation.Added : SyncDictionaryOperation.Set;
+                SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(operation, key, value);
                 InvokeChange(change);
             }
         }
@@ -511,13 +526,13 @@ namespace PurrNet
             if (!ValidateAuthority())
                 return;
 
-            if (!_dict.TryGetValue(key, out var value))
+            if (!_dict.TryGetValue(key, out TValue value))
             {
                 PurrLogger.LogError($"Key {key} not found in SyncDictionary when trying to SetDirty", parent);
                 return;
             }
 
-            var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Set, key, value);
+            SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Set, key, value);
             QueueChange(change);
             InvokeChange(change);
 
@@ -542,7 +557,7 @@ namespace PurrNet
                 if (_dict.ContainsKey(key))
                 {
                     _dict[key] = value;
-                    var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Set, key, value);
+                    SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Set, key, value);
                     InvokeChange(change);
                 }
             }
@@ -556,7 +571,7 @@ namespace PurrNet
                 if (_dict.ContainsKey(key))
                 {
                     _dict[key] = value;
-                    var change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Set, key, value);
+                    SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Set, key, value);
                     InvokeChange(change);
                 }
             }
@@ -595,7 +610,7 @@ namespace PurrNet
 
         public Dictionary<TKey, TValue> ToDictionary()
         {
-            var dict = new Dictionary<TKey, TValue>();
+            Dictionary<TKey, TValue> dict = new Dictionary<TKey, TValue>();
 
             if (isKeySerializable && isValueSerializable)
             {
@@ -608,7 +623,7 @@ namespace PurrNet
             }
             else
             {
-                var count = Mathf.Min(stringKeys.Count, stringValues.Count);
+                int count = Mathf.Min(stringKeys.Count, stringValues.Count);
                 for (int i = 0; i < count; i++)
                 {
                     if (stringKeys[i] != null && !dict.ContainsKey(default(TKey)))
@@ -626,7 +641,7 @@ namespace PurrNet
             stringKeys.Clear();
             stringValues.Clear();
 
-            foreach (var kvp in dict)
+            foreach (KeyValuePair<TKey, TValue> kvp in dict)
             {
                 if (isKeySerializable && isValueSerializable)
                 {

@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace PurrNet
 {
-    public class NetworkModule : ILateModuleInitialize
+    public class NetworkModule
     {
         public NetworkIdentity parent { get; private set; }
 
@@ -426,7 +426,7 @@ namespace PurrNet
         /// <param name="parentIdentity"></param>
         /// <param name="attachedToModule"></param>
         /// <param name="moduleID">If we already know the module ID, then it can be provided.</param>
-        public void LateInitialize(NetworkIdentity parentIdentity, NetworkModule attachedToModule, byte? moduleID = null)
+        internal void LateInitialize(NetworkIdentity parentIdentity, NetworkModule attachedToModule, byte? moduleID = null)
         {
             // Check for re-registration
             if (wasInitialized)
@@ -482,5 +482,40 @@ namespace PurrNet
             // call the init methods on our children (if we have any).
             parentIdentity.LateInitializeModule(this);
         }
+
+        /// <summary>
+        /// Attach a network module to this module at runtime, allowing
+        /// for the use of RPCs and contained network modules.
+        /// Creating new network modules, or reassigning them at runtime
+        /// will cause them to not function correctly if they have not 
+        /// been attached.
+        /// </summary>
+        /// <param name="module"></param>
+        public void Attach(NetworkModule module)
+        {
+            if (module == null)
+                throw new NullReferenceException($"Attempting to attach a null module to a <b>{GetType().Name}</b>.");
+            if (parent == null)
+                throw new LateModuleException($"The network module <b>{module.GetType().Name}</b> cannot be attached to a <b>{GetType().Name}</b> " +
+                    $"before it has been initialized.");
+            module.LateInitialize(parent, this);
+        }
+
+        /// <summary>
+        /// Detatch a network module from ourselves, which should then
+        /// be immediately disposed and not reused.
+        /// By detatching a network module, it will not longer function.
+        /// Calling detatch for a network module that has all references
+        /// removed is necessary to clean it up. If modules are dynamically
+        /// created but not cleaned up, then the 255 limit will be reached
+        /// quickly.
+        /// </summary>
+        /// <param name="module"></param>
+        public void Detatch(NetworkModule module)
+        {
+            // TODO: Allow modules to be detached so that their ID can be recycled.
+            throw new LateModuleException($"Types deriving from NetworkModule are immutable once added to a List can cannot be modified.");
+        }
+
     }
 }
