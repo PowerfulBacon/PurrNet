@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/PowerfulBacon/PurrNet/compare/v1.0.0...v1.0.1) (2025-09-01)
+
+
+### Bug Fixes
+
+* Fixes SyncVar double initialization ([28c92e7](https://github.com/PowerfulBacon/PurrNet/commit/28c92e76d0a1c1007bf74db080819f2e4b44d431))
+
 # 1.0.0 (2025-09-01)
 
 
