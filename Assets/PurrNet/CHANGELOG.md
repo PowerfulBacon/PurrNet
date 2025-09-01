@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/PowerfulBacon/PurrNet/compare/v1.0.2...v1.1.0) (2025-09-01)
+
+
+### Features
+
+* Adds in a debug view for modules under network identities when PURRNET_DEBUG_NETWORK_IDENTITY is set ([289f339](https://github.com/PowerfulBacon/PurrNet/commit/289f33949edde233a8eeb6b61ec824c4a08b5046))
+
 ## [1.0.2](https://github.com/PowerfulBacon/PurrNet/compare/v1.0.1...v1.0.2) (2025-09-01)
 
 
