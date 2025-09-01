@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/PowerfulBacon/PurrNet/compare/v1.1.0...v1.1.1) (2025-09-01)
+
+
+### Bug Fixes
+
+* Fixes network modules inside dynamic modules instantiating with the wrong ID ([d89e7f1](https://github.com/PowerfulBacon/PurrNet/commit/d89e7f1da98284e59609c428608be615f153a5c6))
+
 # [1.1.0](https://github.com/PowerfulBacon/PurrNet/compare/v1.0.2...v1.1.0) (2025-09-01)
 
 
