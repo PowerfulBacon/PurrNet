@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/PowerfulBacon/PurrNet/compare/v1.1.2...v1.1.3) (2025-09-01)
+
+
+### Bug Fixes
+
+* Fixes mistake ([69b26e8](https://github.com/PowerfulBacon/PurrNet/commit/69b26e8687c13b324632fda9f8681a3d3632ae7f))
+
 ## [1.1.2](https://github.com/PowerfulBacon/PurrNet/compare/v1.1.1...v1.1.2) (2025-09-01)
 
 
