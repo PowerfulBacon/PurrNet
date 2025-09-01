@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Reflection;
 using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Pooling;
 using PurrNet.Utils;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace PurrNet
@@ -43,8 +43,8 @@ namespace PurrNet
                 if (!networkManager)
                     return null;
 
-                if (networkManager.TryGetModule<ColliderRollbackFactory>(isServer, out var factory) &&
-                    factory.TryGetModule(sceneId, out var module))
+                if (networkManager.TryGetModule<ColliderRollbackFactory>(isServer, out ColliderRollbackFactory factory) &&
+                    factory.TryGetModule(sceneId, out RollbackModule module))
                     return module;
 
                 return null;
@@ -74,7 +74,7 @@ namespace PurrNet
                 if (_parent == value)
                     return;
 
-                var oldParent = _parent;
+                NetworkIdentity oldParent = _parent;
                 _parent = value;
                 onParentChanged?.Invoke(oldParent, value);
             }
@@ -124,7 +124,7 @@ namespace PurrNet
 
             RecalculateNearestPath();
 
-            var firstIdentity = GetComponent<NetworkIdentity>();
+            NetworkIdentity firstIdentity = GetComponent<NetworkIdentity>();
 
             if (firstIdentity != this)
                 _directChildren = new List<NetworkIdentity>();
@@ -133,14 +133,14 @@ namespace PurrNet
 
         internal void RecalculateDirectChildren()
         {
-            using var dChildren = DisposableList<TransformIdentityPair>.Create(16);
+            using DisposableList<TransformIdentityPair> dChildren = DisposableList<TransformIdentityPair>.Create(16);
             HierarchyPool.GetDirectChildren(transform, dChildren);
 
             if (isSceneObject)
             {
-                for (var i = 0; i < dChildren.Count; i++)
+                for (int i = 0; i < dChildren.Count; i++)
                 {
-                    var child = dChildren[i];
+                    TransformIdentityPair child = dChildren[i];
                     if (child.identity.skipSceneAutoSpawning)
                         dChildren.RemoveAt(i--);
                 }
@@ -173,7 +173,7 @@ namespace PurrNet
         {
             if (_parent)
             {
-                using var invPath = HierarchyPool.GetInvPath(_parent.transform, transform);
+                using DisposableList<int> invPath = HierarchyPool.GetInvPath(_parent.transform, transform);
 
                 if (_invertedPathToNearestParent == null)
                     _invertedPathToNearestParent = new int[invPath.Count];
@@ -195,7 +195,7 @@ namespace PurrNet
         /// <returns>Nearest parent with a NetworkIdentity</returns>
         public NetworkIdentity GetNearestParent()
         {
-            var current = transform.parent;
+            Transform current = transform.parent;
             while (current)
             {
                 if (current.TryGetComponent(out NetworkIdentity identity))
@@ -291,11 +291,11 @@ namespace PurrNet
 
                 if (isServer)
                 {
-                    return networkManager.TryGetModule<ScenePlayersModule>(true, out var scenesModule) &&
+                    return networkManager.TryGetModule<ScenePlayersModule>(true, out ScenePlayersModule scenesModule) &&
                            scenesModule.IsPlayerLoadedInScene(owner.Value, sceneId);
                 }
 
-                return networkManager.TryGetModule<PlayersManager>(false, out var module) &&
+                return networkManager.TryGetModule<PlayersManager>(false, out PlayersManager module) &&
                        module.IsPlayerConnected(owner.Value);
             }
         }
@@ -336,7 +336,7 @@ namespace PurrNet
                 if (_localPlayer.HasValue)
                     return _localPlayer;
 
-                if (networkManager.TryGetModule<PlayersManager>(false, out var players))
+                if (networkManager.TryGetModule<PlayersManager>(false, out PlayersManager players))
                 {
                     _localPlayer = players.localPlayerId;
                     return _localPlayer;
@@ -372,8 +372,8 @@ namespace PurrNet
 
         public NetworkIdentity GetRootIdentity()
         {
-            var lastKnown = gameObject.GetComponent<NetworkIdentity>();
-            var currentParent = parent;
+            NetworkIdentity lastKnown = gameObject.GetComponent<NetworkIdentity>();
+            NetworkIdentity currentParent = parent;
 
             while (currentParent)
             {
@@ -399,7 +399,7 @@ namespace PurrNet
         [ContextMenu("PurrNet/Print Prototype")]
         private void PrintPrototype()
         {
-            using var prototype = HierarchyPool.GetFullPrototype(transform);
+            using GameObjectPrototype prototype = HierarchyPool.GetFullPrototype(transform);
             PurrLogger.Log(prototype.ToString());
         }
 
@@ -414,11 +414,11 @@ namespace PurrNet
         /// </summary>
         public GameObject Duplicate()
         {
-            using var prototype = HierarchyPool.GetFullPrototype(transform);
-            if (networkManager.TryGetModule<HierarchyFactory>(isServer, out var factory) &&
-                factory.TryGetHierarchy(sceneId, out var hierarchy))
+            using GameObjectPrototype prototype = HierarchyPool.GetFullPrototype(transform);
+            if (networkManager.TryGetModule<HierarchyFactory>(isServer, out HierarchyFactory factory) &&
+                factory.TryGetHierarchy(sceneId, out HierarchyV2 hierarchy))
             {
-                var go = hierarchy.CreatePrototype(prototype, new List<NetworkIdentity>());
+                GameObject go = hierarchy.CreatePrototype(prototype, new List<NetworkIdentity>());
                 hierarchy.InternalSpawn(go);
                 return go;
             }
@@ -443,7 +443,7 @@ namespace PurrNet
                 RegisterTickEvent(asServer);
             }
 
-            if (networkManager.TryGetModule<PlayersManager>(asServer, out var players))
+            if (networkManager.TryGetModule<PlayersManager>(asServer, out PlayersManager players))
             {
                 // ReSharper disable once SuspiciousTypeConversion.Global
                 if (this is IPlayerEvents events)
@@ -452,7 +452,7 @@ namespace PurrNet
                     players.onPlayerLeft += events.OnPlayerDisconnected;
                 }
 
-                if (networkManager.TryGetModule<ScenePlayersModule>(asServer, out var scenePlayers))
+                if (networkManager.TryGetModule<ScenePlayersModule>(asServer, out ScenePlayersModule scenePlayers))
                 {
                     // ReSharper disable once SuspiciousTypeConversion.Global
                     if (this is IServerSceneEvents sceneEvents)
@@ -495,7 +495,7 @@ namespace PurrNet
                 UnregisterTickEvent(asServer);
             }
 
-            if (!networkManager.TryGetModule<PlayersManager>(asServer, out var players)) return;
+            if (!networkManager.TryGetModule<PlayersManager>(asServer, out PlayersManager players)) return;
 
             // ReSharper disable once SuspiciousTypeConversion.Global
             if (this is IPlayerEvents events)
@@ -504,7 +504,7 @@ namespace PurrNet
                 players.onPlayerLeft -= events.OnPlayerDisconnected;
             }
 
-            if (!networkManager.TryGetModule<ScenePlayersModule>(asServer, out var scenePlayers)) return;
+            if (!networkManager.TryGetModule<ScenePlayersModule>(asServer, out ScenePlayersModule scenePlayers)) return;
 
             if (_serverSceneEvents == null) return;
 
@@ -546,9 +546,9 @@ namespace PurrNet
             InternalTick();
             _ticker?.OnTick(_clientTickManager.tickDelta);
 
-            for (var i = 0; i < _tickables.Count; i++)
+            for (int i = 0; i < _tickables.Count; i++)
             {
-                var ticker = _tickables[i];
+                ITick ticker = _tickables[i];
                 ticker.OnTick(_clientTickManager.tickDelta);
             }
         }
@@ -559,9 +559,9 @@ namespace PurrNet
             {
                 InternalTick();
                 _ticker?.OnTick(_serverTickManager.tickDelta);
-                for (var i = 0; i < _tickables.Count; i++)
+                for (int i = 0; i < _tickables.Count; i++)
                 {
-                    var ticker = _tickables[i];
+                    ITick ticker = _tickables[i];
                     ticker.OnTick(_serverTickManager.tickDelta);
                 }
             }
@@ -740,15 +740,20 @@ namespace PurrNet
 
         private void CallInitMethods()
         {
-            if (!_methodCache.TryGetValue(GetType(), out var cached))
+            CallInitMethodFor(GetType(), this);
+        }
+
+        internal void CallInitMethodFor(Type targetType, object target)
+        {
+            if (!_methodCache.TryGetValue(targetType, out List<MethodInfo> cached))
             {
-                var type = GetType();
-                var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+                Type type = targetType;
+                MethodInfo[] methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
                 cached = new List<MethodInfo>(methods.Length);
 
                 for (int i = 0; i < methods.Length; i++)
                 {
-                    var m = methods[i];
+                    MethodInfo m = methods[i];
                     if (m.Name.EndsWith("_CodeGen_Initialize"))
                         cached.Add(m);
                 }
@@ -757,8 +762,25 @@ namespace PurrNet
             }
 
             int count = cached.Count;
-            for (var i = 0; i < count; i++)
-                cached[i].Invoke(this, Array.Empty<object>());
+            // If we are initialising ourselves as a network identity, then we
+            // expect no parameters.
+            if (typeof(NetworkIdentity).IsAssignableFrom(targetType))
+            {
+                for (int i = 0; i < count; i++)
+                    cached[i].Invoke(target, Array.Empty<object>());
+            }
+            else
+            {
+                // If we are late-initializing as a network module, instead of
+                // being called from the CodeGen_Initialize method, we are invoked
+                // here and require the string argument representing our parent
+                // We also need to simulate the RegisterModuleInternal call
+                string[] arguments = new string[] {
+                    GetType().Name
+                };
+                for (int i = 0; i < count; i++)
+                    cached[i].Invoke(target, arguments);
+            }
         }
 
         /// <summary>
@@ -768,6 +790,11 @@ namespace PurrNet
         public int layer { get; private set; }
 
         public bool isInPool { get; private set; }
+
+        /// <summary>
+        /// Are we currently initializing?
+        /// </summary>
+        private bool _isInitializing = false;
 
         [ContextMenu("PurrNet/Despawn")]
         public void Despawn()
@@ -840,6 +867,7 @@ namespace PurrNet
         internal void SetIdentity(NetworkManager manager, HierarchyV2 hierarchy, SceneID scene, bool asServer,
             bool asHost)
         {
+            _isInitializing = true;
             isInPool = false;
             layer = gameObject.layer;
             networkManager = manager;
@@ -872,8 +900,11 @@ namespace PurrNet
                 OnInitializeModules();
                 CallInitMethods();
 
-                foreach (var module in _externalModulesView)
+                for (int i = 0; i < _externalModulesView.Count; i++)
+                {
+                    NetworkModule module = _externalModulesView[i];
                     module.OnInitializeModules();
+                }
 
                 _tickables.Clear();
                 RegisterEvents();
@@ -883,6 +914,38 @@ namespace PurrNet
             {
                 _visitiblityRules = Instantiate(_visitiblityRules);
                 _visitiblityRules.Setup(manager);
+            }
+            _isInitializing = false;
+        }
+
+        /// <summary>
+        /// Initialize a module that wasn't available to be initialized at the start
+        /// </summary>
+        /// <param name="module"></param>
+        public void LateInitializeModule(NetworkModule parentModule)
+        {
+            int externalModuleStart = _externalModulesView.Count;
+            // Initialize the module
+            CallInitMethodFor(parentModule.GetType(), parentModule);
+            // If we are initializing, then OnInitializeModules and RegisterEvents is yet
+            // to be called. (But we still need to call the init method, as at this point
+            // we were added inside of OnInitializeModules()).
+            if (_isInitializing)
+                return;
+            // Initialization may cause more external modules to be added, but they will
+            // be late initialized by themselves.
+            int externalModuleEnd = _externalModulesView.Count;
+            // Initialize what we added, and only what we added here.
+            for (int addedIndex = externalModuleStart; addedIndex < externalModuleEnd; addedIndex++)
+            {
+                NetworkModule module = _externalModulesView[addedIndex];
+                // Call the callback for it
+                module.OnInitializeModules();
+                // Add the tickable
+                if (module is ITick tickableModule)
+                {
+                    _tickables.Add(tickableModule);
+                }
             }
         }
 
@@ -938,7 +1001,7 @@ namespace PurrNet
             }
 
             if (manager.TryGetModule(manager.isServer, out HierarchyFactory module) &&
-                module.TryGetHierarchy(gameObject.scene, out var hierarchy))
+                module.TryGetHierarchy(gameObject.scene, out HierarchyV2 hierarchy))
             {
                 hierarchy.OnGameObjectCreated(gameObject, prefab);
             }
@@ -961,7 +1024,7 @@ namespace PurrNet
             }
 
             if (manager.TryGetModule(manager.isServer, out HierarchyFactory module) &&
-                module.TryGetHierarchy(gameObject.scene, out var hierarchy))
+                module.TryGetHierarchy(gameObject.scene, out HierarchyV2 hierarchy))
             {
                 hierarchy.InternalSpawn(gameObject);
             }
@@ -985,12 +1048,12 @@ namespace PurrNet
                 return;
             }
 
-            using var identities = DisposableList<TransformIdentityPair>.Create(16);
+            using DisposableList<TransformIdentityPair> identities = DisposableList<TransformIdentityPair>.Create(16);
             HierarchyPool.GetDirectChildren(go.transform, identities);
 
-            for (var i = 0; i < identities.Count; i++)
+            for (int i = 0; i < identities.Count; i++)
             {
-                var pair = identities[i];
+                TransformIdentityPair pair = identities[i];
                 pair.identity.Spawn(prefab, manager);
             }
         }
@@ -1006,12 +1069,12 @@ namespace PurrNet
                 return;
             }
 
-            using var identities = DisposableList<TransformIdentityPair>.Create(16);
+            using DisposableList<TransformIdentityPair> identities = DisposableList<TransformIdentityPair>.Create(16);
             HierarchyPool.GetDirectChildren(go.transform, identities);
 
-            for (var i = 0; i < identities.Count; i++)
+            for (int i = 0; i < identities.Count; i++)
             {
-                var pair = identities[i];
+                TransformIdentityPair pair = identities[i];
                 pair.identity.Spawn(manager);
             }
         }

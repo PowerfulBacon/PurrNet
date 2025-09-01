@@ -1,9 +1,9 @@
-using UnityEngine;
 using PurrNet.Logging;
+using PurrNet.Transports;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using PurrNet.Transports;
+using UnityEngine;
 using UnityEngine.Scripting;
 
 namespace PurrNet
@@ -134,14 +134,14 @@ namespace PurrNet
                 if (!ValidateAuthority())
                     return;
 
-                var oldValue = _list[idx];
+                T oldValue = _list[idx];
 
                 if (oldValue != null && oldValue.Equals(value) || oldValue == null && value == null)
                     return;
 
                 _list[idx] = value;
 
-                var change = SyncListChange<T>.Set(value, oldValue, idx);
+                SyncListChange<T> change = SyncListChange<T>.Set(value, oldValue, idx);
                 QueueChange(change);
                 InvokeChange(change);
 
@@ -159,6 +159,28 @@ namespace PurrNet
         {
             _pendingChanges.Add(change);
             _isDirty = true;
+        }
+
+        /// <summary>
+        /// Before we do anything, register anything initially added to the list
+        /// as a late module.
+        /// Even though it's not technically late, it won't have been registered
+        /// as a base module with the client.
+        /// </summary>
+        /// <exception cref="Exception"></exception>
+        public override void OnInitializeModules()
+        {
+            foreach (T item in _list)
+            {
+                // If we haven't yet been initialized, then the contents will
+                // be initialized when we initialize.
+                if (item is ILateModuleInitialize module)
+                {
+                    if (parent == null)
+                        throw new Exception($"Types deriving from NetworkModule may only be added to the contents of a SyncList<> once the SyncList<> has been initialized.");
+                    module.LateInitialize(parent, this);
+                }
+            }
         }
 
         public override void OnSpawn()
@@ -197,7 +219,7 @@ namespace PurrNet
             {
                 for (int i = _list.Count - 1; i >= newList.Count; i--)
                 {
-                    var removed = _list[i];
+                    T removed = _list[i];
                     _list.RemoveAt(i);
                     InvokeChange(SyncListChange<T>.Removed(removed, removed, i));
                 }
@@ -215,7 +237,7 @@ namespace PurrNet
                 }
                 else if (!_list[i]?.Equals(newList[i]) ?? newList[i] != null)
                 {
-                    var old = _list[i];
+                    T old = _list[i];
                     _list[i] = newList[i];
                     InvokeChange(SyncListChange<T>.Set(newList[i], old, i));
                     listChanged = true;
@@ -239,14 +261,26 @@ namespace PurrNet
             if (!isServer || isHost)
             {
                 _list.Clear();
+                foreach (T item in items)
+                {
+                    // If we haven't yet been initialized, then the contents will
+                    // be initialized when we initialize.
+                    if (item is ILateModuleInitialize module)
+                    {
+                        if (parent == null)
+                            throw new Exception($"Types deriving from NetworkModule may only be added to the contents of a SyncList<> once the SyncList<> has been initialized.");
+                        module.LateInitialize(parent, this);
+                    }
+                }
+
                 _list.AddRange(items);
 
-                var change = SyncListChange<T>.Cleared();
+                SyncListChange<T> change = SyncListChange<T>.Cleared();
                 InvokeChange(change);
 
                 for (int i = 0; i < items.Count; i++)
                 {
-                    var changeI = SyncListChange<T>.Added(items[i], i);
+                    SyncListChange<T> changeI = SyncListChange<T>.Added(items[i], i);
                     InvokeChange(changeI);
                 }
             }
@@ -261,8 +295,17 @@ namespace PurrNet
             if (!ValidateAuthority())
                 return;
 
+            // If we haven't yet been initialized, then the contents will
+            // be initialized when we initialize.
+            if (item is ILateModuleInitialize module)
+            {
+                if (parent == null)
+                    throw new Exception($"Types deriving from NetworkModule may only be added to the contents of a SyncList<> once the SyncList<> has been initialized.");
+                module.LateInitialize(parent, this);
+            }
+
             _list.Add(item);
-            var change = SyncListChange<T>.Added(item, _list.Count - 1);
+            SyncListChange<T> change = SyncListChange<T>.Added(item, _list.Count - 1);
             QueueChange(change);
             InvokeChange(change);
         }
@@ -276,7 +319,7 @@ namespace PurrNet
                 return;
 
             _list.Clear();
-            var change = SyncListChange<T>.Cleared();
+            SyncListChange<T> change = SyncListChange<T>.Cleared();
             QueueChange(change);
             InvokeChange(change);
         }
@@ -292,7 +335,7 @@ namespace PurrNet
                 return;
 
             _list.Insert(index, item);
-            var change = SyncListChange<T>.Inserted(item, index);
+            SyncListChange<T> change = SyncListChange<T>.Inserted(item, index);
             QueueChange(change);
             InvokeChange(change);
         }
@@ -310,9 +353,9 @@ namespace PurrNet
             int idx = _list.IndexOf(item);
             if (idx < 0) return false;
 
-            var oldValue = _list[idx];
+            T oldValue = _list[idx];
             _list.RemoveAt(idx);
-            var change = SyncListChange<T>.Removed(item, oldValue, idx);
+            SyncListChange<T> change = SyncListChange<T>.Removed(item, oldValue, idx);
             QueueChange(change);
             InvokeChange(change);
 
@@ -328,10 +371,10 @@ namespace PurrNet
             if (!ValidateAuthority())
                 return;
 
-            var oldValue = _list[index];
+            T oldValue = _list[index];
             T item = _list[index];
             _list.RemoveAt(index);
-            var change = SyncListChange<T>.Removed(item, oldValue, index);
+            SyncListChange<T> change = SyncListChange<T>.Removed(item, oldValue, index);
             QueueChange(change);
             InvokeChange(change);
         }
@@ -380,8 +423,8 @@ namespace PurrNet
                 return;
             }
 
-            var value = _list[index];
-            var change = SyncListChange<T>.SetDirty(value, index);
+            T value = _list[index];
+            SyncListChange<T> change = SyncListChange<T>.SetDirty(value, index);
             QueueChange(change);
             InvokeChange(change);
         }
@@ -398,7 +441,7 @@ namespace PurrNet
 
             if (_isDirty)
             {
-                foreach (var change in _pendingChanges)
+                foreach (SyncListChange<T> change in _pendingChanges)
                 {
                     switch (change.operation)
                     {
@@ -454,8 +497,16 @@ namespace PurrNet
         {
             if (!isServer || isHost)
             {
+                // If we haven't yet been initialized, then the contents will
+                // be initialized when we initialize.
+                if (item is ILateModuleInitialize module)
+                {
+                    if (parent == null)
+                        throw new Exception($"Types deriving from NetworkModule may only be added to the contents of a SyncList<> once the SyncList<> has been initialized.");
+                    module.LateInitialize(parent, this);
+                }
                 _list.Add(item);
-                var change = SyncListChange<T>.Added(item, _list.Count - 1);
+                SyncListChange<T> change = SyncListChange<T>.Added(item, _list.Count - 1);
                 InvokeChange(change);
             }
         }
@@ -465,8 +516,16 @@ namespace PurrNet
         {
             if (!isHost)
             {
+                // If we haven't yet been initialized, then the contents will
+                // be initialized when we initialize.
+                if (item is ILateModuleInitialize module)
+                {
+                    if (parent == null)
+                        throw new Exception($"Types deriving from NetworkModule may only be added to the contents of a SyncList<> once the SyncList<> has been initialized.");
+                    module.LateInitialize(parent, this);
+                }
                 _list.Add(item);
-                var change = SyncListChange<T>.Added(item, _list.Count - 1);
+                SyncListChange<T> change = SyncListChange<T>.Added(item, _list.Count - 1);
                 InvokeChange(change);
             }
         }
@@ -486,9 +545,9 @@ namespace PurrNet
                 int idx = _list.IndexOf(item);
                 if (idx >= 0)
                 {
-                    var oldValue = _list[idx];
+                    T oldValue = _list[idx];
                     _list.RemoveAt(idx);
-                    var change = SyncListChange<T>.Removed(item, oldValue, idx);
+                    SyncListChange<T> change = SyncListChange<T>.Removed(item, oldValue, idx);
                     InvokeChange(change);
                 }
             }
@@ -502,9 +561,9 @@ namespace PurrNet
                 int idx = _list.IndexOf(item);
                 if (idx >= 0)
                 {
-                    var oldValue = _list[idx];
+                    T oldValue = _list[idx];
                     _list.RemoveAt(idx);
-                    var change = SyncListChange<T>.Removed(item, oldValue, idx);
+                    SyncListChange<T> change = SyncListChange<T>.Removed(item, oldValue, idx);
                     InvokeChange(change);
                 }
             }
@@ -522,10 +581,10 @@ namespace PurrNet
         {
             if ((!isServer || isHost) && index < _list.Count)
             {
-                var oldValue = _list[index];
+                T oldValue = _list[index];
                 T item = _list[index];
                 _list.RemoveAt(index);
-                var change = SyncListChange<T>.Removed(item, oldValue, index);
+                SyncListChange<T> change = SyncListChange<T>.Removed(item, oldValue, index);
                 InvokeChange(change);
             }
         }
@@ -535,10 +594,10 @@ namespace PurrNet
         {
             if (!isHost && index < _list.Count)
             {
-                var oldValue = _list[index];
+                T oldValue = _list[index];
                 T item = _list[index];
                 _list.RemoveAt(index);
-                var change = SyncListChange<T>.Removed(item, oldValue, index);
+                SyncListChange<T> change = SyncListChange<T>.Removed(item, oldValue, index);
                 InvokeChange(change);
             }
         }
@@ -556,7 +615,7 @@ namespace PurrNet
             if (!isServer || isHost)
             {
                 _list.Clear();
-                var change = SyncListChange<T>.Cleared();
+                SyncListChange<T> change = SyncListChange<T>.Cleared();
                 InvokeChange(change);
             }
         }
@@ -567,7 +626,7 @@ namespace PurrNet
             if (!isHost)
             {
                 _list.Clear();
-                var change = SyncListChange<T>.Cleared();
+                SyncListChange<T> change = SyncListChange<T>.Cleared();
                 InvokeChange(change);
             }
         }
@@ -584,9 +643,9 @@ namespace PurrNet
         {
             if ((!isServer || isHost) && index < _list.Count)
             {
-                var oldValue = _list[index];
+                T oldValue = _list[index];
                 _list[index] = item;
-                var change = SyncListChange<T>.Set(item, oldValue, index);
+                SyncListChange<T> change = SyncListChange<T>.Set(item, oldValue, index);
                 InvokeChange(change);
             }
         }
@@ -596,9 +655,9 @@ namespace PurrNet
         {
             if (!isHost && index < _list.Count)
             {
-                var oldValue = _list[index];
+                T oldValue = _list[index];
                 _list[index] = item;
-                var change = SyncListChange<T>.Set(item, oldValue, index);
+                SyncListChange<T> change = SyncListChange<T>.Set(item, oldValue, index);
                 InvokeChange(change);
             }
         }
@@ -616,7 +675,7 @@ namespace PurrNet
             if ((!isServer || isHost) && index <= _list.Count)
             {
                 _list.Insert(index, item);
-                var change = SyncListChange<T>.Inserted(item, index);
+                SyncListChange<T> change = SyncListChange<T>.Inserted(item, index);
                 InvokeChange(change);
             }
         }
@@ -627,7 +686,7 @@ namespace PurrNet
             if (!isHost && index <= _list.Count)
             {
                 _list.Insert(index, item);
-                var change = SyncListChange<T>.Inserted(item, index);
+                SyncListChange<T> change = SyncListChange<T>.Inserted(item, index);
                 InvokeChange(change);
             }
         }
@@ -647,7 +706,7 @@ namespace PurrNet
                 if (index >= 0 && index < _list.Count)
                 {
                     _list[index] = value;
-                    var change = SyncListChange<T>.SetDirty(value, index);
+                    SyncListChange<T> change = SyncListChange<T>.SetDirty(value, index);
                     InvokeChange(change);
                 }
             }
@@ -661,7 +720,7 @@ namespace PurrNet
                 if (index >= 0 && index < _list.Count)
                 {
                     _list[index] = value;
-                    var change = SyncListChange<T>.SetDirty(value, index);
+                    SyncListChange<T> change = SyncListChange<T>.SetDirty(value, index);
                     InvokeChange(change);
                 }
             }

@@ -1,15 +1,16 @@
-using System;
-using System.Reflection;
 using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Profiler;
 using PurrNet.Transports;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace PurrNet
 {
-    public class NetworkModule
+    public class NetworkModule : ILateModuleInitialize
     {
         public NetworkIdentity parent { get; private set; }
 
@@ -33,6 +34,17 @@ namespace PurrNet
 
         [UsedImplicitly] public bool isSpawned => parent && parent.isSpawned;
 
+        /// <summary>
+        /// Is this module dynamic, that is, was it registered to its parent identity
+        /// some time after construction?
+        /// Non-dynamic modules are assumed to be created when the parent identity is
+        /// constructed, which means they do not need to be created via serialisation
+        /// as they will already exist when the identity is spawned on the client.
+        /// Dynamic modules are created by events which the client will not know about,
+        /// so need a new instance created when we read their value.
+        /// </summary>
+        public bool isDynamic { get; private set; }
+
         public bool hasOwner => parent.hasOwner;
 
         public bool hasConnectedOwner => parent && parent.hasConnectedOwner;
@@ -44,6 +56,14 @@ namespace PurrNet
         public PlayerID? owner => parent ? parent.owner : null;
 
         public bool isController => parent && parent.isController;
+
+        /// <summary>
+        /// True if this network module has been initialized somewhere, prevents
+        /// re-initialisation and the passing around of network modules which
+        /// is not allowed. It must have a single parent, and once assigned cannot
+        /// be reassigned.
+        /// </summary>
+        private bool wasInitialized = false;
 
         [UsedImplicitly]
         public bool IsController(bool ownerHasAuthority) => parent && parent.IsController(ownerHasAuthority);
@@ -157,15 +177,26 @@ namespace PurrNet
             parent = p;
             index = i;
             name = moduleName;
+            wasInitialized = true;
         }
 
         [UsedByIL]
         public void RegisterModuleInternal(string moduleName, string type, NetworkModule module, bool isNetworkIdentity)
         {
-            var parentRef = this.parent;
+            NetworkIdentity parentRef = this.parent;
 
             if (parentRef)
                 parentRef.RegisterModuleInternal(moduleName, type, module, isNetworkIdentity);
+            else PurrLogger.LogError($"Registering module '{moduleName}' failed since it is not spawned.");
+        }
+
+        [UsedByIL]
+        public void RegisterKnownModuleInternal(string moduleName, byte moduleId, string type, NetworkModule module)
+        {
+            NetworkIdentity parentRef = this.parent;
+
+            if (parentRef)
+                parentRef.RegisterKnownModuleInternal(moduleName, moduleId, type, module);
             else PurrLogger.LogError($"Registering module '{moduleName}' failed since it is not spawned.");
         }
 
@@ -186,15 +217,15 @@ namespace PurrNet
                 return;
             }
 
-            var nm = parent.networkManager;
+            NetworkManager nm = parent.networkManager;
 
-            if (!nm.TryGetModule<RPCModule>(nm.isServer, out var module))
+            if (!nm.TryGetModule<RPCModule>(nm.isServer, out RPCModule module))
             {
                 PurrLogger.LogError("Failed to get RPC module.", parent);
                 return;
             }
 
-            var rules = networkManager.networkRules;
+            NetworkRules rules = networkManager.networkRules;
             bool shouldIgnoreOwnership = rules && rules.ShouldIgnoreRequireOwner();
 
             if (!shouldIgnoreOwnership && signature.requireOwnership && !isOwner)
@@ -230,12 +261,12 @@ namespace PurrNet
                 case RPCType.TargetRPC:
                     if (isServer)
                     {
-                        using var targets = signature.GetTargets();
+                        using Pooling.DisposableList<PlayerID> targets = signature.GetTargets();
                         parent.Send(targets, packet, signature.channel);
                     }
                     else
                     {
-                        using var targets = signature.GetTargets();
+                        using Pooling.DisposableList<PlayerID> targets = signature.GetTargets();
 
                         // TODO: we should batch this into one packet to the server instead of N
                         for (int i = 0; i < targets.Count; i++)
@@ -281,11 +312,11 @@ namespace PurrNet
         [UsedByIL]
         protected object CallGeneric(string methodName, GenericRPCHeader rpcHeader)
         {
-            var key = new NetworkIdentity.InstanceGenericKey(methodName, GetType(), rpcHeader.types);
+            NetworkIdentity.InstanceGenericKey key = new NetworkIdentity.InstanceGenericKey(methodName, GetType(), rpcHeader.types);
 
-            if (!NetworkIdentity.genericMethods.TryGetValue(key, out var gmethod))
+            if (!NetworkIdentity.genericMethods.TryGetValue(key, out MethodInfo gmethod))
             {
-                var method = GetType().GetMethod(methodName,
+                MethodInfo method = GetType().GetMethod(methodName,
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
                 gmethod = method?.MakeGenericMethod(rpcHeader.types);
 
@@ -308,7 +339,7 @@ namespace PurrNet
                 throw new InvalidOperationException(
                     $"Trying to send RPC from '{GetType().Name}' which is not spawned.");
 
-            var rpc = new ChildRPCPacket
+            ChildRPCPacket rpc = new ChildRPCPacket
             {
                 networkId = parent.id!.Value,
                 sceneId = parent.sceneId,
@@ -381,6 +412,75 @@ namespace PurrNet
                     $"Client is trying to act on module that is `<b>ownerAuth</b>` but the owner is `<b>{owner}</b>` (not you: `{local}`).",
                 _ => "Client is trying to act on module that is not `<b>ownerAuth</b>`, only server can act on it."
             };
+        }
+
+        /// <summary>
+        /// Store whether or not we can be dynamic
+        /// </summary>
+        private static Dictionary<Type, bool> _dynamicSafeCache = new Dictionary<Type, bool>();
+
+        /// <summary>
+        /// When we are added to a SyncVar, or contained inside another NetworkModule then
+        /// we need to be initialized so that we can be properly networked.
+        /// </summary>
+        /// <param name="parentIdentity"></param>
+        /// <param name="attachedToModule"></param>
+        /// <param name="moduleID">If we already know the module ID, then it can be provided.</param>
+        public void LateInitialize(NetworkIdentity parentIdentity, NetworkModule attachedToModule, byte? moduleID = null)
+        {
+            // Check for re-registration
+            if (wasInitialized)
+            {
+                throw new LateModuleException($"A network module called <b>{name}</b> was attached to the " +
+                    $"module <b>{attachedToModule.name}</b>, but it had already been attached to " +
+                    $"another module. Once a network module has been initialized, it must remain" +
+                    $"attached to its parent module, and cannot be reassigned. Do not assign" +
+                    $"network modules to any network modules such as SyncVar unless they are" +
+                    $"new instances.");
+            }
+            // Check for a default constructor
+            if (!_dynamicSafeCache.TryGetValue(GetType(), out bool isSafe))
+            {
+                isSafe = GetType().GetConstructor(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, null, new Type[0], null) != null;
+                _dynamicSafeCache.TryAdd(GetType(), isSafe);
+            }
+            if (!isSafe)
+            {
+                throw new LateModuleException($"The network module <b>{name}</b> of type <b>{GetType().Name}</b> referenced via the variable " +
+                    $"<b>{attachedToModule.name} </b>" +
+                    $"is initialized late via a SyncVar type, but does not have a default constructor. Please either provide" +
+                    $"a default constructor if the state of the object does not depend on the values provided in the constructor " +
+                    $"or mark the type as packable to override the packing behaviour.");
+            }
+            // Mark as dynamic
+            isDynamic = true;
+            // Register the module
+            if (!moduleID.HasValue)
+            {
+                if (attachedToModule == null)
+                {
+                    parentIdentity.RegisterModuleInternal(name, GetType().Name, this, false);
+                }
+                else
+                {
+                    attachedToModule.RegisterModuleInternal(attachedToModule.name, attachedToModule.GetType().Name, this, false);
+                }
+            }
+            else
+            {
+                if (attachedToModule == null)
+                {
+                    parentIdentity.RegisterKnownModuleInternal(name, moduleID.Value, GetType().Name, this);
+                }
+                else
+                {
+                    attachedToModule.RegisterKnownModuleInternal(attachedToModule.name, moduleID.Value, attachedToModule.GetType().Name, this);
+                }
+            }
+            // Find and call the init method on ourselves
+            // This init method will invoke RegisterModuleInternal, and will recursively
+            // call the init methods on our children (if we have any).
+            parentIdentity.LateInitializeModule(this);
         }
     }
 }

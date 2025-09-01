@@ -1,13 +1,21 @@
-using System.Collections.Generic;
 using PurrNet.Logging;
 using PurrNet.Modules;
+using System.Collections.Generic;
 
 namespace PurrNet
 {
     public partial class NetworkIdentity
     {
+        /// <summary>
+        /// The modules attached to the identity.
+        /// </summary>
         public IReadOnlyList<NetworkModule> modules => _externalModulesView;
 
+        /// <summary>
+        /// External modules, without null elements.
+        /// The index does not line up with the internal ID of the module, use TryGetModule() to get
+        /// a module with a specific ID.
+        /// </summary>
         private readonly List<NetworkModule> _externalModulesView = new List<NetworkModule>();
         private readonly List<NetworkModule> _modules = new List<NetworkModule>();
 
@@ -43,6 +51,48 @@ namespace PurrNet
             _externalModulesView.Add(module);
         }
 
+        /// <summary>
+        /// Register a known module which should already exist.
+        /// </summary>
+        /// <param name="moduleName">The name of the module being registered.</param>
+        /// <param name="moduleId">The ID of the module to use.</param>
+        /// <param name="type">The type name of the module being used.</param>
+        /// <param name="module">The module being registered</param>
+        /// <exception cref="System.Exception"></exception>
+        /// <exception cref="System.NullReferenceException"></exception>
+        [UsedByIL]
+        public void RegisterKnownModuleInternal(string moduleName, byte moduleId, string type, NetworkModule module)
+        {
+            if (moduleId >= byte.MaxValue)
+            {
+                throw new System.Exception($"Too many modules in {GetType().Name}! Max is {byte.MaxValue}.\n" +
+                                           $"This could also happen with circular dependencies.");
+            }
+
+            if (module == null)
+            {
+                throw new System.NullReferenceException("Attempting to register a null module by ID, which is not" +
+                    "allowed. When an ID is provided, the module is assumed to be existing.");
+            }
+
+            if (_moduleId <= moduleId)
+            {
+                _moduleId = moduleId;
+                _moduleId++;
+            }
+
+            module.SetComponentParent(this, moduleId, moduleName);
+
+            // Expand the array
+            while (_modules.Count < moduleId + 1)
+            {
+                _modules.Add(null);
+            }
+            
+            _modules[moduleId] = module;
+            _externalModulesView.Add(module);
+        }
+
         public bool TryGetModule(byte moduleId, out NetworkModule module)
         {
             if (moduleId >= _modules.Count)
@@ -52,14 +102,14 @@ namespace PurrNet
             }
 
             module = _modules[moduleId];
-            return true;
+            return module != null;
         }
 
         private void RegisterEvents()
         {
-            for (var i = 0; i < _externalModulesView.Count; i++)
+            for (int i = 0; i < _externalModulesView.Count; i++)
             {
-                var module = _externalModulesView[i];
+                NetworkModule module = _externalModulesView[i];
                 if (module is ITick tickableModule)
                 {
                     _tickables.Add(tickableModule);

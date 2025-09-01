@@ -1,5 +1,6 @@
 using PurrNet.Modules;
 using PurrNet.Packing;
+using System;
 
 namespace PurrNet
 {
@@ -20,8 +21,8 @@ namespace PurrNet
                 Packer<bool>.Write(packer, false);
                 return;
             }
-
             Packer<bool>.Write(packer, true);
+            Packer<bool>.Write(packer, module.isDynamic);
             Packer<byte>.Write(packer, module.index);
 
             Packer<NetworkIdentity>.Write(packer, module.parent);
@@ -40,15 +41,31 @@ namespace PurrNet
                 return;
             }
 
+            bool isDynamic = false;
+            Packer<bool>.Read(packer, ref isDynamic);
+
             byte index = 0;
             Packer<byte>.Read(packer, ref index);
 
             NetworkIdentity identity = null;
             Packer<NetworkIdentity>.Read(packer, ref identity);
 
-            if (identity && identity.TryGetModule(index, out var nmodule) && nmodule is T result)
+
+            if (identity && identity.TryGetModule(index, out NetworkModule nmodule) && nmodule is T result)
+            {
                 module = result;
-            else module = null;
+                return;
+            }
+            // No module found
+            module = null;
+            // Do we need to create it?
+            if (isDynamic)
+            {
+                T instantiated = (T)Activator.CreateInstance(typeof(T), true);
+                instantiated.LateInitialize(identity, null, index);
+                module = instantiated;
+                return;
+            }
         }
 
         [UsedByIL]
