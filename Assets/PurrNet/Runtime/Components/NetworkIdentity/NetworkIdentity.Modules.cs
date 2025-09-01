@@ -67,8 +67,9 @@ namespace PurrNet
                         $"can happen when modules are created in the constructor of an object, but are created with non-deterministic " +
                         $"behaviour. The server and the client must initiate any local modules in the exact same way, otherwise they " +
                         $"should be stored inside of a SyncVar to become a dynamic module.");
-                module.SetComponentParent(this, _moduleId++, moduleName);
+                module.SetComponentParent(this, _moduleId, moduleName);
                 _modules[_moduleId] = module;
+                _moduleId++;
             }
             else
             {
