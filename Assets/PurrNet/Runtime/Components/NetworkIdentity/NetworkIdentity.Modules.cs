@@ -55,9 +55,26 @@ namespace PurrNet
                 return;
             }
 
-            module.SetComponentParent(this, _moduleId++, moduleName);
-
-            _modules.Add(module);
+            if (_moduleId == _modules.Count)
+            {
+                module.SetComponentParent(this, _moduleId++, moduleName);
+                _modules.Add(module);
+            }
+            else if (_moduleId < _modules.Count)
+            {
+                if (_modules[_moduleId] != null)
+                    throw new LateModuleException($"Module in {GetType().Name} has overflowed its space of allowed IDs. This " +
+                        $"can happen when modules are created in the constructor of an object, but are created with non-deterministic " +
+                        $"behaviour. The server and the client must initiate any local modules in the exact same way, otherwise they " +
+                        $"should be stored inside of a SyncVar to become a dynamic module.");
+                module.SetComponentParent(this, _moduleId++, moduleName);
+                _modules[_moduleId] = module;
+            }
+            else
+            {
+                throw new LateModuleException("ModuleID was greater than the number of modules. An internal issue has occurred, possibly due to another " +
+                    "exception.");
+            }
             _externalModulesView.Add(module);
         }
 
