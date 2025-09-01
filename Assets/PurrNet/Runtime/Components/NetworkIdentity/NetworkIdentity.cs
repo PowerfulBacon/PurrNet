@@ -96,8 +96,6 @@ namespace PurrNet
 
         public bool skipSceneAutoSpawning { get; set; } = false;
 
-        public bool hasInitializedModules { get; private set; } = false;
-
         /// <summary>
         /// Used for internal cleanup, avoid using this.
         /// </summary>
@@ -906,6 +904,7 @@ namespace PurrNet
                 {
                     NetworkModule module = _externalModulesView[i];
                     module.OnInitializeModules();
+                    module.isModuleInitialized = true;
                 }
 
                 _tickables.Clear();
@@ -918,7 +917,6 @@ namespace PurrNet
                 _visitiblityRules.Setup(manager);
             }
             _isInitializing = false;
-            hasInitializedModules = true;
         }
 
         /// <summary>
@@ -945,6 +943,7 @@ namespace PurrNet
                 NetworkModule module = _externalModulesView[addedIndex];
                 // Call the callback for it
                 module.OnInitializeModules();
+                module.isModuleInitialized = true;
                 // Add the tickable
                 if (module is ITick tickableModule)
                 {

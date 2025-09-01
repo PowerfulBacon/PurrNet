@@ -65,6 +65,11 @@ namespace PurrNet
         /// </summary>
         private bool wasInitialized = false;
 
+        /// <summary>
+        /// Has the module been initialized?
+        /// </summary>
+        public bool isModuleInitialized { get; internal set; } = false;
+
         [UsedImplicitly]
         public bool IsController(bool ownerHasAuthority) => parent && parent.IsController(ownerHasAuthority);
 

@@ -61,9 +61,9 @@ namespace PurrNet
                 _value = value;
                 _isDirty = true;
 
-                if (parent.hasInitializedModules && oldValue is NetworkModule detachedModule)
+                if (isModuleInitialized && oldValue is NetworkModule detachedModule)
                     Detatch(detachedModule);
-                if (parent.hasInitializedModules && _value is NetworkModule attachedModule)
+                if (isModuleInitialized && _value is NetworkModule attachedModule)
                     Attach(attachedModule);
 
                 onChanged?.Invoke(value);
