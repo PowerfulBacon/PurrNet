@@ -1,13 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using K4os.Compression.LZ4;
 using PurrNet.Logging;
 using PurrNet.Packing;
 using PurrNet.Pooling;
 using PurrNet.Transports;
 using PurrNet.Utils;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace PurrNet.Modules
 {
@@ -57,7 +56,7 @@ namespace PurrNet.Modules
 
         private void OnObserverAdded(PlayerID player, SceneID scene, NetworkID id)
         {
-            if (!_hierarchyModule.TryGetIdentity(scene, id, out var identity))
+            if (!_hierarchyModule.TryGetIdentity(scene, id, out NetworkIdentity identity))
                 return;
 
             SendAnyInstanceRPCs(player, identity);
@@ -69,7 +68,7 @@ namespace PurrNet.Modules
         {
             for (int i = 0; i < _bufferedRpcsDatas.Count; i++)
             {
-                var data = _bufferedRpcsDatas[i];
+                RPC_DATA data = _bufferedRpcsDatas[i];
 
                 if (data.rpcid.sceneId != identity.sceneId) continue;
                 if (data.rpcid.networkId != identity.id) continue;
@@ -82,7 +81,7 @@ namespace PurrNet.Modules
 
             for (int i = 0; i < _bufferedChildRpcsDatas.Count; i++)
             {
-                var data = _bufferedChildRpcsDatas[i];
+                CHILD_RPC_DATA data = _bufferedChildRpcsDatas[i];
 
                 if (data.rpcid.sceneId != identity.sceneId) continue;
                 if (data.rpcid.networkId != identity.id) continue;
@@ -99,11 +98,11 @@ namespace PurrNet.Modules
         {
             for (int i = 0; i < _bufferedRpcsDatas.Count; i++)
             {
-                var data = _bufferedRpcsDatas[i];
+                RPC_DATA data = _bufferedRpcsDatas[i];
 
                 if (data.rpcid.sceneId != scene) continue;
 
-                var key = data.rpcid;
+                RPC_ID key = data.rpcid;
                 FreeStream(data.stream);
 
                 _bufferedRpcsKeys.Remove(key);
@@ -112,11 +111,11 @@ namespace PurrNet.Modules
 
             for (int i = 0; i < _bufferedChildRpcsDatas.Count; i++)
             {
-                var data = _bufferedChildRpcsDatas[i];
+                CHILD_RPC_DATA data = _bufferedChildRpcsDatas[i];
 
                 if (data.rpcid.sceneId != scene) continue;
 
-                var key = data.rpcid;
+                RPC_ID key = data.rpcid;
                 FreeStream(data.stream);
 
                 _bufferedChildRpcsKeys.Remove(key);
@@ -132,11 +131,11 @@ namespace PurrNet.Modules
         [UsedByIL]
         public static PlayerID GetLocalPlayer()
         {
-            var nm = NetworkManager.main;
+            NetworkManager nm = NetworkManager.main;
 
             if (!nm) return default;
 
-            if (!nm.TryGetModule<PlayersManager>(false, out var players))
+            if (!nm.TryGetModule<PlayersManager>(false, out PlayersManager players))
                 return default;
 
             return players.localPlayerId ?? default;
@@ -146,7 +145,7 @@ namespace PurrNet.Modules
         {
             if (!nm) return default;
 
-            if (!nm.TryGetModule<PlayersManager>(false, out var players))
+            if (!nm.TryGetModule<PlayersManager>(false, out PlayersManager players))
                 return default;
 
             return players.localPlayerId ?? default;
@@ -161,7 +160,7 @@ namespace PurrNet.Modules
         [UsedByIL]
         public static void SendStaticRPC(StaticRPCPacket packet, RPCSignature signature)
         {
-            var nm = NetworkManager.main;
+            NetworkManager nm = NetworkManager.main;
 
             if (!nm)
             {
@@ -169,13 +168,13 @@ namespace PurrNet.Modules
                 return;
             }
 
-            if (!nm.TryGetModule<RPCModule>(nm.isServer, out var module))
+            if (!nm.TryGetModule<RPCModule>(nm.isServer, out RPCModule module))
             {
                 PurrLogger.LogError("Failed to get RPC module while sending static RPC.", nm);
                 return;
             }
 
-            var rules = nm.networkRules;
+            NetworkRules rules = nm.networkRules;
             bool shouldIgnore = rules && rules.ShouldIgnoreRequireServer();
 
             if (!shouldIgnore && signature.requireServer && !nm.isServer)
@@ -191,7 +190,7 @@ namespace PurrNet.Modules
             {
                 case RPCType.ServerRPC:
                 {
-                    if (nm.TryGetModule<PlayersManager>(false, out var players))
+                    if (nm.TryGetModule<PlayersManager>(false, out PlayersManager players))
                         players.SendToServer(packet, signature.channel);
                     break;
                 }
@@ -199,7 +198,7 @@ namespace PurrNet.Modules
                 {
                     if (nm.isServer)
                     {
-                        var players = nm.GetModule<PlayersManager>(true);
+                            PlayersManager players = nm.GetModule<PlayersManager>(true);
                         _observers.Clear();
                         _observers.AddRange(players.players);
 
@@ -216,16 +215,16 @@ namespace PurrNet.Modules
                 {
                     if (nm.isServer)
                     {
-                        var players = nm.GetModule<PlayersManager>(true);
-                        using var targets = signature.GetTargets();
+                            PlayersManager players = nm.GetModule<PlayersManager>(true);
+                        using DisposableList<PlayerID> targets = signature.GetTargets();
                         players.SendList(targets, packet, signature.channel);
                     }
                     else
                     {
-                        using var players = signature.GetTargets();
+                        using DisposableList<PlayerID> players = signature.GetTargets();
 
                         // TODO: We should batch this into one packet... but hey, too lazy rn
-                        for (var i = 0; i < players.Count; i++)
+                        for (int i = 0; i < players.Count; i++)
                         {
                             packet.targetPlayerId = players[i];
                             nm.GetModule<PlayersManager>(false).SendToServer(packet, signature.channel);
@@ -250,7 +249,7 @@ namespace PurrNet.Modules
         [UsedByIL]
         public static bool ValidateReceivingStaticRPC(RPCInfo info, RPCSignature signature, IRpc data, bool asServer)
         {
-            var nm = NetworkManager.main;
+            NetworkManager nm = NetworkManager.main;
 
             if (!nm)
             {
@@ -258,7 +257,7 @@ namespace PurrNet.Modules
                 return false;
             }
 
-            if (!nm.TryGetModule<RPCModule>(nm.isServer, out var module))
+            if (!nm.TryGetModule<RPCModule>(nm.isServer, out RPCModule module))
             {
                 PurrLogger.LogError("Failed to get RPC module while sending static RPC.", nm);
                 return false;
@@ -276,7 +275,7 @@ namespace PurrNet.Modules
                 return true;
             }
 
-            var rules = nm.networkRules;
+            NetworkRules rules = nm.networkRules;
             bool shouldIgnore = rules && rules.ShouldIgnoreRequireServer();
 
             if (!shouldIgnore && signature.requireServer)
@@ -291,9 +290,9 @@ namespace PurrNet.Modules
                 case RPCType.ServerRPC: return true;
                 case RPCType.ObserversRPC:
                 {
-                    var players = nm.GetModule<PlayersManager>(true);
-                    var rawData = BroadcastModule.GetImmediateData(data);
-                    var collection = signature.excludeSender
+                        PlayersManager players = nm.GetModule<PlayersManager>(true);
+                        ByteData rawData = BroadcastModule.GetImmediateData(data);
+                        IReadOnlyList<PlayerID> collection = signature.excludeSender
                         ? GetImmediateExcept(players, info.sender)
                         : players.players;
                     if (data is StaticRPCPacket staticRpc)
@@ -303,8 +302,8 @@ namespace PurrNet.Modules
                 }
                 case RPCType.TargetRPC:
                 {
-                    var players = nm.GetModule<PlayersManager>(true);
-                    var rawData = BroadcastModule.GetImmediateData(data);
+                        PlayersManager players = nm.GetModule<PlayersManager>(true);
+                        ByteData rawData = BroadcastModule.GetImmediateData(data);
                     if (data is StaticRPCPacket staticRpc)
                         module.AppendToBufferedRPCs(staticRpc, signature);
                     players.SendRaw(data.targetPlayerId, rawData, signature.channel);
@@ -354,12 +353,12 @@ namespace PurrNet.Modules
         [UsedByIL]
         public static object CallStaticGeneric(RuntimeTypeHandle type, string methodName, GenericRPCHeader rpcHeader)
         {
-            var targetType = Type.GetTypeFromHandle(type);
-            var key = new StaticGenericKey(type.Value, methodName, rpcHeader.types);
+            Type targetType = Type.GetTypeFromHandle(type);
+            StaticGenericKey key = new StaticGenericKey(type.Value, methodName, rpcHeader.types);
 
-            if (!_staticGenericHandlers.TryGetValue(key, out var gmethod))
+            if (!_staticGenericHandlers.TryGetValue(key, out MethodInfo gmethod))
             {
-                var method = targetType.GetMethod(methodName,
+                MethodInfo method = targetType.GetMethod(methodName,
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
                 gmethod = method?.MakeGenericMethod(rpcHeader.types);
 
@@ -379,7 +378,7 @@ namespace PurrNet.Modules
         {
             for (int i = 0; i < _bufferedChildRpcsDatas.Count; i++)
             {
-                var data = _bufferedChildRpcsDatas[i];
+                CHILD_RPC_DATA data = _bufferedChildRpcsDatas[i];
 
                 if (data.rpcid.sceneId != identity.sceneId)
                     continue;
@@ -387,14 +386,14 @@ namespace PurrNet.Modules
                 if (data.rpcid.networkId != identity.id)
                     continue;
 
-                if (data.sig.excludeOwner && _ownership.TryGetOwner(identity, out var owner) && owner == player)
+                if (data.sig.excludeOwner && _ownership.TryGetOwner(identity, out PlayerID owner) && owner == player)
                     continue;
 
                 switch (data.sig.type)
                 {
                     case RPCType.ObserversRPC:
                     {
-                        var packet = data.packet;
+                            ChildRPCPacket packet = data.packet;
                         packet.data = data.stream.ToByteData();
                         _playersManager.Send(player, packet);
 
@@ -405,7 +404,7 @@ namespace PurrNet.Modules
                     {
                         if (data.sig.targetPlayer == player)
                         {
-                            var packet = data.packet;
+                                ChildRPCPacket packet = data.packet;
                             packet.data = data.stream.ToByteData();
                             _playersManager.Send(player, packet);
                         }
@@ -424,7 +423,7 @@ namespace PurrNet.Modules
         {
             for (int i = 0; i < _bufferedRpcsDatas.Count; i++)
             {
-                var data = _bufferedRpcsDatas[i];
+                RPC_DATA data = _bufferedRpcsDatas[i];
 
                 if (data.rpcid.sceneId != identity.sceneId)
                     continue;
@@ -432,14 +431,14 @@ namespace PurrNet.Modules
                 if (data.rpcid.networkId != identity.id)
                     continue;
 
-                if (data.sig.excludeOwner && _ownership.TryGetOwner(identity, out var owner) && owner == player)
+                if (data.sig.excludeOwner && _ownership.TryGetOwner(identity, out PlayerID owner) && owner == player)
                     continue;
 
                 switch (data.sig.type)
                 {
                     case RPCType.ObserversRPC:
                     {
-                        var packet = data.packet;
+                            RPCPacket packet = data.packet;
                         packet.data = data.stream.ToByteData();
                         _playersManager.Send(player, packet);
 
@@ -450,7 +449,7 @@ namespace PurrNet.Modules
                     {
                         if (data.sig.targetPlayer == player)
                         {
-                            var packet = data.packet;
+                                RPCPacket packet = data.packet;
                             packet.data = data.stream.ToByteData();
                             _playersManager.Send(player, packet);
                         }
@@ -465,13 +464,13 @@ namespace PurrNet.Modules
         {
             for (int i = 0; i < _bufferedStaticRpcsDatas.Count; i++)
             {
-                var data = _bufferedStaticRpcsDatas[i];
+                STATIC_RPC_DATA data = _bufferedStaticRpcsDatas[i];
 
                 switch (data.sig.type)
                 {
                     case RPCType.ObserversRPC:
                     {
-                        var packet = data.packet;
+                            StaticRPCPacket packet = data.packet;
                         packet.data = data.stream.ToByteData();
                         _playersManager.Send(player, packet);
 
@@ -482,7 +481,7 @@ namespace PurrNet.Modules
                     {
                         if (data.sig.targetPlayer == player)
                         {
-                            var packet = data.packet;
+                                StaticRPCPacket packet = data.packet;
                             packet.data = data.stream.ToByteData();
                             _playersManager.Send(player, packet);
                         }
@@ -520,19 +519,19 @@ namespace PurrNet.Modules
         {
             if (!signature.bufferLast) return;
 
-            var rpcid = new RPC_ID(packet);
+            RPC_ID rpcid = new RPC_ID(packet);
 
-            if (_bufferedStaticRpcsKeys.TryGetValue(rpcid, out var data))
+            if (_bufferedStaticRpcsKeys.TryGetValue(rpcid, out STATIC_RPC_DATA data))
             {
                 data.stream.ResetPosition();
                 data.stream.WriteBytes(packet.data);
             }
             else
             {
-                var newStream = AllocStream(false);
+                BitPacker newStream = AllocStream(false);
                 newStream.WriteBytes(packet.data);
 
-                var newdata = new STATIC_RPC_DATA
+                STATIC_RPC_DATA newdata = new STATIC_RPC_DATA
                 {
                     rpcid = rpcid,
                     packet = packet,
@@ -549,19 +548,19 @@ namespace PurrNet.Modules
         {
             if (!signature.bufferLast) return;
 
-            var rpcid = new RPC_ID(packet);
+            RPC_ID rpcid = new RPC_ID(packet);
 
-            if (_bufferedChildRpcsKeys.TryGetValue(rpcid, out var data))
+            if (_bufferedChildRpcsKeys.TryGetValue(rpcid, out CHILD_RPC_DATA data))
             {
                 data.stream.ResetPosition();
                 data.stream.WriteBytes(packet.data);
             }
             else
             {
-                var newStream = AllocStream(false);
+                BitPacker newStream = AllocStream(false);
                 newStream.WriteBytes(packet.data);
 
-                var newdata = new CHILD_RPC_DATA
+                CHILD_RPC_DATA newdata = new CHILD_RPC_DATA
                 {
                     rpcid = rpcid,
                     packet = packet,
@@ -578,19 +577,19 @@ namespace PurrNet.Modules
         {
             if (!signature.bufferLast) return;
 
-            var rpcid = new RPC_ID(packet);
+            RPC_ID rpcid = new RPC_ID(packet);
 
-            if (_bufferedRpcsKeys.TryGetValue(rpcid, out var data))
+            if (_bufferedRpcsKeys.TryGetValue(rpcid, out RPC_DATA data))
             {
                 data.stream.ResetPosition();
                 data.stream.WriteBytes(packet.data);
             }
             else
             {
-                var newStream = AllocStream(false);
+                BitPacker newStream = AllocStream(false);
                 newStream.WriteBytes(packet.data);
 
-                var newdata = new RPC_DATA
+                RPC_DATA newdata = new RPC_DATA
                 {
                     rpcid = rpcid,
                     packet = packet,
@@ -606,7 +605,7 @@ namespace PurrNet.Modules
         [UsedByIL]
         public static RPCPacket BuildRawRPC(NetworkID? networkId, SceneID id, byte rpcId, BitPacker data)
         {
-            var rpc = new RPCPacket
+            RPCPacket rpc = new RPCPacket
             {
                 networkId = networkId ?? default,
                 rpcId = rpcId,
@@ -621,9 +620,9 @@ namespace PurrNet.Modules
         [UsedByIL]
         public static StaticRPCPacket BuildStaticRawRPC<T>(byte rpcId, BitPacker data)
         {
-            var hash = Hasher.GetStableHashU32<T>();
+            uint hash = Hasher.GetStableHashU32<T>();
 
-            var rpc = new StaticRPCPacket
+            StaticRPCPacket rpc = new StaticRPCPacket
             {
                 rpcId = rpcId,
                 data = data.ToByteData(),
@@ -667,18 +666,18 @@ namespace PurrNet.Modules
 
         static StaticRPCHandler GetStaticRPCHandler(Type type, byte rpcId)
         {
-            var rpcKey = new RPCKey(type, rpcId);
+            RPCKey rpcKey = new RPCKey(type, rpcId);
 
-            if (_rpcHandlers.TryGetValue(rpcKey, out var handler))
+            if (_rpcHandlers.TryGetValue(rpcKey, out StaticRPCHandler handler))
                 return handler;
 
             string methodName = $"HandleRPCGenerated_{rpcId}";
-            var method = type.GetMethod(methodName,
+            MethodInfo method = type.GetMethod(methodName,
                 BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
 
             if (method != null)
             {
-                var d = Delegate.CreateDelegate(typeof(StaticRPCHandler), method);
+                Delegate d = Delegate.CreateDelegate(typeof(StaticRPCHandler), method);
                 if (d is StaticRPCHandler staticDel)
                 {
                     _rpcHandlers[rpcKey] = staticDel;
@@ -693,16 +692,16 @@ namespace PurrNet.Modules
 
         unsafe void ReceiveStaticRPC(PlayerID player, StaticRPCPacket data, bool asServer)
         {
-            if (!Hasher.TryGetType(data.typeHash, out var type))
+            if (!Hasher.TryGetType(data.typeHash, out Type type))
             {
                 PurrLogger.LogError($"Failed to resolve type with hash {data.typeHash}.");
                 return;
             }
 
-            using var stream = BitPackerPool.Get(data.data);
+            using BitPacker stream = BitPackerPool.Get(data.data);
 
-            var rpcHandlerPtr = GetStaticRPCHandler(type, data.rpcId);
-            var info = new RPCInfo
+            StaticRPCHandler rpcHandlerPtr = GetStaticRPCHandler(type, data.rpcId);
+            RPCInfo info = new RPCInfo
             {
                 manager = _manager,
                 sender = player,
@@ -729,24 +728,26 @@ namespace PurrNet.Modules
 
         void ReceiveChildRPC(PlayerID player, ChildRPCPacket packet, bool asServer)
         {
-            using var stream = BitPackerPool.Get(packet.data);
+            using BitPacker stream = BitPackerPool.Get(packet.data);
 
-            var info = new RPCInfo
+            RPCInfo info = new RPCInfo
             {
                 manager = _manager,
                 sender = player,
                 asServer = asServer
             };
 
-            if (_hierarchyModule.TryGetIdentity(packet.sceneId, packet.networkId, out var identity) && identity)
+            if (_hierarchyModule.TryGetIdentity(packet.sceneId, packet.networkId, out NetworkIdentity identity) && identity)
             {
                 if (!identity.enabled && !identity.ShouldPlayRPCsWhenDisabled())
                     return;
 
-                if (!identity.TryGetModule(packet.childId, out var networkClass))
+                if (!identity.TryGetModule(packet.childId, out NetworkModule networkClass))
                 {
-                    PurrLogger.LogError(
-                        $"Can't find child with id {packet.childId} in identity {identity.GetType().Name}.", identity);
+                    // Queue the RPC for execution
+                    identity.QueueRpcForModule(packet.childId, new QueuedRpc(packet, info, asServer));
+                    PurrLogger.LogWarning(
+                        $"Can't find child with id {packet.childId} in identity {identity.GetType().Name}, this RPC has been queued and will execute when the module becomes available.", identity);
                 }
                 else
                 {
@@ -769,16 +770,16 @@ namespace PurrNet.Modules
 
         void ReceiveRPC(PlayerID player, RPCPacket packet, bool asServer)
         {
-            using var stream = BitPackerPool.Get(packet.data);
+            using BitPacker stream = BitPackerPool.Get(packet.data);
 
-            var info = new RPCInfo
+            RPCInfo info = new RPCInfo
             {
                 manager = _manager,
                 sender = packet.senderId,
                 asServer = asServer
             };
 
-            if (_hierarchyModule.TryGetIdentity(packet.sceneId, packet.networkId, out var identity) && identity)
+            if (_hierarchyModule.TryGetIdentity(packet.sceneId, packet.networkId, out NetworkIdentity identity) && identity)
             {
                 if (!identity.enabled && !identity.ShouldPlayRPCsWhenDisabled())
                 {
@@ -816,7 +817,7 @@ namespace PurrNet.Modules
             if (signature.compressionLevel == CompressionLevel.None)
                 return;
 
-            var level = signature.compressionLevel switch
+            LZ4Level level = signature.compressionLevel switch
             {
                 CompressionLevel.None => default,
                 CompressionLevel.Fast => LZ4Level.L00_FAST,
@@ -825,7 +826,7 @@ namespace PurrNet.Modules
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-            var newPacker = packer.Pickle(level);
+            BitPacker newPacker = packer.Pickle(level);
             rpcData = newPacker.ToByteData();
             packer.Dispose();
             packer = newPacker;
@@ -839,7 +840,7 @@ namespace PurrNet.Modules
             if (info.compileTimeSignature.compressionLevel == CompressionLevel.None)
                 return;
 
-            var newPacker = BitPackerPool.Get();
+            BitPacker newPacker = BitPackerPool.Get();
             newPacker.UnpickleFrom(rpcData);
             newPacker.ResetPositionAndMode(true);
 
