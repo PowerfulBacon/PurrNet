@@ -248,6 +248,11 @@ namespace PurrNet
         Queue<Action> _onSpawnedQueue;
 
         /// <summary>
+        /// RPCs queued to execute when we recieve information about a network module.
+        /// </summary>
+        private Dictionary<int, Queue<QueuedRpc>> _queuedRpcs = new Dictionary<int, Queue<QueuedRpc>>();
+
+        /// <summary>
         /// Returns if you can control this object.
         /// If the object has an owner, it will return if you are the owner.
         /// If the object doesn't have an owner, it will return if you are the server.
@@ -903,8 +908,7 @@ namespace PurrNet
                 for (int i = 0; i < _externalModulesView.Count; i++)
                 {
                     NetworkModule module = _externalModulesView[i];
-                    module.OnInitializeModules();
-                    module.isModuleInitialized = true;
+                    InitializeModule(module);
                 }
 
                 _tickables.Clear();
@@ -942,8 +946,7 @@ namespace PurrNet
             {
                 NetworkModule module = _externalModulesView[addedIndex];
                 // Call the callback for it
-                module.OnInitializeModules();
-                module.isModuleInitialized = true;
+                InitializeModule(module);
                 // Add the tickable
                 if (module is ITick tickableModule)
                 {
@@ -952,7 +955,57 @@ namespace PurrNet
             }
         }
 
-        private PlayerID? _pendingOwnershipRequest;
+        /// <summary>
+        /// Initialize the module
+        /// </summary>
+        /// <param name="module"></param>
+        private void InitializeModule(NetworkModule module)
+        {
+            module.OnInitializeModules();
+            module.isModuleInitialized = true;
+            // Find any RPCs that were queued
+            if (_queuedRpcs.TryGetValue(module.index, out Queue<QueuedRpc> queue))
+            {
+                while (queue.Count > 0)
+                {
+                    QueuedRpc queuedRpc = queue.Dequeue();
+                    using BitPacker stream = BitPackerPool.Get(queuedRpc.packet.data);
+                    try
+                    {
+                        module.OnReceivedRpc(queuedRpc.packet.rpcId, stream, queuedRpc.packet, queuedRpc.rpcInfo, queuedRpc.asServer);
+                    }
+                    catch (BypassLoggingException)
+                    {
+                        // ignore
+                    }
+                    catch (Exception e)
+                    {
+                        PurrLogger.LogException(e);
+                        PurrLogger.LogError($"{GetType().Name} - {module.GetType().Name} - {queuedRpc.packet.rpcId}");
+                    }
+                }
+                // Cleanup, we no longer require the queue
+                _queuedRpcs.Remove(module.index);
+            }
+        }
+
+        /// <summary>
+        /// Queue an RPC to be executed as soon as a module comes into view
+        /// of this identity.
+        /// </summary>
+        /// <param name="moduleIndex"></param>
+        /// <param name="rpc"></param>
+        internal void QueueRpcForModule(int moduleIndex, QueuedRpc rpc)
+        {
+            if (_modules.Count > moduleIndex && _modules[moduleIndex] != null)
+                throw new Exception("Cannot queue an RPC for an already initialized module, execute it at once.");
+            if (!_queuedRpcs.TryGetValue(moduleIndex, out Queue<QueuedRpc> queue))
+            {
+                queue = new Queue<QueuedRpc>();
+                _queuedRpcs.Add(moduleIndex, queue);
+            }
+            queue.Enqueue(rpc);
+        }
 
         /// <summary>
         /// Evaluates the visibility of this object.
