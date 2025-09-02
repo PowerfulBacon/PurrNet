@@ -316,7 +316,24 @@ namespace PurrNet
             _currentData = GetCurrentTransformData();
             _latestData = _currentData;
             _lastSentDelta = _currentData;
-            ForceSyncServer(_currentData);
+
+            if (isServer)
+            {
+                int obCount = observers.Count;
+                for (var i = 0; i < obCount; i++)
+                {
+                    var observer = observers[i];
+
+                    if (owner == observer)
+                        continue;
+
+                    SendLatestState(observer, _currentData, true);
+                }
+            }
+            else
+            {
+                ForceSyncServer(_currentData);
+            }
         }
 
         [ServerRpc]
