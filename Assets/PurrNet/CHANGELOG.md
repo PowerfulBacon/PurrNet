@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/PowerfulBacon/PurrNet/compare/v1.2.0...v1.2.1) (2025-09-02)
+
+
+### Bug Fixes
+
+* Minor fixes to the dictionary drawer ([8c48063](https://github.com/PowerfulBacon/PurrNet/commit/8c48063d03b5edc68cd8a67cc6cc03e28bc16350))
+
 # [1.2.0](https://github.com/PowerfulBacon/PurrNet/compare/v1.1.3...v1.2.0) (2025-09-02)
 
 
