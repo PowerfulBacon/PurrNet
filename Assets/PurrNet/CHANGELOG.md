@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/PowerfulBacon/PurrNet/compare/v1.2.1...v1.3.0) (2025-09-02)
+
+
+### Bug Fixes
+
+* Fixes queued RPC having no metadata ([b536b62](https://github.com/PowerfulBacon/PurrNet/commit/b536b622209fb22887ff89384d47cf22fbf9ec57))
+
+
+### Features
+
+* RPCs will now be queued if their network module is not available ([6ff313d](https://github.com/PowerfulBacon/PurrNet/commit/6ff313d789649b875eb4126223b34b14091d323f))
+
 ## [1.2.1](https://github.com/PowerfulBacon/PurrNet/compare/v1.2.0...v1.2.1) (2025-09-02)
 
 
