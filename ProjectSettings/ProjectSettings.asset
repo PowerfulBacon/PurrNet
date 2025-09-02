@@ -275,6 +275,9 @@ PlayerSettings:
   AndroidBuildApkPerCpuArchitecture: 0
   AndroidTVCompatibility: 0
   AndroidIsGame: 1
+  androidAppCategory: 3
+  useAndroidAppCategory: 1
+  androidAppCategoryOther: 
   AndroidEnableTango: 0
   androidEnableBanner: 1
   androidUseLowAccuracyLocation: 0
@@ -838,7 +841,7 @@ PlayerSettings:
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
     Server: PURRNET_CONNECTION_DEBUG
-    Standalone: STEAMWORKS_NET
+    Standalone: STEAMWORKS_NET;PURRNET_DEBUG_NETWORK_IDENTITY
     WebGL: STEAMWORKS_NET;PURRNET_DEBUG_NETWORK_IDENTITY
   additionalCompilerArguments: {}
   platformArchitecture: {}
