@@ -63,7 +63,7 @@ public class SomeBaseDataB : SomeBaseData
     }
 }
 
-public class SomeBaseData : IPackedAuto
+public class SomeBaseData : IPackedAuto, IStandaloneSerializable
 {
     public int someInt;
     public string someString;

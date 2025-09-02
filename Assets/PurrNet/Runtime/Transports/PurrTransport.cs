@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using JamesFrowen.SimpleWeb;
 using JetBrains.Annotations;
+using LiteNetLib;
 using PurrNet.Logging;
 using PurrNet.Packing;
 using UnityEngine;
@@ -34,10 +35,15 @@ namespace PurrNet.Transports
             public string clientSecret;
         }
 
+        [Header("Remote Settings")]
         [SerializeField, HideInInspector] private string _masterServer = "https://purrtransport.purrservers.com/";
         [SerializeField, HideInInspector] private string _roomName;
         [SerializeField, HideInInspector] private string _region = "eu-central";
         [SerializeField, HideInInspector] private string _host;
+
+        [Header("Shared Settings")]
+        [Tooltip("The amount of time in seconds before socket is disconnected due to no data being received.")]
+        [SerializeField, HideInInspector] private float _timeoutInSeconds = 5f;
         [SerializeField, HideInInspector] private bool _pollEventsInUpdate;
 
         public string region
@@ -111,6 +117,19 @@ namespace PurrNet.Transports
             _roomName = Guid.NewGuid().ToString().Replace("-", "");
         }
 
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (_masterServer == "https://purrbalancer.riten.dev:8080/")
+            {
+                _masterServer = "https://purrtransport.purrservers.com/";
+                UnityEditor.EditorUtility.SetDirty(this);
+                UnityEditor.AssetDatabase.SaveAssets();
+                UnityEditor.AssetDatabase.Refresh();
+            }
+        }
+#endif
+
         readonly List<CancellationTokenSource> _cancellationTokenSourcesServer = new List<CancellationTokenSource>();
         readonly List<CancellationTokenSource> _cancellationTokenSourcesClient = new List<CancellationTokenSource>();
 
@@ -134,6 +153,51 @@ namespace PurrNet.Transports
             Connect(null, 0);
         }
 
+        private EventBasedNetListener _serverListener;
+        private EventBasedNetListener _clientListener;
+        private NetManager _udpClient;
+        private NetManager _udpServer;
+
+        private bool _isUsingUDP;
+
+        private void OnEnable()
+        {
+            _serverListener = new EventBasedNetListener();
+            _clientListener = new EventBasedNetListener();
+
+            _udpClient = new NetManager(_clientListener)
+            {
+                UnconnectedMessagesEnabled = true,
+                PingInterval = 900,
+                AutoRecycle = true,
+                EnableStatistics = false,
+                DisconnectTimeout = Mathf.RoundToInt(_timeoutInSeconds * 1000)
+            };
+
+            _udpServer = new NetManager(_serverListener)
+            {
+                UnconnectedMessagesEnabled = true,
+                PingInterval = 900,
+                AutoRecycle = true,
+                EnableStatistics = false,
+                DisconnectTimeout = Mathf.RoundToInt(_timeoutInSeconds * 1000)
+            };
+
+            _clientListener.PeerConnectedEvent += OnClientConnectedUDP;
+            _clientListener.PeerDisconnectedEvent += OnClientDisconnectedUDP;
+            _clientListener.NetworkReceiveEvent += OnClientDataUDP;
+
+            _serverListener.PeerConnectedEvent += OnHostConnectedUDP;
+            _serverListener.PeerDisconnectedEvent += OnHostDisconnectedUDP;
+            _serverListener.NetworkReceiveEvent += OnHostDataUDP;
+        }
+
+        private void CleanupUdp()
+        {
+            _udpClient.Stop();
+            _udpServer?.Stop();
+        }
+
         private SimpleWebClient _server;
         private SimpleWebClient _client;
         private HostJoinInfo _hostJoinInfo;
@@ -142,6 +206,12 @@ namespace PurrNet.Transports
         protected override void StartServerInternal()
         {
             Listen(0);
+        }
+
+        private void OnHostDataUDP(NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod deliveryMethod)
+        {
+            var data = new ByteData(reader.RawData, reader.UserDataOffset, reader.UserDataSize);
+            OnHostData(data.segment);
         }
 
         private void OnHostData(ArraySegment<byte> data)
@@ -196,7 +266,7 @@ namespace PurrNet.Transports
                 }
                 case SERVER_PACKET_TYPE.SERVER_CLIENT_DATA:
                 {
-                    if (data.Count < 5)
+                    if (data.Count <= 5)
                         return;
 
                     int connId = data.Array[data.Offset + 1] |
@@ -210,6 +280,12 @@ namespace PurrNet.Transports
                 }
                 default: throw new ArgumentOutOfRangeException(type.ToString());
             }
+        }
+
+        private void OnClientDataUDP(NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod deliveryMethod)
+        {
+            var data = reader.GetRemainingBytesSegment();
+            OnClientData(data);
         }
 
         private void OnClientData(ArraySegment<byte> data)
@@ -254,9 +330,23 @@ namespace PurrNet.Transports
             _server.Send(data);
         }
 
+        private void OnHostConnectedUDP(NetPeer peer)
+        {
+            var authenticate = new ClientAuthenticate()
+            {
+                roomName = _roomName,
+                clientSecret = _hostJoinInfo.secret
+            };
+
+            string json = JsonUtility.ToJson(authenticate);
+            var data = Encoding.UTF8.GetBytes(json);
+
+            _udpServer.SendToAll(data, DeliveryMethod.ReliableOrdered);
+        }
+
         private void OnClientConnected()
         {
-            ClientAuthenticate authenticate = new ClientAuthenticate()
+            var authenticate = new ClientAuthenticate()
             {
                 roomName = _roomName,
                 clientSecret = _clientJoinInfo.secret
@@ -268,12 +358,36 @@ namespace PurrNet.Transports
             _client.Send(data);
         }
 
+        private void OnClientConnectedUDP(NetPeer peer)
+        {
+            var authenticate = new ClientAuthenticate
+            {
+                roomName = _roomName,
+                clientSecret = _clientJoinInfo.secret
+            };
+
+            string json = JsonUtility.ToJson(authenticate);
+            var data = Encoding.UTF8.GetBytes(json);
+
+            _udpClient.SendToAll(data, DeliveryMethod.ReliableOrdered);
+        }
+
+        private void OnHostDisconnectedUDP(NetPeer peer, DisconnectInfo disconnectInfo)
+        {
+            StopListening();
+        }
+
         private void OnHostDisconnected()
         {
             StopListening();
         }
 
         private void OnClientDisconnected()
+        {
+            Disconnect();
+        }
+
+        private void OnClientDisconnectedUDP(NetPeer peer, DisconnectInfo disconnectinfo)
         {
             Disconnect();
         }
@@ -314,16 +428,26 @@ namespace PurrNet.Transports
                     if (token.IsCancellationRequested)
                         return;
 
-                    var builder = new UriBuilder
+                    if (Application.platform != RuntimePlatform.WebGLPlayer)
                     {
-                        Scheme = _hostJoinInfo.ssl ? "wss" : "ws",
-                        Host = _host,
-                        Port = _hostJoinInfo.port,
-                        Query = string.Empty,
-                        Path = string.Empty
-                    };
+                        _isUsingUDP = true;
+                        _udpServer.StartInManualMode(0);
+                        _udpServer.Connect(_host, _hostJoinInfo.udpPort, "PurrNet");
+                    }
+                    else
+                    {
+                        _isUsingUDP = false;
+                        var builder = new UriBuilder
+                        {
+                            Scheme = _hostJoinInfo.ssl ? "wss" : "ws",
+                            Host = _host,
+                            Port = _hostJoinInfo.port,
+                            Query = string.Empty,
+                            Path = string.Empty
+                        };
 
-                    _server.Connect(builder.Uri);
+                        _server.Connect(builder.Uri);
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -332,7 +456,7 @@ namespace PurrNet.Transports
                 catch (Exception e)
                 {
                     StopListening();
-                    PurrLogger.LogError(e.Message);
+                    PurrLogger.LogException(e);
                 }
             }
             catch (Exception e)
@@ -361,6 +485,8 @@ namespace PurrNet.Transports
                 _server.Disconnect();
             }
 
+            _udpServer?.Stop();
+
             _server = null;
 
             if (listenerState is ConnectionState.Connecting or ConnectionState.Connected)
@@ -383,6 +509,8 @@ namespace PurrNet.Transports
                 _client.onError -= OnError;
                 _client.Disconnect();
             }
+
+            _udpClient?.Stop();
 
             _client = null;
 
@@ -423,14 +551,23 @@ namespace PurrNet.Transports
                 if (token.IsCancellationRequested)
                     return;
 
-                var builder = new UriBuilder
+                if (Application.platform != RuntimePlatform.WebGLPlayer)
                 {
-                    Scheme = _clientJoinInfo.ssl ? "wss" : "ws",
-                    Host = _clientJoinInfo.host,
-                    Port = _clientJoinInfo.port
-                };
+                    _isUsingUDP = true;
+                    _udpClient.StartInManualMode(0);
+                    _udpClient.Connect(_clientJoinInfo.host, _clientJoinInfo.udpPort, "PurrNet");
+                }
+                else
+                {
+                    var builder = new UriBuilder
+                    {
+                        Scheme = _clientJoinInfo.ssl ? "wss" : "ws",
+                        Host = _clientJoinInfo.host,
+                        Port = _clientJoinInfo.port
+                    };
 
-                _client.Connect(builder.Uri);
+                    _client.Connect(builder.Uri);
+                }
             }
             catch (Exception e)
             {
@@ -474,11 +611,20 @@ namespace PurrNet.Transports
 
             Packer<byte>.Write(_packer, (byte)HOST_PACKET_TYPE.SEND_ONE);
             Packer<int>.Write(_packer, target.connectionId);
+
+            if (_isUsingUDP)
+                Packer<byte>.Write(_packer, (byte)UDPTransport.ToDeliveryMethod(method));
+
             _packer.WriteBytes(odata);
 
             var data = _packer.ToByteData();
 
-            _server.Send(new ArraySegment<byte>(data.data, data.offset, data.length));
+            if (_isUsingUDP)
+            {
+                var deliveryMethod = UDPTransport.ToDeliveryMethod(method);
+                _udpServer.SendToAll(new ArraySegment<byte>(data.data, data.offset, data.length), deliveryMethod);
+            }
+            else _server.Send(new ArraySegment<byte>(data.data, data.offset, data.length));
             RaiseDataSent(target, data, true);
         }
 
@@ -487,7 +633,19 @@ namespace PurrNet.Transports
             if (clientState != ConnectionState.Connected)
                 return;
 
-            _client.Send(new ArraySegment<byte>(data.data, data.offset, data.length));
+            if (_isUsingUDP)
+            {
+                var deliveryMethod = UDPTransport.ToDeliveryMethod(method);
+                _packer.ResetPositionAndMode(false);
+                Packer<byte>.Write(_packer, (byte)deliveryMethod);
+                _packer.WriteBytes(data);
+                _udpClient.SendToAll(_packer.ToByteData().segment, deliveryMethod);
+            }
+            else
+            {
+                _client.Send(new ArraySegment<byte>(data.data, data.offset, data.length));
+            }
+
             RaiseDataSent(default, data, false);
         }
 
@@ -500,8 +658,16 @@ namespace PurrNet.Transports
         {
             if (!_pollEventsInUpdate)
             {
-                _server?.ProcessMessageQueue();
-                _client?.ProcessMessageQueue();
+                if (_isUsingUDP)
+                {
+                    _udpClient.PollEvents();
+                    _udpServer.PollEvents();
+                }
+                else
+                {
+                    _server?.ProcessMessageQueue();
+                    _client?.ProcessMessageQueue();
+                }
             }
         }
 
@@ -509,17 +675,35 @@ namespace PurrNet.Transports
         {
             if (_pollEventsInUpdate)
             {
-                _server?.ProcessMessageQueue();
-                _client?.ProcessMessageQueue();
+                if (_isUsingUDP)
+                {
+                    _udpClient.PollEvents();
+                    _udpServer.PollEvents();
+                }
+                else
+                {
+                    _server?.ProcessMessageQueue();
+                    _client?.ProcessMessageQueue();
+                }
             }
         }
 
-        public void SendMessages(float delta) { }
+        public void SendMessages(float delta)
+        {
+            if (_isUsingUDP)
+            {
+                var dInMs = Mathf.FloorToInt(delta * 1000);
+
+                _udpClient.ManualUpdate(dInMs);
+                _udpServer.ManualUpdate(dInMs);
+            }
+        }
 
         private void OnDisable()
         {
             StopListening();
             Disconnect();
+            CleanupUdp();
         }
     }
 }

@@ -258,7 +258,6 @@ namespace PurrNet.Transports
             _client.DisconnectAll();
             _client.Stop();
 
-
             clientState = ConnectionState.Disconnected;
             TriggerConnectionStateEvent(false);
         }
@@ -303,7 +302,7 @@ namespace PurrNet.Transports
             }
         }
 
-        static DeliveryMethod ToDeliveryMethod(Channel channel)
+        public static DeliveryMethod ToDeliveryMethod(Channel channel)
         {
             return channel switch
             {
