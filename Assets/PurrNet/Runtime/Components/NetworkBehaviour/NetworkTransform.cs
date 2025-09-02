@@ -310,20 +310,34 @@ namespace PurrNet
         /// </summary>
         public void ForceSync()
         {
-            if (!isController)
+            if (!IsController(_ownerAuth))
                 return;
 
             _currentData = GetCurrentTransformData();
             _latestData = _currentData;
+            _lastSentDelta = _currentData;
             ForceSyncServer(_currentData);
         }
 
+        [ServerRpc]
         private void ForceSyncServer(NetworkTransformData data)
         {
-            foreach (var observer in observers)
+            if (!_ownerAuth)
+                return;
+
+            _lastReadData = data;
+            _currentData = data;
+
+            TeleportToData(data);
+            ApplyLerpedPosition();
+
+            int obCount = observers.Count;
+            for (var i = 0; i < obCount; i++)
             {
-                if (IsController(observer, _ownerAuth, false))
-                    return; //No need to send state to controller
+                var observer = observers[i];
+
+                if (owner == observer)
+                    continue;
 
                 SendLatestState(observer, data, true);
             }
