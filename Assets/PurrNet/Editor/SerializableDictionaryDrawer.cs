@@ -37,18 +37,13 @@ namespace PurrNet.Editor
                     for (int i = 0; i < count; i++)
                     {
                         EditorGUILayout.BeginVertical("box");
-                        if (displayKeysProp.GetArrayElementAtIndex(i).GetType() == typeof(string) || displayKeysProp.GetArrayElementAtIndex(i).GetType().IsPrimitive)
-                        {
-                            EditorGUILayout.PropertyField(displayValuesProp.GetArrayElementAtIndex(i), new GUIContent($"{displayKeysProp.GetArrayElementAtIndex(i)}"), true);
-                        }
-                        else
-                        {
-                            bool isEnabled = GUI.enabled;
-                            GUI.enabled = false;
-                            EditorGUILayout.PropertyField(displayKeysProp.GetArrayElementAtIndex(i), new GUIContent("Key"), true);
-                            GUI.enabled = isEnabled;
-                            EditorGUILayout.PropertyField(displayValuesProp.GetArrayElementAtIndex(i), new GUIContent("Value"), true);
-                        }
+                        SerializedProperty keyProperty = displayKeysProp.GetArrayElementAtIndex(i);
+                        SerializedProperty valueProperty = displayValuesProp.GetArrayElementAtIndex(i);
+                        bool isEnabled = GUI.enabled;
+                        GUI.enabled = false;
+                        EditorGUILayout.PropertyField(keyProperty, new GUIContent("Key"), true);
+                        GUI.enabled = isEnabled;
+                        EditorGUILayout.PropertyField(valueProperty, new GUIContent("Value"), true);
                         EditorGUILayout.EndVertical();
                     }
                 }
