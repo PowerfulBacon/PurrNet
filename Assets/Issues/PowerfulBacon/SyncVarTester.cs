@@ -8,7 +8,7 @@ public class SyncVarTester : NetworkIdentity
 
     public SyncVar<int> intTester = new SyncVar<int>(0);
 
-    public SyncDictionary<int, Foo> foo = new SyncDictionary<int, Foo>();
+    public SyncDictionary<PlayerID, Foo> foo = new SyncDictionary<PlayerID, Foo>();
 
     protected override void OnSpawned(bool asServer)
     {
@@ -23,10 +23,10 @@ public class SyncVarTester : NetworkIdentity
     {
         if (player.isServer || player == localPlayer || isReconnect || !asServer)
             return;
-        if (foo.ContainsKey((int)player.id.value))
+        if (foo.ContainsKey(player))
             return;
         // Late instantiation
-        foo.Add((int)player.id.value, new Foo((int)player.id.value));
+        foo.Add(player, new Foo((int)player.id.value));
     }
 }
 
