@@ -459,23 +459,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Issues.PowerfulBacon::SyncVarTester
   _isSetup: 0
-  _prefabId: -2147483648
-  _componentIndex: -2147483648
+  _prefabId: 0
+  _componentIndex: 0
   _shouldBePooled: 0
   _parent: {fileID: 0}
   _invertedPathToNearestParent: 
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  foo:
+  intTester:
+    _value: 0
     _ownerAuth: 0
     _sendIntervalInSeconds: 0
-    _list:
-    - test:
-        _value:
-          test: -1
-        _ownerAuth: 0
-        _sendIntervalInSeconds: 0
+  foo:
+    _ownerAuth: 0
+    _serializedDict:
+      keys: 
+      values: []
+      stringKeys: []
+      stringValues: []
+    _sendIntervalInSeconds: 0
+    _useForceSend: 0
 --- !u!114 &1675836511
 MonoBehaviour:
   m_ObjectHideFlags: 0
