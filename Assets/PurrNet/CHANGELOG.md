@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/PowerfulBacon/PurrNet/compare/v1.1.3...v1.2.0) (2025-09-02)
+
+
+### Features
+
+* Changes how dictionaries are drawn so they can show complex objects in their contents ([6c44aa9](https://github.com/PowerfulBacon/PurrNet/commit/6c44aa95b7dddc148ee65b3bb9ac9b90c59da94c))
+
 ## [1.1.3](https://github.com/PowerfulBacon/PurrNet/compare/v1.1.2...v1.1.3) (2025-09-01)
 
 
