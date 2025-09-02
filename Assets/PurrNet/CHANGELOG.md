@@ -1,3 +1,16 @@
+# [1.4.0](https://github.com/PowerfulBacon/PurrNet/compare/v1.3.0...v1.4.0) (2025-09-02)
+
+
+### Bug Fixes
+
+* Fixes queued RPC having no metadata ([b536b62](https://github.com/PowerfulBacon/PurrNet/commit/b536b622209fb22887ff89384d47cf22fbf9ec57))
+* Run the release please ([dd8a0f7](https://github.com/PowerfulBacon/PurrNet/commit/dd8a0f708569a9f5aea964973bd872abd4625bd0))
+
+
+### Features
+
+* Adds a log for no reason, debugging ([112e21f](https://github.com/PowerfulBacon/PurrNet/commit/112e21f7009a7e33b6316af445d5b903e4ce3055))
+
 # [1.3.0](https://github.com/PowerfulBacon/PurrNet/compare/v1.2.1...v1.3.0) (2025-09-02)
 
 
