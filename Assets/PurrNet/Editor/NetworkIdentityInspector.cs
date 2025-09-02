@@ -289,14 +289,17 @@ namespace PurrNet.Editor
                 EditorGUI.indentLevel--;
             }
 
-            EditorGUILayout.LabelField($"Modules ({identity.modules.Count}):");
-
-            EditorGUI.indentLevel++;
-            foreach (NetworkModule child in identity.modules)
+            if (identity.modules != null)
             {
-                EditorGUILayout.LabelField($"{child.index}: {child.name} ({child.GetType().Name})");
+                EditorGUILayout.LabelField($"Modules ({identity.modules.Count}):");
+
+                EditorGUI.indentLevel++;
+                foreach (NetworkModule child in identity.modules)
+                {
+                    EditorGUILayout.LabelField($"{child.index}: {child.name} ({child.GetType().Name})");
+                }
+                EditorGUI.indentLevel--;
             }
-            EditorGUI.indentLevel--;
 
             EditorGUILayout.EndVertical();
             GUI.enabled = old2;

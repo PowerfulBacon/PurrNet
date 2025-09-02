@@ -221,7 +221,7 @@ namespace PurrNet
             if (!ValidateAuthority())
                 return;
 
-            if (value is NetworkModule attachedModule)
+            if (isModuleInitialized && value is NetworkModule attachedModule)
                 Attach(attachedModule);
 
             _dict.Add(key, value);

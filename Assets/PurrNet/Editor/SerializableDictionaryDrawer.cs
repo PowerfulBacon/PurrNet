@@ -1,6 +1,6 @@
 #if UNITY_EDITOR
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace PurrNet.Editor
 {
@@ -13,84 +13,43 @@ namespace PurrNet.Editor
         private const float ColumnHeaderHeight = 18f;
         private bool _foldout = true;
 
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            var keysProp = property.FindPropertyRelative("keys");
-            var stringKeysProp = property.FindPropertyRelative("stringKeys");
-            var displayKeysProp = (keysProp != null && keysProp.arraySize > 0) ? keysProp : stringKeysProp;
-
-            if (!_foldout) return HeaderHeight;
-
-            float totalHeight = HeaderHeight + ColumnHeaderHeight;
-            int count = displayKeysProp?.arraySize ?? 0;
-            totalHeight += (EditorGUIUtility.singleLineHeight + ElementPadding) * count;
-            totalHeight += BottomPadding;
-
-            return totalHeight;
-        }
-
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
 
-            var keysProp = property.FindPropertyRelative("keys");
-            var valuesProp = property.FindPropertyRelative("values");
-            var stringKeysProp = property.FindPropertyRelative("stringKeys");
-            var stringValuesProp = property.FindPropertyRelative("stringValues");
+            SerializedProperty keysProp = property.FindPropertyRelative("keys");
+            SerializedProperty valuesProp = property.FindPropertyRelative("values");
+            SerializedProperty stringKeysProp = property.FindPropertyRelative("stringKeys");
+            SerializedProperty stringValuesProp = property.FindPropertyRelative("stringValues");
 
-            var useSerializableTypes = keysProp != null && keysProp.arraySize > 0;
-            var displayKeysProp = useSerializableTypes ? keysProp : stringKeysProp;
-            var displayValuesProp = useSerializableTypes ? valuesProp : stringValuesProp;
+            bool useSerializableTypes = keysProp != null && keysProp.arraySize > 0;
+            SerializedProperty displayKeysProp = useSerializableTypes ? keysProp : stringKeysProp;
+            SerializedProperty displayValuesProp = useSerializableTypes ? valuesProp : stringValuesProp;
 
-            Rect headerRect = new Rect(position.x, position.y, position.width, HeaderHeight);
-            _foldout = EditorGUI.Foldout(headerRect, _foldout, label, true);
 
             if (_foldout)
             {
                 EditorGUI.indentLevel++;
-                float yOffset = HeaderHeight;
-
-                Rect headerBgRect = new Rect(position.x, position.y + yOffset, position.width, ColumnHeaderHeight);
-                EditorGUI.DrawRect(headerBgRect, new Color(0.7f, 0.7f, 0.7f, 0.1f));
-
-                float headerLabelOffset = 2f;
-                Rect keyHeaderRect = new Rect(position.x, position.y + yOffset + headerLabelOffset,
-                    position.width * 0.45f, EditorGUIUtility.singleLineHeight);
-                Rect valueHeaderRect = new Rect(position.x + position.width * 0.5f,
-                    position.y + yOffset + headerLabelOffset, position.width * 0.45f,
-                    EditorGUIUtility.singleLineHeight);
-
-                EditorGUI.LabelField(keyHeaderRect, "Key");
-                EditorGUI.LabelField(valueHeaderRect, "Value");
-
-                yOffset += ColumnHeaderHeight;
-
+                EditorGUILayout.LabelField($"{property.displayName} ({keysProp.arraySize} elements)");
                 if (displayKeysProp != null && displayValuesProp != null)
                 {
                     int count = displayKeysProp.arraySize;
                     for (int i = 0; i < count; i++)
                     {
-                        float elementHeight = EditorGUIUtility.singleLineHeight;
-                        Rect keyRect = new Rect(position.x, position.y + yOffset, position.width * 0.45f,
-                            elementHeight);
-                        Rect valueRect = new Rect(position.x + position.width * 0.5f, position.y + yOffset,
-                            position.width * 0.45f, elementHeight);
-
-                        if (i % 2 == 1)
+                        EditorGUILayout.BeginVertical("box");
+                        if (displayKeysProp.GetArrayElementAtIndex(i).GetType() == typeof(string) || displayKeysProp.GetArrayElementAtIndex(i).GetType().IsPrimitive)
                         {
-                            Rect rowBgRect = new Rect(position.x, position.y + yOffset, position.width, elementHeight);
-                            EditorGUI.DrawRect(rowBgRect, new Color(0.7f, 0.7f, 0.7f, 0.05f));
+                            EditorGUILayout.PropertyField(displayValuesProp.GetArrayElementAtIndex(i), new GUIContent($"{displayKeysProp.GetArrayElementAtIndex(i)}"), true);
                         }
-
-                        using (new EditorGUI.DisabledScope(true))
+                        else
                         {
-                            EditorGUI.PropertyField(keyRect, displayKeysProp.GetArrayElementAtIndex(i),
-                                GUIContent.none);
-                            EditorGUI.PropertyField(valueRect, displayValuesProp.GetArrayElementAtIndex(i),
-                                GUIContent.none);
+                            bool isEnabled = GUI.enabled;
+                            GUI.enabled = false;
+                            EditorGUILayout.PropertyField(displayKeysProp.GetArrayElementAtIndex(i), new GUIContent("Key"), true);
+                            GUI.enabled = isEnabled;
+                            EditorGUILayout.PropertyField(displayValuesProp.GetArrayElementAtIndex(i), new GUIContent("Value"), true);
                         }
-
-                        yOffset += elementHeight + ElementPadding;
+                        EditorGUILayout.EndVertical();
                     }
                 }
 
