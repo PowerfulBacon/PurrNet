@@ -966,6 +966,7 @@ namespace PurrNet
             // Find any RPCs that were queued
             if (_queuedRpcs.TryGetValue(module.index, out Queue<QueuedRpc> queue))
             {
+                int totalRpcs = queue.Count;
                 while (queue.Count > 0)
                 {
                     QueuedRpc queuedRpc = queue.Dequeue();
@@ -986,6 +987,7 @@ namespace PurrNet
                 }
                 // Cleanup, we no longer require the queue
                 _queuedRpcs.Remove(module.index);
+                PurrLogger.Log($"Executed {totalRpcs} queued RPCs for module {module.index}");
             }
         }
 
