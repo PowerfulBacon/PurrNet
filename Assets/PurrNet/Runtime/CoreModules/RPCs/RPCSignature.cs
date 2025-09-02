@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using PurrNet.Modules;
 using PurrNet.Pooling;
 using PurrNet.Transports;
+using System.Collections.Generic;
 
 namespace PurrNet
 {
@@ -19,7 +19,8 @@ namespace PurrNet
     {
         ServerRPC,
         ObserversRPC,
-        TargetRPC
+        TargetRPC,
+        OwnerRPC
     }
 
     public struct RPCSignature
@@ -43,7 +44,7 @@ namespace PurrNet
 
         public DisposableList<PlayerID> GetTargets()
         {
-            var players = DisposableList<PlayerID>.Create();
+            DisposableList<PlayerID> players = DisposableList<PlayerID>.Create();
 
             if (targetPlayer.HasValue)
                 players.Add(targetPlayer.Value);

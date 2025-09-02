@@ -78,7 +78,7 @@ namespace PurrNet
             for (int i = 0; i < genericCount; i++)
             {
                 Packer<uint>.Read(stream, ref hash);
-                var type = Hasher.ResolveType(hash);
+                Type type = Hasher.ResolveType(hash);
 
                 rpcHeader.types[i] = type;
             }
@@ -87,11 +87,11 @@ namespace PurrNet
         [UsedByIL]
         protected object CallGeneric(string methodName, GenericRPCHeader rpcHeader)
         {
-            var key = new InstanceGenericKey(methodName, GetType(), rpcHeader.types);
+            InstanceGenericKey key = new InstanceGenericKey(methodName, GetType(), rpcHeader.types);
 
-            if (!genericMethods.TryGetValue(key, out var gmethod))
+            if (!genericMethods.TryGetValue(key, out MethodInfo gmethod))
             {
-                var method = GetType().GetMethod(methodName,
+                MethodInfo method = GetType().GetMethod(methodName,
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
                 gmethod = method?.MakeGenericMethod(rpcHeader.types);
 
@@ -110,7 +110,7 @@ namespace PurrNet
             }
             catch (TargetInvocationException e)
             {
-                var actualException = e.InnerException;
+                Exception actualException = e.InnerException;
 
                 if (actualException != null)
                 {
@@ -142,10 +142,11 @@ namespace PurrNet
                 RPCType.ServerRPC => !networkManager.isClient,
                 RPCType.TargetRPC => networkManager.isServer,
                 RPCType.ObserversRPC => networkManager.isServer,
+                RPCType.OwnerRPC => networkManager.isServer,
                 _ => throw new ArgumentOutOfRangeException(nameof(rpcType), rpcType, null)
             };
 
-            if (!networkManager.TryGetModule<RpcRequestResponseModule>(asServer, out var module))
+            if (!networkManager.TryGetModule<RpcRequestResponseModule>(asServer, out RpcRequestResponseModule module))
             {
                 return Task.FromException<T>(new InvalidOperationException(
                     "RpcRequestResponseModule module is missing."));
@@ -170,10 +171,11 @@ namespace PurrNet
                 RPCType.ServerRPC => !networkManager.isClient,
                 RPCType.TargetRPC => networkManager.isServer,
                 RPCType.ObserversRPC => networkManager.isServer,
+                RPCType.OwnerRPC => networkManager.isServer,
                 _ => throw new ArgumentOutOfRangeException(nameof(rpcType), rpcType, null)
             };
 
-            if (!networkManager.TryGetModule<RpcRequestResponseModule>(asServer, out var module))
+            if (!networkManager.TryGetModule<RpcRequestResponseModule>(asServer, out RpcRequestResponseModule module))
             {
                 return RawTask.FromException(new InvalidOperationException(
                     "RpcRequestResponseModule module is missing."));
@@ -203,10 +205,11 @@ namespace PurrNet
                 RPCType.ServerRPC => !networkManager.isClient,
                 RPCType.TargetRPC => networkManager.isServer,
                 RPCType.ObserversRPC => networkManager.isServer,
+                RPCType.OwnerRPC => networkManager.isServer,
                 _ => throw new ArgumentOutOfRangeException(nameof(rpcType), rpcType, null)
             };
 
-            if (!networkManager.TryGetModule<RpcRequestResponseModule>(asServer, out var module))
+            if (!networkManager.TryGetModule<RpcRequestResponseModule>(asServer, out RpcRequestResponseModule module))
             {
                 return RawTask.FromException<T>(new InvalidOperationException(
                     "RpcRequestResponseModule module is missing."));
@@ -235,10 +238,11 @@ namespace PurrNet
                 RPCType.ServerRPC => !networkManager.isClient,
                 RPCType.TargetRPC => networkManager.isServer,
                 RPCType.ObserversRPC => networkManager.isServer,
+                RPCType.OwnerRPC => networkManager.isServer,
                 _ => throw new ArgumentOutOfRangeException(nameof(rpcType), rpcType, null)
             };
 
-            if (!networkManager.TryGetModule<RpcRequestResponseModule>(asServer, out var module))
+            if (!networkManager.TryGetModule<RpcRequestResponseModule>(asServer, out RpcRequestResponseModule module))
             {
                 return Task.FromException(new InvalidOperationException(
                     "RpcRequestResponseModule module is missing."));
@@ -264,14 +268,14 @@ namespace PurrNet
                 return;
             }
 
-            if (!networkManager.TryGetModule<RPCModule>(networkManager.isServer, out var module))
+            if (!networkManager.TryGetModule<RPCModule>(networkManager.isServer, out RPCModule module))
             {
                 if (signature is { runLocally: false, channel: Channel.ReliableOrdered or Channel.ReliableUnordered })
                     PurrLogger.LogError($"Trying to send RPC `{signature.rpcName}` from `{GetType().Name}` but RPCModule is missing for `{(networkManager.isServer ? "server" : "client")}`.", this);
                 return;
             }
 
-            var rules = networkManager.networkRules;
+            NetworkRules rules = networkManager.networkRules;
             bool shouldIgnoreOwnership = rules && rules.ShouldIgnoreRequireOwner();
 
             if (!shouldIgnoreOwnership && signature.requireOwnership && !isOwner)
@@ -312,10 +316,10 @@ namespace PurrNet
                 {
                     if (isServer)
                     {
-                        using var players = DisposableList<PlayerID>.Create();
-                        for (var i = 0; i < observers.Count; i++)
+                        using DisposableList<PlayerID> players = DisposableList<PlayerID>.Create();
+                        for (int i = 0; i < observers.Count; i++)
                         {
-                            var player = observers[i];
+                                PlayerID player = observers[i];
                             bool isLocalPlayer = player == networkManager.localPlayer;
 
                             if (signature.runLocally && isLocalPlayer)
@@ -349,12 +353,12 @@ namespace PurrNet
 #endif
                     if (isServer)
                     {
-                        using var targets = signature.GetTargets();
+                        using DisposableList<PlayerID> targets = signature.GetTargets();
                         Send(targets, packet, signature.channel);
                     }
                     else
                     {
-                        using var targets = signature.GetTargets();
+                        using DisposableList<PlayerID> targets = signature.GetTargets();
                         // TODO: we should batch this into one packet to the server instead of N
                         for (int i = 0; i < targets.Count; i++)
                         {
@@ -362,6 +366,52 @@ namespace PurrNet
                             SendToServer(packet, signature.channel);
                         }
                     }
+                    break;
+                case RPCType.OwnerRPC:
+                    // If we only have the server, then 
+                    if (networkManager.isServerOnly)
+                        break;
+                    // The target that we are sending the RPC to.
+                    PlayerID ownerRpcTarget = owner.Value;
+                    // If we have no target, then the target is the server
+                    bool ownerRpcIsTargetServer = !owner.HasValue;
+                    if (isServer)
+                    {
+                        if (ownerRpcIsTargetServer)
+                        {
+                            // If we are targeting the server, but we already executed locally then
+                            // we don't need to send the RPC, as it is already executed.
+                            if (signature.runLocally)
+                                break;
+                            // Send to the server
+                            SendToServer(packet, signature.channel);
+                        }
+                        else
+                        {
+                            // Send to the owner
+                            Send(ownerRpcTarget, packet, signature.channel);
+                        }
+                    }
+                    else
+                    {
+                        if (ownerRpcIsTargetServer)
+                        {
+                            // Send to the server
+                            SendToServer(packet, signature.channel);
+                        }
+                        else
+                        {
+                            // Already executed locally
+                            if (ownerRpcTarget == localPlayer && signature.runLocally)
+                                break;
+                            // Send to the owner
+                            packet.targetPlayerId = ownerRpcTarget;
+                            SendToServer(packet, signature.channel);
+                        }
+                    }
+#if UNITY_EDITOR
+                    Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
+#endif
                     break;
                 default: throw new ArgumentOutOfRangeException();
             }
@@ -379,10 +429,10 @@ namespace PurrNet
 
         internal bool ValidateIncomingRPC(RPCInfo info, RPCSignature signature, IRpc data, bool asServer)
         {
-            var rules = networkManager.networkRules;
+            NetworkRules rules = networkManager.networkRules;
             bool shouldIgnoreOwnership = rules && rules.ShouldIgnoreRequireOwner();
 
-            if (!networkManager.TryGetModule<RPCModule>(networkManager.isServer, out var module))
+            if (!networkManager.TryGetModule<RPCModule>(networkManager.isServer, out RPCModule module))
                 return false;
 
             if (!shouldIgnoreOwnership && signature.requireOwnership && info.sender != owner)
@@ -401,7 +451,7 @@ namespace PurrNet
                     return false;
                 }
 
-                var idObservers = observers;
+                IReadOnlyList<PlayerID> idObservers = observers;
 
                 if (idObservers == null)
                 {
@@ -445,14 +495,21 @@ namespace PurrNet
 
                 case RPCType.ObserversRPC:
                 {
-                    var rawData = BroadcastModule.GetImmediateData(data);
+                    ByteData rawData = BroadcastModule.GetImmediateData(data);
                     SendToObservers(rawData, predicate, signature.channel);
                     AppendToBufferedRPCs(signature, data, module);
                     return !isClient;
                 }
                 case RPCType.TargetRPC:
                 {
-                    var rawData = BroadcastModule.GetImmediateData(data);
+                    ByteData rawData = BroadcastModule.GetImmediateData(data);
+                    SendToTarget(data.targetPlayerId, rawData, signature.channel);
+                    AppendToBufferedRPCs(signature, data, module);
+                    return false;
+                }
+                case RPCType.OwnerRPC:
+                {
+                    ByteData rawData = BroadcastModule.GetImmediateData(data);
                     SendToTarget(data.targetPlayerId, rawData, signature.channel);
                     AppendToBufferedRPCs(signature, data, module);
                     return false;

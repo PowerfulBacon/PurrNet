@@ -46,7 +46,7 @@ namespace PurrNet.Codegen
 
         public override bool WillProcess(ICompiledAssembly compiledAssembly)
         {
-            var name = compiledAssembly.Name;
+            string name = compiledAssembly.Name;
 
 #if UNITY_PLAYMODE
             if (name.Contains("Unity.Multiplayer.Playmode.Workflow.Editor"))
@@ -69,7 +69,7 @@ namespace PurrNet.Codegen
         {
             try
             {
-                var baseType = type.BaseType?.Resolve();
+                TypeDefinition baseType = type.BaseType?.Resolve();
 
                 if (baseType == null)
                     return 0;
@@ -102,7 +102,7 @@ namespace PurrNet.Codegen
                 if (type.BaseType.FullName == baseTypeName)
                     return true;
 
-                var btype = type.BaseType.Resolve();
+                TypeDefinition btype = type.BaseType.Resolve();
                 return btype != null && InheritsFrom(btype, baseTypeName);
             }
             catch
@@ -116,7 +116,7 @@ namespace PurrNet.Codegen
             RPCSignature data = default;
             int rpcCount = 0;
 
-            foreach (var attribute in method.CustomAttributes)
+            foreach (CustomAttribute attribute in method.CustomAttributes)
             {
                 if (attribute.AttributeType.FullName == typeof(ServerRpcAttribute).FullName)
                 {
@@ -126,12 +126,12 @@ namespace PurrNet.Codegen
                         return null;
                     }
 
-                    var channel = (Channel)attribute.ConstructorArguments[0].Value;
-                    var runLocally = (bool)attribute.ConstructorArguments[1].Value;
-                    var requireOwnership = (bool)attribute.ConstructorArguments[2].Value;
-                    var compressionLevel = (CompressionLevel)attribute.ConstructorArguments[3].Value;
-                    var asyncTimeoutInSec = (float)attribute.ConstructorArguments[4].Value;
-                    var stripCode = (StripCodeModeOverride)attribute.ConstructorArguments[5].Value;
+                    Channel channel = (Channel)attribute.ConstructorArguments[0].Value;
+                    bool runLocally = (bool)attribute.ConstructorArguments[1].Value;
+                    bool requireOwnership = (bool)attribute.ConstructorArguments[2].Value;
+                    CompressionLevel compressionLevel = (CompressionLevel)attribute.ConstructorArguments[3].Value;
+                    float asyncTimeoutInSec = (float)attribute.ConstructorArguments[4].Value;
+                    StripCodeModeOverride stripCode = (StripCodeModeOverride)attribute.ConstructorArguments[5].Value;
 
                     data = new RPCSignature
                     {
@@ -157,14 +157,14 @@ namespace PurrNet.Codegen
                         return null;
                     }
 
-                    var channel = (Channel)attribute.ConstructorArguments[0].Value;
-                    var runLocally = (bool)attribute.ConstructorArguments[1].Value;
-                    var bufferLast = (bool)attribute.ConstructorArguments[2].Value;
-                    var requireServer = (bool)attribute.ConstructorArguments[3].Value;
-                    var excludeOwner = (bool)attribute.ConstructorArguments[4].Value;
-                    var excludeSender = (bool)attribute.ConstructorArguments[5].Value;
-                    var compressionLevel = (CompressionLevel)attribute.ConstructorArguments[6].Value;
-                    var asyncTimeoutInSec = (float)attribute.ConstructorArguments[7].Value;
+                    Channel channel = (Channel)attribute.ConstructorArguments[0].Value;
+                    bool runLocally = (bool)attribute.ConstructorArguments[1].Value;
+                    bool bufferLast = (bool)attribute.ConstructorArguments[2].Value;
+                    bool requireServer = (bool)attribute.ConstructorArguments[3].Value;
+                    bool excludeOwner = (bool)attribute.ConstructorArguments[4].Value;
+                    bool excludeSender = (bool)attribute.ConstructorArguments[5].Value;
+                    CompressionLevel compressionLevel = (CompressionLevel)attribute.ConstructorArguments[6].Value;
+                    float asyncTimeoutInSec = (float)attribute.ConstructorArguments[7].Value;
 
                     data = new RPCSignature
                     {
@@ -190,12 +190,12 @@ namespace PurrNet.Codegen
                         return null;
                     }
 
-                    var channel = (Channel)attribute.ConstructorArguments[0].Value;
-                    var runLocally = (bool)attribute.ConstructorArguments[1].Value;
-                    var bufferLast = (bool)attribute.ConstructorArguments[2].Value;
-                    var requireServer = (bool)attribute.ConstructorArguments[3].Value;
-                    var compressionLevel = (CompressionLevel)attribute.ConstructorArguments[4].Value;
-                    var asyncTimeoutInSec = (float)attribute.ConstructorArguments[5].Value;
+                    Channel channel = (Channel)attribute.ConstructorArguments[0].Value;
+                    bool runLocally = (bool)attribute.ConstructorArguments[1].Value;
+                    bool bufferLast = (bool)attribute.ConstructorArguments[2].Value;
+                    bool requireServer = (bool)attribute.ConstructorArguments[3].Value;
+                    CompressionLevel compressionLevel = (CompressionLevel)attribute.ConstructorArguments[4].Value;
+                    float asyncTimeoutInSec = (float)attribute.ConstructorArguments[5].Value;
 
                     data = new RPCSignature
                     {
@@ -203,6 +203,36 @@ namespace PurrNet.Codegen
                         channel = channel,
                         runLocally = runLocally,
                         bufferLast = bufferLast,
+                        requireServer = requireServer,
+                        requireOwnership = false,
+                        excludeOwner = false,
+                        excludeSender = false,
+                        isStatic = method.IsStatic,
+                        asyncTimeoutInSec = asyncTimeoutInSec,
+                        compressionLevel = compressionLevel
+                    };
+                    rpcCount++;
+                }
+                else if (attribute.AttributeType.FullName == typeof(OwnerRpcAttribute).FullName)
+                {
+                    if (attribute.ConstructorArguments.Count != 5)
+                    {
+                        Error(messages, "OwnerRPC attribute must have 5 arguments", method);
+                        return null;
+                    }
+
+                    Channel channel = (Channel)attribute.ConstructorArguments[0].Value;
+                    bool runLocally = (bool)attribute.ConstructorArguments[1].Value;
+                    bool requireServer = (bool)attribute.ConstructorArguments[3].Value;
+                    CompressionLevel compressionLevel = (CompressionLevel)attribute.ConstructorArguments[4].Value;
+                    float asyncTimeoutInSec = (float)attribute.ConstructorArguments[5].Value;
+
+                    data = new RPCSignature
+                    {
+                        type = RPCType.OwnerRPC,
+                        channel = channel,
+                        runLocally = runLocally,
+                        bufferLast = false,
                         requireServer = requireServer,
                         requireOwnership = false,
                         excludeOwner = false,
@@ -230,7 +260,7 @@ namespace PurrNet.Codegen
         {
             if (method.DebugInformation.HasSequencePoints)
             {
-                var first = method.DebugInformation.SequencePoints[0];
+                SequencePoint first = method.DebugInformation.SequencePoints[0];
                 string file = first.Document.Url;
                 if (!string.IsNullOrEmpty(file))
                     file = '/' + file[file.IndexOf("Assets", StringComparison.Ordinal)..].Replace('\\', '/');
@@ -277,40 +307,40 @@ namespace PurrNet.Codegen
         private static void HandleRPCReceiver(ModuleDefinition module, TypeDefinition type,
             DisposableList<RPCMethod> originalRpcs, bool isNetworkClass, int offset)
         {
-            for (var i = 0; i < originalRpcs.Count; i++)
+            for (int i = 0; i < originalRpcs.Count; i++)
             {
-                var attributes = MethodAttributes.Private | MethodAttributes.HideBySig;
+                MethodAttributes attributes = MethodAttributes.Private | MethodAttributes.HideBySig;
 
                 if (originalRpcs[i].Signature.isStatic)
                     attributes |= MethodAttributes.Static;
 
-                bool isValidReturn = ValidateReturnType(originalRpcs[i].originalMethod, out var returnMode);
+                bool isValidReturn = ValidateReturnType(originalRpcs[i].originalMethod, out ReturnMode returnMode);
 
                 if (!isValidReturn)
                     continue;
 
-                var voidType = module.TypeSystem.Void;
-                var newMethod = new MethodDefinition($"HandleRPCGenerated_{offset + i}", attributes, voidType)
+                TypeReference voidType = module.TypeSystem.Void;
+                MethodDefinition newMethod = new MethodDefinition($"HandleRPCGenerated_{offset + i}", attributes, voidType)
                 {
                     IsPublic = true
                 };
 
-                var preserveAttribute = module.GetTypeDefinition<PreserveAttribute>();
-                var constructor = preserveAttribute.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+                TypeDefinition preserveAttribute = module.GetTypeDefinition<PreserveAttribute>();
+                MethodReference constructor = preserveAttribute.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
                     .Import(module);
                 newMethod.CustomAttributes.Add(new CustomAttribute(constructor));
 
-                var streamType = module.GetTypeDefinition<BitPacker>();
+                TypeDefinition streamType = module.GetTypeDefinition<BitPacker>();
 
-                var packetType = originalRpcs[i].Signature.isStatic ? module.GetTypeDefinition<StaticRPCPacket>() :
+                TypeDefinition packetType = originalRpcs[i].Signature.isStatic ? module.GetTypeDefinition<StaticRPCPacket>() :
                     isNetworkClass ? module.GetTypeDefinition<ChildRPCPacket>() : module.GetTypeDefinition<RPCPacket>();
 
-                var rpcInfo = module.GetTypeDefinition<RPCInfo>();
+                TypeDefinition rpcInfo = module.GetTypeDefinition<RPCInfo>();
 
-                var stream = new ParameterDefinition("stream", ParameterAttributes.None, streamType.Import(module));
-                var packet = new ParameterDefinition("packet", ParameterAttributes.None, packetType.Import(module));
-                var info = new ParameterDefinition("info", ParameterAttributes.None, rpcInfo.Import(module));
-                var asServer = new ParameterDefinition("asServer", ParameterAttributes.None, module.TypeSystem.Boolean);
+                ParameterDefinition stream = new ParameterDefinition("stream", ParameterAttributes.None, streamType.Import(module));
+                ParameterDefinition packet = new ParameterDefinition("packet", ParameterAttributes.None, packetType.Import(module));
+                ParameterDefinition info = new ParameterDefinition("info", ParameterAttributes.None, rpcInfo.Import(module));
+                ParameterDefinition asServer = new ParameterDefinition("asServer", ParameterAttributes.None, module.TypeSystem.Boolean);
 
                 newMethod.Parameters.Add(stream);
                 newMethod.Parameters.Add(packet);
@@ -318,8 +348,8 @@ namespace PurrNet.Codegen
                 newMethod.Parameters.Add(asServer);
                 newMethod.Body.InitLocals = true;
 
-                var code = newMethod.Body.GetILProcessor();
-                var end = Instruction.Create(OpCodes.Ret);
+                ILProcessor code = newMethod.Body.GetILProcessor();
+                Instruction end = Instruction.Create(OpCodes.Ret);
 
                 ValidateReceivingRPC(module, isNetworkClass, originalRpcs[i], code, info, packet, asServer, end);
 
@@ -328,13 +358,13 @@ namespace PurrNet.Codegen
                 {
                     if (originalRpcs[i].originalMethod.DebugInformation.HasSequencePoints)
                     {
-                        var firstSequencePoint = originalRpcs[i].originalMethod.DebugInformation.SequencePoints[0];
-                        var document = firstSequencePoint.Document;
+                        SequencePoint firstSequencePoint = originalRpcs[i].originalMethod.DebugInformation.SequencePoints[0];
+                        Document document = firstSequencePoint.Document;
 
                         // Get the first instruction of the new method
-                        var firstInstruction = newMethod.Body.Instructions[0];
+                        Instruction firstInstruction = newMethod.Body.Instructions[0];
 
-                        var newSequencePoint = new SequencePoint(firstInstruction, document)
+                        SequencePoint newSequencePoint = new SequencePoint(firstInstruction, document)
                         {
                             StartLine = firstSequencePoint.StartLine,
                             StartColumn = firstSequencePoint.StartColumn,
@@ -351,11 +381,11 @@ namespace PurrNet.Codegen
                 }
 
                 // call RPCModule.PostProcessRPC(RPCSignature signature, ref BitPacker packer)
-                var rpcModule = module.GetTypeDefinition<RPCModule>();
-                var postProcessRPC = rpcModule.GetMethod("PostProcessRpc").Import(module);
+                TypeDefinition rpcModule = module.GetTypeDefinition<RPCModule>();
+                MethodReference postProcessRPC = rpcModule.GetMethod("PostProcessRpc").Import(module);
 
                 // get packet.data field
-                var dataField = packetType.GetField("data").Import(module);
+                FieldReference dataField = packetType.GetField("data").Import(module);
                 code.Append(Instruction.Create(OpCodes.Ldarga, packet));
                 code.Append(Instruction.Create(OpCodes.Ldfld, dataField));
                 code.Append(Instruction.Create(OpCodes.Ldarg, info));
@@ -388,31 +418,31 @@ namespace PurrNet.Codegen
         private static void HandleRPCReceiverHandler(ModuleDefinition module, TypeDefinition type,
             DisposableList<RPCMethod> originalRpcs, bool isNetworkModule, int offset, bool isStaticPass)
         {
-            var streamType = module.GetTypeDefinition<BitPacker>().Import(module);
-            var rpcInfoType = module.GetTypeDefinition<RPCInfo>().Import(module);
+            TypeReference streamType = module.GetTypeDefinition<BitPacker>().Import(module);
+            TypeReference rpcInfoType = module.GetTypeDefinition<RPCInfo>().Import(module);
 
-            var packetType = isStaticPass
+            TypeReference packetType = isStaticPass
                 ? module.GetTypeDefinition<StaticRPCPacket>().Import(module)
                 : isNetworkModule
                     ? module.GetTypeDefinition<ChildRPCPacket>().Import(module)
                     : module.GetTypeDefinition<RPCPacket>().Import(module);
 
-            var attributes = isStaticPass ?
+            MethodAttributes attributes = isStaticPass ?
                 MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Static :
                 MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.ReuseSlot;
 
-            var newMethod = new MethodDefinition($"OnReceivedRpc", attributes,
+            MethodDefinition newMethod = new MethodDefinition($"OnReceivedRpc", attributes,
                 module.TypeSystem.Void)
             {
                 IsPublic = true,
                 HasThis = !isStaticPass
             };
 
-            var id = new ParameterDefinition("id", ParameterAttributes.None, module.TypeSystem.Int32);
-            var stream = new ParameterDefinition("stream", ParameterAttributes.None, streamType);
-            var packet = new ParameterDefinition("packet", ParameterAttributes.None, packetType);
-            var info = new ParameterDefinition("info", ParameterAttributes.None, rpcInfoType);
-            var asServer = new ParameterDefinition("asServer", ParameterAttributes.None, module.TypeSystem.Boolean);
+            ParameterDefinition id = new ParameterDefinition("id", ParameterAttributes.None, module.TypeSystem.Int32);
+            ParameterDefinition stream = new ParameterDefinition("stream", ParameterAttributes.None, streamType);
+            ParameterDefinition packet = new ParameterDefinition("packet", ParameterAttributes.None, packetType);
+            ParameterDefinition info = new ParameterDefinition("info", ParameterAttributes.None, rpcInfoType);
+            ParameterDefinition asServer = new ParameterDefinition("asServer", ParameterAttributes.None, module.TypeSystem.Boolean);
 
             // int id, BitPacker stream, StaticRPCPacket packet, RPCInfo info, bool asServer
             newMethod.Parameters.Add(id);
@@ -423,16 +453,16 @@ namespace PurrNet.Codegen
 
             type.Methods.Add(newMethod);
 
-            var body = newMethod.Body.GetILProcessor();
+            ILProcessor body = newMethod.Body.GetILProcessor();
 
             for (int i = 0; i < originalRpcs.Count; i++)
             {
-                var rpc = originalRpcs[i];
+                RPCMethod rpc = originalRpcs[i];
 
                 if (rpc.Signature.isStatic != isStaticPass)
                     continue;
 
-                var next = Instruction.Create(OpCodes.Nop);
+                Instruction next = Instruction.Create(OpCodes.Nop);
 
                 // if (id == $i)
                 body.Append(Instruction.Create(OpCodes.Ldarg_S, id));
@@ -442,7 +472,7 @@ namespace PurrNet.Codegen
                 // HandleRPCGenerated_$i(packer, packet, info, asServer);
                 string methodName = $"HandleRPCGenerated_{offset + i}";
 
-                var methodReference = new MethodReference(methodName, module.TypeSystem.Void, type);
+                MethodReference methodReference = new MethodReference(methodName, module.TypeSystem.Void, type);
 
                 methodReference.Parameters.Add(new ParameterDefinition(streamType));
                 methodReference.Parameters.Add(new ParameterDefinition(packetType));
@@ -467,9 +497,9 @@ namespace PurrNet.Codegen
 
             if (type.BaseType != null)
             {
-                var parent = type.BaseType;
+                TypeReference parent = type.BaseType;
                 string methodName = $"OnReceivedRpc";
-                var reference = new MethodReference(methodName, module.TypeSystem.Void, parent);
+                MethodReference reference = new MethodReference(methodName, module.TypeSystem.Void, parent);
 
                 reference.Parameters.Add(new ParameterDefinition(module.TypeSystem.Int32));
                 reference.Parameters.Add(new ParameterDefinition(streamType));
@@ -503,7 +533,7 @@ namespace PurrNet.Codegen
             ILProcessor code, ParameterDefinition info, ParameterDefinition data, ParameterDefinition asServer,
             Instruction end)
         {
-            var compileTimeSignatureField = info.ParameterType.GetField("compileTimeSignature").Import(module);
+            FieldReference compileTimeSignatureField = info.ParameterType.GetField("compileTimeSignature").Import(module);
 
             code.Append(Instruction.Create(OpCodes.Ldarga, info));
             PushRPCSignature(module, code, originalRpc, true, isNetworkClass);
@@ -512,12 +542,12 @@ namespace PurrNet.Codegen
             MethodReference validateReceivingRPC;
             if (originalRpc.Signature.isStatic)
             {
-                var rpcModule = module.GetTypeDefinition<RPCModule>();
+                TypeDefinition rpcModule = module.GetTypeDefinition<RPCModule>();
                 validateReceivingRPC = rpcModule.GetMethod("ValidateReceivingStaticRPC").Import(module);
             }
             else if (isNetworkClass)
             {
-                var nclass = module.GetTypeDefinition<NetworkModule>();
+                TypeDefinition nclass = module.GetTypeDefinition<NetworkModule>();
                 validateReceivingRPC = nclass.GetMethod("ValidateReceivingRPC").Import(module);
 
                 // Call validateReceivingRPC(this, RPCInfo, RPCSignature, asServer)
@@ -525,7 +555,7 @@ namespace PurrNet.Codegen
             }
             else
             {
-                var identityType = module.GetTypeDefinition<NetworkIdentity>();
+                TypeDefinition identityType = module.GetTypeDefinition<NetworkIdentity>();
                 validateReceivingRPC = identityType.GetMethod("ValidateReceivingRPC").Import(module);
 
                 // Call validateReceivingRPC(this, RPCInfo, RPCSignature, asServer)
@@ -556,37 +586,37 @@ namespace PurrNet.Codegen
             ReturnMode returnMode,
             bool isNetworkClass)
         {
-            var code = newMethod.Body.GetILProcessor();
-            var originalMethod = rpcMethod.originalMethod;
+            ILProcessor code = newMethod.Body.GetILProcessor();
+            MethodDefinition originalMethod = rpcMethod.originalMethod;
             int paramCount = originalMethod.Parameters.Count;
 
-            var managerType = module.GetTypeDefinition<NetworkManager>();
-            var networkModule = module.GetTypeDefinition<NetworkModule>();
-            var identityType = module.GetTypeDefinition<NetworkIdentity>();
-            var rpcReqRespType = module.GetTypeDefinition<RpcRequestResponseModule>();
-            var rpcModule = originalMethod.DeclaringType.Module.GetTypeDefinition<RPCModule>();
-            var getLocalPlayer = rpcModule.GetMethod("GetLocalPlayer").Import(module);
-            var responder = rpcReqRespType.GetMethod("CompleteRequestWithResponse", true).Import(module);
-            var responderUniTask = rpcReqRespType.GetMethod("CompleteRequestWithUniTask", true).Import(module);
-            var responderWithoutResponse = rpcReqRespType.GetMethod("CompleteRequestWithEmptyResponse").Import(module);
-            var responderCoroutine = rpcReqRespType.GetMethod("CompleteRequestWithCoroutine").Import(module);
-            var responderUniTaskWithoutResponse =
+            TypeDefinition managerType = module.GetTypeDefinition<NetworkManager>();
+            TypeDefinition networkModule = module.GetTypeDefinition<NetworkModule>();
+            TypeDefinition identityType = module.GetTypeDefinition<NetworkIdentity>();
+            TypeDefinition rpcReqRespType = module.GetTypeDefinition<RpcRequestResponseModule>();
+            TypeDefinition rpcModule = originalMethod.DeclaringType.Module.GetTypeDefinition<RPCModule>();
+            MethodReference getLocalPlayer = rpcModule.GetMethod("GetLocalPlayer").Import(module);
+            MethodReference responder = rpcReqRespType.GetMethod("CompleteRequestWithResponse", true).Import(module);
+            MethodReference responderUniTask = rpcReqRespType.GetMethod("CompleteRequestWithUniTask", true).Import(module);
+            MethodReference responderWithoutResponse = rpcReqRespType.GetMethod("CompleteRequestWithEmptyResponse").Import(module);
+            MethodReference responderCoroutine = rpcReqRespType.GetMethod("CompleteRequestWithCoroutine").Import(module);
+            MethodReference responderUniTaskWithoutResponse =
                 rpcReqRespType.GetMethod("CompleteRequestWithUniTaskEmptyResponse").Import(module);
 
-            var localPlayerProp = identityType.GetProperty("localPlayerForced");
-            var localPlayerGetter = localPlayerProp.GetMethod.Import(module);
+            PropertyDefinition localPlayerProp = identityType.GetProperty("localPlayerForced");
+            MethodReference localPlayerGetter = localPlayerProp.GetMethod.Import(module);
 
-            var localPlayerPropModule = networkModule.GetProperty("localPlayerForced");
-            var localPlayerGetterModule = localPlayerPropModule.GetMethod.Import(module);
+            PropertyDefinition localPlayerPropModule = networkModule.GetProperty("localPlayerForced");
+            MethodReference localPlayerGetterModule = localPlayerPropModule.GetMethod.Import(module);
 
-            var networkManagerProp = identityType.GetProperty("networkManager");
-            var getNetworkManager = networkManagerProp.GetMethod.Import(module);
+            PropertyDefinition networkManagerProp = identityType.GetProperty("networkManager");
+            MethodReference getNetworkManager = networkManagerProp.GetMethod.Import(module);
 
-            var networkManagerModuleProp = networkModule.GetProperty("networkManager");
-            var getNetworkManagerModule = networkManagerModuleProp.GetMethod.Import(module);
+            PropertyDefinition networkManagerModuleProp = networkModule.GetProperty("networkManager");
+            MethodReference getNetworkManagerModule = networkManagerModuleProp.GetMethod.Import(module);
 
-            var mainManagerProp = managerType.GetProperty("main");
-            var mainManagerGetter = mainManagerProp.GetMethod.Import(module);
+            PropertyDefinition mainManagerProp = managerType.GetProperty("main");
+            MethodReference mainManagerGetter = mainManagerProp.GetMethod.Import(module);
 
             VariableDefinition reqId = null;
 
@@ -595,20 +625,20 @@ namespace PurrNet.Codegen
                 reqId = new VariableDefinition(module.TypeSystem.UInt32);
                 newMethod.Body.Variables.Add(reqId);
 
-                var serializer = CreateSerializer(module, module.TypeSystem.UInt32, false);
+                MethodReference serializer = CreateSerializer(module, module.TypeSystem.UInt32, false);
 
                 code.Append(Instruction.Create(OpCodes.Ldarg, stream));
                 code.Append(Instruction.Create(OpCodes.Ldloca, reqId));
                 code.Append(Instruction.Create(OpCodes.Call, serializer));
             }
 
-            for (var p = 0; p < originalMethod.Parameters.Count; p++)
+            for (int p = 0; p < originalMethod.Parameters.Count; p++)
             {
-                var param = originalMethod.Parameters[p];
-                var variable = new VariableDefinition(param.ParameterType);
+                ParameterDefinition param = originalMethod.Parameters[p];
+                VariableDefinition variable = new VariableDefinition(param.ParameterType);
                 newMethod.Body.Variables.Add(variable);
 
-                if (ShouldIgnore(rpcMethod.Signature.type, param, p, paramCount, out var specialType))
+                if (ShouldIgnore(rpcMethod.Signature.type, param, p, paramCount, out SpecialParamType specialType))
                 {
                     switch (specialType)
                     {
@@ -640,7 +670,7 @@ namespace PurrNet.Codegen
                     continue;
                 }
 
-                var serialize = CreateSerializer(module, param.ParameterType, false);
+                MethodReference serialize = CreateSerializer(module, param.ParameterType, false);
 
                 code.Append(Instruction.Create(OpCodes.Ldarg, stream));
                 code.Append(Instruction.Create(OpCodes.Ldloca, variable));
@@ -650,9 +680,9 @@ namespace PurrNet.Codegen
             if (!originalMethod.IsStatic)
                 code.Append(Instruction.Create(OpCodes.Ldarg_0));
 
-            var vars = newMethod.Body.Variables;
+            Mono.Collections.Generic.Collection<VariableDefinition> vars = newMethod.Body.Variables;
 
-            for (var j = reqId == null ? 0 : 1; j < vars.Count; j++)
+            for (int j = reqId == null ? 0 : 1; j < vars.Count; j++)
             {
                 code.Append(Instruction.Create(OpCodes.Ldloc, vars[j]));
             }
@@ -675,7 +705,7 @@ namespace PurrNet.Codegen
                     // load networkManager
                     PushNetworkManager(module, code, isNetworkClass, newMethod.IsStatic);
 
-                    var genericResponse =
+                    GenericInstanceMethod genericResponse =
                         new GenericInstanceMethod(returnMode is ReturnMode.Task ? responder : responderUniTask);
                     genericResponse.GenericArguments.Add(genericInstance.GenericArguments[0]);
                     code.Append(Instruction.Create(OpCodes.Call, genericResponse));
@@ -711,18 +741,18 @@ namespace PurrNet.Codegen
 
         private static void PushNetworkManager(ModuleDefinition module, ILProcessor code, bool isNetworkClass, bool isStatic)
         {
-            var managerType = module.GetTypeDefinition<NetworkManager>();
-            var networkModule = module.GetTypeDefinition<NetworkModule>();
-            var identityType = module.GetTypeDefinition<NetworkIdentity>();
+            TypeDefinition managerType = module.GetTypeDefinition<NetworkManager>();
+            TypeDefinition networkModule = module.GetTypeDefinition<NetworkModule>();
+            TypeDefinition identityType = module.GetTypeDefinition<NetworkIdentity>();
 
-            var networkManagerProp = identityType.GetProperty("networkManager");
-            var getNetworkManager = networkManagerProp.GetMethod.Import(module);
+            PropertyDefinition networkManagerProp = identityType.GetProperty("networkManager");
+            MethodReference getNetworkManager = networkManagerProp.GetMethod.Import(module);
 
-            var networkManagerModuleProp = networkModule.GetProperty("networkManager");
-            var getNetworkManagerModule = networkManagerModuleProp.GetMethod.Import(module);
+            PropertyDefinition networkManagerModuleProp = networkModule.GetProperty("networkManager");
+            MethodReference getNetworkManagerModule = networkManagerModuleProp.GetMethod.Import(module);
 
-            var mainManagerProp = managerType.GetProperty("main");
-            var mainManagerGetter = mainManagerProp.GetMethod.Import(module);
+            PropertyDefinition mainManagerProp = managerType.GetProperty("main");
+            MethodReference mainManagerGetter = mainManagerProp.GetMethod.Import(module);
 
             if (isStatic)
             {
@@ -742,12 +772,12 @@ namespace PurrNet.Codegen
             if (!originalMethod.DeclaringType.HasGenericParameters)
                 return originalMethod;
 
-            var declaringType = new GenericInstanceType(originalMethod.DeclaringType);
+            GenericInstanceType declaringType = new GenericInstanceType(originalMethod.DeclaringType);
 
-            foreach (var t in originalMethod.DeclaringType.GenericParameters)
+            foreach (GenericParameter t in originalMethod.DeclaringType.GenericParameters)
                 declaringType.GenericArguments.Add(t);
 
-            var methodToCall = new MethodReference(
+            MethodReference methodToCall = new MethodReference(
                 originalMethod.Name,
                 originalMethod.ReturnType,
                 declaringType)
@@ -757,13 +787,13 @@ namespace PurrNet.Codegen
                 CallingConvention = originalMethod.CallingConvention,
             };
 
-            foreach (var parameter in originalMethod.Parameters)
+            foreach (ParameterDefinition parameter in originalMethod.Parameters)
             {
                 methodToCall.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes,
                     parameter.ParameterType));
             }
 
-            foreach (var parameter in originalMethod.GenericParameters)
+            foreach (GenericParameter parameter in originalMethod.GenericParameters)
             {
                 methodToCall.GenericParameters.Add(new GenericParameter(parameter.Name, parameter.Owner));
             }
@@ -775,40 +805,40 @@ namespace PurrNet.Codegen
             MethodDefinition newMethod,
             ParameterDefinition stream, ParameterDefinition info, bool isNetworkClass)
         {
-            var identityType = module.GetTypeDefinition<NetworkIdentity>();
-            var rpcReqRespType = module.GetTypeDefinition<RpcRequestResponseModule>();
-            var managerType = module.GetTypeDefinition<NetworkManager>();
-            var networkModule = module.GetTypeDefinition<NetworkModule>();
+            TypeDefinition identityType = module.GetTypeDefinition<NetworkIdentity>();
+            TypeDefinition rpcReqRespType = module.GetTypeDefinition<RpcRequestResponseModule>();
+            TypeDefinition managerType = module.GetTypeDefinition<NetworkManager>();
+            TypeDefinition networkModule = module.GetTypeDefinition<NetworkModule>();
 
-            var responderWithoutResponse = rpcReqRespType.GetMethod("CompleteRequestWithEmptyResponse").Import(module);
-            var responderCoroutine = rpcReqRespType.GetMethod("CompleteRequestWithCoroutine").Import(module);
-            var responderUniTaskWithoutResponse =
+            MethodReference responderWithoutResponse = rpcReqRespType.GetMethod("CompleteRequestWithEmptyResponse").Import(module);
+            MethodReference responderCoroutine = rpcReqRespType.GetMethod("CompleteRequestWithCoroutine").Import(module);
+            MethodReference responderUniTaskWithoutResponse =
                 rpcReqRespType.GetMethod("CompleteRequestWithUniTaskEmptyResponse").Import(module);
 
-            var responderTask = rpcReqRespType.GetMethod("CompleteRequestWithResponseObject", true).Import(module);
-            var responderUniTask = rpcReqRespType.GetMethod("CompleteRequestWithUniTaskObject", true).Import(module);
+            MethodReference responderTask = rpcReqRespType.GetMethod("CompleteRequestWithResponseObject", true).Import(module);
+            MethodReference responderUniTask = rpcReqRespType.GetMethod("CompleteRequestWithUniTaskObject", true).Import(module);
 
-            var localPlayerProp = identityType.GetProperty("localPlayerForced");
-            var localPlayerGetter = localPlayerProp.GetMethod.Import(module);
+            PropertyDefinition localPlayerProp = identityType.GetProperty("localPlayerForced");
+            MethodReference localPlayerGetter = localPlayerProp.GetMethod.Import(module);
 
-            var genericRpcHeaderType = module.GetTypeDefinition<GenericRPCHeader>();
-            var code = newMethod.Body.GetILProcessor();
-            var readHeaderMethod = identityType.GetMethod("ReadGenericHeader").Import(module);
+            TypeDefinition genericRpcHeaderType = module.GetTypeDefinition<GenericRPCHeader>();
+            ILProcessor code = newMethod.Body.GetILProcessor();
+            MethodReference readHeaderMethod = identityType.GetMethod("ReadGenericHeader").Import(module);
 
-            var setInfo = genericRpcHeaderType.GetMethod("SetInfo").Import(module);
-            var readGeneric = genericRpcHeaderType.GetMethod("Read").Import(module);
-            var readT = genericRpcHeaderType.GetMethod("Read", true).Import(module);
-            var setPlayerId = genericRpcHeaderType.GetMethod("SetPlayerId").Import(module);
-            var mainManagerProp = managerType.GetProperty("main");
-            var mainManagerGetter = mainManagerProp.GetMethod.Import(module);
+            MethodReference setInfo = genericRpcHeaderType.GetMethod("SetInfo").Import(module);
+            MethodReference readGeneric = genericRpcHeaderType.GetMethod("Read").Import(module);
+            MethodReference readT = genericRpcHeaderType.GetMethod("Read", true).Import(module);
+            MethodReference setPlayerId = genericRpcHeaderType.GetMethod("SetPlayerId").Import(module);
+            PropertyDefinition mainManagerProp = managerType.GetProperty("main");
+            MethodReference mainManagerGetter = mainManagerProp.GetMethod.Import(module);
 
-            var getNetworkManagerModule = networkModule.GetProperty("networkManager").GetMethod.Import(module);
-            var getNetworkManager = identityType.GetProperty("networkManager").GetMethod.Import(module);
+            MethodReference getNetworkManagerModule = networkModule.GetProperty("networkManager").GetMethod.Import(module);
+            MethodReference getNetworkManager = identityType.GetProperty("networkManager").GetMethod.Import(module);
 
-            var rpcModule = module.GetTypeDefinition<RPCModule>();
-            var nclassType = module.GetTypeDefinition<NetworkModule>();
+            TypeDefinition rpcModule = module.GetTypeDefinition<RPCModule>();
+            TypeDefinition nclassType = module.GetTypeDefinition<NetworkModule>();
 
-            var callGenericMethod = rpcMethod.Signature.isStatic
+            MethodReference callGenericMethod = rpcMethod.Signature.isStatic
                 ?
                 rpcModule.GetMethod("CallStaticGeneric").Import(module)
                 :
@@ -817,16 +847,16 @@ namespace PurrNet.Codegen
                     :
                     identityType.GetMethod("CallGeneric").Import(module);
 
-            var originalMethod = rpcMethod.originalMethod;
+            MethodDefinition originalMethod = rpcMethod.originalMethod;
             int paramCount = originalMethod.Parameters.Count;
             int genericParamCount = originalMethod.GenericParameters.Count;
 
             VariableDefinition requestId = null;
-            var headerValue = new VariableDefinition(genericRpcHeaderType.Import(module));
+            VariableDefinition headerValue = new VariableDefinition(genericRpcHeaderType.Import(module));
             newMethod.Body.Variables.Add(headerValue);
 
-            bool isValidReturn = ValidateReturnType(originalMethod, out var returnMode);
-            var serializeUint = CreateSerializer(module, module.TypeSystem.UInt32, false);
+            bool isValidReturn = ValidateReturnType(originalMethod, out ReturnMode returnMode);
+            MethodReference serializeUint = CreateSerializer(module, module.TypeSystem.UInt32, false);
 
             if (!isValidReturn)
             {
@@ -852,11 +882,11 @@ namespace PurrNet.Codegen
             code.Append(Instruction.Create(OpCodes.Call, readHeaderMethod));
 
             // read generic parameters
-            for (var p = 0; p < paramCount; p++)
+            for (int p = 0; p < paramCount; p++)
             {
-                var param = originalMethod.Parameters[p];
+                ParameterDefinition param = originalMethod.Parameters[p];
 
-                if (ShouldIgnore(rpcMethod.Signature.type, param, p, paramCount, out var specialType))
+                if (ShouldIgnore(rpcMethod.Signature.type, param, p, paramCount, out SpecialParamType specialType))
                 {
                     switch (specialType)
                     {
@@ -877,7 +907,7 @@ namespace PurrNet.Codegen
                                 }
                                 else
                                 {
-                                    var getLocalPlayer = rpcModule.GetMethod("GetLocalPlayer").Import(module);
+                                    MethodReference getLocalPlayer = rpcModule.GetMethod("GetLocalPlayer").Import(module);
                                     code.Append(Instruction.Create(OpCodes.Call, getLocalPlayer));
                                 }
 
@@ -890,7 +920,7 @@ namespace PurrNet.Codegen
                     continue;
                 }
 
-                var genericIdx = param.ParameterType.IsGenericParameter
+                int genericIdx = param.ParameterType.IsGenericParameter
                     ? originalMethod.GenericParameters.IndexOf((GenericParameter)param.ParameterType)
                     : -1;
 
@@ -903,7 +933,7 @@ namespace PurrNet.Codegen
                 }
                 else
                 {
-                    var readAny = new GenericInstanceMethod(readT);
+                    GenericInstanceMethod readAny = new GenericInstanceMethod(readT);
                     readAny.GenericArguments.Add(param.ParameterType);
 
                     code.Append(Instruction.Create(OpCodes.Ldloca, headerValue));
@@ -949,13 +979,13 @@ namespace PurrNet.Codegen
 
                     if (returnMode == ReturnMode.Task)
                     {
-                        var genericResponse = new GenericInstanceMethod(responderTask);
+                        GenericInstanceMethod genericResponse = new GenericInstanceMethod(responderTask);
                         genericResponse.GenericArguments.Add(genericInstance.GenericArguments[0]);
                         code.Append(Instruction.Create(OpCodes.Call, genericResponse));
                     }
                     else
                     {
-                        var genericResponse = new GenericInstanceMethod(responderUniTask);
+                        GenericInstanceMethod genericResponse = new GenericInstanceMethod(responderUniTask);
                         genericResponse.GenericArguments.Add(genericInstance.GenericArguments[0]);
                         code.Append(Instruction.Create(OpCodes.Call, genericResponse));
                     }
@@ -1007,7 +1037,7 @@ namespace PurrNet.Codegen
             if (typeRef is GenericInstanceType genericReturnType)
             {
                 // Resolve the element type to compare against Task<>
-                var resolvedType = genericReturnType.ElementType.Resolve();
+                TypeDefinition resolvedType = genericReturnType.ElementType.Resolve();
 
                 // Check if the resolved type matches Task<>
                 return resolvedType != null && resolvedType.FullName == type.FullName;
@@ -1022,7 +1052,7 @@ namespace PurrNet.Codegen
             if (method.ReturnType is GenericInstanceType genericReturnType)
             {
                 // Resolve the element type to compare against Task<>
-                var resolvedType = genericReturnType.ElementType.Resolve();
+                TypeDefinition resolvedType = genericReturnType.ElementType.Resolve();
 
                 // Check if the resolved type matches Task<>
                 return resolvedType != null && resolvedType.FullName == type.FullName;
@@ -1131,12 +1161,12 @@ namespace PurrNet.Codegen
 
         private static void StripBody(MethodDefinition method, string methodName, PurrNetSettings settings, StripCodeModeOverride overrideMode)
         {
-            var mode = GetMode(settings, overrideMode);
+            StripCodeMode mode = GetMode(settings, overrideMode);
 
             if (mode == StripCodeMode.DoNotStrip)
                 return;
 
-            var il = method.Body.GetILProcessor();
+            ILProcessor il = method.Body.GetILProcessor();
             il.Clear();
 
             AppendStripAction(method, methodName, mode, il, "stripped");
@@ -1151,14 +1181,14 @@ namespace PurrNet.Codegen
                     break;
 
                 case StripCodeMode.ReplaceWithLogWarning:
-                    var logWarningMethod = method.Module.GetTypeDefinition(typeof(PurrLogger))
+                    MethodReference logWarningMethod = method.Module.GetTypeDefinition(typeof(PurrLogger))
                         .GetMethod("LogSimplerWarning", false).Import(method.Module);
                     il.Append(il.Create(OpCodes.Ldstr, $"Method '{method.DeclaringType.Name}.{methodName}' is {action} and cannot be called."));
                     il.Append(il.Create(OpCodes.Call, logWarningMethod));
                     break;
 
                 case StripCodeMode.ReplaceWithLogError:
-                    var logErrorMethod = method.Module.GetTypeDefinition(typeof(PurrLogger))
+                    MethodReference logErrorMethod = method.Module.GetTypeDefinition(typeof(PurrLogger))
                         .GetMethod("LogSimplerError", false).Import(method.Module);
                     il.Append(il.Create(OpCodes.Ldstr, $"Method '{method.DeclaringType.Name}.{methodName}' is {action} and cannot be called."));
                     il.Append(il.Create(OpCodes.Call, logErrorMethod));
@@ -1168,7 +1198,7 @@ namespace PurrNet.Codegen
                     break;
 
                 case StripCodeMode.ThrowNotSupportedException:
-                    var throwExcep = method.Module.GetTypeDefinition(typeof(PurrLogger))
+                    MethodReference throwExcep = method.Module.GetTypeDefinition(typeof(PurrLogger))
                         .GetMethod("ThrowUnsupportedException", false).Import(method.Module);
                     il.Append(il.Create(OpCodes.Ldstr, $"Method '{method.DeclaringType.Name}.{methodName}' is {action} and cannot be called."));
                     il.Append(il.Create(OpCodes.Call, throwExcep));
@@ -1183,7 +1213,7 @@ namespace PurrNet.Codegen
 
         private static void ProperlyEndMethod(MethodDefinition method, ILProcessor il)
         {
-            var returnType = method.ReturnType;
+            TypeReference returnType = method.ReturnType;
             if (returnType.MetadataType != MetadataType.Void)
                 EmitDefaultValue(method, il, returnType);
             il.Append(il.Create(OpCodes.Ret));
@@ -1223,8 +1253,8 @@ namespace PurrNet.Codegen
                 case MetadataType.GenericInstance:
                 case MetadataType.ValueType:
                 {
-                    // For structs, emit a local, initobj, ldloc
-                    var varDef = new VariableDefinition(type);
+                        // For structs, emit a local, initobj, ldloc
+                        VariableDefinition varDef = new VariableDefinition(type);
                     method.Body.Variables.Add(varDef);
                     il.Append(il.Create(OpCodes.Ldloca_S, varDef));
                     il.Append(il.Create(OpCodes.Initobj, type));
@@ -1250,12 +1280,12 @@ namespace PurrNet.Codegen
         private MethodDefinition HandleRPC(ModuleDefinition module, int id, RPCMethod methodRpc, bool isNetworkClass, bool isServerBuild, PurrNetSettings settings,
             HashSet<TypeReference> usedTypes, [UsedImplicitly] List<DiagnosticMessage> messages)
         {
-            var method = methodRpc.originalMethod;
+            MethodDefinition method = methodRpc.originalMethod;
 
             if (method.DeclaringType == null)
                 return null;
 
-            bool isValidReturn = ValidateReturnType(method, out var returnMode);
+            bool isValidReturn = ValidateReturnType(method, out ReturnMode returnMode);
 
             if (!isValidReturn)
             {
@@ -1276,13 +1306,13 @@ namespace PurrNet.Codegen
                 return null;
             }
 
-            if (IsConcreteType(method.ReturnType, out var concreteType))
+            if (IsConcreteType(method.ReturnType, out TypeReference concreteType))
                 usedTypes.Add(concreteType);
 
             string ogName = method.Name;
             method.Name = ogName + "_Original_" + id;
 
-            var attributes = MethodAttributes.Public | MethodAttributes.HideBySig;
+            MethodAttributes attributes = MethodAttributes.Public | MethodAttributes.HideBySig;
 
             if (methodRpc.Signature.isStatic)
                 attributes |= MethodAttributes.Static;
@@ -1290,32 +1320,32 @@ namespace PurrNet.Codegen
             if (method.IsVirtual)
                 attributes |= MethodAttributes.Virtual;
 
-            var newMethod = new MethodDefinition(ogName, attributes, method.ReturnType);
+            MethodDefinition newMethod = new MethodDefinition(ogName, attributes, method.ReturnType);
 
-            foreach (var t in method.GenericParameters)
+            foreach (GenericParameter t in method.GenericParameters)
                 newMethod.GenericParameters.Add(new GenericParameter(t.Name, newMethod));
 
-            foreach (var param in method.CustomAttributes)
+            foreach (CustomAttribute param in method.CustomAttributes)
                 newMethod.CustomAttributes.Add(param);
 
             // add preserve attribute to newMethod
-            var preserveAttribute = module.GetTypeDefinition<PreserveAttribute>();
-            var constructor = preserveAttribute.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+            TypeDefinition preserveAttribute = module.GetTypeDefinition<PreserveAttribute>();
+            MethodReference constructor = preserveAttribute.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
                 .Import(module);
             newMethod.CustomAttributes.Add(new CustomAttribute(constructor));
 
             newMethod.CallingConvention = method.CallingConvention;
             method.CustomAttributes.Clear();
 
-            foreach (var param in method.Parameters)
+            foreach (ParameterDefinition param in method.Parameters)
             {
-                if (IsConcreteType(param.ParameterType, out var concreteParam))
+                if (IsConcreteType(param.ParameterType, out TypeReference concreteParam))
                     usedTypes.Add(concreteParam);
 
-                var p = new ParameterDefinition(param.Name, param.Attributes, param.ParameterType);
+                ParameterDefinition p = new ParameterDefinition(param.Name, param.Attributes, param.ParameterType);
                 newMethod.Parameters.Add(p);
 
-                foreach (var t in param.CustomAttributes)
+                foreach (CustomAttribute t in param.CustomAttributes)
                     p.CustomAttributes.Add(t);
 
                 p.HasDefault = param.HasDefault;
@@ -1330,53 +1360,53 @@ namespace PurrNet.Codegen
                 p.MarshalInfo = param.MarshalInfo;
             }
 
-            var code = newMethod.Body.GetILProcessor();
+            ILProcessor code = newMethod.Body.GetILProcessor();
 
-            var streamType = module.GetTypeDefinition<BitPacker>();
-            var rpcType = module.GetTypeDefinition<RPCModule>();
-            var identityType = module.GetTypeDefinition<NetworkIdentity>();
-            var moduleType = module.GetTypeDefinition<NetworkModule>();
-            var hahserType = module.GetTypeDefinition<Hasher>();
-            var rpcRequestType = module.GetTypeDefinition<RpcRequest>();
-            var rpcSignatureType = module.GetTypeDefinition<RPCSignature>();
-            var reqRespModule = module.GetTypeDefinition<RpcRequestResponseModule>();
-            var packerType = module.GetTypeDefinition(typeof(Packer)).Import(module);
+            TypeDefinition streamType = module.GetTypeDefinition<BitPacker>();
+            TypeDefinition rpcType = module.GetTypeDefinition<RPCModule>();
+            TypeDefinition identityType = module.GetTypeDefinition<NetworkIdentity>();
+            TypeDefinition moduleType = module.GetTypeDefinition<NetworkModule>();
+            TypeDefinition hahserType = module.GetTypeDefinition<Hasher>();
+            TypeDefinition rpcRequestType = module.GetTypeDefinition<RpcRequest>();
+            TypeDefinition rpcSignatureType = module.GetTypeDefinition<RPCSignature>();
+            TypeDefinition reqRespModule = module.GetTypeDefinition<RpcRequestResponseModule>();
+            TypeReference packerType = module.GetTypeDefinition(typeof(Packer)).Import(module);
 
-            var allocStreamMethod = rpcType.GetMethod("AllocStream").Import(module);
-            var freeStreamMethod = rpcType.GetMethod("FreeStream").Import(module);
+            MethodReference allocStreamMethod = rpcType.GetMethod("AllocStream").Import(module);
+            MethodReference freeStreamMethod = rpcType.GetMethod("FreeStream").Import(module);
 
-            var getId = identityType.GetProperty("id");
-            var getSceneId = identityType.GetProperty("sceneId");
-            var getStableHashU32 = hahserType.GetMethod("GetStableHashU32", true).Import(module);
-            var getParent = moduleType.GetProperty("parent").GetMethod.Import(module);
-            var targetPlayerField = rpcSignatureType.GetField("targetPlayer").Import(module);
+            PropertyDefinition getId = identityType.GetProperty("id");
+            PropertyDefinition getSceneId = identityType.GetProperty("sceneId");
+            MethodReference getStableHashU32 = hahserType.GetMethod("GetStableHashU32", true).Import(module);
+            MethodReference getParent = moduleType.GetProperty("parent").GetMethod.Import(module);
+            FieldReference targetPlayerField = rpcSignatureType.GetField("targetPlayer").Import(module);
 
-            var getNextId = identityType.GetMethod("GetNextId", true).Import(module);
-            var getNextIdNonGeneric = identityType.GetMethod("GetNextId").Import(module);
-            var getNextIdStatic = reqRespModule.GetMethod("GetNextIdStatic", true).Import(module);
-            var getNextIdStaticNonGeneric = reqRespModule.GetMethod("GetNextIdStatic").Import(module);
-            var getNextIdUniTaskNonGeneric = identityType.GetMethod("GetNextIdUniTask").Import(module);
-            var getNextIdUniTask = identityType.GetMethod("GetNextIdUniTask", true).Import(module);
+            MethodReference getNextId = identityType.GetMethod("GetNextId", true).Import(module);
+            MethodReference getNextIdNonGeneric = identityType.GetMethod("GetNextId").Import(module);
+            MethodReference getNextIdStatic = reqRespModule.GetMethod("GetNextIdStatic", true).Import(module);
+            MethodReference getNextIdStaticNonGeneric = reqRespModule.GetMethod("GetNextIdStatic").Import(module);
+            MethodReference getNextIdUniTaskNonGeneric = identityType.GetMethod("GetNextIdUniTask").Import(module);
+            MethodReference getNextIdUniTask = identityType.GetMethod("GetNextIdUniTask", true).Import(module);
 
-            var getNextIdUniTaskStatic = reqRespModule.GetMethod("GetNextIdUniTaskStatic", true).Import(module);
-            var getNextIdUniTaskStaticNonGeneric = reqRespModule.GetMethod("GetNextIdUniTaskStatic").Import(module);
+            MethodReference getNextIdUniTaskStatic = reqRespModule.GetMethod("GetNextIdUniTaskStatic", true).Import(module);
+            MethodReference getNextIdUniTaskStaticNonGeneric = reqRespModule.GetMethod("GetNextIdUniTaskStatic").Import(module);
 
-            var waitForTask = reqRespModule.GetMethod("WaitForTask").Import(module);
+            MethodReference waitForTask = reqRespModule.GetMethod("WaitForTask").Import(module);
 
-            var reqIdField = rpcRequestType.GetField("id").Import(module);
+            FieldReference reqIdField = rpcRequestType.GetField("id").Import(module);
 
             // Declare local variables
             newMethod.Body.InitLocals = true;
 
-            var packetType = methodRpc.Signature.isStatic ? module.GetTypeDefinition<StaticRPCPacket>() :
+            TypeDefinition packetType = methodRpc.Signature.isStatic ? module.GetTypeDefinition<StaticRPCPacket>() :
                 isNetworkClass ? module.GetTypeDefinition<ChildRPCPacket>() : module.GetTypeDefinition<RPCPacket>();
 
-            var streamVariable = new VariableDefinition(streamType.Import(module));
-            var rpcDataVariable = new VariableDefinition(packetType.Import(module));
-            var typeHash = new VariableDefinition(module.TypeSystem.UInt32);
-            var rpcRequest = new VariableDefinition(rpcRequestType.Import(module));
-            var taskWithReturnType = new VariableDefinition(newMethod.ReturnType);
-            var rpcSignature = new VariableDefinition(rpcSignatureType.Import(module));
+            VariableDefinition streamVariable = new VariableDefinition(streamType.Import(module));
+            VariableDefinition rpcDataVariable = new VariableDefinition(packetType.Import(module));
+            VariableDefinition typeHash = new VariableDefinition(module.TypeSystem.UInt32);
+            VariableDefinition rpcRequest = new VariableDefinition(rpcRequestType.Import(module));
+            VariableDefinition taskWithReturnType = new VariableDefinition(newMethod.ReturnType);
+            VariableDefinition rpcSignature = new VariableDefinition(rpcSignatureType.Import(module));
 
             if (returnMode != ReturnMode.Void)
             {
@@ -1391,10 +1421,10 @@ namespace PurrNet.Codegen
                 newMethod.Body.Variables.Add(typeHash);
             newMethod.Body.Variables.Add(rpcSignature);
 
-            var paramCount = newMethod.Parameters.Count;
+            int paramCount = newMethod.Parameters.Count;
 
-            var endOfRunLocallyCheck = Instruction.Create(OpCodes.Nop);
-            var executeRunLocally = Instruction.Create(OpCodes.Nop);
+            Instruction endOfRunLocallyCheck = Instruction.Create(OpCodes.Nop);
+            Instruction executeRunLocally = Instruction.Create(OpCodes.Nop);
 
             PushRPCSignature(module, code, methodRpc, false, isNetworkClass);
             code.Append(Instruction.Create(OpCodes.Stloc, rpcSignature));
@@ -1408,7 +1438,7 @@ namespace PurrNet.Codegen
             {
                 PushLocalPlayerProp(module, code, isNetworkClass, methodRpc.Signature.isStatic);
                 code.Append(Instruction.Create(OpCodes.Ldarg_S, newMethod.Parameters[0]));
-                var areEqualMethod = rpcType.GetMethod("ArePlayersEqual", false).Import(module);
+                MethodReference areEqualMethod = rpcType.GetMethod("ArePlayersEqual", false).Import(module);
                 code.Append(Instruction.Create(OpCodes.Call, areEqualMethod));
                 code.Append(Instruction.Create(OpCodes.Brtrue, executeRunLocally));
             }
@@ -1419,7 +1449,7 @@ namespace PurrNet.Codegen
 
                 if (methodRpc.Signature.isStatic)
                 {
-                    var getNextIdRef = returnMode == ReturnMode.UniTask
+                    MethodReference getNextIdRef = returnMode == ReturnMode.UniTask
                         ? getNextIdUniTaskStaticNonGeneric
                         : getNextIdStaticNonGeneric;
 
@@ -1432,17 +1462,17 @@ namespace PurrNet.Codegen
                             return null;
                         }
 
-                        var param = genericInstance.GenericArguments[0];
+                        TypeReference param = genericInstance.GenericArguments[0];
 
                         if (returnMode == ReturnMode.Task)
                         {
-                            var newGetNextId = new GenericInstanceMethod(getNextIdStatic);
+                            GenericInstanceMethod newGetNextId = new GenericInstanceMethod(getNextIdStatic);
                             newGetNextId.GenericArguments.Add(param);
                             getNextIdRef = newGetNextId;
                         }
                         else
                         {
-                            var newGetNextId = new GenericInstanceMethod(getNextIdUniTaskStatic);
+                            GenericInstanceMethod newGetNextId = new GenericInstanceMethod(getNextIdUniTaskStatic);
                             newGetNextId.GenericArguments.Add(param);
                             getNextIdRef = newGetNextId;
                         }
@@ -1475,7 +1505,7 @@ namespace PurrNet.Codegen
                     code.Append(Instruction.Create(OpCodes.Ldc_R4, methodRpc.Signature.asyncTimeoutInSec)); // timeout
                     code.Append(Instruction.Create(OpCodes.Ldloca, rpcRequest)); // out request
 
-                    var getNextIdRef = returnMode == ReturnMode.UniTask
+                    MethodReference getNextIdRef = returnMode == ReturnMode.UniTask
                         ? getNextIdUniTaskNonGeneric
                         : getNextIdNonGeneric;
 
@@ -1488,17 +1518,17 @@ namespace PurrNet.Codegen
                             return null;
                         }
 
-                        var param = genericInstance.GenericArguments[0];
+                        TypeReference param = genericInstance.GenericArguments[0];
 
                         if (returnMode == ReturnMode.Task)
                         {
-                            var newGetNextId = new GenericInstanceMethod(getNextId);
+                            GenericInstanceMethod newGetNextId = new GenericInstanceMethod(getNextId);
                             newGetNextId.GenericArguments.Add(param);
                             getNextIdRef = newGetNextId;
                         }
                         else
                         {
-                            var newGetNextId = new GenericInstanceMethod(getNextIdUniTask);
+                            GenericInstanceMethod newGetNextId = new GenericInstanceMethod(getNextIdUniTask);
                             newGetNextId.GenericArguments.Add(param);
                             getNextIdRef = newGetNextId;
                         }
@@ -1519,7 +1549,7 @@ namespace PurrNet.Codegen
 
             if (returnMode != ReturnMode.Void)
             {
-                var serializeGenericMethod = CreateSerializer(module, module.TypeSystem.UInt32, true);
+                MethodReference serializeGenericMethod = CreateSerializer(module, module.TypeSystem.UInt32, true);
 
                 code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
                 code.Append(Instruction.Create(OpCodes.Ldloc, rpcRequest));
@@ -1527,29 +1557,29 @@ namespace PurrNet.Codegen
                 code.Append(Instruction.Create(OpCodes.Call, serializeGenericMethod));
             }
 
-            for (var i = 0; i < newMethod.GenericParameters.Count; i++)
+            for (int i = 0; i < newMethod.GenericParameters.Count; i++)
             {
-                var param = newMethod.GenericParameters[i];
-                var getStableHashU32Generic = new GenericInstanceMethod(getStableHashU32);
+                GenericParameter param = newMethod.GenericParameters[i];
+                GenericInstanceMethod getStableHashU32Generic = new GenericInstanceMethod(getStableHashU32);
                 getStableHashU32Generic.GenericArguments.Add(param);
 
                 code.Append(Instruction.Create(OpCodes.Call, getStableHashU32Generic));
                 code.Append(Instruction.Create(OpCodes.Stloc, typeHash));
 
-                var serializeGenericMethod = CreateSerializer(module, module.TypeSystem.UInt32, true);
+                MethodReference serializeGenericMethod = CreateSerializer(module, module.TypeSystem.UInt32, true);
 
                 code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
                 code.Append(Instruction.Create(OpCodes.Ldloc, typeHash));
                 code.Append(Instruction.Create(OpCodes.Call, serializeGenericMethod));
             }
 
-            for (var i = 0; i < paramCount; i++)
+            for (int i = 0; i < paramCount; i++)
             {
-                var param = newMethod.Parameters[i];
+                ParameterDefinition param = newMethod.Parameters[i];
 
                 if (methodRpc.Signature.type == RPCType.TargetRPC && i == 0)
                 {
-                    var argType = GetArgType(param.ParameterType);
+                    TargetArgType argType = GetArgType(param.ParameterType);
                     if (argType == TargetArgType.None)
                     {
                         Error(messages, "TargetRPC method must have a 'PlayerID' as the first parameter", method);
@@ -1563,7 +1593,7 @@ namespace PurrNet.Codegen
                     continue;
 
                 // if isGeneric, write the type hash
-                var serializeGenericMethod = CreateSerializer(module, param.ParameterType, true);
+                MethodReference serializeGenericMethod = CreateSerializer(module, param.ParameterType, true);
 
                 code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
                 code.Append(Instruction.Create(OpCodes.Ldarg, param));
@@ -1572,8 +1602,8 @@ namespace PurrNet.Codegen
 
             if (methodRpc.Signature.isStatic)
             {
-                var buildRawRPCMethod = rpcType.GetMethod("BuildStaticRawRPC", true).Import(module);
-                var genericInstanceMethod = new GenericInstanceMethod(buildRawRPCMethod);
+                MethodReference buildRawRPCMethod = rpcType.GetMethod("BuildStaticRawRPC", true).Import(module);
+                GenericInstanceMethod genericInstanceMethod = new GenericInstanceMethod(buildRawRPCMethod);
                 genericInstanceMethod.GenericArguments.Add(method.DeclaringType);
 
                 // rpcId, stream
@@ -1585,7 +1615,7 @@ namespace PurrNet.Codegen
             }
             else if (isNetworkClass)
             {
-                var buildChildRpc = module.GetTypeDefinition<NetworkModule>().GetMethod("BuildRPC").Import(module);
+                MethodReference buildChildRpc = module.GetTypeDefinition<NetworkModule>().GetMethod("BuildRPC").Import(module);
 
                 code.Append(Instruction.Create(OpCodes.Ldarg_0));
                 code.Append(Instruction.Create(OpCodes.Ldc_I4, id));
@@ -1594,7 +1624,7 @@ namespace PurrNet.Codegen
             }
             else
             {
-                var buildRawRPCMethod = rpcType.GetMethod("BuildRawRPC").Import(module);
+                MethodReference buildRawRPCMethod = rpcType.GetMethod("BuildRawRPC").Import(module);
 
                 code.Append(Instruction.Create(OpCodes.Ldarg_0));
                 code.Append(Instruction.Create(OpCodes.Call, getId.GetMethod.Import(module))); // id
@@ -1610,7 +1640,7 @@ namespace PurrNet.Codegen
             code.Append(Instruction.Create(OpCodes.Stloc, rpcDataVariable)); // rpcPacket
 
             // Call RPCModule.PreProcessRpc(RPCPacket packet, RPCSignature signature, ref BitPacker packer)
-            var preProcessRpc = rpcType.GetMethod("PreProcessRpc").Import(module);
+            MethodReference preProcessRpc = rpcType.GetMethod("PreProcessRpc").Import(module);
 
             // get rpcDataVariable.data field
             code.Append(Instruction.Create(OpCodes.Ldloca, rpcDataVariable));
@@ -1628,17 +1658,17 @@ namespace PurrNet.Codegen
 
             if (methodRpc.Signature.isStatic)
             {
-                var sendRpc = rpcType.GetMethod("SendStaticRPC").Import(module);
+                MethodReference sendRpc = rpcType.GetMethod("SendStaticRPC").Import(module);
                 code.Append(Instruction.Create(OpCodes.Call, sendRpc));
             }
             else if (isNetworkClass)
             {
-                var sendRpc = module.GetTypeDefinition<NetworkModule>().GetMethod("SendRPC").Import(module);
+                MethodReference sendRpc = module.GetTypeDefinition<NetworkModule>().GetMethod("SendRPC").Import(module);
                 code.Append(Instruction.Create(OpCodes.Call, sendRpc));
             }
             else
             {
-                var sendRpc = identityType.GetMethod("SendRPC").Import(module);
+                MethodReference sendRpc = identityType.GetMethod("SendRPC").Import(module);
                 code.Append(Instruction.Create(OpCodes.Call, sendRpc));
             }
 
@@ -1662,16 +1692,16 @@ namespace PurrNet.Codegen
             bool hasRpcInfoParam = paramCount > 0 && newMethod.Parameters[^1].ParameterType.FullName == typeof(RPCInfo).FullName;
             if (hasRpcInfoParam)
             {
-                var RPCInfo_compileTimeSignatureField = module.GetTypeDefinition<RPCInfo>()
+                FieldReference RPCInfo_compileTimeSignatureField = module.GetTypeDefinition<RPCInfo>()
                     .GetField("compileTimeSignature").Import(module);
 
-                var RPCInfo_manager = module.GetTypeDefinition<RPCInfo>()
+                FieldReference RPCInfo_manager = module.GetTypeDefinition<RPCInfo>()
                     .GetField("manager").Import(module);
 
-                var RPCInfo_sender = module.GetTypeDefinition<RPCInfo>()
+                FieldReference RPCInfo_sender = module.GetTypeDefinition<RPCInfo>()
                     .GetField("sender").Import(module);
 
-                var RPCInfo_asServer = module.GetTypeDefinition<RPCInfo>()
+                FieldReference RPCInfo_asServer = module.GetTypeDefinition<RPCInfo>()
                     .GetField("asServer").Import(module);
 
                 code.Append(Instruction.Create(OpCodes.Ldarga, newMethod.Parameters[^1]));
@@ -1692,15 +1722,15 @@ namespace PurrNet.Codegen
                 code.Append(Instruction.Create(OpCodes.Stfld, RPCInfo_asServer));
             }
 
-            var callMethod = GetOriginalMethod(method);
+            MethodReference callMethod = GetOriginalMethod(method);
 
             if (method.HasGenericParameters)
             {
-                var genericInstanceMethod = new GenericInstanceMethod(callMethod);
+                GenericInstanceMethod genericInstanceMethod = new GenericInstanceMethod(callMethod);
 
-                for (var i = 0; i < method.GenericParameters.Count; i++)
+                for (int i = 0; i < method.GenericParameters.Count; i++)
                 {
-                    var gp = method.GenericParameters[i];
+                    GenericParameter gp = method.GenericParameters[i];
                     genericInstanceMethod.GenericArguments.Add(gp);
                 }
 
@@ -1711,20 +1741,20 @@ namespace PurrNet.Codegen
                 code.Append(Instruction.Create(OpCodes.Ldarg_0)); // this
 
             // Packer.Copy<T>
-            var copyMethod = packerType.GetMethod("Copy", true).Import(module);
+            MethodReference copyMethod = packerType.GetMethod("Copy", true).Import(module);
 
             for (int i = 0; i < paramCount; ++i)
             {
-                var param = newMethod.Parameters[i];
+                ParameterDefinition param = newMethod.Parameters[i];
                 code.Append(Instruction.Create(OpCodes.Ldarg, param)); // param
 
                 bool shouldIgnore = ShouldIgnore(methodRpc.Signature.type, param, i, paramCount, out _);
-                var resolved = param.ParameterType.Resolve();
+                TypeDefinition resolved = param.ParameterType.Resolve();
 
                 if (shouldIgnore || resolved != null && resolved.IsUnmanaged())
                     continue;
 
-                var copyMethodGeneric = new GenericInstanceMethod(copyMethod);
+                GenericInstanceMethod copyMethodGeneric = new GenericInstanceMethod(copyMethod);
                 copyMethodGeneric.GenericArguments.Add(param.ParameterType);
 
                 code.Append(Instruction.Create(OpCodes.Call, copyMethodGeneric)); // Packer.Copy<T>(param)
@@ -1759,10 +1789,10 @@ namespace PurrNet.Codegen
             if (methodRpc.Signature.isStatic)
             {
                 // NetworkManager.main.isServerOnly
-                var managerType = module.GetTypeDefinition<NetworkManager>();
-                var mainManagerProp = managerType.GetProperty("main");
-                var mainManagerGetter = mainManagerProp.GetMethod.Import(module);
-                var getIsServerOnly = module.GetTypeDefinition<NetworkManager>().GetProperty("isServer")
+                TypeDefinition managerType = module.GetTypeDefinition<NetworkManager>();
+                PropertyDefinition mainManagerProp = managerType.GetProperty("main");
+                MethodReference mainManagerGetter = mainManagerProp.GetMethod.Import(module);
+                MethodReference getIsServerOnly = module.GetTypeDefinition<NetworkManager>().GetProperty("isServer")
                     .GetMethod.Import(module);
 
                 code.Append(Instruction.Create(OpCodes.Call, mainManagerGetter));
@@ -1770,13 +1800,13 @@ namespace PurrNet.Codegen
             }
             else if (isNetworkClass)
             {
-                var getIsServerOnly = moduleType.GetProperty("isServer");
+                PropertyDefinition getIsServerOnly = moduleType.GetProperty("isServer");
                 code.Append(Instruction.Create(OpCodes.Ldarg_0));
                 code.Append(Instruction.Create(OpCodes.Call, getIsServerOnly.GetMethod.Import(module)));
             }
             else
             {
-                var getIsServerOnly = identityType.GetProperty("isServer");
+                PropertyDefinition getIsServerOnly = identityType.GetProperty("isServer");
                 code.Append(Instruction.Create(OpCodes.Ldarg_0));
                 code.Append(Instruction.Create(OpCodes.Call, getIsServerOnly.GetMethod.Import(module)));
             }
@@ -1784,19 +1814,19 @@ namespace PurrNet.Codegen
 
         private static MethodReference CreateSerializer(ModuleDefinition module, TypeReference type, bool isWrite)
         {
-            var packerType = module.GetTypeDefinition(typeof(Packer<>)).Import(module);
-            var method = packerType.GetMethod(isWrite ? "Write" : "Read").Import(module);
+            TypeReference packerType = module.GetTypeDefinition(typeof(Packer<>)).Import(module);
+            MethodReference method = packerType.GetMethod(isWrite ? "Write" : "Read").Import(module);
 
-            var genericPackerType = new GenericInstanceType(packerType);
+            GenericInstanceType genericPackerType = new GenericInstanceType(packerType);
             genericPackerType.GenericArguments.Add(type);
 
-            var genericWriteMethod =
+            MethodReference genericWriteMethod =
                 new MethodReference(method.Name, method.ReturnType, genericPackerType.Import(module))
                 {
                     HasThis = method.HasThis
                 };
 
-            foreach (var param in method.Parameters)
+            foreach (ParameterDefinition param in method.Parameters)
                 genericWriteMethod.Parameters.Add(new ParameterDefinition(param.Name, param.Attributes,
                     param.ParameterType));
 
@@ -1837,7 +1867,7 @@ namespace PurrNet.Codegen
                 return TargetArgType.None;
             }
 
-            var resolved = type.Resolve();
+            TypeDefinition resolved = type.Resolve();
 
             if (GenerateSerializersProcessor.HasInterfaceRaw(resolved, typeof(IList<>)))
                 return TargetArgType.List;
@@ -1851,9 +1881,9 @@ namespace PurrNet.Codegen
         private static void PushRPCSignature(ModuleDefinition module, ILProcessor code, RPCMethod rpc,
             bool isReceiving, bool isNetworkModule)
         {
-            var rpcDetails = module.GetTypeDefinition<RPCSignature>();
-            var makeRpcDetails = rpcDetails.GetMethod("Make").Import(module);
-            var makeRpcDetailsTarget = rpcDetails.GetMethod("MakeWithTarget").Import(module);
+            TypeDefinition rpcDetails = module.GetTypeDefinition<RPCSignature>();
+            MethodReference makeRpcDetails = rpcDetails.GetMethod("Make").Import(module);
+            MethodReference makeRpcDetailsTarget = rpcDetails.GetMethod("MakeWithTarget").Import(module);
 
             // RPCDetails Make(RPCType type, Channel channel, bool runLocally, bool bufferLast, bool requireServer, bool excludeOwner)
             code.Append(Instruction.Create(OpCodes.Ldc_I4, (int)rpc.Signature.type));
@@ -1873,9 +1903,9 @@ namespace PurrNet.Codegen
             {
                 if (!isReceiving)
                 {
-                    var argType = rpc.originalMethod.Parameters[0].ParameterType;
+                    TypeReference argType = rpc.originalMethod.Parameters[0].ParameterType;
 
-                    var type = GetArgType(argType);
+                    TargetArgType type = GetArgType(argType);
 
                     switch (type)
                     {
@@ -1937,17 +1967,17 @@ namespace PurrNet.Codegen
 
         private static void LoadDefaultPlayerId(ModuleDefinition module, ILProcessor code)
         {
-            var playdIdType = module.GetTypeDefinition<PlayerID>();
+            TypeDefinition playdIdType = module.GetTypeDefinition<PlayerID>();
             playdIdType.Import(module);
-            var getNullableMethod = playdIdType.GetMethod("GetDefaultNullable").Import(module);
+            MethodReference getNullableMethod = playdIdType.GetMethod("GetDefaultNullable").Import(module);
             code.Append(Instruction.Create(OpCodes.Call, getNullableMethod));
         }
 
         private static void ConvertPlayerIDToNullable(ModuleDefinition module, ILProcessor code)
         {
-            var playdIdType = module.GetTypeDefinition<PlayerID>();
+            TypeDefinition playdIdType = module.GetTypeDefinition<PlayerID>();
             playdIdType.Import(module);
-            var getNullableMethod = playdIdType.GetMethod("GetNullable").Import(module);
+            MethodReference getNullableMethod = playdIdType.GetMethod("GetNullable").Import(module);
             code.Append(Instruction.Create(OpCodes.Call, getNullableMethod));
         }
 
@@ -1955,7 +1985,7 @@ namespace PurrNet.Codegen
         {
             if (!isStatic)
             {
-                var localPlayerProp =
+                MethodReference localPlayerProp =
                     isNetworkModule
                         ? module.GetTypeDefinition<NetworkModule>().GetProperty("localPlayerForced").GetMethod
                             .Import(module)
@@ -1967,8 +1997,8 @@ namespace PurrNet.Codegen
             }
             else
             {
-                var rpcModule = module.GetTypeDefinition<RPCModule>();
-                var getLocalPlayer = rpcModule.GetMethod("GetLocalPlayer").Import(module);
+                TypeDefinition rpcModule = module.GetTypeDefinition<RPCModule>();
+                MethodReference getLocalPlayer = rpcModule.GetMethod("GetLocalPlayer").Import(module);
                 code.Append(Instruction.Create(OpCodes.Call, getLocalPlayer));
             }
         }
@@ -1976,30 +2006,30 @@ namespace PurrNet.Codegen
         private static bool UpdateMethodReferences(ModuleDefinition module, MethodReference old, MethodReference @new,
             [UsedImplicitly] List<DiagnosticMessage> messages)
         {
-            using var types =  DisposableList<TypeDefinition>.Create(32);
-            var startLocalExecutionFlag = module.GetTypeDefinition(typeof(PurrCompilerFlags))
+            using DisposableList<TypeDefinition> types =  DisposableList<TypeDefinition>.Create(32);
+            string startLocalExecutionFlag = module.GetTypeDefinition(typeof(PurrCompilerFlags))
                 .GetMethod("EnterLocalExecution").FullName;
-            var exitLocalExecutionFlag = module.GetTypeDefinition(typeof(PurrCompilerFlags))
+            string exitLocalExecutionFlag = module.GetTypeDefinition(typeof(PurrCompilerFlags))
                 .GetMethod("ExitLocalExecution").FullName;
 
             types.AddRange(module.Types);
-            foreach (var type in module.Types)
+            foreach (TypeDefinition type in module.Types)
             {
                 types.AddRange(type.NestedTypes);
             }
 
             bool isSkipping = false;
 
-            for (var tidx = 0; tidx < types.Count; tidx++)
+            for (int tidx = 0; tidx < types.Count; tidx++)
             {
-                var type = types[tidx];
-                foreach (var method in type.Methods)
+                TypeDefinition type = types[tidx];
+                foreach (MethodDefinition method in type.Methods)
                 {
                     if (method == @new || method.GetElementMethod() == @new) continue;
 
                     if (method.Body == null) continue;
 
-                    var processor = method.Body.GetILProcessor();
+                    ILProcessor processor = method.Body.GetILProcessor();
 
                     bool hasLocalModeAttribute = method.CustomAttributes.Any(a =>
                         a.AttributeType.FullName == typeof(LocalModeAttribute).FullName);
@@ -2007,9 +2037,9 @@ namespace PurrNet.Codegen
                     if (hasLocalModeAttribute)
                         continue;
 
-                    for (var i = 0; i < method.Body.Instructions.Count; i++)
+                    for (int i = 0; i < method.Body.Instructions.Count; i++)
                     {
-                        var instruction = method.Body.Instructions[i];
+                        Instruction instruction = method.Body.Instructions[i];
 
                         if (instruction.OpCode == OpCodes.Call && instruction.Operand is MethodReference
                             {
@@ -2052,7 +2082,7 @@ namespace PurrNet.Codegen
                         if (instruction.Operand is MethodReference methodReference &&
                             methodReference.GetElementMethod() == old)
                         {
-                            var newRef = GenerateNewRef(@new, methodReference);
+                            MethodReference newRef = GenerateNewRef(@new, methodReference);
                             processor.Replace(instruction, Instruction.Create(instruction.OpCode, newRef));
                         }
                     }
@@ -2073,10 +2103,10 @@ namespace PurrNet.Codegen
         private static MethodReference GenerateNewRef(MethodReference @new, MethodReference methodReference)
         {
             // Check if methodReference is a MethodDefinition for a deeper copy if possible
-            var methodDefinition = methodReference.Resolve();
+            MethodDefinition methodDefinition = methodReference.Resolve();
 
             // Start with a MethodReference pointing to the new definition, copying name and return type
-            var newRef = new MethodReference(@new.Name, @new.ReturnType, @new.DeclaringType)
+            MethodReference newRef = new MethodReference(@new.Name, @new.ReturnType, @new.DeclaringType)
             {
                 HasThis = methodReference.HasThis,
                 ExplicitThis = methodReference.ExplicitThis,
@@ -2084,13 +2114,13 @@ namespace PurrNet.Codegen
             };
 
             // Clone parameters with exact types and attributes
-            foreach (var parameter in methodDefinition.Parameters)
+            foreach (ParameterDefinition parameter in methodDefinition.Parameters)
             {
-                var newParameterType = parameter.ParameterType;
+                TypeReference newParameterType = parameter.ParameterType;
                 if (newParameterType is GenericParameter && newRef.GenericParameters.Count > 0)
                 {
                     // Ensure matching GenericParameter
-                    var matchedParameter =
+                    GenericParameter matchedParameter =
                         newRef.GenericParameters.FirstOrDefault(p => p.Name == newParameterType.Name);
                     if (matchedParameter != null) newParameterType = matchedParameter;
                 }
@@ -2099,19 +2129,19 @@ namespace PurrNet.Codegen
             }
 
             // Handle generic parameters exactly as defined in the MethodDefinition
-            foreach (var genericParameter in methodDefinition.GenericParameters)
+            foreach (GenericParameter genericParameter in methodDefinition.GenericParameters)
             {
-                var newGenericParameter = new GenericParameter(genericParameter.Name, newRef);
+                GenericParameter newGenericParameter = new GenericParameter(genericParameter.Name, newRef);
                 newRef.GenericParameters.Add(newGenericParameter);
             }
 
             // If the methodReference is a GenericInstanceMethod, convert newRef to match
             if (methodReference is GenericInstanceMethod ogGenericMethodRef)
             {
-                var newGenericInstanceMethod = new GenericInstanceMethod(newRef);
+                GenericInstanceMethod newGenericInstanceMethod = new GenericInstanceMethod(newRef);
 
                 // Match each generic argument exactly
-                foreach (var argument in ogGenericMethodRef.GenericArguments)
+                foreach (TypeReference argument in ogGenericMethodRef.GenericArguments)
                     newGenericInstanceMethod.GenericArguments.Add(argument);
 
                 // Assign the generic instance method back to newRef
@@ -2123,10 +2153,10 @@ namespace PurrNet.Codegen
 
         static DisposableList<TypeDefinition> GetAllTypes(ModuleDefinition module)
         {
-            var types = DisposableList<TypeDefinition>.Create(32);
+            DisposableList<TypeDefinition> types = DisposableList<TypeDefinition>.Create(32);
 
             types.AddRange(module.Types);
-            foreach (var type in module.Types)
+            foreach (TypeDefinition type in module.Types)
                 types.AddRange(type.NestedTypes);
 
             return types;
@@ -2140,11 +2170,11 @@ namespace PurrNet.Codegen
                 if (!WillProcess(compiledAssembly))
                     return null!;
 
-                var settings = PurrNetSettings.GetOrCreateSettings();
+                PurrNetSettings settings = PurrNetSettings.GetOrCreateSettings();
                 bool isEditor = false;
                 bool isServerBuild = false;
 
-                foreach (var define in compiledAssembly.Defines)
+                foreach (string define in compiledAssembly.Defines)
                 {
                     switch (define)
                     {
@@ -2160,19 +2190,19 @@ namespace PurrNet.Codegen
                 if (isEditor)
                     isServerBuild = true;
 
-                var visitedTypes = new HashSet<string>(128);
-                var typesToGenerateSerializer = new HashSet<TypeReference>(128, TypeReferenceEqualityComparer.Default);
-                var typesToPrepareHasher = new HashSet<TypeReference>(128, TypeReferenceEqualityComparer.Default);
-                var typesToIgnoreForDelta = new HashSet<TypeReference>(128, TypeReferenceEqualityComparer.Default);
-                var typesToIgnoreForSerialization = new HashSet<TypeReference>(128, TypeReferenceEqualityComparer.Default);
+                HashSet<string> visitedTypes = new HashSet<string>(128);
+                HashSet<TypeReference> typesToGenerateSerializer = new HashSet<TypeReference>(128, TypeReferenceEqualityComparer.Default);
+                HashSet<TypeReference> typesToPrepareHasher = new HashSet<TypeReference>(128, TypeReferenceEqualityComparer.Default);
+                HashSet<TypeReference> typesToIgnoreForDelta = new HashSet<TypeReference>(128, TypeReferenceEqualityComparer.Default);
+                HashSet<TypeReference> typesToIgnoreForSerialization = new HashSet<TypeReference>(128, TypeReferenceEqualityComparer.Default);
 
-                var messages = new List<DiagnosticMessage>(32);
+                List<DiagnosticMessage> messages = new List<DiagnosticMessage>(32);
 
-                using var peStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PeData);
-                using var pdbStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PdbData);
-                var resolver = new AssemblyResolver(compiledAssembly);
+                using MemoryStream peStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PeData);
+                using MemoryStream pdbStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PdbData);
+                AssemblyResolver resolver = new AssemblyResolver(compiledAssembly);
 
-                var assemblyDefinition = AssemblyDefinition.ReadAssembly(peStream, new ReaderParameters
+                AssemblyDefinition assemblyDefinition = AssemblyDefinition.ReadAssembly(peStream, new ReaderParameters
                 {
                     ReadSymbols = true,
                     SymbolStream = pdbStream,
@@ -2182,26 +2212,26 @@ namespace PurrNet.Codegen
 
                 resolver.SetSelf(assemblyDefinition);
 
-                for (var m = 0; m < assemblyDefinition.Modules.Count; m++)
+                for (int m = 0; m < assemblyDefinition.Modules.Count; m++)
                 {
-                    var module = assemblyDefinition.Modules[m];
-                    var hasPurrNetAsReference = HasPurrNetAsReference(compiledAssembly.Name, module);
+                    ModuleDefinition module = assemblyDefinition.Modules[m];
+                    bool hasPurrNetAsReference = HasPurrNetAsReference(compiledAssembly.Name, module);
 
-                    using var types = GetAllTypes(module);
-                    var usedTypes = new HashSet<TypeReference>(TypeReferenceEqualityComparer.Default);
+                    using DisposableList<TypeDefinition> types = GetAllTypes(module);
+                    HashSet<TypeReference> usedTypes = new HashSet<TypeReference>(TypeReferenceEqualityComparer.Default);
 
-                    for (var t = 0; t < types.Count; t++)
+                    for (int t = 0; t < types.Count; t++)
                     {
                         if (types[t].HasInterfaces)
                         {
                             try
                             {
-                                var mathInterfaceName = typeof(IMath<>).FullName;
+                                string mathInterfaceName = typeof(IMath<>).FullName;
 
-                                for (var i = 0; i < types[t].Interfaces.Count; i++)
+                                for (int i = 0; i < types[t].Interfaces.Count; i++)
                                 {
-                                    var reference = types[t].Interfaces[i].InterfaceType;
-                                    var resolved = reference.Resolve();
+                                    TypeReference reference = types[t].Interfaces[i].InterfaceType;
+                                    TypeDefinition resolved = reference.Resolve();
 
                                     if (resolved == null)
                                         continue;
@@ -2229,7 +2259,7 @@ namespace PurrNet.Codegen
                         RegisterSerializersProcessor.HandleType(module, types[t], isEditor, typesToIgnoreForDelta,
                             typesToIgnoreForSerialization);
 
-                        var type = types[t];
+                        TypeDefinition type = types[t];
 
 #if UNITY_PLAYMODE
                         if (type.Name == "TopView" && type.Namespace == "Unity.Multiplayer.Playmode.Workflow.Editor")
@@ -2239,11 +2269,11 @@ namespace PurrNet.Codegen
                             continue;
 
                         // check if it has RegisterNetworkTypeAttribute
-                        foreach (var customAttribute in type.CustomAttributes)
+                        foreach (CustomAttribute customAttribute in type.CustomAttributes)
                         {
                             if (customAttribute.AttributeType.FullName == typeof(RegisterNetworkTypeAttribute).FullName)
                             {
-                                foreach (var field in customAttribute.ConstructorArguments)
+                                foreach (CustomAttributeArgument field in customAttribute.ConstructorArguments)
                                 {
                                     if (field.Value is TypeReference tref)
                                         typesToGenerateSerializer.Add(tref);
@@ -2261,33 +2291,33 @@ namespace PurrNet.Codegen
 
                         if (!type.IsClass)
                         {
-                            for (var i = 0; i < type.Methods.Count; i++)
+                            for (int i = 0; i < type.Methods.Count; i++)
                                 ProcessServerOnlyMethods(type.Methods[i], settings, isServerBuild, isEditor);
                             continue;
                         }
 
-                        var idFullName = typeof(NetworkIdentity).FullName;
-                        var classFullName = typeof(NetworkModule).FullName;
+                        string idFullName = typeof(NetworkIdentity).FullName;
+                        string classFullName = typeof(NetworkModule).FullName;
 
                         bool inheritsFromNetworkIdentity =
                             type.FullName == idFullName || InheritsFrom(type, idFullName);
                         bool inheritsFromNetworkClass =
                             type.FullName == classFullName || InheritsFrom(type, classFullName);
 
-                        using var _rpcMethods = DisposableList<RPCMethod>.Create(32);
+                        using DisposableList<RPCMethod> _rpcMethods = DisposableList<RPCMethod>.Create(32);
 
                         int idOffset = GetIDOffset(type, messages);
 
                         if (inheritsFromNetworkIdentity || inheritsFromNetworkClass)
                         {
-                            var _networkFields = new List<FieldDefinition>();
+                            List<FieldDefinition> _networkFields = new List<FieldDefinition>();
 
                             // add the Preserve attribute
                             if (type.CustomAttributes.All(x =>
                                     x.AttributeType.FullName != typeof(PreserveAttribute).FullName))
                             {
-                                var preserveAttribute = module.GetTypeDefinition<PreserveAttribute>();
-                                var constructor = preserveAttribute.Resolve().Methods
+                                TypeDefinition preserveAttribute = module.GetTypeDefinition<PreserveAttribute>();
+                                MethodReference constructor = preserveAttribute.Resolve().Methods
                                     .First(md => md.IsConstructor && !md.HasParameters).Import(module);
                                 type.CustomAttributes.Add(new CustomAttribute(constructor));
                             }
@@ -2297,11 +2327,11 @@ namespace PurrNet.Codegen
                             CreateSyncVarInitMethod(inheritsFromNetworkIdentity, module, type, _networkFields);
                         }
 
-                        for (var i = 0; i < type.Methods.Count; i++)
+                        for (int i = 0; i < type.Methods.Count; i++)
                         {
                             try
                             {
-                                var method = type.Methods[i];
+                                MethodDefinition method = type.Methods[i];
                                 ProcessServerOnlyMethods(type.Methods[i], settings, isServerBuild, isEditor);
 
                                 if (inheritsFromNetworkIdentity && MakeSureOverrideIsCalled.ShouldProcess(method))
@@ -2310,7 +2340,7 @@ namespace PurrNet.Codegen
                                 if (method.DeclaringType.FullName != type.FullName)
                                     continue;
 
-                                var rpcType = GetMethodRPCType(method, messages);
+                                RPCSignature? rpcType = GetMethodRPCType(method, messages);
 
                                 if (rpcType == null)
                                     continue;
@@ -2348,13 +2378,13 @@ namespace PurrNet.Codegen
                         if (inheritsFromNetworkIdentity || inheritsFromNetworkClass)
                             typesToGenerateSerializer.Add(type);
 
-                        for (var index = 0; index < _rpcMethods.Count; index++)
+                        for (int index = 0; index < _rpcMethods.Count; index++)
                         {
-                            var method = _rpcMethods[index].originalMethod;
+                            MethodDefinition method = _rpcMethods[index].originalMethod;
 
                             try
                             {
-                                var newMethod = HandleRPC(module, idOffset + index, _rpcMethods[index],
+                                MethodDefinition newMethod = HandleRPC(module, idOffset + index, _rpcMethods[index],
                                     inheritsFromNetworkClass, isServerBuild, settings, usedTypes, messages);
 
                                 if (newMethod != null && method.DeclaringType != null)
@@ -2401,7 +2431,7 @@ namespace PurrNet.Codegen
                         {
                             FindUsedTypes(module, types, usedTypes);
 
-                            foreach (var usedType in usedTypes)
+                            foreach (TypeReference usedType in usedTypes)
                             {
                                 if (IsTypeInOwnModule(usedType, module))
                                     typesToGenerateSerializer.Add(usedType);
@@ -2423,18 +2453,18 @@ namespace PurrNet.Codegen
                 // remove any typesToGenerateSerializer from typesToPrepareHasher
                 typesToPrepareHasher.ExceptWith(typesToGenerateSerializer);
 
-                foreach (var typeRef in typesToGenerateSerializer)
+                foreach (TypeReference typeRef in typesToGenerateSerializer)
                     GenerateSerializersProcessor.HandleType(false, assemblyDefinition, typeRef, visitedTypes, isEditor,
                         typesToIgnoreForSerialization, typesToIgnoreForDelta);
 
-                foreach (var typeRef in typesToPrepareHasher)
+                foreach (TypeReference typeRef in typesToPrepareHasher)
                     GenerateSerializersProcessor.HandleType(true, assemblyDefinition, typeRef, visitedTypes, isEditor,
                         typesToIgnoreForSerialization, typesToIgnoreForDelta);
 
-                var pe = new MemoryStream();
-                var pdb = new MemoryStream();
+                MemoryStream pe = new MemoryStream();
+                MemoryStream pdb = new MemoryStream();
 
-                var writerParameters = new WriterParameters
+                WriterParameters writerParameters = new WriterParameters
                 {
                     WriteSymbols = true,
                     SymbolStream = pdb,
@@ -2459,7 +2489,7 @@ namespace PurrNet.Codegen
             }
             catch (Exception e)
             {
-                var messages = new List<DiagnosticMessage>
+                List<DiagnosticMessage> messages = new List<DiagnosticMessage>
                 {
                     new()
                     {
@@ -2479,7 +2509,7 @@ namespace PurrNet.Codegen
 
             bool hasPurrNetAsReference = false;
 
-            foreach (var reference in module.AssemblyReferences)
+            foreach (AssemblyNameReference reference in module.AssemblyReferences)
             {
                 if (reference.Name == "PurrNet.Runtime")
                 {
@@ -2495,7 +2525,7 @@ namespace PurrNet.Codegen
         {
             CustomAttribute serverOnlyAttribute = null;
 
-            foreach (var attribute in method.CustomAttributes)
+            foreach (CustomAttribute attribute in method.CustomAttributes)
             {
                 if (attribute.AttributeType.FullName == typeof(ServerOnlyAttribute).FullName)
                 {
@@ -2510,7 +2540,7 @@ namespace PurrNet.Codegen
             if (serverBuild && !isEditor)
                 return;
 
-            var stripCodeMode = (StripCodeModeOverride)serverOnlyAttribute.ConstructorArguments[0].Value;
+            StripCodeModeOverride stripCodeMode = (StripCodeModeOverride)serverOnlyAttribute.ConstructorArguments[0].Value;
             PutServerCheck(method, settings, stripCodeMode);
             if (!serverBuild)
                 StripBody(method, method.Name, settings, stripCodeMode);
@@ -2518,21 +2548,21 @@ namespace PurrNet.Codegen
 
         static void PutServerCheck(MethodDefinition method, PurrNetSettings settings, StripCodeModeOverride modeOverride)
         {
-            var il = method.Body.GetILProcessor();
-            var instructions = method.Body.Instructions;
-            var module = method.Module;
+            ILProcessor il = method.Body.GetILProcessor();
+            Mono.Collections.Generic.Collection<Instruction> instructions = method.Body.Instructions;
+            ModuleDefinition module = method.Module;
 
-            var getIsServer = GetIsServerMethod(module);
-            var firstInstruction = instructions[0];
-            var ogInstructionCount = instructions.Count;
+            Instruction getIsServer = GetIsServerMethod(module);
+            Instruction firstInstruction = instructions[0];
+            int ogInstructionCount = instructions.Count;
 
             // at the end, return default value
-            var mode = GetMode(settings, modeOverride);
+            StripCodeMode mode = GetMode(settings, modeOverride);
             if (mode == StripCodeMode.DoNotStrip)
                 mode = StripCodeMode.ReplaceWithEmptyMethod;
             AppendStripAction(method, method.Name, mode, il, "server only");
 
-            var returnDefaultInst = instructions[ogInstructionCount];
+            Instruction returnDefaultInst = instructions[ogInstructionCount];
 
             il.InsertBefore(firstInstruction, getIsServer);
             il.InsertAfter(getIsServer, Instruction.Create(OpCodes.Brfalse, returnDefaultInst));
@@ -2540,10 +2570,10 @@ namespace PurrNet.Codegen
 
         private static Instruction GetIsServerMethod(ModuleDefinition module)
         {
-            var isServerOnlyProp = module.GetTypeDefinition<NetworkManager>()
+            MethodReference isServerOnlyProp = module.GetTypeDefinition<NetworkManager>()
                 .GetProperty("isServerStatic")
                 .GetMethod.Import(module);
-            var getIsServer = Instruction.Create(OpCodes.Call, isServerOnlyProp);
+            Instruction getIsServer = Instruction.Create(OpCodes.Call, isServerOnlyProp);
             return getIsServer;
         }
 
@@ -2552,9 +2582,9 @@ namespace PurrNet.Codegen
         {
             if (type.BaseType is GenericInstanceType genericType)
             {
-                foreach (var genericParameter in genericType.GenericArguments)
+                foreach (TypeReference genericParameter in genericType.GenericArguments)
                 {
-                    if (IsConcreteType(genericParameter, out var concreteType))
+                    if (IsConcreteType(genericParameter, out TypeReference concreteType))
                     {
                         if (concreteType != null)
                             typesToGenerateSerializer.Add(concreteType);
@@ -2566,17 +2596,17 @@ namespace PurrNet.Codegen
         private static void FindNetworkModules(TypeDefinition type, string classFullName,
             List<FieldDefinition> _networkFields)
         {
-            for (var i = 0; i < type.Fields.Count; i++)
+            for (int i = 0; i < type.Fields.Count; i++)
             {
-                var field = type.Fields[i];
+                FieldDefinition field = type.Fields[i];
 
                 if (field.IsStatic) continue;
 
-                var fieldType = field.FieldType.Resolve();
+                TypeDefinition fieldType = field.FieldType.Resolve();
 
                 if (fieldType == null) continue;
 
-                var isNetworkClass = fieldType.FullName == classFullName || InheritsFrom(fieldType, classFullName);
+                bool isNetworkClass = fieldType.FullName == classFullName || InheritsFrom(fieldType, classFullName);
 
                 if (!isNetworkClass) continue;
 
@@ -2588,11 +2618,11 @@ namespace PurrNet.Codegen
         {
             HashSet<TypeReference> visited = new HashSet<TypeReference>(TypeReferenceEqualityComparer.Default);
             HashSet<TypeReference> visited2 = new HashSet<TypeReference>(TypeReferenceEqualityComparer.Default);
-            var copy = typesToHandle.ToArray();
+            TypeReference[] copy = typesToHandle.ToArray();
 
-            for (var i = 0; i < copy.Length; i++)
+            for (int i = 0; i < copy.Length; i++)
             {
-                var type = copy[i];
+                TypeReference type = copy[i];
                 if (type is GenericInstanceType genericInstance)
                     AddNestedGenerics(assembly, genericInstance, typesToHandle, visited2);
                 AddNestedFields(assembly, type, typesToHandle, visited);
@@ -2604,7 +2634,7 @@ namespace PurrNet.Codegen
         {
             for (int i = 0; i < type.GenericArguments.Count; i++)
             {
-                var argument = type.GenericArguments[i];
+                TypeReference argument = type.GenericArguments[i];
 
                 if (!visited.Add(argument))
                     continue;
@@ -2623,9 +2653,9 @@ namespace PurrNet.Codegen
         private static void AddNestedFields(AssemblyDefinition assembly, TypeReference reference,
             HashSet<TypeReference> typesToHandle, HashSet<TypeReference> visited)
         {
-            var fields = GetConcreteFields(reference);
+            List<TypeReference> fields = GetConcreteFields(reference);
 
-            foreach (var field in fields)
+            foreach (TypeReference field in fields)
             {
                 if (!visited.Add(field))
                     continue;
@@ -2644,8 +2674,8 @@ namespace PurrNet.Codegen
                     // Check the generic arguments
                     for (int i = 0; i < genericInstance.GenericArguments.Count; i++)
                     {
-                        var argument = genericInstance.GenericArguments[i];
-                        var resolvedArg = argument.Resolve();
+                        TypeReference argument = genericInstance.GenericArguments[i];
+                        TypeDefinition resolvedArg = argument.Resolve();
 
                         if (resolvedArg != null)
                         {
@@ -2696,7 +2726,7 @@ namespace PurrNet.Codegen
                 }
 
                 // Process each field
-                foreach (var field in typeDef.Fields)
+                foreach (FieldDefinition field in typeDef.Fields)
                 {
                     TypeReference fieldType = field.FieldType;
 
@@ -2711,7 +2741,7 @@ namespace PurrNet.Codegen
 
                 if (typeDef != null)
                 {
-                    foreach (var field in typeDef.Fields)
+                    foreach (FieldDefinition field in typeDef.Fields)
                         concreteFields.Add(field.FieldType);
                 }
             }
@@ -2726,7 +2756,7 @@ namespace PurrNet.Codegen
             {
                 // Substitute each generic argument recursively
                 GenericInstanceType concreteGenericInstance = new GenericInstanceType(genericInstance.ElementType);
-                foreach (var argument in genericInstance.GenericArguments)
+                foreach (TypeReference argument in genericInstance.GenericArguments)
                 {
                     concreteGenericInstance.GenericArguments.Add(SubstituteGenericParameters(argument, genericMapping));
                 }
@@ -2736,7 +2766,7 @@ namespace PurrNet.Codegen
             else if (type is GenericParameter genericParameter)
             {
                 // Replace the generic parameter with its mapped concrete type
-                if (genericMapping.TryGetValue(genericParameter.Name, out var concreteType))
+                if (genericMapping.TryGetValue(genericParameter.Name, out TypeReference concreteType))
                 {
                     return concreteType;
                 }
@@ -2754,16 +2784,16 @@ namespace PurrNet.Codegen
         private static void CreateSyncVarInitMethod(bool isNetworkIdentity, ModuleDefinition module,
             TypeDefinition type, List<FieldDefinition> networkFields)
         {
-            var methodName = GenerateSerializersProcessor.MakeFullNameValidCSharp(type.Name);
-            var newMethod = new MethodDefinition($"__{methodName}_CodeGen_Initialize",
+            string methodName = GenerateSerializersProcessor.MakeFullNameValidCSharp(type.Name);
+            MethodDefinition newMethod = new MethodDefinition($"__{methodName}_CodeGen_Initialize",
                 MethodAttributes.Public | MethodAttributes.HideBySig, module.TypeSystem.Void);
 
-            var preserveAttribute = module.GetTypeDefinition<PreserveAttribute>();
-            var constructor = preserveAttribute.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+            TypeDefinition preserveAttribute = module.GetTypeDefinition<PreserveAttribute>();
+            MethodReference constructor = preserveAttribute.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
                 .Import(module);
             newMethod.CustomAttributes.Add(new CustomAttribute(constructor));
 
-            var parentStr = new ParameterDefinition("parent", ParameterAttributes.None, module.TypeSystem.String);
+            ParameterDefinition parentStr = new ParameterDefinition("parent", ParameterAttributes.None, module.TypeSystem.String);
 
             if (!isNetworkIdentity)
                 newMethod.Parameters.Add(parentStr);
@@ -2772,20 +2802,20 @@ namespace PurrNet.Codegen
 
             newMethod.Body.InitLocals = true;
 
-            var code = newMethod.Body.GetILProcessor();
+            ILProcessor code = newMethod.Body.GetILProcessor();
 
-            var parentType =
+            TypeReference parentType =
                 (isNetworkIdentity
                     ? module.GetTypeDefinition<NetworkIdentity>()
                     : module.GetTypeDefinition<NetworkModule>()).Import(module);
 
-            var registerModule = parentType.GetMethod("RegisterModuleInternal").Import(module);
-            var concatMethod = module.TypeSystem.String.Resolve()
+            MethodReference registerModule = parentType.GetMethod("RegisterModuleInternal").Import(module);
+            MethodReference concatMethod = module.TypeSystem.String.Resolve()
                 .GetMethod("Concat", module.TypeSystem.String, module.TypeSystem.String).Import(module);
 
             for (int i = 0; i < networkFields.Count; i++)
             {
-                var field = networkFields[i];
+                FieldDefinition field = networkFields[i];
 
                 // add the Preserve attribute to field
                 if (field.CustomAttributes.All(x => x.AttributeType.FullName != typeof(PreserveAttribute).FullName))
@@ -2799,7 +2829,7 @@ namespace PurrNet.Codegen
                 code.Append(Instruction.Create(OpCodes.Ldc_I4, isNetworkIdentity ? 1 : 0));
                 code.Append(Instruction.Create(OpCodes.Call, registerModule));
 
-                var endInstruction = Instruction.Create(OpCodes.Nop);
+                Instruction endInstruction = Instruction.Create(OpCodes.Nop);
 
                 // if not null
                 code.Append(Instruction.Create(OpCodes.Ldarg_0));
@@ -2807,9 +2837,9 @@ namespace PurrNet.Codegen
                 code.Append(Instruction.Create(OpCodes.Brfalse, endInstruction));
 
                 // call init method
-                var initMethodName =
+                string initMethodName =
                     $"__{GenerateSerializersProcessor.MakeFullNameValidCSharp(field.FieldType.Name)}_CodeGen_Initialize";
-                var codeGenInitRef = new MethodReference(initMethodName, module.TypeSystem.Void, field.FieldType)
+                MethodReference codeGenInitRef = new MethodReference(initMethodName, module.TypeSystem.Void, field.FieldType)
                 {
                     HasThis = true
                 };
@@ -2835,13 +2865,13 @@ namespace PurrNet.Codegen
                 if (!isNetworkIdentity)
                 {
                     // if null
-                    var endInstruction2 = Instruction.Create(OpCodes.Nop);
+                    Instruction endInstruction2 = Instruction.Create(OpCodes.Nop);
                     code.Append(Instruction.Create(OpCodes.Ldarg_0));
                     code.Append(Instruction.Create(OpCodes.Ldfld, field));
                     code.Append(Instruction.Create(OpCodes.Brtrue, endInstruction2));
 
                     // call error
-                    var errorMethod = module.GetTypeDefinition<NetworkModule>().GetMethod("Error").Import(module);
+                    MethodReference errorMethod = module.GetTypeDefinition<NetworkModule>().GetMethod("Error").Import(module);
 
                     code.Append(Instruction.Create(OpCodes.Ldarg_0));
                     code.Append(Instruction.Create(OpCodes.Ldarg_1));
@@ -2859,18 +2889,18 @@ namespace PurrNet.Codegen
         private static void FindUsedTypes(ModuleDefinition module, DisposableList<TypeDefinition> allTypes,
             HashSet<TypeReference> types)
         {
-            var playersBroadcasterSubscribe = module.GetTypeDefinition<PlayersBroadcaster>();
-            var playersManagerSubscribe = module.GetTypeDefinition<PlayersManager>();
-            var broadcastModuleSubscribe = module.GetTypeDefinition<BroadcastModule>();
-            var networkModule = module.GetTypeDefinition<NetworkModule>();
+            TypeDefinition playersBroadcasterSubscribe = module.GetTypeDefinition<PlayersBroadcaster>();
+            TypeDefinition playersManagerSubscribe = module.GetTypeDefinition<PlayersManager>();
+            TypeDefinition broadcastModuleSubscribe = module.GetTypeDefinition<BroadcastModule>();
+            TypeDefinition networkModule = module.GetTypeDefinition<NetworkModule>();
 
             for (int i = 0; i < allTypes.Count; i++)
             {
-                var type = allTypes[i];
+                TypeDefinition type = allTypes[i];
 
-                foreach (var field in type.Fields)
+                foreach (FieldDefinition field in type.Fields)
                 {
-                    var resolved = field.FieldType.Resolve();
+                    TypeDefinition resolved = field.FieldType.Resolve();
                     if (resolved == null) continue;
 
                     AddAnySyncVarOrGenericNetworkModulesType(types, field.FieldType, resolved, networkModule);
@@ -2878,15 +2908,15 @@ namespace PurrNet.Codegen
 
                 for (int j = 0; j < type.Methods.Count; j++)
                 {
-                    var method = type.Methods[j];
+                    MethodDefinition method = type.Methods[j];
 
                     if (method.Body == null) continue;
 
-                    var body = method.Body;
+                    MethodBody body = method.Body;
 
                     for (int k = 0; k < body.Instructions.Count; k++)
                     {
-                        var instruction = body.Instructions[k];
+                        Instruction instruction = body.Instructions[k];
 
                         if (instruction.OpCode != OpCodes.Call && instruction.OpCode != OpCodes.Callvirt)
                             continue;
@@ -2895,13 +2925,13 @@ namespace PurrNet.Codegen
                         {
                             if (IsRpcMethod(normalMethod) && normalMethod.DeclaringType is GenericInstanceType genericInstanceType)
                             {
-                                if (IsConcreteType(genericInstanceType, out var gconcreteType))
+                                if (IsConcreteType(genericInstanceType, out TypeReference gconcreteType))
                                     types.Add(gconcreteType);
 
-                                for (var index = 0; index < genericInstanceType.GenericArguments.Count; index++)
+                                for (int index = 0; index < genericInstanceType.GenericArguments.Count; index++)
                                 {
-                                    var ga = genericInstanceType.GenericArguments[index];
-                                    if (IsConcreteType(ga, out var concreteType))
+                                    TypeReference ga = genericInstanceType.GenericArguments[index];
+                                    if (IsConcreteType(ga, out TypeReference concreteType))
                                         types.Add(concreteType);
                                 }
                             }
@@ -2912,14 +2942,14 @@ namespace PurrNet.Codegen
                             if (IsRpcMethod(currentMethod))
                                 FindUsedGenericRpcTypes(types, currentMethod);
 
-                            var isSubscribeMethod =
+                            bool isSubscribeMethod =
                                 currentMethod.GenericArguments.Count == 1 && currentMethod.Name.Equals("Subscribe") &&
                                 (currentMethod.DeclaringType.FullName == playersManagerSubscribe.FullName ||
                                  currentMethod.DeclaringType.FullName == broadcastModuleSubscribe.FullName ||
                                  currentMethod.DeclaringType.FullName == playersBroadcasterSubscribe.FullName);
 
                             if (isSubscribeMethod &&
-                                IsConcreteType(currentMethod.GenericArguments[0], out var concreteType))
+                                IsConcreteType(currentMethod.GenericArguments[0], out TypeReference concreteType))
                                 types.Add(concreteType);
                         }
                     }
@@ -2942,12 +2972,12 @@ namespace PurrNet.Codegen
                 if (genericInstance.GenericArguments == null)
                     return;
 
-                foreach (var genericArg in genericInstance.GenericArguments)
+                foreach (TypeReference genericArg in genericInstance.GenericArguments)
                 {
                     if (genericArg == null)
                         continue;
 
-                    if (IsConcreteType(genericArg, out var concreteType))
+                    if (IsConcreteType(genericArg, out TypeReference concreteType))
                     {
                         types.Add(concreteType);
                     }
@@ -2961,7 +2991,7 @@ namespace PurrNet.Codegen
 
         private static void FindUsedGenericRpcTypes(HashSet<TypeReference> types, GenericInstanceMethod currentMethod)
         {
-            foreach (var argument in currentMethod.GenericArguments)
+            foreach (TypeReference argument in currentMethod.GenericArguments)
             {
                 if (!argument.IsGenericParameter)
                     types.Add(argument);
@@ -2972,16 +3002,17 @@ namespace PurrNet.Codegen
         {
             try
             {
-                var resolved = currentMethod.Resolve();
+                MethodDefinition resolved = currentMethod.Resolve();
 
                 if (resolved == null)
                     return false;
 
-                foreach (var attribute in resolved.CustomAttributes)
+                foreach (CustomAttribute attribute in resolved.CustomAttributes)
                 {
                     if (attribute.AttributeType.FullName == typeof(ServerRpcAttribute).FullName ||
                         attribute.AttributeType.FullName == typeof(TargetRpcAttribute).FullName ||
-                        attribute.AttributeType.FullName == typeof(ObserversRpcAttribute).FullName)
+                        attribute.AttributeType.FullName == typeof(ObserversRpcAttribute).FullName ||
+                        attribute.AttributeType.FullName == typeof(OwnerRpcAttribute).FullName)
                     {
                         return true;
                     }
