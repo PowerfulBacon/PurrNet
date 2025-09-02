@@ -146,7 +146,7 @@ namespace PurrNet
 
                 _list[idx] = value;
 
-                if (value is NetworkModule attachedModule)
+                if (isModuleInitialized && value is NetworkModule attachedModule)
                 {
                     Attach(attachedModule);
                 }
@@ -267,13 +267,6 @@ namespace PurrNet
             if (!isServer || isHost)
             {
                 _list.Clear();
-                foreach (T item in items)
-                {
-                    if (item is NetworkModule attachedModule)
-                    {
-                        Attach(attachedModule);
-                    }
-                }
 
                 _list.AddRange(items);
 
@@ -297,7 +290,7 @@ namespace PurrNet
             if (!ValidateAuthority())
                 return;
 
-            if (item is NetworkModule attachedModule)
+            if (isModuleInitialized && item is NetworkModule attachedModule)
             {
                 Attach(attachedModule);
             }

@@ -2,16 +2,13 @@
 
 using PurrNet;
 using System;
-using System.Collections.Generic;
 
 public class SyncVarTester : NetworkIdentity
 {
 
     public SyncVar<int> intTester = new SyncVar<int>(0);
 
-    public SyncList<Foo> foo = new SyncList<Foo>(new List<Foo>() {
-        new Foo(-1)
-    });
+    public SyncDictionary<int, Foo> foo = new SyncDictionary<int, Foo>();
 
     protected override void OnSpawned(bool asServer)
     {
@@ -26,8 +23,10 @@ public class SyncVarTester : NetworkIdentity
     {
         if (player.isServer || player == localPlayer || isReconnect || !asServer)
             return;
+        if (foo.ContainsKey((int)player.id.value))
+            return;
         // Late instantiation
-        foo.Add(new Foo((int)player.id.value));
+        foo.Add((int)player.id.value, new Foo((int)player.id.value));
     }
 }
 
