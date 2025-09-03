@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using JamesFrowen.SimpleWeb;
@@ -171,6 +174,7 @@ namespace PurrNet.Transports
                 PingInterval = 900,
                 AutoRecycle = true,
                 EnableStatistics = false,
+                IPv6Enabled = false,
                 DisconnectTimeout = Mathf.RoundToInt(_timeoutInSeconds * 1000)
             };
 
@@ -180,6 +184,7 @@ namespace PurrNet.Transports
                 PingInterval = 900,
                 AutoRecycle = true,
                 EnableStatistics = false,
+                IPv6Enabled = false,
                 DisconnectTimeout = Mathf.RoundToInt(_timeoutInSeconds * 1000)
             };
 
@@ -432,7 +437,10 @@ namespace PurrNet.Transports
                     {
                         _isUsingUDP = true;
                         _udpServer.StartInManualMode(0);
-                        _udpServer.Connect(_host, _hostJoinInfo.udpPort, "PurrNet");
+                        var addresses = await Dns.GetHostAddressesAsync(_host);
+                        var ipv4 = addresses.FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork)
+                                   ?? IPAddress.Any;
+                        _udpServer.Connect(ipv4.ToString(), _hostJoinInfo.udpPort, "PurrNet");
                     }
                     else
                     {
@@ -555,7 +563,12 @@ namespace PurrNet.Transports
                 {
                     _isUsingUDP = true;
                     _udpClient.StartInManualMode(0);
-                    _udpClient.Connect(_clientJoinInfo.host, _clientJoinInfo.udpPort, "PurrNet");
+
+                    var addresses = await Dns.GetHostAddressesAsync(_clientJoinInfo.host);
+                    var ipv4 = addresses.FirstOrDefault(ipArd => ipArd.AddressFamily == AddressFamily.InterNetwork)
+                               ?? IPAddress.Any;
+
+                    _udpClient.Connect(ipv4.ToString(), _clientJoinInfo.udpPort, "PurrNet");
                 }
                 else
                 {
