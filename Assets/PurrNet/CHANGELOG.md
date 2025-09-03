@@ -1,3 +1,10 @@
+# [1.16.0-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.5...v1.16.0-beta.6) (2025-09-03)
+
+
+### Bug Fixes
+
+* resolve hostname for the udp transport ([cc86356](https://github.com/PurrNet/PurrNet/commit/cc86356a681413e26bab57564c49d45dd6a8808d))
+
 # [1.16.0-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.4...v1.16.0-beta.5) (2025-09-02)
 
 
