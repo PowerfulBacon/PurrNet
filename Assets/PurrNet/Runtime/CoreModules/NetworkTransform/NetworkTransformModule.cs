@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using PurrNet.Logging;
 using PurrNet.Packing;
 using PurrNet.Pooling;
 using PurrNet.Transports;
@@ -130,6 +131,9 @@ namespace PurrNet.Modules
                 using var tmp = BitPackerPool.Get();
 
                 anyWritten = nt.DeltaWrite(tmp) || anyWritten;
+
+                if (!anyWritten)
+                    continue;
 
                 PackedInt length = tmp.positionInBits;
                 tmp.ResetPositionAndMode(true);
