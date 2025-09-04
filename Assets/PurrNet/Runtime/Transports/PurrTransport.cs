@@ -635,7 +635,7 @@ namespace PurrNet.Transports
             if (_isUsingUDP)
             {
                 var deliveryMethod = UDPTransport.ToDeliveryMethod(method);
-                _udpServer.SendToAll(new ArraySegment<byte>(data.data, data.offset, data.length), deliveryMethod);
+                _udpServer.SendToAll(data.data, data.offset, data.length, deliveryMethod);
             }
             else _server.Send(new ArraySegment<byte>(data.data, data.offset, data.length));
             RaiseDataSent(target, data, true);
@@ -652,7 +652,8 @@ namespace PurrNet.Transports
                 _packer.ResetPositionAndMode(false);
                 Packer<byte>.Write(_packer, (byte)deliveryMethod);
                 _packer.WriteBytes(data);
-                _udpClient.SendToAll(_packer.ToByteData().segment, deliveryMethod);
+                var byteData = _packer.ToByteData();
+                _udpClient.SendToAll(byteData.data, byteData.offset, byteData.length, deliveryMethod);
             }
             else
             {
