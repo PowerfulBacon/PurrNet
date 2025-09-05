@@ -1,3 +1,10 @@
+# [1.16.0-beta.9](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.8...v1.16.0-beta.9) (2025-09-05)
+
+
+### Bug Fixes
+
+* network transform module bug ([b6a0a5d](https://github.com/PurrNet/PurrNet/commit/b6a0a5d747f0369d9316123b8619e376f97572e8))
+
 # [1.16.0-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.7...v1.16.0-beta.8) (2025-09-04)
 
 
