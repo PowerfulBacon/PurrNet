@@ -59,10 +59,10 @@ namespace PurrNet.Modules
 
             packet.ResetPositionAndMode(true);
 
-            PackedInt ntCount = default;
+            int ntCount = default;
             NetworkID lastNid = default;
 
-            Packer<PackedInt>.Read(packet, ref ntCount);
+            Packer<int>.Read(packet, ref ntCount);
 
             for (var i = 0; i < ntCount; i++)
             {
@@ -124,16 +124,22 @@ namespace PurrNet.Modules
 
             NetworkID lastNid = default;
             int count = controlled.Count;
-            Packer<PackedInt>.Write(packer, count);
+            var countPos = packer.positionInBits;
+
+            int writtenCount = 0;
+            Packer<int>.Write(packer, 0);
+
             for (var i = 0; i < count; i++)
             {
                 var nt = controlled[i];
                 using var tmp = BitPackerPool.Get();
 
-                anyWritten = nt.DeltaWrite(tmp) || anyWritten;
+                bool thisWrite = nt.DeltaWrite(tmp);
 
-                if (!anyWritten)
+                if (!thisWrite)
                     continue;
+
+                anyWritten = true;
 
                 PackedInt length = tmp.positionInBits;
                 tmp.ResetPositionAndMode(true);
@@ -143,7 +149,13 @@ namespace PurrNet.Modules
                 packer.WriteBits(tmp, length);
 
                 lastNid = nt.id.Value;
+                writtenCount += 1;
             }
+
+            var lastPos = packer.positionInBits;
+            packer.SetBitPosition(countPos);
+            Packer<int>.Write(packer, writtenCount);
+            packer.SetBitPosition(lastPos);
 
             ListPool<NetworkTransform>.Destroy(controlled);
 
