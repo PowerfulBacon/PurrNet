@@ -370,7 +370,7 @@ MonoBehaviour:
   _startClientFlags: 7
   _cookieScope: 1
   _dontDestroyOnLoad: 0
-  _transport: {fileID: 999871917}
+  _transport: {fileID: 999871915}
   _networkPrefabs: {fileID: 11400000, guid: 44629c9ddffa3d347944a4335df094e0, type: 2}
   _networkAssets: {fileID: 0}
   _networkRules: {fileID: 11400000, guid: d8799083b96579a42b8b2d03e4ceae98, type: 2}
@@ -405,10 +405,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 332e746c3c3253246aacad4d5559f1fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.PurrTransport
-  _masterServer: https://resolute-games.purrservers.com/
+  _masterServer: https://purrtransport.purrservers.com/
   _roomName: 9e09843bf969410eb8418542d5bde2a7fesf
-  _region: ewr-1
-  _host: resolute-games-ewr-1.purrservers.com
+  _region: france
+  _host: purrtransport-france.purrservers.com
   _timeoutInSeconds: 5
   _pollEventsInUpdate: 0
 --- !u!114 &999871916
