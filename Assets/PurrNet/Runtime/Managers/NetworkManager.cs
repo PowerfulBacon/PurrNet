@@ -255,6 +255,9 @@ namespace PurrNet
         [UsedByIL]
         public static bool isServerStatic => main && main.isServer;
 
+        [UsedByIL]
+        public static bool isClientStatic => main && main.isClient;
+
         /// <summary>
         /// Whether the network manager is a client.
         /// </summary>
