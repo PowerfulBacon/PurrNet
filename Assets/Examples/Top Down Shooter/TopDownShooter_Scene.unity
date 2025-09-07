@@ -1682,15 +1682,9 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  playerNames:
-    _ownerAuth: 0
-    _serializedItems: []
-    _length: 0
-    _sendIntervalInSeconds: 0
-  playerNames2:
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-    _list: []
+  spawnedObject: {fileID: 0}
+  networkPrefab: {fileID: 0}
+  singleplayerPrefab: {fileID: 0}
 --- !u!114 &634351201
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3178,7 +3172,7 @@ MonoBehaviour:
   _startClientFlags: 7
   _cookieScope: 1
   _dontDestroyOnLoad: 0
-  _transport: {fileID: 1216416912}
+  _transport: {fileID: 1216416902}
   _networkPrefabs: {fileID: 11400000, guid: 37af97d33ef8d9747b965053a79d21f4, type: 2}
   _networkAssets: {fileID: 11400000, guid: a519d78740d8b804e80cc0fd8da9b0cd, type: 2}
   _networkRules: {fileID: 11400000, guid: d8799083b96579a42b8b2d03e4ceae98, type: 2}

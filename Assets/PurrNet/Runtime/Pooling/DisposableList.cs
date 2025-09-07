@@ -190,12 +190,17 @@ namespace PurrNet.Pooling
             {
                 if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
                 NotifyUsage();
+                if (index >= list.Count || index < 0)
+                    throw new IndexOutOfRangeException($"Index {index} is out of range for list of size {list.Count}.");
                 return list[index];
             }
             set
             {
                 if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
                 NotifyUsage();
+
+                if (index >= list.Count || index < 0)
+                    throw new IndexOutOfRangeException($"Index {index} is out of range for list of size {list.Count}.");
                 list[index] = value;
             }
         }
