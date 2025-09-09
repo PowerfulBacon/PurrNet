@@ -1,3 +1,10 @@
+# [1.16.0-beta.11](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.10...v1.16.0-beta.11) (2025-09-07)
+
+
+### Bug Fixes
+
+* some delta packing for spawn packet batches ([20388f8](https://github.com/PurrNet/PurrNet/commit/20388f8ef8d4c38c66d3a8fd09e008a4647a1499))
+
 # [1.16.0-beta.10](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.9...v1.16.0-beta.10) (2025-09-05)
 
 
