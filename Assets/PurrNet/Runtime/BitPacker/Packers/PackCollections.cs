@@ -297,6 +297,7 @@ namespace PurrNet.Packing
 
             if (!areEqual)
                 ReadArray(packer, ref value);
+            else value = Packer.Copy(oldvalue);
         }
 
         private static void ReadDeltaList<T>(BitPacker packer, List<T> oldvalue, ref List<T> value)
@@ -306,6 +307,7 @@ namespace PurrNet.Packing
 
             if (!areEqual)
                 ReadList(packer, ref value);
+            else value = Packer.Copy(oldvalue);
         }
 
         [UsedByIL]
