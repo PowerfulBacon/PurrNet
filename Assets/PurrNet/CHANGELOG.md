@@ -1,3 +1,10 @@
+# [1.16.0-beta.12](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.11...v1.16.0-beta.12) (2025-09-09)
+
+
+### Bug Fixes
+
+* naive delta packer for array and list ([4904eaa](https://github.com/PurrNet/PurrNet/commit/4904eaa69a2b5540b4d81b1a3fdf6000806a77f3))
+
 # [1.16.0-beta.11](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.10...v1.16.0-beta.11) (2025-09-07)
 
 
