@@ -1,3 +1,10 @@
+# [1.16.0-beta.13](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.12...v1.16.0-beta.13) (2025-09-10)
+
+
+### Bug Fixes
+
+* include local pos for child pieces ([4c67434](https://github.com/PurrNet/PurrNet/commit/4c67434b0fa854943a8ca84073931457b83f639c))
+
 # [1.16.0-beta.12](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.11...v1.16.0-beta.12) (2025-09-09)
 
 
