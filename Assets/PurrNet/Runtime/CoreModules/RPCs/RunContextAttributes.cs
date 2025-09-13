@@ -5,21 +5,21 @@ using UnityEngine.Scripting;
 namespace PurrNet
 {
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    public class ServerAttribute : PreserveAttribute
+    public sealed class ServerAttribute : PreserveAttribute
     {
         [UsedImplicitly]
         public ServerAttribute() { }
     }
 
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    public class OwnerAttribute : PreserveAttribute
+    public sealed class OwnerAttribute : PreserveAttribute
     {
         [UsedImplicitly]
         public OwnerAttribute() { }
     }
 
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    public class ClientAttribute : PreserveAttribute
+    public sealed class ClientAttribute : PreserveAttribute
     {
         [UsedImplicitly]
         public ClientAttribute() { }
