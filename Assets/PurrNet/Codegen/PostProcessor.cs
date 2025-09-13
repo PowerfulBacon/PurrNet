@@ -2627,30 +2627,16 @@ namespace PurrNet.Codegen
 
             if (hasServer)
             {
-                if (inheritsFromNetworkIdentity)
-                {
-                    CheckNetworkIdentityProperty("isServer", module, il, firstInstruction);
-                }
-                else
-                {
-                    var callIsServer = GetIsServerMethod(module);
-                    il.InsertBefore(firstInstruction, callIsServer);
-                    il.InsertAfter(callIsServer, il.Create(OpCodes.Brtrue, firstInstruction));
-                }
+                var callIsServer = GetIsServerMethod(module);
+                il.InsertBefore(firstInstruction, callIsServer);
+                il.InsertAfter(callIsServer, il.Create(OpCodes.Brtrue, firstInstruction));
             }
 
             if (hasClient)
             {
-                if (inheritsFromNetworkIdentity)
-                {
-                    CheckNetworkIdentityProperty("isClient", module, il, firstInstruction);
-                }
-                else
-                {
-                    var callIsClient = GetIsClientMethod(module);
-                    il.InsertBefore(firstInstruction, callIsClient);
-                    il.InsertAfter(callIsClient, il.Create(OpCodes.Brtrue, firstInstruction));
-                }
+                var callIsClient = GetIsClientMethod(module);
+                il.InsertBefore(firstInstruction, callIsClient);
+                il.InsertAfter(callIsClient, il.Create(OpCodes.Brtrue, firstInstruction));
             }
 
             if (hasOwner)
