@@ -1,3 +1,10 @@
+# [1.16.0-beta.14](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.13...v1.16.0-beta.14) (2025-09-10)
+
+
+### Bug Fixes
+
+* steam errors when trying to use connection after closed ([ee4ed6a](https://github.com/PurrNet/PurrNet/commit/ee4ed6ab6c540d85aaf51ed0f5af29d43508e3ce))
+
 # [1.16.0-beta.13](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.12...v1.16.0-beta.13) (2025-09-10)
 
 
