@@ -1344,10 +1344,9 @@ namespace PurrNet.Modules
                 if (TryGetIdentity(prototype.parentID.Value, out var parent))
                 {
                     result.transform.SetParent(parent.transform, false);
-                    SetLocalPosAndRot(resultTrs, prototype.position, prototype.rotation, prototype.scale);
-
                     if (result.TryGetComponent<NetworkIdentity>(out var nid))
                         ApplyParentChange(nid, parent, prototype.path, false);
+                    SetLocalPosAndRot(resultTrs, prototype.position, prototype.rotation, prototype.scale);
                 }
                 else
                 {
