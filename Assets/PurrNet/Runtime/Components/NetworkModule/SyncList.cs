@@ -138,7 +138,7 @@ namespace PurrNet
 
                 if (oldValue is NetworkModule detachedModule)
                 {
-                    Detatch(detachedModule);
+                    LocalDetach(detachedModule);
                 }
 
                 if (oldValue != null && oldValue.Equals(value) || oldValue == null && value == null)
@@ -148,7 +148,7 @@ namespace PurrNet
 
                 if (isModuleInitialized && value is NetworkModule attachedModule)
                 {
-                    Attach(attachedModule);
+                    Attach<T>(attachedModule);
                 }
 
                 SyncListChange<T> change = SyncListChange<T>.Set(value, oldValue, idx);
@@ -184,7 +184,18 @@ namespace PurrNet
             {
                 if (item is NetworkModule attachedModule)
                 {
-                    Attach(attachedModule);
+                    Attach<T>(attachedModule);
+                }
+            }
+        }
+
+        public override void OnDespawned()
+        {
+            foreach (T item in _list)
+            {
+                if (item is NetworkModule attachedModule)
+                {
+                    LocalDetach(attachedModule);
                 }
             }
         }
@@ -292,7 +303,7 @@ namespace PurrNet
 
             if (isModuleInitialized && item is NetworkModule attachedModule)
             {
-                Attach(attachedModule);
+                Attach<T>(attachedModule);
             }
 
             _list.Add(item);
@@ -313,7 +324,7 @@ namespace PurrNet
             {
                 if (item is NetworkModule detachedModule)
                 {
-                    Detatch(detachedModule);
+                    LocalDetach(detachedModule);
                 }
             }
 
@@ -355,7 +366,7 @@ namespace PurrNet
             T oldValue = _list[idx];
             if (oldValue is NetworkModule detachedModule)
             {
-                Detatch(detachedModule);
+                LocalDetach(detachedModule);
             }
             _list.RemoveAt(idx);
             SyncListChange<T> change = SyncListChange<T>.Removed(item, oldValue, idx);
@@ -378,7 +389,7 @@ namespace PurrNet
             T item = _list[index];
             if (item is NetworkModule detachedModule)
             {
-                Detatch(detachedModule);
+                LocalDetach(detachedModule);
             }
             _list.RemoveAt(index);
             SyncListChange<T> change = SyncListChange<T>.Removed(item, oldValue, index);
@@ -554,6 +565,9 @@ namespace PurrNet
                 {
                     T oldValue = _list[idx];
                     _list.RemoveAt(idx);
+                    // Client detach handling
+                    if (oldValue is NetworkModule detachedModule)
+                        LocalDetach(detachedModule);
                     SyncListChange<T> change = SyncListChange<T>.Removed(item, oldValue, idx);
                     InvokeChange(change);
                 }
@@ -570,42 +584,12 @@ namespace PurrNet
                 {
                     T oldValue = _list[idx];
                     _list.RemoveAt(idx);
+                    // Client detach handling
+                    if (oldValue is NetworkModule detachedModule)
+                        LocalDetach(detachedModule);
                     SyncListChange<T> change = SyncListChange<T>.Removed(item, oldValue, idx);
                     InvokeChange(change);
                 }
-            }
-        }
-
-        [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
-        private void SendRemoveAtToServer(int index)
-        {
-            if (!_ownerAuth) return;
-            SendRemoveAtToOthers(index);
-        }
-
-        [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true)]
-        private void SendRemoveAtToOthers(int index)
-        {
-            if ((!isServer || isHost) && index < _list.Count)
-            {
-                T oldValue = _list[index];
-                T item = _list[index];
-                _list.RemoveAt(index);
-                SyncListChange<T> change = SyncListChange<T>.Removed(item, oldValue, index);
-                InvokeChange(change);
-            }
-        }
-
-        [ObserversRpc(Channel.ReliableOrdered)]
-        private void SendRemoveAtToAll(int index)
-        {
-            if (!isHost && index < _list.Count)
-            {
-                T oldValue = _list[index];
-                T item = _list[index];
-                _list.RemoveAt(index);
-                SyncListChange<T> change = SyncListChange<T>.Removed(item, oldValue, index);
-                InvokeChange(change);
             }
         }
 
@@ -621,6 +605,10 @@ namespace PurrNet
         {
             if (!isServer || isHost)
             {
+                // Client detach handling
+                foreach (T item in _list)
+                    if (item is NetworkModule detachedModule)
+                        LocalDetach(detachedModule);
                 _list.Clear();
                 SyncListChange<T> change = SyncListChange<T>.Cleared();
                 InvokeChange(change);
@@ -632,6 +620,10 @@ namespace PurrNet
         {
             if (!isHost)
             {
+                // Client detach handling
+                foreach (T item in _list)
+                    if (item is NetworkModule detachedModule)
+                        LocalDetach(detachedModule);
                 _list.Clear();
                 SyncListChange<T> change = SyncListChange<T>.Cleared();
                 InvokeChange(change);
@@ -652,6 +644,9 @@ namespace PurrNet
             {
                 T oldValue = _list[index];
                 _list[index] = item;
+                // Client detach handling
+                if (item is NetworkModule detachedModule && !detachedModule.Equals(oldValue))
+                    LocalDetach(detachedModule);
                 SyncListChange<T> change = SyncListChange<T>.Set(item, oldValue, index);
                 InvokeChange(change);
             }
@@ -664,6 +659,9 @@ namespace PurrNet
             {
                 T oldValue = _list[index];
                 _list[index] = item;
+                // Client detach handling
+                if (item is NetworkModule detachedModule && !detachedModule.Equals(oldValue))
+                    LocalDetach(detachedModule);
                 SyncListChange<T> change = SyncListChange<T>.Set(item, oldValue, index);
                 InvokeChange(change);
             }
@@ -695,41 +693,6 @@ namespace PurrNet
                 _list.Insert(index, item);
                 SyncListChange<T> change = SyncListChange<T>.Inserted(item, index);
                 InvokeChange(change);
-            }
-        }
-
-        [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
-        private void SendSetDirtyToServer(int index, T value)
-        {
-            if (!_ownerAuth) return;
-            SendSetDirtyToOthers(index, value);
-        }
-
-        [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true)]
-        private void SendSetDirtyToOthers(int index, T value)
-        {
-            if (!isServer || isHost)
-            {
-                if (index >= 0 && index < _list.Count)
-                {
-                    _list[index] = value;
-                    SyncListChange<T> change = SyncListChange<T>.SetDirty(value, index);
-                    InvokeChange(change);
-                }
-            }
-        }
-
-        [ObserversRpc(Channel.ReliableOrdered)]
-        private void SendSetDirtyToAll(int index, T value)
-        {
-            if (!isHost)
-            {
-                if (index >= 0 && index < _list.Count)
-                {
-                    _list[index] = value;
-                    SyncListChange<T> change = SyncListChange<T>.SetDirty(value, index);
-                    InvokeChange(change);
-                }
             }
         }
 

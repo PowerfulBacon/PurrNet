@@ -140,6 +140,17 @@ namespace PurrNet
             else SendInitialStateToServer(_dict);
         }
 
+        public override void OnDespawned()
+        {
+            foreach (TValue item in _dict.Values)
+            {
+                if (item is NetworkModule detachedModule)
+                {
+                    LocalDetach(detachedModule);
+                }
+            }
+        }
+
         public override void OnObserverAdded(PlayerID player)
         {
             HandleInitialStateTarget(player, _dict);
@@ -222,7 +233,7 @@ namespace PurrNet
                 return;
 
             if (isModuleInitialized && value is NetworkModule attachedModule)
-                Attach(attachedModule);
+                Attach<TValue>(attachedModule);
 
             _dict.Add(key, value);
             SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, key, value);
@@ -247,7 +258,7 @@ namespace PurrNet
                 return false;
 
             if (value is NetworkModule removedModule)
-                Detatch(removedModule);
+                LocalDetach(removedModule);
 
             SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Removed, key, value);
             QueueChange(change);
@@ -262,7 +273,7 @@ namespace PurrNet
                 return false;
 
             if (item.Value is NetworkModule removedModule)
-                Detatch(removedModule);
+                LocalDetach(removedModule);
 
             return Remove(item.Key);
         }
@@ -278,7 +289,7 @@ namespace PurrNet
             foreach (TValue item in _dict.Values)
             {
                 if (item is NetworkModule removedModule)
-                    Detatch(removedModule);
+                    LocalDetach(removedModule);
             }
 
             _dict.Clear();
@@ -393,35 +404,6 @@ namespace PurrNet
         #region RPCs
 
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
-        private void SendAddToServer(TKey key, TValue value)
-        {
-            if (!_ownerAuth) return;
-            SendAddToOthers(key, value);
-        }
-
-        [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true)]
-        private void SendAddToOthers(TKey key, TValue value)
-        {
-            if (!isServer || isHost)
-            {
-                _dict[key] = value;
-                SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, key, value);
-                InvokeChange(change);
-            }
-        }
-
-        [ObserversRpc(Channel.ReliableOrdered)]
-        private void SendAddToAll(TKey key, TValue value)
-        {
-            if (!isHost)
-            {
-                _dict[key] = value;
-                SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Added, key, value);
-                InvokeChange(change);
-            }
-        }
-
-        [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
         private void SendRemoveToServer(TKey key)
         {
             if (!_ownerAuth) return;
@@ -435,6 +417,8 @@ namespace PurrNet
             {
                 if (_dict.TryGetValue(key, out TValue value))
                 {
+                    if (value is NetworkModule detachedModule)
+                        LocalDetach(detachedModule);
                     _dict.Remove(key);
                     SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Removed, key, value);
                     InvokeChange(change);
@@ -449,6 +433,8 @@ namespace PurrNet
             {
                 if (_dict.Remove(key, out TValue value))
                 {
+                    if (value is NetworkModule detachedModule)
+                        LocalDetach(detachedModule);
                     SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Removed, key, value);
                     InvokeChange(change);
                 }
@@ -467,6 +453,12 @@ namespace PurrNet
         {
             if (!isServer || isHost)
             {
+                foreach (TValue value in _dict.Values)
+                {
+                    // Client detach handling
+                    if (value is NetworkModule detachedModule)
+                        LocalDetach(detachedModule);
+                }
                 _dict.Clear();
                 SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
                 InvokeChange(change);
@@ -478,6 +470,12 @@ namespace PurrNet
         {
             if (!isHost)
             {
+                foreach (TValue value in _dict.Values)
+                {
+                    // Client detach handling
+                    if (value is NetworkModule detachedModule)
+                        LocalDetach(detachedModule);
+                }
                 _dict.Clear();
                 SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Cleared);
                 InvokeChange(change);
@@ -496,7 +494,17 @@ namespace PurrNet
         {
             if (!isServer || isHost)
             {
-                _dict[key] = value;
+                if (_dict.TryGetValue(key, out TValue previousValue))
+                {
+                    _dict[key] = value;
+                    // Client detach handling
+                    if (previousValue is NetworkModule detachedModule && !previousValue.Equals(value))
+                        LocalDetach(detachedModule);
+                }
+                else
+                {
+                    _dict[key] = value;
+                }
                 SyncDictionaryOperation operation = isNewKey ? SyncDictionaryOperation.Added : SyncDictionaryOperation.Set;
                 SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(operation, key, value);
                 InvokeChange(change);
@@ -508,7 +516,17 @@ namespace PurrNet
         {
             if (!isHost)
             {
-                _dict[key] = value;
+                if (_dict.TryGetValue(key, out TValue previousValue))
+                {
+                    _dict[key] = value;
+                    // Client detach handling
+                    if (previousValue is NetworkModule detachedModule && !previousValue.Equals(value))
+                        LocalDetach(detachedModule);
+                }
+                else
+                {
+                    _dict[key] = value;
+                }
                 SyncDictionaryOperation operation = isNewKey ? SyncDictionaryOperation.Added : SyncDictionaryOperation.Set;
                 SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(operation, key, value);
                 InvokeChange(change);
@@ -556,7 +574,11 @@ namespace PurrNet
             {
                 if (_dict.ContainsKey(key))
                 {
+                    TValue previousValue = _dict[key];
                     _dict[key] = value;
+                    // Client detach handling
+                    if (previousValue is NetworkModule detachedModule && !previousValue.Equals(value))
+                        LocalDetach(detachedModule);
                     SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Set, key, value);
                     InvokeChange(change);
                 }
@@ -570,7 +592,11 @@ namespace PurrNet
             {
                 if (_dict.ContainsKey(key))
                 {
+                    TValue previousValue = _dict[key];
                     _dict[key] = value;
+                    // Client detach handling
+                    if (previousValue is NetworkModule detachedModule && !previousValue.Equals(value))
+                        LocalDetach(detachedModule);
                     SyncDictionaryChange<TKey, TValue> change = new SyncDictionaryChange<TKey, TValue>(SyncDictionaryOperation.Set, key, value);
                     InvokeChange(change);
                 }

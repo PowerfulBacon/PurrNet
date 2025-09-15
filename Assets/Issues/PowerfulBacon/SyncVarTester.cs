@@ -2,6 +2,7 @@
 
 using PurrNet;
 using System;
+using UnityEngine;
 
 public class SyncVarTester : NetworkIdentity
 {
@@ -28,6 +29,22 @@ public class SyncVarTester : NetworkIdentity
         // Late instantiation
         foo.Add(player, new Foo((int)player.id.value));
     }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            foo.Clear();
+        }
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            foreach (PlayerID player in networkManager.players)
+            {
+                foo.Add(player, new Foo((int)player.id.value));
+            }
+        }
+    }
+
 }
 
 [Serializable]

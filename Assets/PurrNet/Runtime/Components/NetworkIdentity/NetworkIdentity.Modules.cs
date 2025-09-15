@@ -1,7 +1,9 @@
 using PurrNet.Logging;
 using PurrNet.Modules;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace PurrNet
 {
@@ -22,12 +24,87 @@ namespace PurrNet
 
         private byte _moduleId;
 
+        private Queue<byte> _overrideModuleIDs;
+
+        /// <summary>
+        /// If we run out of module IDs, then we can recycle any that have been detached.
+        /// </summary>
+        private Queue<byte> _recycledModuleIDs = null;
+
+        [UsedByIL]
+        public void UnregisterModuleInternal(NetworkModule module)
+        {
+            UnityEngine.Debug.Log($"Module {module.name} was detached");
+            // Remove the module
+            _externalModulesView.Remove(module);
+            _modules[module.index] = null;
+            // Despawn the module
+            try
+            {
+                module.OnDespawned();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+            try
+            {
+                module.OnDespawned(isServer);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+            // Create a new stack for recycled IDs
+            if (_recycledModuleIDs == null)
+                _recycledModuleIDs = new Queue<byte>();
+            _recycledModuleIDs.Enqueue(module.index);
+        }
+
         [UsedByIL]
         public void RegisterModuleInternal(string moduleName, string type, NetworkModule module, bool isNetworkIdentity)
         {
-            if (_moduleId >= byte.MaxValue)
+            Debug.Log($"Init method called for {moduleName}");
+
+            bool incrementModuleID = true;
+
+            byte newModuleID = _moduleId;
+
+            if (_overrideModuleIDs != null)
             {
-                if (_modules.Any(x => x?.isDynamic ?? false))
+                while (_overrideModuleIDs.Count > 0)
+                {
+                    // Check if we already assigned this module ID directly
+                    byte current = _overrideModuleIDs.Dequeue();
+                    // Already assigned via force assign, skip
+                    if (_externalModulesView.Any(x => x.index == current))
+                    {
+                        continue;
+                    }
+                    // Force set this module ID
+                    newModuleID = current;
+                    incrementModuleID = false;
+                    break;
+                }
+                Debug.Log($"Force assigning new module to {newModuleID}");
+                // Used up all the overrides
+                if (_overrideModuleIDs.Count == 0)
+                    _overrideModuleIDs = null;
+                while (newModuleID > _modules.Count)
+                {
+                    _modules.Add(null);
+                }
+            }
+
+            if (newModuleID >= byte.MaxValue)
+            {
+                // Re-use any old IDs which are no longer in use if we run past the byte limit.
+                if (_recycledModuleIDs != null && _recycledModuleIDs.Count > 0)
+                {
+                    newModuleID = _recycledModuleIDs.Dequeue();
+                    incrementModuleID = false;
+                }
+                else if (_modules.Any(x => x?.isDynamic ?? false))
                 {
                     throw new System.Exception($"Too many modules in {GetType().Name}! Max is {byte.MaxValue}.\n" +
                                                $"This can be caused by dynamically created modules which are not " +
@@ -42,7 +119,8 @@ namespace PurrNet
 
             if (module == null)
             {
-                ++_moduleId;
+                if (incrementModuleID)
+                    ++_moduleId;
                 _modules.Add(null);
 
                 if (isNetworkIdentity)
@@ -55,21 +133,20 @@ namespace PurrNet
                 return;
             }
 
-            if (_moduleId == _modules.Count)
+            if (newModuleID == _modules.Count)
             {
-                module.SetComponentParent(this, _moduleId++, moduleName);
+                module.SetComponentParent(this, newModuleID, moduleName);
                 _modules.Add(module);
             }
-            else if (_moduleId < _modules.Count)
+            else if (newModuleID < _modules.Count)
             {
-                if (_modules[_moduleId] != null)
+                if (_modules[newModuleID] != null)
                     throw new LateModuleException($"Module in {GetType().Name} has overflowed its space of allowed IDs. This " +
                         $"can happen when modules are created in the constructor of an object, but are created with non-deterministic " +
                         $"behaviour. The server and the client must initiate any local modules in the exact same way, otherwise they " +
                         $"should be stored inside of a SyncVar to become a dynamic module.");
-                module.SetComponentParent(this, _moduleId, moduleName);
-                _modules[_moduleId] = module;
-                _moduleId++;
+                module.SetComponentParent(this, newModuleID, moduleName);
+                _modules[newModuleID] = module;
             }
             else
             {
@@ -77,6 +154,8 @@ namespace PurrNet
                     "exception.");
             }
             _externalModulesView.Add(module);
+            if (incrementModuleID)
+                _moduleId++;
         }
 
         /// <summary>
@@ -88,8 +167,7 @@ namespace PurrNet
         /// <param name="module">The module being registered</param>
         /// <exception cref="System.Exception"></exception>
         /// <exception cref="System.NullReferenceException"></exception>
-        [UsedByIL]
-        public void RegisterKnownModuleInternal(string moduleName, byte moduleId, string type, NetworkModule module)
+        internal void RegisterKnownModuleInternal(string moduleName, byte moduleId, string type, NetworkModule module)
         {
             if (moduleId >= byte.MaxValue)
             {
@@ -109,8 +187,17 @@ namespace PurrNet
             // and 9 may be delivered after 18, so we want to revert backwards.
             // The client should never be making its own network modules outside of the constructor, and
             // they wouldn't work or affect this if they did anyway.
-            _moduleId = moduleId;
-            _moduleId++;
+            // Once we hit the max value, we do not go backwards as we only pull from our list of recycled
+            // IDs instead.
+            if (_moduleId < byte.MaxValue)
+            {
+                _moduleId = moduleId;
+                _moduleId++;
+            }
+            else
+            {
+                _recycledModuleIDs = new Queue<byte>(_recycledModuleIDs.Where(x => x != moduleId));
+            }
 
             module.SetComponentParent(this, moduleId, moduleName);
 
@@ -147,5 +234,21 @@ namespace PurrNet
                 }
             }
         }
+
+        [TargetRpc(Transports.Channel.ReliableOrdered)]
+        public static void SyncIdentityModuleIDs(PlayerID target, NetworkIdentity identity, byte moduleID, byte[] overrideModuleIDs, byte[] recycledModuleIDs)
+        {
+            identity._recycledModuleIDs = new Queue<byte>(recycledModuleIDs);
+            identity._overrideModuleIDs = new Queue<byte>(overrideModuleIDs);
+            // If we are using recycled module IDs, then we need to make sure we don't use sequential
+            // ordering and only pull form recycled IDs.
+            identity._moduleId = moduleID;
+            while (identity._modules.Count < identity._moduleId)
+            {
+                identity._modules.Add(null);
+            }
+            Debug.Log($"Identity module ID state synced to {string.Join(", ", recycledModuleIDs)} with forced ID ordering of {string.Join(", ", overrideModuleIDs)}");
+        }
+
     }
 }

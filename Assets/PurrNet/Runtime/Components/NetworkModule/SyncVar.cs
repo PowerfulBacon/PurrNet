@@ -62,9 +62,9 @@ namespace PurrNet
                 _isDirty = true;
 
                 if (isModuleInitialized && oldValue is NetworkModule detachedModule)
-                    Detatch(detachedModule);
+                    LocalDetach(detachedModule);
                 if (isModuleInitialized && _value is NetworkModule attachedModule)
-                    Attach(attachedModule);
+                    Attach<T>(attachedModule);
 
                 onChanged?.Invoke(value);
                 onChangedWithOld?.Invoke(oldValue, value);
@@ -104,7 +104,7 @@ namespace PurrNet
         public override void OnInitializeModules()
         {
             if (value is NetworkModule initialModule)
-                Attach(initialModule);
+                Attach<T>(initialModule);
         }
 
         public override void OnObserverAdded(PlayerID player, bool isSpawner)
@@ -123,6 +123,8 @@ namespace PurrNet
                 _id += 1;
                 FlushImmediately();
             }
+            if (value is NetworkModule currentModule)
+                LocalDetach(currentModule);
         }
 
         public void SetDirty()
@@ -222,6 +224,8 @@ namespace PurrNet
                 Packer<T>.Read(newValue, ref _value);
                 onChanged?.Invoke(value);
                 onChangedWithOld?.Invoke(oldValue, value);
+                if (oldValue is NetworkModule detachedModule && !oldValue.Equals(_value))
+                    LocalDetach(detachedModule);
             }
         }
 
@@ -314,6 +318,10 @@ namespace PurrNet
             Packer<T>.Read(newValue, ref _value);
             onChanged?.Invoke(value);
             onChangedWithOld?.Invoke(oldValue, value);
+
+            if (oldValue is NetworkModule detachedModule && !oldValue.Equals(_value))
+                LocalDetach(detachedModule);
+
         }
 
         public static implicit operator T(SyncVar<T> syncVar)

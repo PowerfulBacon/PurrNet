@@ -66,6 +66,11 @@ namespace PurrNet
         private bool wasInitialized = false;
 
         /// <summary>
+        /// Has the module been despawned?
+        /// </summary>
+        public bool isModuleDespawned { get; internal set; } = false;
+
+        /// <summary>
         /// Has the module been initialized?
         /// </summary>
         public bool isModuleInitialized { get; internal set; } = false;
@@ -196,6 +201,15 @@ namespace PurrNet
         }
 
         [UsedByIL]
+        public void UnregisterModuleInternal(NetworkModule module)
+        {
+            NetworkIdentity parentRef = this.parent;
+
+            if (parentRef)
+                parentRef.UnregisterModuleInternal(module);
+            else PurrLogger.LogError($"Unregistering module '{module.name}' failed since it is not spawned.");
+        }
+
         public void RegisterKnownModuleInternal(string moduleName, byte moduleId, string type, NetworkModule module)
         {
             NetworkIdentity parentRef = this.parent;
@@ -489,6 +503,23 @@ namespace PurrNet
         }
 
         /// <summary>
+        /// Attach a network module, ensuring that it's type aligns with the 
+        /// provided generic type.
+        /// Use in cases such as SyncVar where the stored module must be the
+        /// same type as the variable or else descyn may occur.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="module"></param>
+        public void Attach<T>(NetworkModule module)
+        {
+            if (module.GetType() != typeof(T))
+                throw new LateModuleException($"Network module of type <b>{module.GetType().Name}</b> could not be stored inside of <b>{GetType().Name}</b> " +
+                    $"as it requires a type of <b>{typeof(T).Name}</b>. Subtypes of network modules are not allowed to be attached when a specific type is " +
+                    $"expected, as this would result in desynchronisation.");
+            Attach(module);
+        }
+
+        /// <summary>
         /// Attach a network module to this module at runtime, allowing
         /// for the use of RPCs and contained network modules.
         /// Creating new network modules, or reassigning them at runtime
@@ -516,10 +547,17 @@ namespace PurrNet
         /// quickly.
         /// </summary>
         /// <param name="module"></param>
-        public void Detatch(NetworkModule module)
+        public void LocalDetach(NetworkModule module)
         {
-            // TODO: Allow modules to be detached so that their ID can be recycled.
-            throw new LateModuleException($"Types deriving from NetworkModule are immutable once added to a List can cannot be modified.");
+            parent.LateUninitializeModule(module);
+        }
+
+        /// <summary>
+        /// Called when we are detached
+        /// </summary>
+        internal void OnDetached()
+        {
+            parent = null;
         }
 
     }

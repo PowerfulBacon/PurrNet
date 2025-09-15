@@ -1,10 +1,10 @@
+using PurrNet.Logging;
+using PurrNet.Modules;
+using PurrNet.Utils;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using PurrNet.Logging;
-using PurrNet.Modules;
-using PurrNet.Utils;
 using Object = UnityEngine.Object;
 
 namespace PurrNet.Packing
@@ -79,7 +79,7 @@ namespace PurrNet.Packing
             }
             catch (Exception e)
             {
-                PurrLogger.LogError($"Failed to write value of type '{typeof(T)}'.\n{e.Message}\n{e.StackTrace}");
+                PurrLogger.LogException(new Exception($"Failed to write value of type {typeof(T).Name}", e));
             }
         }
 
@@ -98,7 +98,7 @@ namespace PurrNet.Packing
             }
             catch (Exception e)
             {
-                PurrLogger.LogError($"Failed to read value of type '{typeof(T)}'.\n{e.Message}\n{e.StackTrace}");
+                PurrLogger.LogException(new Exception($"Failed to read exact type {typeof(T).Name}", e));
             }
         }
 
@@ -117,7 +117,7 @@ namespace PurrNet.Packing
             }
             catch (Exception e)
             {
-                PurrLogger.LogError($"Failed to write value of type '{typeof(T)}'.\n{e.Message}\n{e.StackTrace}");
+                PurrLogger.LogException(new Exception($"Failed to write value of type {typeof(T).Name}", e));
             }
         }
 
@@ -136,7 +136,7 @@ namespace PurrNet.Packing
             }
             catch (Exception e)
             {
-                PurrLogger.LogError($"Failed to read value of type '{typeof(T)}'.\n{e.Message}\n{e.StackTrace}");
+                PurrLogger.LogException(new Exception($"Failed to read value of type {typeof(T).Name}", e));
             }
         }
 
@@ -150,7 +150,7 @@ namespace PurrNet.Packing
             }
             else
             {
-                var vtype = value.GetType();
+                Type vtype = value.GetType();
                 type = Hasher.IsRegistered(vtype) ? vtype : typeof(T);
             }
 
@@ -178,9 +178,9 @@ namespace PurrNet.Packing
                 return;
             }
 
-            var hash = Packer<PackedUInt>.Read(packer);
+            PackedUInt hash = Packer<PackedUInt>.Read(packer);
 
-            if (!Hasher.TryGetType(hash, out var type))
+            if (!Hasher.TryGetType(hash, out Type type))
                 throw new Exception($"Type with hash '{hash}' not found.");
 
             object result = value;
@@ -203,7 +203,7 @@ namespace PurrNet.Packing
 
         public static T Read(BitPacker packer)
         {
-            var value = default(T);
+            T value = default(T);
             Read(packer, ref value);
             return value;
         }
@@ -223,10 +223,10 @@ namespace PurrNet.Packing
             if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                 return value;
 
-            using var tmpPacker = BitPackerPool.Get();
+            using BitPacker tmpPacker = BitPackerPool.Get();
             Packer<T>.Write(tmpPacker, value);
             tmpPacker.ResetPositionAndMode(true);
-            var copy = default(T);
+            T copy = default(T);
             Packer<T>.Read(tmpPacker, ref copy);
             return copy;
         }
@@ -234,8 +234,8 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static bool AreEqual<T>(T a, T b)
         {
-            using var packerA = BitPackerPool.Get();
-            using var packerB = BitPackerPool.Get();
+            using BitPacker packerA = BitPackerPool.Get();
+            using BitPacker packerB = BitPackerPool.Get();
 
             Packer<T>.Write(packerA, a);
             Packer<T>.Write(packerB, b);
@@ -261,7 +261,7 @@ namespace PurrNet.Packing
 
             if (bits > 0)
             {
-                var remainingBits = (byte)bits;
+                byte remainingBits = (byte)bits;
                 ulong aBits = packerA.ReadBits(remainingBits);
                 ulong bBits = packerB.ReadBits(remainingBits);
                 if (aBits != bBits)
@@ -327,7 +327,7 @@ namespace PurrNet.Packing
 
         public static bool WriteAsNetworkAsset(BitPacker packer, Object unityObj)
         {
-            var nassets = NetworkManager.main.networkAssets;
+            NetworkAssets nassets = NetworkManager.main.networkAssets;
             int index = nassets && unityObj ? nassets.GetIndex(unityObj) : -1;
             bool isNetworkAsset = index != -1;
             Packer<bool>.Write(packer, isNetworkAsset);
@@ -357,8 +357,8 @@ namespace PurrNet.Packing
                 if (ReadAsNetworkAsset(packer, ref value))
                     return;
 
-                var typeHash = Packer<PackedUInt>.Read(packer);
-                var type = Hasher.ResolveType(typeHash);
+                PackedUInt typeHash = Packer<PackedUInt>.Read(packer);
+                Type type = Hasher.ResolveType(typeHash);
 
                 object obj = null;
                 ReadRawObject(type, packer, ref obj);
@@ -390,7 +390,7 @@ namespace PurrNet.Packing
 
         public static void WriteAsExactType<T>(BitPacker packer, Type type, T value)
         {
-            if (!_writeExactMethods.TryGetValue(type, out var method))
+            if (!_writeExactMethods.TryGetValue(type, out MethodInfo method))
             {
                 PurrLogger.LogError($"No writer for type '{type}' is registered.");
                 return;
@@ -410,7 +410,7 @@ namespace PurrNet.Packing
 
         public static void Write(BitPacker packer, Type type, object value)
         {
-            if (!_writeWrappedMethods.TryGetValue(type, out var method))
+            if (!_writeWrappedMethods.TryGetValue(type, out MethodInfo method))
             {
                 PurrLogger.LogError($"No writer for type '{type}' is registered.");
                 return;
@@ -430,9 +430,9 @@ namespace PurrNet.Packing
 
         public static void Write(BitPacker packer, object value)
         {
-            var type = value.GetType();
+            Type type = value.GetType();
 
-            if (!_writeWrappedMethods.TryGetValue(type, out var method))
+            if (!_writeWrappedMethods.TryGetValue(type, out MethodInfo method))
             {
                 FallbackWriter(packer, value);
                 return;
@@ -452,9 +452,9 @@ namespace PurrNet.Packing
 
         static void WriteRawObject(object value, BitPacker packer)
         {
-            var type = value.GetType();
+            Type type = value.GetType();
 
-            if (!_writeExactMethods.TryGetValue(type, out var method))
+            if (!_writeExactMethods.TryGetValue(type, out MethodInfo method))
             {
                 PurrLogger.LogError($"No writer for type '{type}' is registered.");
                 return;
@@ -474,7 +474,7 @@ namespace PurrNet.Packing
 
         public static void Read(BitPacker packer, Type type, ref object value)
         {
-            if (!_readWrappedMethods.TryGetValue(type, out var method))
+            if (!_readWrappedMethods.TryGetValue(type, out MethodInfo method))
             {
                 FallbackReader(packer, ref value);
                 return;
@@ -497,7 +497,7 @@ namespace PurrNet.Packing
 
         public static void ReadAsExactType(BitPacker packer, Type type, ref object value)
         {
-            if (!_readExactMethods.TryGetValue(type, out var method))
+            if (!_readExactMethods.TryGetValue(type, out MethodInfo method))
             {
                 FallbackReader(packer, ref value);
                 return;
@@ -520,7 +520,7 @@ namespace PurrNet.Packing
 
         public static void ReadRawObject(Type type, BitPacker packer, ref object value)
         {
-            if (!_readExactMethods.TryGetValue(type, out var method))
+            if (!_readExactMethods.TryGetValue(type, out MethodInfo method))
             {
                 PurrLogger.LogError($"No reader for type '{type}' is registered.");
                 return;
