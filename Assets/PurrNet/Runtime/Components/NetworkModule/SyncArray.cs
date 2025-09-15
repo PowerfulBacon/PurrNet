@@ -166,9 +166,9 @@ namespace PurrNet
                 _array[index] = value;
 
                 if (oldValue is NetworkModule detatchedModule)
-                    Detatch(detatchedModule);
+                    LocalDetach(detatchedModule);
                 if (value is NetworkModule attachedModule)
-                    Attach(attachedModule);
+                    Attach<T>(attachedModule);
 
                 SyncArrayChange<T> change = SyncArrayChange<T>.Set(value, oldValue, index);
                 InvokeChange(change);
@@ -199,6 +199,17 @@ namespace PurrNet
                     SendSetToAll(i, _array[i]);
                 else
                     SendSetToServer(i, _array[i]);
+            }
+        }
+
+        public override void OnDespawned()
+        {
+            foreach (T item in _array)
+            {
+                if (item is NetworkModule detachedModule)
+                {
+                    LocalDetach(detachedModule);
+                }
             }
         }
 
@@ -489,6 +500,8 @@ namespace PurrNet
                 {
                     T oldValue = _array[index];
                     _array[index] = value;
+                    if (value is NetworkModule detachedModule && !value.Equals(oldValue))
+                        LocalDetach(detachedModule);
                     SyncArrayChange<T> change = SyncArrayChange<T>.Set(value, oldValue, index);
                     QueueChange(change);
                     InvokeChange(change);
@@ -505,6 +518,8 @@ namespace PurrNet
                 {
                     T oldValue = _array[index];
                     _array[index] = value;
+                    if (value is NetworkModule detachedModule && !value.Equals(oldValue))
+                        LocalDetach(detachedModule);
                     SyncArrayChange<T> change = SyncArrayChange<T>.Set(value, oldValue, index);
                     QueueChange(change);
                     InvokeChange(change);
@@ -524,6 +539,9 @@ namespace PurrNet
         {
             if (!isServer || isHost)
             {
+                foreach (T value in _array)
+                    if (value is NetworkModule detachedModule)
+                        LocalDetach(detachedModule);
                 Array.Clear(_array, 0, _length);
                 SyncArrayChange<T> change = SyncArrayChange<T>.Cleared();
                 QueueChange(change);
@@ -536,6 +554,9 @@ namespace PurrNet
         {
             if (!isHost)
             {
+                foreach (T value in _array)
+                    if (value is NetworkModule detachedModule)
+                        LocalDetach(detachedModule);
                 Array.Clear(_array, 0, _length);
                 SyncArrayChange<T> change = SyncArrayChange<T>.Cleared();
                 QueueChange(change);
@@ -596,7 +617,10 @@ namespace PurrNet
             {
                 if (index >= 0 && index < _length)
                 {
+                    T previousValue = _array[index];
                     _array[index] = value;
+                    if (value is NetworkModule detachedModule && !detachedModule.Equals(previousValue))
+                        LocalDetach(detachedModule);
                     SyncArrayChange<T> change = SyncArrayChange<T>.SetDirty(value, index);
                     QueueChange(change);
                     InvokeChange(change);
@@ -611,7 +635,10 @@ namespace PurrNet
             {
                 if (index >= 0 && index < _length)
                 {
+                    T previousValue = _array[index];
                     _array[index] = value;
+                    if (value is NetworkModule detachedModule && !detachedModule.Equals(previousValue))
+                        LocalDetach(detachedModule);
                     SyncArrayChange<T> change = SyncArrayChange<T>.SetDirty(value, index);
                     QueueChange(change);
                     InvokeChange(change);

@@ -18,11 +18,17 @@ namespace PurrNet
         {
             if (module is not { isSpawned: true } || !module.parent)
             {
-                Packer<bool>.Write(packer, false);
+                Packer<byte>.Write(packer, (byte)PackerModuleFlags.NotSpawned);
                 return;
             }
-            Packer<bool>.Write(packer, true);
-            Packer<bool>.Write(packer, module.isDynamic);
+            PackerModuleFlags flags = PackerModuleFlags.IsSpawned;
+            // Pack the dynamic flag
+            if (module.isDynamic)
+            {
+                flags |= PackerModuleFlags.IsDynamic;
+            }
+            // Send the stuff
+            Packer<byte>.Write(packer, (byte)flags);
             Packer<byte>.Write(packer, module.index);
 
             Packer<NetworkIdentity>.Write(packer, module.parent);
@@ -31,18 +37,20 @@ namespace PurrNet
         [UsedByIL]
         public static void ReadModule<T>(this BitPacker packer, ref T module) where T : NetworkModule
         {
-            bool hasValue = false;
+            PackerModuleFlags flags = PackerModuleFlags.NotSpawned;
 
-            Packer<bool>.Read(packer, ref hasValue);
+            byte flagByte = 0;
+            Packer<byte>.Read(packer, ref flagByte);
+            flags = (PackerModuleFlags)flagByte;
 
-            if (!hasValue)
+            // Module is not spawned
+            if ((flags & PackerModuleFlags.IsSpawned) == 0)
             {
                 module = null;
                 return;
             }
 
-            bool isDynamic = false;
-            Packer<bool>.Read(packer, ref isDynamic);
+            bool isDynamic = (flags & PackerModuleFlags.IsDynamic) != 0;
 
             byte index = 0;
             Packer<byte>.Read(packer, ref index);
@@ -61,7 +69,7 @@ namespace PurrNet
             // Do we need to create it?
             if (isDynamic)
             {
-
+                // Create a new module at the index that was requested.
                 T instantiated = (T)Activator.CreateInstance(typeof(T), true);
                 instantiated.LateInitialize(identity, null, index);
                 module = instantiated;

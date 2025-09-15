@@ -6,6 +6,7 @@ using PurrNet.Pooling;
 using PurrNet.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -741,7 +742,8 @@ namespace PurrNet
         }
 
 
-        static readonly Dictionary<Type, List<MethodInfo>> _methodCache = new ();
+        static readonly Dictionary<Type, List<MethodInfo>> _initMethodCache = new ();
+        static readonly Dictionary<Type, List<MethodInfo>> _uninitMethodCache = new();
 
         private void CallInitMethods()
         {
@@ -750,7 +752,7 @@ namespace PurrNet
 
         internal void CallInitMethodFor(Type targetType, object target)
         {
-            if (!_methodCache.TryGetValue(targetType, out List<MethodInfo> cached))
+            if (!_initMethodCache.TryGetValue(targetType, out List<MethodInfo> cached))
             {
                 Type type = targetType;
                 MethodInfo[] methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
@@ -763,7 +765,47 @@ namespace PurrNet
                         cached.Add(m);
                 }
 
-                _methodCache[type] = cached;
+                _initMethodCache[type] = cached;
+            }
+
+            int count = cached.Count;
+            // If we are initialising ourselves as a network identity, then we
+            // expect no parameters.
+            if (typeof(NetworkIdentity).IsAssignableFrom(targetType))
+            {
+                for (int i = 0; i < count; i++)
+                    cached[i].Invoke(target, Array.Empty<object>());
+            }
+            else
+            {
+                // If we are late-initializing as a network module, instead of
+                // being called from the CodeGen_Initialize method, we are invoked
+                // here and require the string argument representing our parent
+                // We also need to simulate the RegisterModuleInternal call
+                string[] arguments = new string[] {
+                    GetType().Name
+                };
+                for (int i = 0; i < count; i++)
+                    cached[i].Invoke(target, arguments);
+            }
+        }
+
+        internal void CallUninitMethodFor(Type targetType, object target)
+        {
+            if (!_uninitMethodCache.TryGetValue(targetType, out List<MethodInfo> cached))
+            {
+                Type type = targetType;
+                MethodInfo[] methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+                cached = new List<MethodInfo>(methods.Length);
+
+                for (int i = 0; i < methods.Length; i++)
+                {
+                    MethodInfo m = methods[i];
+                    if (m.Name.EndsWith("_CodeGen_Uninitialize"))
+                        cached.Add(m);
+                }
+
+                _uninitMethodCache[type] = cached;
             }
 
             int count = cached.Count;
@@ -951,6 +993,35 @@ namespace PurrNet
                 if (module is ITick tickableModule)
                 {
                     _tickables.Add(tickableModule);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Uninitialize a module and anything related to it.
+        /// </summary>
+        /// <param name="parentModule"></param>
+        public void LateUninitializeModule(NetworkModule parentModule)
+        {
+            // Create a copy of the modules
+            NetworkModule[] moduleCopyList = _externalModulesView.ToArray();
+            // Self uninitialize
+            UnregisterModuleInternal(parentModule);
+            // Uninitialize method call
+            CallUninitMethodFor(parentModule.GetType(), parentModule);
+            // Find all of the modules that were uninitialized
+            foreach (NetworkModule module in moduleCopyList)
+            {
+                if (_modules[module.index] != module && !module.isModuleDespawned)
+                {
+                    module.isModuleDespawned = true;
+                    // Stop ticking
+                    if (module is ITick tickableModule)
+                    {
+                        _tickables.Remove(tickableModule);
+                    }
+                    // Detach
+                    module.OnDetached();
                 }
             }
         }
@@ -1467,6 +1538,12 @@ namespace PurrNet
 
         public void TriggerOnObserverAdded(PlayerID target, bool isSpawner)
         {
+
+            if (_recycledModuleIDs != null)
+            {
+                SyncIdentityModuleIDs(target, this, _moduleId, _externalModulesView.Select(x => x.index).ToArray(), _recycledModuleIDs.ToArray());
+            }
+
             try
             {
                 OnObserverAdded(target);
