@@ -1129,6 +1129,26 @@ namespace PurrNet.Codegen
             }
         }
 
+        static GuardFailureAction GetMode(PurrNetSettings settings, GuardFailureActionOverride overrideAction)
+        {
+            switch (overrideAction)
+            {
+                case GuardFailureActionOverride.ReturnDefault:
+                    return GuardFailureAction.ReturnDefault;
+                case GuardFailureActionOverride.ThrowException:
+                    return GuardFailureAction.ThrowException;
+                case GuardFailureActionOverride.LogWarning:
+                    return GuardFailureAction.LogWarning;
+                case GuardFailureActionOverride.LogError:
+                    return GuardFailureAction.LogError;
+                case GuardFailureActionOverride.Ignore:
+                    return GuardFailureAction.Ignore;
+                case GuardFailureActionOverride.Settings:
+                default:
+                    return settings.guardFailureAction;
+            }
+        }
+
         private static void StripBody(MethodDefinition method, string methodName, PurrNetSettings settings, StripCodeModeOverride overrideMode)
         {
             var mode = GetMode(settings, overrideMode);
@@ -2262,7 +2282,11 @@ namespace PurrNet.Codegen
                         if (!type.IsClass)
                         {
                             for (var i = 0; i < type.Methods.Count; i++)
-                                ProcessServerOnlyMethods(type.Methods[i], settings, isServerBuild, isEditor);
+                            {
+                                var method = type.Methods[i];
+                                ProcessServerOnlyMethods(method, settings, isServerBuild, isEditor);
+                                ProcessRunContextGuardedMethods(method, settings, false);
+                            }
                             continue;
                         }
 
@@ -2302,7 +2326,8 @@ namespace PurrNet.Codegen
                             try
                             {
                                 var method = type.Methods[i];
-                                ProcessServerOnlyMethods(type.Methods[i], settings, isServerBuild, isEditor);
+                                ProcessServerOnlyMethods(method, settings, isServerBuild, isEditor);
+                                ProcessRunContextGuardedMethods(method, settings, inheritsFromNetworkIdentity);
 
                                 if (inheritsFromNetworkIdentity && MakeSureOverrideIsCalled.ShouldProcess(method))
                                     MakeSureOverrideIsCalled.Process(method, messages);
@@ -2545,6 +2570,136 @@ namespace PurrNet.Codegen
                 .GetMethod.Import(module);
             var getIsServer = Instruction.Create(OpCodes.Call, isServerOnlyProp);
             return getIsServer;
+        }
+
+        private static Instruction GetIsClientMethod(ModuleDefinition module)
+        {
+            var isClientProp = module.GetTypeDefinition<NetworkManager>()
+                .GetProperty("isClientStatic")
+                .GetMethod.Import(module);
+            var getIsClient = Instruction.Create(OpCodes.Call, isClientProp);
+            return getIsClient;
+        }
+
+        private static void ProcessRunContextGuardedMethods(MethodDefinition method, PurrNetSettings settings, bool inheritsFromNetworkIdentity)
+        {
+            if (method.Body == null) return;
+
+            bool hasServer = false;
+            bool hasClient = false;
+            bool hasOwner = false;
+
+            var guardFailureActionOverride = GuardFailureActionOverride.Settings;
+
+            foreach (var attribute in method.CustomAttributes)
+            {
+                string fullName = attribute.AttributeType.FullName;
+                if (!hasServer && fullName == typeof(ServerAttribute).FullName)
+                {
+                    hasServer = true;
+                }
+                else if (!hasClient && fullName == typeof(ClientAttribute).FullName)
+                {
+                    hasClient = true;
+                }
+                else if (!hasOwner && fullName == typeof(OwnerAttribute).FullName)
+                {
+                    hasOwner = true;
+                }
+                else if (fullName == typeof(GuardFailureActionAttribute).FullName)
+                {
+                    guardFailureActionOverride = (GuardFailureActionOverride)attribute.ConstructorArguments[0].Value;
+                }
+            }
+
+            if (!hasServer && !hasClient && !hasOwner)
+                return;
+
+            var guardFailureAction = GetMode(settings, guardFailureActionOverride);
+            if (guardFailureAction == GuardFailureAction.Ignore) return;
+
+            // insert guard
+            var il = method.Body.GetILProcessor();
+            var firstInstruction = method.Body.Instructions[0];
+            var module = method.Module;
+
+            var failureHandler = CreateGuardFailureActionHandler(method, il, guardFailureAction);
+
+            if (hasServer)
+            {
+                var callIsServer = GetIsServerMethod(module);
+                il.InsertBefore(firstInstruction, callIsServer);
+                il.InsertAfter(callIsServer, il.Create(OpCodes.Brtrue, firstInstruction));
+            }
+
+            if (hasClient)
+            {
+                var callIsClient = GetIsClientMethod(module);
+                il.InsertBefore(firstInstruction, callIsClient);
+                il.InsertAfter(callIsClient, il.Create(OpCodes.Brtrue, firstInstruction));
+            }
+
+            if (hasOwner)
+            {
+                if (!inheritsFromNetworkIdentity)
+                    throw new InvalidOperationException($"[Owner] requires {method.DeclaringType.Name} to inherit NetworkIdentity.");
+
+                CheckNetworkIdentityProperty("isOwner", module, il, firstInstruction);
+            }
+
+            il.InsertBefore(firstInstruction, il.Create(OpCodes.Br, failureHandler));
+        }
+
+        private static Instruction CreateGuardFailureActionHandler(
+            MethodDefinition method,
+            ILProcessor il,
+            GuardFailureAction action)
+        {
+            var handler = il.Create(OpCodes.Nop);
+            il.Append(handler);
+
+            switch (action)
+            {
+                case GuardFailureAction.ReturnDefault:
+                    break;
+                case GuardFailureAction.ThrowException:
+                    var throwExcep = method.Module.GetTypeDefinition(typeof(PurrLogger))
+                        .GetMethod("ThrowUnsupportedException", false).Import(method.Module);
+                    il.Append(il.Create(OpCodes.Ldstr, $"Method '{method.DeclaringType.Name}.{method.Name}' cannot be called from this context."));
+                    il.Append(il.Create(OpCodes.Call, throwExcep));
+                    break;
+                case GuardFailureAction.LogWarning:
+                    var logWarningMethod = method.Module.GetTypeDefinition(typeof(PurrLogger))
+                        .GetMethod("LogSimplerWarning", false).Import(method.Module);
+                    il.Append(il.Create(OpCodes.Ldstr, $"Method '{method.DeclaringType.Name}.{method.Name}' cannot be called from this context."));
+                    il.Append(il.Create(OpCodes.Call, logWarningMethod));
+                    break;
+                case GuardFailureAction.LogError:
+                    var logErrorMethod = method.Module.GetTypeDefinition(typeof(PurrLogger))
+                        .GetMethod("LogSimplerError", false).Import(method.Module);
+                    il.Append(il.Create(OpCodes.Ldstr, $"Method '{method.DeclaringType.Name}.{method.Name}' cannot be called from this context."));
+                    il.Append(il.Create(OpCodes.Call, logErrorMethod));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            ProperlyEndMethod(method, il);
+
+            return handler;
+        }
+
+        private static void CheckNetworkIdentityProperty(string property, ModuleDefinition module, ILProcessor il, Instruction target)
+        {
+            var networkIdentityType = module.GetTypeDefinition<NetworkIdentity>().Resolve();
+            var isOwnerGetter = networkIdentityType
+                .GetProperty(property)
+                .GetMethod.Import(module);
+
+            var ldarg0 = il.Create(OpCodes.Ldarg_0);
+            il.InsertBefore(target, ldarg0);
+            il.InsertAfter(ldarg0, il.Create(OpCodes.Callvirt, isOwnerGetter));
+            il.InsertAfter(ldarg0.Next, il.Create(OpCodes.Brtrue, target));
         }
 
         private static void IncludeAnyConcreteGenericParameters(TypeDefinition type,
