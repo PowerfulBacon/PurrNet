@@ -101,6 +101,20 @@ namespace PurrNet.Editor
         }
 #endif
 
+#if PURR_CONTEXT_BUTTONS
+        [MenuItem("Tools/PurrNet/Packages/Disable PurrContextButtons", priority = 100)]
+        public static void UninstallPURR_CONTEXT_BUTTONS()
+        {
+            EnableLeakDetector.RemoveSymbol("PURR_CONTEXT_BUTTONS");
+        }
+#else
+        [MenuItem("Tools/PurrNet/Packages/Enable PurrContextButtons", priority = 100)]
+        public static void InstallPURR_CONTEXT_BUTTONS()
+        {
+            EnableLeakDetector.AddSymbol("PURR_CONTEXT_BUTTONS");
+        }
+#endif
+
 #if PURR_ENDIAN
         [MenuItem("Tools/PurrNet/Packages/Disable Endianness Check", priority = 100)]
         public static void UninstallEndianness()

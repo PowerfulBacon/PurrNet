@@ -656,6 +656,12 @@ namespace PurrNet.Modules
             if (data.sceneId != _sceneId)
                 return;
 
+            if (!asServer && _manager.isServer)
+            {
+                // when in host mode, let the server handle the despawn on their module
+                return;
+            }
+
             if (!TryGetIdentity(data.parentId, out var identity))
             {
                 return;
@@ -784,6 +790,10 @@ namespace PurrNet.Modules
         private void SendDespawnPacket(PlayerID player, NetworkIdentity identity, bool batched)
         {
             if (!identity.id.HasValue)
+                return;
+
+            // dont send despawn packet to the local player
+            if (player == _manager.localPlayer)
                 return;
 
             var packet = new DespawnPacket

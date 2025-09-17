@@ -390,20 +390,20 @@ namespace PurrNet
 
         private readonly List<ITick> _tickables = new List<ITick>();
 
-        [ContextMenu("PurrNet/Take Ownership")]
+        [ContextMenu("PurrNet/Take Ownership"), PurrContextButton]
         private void TakeOwnership()
         {
             GiveOwnership(localPlayer);
         }
 
-        [ContextMenu("PurrNet/Print Prototype")]
+        [ContextMenu("PurrNet/Print Prototype"), PurrContextButton]
         private void PrintPrototype()
         {
             using var prototype = HierarchyPool.GetFullPrototype(transform);
             PurrLogger.Log(prototype.ToString());
         }
 
-        [ContextMenu("PurrNet/Duplicate Prototype")]
+        [ContextMenu("PurrNet/Duplicate Prototype"), PurrContextButton]
         private void DuplicatePrototype()
         {
             Duplicate();
@@ -426,7 +426,7 @@ namespace PurrNet
             return null;
         }
 
-        [ContextMenu("PurrNet/Destroy GameObject")]
+        [ContextMenu("PurrNet/Destroy GameObject"), PurrContextButton]
         private void DeleteGameObject()
         {
             Destroy(gameObject);
@@ -769,7 +769,7 @@ namespace PurrNet
 
         public bool isInPool { get; private set; }
 
-        [ContextMenu("PurrNet/Despawn")]
+        [ContextMenu("PurrNet/Despawn"), PurrContextButton]
         public void Despawn()
         {
             if (isSpawned)
@@ -894,6 +894,7 @@ namespace PurrNet
         /// This is server specific.
         /// Re-evaulation includes all children.
         /// </summary>
+        [ContextMenu("PurrNet/Evaluate Visibility"), PurrContextButton]
         public void EvaluateVisibility()
         {
             if (!isServer)
