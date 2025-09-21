@@ -1318,6 +1318,9 @@ namespace PurrNet.Codegen
             foreach (var param in method.CustomAttributes)
                 newMethod.CustomAttributes.Add(param);
 
+            if (method.HasGenericParameters)
+                method.IsPublic = true;
+
             // add preserve attribute to newMethod
             var preserveAttribute = module.GetTypeDefinition<PreserveAttribute>();
             var constructor = preserveAttribute.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
