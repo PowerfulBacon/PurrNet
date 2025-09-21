@@ -1,3 +1,10 @@
+# [1.16.0-beta.18](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.17...v1.16.0-beta.18) (2025-09-21)
+
+
+### Bug Fixes
+
+* Added PurrChat link to toolbar ([72d3d58](https://github.com/PurrNet/PurrNet/commit/72d3d58cf6be44a925837f736c49b7a1af92e93b))
+
 # [1.16.0-beta.17](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.16...v1.16.0-beta.17) (2025-09-17)
 
 
