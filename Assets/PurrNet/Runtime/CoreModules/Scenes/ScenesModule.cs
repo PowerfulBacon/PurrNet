@@ -963,7 +963,8 @@ namespace PurrNet.Modules
                 {
                     if (_emptyScene != null)
                     {
-                        SceneManager.UnloadSceneAsync(_emptyScene.Value);
+                        if (_emptyScene.Value.IsValid())
+                            SceneManager.UnloadSceneAsync(_emptyScene.Value);
                         _emptyScene = null;
                         return false;
                     }
