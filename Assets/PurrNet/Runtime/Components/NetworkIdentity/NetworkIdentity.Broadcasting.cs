@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 #if UNITASK_PURRNET_SUPPORT
 using Cysharp.Threading.Tasks;
 #endif
-using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
