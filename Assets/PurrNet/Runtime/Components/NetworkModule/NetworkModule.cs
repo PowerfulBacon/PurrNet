@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
+using PurrNet.Pooling;
 using PurrNet.Profiler;
 using PurrNet.Transports;
 
@@ -223,7 +224,19 @@ namespace PurrNet
                 case RPCType.ObserversRPC:
                 {
                     if (isServer)
-                        parent.SendToObservers(packet, ShouldSend, signature.channel);
+                    {
+                        var obs = parent.observers;
+                        var count = parent.observers.Count;
+                        using var players = DisposableList<PlayerID>.Create(count);
+                        for (var i = 0; i < count; i++)
+                        {
+                            var player = obs[i];
+                            if (ShouldSend(player))
+                                players.Add(player);
+                        }
+
+                        parent.Send(players, packet, signature.channel);
+                    }
                     else parent.SendToServer(packet, signature.channel);
                     break;
                 }
