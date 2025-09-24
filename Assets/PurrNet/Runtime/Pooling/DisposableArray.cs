@@ -33,13 +33,18 @@ namespace PurrNet.Pooling
             }
         }
 
-        public static DisposableArray<T> Create(int size) =>
-            new()
+        public static DisposableArray<T> Create(int size)
+        {
+            var rented = ArrayPool<T>.Shared.Rent(size);
+            Array.Clear(rented, 0, size);
+
+            return new DisposableArray<T>
             {
-                array = ArrayPool<T>.Shared.Rent(size),
+                array = rented,
                 Count = size,
                 _shouldDispose = true
             };
+        }
 
         public static DisposableArray<T> Create(DisposableArray<T> copyFrom)
         {
