@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using PurrNet.Logging;
 using PurrNet.Modules;
@@ -14,6 +15,12 @@ namespace PurrNet
 
         [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
         private int _currentSpawnPoint;
+
+        /// <summary>
+        /// Instance-level event hook that allows custom spawn positions.
+        /// Return null to let the spawner fall back to default logic.
+        /// </summary>
+        public event Func<PlayerID, SceneID, bool, (Vector3 position, Quaternion rotation)?> OnRequestSpawnPosition;
 
         private void Awake()
         {
@@ -106,7 +113,13 @@ namespace PurrNet
 
             CleanupSpawnPoints();
 
-            if (spawnPoints.Count > 0)
+            (Vector3 pos, Quaternion rot)? customSpawn = OnRequestSpawnPosition?.Invoke(player, scene, asServer);
+            if (customSpawn.HasValue)
+            {
+                var (position, rotation) = customSpawn.Value;
+                newPlayer = UnityProxy.Instantiate(_playerPrefab, position, rotation, unityScene);
+            }
+            else if (spawnPoints.Count > 0)
             {
                 var spawnPoint = spawnPoints[_currentSpawnPoint];
                 _currentSpawnPoint = (_currentSpawnPoint + 1) % spawnPoints.Count;
