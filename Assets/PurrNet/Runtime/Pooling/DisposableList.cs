@@ -204,5 +204,12 @@ namespace PurrNet.Pooling
                 list[index] = value;
             }
         }
+
+        public void Reverse()
+        {
+            if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
+            NotifyUsage();
+            list.Reverse();
+        }
     }
 }
