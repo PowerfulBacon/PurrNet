@@ -292,43 +292,57 @@ namespace PurrNet.Packing
         }
 
         [UsedByIL]
-        private static bool WriteUInt64(BitPacker packer, PackedLong oldvalue, PackedLong newvalue)
+        private static bool WriteInt64(BitPacker packer, PackedLong oldvalue, PackedLong newvalue)
         {
             return DeltaPacker<long>.Write(packer, oldvalue.value, newvalue.value);
         }
 
         [UsedByIL]
-        private static void ReadUInt64(BitPacker packer, PackedLong oldvalue, ref PackedLong value)
+        private static void ReadInt64(BitPacker packer, PackedLong oldvalue, ref PackedLong value)
         {
             DeltaPacker<long>.Read(packer, oldvalue.value, ref value.value);
         }
 
         [UsedByIL]
-        private static bool WriteUInt64(BitPacker packer, PackedULong oldvalue, PackedULong newvalue)
+        private static bool WriteIndex(BitPacker packer, Size oldvalue, Size newvalue)
         {
-            bool hasChanged = oldvalue != newvalue;
+            bool hasChanged = oldvalue.value != newvalue.value;
             Packer<bool>.Write(packer, hasChanged);
 
             if (hasChanged)
             {
-                var isFullWritePos = packer.positionInBits;
-                Packer<bool>.Write(packer, false);
+                ulong diff = newvalue.value - oldvalue.value;
+                Packer<Size>.Write(packer, diff);
+            }
 
-                var start = packer.positionInBits;
-                Packer<PackedULong>.Write(packer, newvalue);
-                var fullLen = packer.positionInBits - start;
-                packer.SetBitPosition(start);
+            return hasChanged;
+        }
 
-                ulong diff = newvalue - oldvalue;
+        [UsedByIL]
+        private static void ReadIndex(BitPacker packer, Size oldvalue, ref Size value)
+        {
+            bool hasChanged = default;
+            Packer<bool>.Read(packer, ref hasChanged);
+
+            if (hasChanged)
+            {
+                Size packed = default;
+                Packer<Size>.Read(packer, ref packed);
+                value.value = oldvalue.value + packed.value;
+            }
+            else value = oldvalue;
+        }
+
+        [UsedByIL]
+        private static bool WriteUInt64(BitPacker packer, PackedULong oldvalue, PackedULong newvalue)
+        {
+            bool hasChanged = oldvalue.value != newvalue.value;
+            Packer<bool>.Write(packer, hasChanged);
+
+            if (hasChanged)
+            {
+                ulong diff = newvalue.value - oldvalue.value;
                 Packer<PackedULong>.Write(packer, diff);
-                var deltaLen = packer.positionInBits - start;
-
-                if (fullLen < deltaLen)
-                {
-                    packer.WriteAt(isFullWritePos, true);
-                    packer.SetBitPosition(start);
-                    Packer<PackedULong>.Write(packer, newvalue);
-                }
             }
 
             return hasChanged;
@@ -342,21 +356,9 @@ namespace PurrNet.Packing
 
             if (hasChanged)
             {
-                bool isFullWritePos = default;
-                Packer<bool>.Read(packer, ref isFullWritePos);
-
-                if (isFullWritePos)
-                {
-                    PackedULong packed = default;
-                    Packer<PackedULong>.Read(packer, ref packed);
-                    value = packed;
-                }
-                else
-                {
-                    PackedULong packed = default;
-                    Packer<PackedULong>.Read(packer, ref packed);
-                    value = oldvalue + packed.value;
-                }
+                PackedULong packed = default;
+                Packer<PackedULong>.Read(packer, ref packed);
+                value.value = oldvalue.value + packed.value;
             }
             else value = oldvalue;
         }

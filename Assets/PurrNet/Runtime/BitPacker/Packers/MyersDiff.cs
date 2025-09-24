@@ -1,48 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using PurrNet.Pooling;
+using UnityEngine;
 
 namespace PurrNet.Packing
 {
-    public enum OperationType
-    {
-        Add,      // append only, no index
-        Insert,   // insert at position
-        Delete   // range delete
-    }
-
-    public readonly struct DiffOp<T> : IDisposable
-    {
-        public readonly OperationType Type;
-        public readonly int Index;       // for Insert/Delete/Replace
-        public readonly int Length;      // for Delete (count) / Replace (old length)
-        public readonly DisposableList<T>? Values; // for Insert/Replace/Add
-
-        public DiffOp(OperationType type, int index, int length, DisposableList<T>? values = null)
-        {
-            Type = type;
-            Index = index;
-            Length = length;
-            Values = values;
-        }
-
-        public override string ToString()
-        {
-            return Type switch
-            {
-                OperationType.Delete => $"Delete {Length} at [{Index}]",
-                OperationType.Insert => $"Insert {{{string.Join(",", Values!.Value)}}} at [{Index}]",
-                OperationType.Add => $"Add {{{string.Join(",", Values!.Value)}}}",
-                _ => base.ToString()
-            };
-        }
-
-        public void Dispose()
-        {
-            Values?.Dispose();
-        }
-    }
-
     public static class MyersDiff
     {
         public static DisposableList<DiffOp<T>> Diff<T>(IReadOnlyList<T> a, IReadOnlyList<T> b)
@@ -70,7 +32,7 @@ namespace PurrNet.Packing
 
                     int y = x - k;
                     // follow diagonal (the "snake")
-                    while (x < n && y < m && EqualityComparer<T>.Default.Equals(a[x], b[y]))
+                    while (x < n && y < m && Packer.AreEqual(a[x], b[y]))
                     {
                         x++;
                         y++;
@@ -156,7 +118,7 @@ namespace PurrNet.Packing
                     else
                     {
                         x--;
-                        elementOps.Add(new DiffOp<T>(OperationType.Delete, x, 1, null));
+                        elementOps.Add(new DiffOp<T>(OperationType.Delete, Math.Max(x - 1, 0), 1));
                     }
                 }
             }
@@ -175,40 +137,40 @@ namespace PurrNet.Packing
             {
                 var op = ops[i];
 
-                switch (op.Type)
+                switch (op.type)
                 {
                     // Merge consecutive Deletes
                     case OperationType.Delete:
                     {
-                        int idx = op.Index;
-                        int len = op.Length;
-                        while (i + 1 < ops.Count && ops[i + 1].Type == OperationType.Delete &&
-                               ops[i + 1].Index == idx + len)
+                        int idx = op.index;
+                        int len = op.length;
+                        while (i + 1 < ops.Count && ops[i + 1].type == OperationType.Delete &&
+                               ops[i + 1].index == idx + len)
                         {
-                            len += ops[i + 1].Length;
+                            len += ops[i + 1].length;
                             i++;
                         }
 
-                        result.Add(new DiffOp<T>(OperationType.Delete, idx, len, null));
+                        result.Add(new DiffOp<T>(OperationType.Delete, idx, len));
                         continue;
                     }
                     // Merge Inserts/Adds
                     case OperationType.Insert:
                     case OperationType.Add:
                     {
-                        var vals = DisposableList<T>.Create(op.Values!);
-                        int idx = op.Index;
-                        bool isAdd = op.Type == OperationType.Add;
+                        var vals = DisposableList<T>.Create(op.values!);
+                        int idx = op.index;
+                        bool isAdd = op.type == OperationType.Add;
 
                         while (i + 1 < ops.Count &&
-                               ops[i + 1].Type == op.Type &&
-                               (isAdd || ops[i + 1].Index == idx + vals.Count))
+                               ops[i + 1].type == op.type &&
+                               (isAdd || ops[i + 1].index == idx + vals.Count))
                         {
-                            vals.AddRange(ops[i + 1].Values!);
+                            vals.AddRange(ops[i + 1].values!);
                             i++;
                         }
 
-                        result.Add(new DiffOp<T>(op.Type, idx, 0, vals));
+                        result.Add(new DiffOp<T>(op.type, idx, 0, vals));
                         continue;
                     }
                     default:
@@ -219,6 +181,32 @@ namespace PurrNet.Packing
             }
 
             return result;
+        }
+
+        public static void Apply<T>(DisposableList<T> list, DisposableList<DiffOp<T>> ops)
+        {
+            int opsCount = ops.Count;
+
+            for (int i = opsCount - 1; i >= 0; i--)
+            {
+                var op = ops[i];
+                if (op.type == OperationType.Delete)
+                    list.RemoveRange(op.index, op.length);
+            }
+
+            for (int i = 0; i < opsCount; i++)
+            {
+                var op = ops[i];
+                if (op is { type: OperationType.Insert, values: { isDisposed: false } })
+                    list.InsertRange(op.index, op.values);
+            }
+
+            for (int i = 0; i < opsCount; i++)
+            {
+                var op = ops[i];
+                if (op is { type: OperationType.Add, values: { isDisposed: false } })
+                    list.AddRange(op.values);
+            }
         }
     }
 }

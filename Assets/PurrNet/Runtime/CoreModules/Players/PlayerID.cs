@@ -13,17 +13,17 @@ namespace PurrNet
         [UsedByIL]
         public static PlayerID? GetNullable(PlayerID player) => player;
 
-        private PackedULong _id { get; }
+        private Size _id { get; }
 
         public bool isBot { get; }
 
-        public PackedULong id => _id;
+        public Size id => _id;
 
         public static readonly PlayerID Server = new PlayerID(0, false);
 
         public bool isServer => _id == 0;
 
-        public PlayerID(PackedULong id, bool isBot)
+        public PlayerID(Size id, bool isBot)
         {
             _id = id;
             this.isBot = isBot;
