@@ -181,10 +181,7 @@ namespace PurrNet.Transports
             {
                 if (_connections[i] == conn)
                 {
-                    if (_peers.ContainsKey(conn))
-                    {
-                        _peers.Remove(conn);
-                    }
+                    _peers.Remove(conn);
                     _connections.RemoveAt(i);
                     break;
                 }
@@ -198,7 +195,7 @@ namespace PurrNet.Transports
         {
             var conn = new Connection(peer.Id);
 
-            _peers.Add(conn, PeerInfo.Generate(peer));
+            _peers[conn] = PeerInfo.Generate(peer);
 	  
             _connections.Add(conn);
             onConnected?.Invoke(conn, true);
