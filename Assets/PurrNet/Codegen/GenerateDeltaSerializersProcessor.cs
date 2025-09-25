@@ -28,6 +28,7 @@ namespace PurrNet.Codegen
         private static void CreateReadMethod(ModuleDefinition module, MethodDefinition method, TypeReference typeRef,
             TypeReference bitStreamType)
         {
+            var packerType = module.GetTypeDefinition(typeof(Packer)).Import(module);
             var packerGenType = module.GetTypeDefinition(typeof(Packer<>)).Import(module);
             var deltaPackerGenType = module.GetTypeDefinition(typeof(DeltaPacker<>)).Import(module);
 
@@ -58,7 +59,7 @@ namespace PurrNet.Codegen
 
             var il = method.Body.GetILProcessor();
             var endOfFunction = il.Create(OpCodes.Ret);
-            var elseBlock = il.Create(OpCodes.Ldarg_2);
+            var elseBlock = il.Create(OpCodes.Nop);
 
             var standaloneType = GenerateSerializersProcessor.HasInterfaceExtra(type, typeof(IStandaloneSerializable));
 
@@ -250,7 +251,18 @@ namespace PurrNet.Codegen
 
             // value = oldValue
 
+            // Ldarg_2 = Packer.Copy
+            il.Emit(OpCodes.Ldarg_2);
             il.Emit(OpCodes.Ldarg_1);
+
+            if (typeRef.Resolve()?.IsUnmanaged() != true)
+            {
+                var copy = packerType.GetMethod("Copy", true).Import(module);
+                var copyGeneric = new GenericInstanceMethod(copy);
+                copyGeneric.GenericArguments.Add(typeRef);
+                il.Emit(OpCodes.Call, copyGeneric);
+            }
+
             il.Emit(OpCodes.Stobj, typeRef);
 
             il.Append(endOfFunction);

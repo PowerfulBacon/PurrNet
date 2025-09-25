@@ -36,6 +36,11 @@ namespace PurrNet.Packing
                     scope.Write<DiffOp<T>>(changes[i]);
                 scope.Write(DiffOp<T>.FinalOperation());
             }
+            else if (old.isDisposed != value.isDisposed)
+            {
+                scope.Write<bool>(true);
+                scope.Write(DiffOp<T>.FinalOperation());
+            }
 
             return scope.Complete();
         }
@@ -84,7 +89,12 @@ namespace PurrNet.Packing
                 changes.Add(operation);
             }
 
-            MyersDiff.Apply(value, changes);
+            if (changes.Count > 0)
+            {
+                MyersDiff.Apply(value, changes);
+                for (var i = 0; i < changes.Count; i++)
+                    changes[i].Dispose();
+            }
 
             changes.Dispose();
         }

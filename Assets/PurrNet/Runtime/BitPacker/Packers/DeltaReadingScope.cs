@@ -1,4 +1,6 @@
-﻿namespace PurrNet.Packing
+﻿using System;
+
+namespace PurrNet.Packing
 {
     public static class DeltaReadingScope
     {
@@ -7,6 +9,8 @@
             bool hasChanged = Packer<bool>.Read(packer);
             if (!hasChanged)
             {
+                if (newVal is IDisposable disposable)
+                    disposable.Dispose();
                 newVal = Packer.Copy(old);
                 return false;
             }
