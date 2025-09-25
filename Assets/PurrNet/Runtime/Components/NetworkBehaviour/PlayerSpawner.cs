@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using PurrNet.Logging;
 using PurrNet.Modules;
@@ -6,6 +5,17 @@ using UnityEngine;
 
 namespace PurrNet
 {
+    public struct SpawnPoint
+    {
+        public Vector3 position;
+        public Quaternion rotation;
+    }
+
+    public interface IProvideSpawnPoints
+    {
+        public SpawnPoint NextSpawnPoint(PlayerID player);
+    }
+
     public class PlayerSpawner : PurrMonoBehaviour
     {
         [SerializeField, HideInInspector] private NetworkIdentity playerPrefab;
@@ -16,11 +26,25 @@ namespace PurrNet
         [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
         private int _currentSpawnPoint;
 
+        private IProvideSpawnPoints _spawnPointProvider;
+
         /// <summary>
-        /// Instance-level event hook that allows custom spawn positions.
-        /// Return null to let the spawner fall back to default logic.
+        /// Sets a provider that will be used to provide spawn points for players.
+        /// Spawn points lists will be ignored.
         /// </summary>
-        public event Func<PlayerID, SceneID, bool, (Vector3 position, Quaternion rotation)?> OnRequestSpawnPosition;
+        public void SetRespawnPointProvider(IProvideSpawnPoints provider)
+        {
+            _spawnPointProvider = provider;
+        }
+
+        /// <summary>
+        /// Resets the spawn point provider.
+        /// Uses the spawn points list instead.
+        /// </summary>
+        public void ResetSpawnPointProvider()
+        {
+            _spawnPointProvider = null;
+        }
 
         private void Awake()
         {
@@ -113,11 +137,10 @@ namespace PurrNet
 
             CleanupSpawnPoints();
 
-            (Vector3 pos, Quaternion rot)? customSpawn = OnRequestSpawnPosition?.Invoke(player, scene, asServer);
-            if (customSpawn.HasValue)
+            if (_spawnPointProvider != null)
             {
-                var (position, rotation) = customSpawn.Value;
-                newPlayer = UnityProxy.Instantiate(_playerPrefab, position, rotation, unityScene);
+                var point = _spawnPointProvider.NextSpawnPoint(player);
+                newPlayer = UnityProxy.Instantiate(_playerPrefab, point.position, point.rotation, unityScene);
             }
             else if (spawnPoints.Count > 0)
             {
