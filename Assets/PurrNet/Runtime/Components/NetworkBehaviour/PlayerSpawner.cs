@@ -5,6 +5,17 @@ using UnityEngine;
 
 namespace PurrNet
 {
+    public struct SpawnPoint
+    {
+        public Vector3 position;
+        public Quaternion rotation;
+    }
+
+    public interface IProvideSpawnPoints
+    {
+        public SpawnPoint NextSpawnPoint(PlayerID player);
+    }
+
     public class PlayerSpawner : PurrMonoBehaviour
     {
         [SerializeField, HideInInspector] private NetworkIdentity playerPrefab;
@@ -14,6 +25,26 @@ namespace PurrNet
 
         [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
         private int _currentSpawnPoint;
+
+        private IProvideSpawnPoints _spawnPointProvider;
+
+        /// <summary>
+        /// Sets a provider that will be used to provide spawn points for players.
+        /// Spawn points lists will be ignored.
+        /// </summary>
+        public void SetRespawnPointProvider(IProvideSpawnPoints provider)
+        {
+            _spawnPointProvider = provider;
+        }
+
+        /// <summary>
+        /// Resets the spawn point provider.
+        /// Uses the spawn points list instead.
+        /// </summary>
+        public void ResetSpawnPointProvider()
+        {
+            _spawnPointProvider = null;
+        }
 
         private void Awake()
         {
@@ -106,7 +137,12 @@ namespace PurrNet
 
             CleanupSpawnPoints();
 
-            if (spawnPoints.Count > 0)
+            if (_spawnPointProvider != null)
+            {
+                var point = _spawnPointProvider.NextSpawnPoint(player);
+                newPlayer = UnityProxy.Instantiate(_playerPrefab, point.position, point.rotation, unityScene);
+            }
+            else if (spawnPoints.Count > 0)
             {
                 var spawnPoint = spawnPoints[_currentSpawnPoint];
                 _currentSpawnPoint = (_currentSpawnPoint + 1) % spawnPoints.Count;
