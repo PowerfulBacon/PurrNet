@@ -151,7 +151,7 @@ namespace PurrNet.Packing
             var scope = new DeltaWritingScope(packer);
 
             if (Packer.AreEqual(old, newVal))
-                return scope.Complete();
+                return scope.CompleteWithoutChanges();
 
             WriteOperation<T>(packer, newVal);
             return scope.CompleteWithChanges();
