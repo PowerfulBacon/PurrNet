@@ -1279,7 +1279,10 @@ namespace PurrNet.Codegen
 
             if (!isValidReturn)
             {
-                Error(messages, $"RPC '{method.Name}' RPC must return <b>void</b>, <b>Task</b> or <b>UniTask</b>",
+                Error(messages,
+                    method.ReturnType.Name.Contains("UniTask")
+                        ? $"RPC '{method.Name}' uses <b>UniTask</b>, you need to enable support under `Tools/PurrNet/Packages/Install UniTask` or define the `UNITASK_PURRNET_SUPPORT` symbol."
+                        : $"RPC '{method.Name}' RPC must return <b>void</b>, <b>Task</b> or <b>UniTask</b>",
                     method);
                 return null;
             }
