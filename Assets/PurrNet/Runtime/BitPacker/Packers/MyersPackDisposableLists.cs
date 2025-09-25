@@ -10,14 +10,16 @@ namespace PurrNet.Packing
         {
             var scope = new DeltaWritingScope(packer);
 
+            if (Packer.AreEqual(old, value))
+                return scope.Complete();
+
             if (value.isDisposed)
             {
-                if (value.isDisposed == old.isDisposed)
-                    return scope.Complete();
-
                 scope.Write<bool>(false);
                 return scope.Complete();
             }
+
+            scope.Write<bool>(true);
 
             DisposableList<DiffOp<T>> changes;
 
@@ -30,18 +32,12 @@ namespace PurrNet.Packing
 
             if (changes.Count > 0)
             {
-                scope.Write<bool>(true);
                 int count = changes.Count;
                 for (int i = 0; i < count; i++)
                     scope.Write<DiffOp<T>>(changes[i]);
-                scope.Write(DiffOp<T>.FinalOperation());
-            }
-            else if (old.isDisposed != value.isDisposed)
-            {
-                scope.Write<bool>(true);
-                scope.Write(DiffOp<T>.FinalOperation());
             }
 
+            scope.Write(DiffOp<T>.FinalOperation());
             return scope.Complete();
         }
 
@@ -59,31 +55,16 @@ namespace PurrNet.Packing
                 return;
             }
 
-            if (!old.isDisposed)
-            {
-                if (value.isDisposed)
-                {
-                    value = DisposableList<T>.Create(old.Count);
-                    value.AddRange(old);
-                }
-                else if (value.list != old.list)
-                {
-                    value.Clear();
-                    value.AddRange(old);
-                }
-            }
-            else if (value.isDisposed)
-            {
+            if (value.isDisposed || (!old.isDisposed && old.list == value.list))
                 value = DisposableList<T>.Create();
-            }
-            else value.Clear();
+
+            if (!old.isDisposed)
+                value.AddRange(old);
 
             var changes = DisposableList<DiffOp<T>>.Create();
-
-            while (packer.positionInBits < packer.length * 8)
+            while (true)
             {
-                DiffOp<T> operation = default;
-                packer.ReadOperation(ref operation);
+                var operation = Packer<DiffOp<T>>.Read(packer);
                 if (operation.type == OperationType.End)
                     break;
                 changes.Add(operation);
