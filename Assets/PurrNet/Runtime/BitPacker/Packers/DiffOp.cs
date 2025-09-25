@@ -69,13 +69,44 @@ namespace PurrNet.Packing
                     break;
                 case OperationType.Insert:
                     Packer<Size>.Write(packer, value.index);
-                    Packer<DisposableList<T>>.Write(packer, value.values);
+                    WriteListCompressed(packer, value.values);
+                    //Packer<DisposableList<T>>.Write(packer, value.values);
                     break;
                 case OperationType.Add:
-                    Packer<DisposableList<T>>.Write(packer, value.values);
+                    WriteListCompressed(packer, value.values);
+                    //Packer<DisposableList<T>>.Write(packer, value.values);
                     break;
                 default: throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private static void WriteListCompressed<T>(BitPacker packer, DisposableList<T> values)
+        {
+            T last = default;
+            Packer<Size>.Write(packer, values.Count);
+            for (var i = 0; i < values.Count; i++)
+            {
+                var v = values[i];
+                DeltaPacker<T>.Write(packer, last, v);
+                last = Packer.Copy(v);
+            }
+        }
+
+        private static DisposableList<T> ReadListCompressed<T>(BitPacker packer)
+        {
+            var count = Packer<Size>.Read(packer);
+            var list = DisposableList<T>.Create(count);
+            var last = default(T);
+
+            for (var i = 0; i < count; i++)
+            {
+                T current = default;
+                DeltaPacker<T>.Read(packer, last, ref current);
+                last = Packer.Copy(current);
+                list.Add(current);
+            }
+
+            return list;
         }
 
         [UsedByIL]
@@ -101,11 +132,13 @@ namespace PurrNet.Packing
                     break;
                 case OperationType.Insert:
                     Packer<Size>.Read(packer, ref size);
-                    Packer<DisposableList<T>>.Read(packer, ref values);
+                    values = ReadListCompressed<T>(packer);
+                    //Packer<DisposableList<T>>.Read(packer, ref values);
                     value = new DiffOp<T>(type, (int)size.value, values.Count, values);
                     break;
                 case OperationType.Add:
-                    Packer<DisposableList<T>>.Read(packer, ref values);
+                    // Packer<DisposableList<T>>.Read(packer, ref values);
+                    values = ReadListCompressed<T>(packer);
                     value = new DiffOp<T>(type, 0, values.Count, values);
                     break;
                 default: throw new ArgumentOutOfRangeException();

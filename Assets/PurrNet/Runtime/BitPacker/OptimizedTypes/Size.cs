@@ -16,6 +16,8 @@ namespace PurrNet.Packing
 
         public static implicit operator uint(Size value) => value.value;
 
+        public static implicit operator int(Size value) => (int)value.value;
+
         public static implicit operator Size(long value) => new Size((uint)value);
 
         public static implicit operator Size(int value) => new Size((uint)value);

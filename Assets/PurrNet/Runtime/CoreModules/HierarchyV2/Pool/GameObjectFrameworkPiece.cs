@@ -1,13 +1,14 @@
 ﻿using System.Text;
+using PurrNet.Packing;
 using UnityEngine;
 
 namespace PurrNet.Modules
 {
     public readonly struct LocalTransform
     {
-        public readonly Vector3 localPosition;
-        public readonly Quaternion localRotation;
-        public readonly Vector3 localScale;
+        public readonly CompressedVector3 localPosition;
+        public readonly PackedQuaternion localRotation;
+        public readonly CompressedVector3 localScale;
 
         public LocalTransform(Vector3 position, Quaternion rotation, Vector3 localScale)
         {
@@ -27,7 +28,7 @@ namespace PurrNet.Modules
     {
         public readonly PrefabPieceID pid;
         public readonly NetworkID id;
-        public readonly int childCount;
+        public readonly Size childCount;
         public readonly bool isActive;
         public readonly int[] inversedRelativePath;
 
