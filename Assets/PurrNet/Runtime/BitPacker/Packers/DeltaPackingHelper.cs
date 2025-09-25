@@ -33,7 +33,7 @@
 
         public bool CompleteWithChanges()
         {
-            packer.WriteAt(hasChangedFlag, hasChanged);
+            packer.WriteAt(hasChangedFlag, true);
             return true;
         }
 
