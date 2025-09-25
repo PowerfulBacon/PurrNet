@@ -889,7 +889,7 @@ namespace PurrNet.Modules
             {
                 case CleanupStage.None:
                     {
-                        if (rules.SceneCleanupModeOnDisconnect() == SceneCleanupMode.AllScenes)
+                        if (rules.SceneCleanupModeOnDisconnect() == SceneCleanupMode.All)
                         {
                             if (_networkManager.originalSceneBuildIndex == -1)
                             {
@@ -979,6 +979,10 @@ namespace PurrNet.Modules
                         if (_ogSceneLoad is { isDone: true })
                         {
                             _scenes.Clear();
+
+                            if (_networkManager.TryGetModule(!_asServer, out ScenesModule module))
+                                module._cleanupStage = CleanupStage.Done;
+
                             _cleanupStage = CleanupStage.Done;
                         }
 
