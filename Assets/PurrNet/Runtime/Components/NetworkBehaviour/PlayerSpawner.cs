@@ -13,7 +13,7 @@ namespace PurrNet
 
     public interface IProvideSpawnPoints
     {
-        public SpawnPoint NextSpawnPoint(PlayerID player);
+        public SpawnPoint NextSpawnPoint(PlayerID player, SceneID scene);
     }
 
     public class PlayerSpawner : PurrMonoBehaviour
@@ -139,7 +139,7 @@ namespace PurrNet
 
             if (_spawnPointProvider != null)
             {
-                var point = _spawnPointProvider.NextSpawnPoint(player);
+                var point = _spawnPointProvider.NextSpawnPoint(player, scene);
                 newPlayer = UnityProxy.Instantiate(_playerPrefab, point.position, point.rotation, unityScene);
             }
             else if (spawnPoints.Count > 0)
