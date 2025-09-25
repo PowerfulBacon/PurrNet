@@ -9,6 +9,28 @@ namespace PurrNet.Packing
     {
         public static DisposableList<DiffOp<T>> Diff<T>(IReadOnlyList<T> a, IReadOnlyList<T> b)
         {
+            switch (a.Count)
+            {
+                case 0 when b.Count == 0:
+                    return DisposableList<DiffOp<T>>.Create();
+                case 0:
+                {
+                    var res = DisposableList<DiffOp<T>>.Create();
+                    if (b.Count == 0)
+                        return res;
+                    var bList = DisposableList<T>.Create(b);
+                    res.Add(new DiffOp<T>(OperationType.Add, 0, 0, bList));
+                    return res;
+                }
+            }
+
+            if (b.Count == 0)
+            {
+                var res = DisposableList<DiffOp<T>>.Create();
+                res.Add(new DiffOp<T>(OperationType.Delete, 0, a.Count));
+                return res;
+            }
+
             int n = a.Count, m = b.Count;
             int max = n + m;
             int size = 2 * max + 1;       // total array size per wavefront
