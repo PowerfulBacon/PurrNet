@@ -56,6 +56,8 @@ namespace PurrNet.Transports
 
         public IReadOnlyList<Connection> connections => _connections;
 
+        public IReadOnlyDictionary<Connection, PeerInfo> peers => _peers;
+
         private EventBasedNetListener _clientListener;
         private EventBasedNetListener _serverListener;
 
@@ -67,6 +69,8 @@ namespace PurrNet.Transports
         public ConnectionState listenerState { get; private set; } = ConnectionState.Disconnected;
 
         readonly List<Connection> _connections = new List<Connection>();
+
+        readonly Dictionary<Connection, PeerInfo> _peers = new Dictionary<Connection, PeerInfo>();
 
         public override bool isSupported => Application.platform != RuntimePlatform.WebGLPlayer;
 
@@ -177,6 +181,10 @@ namespace PurrNet.Transports
             {
                 if (_connections[i] == conn)
                 {
+                    if (_peers.ContainsKey(conn))
+                    {
+                        _peers.Remove(conn);
+                    }
                     _connections.RemoveAt(i);
                     break;
                 }
@@ -189,6 +197,9 @@ namespace PurrNet.Transports
         private void OnServerConnected(NetPeer peer)
         {
             var conn = new Connection(peer.Id);
+
+            _peers.Add(conn, PeerInfo.Generate(peer));
+	  
             _connections.Add(conn);
             onConnected?.Invoke(conn, true);
         }
@@ -298,6 +309,7 @@ namespace PurrNet.Transports
                 listenerState = ConnectionState.Disconnected;
                 TriggerConnectionStateEvent(true);
 
+                _peers.Clear();
                 _connections.Clear();
             }
         }
@@ -364,6 +376,7 @@ namespace PurrNet.Transports
             TriggerConnectionStateEvent(true);
             TriggerConnectionStateEvent(false);
 
+            _peers.Clear();
             _connections.Clear();
         }
 
