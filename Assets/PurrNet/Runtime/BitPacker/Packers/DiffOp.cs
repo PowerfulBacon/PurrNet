@@ -87,7 +87,7 @@ namespace PurrNet.Packing
             {
                 var v = values[i];
                 DeltaPacker<T>.Write(packer, last, v);
-                last = Packer.Copy(v);
+                last = v;
             }
         }
 
@@ -101,7 +101,7 @@ namespace PurrNet.Packing
             {
                 T current = default;
                 DeltaPacker<T>.Read(packer, last, ref current);
-                last = Packer.Copy(current);
+                last = current;
                 list.Add(current);
             }
 
