@@ -5,20 +5,20 @@ namespace PurrNet.Packing
     [Serializable]
     public struct Size : IEquatable<Size>, IPackedAuto
     {
-        public ulong value;
+        public uint value;
 
-        public Size(ulong value)
+        public Size(uint value)
         {
             this.value = value;
         }
 
-        public static implicit operator Size(ulong value) => new Size(value);
+        public static implicit operator Size(uint value) => new Size(value);
 
-        public static implicit operator ulong(Size value) => value.value;
+        public static implicit operator uint(Size value) => value.value;
 
-        public static implicit operator Size(long value) => new Size((ulong)value);
+        public static implicit operator Size(long value) => new Size((uint)value);
 
-        public static implicit operator Size(int value) => new Size((ulong)value);
+        public static implicit operator Size(int value) => new Size((uint)value);
 
         public bool Equals(Size other)
         {

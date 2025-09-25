@@ -311,8 +311,8 @@ namespace PurrNet.Packing
 
             if (hasChanged)
             {
-                ulong diff = newvalue.value - oldvalue.value;
-                Packer<Size>.Write(packer, diff);
+                long diff = newvalue.value - oldvalue.value;
+                Packer<PackedLong>.Write(packer, diff);
             }
 
             return hasChanged;
@@ -326,9 +326,9 @@ namespace PurrNet.Packing
 
             if (hasChanged)
             {
-                Size packed = default;
-                Packer<Size>.Read(packer, ref packed);
-                value.value = oldvalue.value + packed.value;
+                PackedLong packed = default;
+                Packer<PackedLong>.Read(packer, ref packed);
+                value.value = (uint)(oldvalue.value + packed.value);
             }
             else value = oldvalue;
         }

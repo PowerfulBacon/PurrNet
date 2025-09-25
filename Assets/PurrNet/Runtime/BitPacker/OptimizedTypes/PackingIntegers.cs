@@ -211,33 +211,33 @@ namespace PurrNet.Packing
             int segmentCount = SEGMENTS - emptyChunks;
             int pointer = 0;
 
-            const ulong mask = (ulong.MaxValue >> (TOTAL_BITS - CHUNK));
+            const uint mask = uint.MaxValue >> (32 - CHUNK);
             do
             {
-                ulong isolated = (value.value >> pointer) & mask;
+                uint isolated = (value.value >> pointer) & mask;
                 packer.WriteBits(isolated, CHUNK);
                 pointer += CHUNK;
 
                 --segmentCount;
                 packer.WriteBits(segmentCount <= 0 ? 0u : 1u, 1);
-            } while (segmentCount > 0 && pointer < TOTAL_BITS);
+            } while (segmentCount > 0 && pointer < 32);
         }
 
         [UsedByIL]
         public static void Read(BitPacker packer, ref Size value)
         {
-            ulong result = 0;
+            uint result = 0;
             int pointer = 0;
             bool continueReading;
 
             do
             {
-                ulong chunk = packer.ReadBits(CHUNK);
+                uint chunk = (uint)packer.ReadBits(CHUNK);
                 result |= chunk << pointer;
                 pointer += CHUNK;
 
                 continueReading = packer.ReadBits(1) == 1;
-            } while (continueReading && pointer < TOTAL_BITS);
+            } while (continueReading && pointer < 32);
 
             value.value = result;
         }
