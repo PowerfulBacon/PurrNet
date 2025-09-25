@@ -1,7 +1,6 @@
 ﻿using System;
 using PurrNet.Modules;
 using PurrNet.Pooling;
-using UnityEngine;
 
 namespace PurrNet.Packing
 {
@@ -116,9 +115,9 @@ namespace PurrNet.Packing
             value.Dispose();
 
             var type = Packer<OperationType>.Read(packer);
-            Size size = default;
+            Size index = default;
             Size length = default;
-            DisposableList<T> values = default;
+            DisposableList<T> values;
 
             switch (type)
             {
@@ -126,15 +125,15 @@ namespace PurrNet.Packing
                     value = DiffOp<T>.FinalOperation();
                     break;
                 case OperationType.Delete:
-                    Packer<Size>.Read(packer, ref size);
+                    Packer<Size>.Read(packer, ref index);
                     Packer<Size>.Read(packer, ref length);
-                    value = new DiffOp<T>(type, (int)size.value, (int)length.value);
+                    value = new DiffOp<T>(type, (int)index.value, (int)length.value);
                     break;
                 case OperationType.Insert:
-                    Packer<Size>.Read(packer, ref size);
+                    Packer<Size>.Read(packer, ref index);
                     values = ReadListCompressed<T>(packer);
                     //Packer<DisposableList<T>>.Read(packer, ref values);
-                    value = new DiffOp<T>(type, (int)size.value, values.Count, values);
+                    value = new DiffOp<T>(type, (int)index.value, values.Count, values);
                     break;
                 case OperationType.Add:
                     // Packer<DisposableList<T>>.Read(packer, ref values);
