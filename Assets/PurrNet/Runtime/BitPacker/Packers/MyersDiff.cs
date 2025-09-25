@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using PurrNet.Pooling;
-using UnityEngine;
 
 namespace PurrNet.Packing
 {
