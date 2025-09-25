@@ -60,13 +60,15 @@ namespace PurrNet.Modules
 
             int ntCount = default;
             NetworkID lastNid = default;
+            PackedInt lastLen = default;
 
             Packer<int>.Read(packet, ref ntCount);
 
             for (var i = 0; i < ntCount; i++)
             {
                 PackedInt length = default;
-                Packer<PackedInt>.Read(packet, ref length);
+                DeltaPacker<PackedInt>.Read(packet, lastLen, ref length);
+                lastLen = length;
                 DeltaPacker<NetworkID>.Read(packet, lastNid, ref lastNid);
 
                 if (_factory.TryGetIdentity(_scene, lastNid, out var identity) && identity is NetworkTransform nt &&
@@ -126,6 +128,7 @@ namespace PurrNet.Modules
             var countPos = packer.positionInBits;
 
             int writtenCount = 0;
+            PackedInt lastLen = default;
             Packer<int>.Write(packer, 0);
 
             for (var i = 0; i < count; i++)
@@ -143,7 +146,8 @@ namespace PurrNet.Modules
                 PackedInt length = tmp.positionInBits;
                 tmp.ResetPositionAndMode(true);
 
-                Packer<PackedInt>.Write(packer, length);
+                DeltaPacker<PackedInt>.Write(packer, lastLen, length);
+                lastLen = length;
                 DeltaPacker<NetworkID>.Write(packer, lastNid, nt.id!.Value);
                 packer.WriteBits(tmp, length);
 

@@ -97,20 +97,8 @@ namespace PurrNet.Packing
 
             Packer<bool>.Write(packer, true);
 
-            var deltaAsInt = Mathf.RoundToInt(delta / CompressedFloat.PRECISION);
-            var estimatedNewValue = oldvalue + deltaAsInt * CompressedFloat.PRECISION;
-            bool isCorrect = Mathf.Abs(newvalue - estimatedNewValue) < CompressedFloat.PRECISION * 2;
-
-            Packer<bool>.Write(packer, isCorrect);
-
-            if (isCorrect)
-            {
-                Packer<PackedInt>.Write(packer, deltaAsInt);
-            }
-            else
-            {
-                Packer<CompressedFloat>.Write(packer, newvalue);
-            }
+            var deltaAsInt = (long)Math.Round(delta / CompressedFloat.PRECISION);
+            Packer<PackedLong>.Write(packer, deltaAsInt);
 
             return true;
         }
@@ -123,19 +111,9 @@ namespace PurrNet.Packing
 
             if (hasChanged)
             {
-                bool isCorrect = default;
-                Packer<bool>.Read(packer, ref isCorrect);
-
-                if (isCorrect)
-                {
-                    PackedInt packed = default;
-                    Packer<PackedInt>.Read(packer, ref packed);
-                    value = oldvalue + packed.value * CompressedFloat.PRECISION;
-                }
-                else
-                {
-                    Packer<CompressedFloat>.Read(packer, ref value);
-                }
+                PackedLong packed = default;
+                Packer<PackedLong>.Read(packer, ref packed);
+                value = oldvalue + packed.value * CompressedFloat.PRECISION;
             }
             else value = oldvalue;
         }
