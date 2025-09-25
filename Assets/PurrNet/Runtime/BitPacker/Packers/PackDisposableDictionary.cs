@@ -96,8 +96,10 @@ namespace PurrNet.Packing
                 newKeysList.AddRange(value.Keys);
                 newValuesList.AddRange(value.Values);
 
-                hasChanged = packer.WriteDisposableDeltaList(oldKeysList, newKeysList) || hasChanged;
-                hasChanged = packer.WriteDisposableDeltaList(oldValuesList, newValuesList) || hasChanged;
+                hasChanged = DeltaPacker<DisposableList<TKey>>.Write(packer, oldKeysList, newKeysList) || hasChanged;
+                //hasChanged = packer.WriteDisposableDeltaList(oldKeysList, newKeysList) || hasChanged;
+                hasChanged = DeltaPacker<DisposableList<TValue>>.Write(packer, oldValuesList, newValuesList) || hasChanged;
+                //hasChanged = packer.WriteDisposableDeltaList(oldValuesList, newValuesList) || hasChanged;
 
                 oldKeysList.Dispose();
                 oldValuesList.Dispose();
@@ -170,8 +172,10 @@ namespace PurrNet.Packing
             var keysList = DisposableList<TKey>.Create(newCount.value);
             var valuesList = DisposableList<TValue>.Create(newCount.value);
 
-            packer.ReadDisposableDeltaList(oldKeysList, ref keysList);
-            packer.ReadDisposableDeltaList(oldValuesList, ref valuesList);
+            DeltaPacker<DisposableList<TKey>>.Read(packer, oldKeysList, ref keysList);
+            //packer.ReadDisposableDeltaList(oldKeysList, ref keysList);
+            DeltaPacker<DisposableList<TValue>>.Read(packer, oldValuesList, ref valuesList);
+            //packer.ReadDisposableDeltaList(oldValuesList, ref valuesList);
 
             for (int i = 0; i < newCount.value; i++)
                 value.Add(keysList[i], valuesList[i]);

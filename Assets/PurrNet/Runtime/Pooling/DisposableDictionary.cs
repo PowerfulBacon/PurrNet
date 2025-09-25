@@ -20,7 +20,6 @@ namespace PurrNet.Pooling
             val._isAllocated = true;
             return val;
         }
-        
         public static DisposableDictionary<TKey, TValue> Create(IDictionary<TKey, TValue> copyFrom)
         {
             var val = new DisposableDictionary<TKey, TValue>();
@@ -181,6 +180,13 @@ namespace PurrNet.Pooling
                     throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
                 return dictionary.Values;
             }
+        }
+
+        public TValue GetValueOrDefault(TKey key)
+        {
+            if (!_isAllocated)
+                throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+            return dictionary.GetValueOrDefault(key);
         }
     }
 }
