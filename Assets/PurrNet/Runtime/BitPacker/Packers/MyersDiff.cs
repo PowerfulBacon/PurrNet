@@ -110,7 +110,7 @@ namespace PurrNet.Packing
                 {
                     // right (delete)
                     prevK = k - 1;
-                    prevX = v[prevK + offset] + 1;
+                    prevX = v[prevK + offset];
                     down = false;
                 }
 
@@ -139,7 +139,7 @@ namespace PurrNet.Packing
                     else
                     {
                         x--;
-                        elementOps.Add(new DiffOp<T>(OperationType.Delete, Math.Max(x - 1, 0), 1));
+                        elementOps.Add(new DiffOp<T>(OperationType.Delete, x, 1));
                     }
                 }
             }
