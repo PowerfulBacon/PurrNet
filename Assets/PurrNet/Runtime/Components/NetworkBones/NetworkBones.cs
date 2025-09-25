@@ -96,6 +96,10 @@ namespace PurrNet
                 for (var bIdx = 0; bIdx < _extraBones.Length; bIdx++)
                 {
                     var bone = _extraBones[bIdx];
+
+                    if (!bone)
+                        continue;
+
                     if (!_bones.Contains(bone))
                         _bones.Add(bone);
                 }

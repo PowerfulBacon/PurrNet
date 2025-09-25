@@ -3444,6 +3444,7 @@ MonoBehaviour:
   checkInterval: 0.33
   placement: 1
   _displayType: 3
+  _displayTarget: 6
   fontSize: 13
   textColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1284249959
