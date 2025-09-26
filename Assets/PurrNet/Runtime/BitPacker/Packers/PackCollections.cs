@@ -53,8 +53,8 @@ namespace PurrNet.Packing
         {
             Packer<DisposableList<T>>.RegisterWriter(PackDisposableLists.WriteDisposableList);
             Packer<DisposableList<T>>.RegisterReader(PackDisposableLists.ReadDisposableList);
-            DeltaPacker<DisposableList<T>>.RegisterWriter(PackDisposableLists.WriteDisposableDeltaList);
-            DeltaPacker<DisposableList<T>>.RegisterReader(PackDisposableLists.ReadDisposableDeltaList);
+            DeltaPacker<DisposableList<T>>.RegisterWriter(MyersPackDisposableLists.WriteDisposableDeltaList);
+            DeltaPacker<DisposableList<T>>.RegisterReader(MyersPackDisposableLists.ReadDisposableDeltaList);
             DiffOpSerializer.Register<T>();
         }
 

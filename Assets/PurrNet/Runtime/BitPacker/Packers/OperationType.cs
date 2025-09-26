@@ -32,7 +32,7 @@ namespace PurrNet.Packing
             if (old != newVal)
             {
                 WriteOperationType(packer, newVal);
-                scope.MarkDirty();
+                return scope.CompleteWithChanges();
             }
             return scope.Complete();
         }

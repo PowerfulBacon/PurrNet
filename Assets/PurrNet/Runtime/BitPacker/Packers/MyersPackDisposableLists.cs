@@ -59,14 +59,20 @@ namespace PurrNet.Packing
                 value = DisposableList<T>.Create();
 
             if (!old.isDisposed)
+            {
+                value.Clear();
                 value.AddRange(old);
+            }
 
             var changes = DisposableList<DiffOp<T>>.Create();
             while (true)
             {
                 var operation = Packer<DiffOp<T>>.Read(packer);
                 if (operation.type == OperationType.End)
+                {
+                    operation.Dispose();
                     break;
+                }
                 changes.Add(operation);
             }
 
