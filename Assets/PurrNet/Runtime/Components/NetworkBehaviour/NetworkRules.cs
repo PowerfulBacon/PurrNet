@@ -9,19 +9,19 @@ namespace PurrNet
     public enum SceneCleanupMode
     {
         /// <summary>
-        /// Do not cleanup any scenes on disconnect.
+        /// Do not cleanup any scenes or reload the starting scene on disconnect.
         /// </summary>
         Off,
 
         /// <summary>
-        /// Cleanup scenes that were loaded through the network, and load the starting scene additively.
+        /// Cleanup scenes that were loaded through the network, and reload the starting scene additively.
         /// </summary>
-        OnlineScenesOnly,
+        OnlineOnly,
 
         /// <summary>
-        /// Cleanup all scenes and load the start scene in single mode.
+        /// Cleanup all scenes and reload the starting scene in single mode.
         /// </summary>
-        AllScenes
+        All
     }
 
     [Serializable]
@@ -87,7 +87,7 @@ namespace PurrNet
 
         public bool removePlayerFromSceneOnDisconnect;
 
-        [Tooltip("On disconnect, unload scenes based on the cleanup mode and load the starting scene")]
+        [Tooltip("On disconnect, unload scenes and reload the starting scene based on the selected cleanup mode")]
         public SceneCleanupMode sceneCleanupModeOnDisconnect;
 
         public bool alwaysIncludeDontDestroyOnLoadScene;
@@ -95,8 +95,8 @@ namespace PurrNet
         [Obsolete("Use sceneCleanupModeOnDisconnect instead.")]
         public bool cleanupScenesOnDisconnect
         {
-            readonly get => sceneCleanupModeOnDisconnect == SceneCleanupMode.OnlineScenesOnly;
-            set => sceneCleanupModeOnDisconnect = value ? SceneCleanupMode.OnlineScenesOnly : SceneCleanupMode.Off;
+            readonly get => sceneCleanupModeOnDisconnect == SceneCleanupMode.OnlineOnly;
+            set => sceneCleanupModeOnDisconnect = value ? SceneCleanupMode.OnlineOnly : SceneCleanupMode.Off;
         }
 
         public readonly void OnBeforeSerialize()
@@ -106,9 +106,9 @@ namespace PurrNet
 
         public void OnAfterDeserialize()
         {
-            if (_cleanupScenesOnDisconnect && sceneCleanupModeOnDisconnect != SceneCleanupMode.OnlineScenesOnly)
+            if (_cleanupScenesOnDisconnect && sceneCleanupModeOnDisconnect != SceneCleanupMode.OnlineOnly)
             {
-                sceneCleanupModeOnDisconnect = SceneCleanupMode.OnlineScenesOnly;
+                sceneCleanupModeOnDisconnect = SceneCleanupMode.OnlineOnly;
                 _cleanupScenesOnDisconnect = false;
             }
         }
@@ -172,7 +172,7 @@ namespace PurrNet
         private NetworkSceneRules _defaultSceneRules = new NetworkSceneRules
         {
             removePlayerFromSceneOnDisconnect = false,
-            sceneCleanupModeOnDisconnect = SceneCleanupMode.OnlineScenesOnly,
+            sceneCleanupModeOnDisconnect = SceneCleanupMode.OnlineOnly,
             alwaysIncludeDontDestroyOnLoadScene = false
         };
 
