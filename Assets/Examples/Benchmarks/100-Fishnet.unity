@@ -522,7 +522,7 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   _fishPrefab: {fileID: 5999752480146570505, guid: ce611468ecbf48540a5a5c8dc5bc09f0, type: 3}
-  _fishCount: 100
+  _fishCount: 800
 --- !u!1 &682580130
 GameObject:
   m_ObjectHideFlags: 0

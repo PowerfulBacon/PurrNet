@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace PurrNet.Packing
 {
-    [System.Serializable]
+    [Serializable]
     public struct CompressedVector3 : IEquatable<CompressedVector3>
     {
         public CompressedFloat x;
