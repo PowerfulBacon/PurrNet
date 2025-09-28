@@ -107,6 +107,10 @@ namespace PurrNet.Codegen
                 assembly.MainModule.TypeSystem.Object
             );
 
+            var editorType = assembly.MainModule.GetTypeDefinition<GeneratedByILAttribute>().Import(assembly.MainModule);
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters).Import(assembly.MainModule);
+            var editorAttribute = new CustomAttribute(editorConstructor);
+            serializerClass.CustomAttributes.Add(editorAttribute);
             var resolvedType = type.Resolve();
 
             if (resolvedType == null)
@@ -212,7 +216,7 @@ namespace PurrNet.Codegen
             if (ignoreDelta?.Contains(type) == false)
                 GenerateDeltaSerializersProcessor.HandleType(assembly, type, serializerClass);
 
-            RegisterSerializersProcessor.HandleType(type.Module, serializerClass, isEditor, null, null);
+            RegisterSerializersProcessor.HandleType(type.Module, serializerClass, null, null);
         }
 
         private static void HandleHashOnly(AssemblyDefinition assembly, TypeReference type,
@@ -223,9 +227,10 @@ namespace PurrNet.Codegen
 
             var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>()
                 .Import(assembly.MainModule);
-            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
                 .Import(assembly.MainModule);
             var editorAttribute = new CustomAttribute(editorConstructor);
+            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, -1));
             registerMethod.CustomAttributes.Add(editorAttribute);
 
             var il = registerMethod.Body.GetILProcessor();
@@ -249,9 +254,10 @@ namespace PurrNet.Codegen
                 new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
 
             var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
-            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
                 .Import(assembly.MainModule);
             var editorAttribute = new CustomAttribute(editorConstructor);
+            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, -1));
             registerMethod.CustomAttributes.Add(editorAttribute);
 
             registerMethod.Body = new MethodBody(registerMethod)
@@ -271,10 +277,10 @@ namespace PurrNet.Codegen
                 new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
 
             var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
-            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
                 .Import(assembly.MainModule);
             var editorAttribute = new CustomAttribute(editorConstructor);
-
+            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, -1));
             registerMethod.CustomAttributes.Add(editorAttribute);
             registerMethod.Body = new MethodBody(registerMethod)
             {
@@ -294,9 +300,10 @@ namespace PurrNet.Codegen
                 new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
 
             var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
-            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
                 .Import(assembly.MainModule);
             var editorAttribute = new CustomAttribute(editorConstructor);
+            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, -1));
             registerMethod.CustomAttributes.Add(editorAttribute);
             registerMethod.Body = new MethodBody(registerMethod)
             {

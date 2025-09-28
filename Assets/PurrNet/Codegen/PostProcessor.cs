@@ -2252,7 +2252,7 @@ namespace PurrNet.Codegen
                         }
 
                         UnityProxyProcessor.Process(types[t], messages);
-                        RegisterSerializersProcessor.HandleType(module, types[t], isEditor, typesToIgnoreForDelta,
+                        RegisterSerializersProcessor.HandleType(module, types[t], typesToIgnoreForDelta,
                             typesToIgnoreForSerialization);
 
                         var type = types[t];
