@@ -489,7 +489,7 @@ namespace PurrNet
                 }
             }
 
-            methodsToCall.list.Sort((a, b) => b.priority.CompareTo(a.priority));
+            methodsToCall.list.Sort((a, b) => a.priority.CompareTo(b.priority));
 
             for (var i = 0; i < methodsToCall.Count; i++)
                 methodsToCall[i].method.Invoke(null, null);
