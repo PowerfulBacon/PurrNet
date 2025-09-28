@@ -1168,7 +1168,7 @@ namespace PurrNet
             if (clientConnected)
                 _clientModules.TriggerOnPreFixedUpdate();
 
-            if (_transport && (serverConnected || clientConnected))
+            if (_transport)
                 _transport.transport.ReceiveMessages(delta);
 
             if (serverConnected)
@@ -1183,7 +1183,7 @@ namespace PurrNet
             if (clientConnected)
                 _clientModules.TriggerOnPostFixedUpdate();
 
-            if (_transport && (serverConnected || clientConnected))
+            if (_transport)
                 _transport.transport.SendMessages(delta);
 
             if (_isCleaningClient && _clientModules.Cleanup())
