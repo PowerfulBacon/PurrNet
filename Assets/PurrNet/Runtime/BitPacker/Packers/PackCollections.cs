@@ -13,7 +13,6 @@ namespace PurrNet.Packing
         {
             Packer<T?>.RegisterWriter(PackNullables.WriteNullable);
             Packer<T?>.RegisterReader(PackNullables.ReadNullable);
-
             DeltaPacker<T?>.RegisterWriter(PackNullables.WriteDeltaNullable);
             DeltaPacker<T?>.RegisterReader(PackNullables.ReadDeltaNullable);
         }
@@ -23,6 +22,8 @@ namespace PurrNet.Packing
         {
             Packer<Dictionary<TKey, TValue>>.RegisterWriter(WriteDictionary);
             Packer<Dictionary<TKey, TValue>>.RegisterReader(ReadDictionary);
+            RegisterDisposableList<TKey>();
+            RegisterDisposableList<TValue>();
         }
 
         [UsedByIL]
@@ -32,6 +33,8 @@ namespace PurrNet.Packing
             Packer<DisposableDictionary<TKey, TValue>>.RegisterReader(PackDisposableDictionary.ReadDictionary);
             DeltaPacker<DisposableDictionary<TKey, TValue>>.RegisterWriter(PackDisposableDictionary.WriteDeltaDictionary);
             DeltaPacker<DisposableDictionary<TKey, TValue>>.RegisterReader(PackDisposableDictionary.ReadDeltaDictionary);
+            RegisterDisposableList<TKey>();
+            RegisterDisposableList<TValue>();
         }
 
         [UsedByIL]
