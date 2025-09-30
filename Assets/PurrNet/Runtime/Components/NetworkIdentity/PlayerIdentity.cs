@@ -12,9 +12,9 @@ namespace PurrNet
         {
             base.OnOwnerChanged(oldOwner, newOwner, asServer);
 
-            if (asServer && (isHost || networkManager.isPlannedHost))
+            if (asServer && isHost)
                 return;
-            
+
             if (oldOwner.HasValue)
                 _allPlayers.Remove(this as T);
 
@@ -43,7 +43,7 @@ namespace PurrNet
                 player = null;
                 return false;
             }
-            
+
             return _allPlayers.TryGetFirst(NetworkManager.main.localPlayer, out player);
         }
 
@@ -51,7 +51,7 @@ namespace PurrNet
         {
             return _allPlayers.TryGetFirst(playerId, out player);
         }
-        
+
         private sealed class FirstElementMap<TKey, T>
         {
             readonly Dictionary<TKey, List<T>> _lists = new();
@@ -99,7 +99,7 @@ namespace PurrNet
                 if (foundIndex < 0) return false;
                 return RemoveAt(foundKey, foundIndex);
             }
-            
+
             public bool RemoveKey(TKey key)
             {
                 _first.Remove(key);
