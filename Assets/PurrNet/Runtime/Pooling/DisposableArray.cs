@@ -5,15 +5,57 @@ using System.Collections.Generic;
 
 namespace PurrNet.Pooling
 {
-    public struct DisposableArray<T> : IDisposable, IReadOnlyList<T>
+    public struct DisposableArray<T> : IDisposable, IReadOnlyList<T>, IList<T>
     {
         private bool _shouldDispose;
 
         public T[] array { get; private set; }
 
+        public void Add(T item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Clear()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Contains(T item)
+        {
+            return Array.IndexOf(array, item) >= 0;
+        }
+
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            Array.Copy(this.array, array, Count);
+        }
+
+        public bool Remove(T item)
+        {
+            throw new NotImplementedException();
+        }
+
         public int Count { get; private set; }
 
+        public bool IsReadOnly => false;
+
         public bool isDisposed => !_shouldDispose;
+
+        public int IndexOf(T item)
+        {
+            return Array.IndexOf(array, item);
+        }
+
+        public void Insert(int index, T item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveAt(int index)
+        {
+            throw new NotImplementedException();
+        }
 
         public T this[int index]
         {
@@ -50,6 +92,18 @@ namespace PurrNet.Pooling
         {
             var array = ArrayPool<T>.Shared.Rent(copyFrom.Count);
             Array.Copy(copyFrom.array, array, copyFrom.Count);
+            return new DisposableArray<T>
+            {
+                array = array,
+                Count = copyFrom.Count,
+                _shouldDispose = true
+            };
+        }
+
+        public static DisposableArray<T> Create(IList<T> copyFrom)
+        {
+            var array = ArrayPool<T>.Shared.Rent(copyFrom.Count);
+            copyFrom.CopyTo(array, 0);
             return new DisposableArray<T>
             {
                 array = array,

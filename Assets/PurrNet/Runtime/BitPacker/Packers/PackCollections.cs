@@ -52,6 +52,14 @@ namespace PurrNet.Packing
         }
 
         [UsedByIL]
+        public static void RegisterDisposableArray<T>()
+        {
+            Packer<DisposableArray<T>>.RegisterWriter(WriteDArray);
+            Packer<DisposableArray<T>>.RegisterReader(ReadDArray);
+            RegisterDisposableList<T>();
+        }
+
+        [UsedByIL]
         public static void RegisterDisposableList<T>()
         {
             Packer<DisposableList<T>>.RegisterWriter(PackDisposableLists.WriteDisposableList);
@@ -66,6 +74,68 @@ namespace PurrNet.Packing
         {
             Packer<DisposableHashSet<T>>.RegisterWriter(WriteDisposableHashSet);
             Packer<DisposableHashSet<T>>.RegisterReader(ReadDisposableHashSet);
+        }
+
+        [UsedByIL]
+        public static void WriteDArray<T>(this BitPacker packer, DisposableArray<T> value)
+        {
+            if (value.isDisposed)
+            {
+                Packer<bool>.Write(packer, false);
+                return;
+            }
+
+            Packer<bool>.Write(packer, true);
+            Packer<Size>.Write(packer, value.Count);
+
+            for (int i = 0; i < value.Count; i++)
+                Packer<T>.Write(packer, value[i]);
+        }
+
+        [UsedByIL]
+        public static bool WriteDeltaDArray<T>(this BitPacker packer, DisposableArray<T> value, DisposableArray<T> newValue)
+        {
+            using var old = value.isDisposed ? default : DisposableList<T>.Create(value);
+            using var @new = newValue.isDisposed ? default : DisposableList<T>.Create(newValue);
+
+            return DeltaPacker<DisposableList<T>>.Write(packer, old, @new);
+        }
+
+        [UsedByIL]
+        public static void ReadDeltaDArray<T>(this BitPacker packer, ref DisposableArray<T> value,
+            ref DisposableArray<T> newValue)
+        {
+            using var old = value.isDisposed ? default : DisposableList<T>.Create(value);
+            var @new = newValue.isDisposed ? default : DisposableList<T>.Create(newValue);
+
+            DeltaPacker<DisposableList<T>>.Read(packer, old, ref @new);
+
+            value.Dispose();
+
+            if (!@new.isDisposed)
+                value = DisposableArray<T>.Create(@new);
+
+            @new.Dispose();
+        }
+
+        [UsedByIL]
+        public static void ReadDArray<T>(this BitPacker packer, ref DisposableArray<T> value)
+        {
+            bool hasValue = Packer<bool>.Read(packer);
+            value.Dispose();
+
+            if (!hasValue)
+                return;
+
+            int length = Packer<Size>.Read(packer);
+            value = DisposableArray<T>.Create(length);
+
+            for (int i = 0; i < length; i++)
+            {
+                T item = default;
+                Packer<T>.Read(packer, ref item);
+                value[i] = item;
+            }
         }
 
         [UsedByIL]
