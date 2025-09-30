@@ -1,3 +1,10 @@
+# [1.16.0-beta.40](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.39...v1.16.0-beta.40) (2025-09-30)
+
+
+### Bug Fixes
+
+* packing for DisposableArray.cs ([1e5b4d2](https://github.com/PurrNet/PurrNet/commit/1e5b4d20907f09d45c03459c7396f8005dd12c7c))
+
 # [1.16.0-beta.39](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.38...v1.16.0-beta.39) (2025-09-29)
 
 
