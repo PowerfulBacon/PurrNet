@@ -288,13 +288,17 @@ namespace PurrNet
             _id = packetId;
 
             Packer<T>.Read(newValue, ref _cache);
+            int readPos = newValue.positionInBits;
             newValue.SetBitPosition(0);
 
             bool bothNull = _value == null && _cache == null;
             bool bothEqual = _value != null && _value.Equals(_cache);
 
             if (bothNull || bothEqual)
+            {
+                newValue.SetBitPosition(readPos);
                 return;
+            }
 
             var oldValue = value;
             Packer<T>.Read(newValue, ref _value);
