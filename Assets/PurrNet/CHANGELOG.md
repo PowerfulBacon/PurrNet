@@ -1,3 +1,10 @@
+# [1.16.0-beta.42](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.41...v1.16.0-beta.42) (2025-10-04)
+
+
+### Bug Fixes
+
+* disposable dictionary serialization fixes ([0a93474](https://github.com/PurrNet/PurrNet/commit/0a934746bda14c997c2aaaf3948fee32c81f8fd0))
+
 # [1.16.0-beta.41](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.40...v1.16.0-beta.41) (2025-10-02)
 
 
