@@ -169,12 +169,13 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static void Write(BitPacker packer, PackedULong value)
         {
+            ulong uvalue = value.value;
             while (true)
             {
-                ulong chunk = value & 0x7FUL;
-                value.value >>= 7;
+                ulong chunk = uvalue & 0x7FUL;
+                uvalue >>= 7;
 
-                if (value.value == 0)
+                if (uvalue == 0)
                 {
                     packer.WriteBits(chunk, 7);
                     packer.WriteBits(0, 1);
@@ -191,14 +192,16 @@ namespace PurrNet.Packing
         {
             ulong result = 0;
             int shift = 0;
-            bool cont;
-            do
+
+            while (shift < 64)
             {
                 ulong chunk = packer.ReadBits(7);
-                cont = packer.ReadBits(1) == 1;
-                result |= (chunk << shift);
+                bool cont = packer.ReadBits(1) == 1;
+                result |= chunk << shift;
                 shift += 7;
-            } while (cont && shift < 64);
+
+                if (!cont) break;
+            }
 
             value.value = result;
         }

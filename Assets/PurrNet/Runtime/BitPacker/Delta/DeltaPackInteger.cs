@@ -1,4 +1,5 @@
 using PurrNet.Modules;
+using UnityEngine;
 
 namespace PurrNet.Packing
 {
@@ -238,8 +239,8 @@ namespace PurrNet.Packing
 
             if (hasChanged)
             {
-                PackedULong diff = newvalue - oldvalue;
-                Packer<PackedULong>.Write(packer, diff);
+                PackedLong diff = (long)newvalue - (long)oldvalue;
+                Packer<PackedLong>.Write(packer, diff);
             }
 
             return hasChanged;
@@ -253,9 +254,9 @@ namespace PurrNet.Packing
 
             if (hasChanged)
             {
-                PackedULong packed = default;
-                Packer<PackedULong>.Read(packer, ref packed);
-                value = oldvalue + packed.value;
+                PackedLong packed = default;
+                Packer<PackedLong>.Read(packer, ref packed);
+                value = (ulong)((long)oldvalue + packed.value);
             }
             else value = oldvalue;
         }

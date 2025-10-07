@@ -1,10 +1,23 @@
-using PurrNet;
-using PurrNet.Modules;
+using PurrNet.Logging;
+using PurrNet.Packing;
+using UnityEngine;
 
-public class TestingDeltas : NetworkIdentity
+public class TestingDeltas : MonoBehaviour
 {
-    protected override void OnSpawned(bool asServer)
+    void Start()
     {
-        // GetMessenger(asServer).
+        using var packer = BitPackerPool.Get();
+
+        ulong old = 1;
+        ulong @new = 76;
+
+        DeltaPacker<ulong>.Write(packer, old, @new);
+
+        packer.ResetPosition();
+
+        ulong read = default;
+        DeltaPacker<ulong>.Read(packer, old, ref read);
+
+        PurrLogger.Log($"Read: {read}. It should be {@new}");
     }
 }
