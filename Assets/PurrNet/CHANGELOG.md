@@ -1,3 +1,10 @@
+# [1.16.0-beta.48](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.47...v1.16.0-beta.48) (2025-10-07)
+
+
+### Bug Fixes
+
+* delta packing registration was faulty ([3db16b8](https://github.com/PurrNet/PurrNet/commit/3db16b844ee0e4379debed08f50f652506235586))
+
 # [1.16.0-beta.47](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.46...v1.16.0-beta.47) (2025-10-07)
 
 
