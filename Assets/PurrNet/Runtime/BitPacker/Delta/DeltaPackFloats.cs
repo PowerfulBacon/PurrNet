@@ -23,7 +23,7 @@ namespace PurrNet.Packing
         [UsedByIL]
         private static void WriteCompressedFloat(BitPacker packer, CompressedFloat value)
         {
-            Packer<PackedInt>.Write(packer, value.ToPackedInt());
+            Packer<PackedInt>.Write(packer, value.rounded);
         }
 
         [UsedByIL]
@@ -31,7 +31,7 @@ namespace PurrNet.Packing
         {
             PackedInt val = default;
             Packer<PackedInt>.Read(packer, ref val);
-            value = new CompressedFloat(val.value * CompressedFloat.PRECISION);
+            value = new CompressedFloat(val.value);
         }
 
         [UsedByIL]

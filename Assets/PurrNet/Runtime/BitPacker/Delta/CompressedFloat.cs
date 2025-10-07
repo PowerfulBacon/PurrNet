@@ -9,13 +9,18 @@ namespace PurrNet.Packing
     {
         public const float PRECISION = 0.001f;
 
-        private int rounded;
+        public int rounded { get; }
 
         public float value => rounded * PRECISION;
 
         public CompressedFloat(float value)
         {
             this.rounded = Mathf.RoundToInt(value / PRECISION);
+        }
+
+        public CompressedFloat(int value)
+        {
+            this.rounded = value;
         }
 
         [Obsolete("This method is not needed anymore")]
