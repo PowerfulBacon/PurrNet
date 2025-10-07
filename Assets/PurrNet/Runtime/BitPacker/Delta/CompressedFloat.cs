@@ -37,6 +37,8 @@ namespace PurrNet.Packing
         public static implicit operator CompressedFloat(float value) => new CompressedFloat(value);
         public static implicit operator float(CompressedFloat angle) => angle.value;
 
+        public static implicit operator CompressedFloat(int value) => new CompressedFloat(value);
+
         public static implicit operator CompressedFloat(PackedInt value) => new CompressedFloat(value.value * PRECISION);
         public static implicit operator PackedInt(CompressedFloat angle) => new PackedInt(Mathf.RoundToInt(angle.value / PRECISION));
 

@@ -87,18 +87,16 @@ namespace PurrNet.Packing
         [UsedByIL]
         private static bool WriteSingle(BitPacker packer, CompressedFloat oldvalue, CompressedFloat newvalue)
         {
-            float delta = newvalue - oldvalue;
+            int delta = newvalue.rounded - oldvalue.rounded;
 
-            if (Math.Abs(delta) <CompressedFloat. PRECISION)
+            if (delta == 0)
             {
                 Packer<bool>.Write(packer, false);
                 return false;
             }
 
             Packer<bool>.Write(packer, true);
-
-            PackedLong deltaAsInt = (long)Math.Round(delta / CompressedFloat.PRECISION);
-            PackingIntegers.Write(packer, deltaAsInt);
+            PackingIntegers.Write(packer, (PackedInt)delta);
             return true;
         }
 
@@ -110,9 +108,9 @@ namespace PurrNet.Packing
 
             if (hasChanged)
             {
-                PackedLong packed = default;
+                PackedInt packed = default;
                 PackingIntegers.Read(packer, ref packed);
-                value = oldvalue + packed.value * CompressedFloat.PRECISION;
+                value = new CompressedFloat(oldvalue.rounded + packed.value);
             }
             else value = oldvalue;
         }
