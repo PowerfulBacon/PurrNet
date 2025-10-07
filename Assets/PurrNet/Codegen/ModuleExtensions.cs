@@ -150,6 +150,22 @@ namespace PurrNet.Codegen
             throw new Exception($"Method {name} not found on type {type.FullName}");
         }
 
+        public static MethodDefinition GetMethod(this TypeDefinition type, string name, int paramCount, bool isGeneric = false)
+        {
+            for (var i = 0; i < type.Methods.Count; i++)
+            {
+                if (type.Methods[i].Name == name && type.Methods[i].HasGenericParameters == isGeneric)
+                {
+                    var method = type.Methods[i];
+
+                    if (method.Parameters.Count == paramCount)
+                        return method;
+                }
+            }
+
+            throw new Exception($"Method {name} not found on type {type.FullName}");
+        }
+
         public static MethodDefinition GetMethod(this TypeDefinition type, string name, TypeReference a,
             TypeReference b, bool isGeneric = false)
         {

@@ -3423,10 +3423,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 332e746c3c3253246aacad4d5559f1fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.PurrTransport
-  _masterServer: https://test-balancer.fly.dev/
-  _roomName: 889634e6584d4c2d9ebd9b3dd5e7d783!
-  _region: brings-all-the-boys
-  _host: test-relay.fly.dev
+  _masterServer: https://purrtransport.purrservers.com/
+  _roomName: 4bb50bc5e6834b37b2f215c6f9517013
+  _region: france
+  _host: purrtransport-france.purrservers.com
   _timeoutInSeconds: 5
   _pollEventsInUpdate: 0
 --- !u!114 &1216416913
