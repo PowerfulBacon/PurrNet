@@ -42,7 +42,7 @@ namespace PurrNet.Packing
 
         public bool Equals(CompressedFloat other)
         {
-            return (int)(value / PRECISION) == (int)(other.value / PRECISION);
+            return rounded == other.rounded;
         }
 
         public override bool Equals(object obj)
