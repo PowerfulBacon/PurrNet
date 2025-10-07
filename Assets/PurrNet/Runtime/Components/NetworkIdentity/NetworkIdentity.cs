@@ -522,7 +522,7 @@ namespace PurrNet
                         _serverTickManager.onTick -= ServerTick;
                 }
             }
-            else if (--_tickRegisteredClient  <= 0)
+            else if (--_tickRegisteredClient <= 0)
             {
                 if (_clientTickManager != null)
                     _clientTickManager.onTick -= ClientTick;
@@ -736,7 +736,7 @@ namespace PurrNet
         }
 
 
-        static readonly Dictionary<Type, List<MethodInfo>> _methodCache = new ();
+        static readonly Dictionary<Type, List<MethodInfo>> _methodCache = new();
 
         private void CallInitMethods()
         {
@@ -901,6 +901,20 @@ namespace PurrNet
                 return;
 
             _serverHierarchy.EvaluateVisibility(transform);
+        }
+
+        /// <summary>
+        /// Evaluates the visibility of this object for a specific player.
+        /// This will recalculate the observers of this object.
+        /// This is server specific.
+        /// Re-evaulation includes all children.
+        /// </summary>
+        public void EvaluateVisibility(PlayerID player)
+        {
+            if (isServer)
+            {
+                _serverHierarchy.EvaluateVisibility(player, base.transform);
+            }
         }
 
         /// <summary>
