@@ -1,23 +1,33 @@
 using PurrNet.Logging;
 using PurrNet.Packing;
+using PurrNet.Pooling;
 using UnityEngine;
 
 public class TestingDeltas : MonoBehaviour
 {
     void Start()
     {
+        var old = DisposableList<int>.Create();
+
+        old.Add(1);
+
+        old.Add(2);
+
+        old.Add(5);
+
+        var @new = DisposableList<int>.Create(old);
+
+        @new[1] = 3;
+
         using var packer = BitPackerPool.Get();
 
-        ulong old = 1;
-        ulong @new = 76;
-
-        DeltaPacker<ulong>.Write(packer, old, @new);
-
+        DeltaPacker<DisposableList<int>>.Write(packer, old, @new);
         packer.ResetPosition();
 
-        ulong read = default;
-        DeltaPacker<ulong>.Read(packer, old, ref read);
+        DisposableList<int> result = default;
+        DeltaPacker<DisposableList<int>>.Read(packer, old, ref result);
 
-        PurrLogger.Log($"Read: {read}. It should be {@new}");
+        Debug.Log(@new);
+        Debug.Log(result);
     }
 }

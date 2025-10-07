@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using PurrNet.Pooling;
 
 namespace PurrNet.Packing
@@ -205,27 +206,30 @@ namespace PurrNet.Packing
 
         public static void Apply<T>(DisposableList<T> list, DisposableList<DiffOp<T>> ops)
         {
-            int opsCount = ops.Count;
-
-            for (int i = opsCount - 1; i >= 0; i--)
+            int offset = 0;
+            int count = ops.Count;
+            for (var i = 0; i < count; i++)
             {
                 var op = ops[i];
-                if (op.type == OperationType.Delete)
-                    list.RemoveRange(op.index, op.length);
-            }
+                switch (op.type)
+                {
+                    case OperationType.Add:
+                        list.AddRange(op.values);
+                        offset += op.values.Count;
+                        break;
+                    case OperationType.Insert:
+                        list.InsertRange(op.index + offset, op.values);
+                        offset += op.values.Count;
+                        break;
 
-            for (int i = 0; i < opsCount; i++)
-            {
-                var op = ops[i];
-                if (op is { type: OperationType.Insert, values: { isDisposed: false } })
-                    list.InsertRange(op.index, op.values);
-            }
-
-            for (int i = 0; i < opsCount; i++)
-            {
-                var op = ops[i];
-                if (op is { type: OperationType.Add, values: { isDisposed: false } })
-                    list.AddRange(op.values);
+                    case OperationType.Delete:
+                        list.RemoveRange(op.index + offset, op.length);
+                        offset -= op.length;
+                        break;
+                    case OperationType.End:
+                        break;
+                    default: throw new ArgumentOutOfRangeException();
+                }
             }
         }
     }
