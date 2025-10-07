@@ -18,6 +18,12 @@ namespace PurrNet.Packing
             this.rounded = Mathf.RoundToInt(value / PRECISION);
         }
 
+        [Obsolete("This method is not needed anymore")]
+        public CompressedFloat Round()
+        {
+            return this;
+        }
+
         public override string ToString()
         {
             return value.ToString(CultureInfo.InvariantCulture);
@@ -29,7 +35,7 @@ namespace PurrNet.Packing
         public static implicit operator CompressedFloat(PackedInt value) => new CompressedFloat(value.value * PRECISION);
         public static implicit operator PackedInt(CompressedFloat angle) => new PackedInt(Mathf.RoundToInt(angle.value / PRECISION));
 
-        public PackedInt ToPackedInt()
+        public PackedLong ToPackedInt()
         {
             return Mathf.RoundToInt(value / PRECISION);
         }
