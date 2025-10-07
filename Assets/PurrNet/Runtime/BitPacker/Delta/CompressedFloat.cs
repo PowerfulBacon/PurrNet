@@ -4,16 +4,18 @@ using UnityEngine;
 
 namespace PurrNet.Packing
 {
-    [System.Serializable]
+    [Serializable]
     public struct CompressedFloat : IEquatable<CompressedFloat>
     {
         public const float PRECISION = 0.001f;
 
-        public float value;
+        private int rounded;
+
+        public float value => rounded * PRECISION;
 
         public CompressedFloat(float value)
         {
-            this.value = value;
+            this.rounded = Mathf.RoundToInt(value / PRECISION);
         }
 
         public override string ToString()
@@ -30,14 +32,6 @@ namespace PurrNet.Packing
         public PackedInt ToPackedInt()
         {
             return Mathf.RoundToInt(value / PRECISION);
-        }
-
-        public CompressedFloat Round()
-        {
-            var copy = this;
-            var rounded = Mathf.RoundToInt(value / PRECISION);
-            copy.value = rounded * PRECISION;
-            return copy;
         }
 
         public bool Equals(CompressedFloat other)

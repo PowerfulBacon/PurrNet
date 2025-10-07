@@ -12,9 +12,9 @@ namespace PurrNet.Packing
 
         public CompressedVector3(CompressedFloat x, CompressedFloat y, CompressedFloat z)
         {
-            this.x = x.Round();
-            this.y = y.Round();
-            this.z = z.Round();
+            this.x = x;
+            this.y = y;
+            this.z = z;
         }
 
         public override string ToString()
