@@ -220,7 +220,12 @@ namespace PurrNet.Pooling
 
         public ICollection<TValue> Values
         {
-            get => throw new NotSupportedException();
+            get
+            {
+                if (!_isAllocated)
+                    throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+                return dictionary.Values;
+            }
         }
 
         public TValue GetValueOrDefault(TKey key)
