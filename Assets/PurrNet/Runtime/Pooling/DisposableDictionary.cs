@@ -220,7 +220,7 @@ namespace PurrNet.Pooling
 
         public ICollection<TValue> Values
         {
-            get => throw new NotSupportedException();
+            get => throw new NotSupportedException("Values may be mismatched with keys. Use dictionary.Values directly if needed.");
         }
 
         public TValue GetValueOrDefault(TKey key)
