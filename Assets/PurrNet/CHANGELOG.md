@@ -1,3 +1,10 @@
+# [1.16.0-beta.47](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.46...v1.16.0-beta.47) (2025-10-07)
+
+
+### Bug Fixes
+
+* ulong packing ([c48f735](https://github.com/PurrNet/PurrNet/commit/c48f7354620cf346eba2ffa95ed529b93fb99517))
+
 # [1.16.0-beta.46](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.45...v1.16.0-beta.46) (2025-10-07)
 
 
