@@ -1,3 +1,10 @@
+# [1.16.0-beta.44](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.43...v1.16.0-beta.44) (2025-10-07)
+
+
+### Bug Fixes
+
+* add debugging scripting symbol for delta compression that packs extra data to let you know of issues ([2c96204](https://github.com/PurrNet/PurrNet/commit/2c9620425c2ae43e545bbc04ed94205f02e75d6e))
+
 # [1.16.0-beta.43](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.42...v1.16.0-beta.43) (2025-10-05)
 
 
