@@ -27,6 +27,9 @@ namespace PurrNet.Codegen
             if (method.Parameters[2].ParameterType.IsByReference)
                 return false;
 
+            if (method.Parameters[2].ParameterType != method.Parameters[1].ParameterType)
+                return false;
+
             type = method.Parameters[1].ParameterType;
             return true;
         }
