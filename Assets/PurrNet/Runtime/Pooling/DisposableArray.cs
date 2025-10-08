@@ -142,5 +142,18 @@ namespace PurrNet.Pooling
         {
             return GetEnumerator();
         }
+
+        public void Resize(int valueCount)
+        {
+            if (isDisposed) throw new ObjectDisposedException(nameof(DisposableArray<T>));
+            if (Count >= valueCount)
+                return;
+
+            var newArray = ArrayPool<T>.Shared.Rent(valueCount);
+            Array.Copy(array, newArray, Count);
+            ArrayPool<T>.Shared.Return(array);
+            array = newArray;
+            Count = valueCount;
+        }
     }
 }

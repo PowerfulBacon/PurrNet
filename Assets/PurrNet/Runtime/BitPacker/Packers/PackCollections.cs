@@ -56,6 +56,9 @@ namespace PurrNet.Packing
         {
             Packer<DisposableArray<T>>.RegisterWriter(WriteDArray);
             Packer<DisposableArray<T>>.RegisterReader(ReadDArray);
+            DeltaPacker<DisposableArray<T>>.RegisterWriter(PackDisposableArrays.WriteDisposableArrayDelta);
+            DeltaPacker<DisposableArray<T>>.RegisterReader(PackDisposableArrays.ReadDisposablArrayDelta);
+
             RegisterDisposableList<T>();
         }
 
@@ -74,6 +77,9 @@ namespace PurrNet.Packing
         {
             Packer<DisposableHashSet<T>>.RegisterWriter(WriteDisposableHashSet);
             Packer<DisposableHashSet<T>>.RegisterReader(ReadDisposableHashSet);
+            DeltaPacker<DisposableHashSet<T>>.RegisterWriter(PackDisposableHashsets.WriteDisposableHashSetDelta);
+            DeltaPacker<DisposableHashSet<T>>.RegisterReader(PackDisposableHashsets.ReadDisposableHashSetDelta);
+            RegisterDisposableList<T>();
         }
 
         [UsedByIL]
