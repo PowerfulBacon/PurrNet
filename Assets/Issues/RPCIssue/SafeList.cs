@@ -43,7 +43,7 @@ public class SafeList<T> : IEnumerable<T>
         public readonly Instruction instruction;
 
         public bool Equals(QueueItem other) => EqualityComparer<T>.Default.Equals(item, other.item) && instruction == other.instruction;
-        public override bool Equals(object? obj) => obj is QueueItem other && Equals(other);
+        public override bool Equals(object obj) => obj is QueueItem other && Equals(other);
         public override int GetHashCode() => HashCode.Combine(item, (int)instruction);
 
         public QueueItem(T item, Instruction instruction)

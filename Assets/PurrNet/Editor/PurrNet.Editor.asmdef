@@ -35,6 +35,11 @@
             "name": "com.rlabrecque.steamworks.net",
             "expression": "",
             "define": "STEAMWORKS_NET_PACKAGE"
+        },
+        {
+            "name": "com.edgegap.unity-servers-plugin",
+            "expression": "",
+            "define": "EDGEGAP_PURRNET_SUPPORT"
         }
     ],
     "noEngineReferences": false

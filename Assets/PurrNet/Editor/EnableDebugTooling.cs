@@ -4,14 +4,16 @@ namespace PurrNet.Editor
 {
     public static class EnableDebugTooling
     {
+        const string DEBUG_PATH = "Tools/PurrNet/Features/Debug";
+
 #if PURR_DELTA_CHECK
-        [MenuItem("Tools/PurrNet/Debug/Disable Delta Validator", priority = 200)]
+        [MenuItem(DEBUG_PATH + "/Disable Delta Validator", priority = 100)]
         public static void UninstallDeltaCheck()
         {
             SymbolsHelper.RemoveSymbol("PURR_DELTA_CHECK");
         }
 #else
-        [MenuItem("Tools/PurrNet/Debug/Enable Delta Validator", priority = 200)]
+        [MenuItem(DEBUG_PATH + "/Enable Delta Validator", priority = 100)]
         public static void InstallDeltaCheck()
         {
             SymbolsHelper.AddSymbol("PURR_DELTA_CHECK");
@@ -19,13 +21,13 @@ namespace PurrNet.Editor
 #endif
 
 #if PURR_LEAKS_CHECK
-        [MenuItem("Tools/PurrNet/Debug/Disable Leak Detection", priority = 200)]
+        [MenuItem(DEBUG_PATH + "/Disable Leak Detection", priority = 100)]
         public static void Uninstall()
         {
             SymbolsHelper.RemoveSymbol("PURR_LEAKS_CHECK");
         }
 #else
-        [MenuItem("Tools/PurrNet/Debug/Enable Leak Detection", priority = 200)]
+        [MenuItem(DEBUG_PATH + "/Enable Leak Detection", priority = 100)]
         public static void Install()
         {
             SymbolsHelper.AddSymbol("PURR_LEAKS_CHECK");
@@ -33,13 +35,13 @@ namespace PurrNet.Editor
 #endif
 
 #if PURRNET_DEBUG_POOLING
-        [MenuItem("Tools/PurrNet/Debug/Disable Pool Debug", priority = 200)]
+        [MenuItem(DEBUG_PATH + "/Disable Pool Debug", priority = 100)]
         public static void UninstallPool()
         {
             SymbolsHelper.RemoveSymbol("PURRNET_DEBUG_POOLING");
         }
 #else
-        [MenuItem("Tools/PurrNet/Debug/Enable Pool Debug", priority = 200)]
+        [MenuItem(DEBUG_PATH + "/Enable Pool Debug", priority = 100)]
         public static void InstallPool()
         {
             SymbolsHelper.AddSymbol("PURRNET_DEBUG_POOLING");

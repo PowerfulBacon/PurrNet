@@ -52,12 +52,12 @@ namespace PurrNet
             return _allPlayers.TryGetFirst(playerId, out player);
         }
 
-        private sealed class FirstElementMap<TKey, T>
+        private sealed class FirstElementMap<TKey, P>
         {
-            readonly Dictionary<TKey, List<T>> _lists = new();
-            readonly Dictionary<TKey, T> _first = new();
-            public IReadOnlyDictionary<TKey, T> first => _first;
-            public List<T> this[TKey key]
+            readonly Dictionary<TKey, List<P>> _lists = new();
+            readonly Dictionary<TKey, P> _first = new();
+            public IReadOnlyDictionary<TKey, P> first => _first;
+            public List<P> this[TKey key]
             {
                 get => _lists[key];
                 set
@@ -66,11 +66,11 @@ namespace PurrNet
                     _first[key] = value != null && value.Count > 0 ? value[0] : default;
                 }
             }
-            public void AddItem(TKey key, T item)
+            public void AddItem(TKey key, P item)
             {
                 if (!_lists.TryGetValue(key, out var list))
                 {
-                    list = new List<T>();
+                    list = new List<P>();
                     _lists[key] = list;
                 }
                 if (list.Count == 0) _first[key] = item;
@@ -87,7 +87,7 @@ namespace PurrNet
                 return true;
             }
 
-            public bool Remove(T item)
+            public bool Remove(P item)
             {
                 TKey foundKey = default;
                 int foundIndex = -1;
@@ -105,7 +105,7 @@ namespace PurrNet
                 _first.Remove(key);
                 return _lists.Remove(key);
             }
-            public bool TryGetFirst(TKey key, out T value) => _first.TryGetValue(key, out value);
+            public bool TryGetFirst(TKey key, out P value) => _first.TryGetValue(key, out value);
         }
     }
 }
