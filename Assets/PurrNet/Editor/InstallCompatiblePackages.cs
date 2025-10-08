@@ -17,7 +17,7 @@ namespace PurrNet.Editor
             Client.Resolve();
         }
 
-        [MenuItem(PACKAGES + "/Edgegap/Uninstall Edgegap", priority = 100)]
+        [MenuItem(PACKAGES + "/Edgegap/Uninstall Edgegap", priority = 101)]
         public static void UninstallEdgegap()
         {
             if (EditorUtility.DisplayDialog("Uninstall Edgegap", "This will remove Edgegap from the package manager. Do you want to continue?", "Yes", "No"))
