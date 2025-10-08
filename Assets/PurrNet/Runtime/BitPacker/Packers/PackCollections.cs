@@ -170,7 +170,7 @@ namespace PurrNet.Packing
             long length = default;
 
             packer.ReadInteger(ref length, 31);
-            value = new DisposableHashSet<T>((int)length);
+            value = DisposableHashSet<T>.Create((int)length);
 
             for (int i = 0; i < length; i++)
             {
