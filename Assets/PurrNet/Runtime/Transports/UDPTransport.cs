@@ -94,6 +94,7 @@ namespace PurrNet.Transports
                 {
                     _serverPort = (ushort)port;
                     _address = "0.0.0.0";
+                    PurrLogger.Log($"Edgegap Auto-Setup: 0.0.0.0:{port}");
                 }
             }
         }

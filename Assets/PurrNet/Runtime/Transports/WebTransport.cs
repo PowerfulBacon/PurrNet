@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Authentication;
 using JamesFrowen.SimpleWeb;
 using PurrNet.Edgegap.Runtime;
+using PurrNet.Logging;
 using UnityEngine;
 
 namespace PurrNet.Transports
@@ -143,12 +144,15 @@ namespace PurrNet.Transports
                     _serverPort = (ushort)port;
                     _address = "0.0.0.0";
                     _enableSSL = false;
+                    PurrLogger.Log($"Edgegap Auto-Setup: 0.0.0.0:{port} ssl: false");
                 }
                 else if (arbitrium.TryGetPort("WSS", 0, out var sslport))
                 {
                     _serverPort = (ushort)sslport;
                     _address = "0.0.0.0";
                     _enableSSL = true;
+
+                    PurrLogger.Log($"Edgegap Auto-Setup: 0.0.0.0:{sslport} ssl: true");
                 }
             }
         }
