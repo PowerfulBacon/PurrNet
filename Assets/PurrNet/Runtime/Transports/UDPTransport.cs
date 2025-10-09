@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using LiteNetLib;
+using PurrNet.Edgegap.Runtime;
 using PurrNet.Logging;
 using UnityEngine;
 
@@ -8,6 +9,8 @@ namespace PurrNet.Transports
     [DefaultExecutionOrder(-100)]
     public class UDPTransport : GenericTransport, ITransport, INetLogger
     {
+        [SerializeField] private AutomaticCloudSetups _automaticCloudSetups;
+
         [Header("Server Settings")]
         [Tooltip("The port which the server will start on, and clients connect.")]
         [SerializeField]
@@ -79,6 +82,20 @@ namespace PurrNet.Transports
         private void Awake()
         {
             NetDebug.Logger = this;
+            SetupCloud();
+        }
+
+        private void SetupCloud()
+        {
+            if (_automaticCloudSetups.adaptToEdgegap)
+            {
+                var arbitrium = EdgegapUtils.GetArbitrium();
+                if (arbitrium.TryGetPort("UDP", 0, out var port))
+                {
+                    _serverPort = (ushort)port;
+                    _address = "0.0.0.0";
+                }
+            }
         }
 
         private void OnEnable()
@@ -196,7 +213,7 @@ namespace PurrNet.Transports
             var conn = new Connection(peer.Id);
 
             _peers[conn] = PeerInfo.Generate(peer);
-	  
+
             _connections.Add(conn);
             onConnected?.Invoke(conn, true);
         }

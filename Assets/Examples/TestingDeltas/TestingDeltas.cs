@@ -1,33 +1,35 @@
-using PurrNet.Logging;
-using PurrNet.Packing;
-using PurrNet.Pooling;
+using PurrNet;
 using UnityEngine;
 
-public class TestingDeltas : MonoBehaviour
+public class TestingDeltas : NetworkIdentity
 {
-    void Start()
+    [SerializeField] private bool _onSpawnException;
+    [SerializeField] private bool _onSpawnVariantException;
+    [SerializeField] private bool _onDespawnException;
+    [SerializeField] private bool _onDespawnVariantException;
+
+
+    protected override void OnSpawned()
     {
-        var old = DisposableList<int>.Create();
+        if (_onSpawnException)
+            throw new System.NotImplementedException();
+    }
 
-        old.Add(1);
+    protected override void OnSpawned(bool asServer)
+    {
+        if (_onSpawnVariantException)
+            throw new System.NotImplementedException();
+    }
 
-        old.Add(2);
+    protected override void OnDespawned()
+    {
+        if (_onDespawnException)
+            throw new System.NotImplementedException();
+    }
 
-        old.Add(5);
-
-        var @new = DisposableList<int>.Create(old);
-
-        @new[1] = 3;
-
-        using var packer = BitPackerPool.Get();
-
-        DeltaPacker<DisposableList<int>>.Write(packer, old, @new);
-        packer.ResetPosition();
-
-        DisposableList<int> result = default;
-        DeltaPacker<DisposableList<int>>.Read(packer, old, ref result);
-
-        Debug.Log(@new);
-        Debug.Log(result);
+    protected override void OnDespawned(bool asServer)
+    {
+        if (_onDespawnVariantException)
+            throw new System.NotImplementedException();
     }
 }

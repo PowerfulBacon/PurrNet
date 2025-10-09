@@ -112,8 +112,6 @@ namespace PurrNet.Editor
         {
             base.OnInspectorGUI();
 
-            EditorGUILayout.Space();
-
             var transport = (PurrTransport)target;
 
             var oldMasterServer = _masterServer.stringValue;
