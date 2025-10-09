@@ -841,7 +841,7 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Server: PURRNET_CONNECTION_DEBUG
+    Server: PURRNET_CONNECTION_DEBUG;EDGEGAP_PLUGIN_SERVERS
     Standalone: STEAMWORKS_NET;EDGEGAP_PLUGIN_SERVERS
     WebGL: STEAMWORKS_NET;PURRNET_DEBUG_NETWORK_IDENTITY;PURR_CONTEXT_BUTTONS
   additionalCompilerArguments: {}
