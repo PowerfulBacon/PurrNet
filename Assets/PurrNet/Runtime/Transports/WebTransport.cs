@@ -154,6 +154,7 @@ namespace PurrNet.Transports
 
                     PurrLogger.Log($"Edgegap Auto-Setup: 0.0.0.0:{sslport} ssl: true");
                 }
+                else PurrLogger.Log("Edgegap Auto-Setup: No WebSocket port");
             }
         }
 

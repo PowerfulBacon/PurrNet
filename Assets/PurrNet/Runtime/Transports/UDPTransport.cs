@@ -96,6 +96,7 @@ namespace PurrNet.Transports
                     _address = "0.0.0.0";
                     PurrLogger.Log($"Edgegap Auto-Setup: 0.0.0.0:{port}");
                 }
+                else PurrLogger.Log("Edgegap Auto-Setup: No UDP port");
             }
         }
 
