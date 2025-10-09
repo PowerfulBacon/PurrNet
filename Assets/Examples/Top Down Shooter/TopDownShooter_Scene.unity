@@ -1531,6 +1531,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afdd58584995991448806f747b17efbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Internal.Examples::TestingDeltas
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _onSpawnException: 0
+  _onSpawnVariantException: 0
+  _onDespawnException: 0
+  _onDespawnVariantException: 0
 --- !u!1 &607789177
 GameObject:
   m_ObjectHideFlags: 0
@@ -3319,7 +3332,7 @@ MonoBehaviour:
   _startClientFlags: 7
   _cookieScope: 1
   _dontDestroyOnLoad: 0
-  _transport: {fileID: 1216416912}
+  _transport: {fileID: 1216416902}
   _networkPrefabs: {fileID: 11400000, guid: 37af97d33ef8d9747b965053a79d21f4, type: 2}
   _networkAssets: {fileID: 11400000, guid: a519d78740d8b804e80cc0fd8da9b0cd, type: 2}
   _networkRules: {fileID: 11400000, guid: d8799083b96579a42b8b2d03e4ceae98, type: 2}
@@ -3354,6 +3367,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc64ff707d914a64e95f2ac0bf554c09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _automaticCloudSetups:
+    _adaptToEdgegap: 1
   _serverPort: 69
   _maxConnections: 100
   _address: 127.0.0.1
@@ -3413,9 +3428,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de4778b5edf2476448bcb3ac3d9c35d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.WebTransport
+  _automaticCloudSetups:
+    _adaptToEdgegap: 1
   _serverPort: 5001
-  _forceIpv4: 0
   _maxConnections: 100
+  _forceIpv4: 0
   _address: 127.0.0.1
   _query: 
   _path: 
@@ -4570,6 +4587,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc64ff707d914a64e95f2ac0bf554c09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.UDPTransport
+  _automaticCloudSetups:
+    _adaptToEdgegap: 1
   _serverPort: 5000
   _maxConnections: 100
   _address: 127.0.0.1
