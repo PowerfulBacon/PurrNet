@@ -8,6 +8,10 @@ namespace PurrNet.Edgegap.Runtime
 
         public bool TryGetPort(string protocol, int index, out int port)
         {
+            port = 0;
+
+            if (arbitriumPortsMapping == null)
+                return false;
             int counter = 0;
             foreach (var (_, data) in arbitriumPortsMapping.ports)
             {
@@ -23,7 +27,6 @@ namespace PurrNet.Edgegap.Runtime
                 }
             }
 
-            port = 0;
             return false;
         }
     }
