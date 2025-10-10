@@ -1,3 +1,10 @@
+# [1.16.0-beta.55](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.54...v1.16.0-beta.55) (2025-10-10)
+
+
+### Bug Fixes
+
+* host disconnecting was despawning other player owned objects due to bad cache ([52e1717](https://github.com/PurrNet/PurrNet/commit/52e171765f8e2b3834ed9ea3178979bbdabfcce4))
+
 # [1.16.0-beta.54](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.53...v1.16.0-beta.54) (2025-10-10)
 
 
