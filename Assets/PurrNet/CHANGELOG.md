@@ -1,3 +1,10 @@
+# [1.16.0-beta.53](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.52...v1.16.0-beta.53) (2025-10-10)
+
+
+### Bug Fixes
+
+* some more `try catch` and reset whitelist/blacklist state when pool reset called ([5d4958b](https://github.com/PurrNet/PurrNet/commit/5d4958b1bfe948c7c77431740ce15912c92a1a08))
+
 # [1.16.0-beta.52](https://github.com/PurrNet/PurrNet/compare/v1.16.0-beta.51...v1.16.0-beta.52) (2025-10-10)
 
 
