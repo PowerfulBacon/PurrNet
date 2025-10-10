@@ -898,6 +898,13 @@ namespace PurrNet.Modules
 
             _owners[identity.id.Value] = player;
 
+            var oldOwner = identity.GetOwner(_asServer);
+
+            // Remove from old owner's owned list
+            if (oldOwner.HasValue && oldOwner.Value != player && _playerOwnedIds.TryGetValue(oldOwner.Value, out var owned))
+                owned.Remove(identity.id.Value);
+
+            // Add to new owner's owned list
             if (!_playerOwnedIds.TryGetValue(player, out var ownedIds))
             {
                 ownedIds = new HashSet<NetworkID> { identity.id.Value };
