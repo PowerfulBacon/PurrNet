@@ -931,7 +931,7 @@ namespace PurrNet
         {
             if (isServer)
             {
-                _serverHierarchy.EvaluateVisibility(player, base.transform);
+                _serverHierarchy.EvaluateVisibility(player, transform);
             }
         }
 
