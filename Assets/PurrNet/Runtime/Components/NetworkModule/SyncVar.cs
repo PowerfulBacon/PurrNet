@@ -61,21 +61,20 @@ namespace PurrNet
                 _value = value;
                 _isDirty = true;
 
-                onChanged?.Invoke(value);
-                onChangedWithOld?.Invoke(oldValue, value);
+                TriggerEvents(oldValue);
             }
+        }
+
+        public override void OnPoolReset()
+        {
+            onChanged = null;
+            onChangedWithOld = null;
         }
 
         public override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool isSpawnEvent, bool asServer)
         {
             if (isSpawnEvent)
                 return;
-
-            /*if (_ownerAuth && asServer)
-            {
-                _id = 0;
-                SendLatestStateToAll(_id, _value);
-            }*/
 
             if (_ownerAuth)
             {
@@ -206,8 +205,7 @@ namespace PurrNet
 
                 var oldValue = value;
                 Packer<T>.Read(newValue, ref _value);
-                onChanged?.Invoke(value);
-                onChangedWithOld?.Invoke(oldValue, value);
+                TriggerEvents(oldValue);
             }
         }
 
@@ -302,8 +300,29 @@ namespace PurrNet
 
             var oldValue = value;
             Packer<T>.Read(newValue, ref _value);
-            onChanged?.Invoke(value);
-            onChangedWithOld?.Invoke(oldValue, value);
+
+            TriggerEvents(oldValue);
+        }
+
+        private void TriggerEvents(T oldValue)
+        {
+            try
+            {
+                onChanged?.Invoke(value);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            try
+            {
+                onChangedWithOld?.Invoke(oldValue, value);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         public static implicit operator T(SyncVar<T> syncVar)
