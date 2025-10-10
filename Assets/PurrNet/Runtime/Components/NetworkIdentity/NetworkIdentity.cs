@@ -792,10 +792,26 @@ namespace PurrNet
 
         internal void ResetIdentity()
         {
-            OnPoolReset();
+            try
+            {
+                OnPoolReset();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
 
             for (int i = 0; i < _externalModulesView.Count; i++)
-                _externalModulesView[i].OnPoolReset();
+            {
+                try
+                {
+                    _externalModulesView[i].OnPoolReset();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
 
             // notify parent
             if (parent && parent.isSpawned)
@@ -830,6 +846,8 @@ namespace PurrNet
             _tickRegisteredClient = 0;
             _whiteBlackDirty = false;
             isManualSpawn = false;
+            _whitelist.Clear();
+            _blacklist.Clear();
         }
 
         private void OnChildDespawned(NetworkIdentity networkIdentity)
@@ -1264,6 +1282,14 @@ namespace PurrNet
             try
             {
                 OnOwnerChanged(oldOwner, newOwner, asServer);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            try
+            {
                 OnOwnerChanged(oldOwner, newOwner, isSpawner, asServer);
             }
             catch (Exception e)
@@ -1276,6 +1302,14 @@ namespace PurrNet
                 try
                 {
                     _externalModulesView[i].OnOwnerChanged(oldOwner, newOwner, asServer);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+
+                try
+                {
                     _externalModulesView[i].OnOwnerChanged(oldOwner, newOwner, isSpawner, asServer);
                 }
                 catch (Exception e)
@@ -1338,6 +1372,14 @@ namespace PurrNet
             try
             {
                 OnPreObserverAdded(target);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            try
+            {
                 OnPreObserverAdded(target, isSpawner);
             }
             catch (Exception e)
@@ -1350,6 +1392,14 @@ namespace PurrNet
                 try
                 {
                     _externalModulesView[i].OnPreObserverAdded(target);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+
+                try
+                {
                     _externalModulesView[i].OnPreObserverAdded(target, isSpawner);
                 }
                 catch (Exception e)
@@ -1364,6 +1414,14 @@ namespace PurrNet
             try
             {
                 OnObserverAdded(target);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            try
+            {
                 OnObserverAdded(target, isSpawner);
             }
             catch (Exception e)
@@ -1376,6 +1434,14 @@ namespace PurrNet
                 try
                 {
                     _externalModulesView[i].OnObserverAdded(target);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+
+                try
+                {
                     _externalModulesView[i].OnObserverAdded(target, isSpawner);
                 }
                 catch (Exception e)
@@ -1383,7 +1449,15 @@ namespace PurrNet
                     Debug.LogException(e);
                 }
             }
-            onObserverAdded?.Invoke(target);
+
+            try
+            {
+                onObserverAdded?.Invoke(target);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         public void TriggerOnObserverRemoved(PlayerID target)
@@ -1408,7 +1482,15 @@ namespace PurrNet
                     Debug.LogException(e);
                 }
             }
-            onObserverRemoved?.Invoke(target);
+
+            try
+            {
+                onObserverRemoved?.Invoke(target);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         internal void ClearObservers()
