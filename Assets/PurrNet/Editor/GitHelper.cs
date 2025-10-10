@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace PurrNet.Editor
@@ -8,7 +7,7 @@ namespace PurrNet.Editor
     {
         static bool? _installed;
 
-        public static bool installed
+        static bool installed
         {
             get
             {
@@ -19,7 +18,7 @@ namespace PurrNet.Editor
 
         public static bool CheckGit()
         {
-            if (!GitHelper.installed)
+            if (!installed)
             {
                 if (EditorUtility.DisplayDialog("Git not installed",
                         "Git is not installed on this machine.\n" +
@@ -49,28 +48,7 @@ namespace PurrNet.Editor
 
         static bool IsGitInstalled()
         {
-            try
-            {
-                var process = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "git",
-                        Arguments = "--version",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true
-                    }
-                };
-
-                process.Start();
-                process.WaitForExit();
-                return process.ExitCode == 0;
-            }
-            catch
-            {
-                return false;
-            }
+            return ToolChecker.CheckTool("git");
         }
     }
 }
