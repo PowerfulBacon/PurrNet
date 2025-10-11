@@ -97,7 +97,7 @@ namespace PurrNet.Editor
             }
             else if (!HasLinuxBuildSupport())
             {
-                summary.AppendLine($"Linux build support is not installed for {Application.unityVersion}.");
+                summary.AppendLine($"Linux modules are not installed for {Application.unityVersion}.");
                 summary.AppendLine($"- Linux Build Support (Mono and or IL2CPP)");
                 summary.AppendLine($"- Linux Dedicated Server Build Support");
                 summary.AppendLine($"(Unity restart is required once installed)");
