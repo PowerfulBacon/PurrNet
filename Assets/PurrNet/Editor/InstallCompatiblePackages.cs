@@ -72,7 +72,7 @@ namespace PurrNet.Editor
         }
 
 
-        [MenuItem(PACKAGES + "/Edgegap/Verify Requirements", priority = 100)]
+        [MenuItem("Tools/PurrNet/Edgegap/Verify Requirements", priority = 201)]
         static void VerifyEdgegapInternal()
         {
             EditorUtility.DisplayProgressBar("Verifying Edgegap Requirements", "Please wait...", 0.5f);
@@ -98,49 +98,15 @@ namespace PurrNet.Editor
             else if (!HasLinuxBuildSupport())
             {
                 summary.AppendLine($"Linux build support is not installed for {Application.unityVersion}.");
-                buttonText = "Install";
+                summary.AppendLine($"- Linux Build Support (Mono and or IL2CPP)");
+                summary.AppendLine($"- Linux Dedicated Server Build Support");
+                summary.AppendLine($"(Unity restart is required once installed)");
+                buttonText = "Open Unity Hub";
                 buttonAction = () =>
                 {
-                    var unityVersion = Application.unityVersion;
-                    var args = $"install-modules --version {unityVersion} -m linux-mono linux-il2cpp";
-
-                    bool linuxMono = false;
-                    bool linuxIl2cpp = false;
-                    string lastOutput = string.Empty;
-                    float progress = 0f;
-
-                    var tokenSource = new CancellationTokenSource();
-                    var command = Task.Run(() => ToolChecker.RunCommand(tokenSource.Token, UnityHubHelper.Path, $"{UnityHubHelper.Headless} {args}", output =>
-                    {
-                        lastOutput = output;
-                        progress = TryFindProgress(output);
-
-                        if (output.Contains("already installed"))
-                        {
-                            linuxMono = linuxMono || output.Contains("linux-mono");
-                            linuxIl2cpp = linuxIl2cpp || output.Contains("linux-il2cpp");
-                        }
-
-                    }), tokenSource.Token);
-
-                    while (!command.IsCompleted)
-                    {
-                        if (EditorUtility.DisplayCancelableProgressBar("Installing Linux Modules", lastOutput, progress))
-                        {
-                            tokenSource.Cancel();
-                            return;
-                        }
-                        Thread.Sleep(100);
-                    }
-
+                    EditorUtility.DisplayProgressBar("Opening Unity Hub", "Please wait...", 1f);
+                    ToolChecker.CheckTool(UnityHubHelper.Path);
                     EditorUtility.ClearProgressBar();
-
-                    if (linuxMono && linuxIl2cpp)
-                    {
-                        EditorUtility.DisplayDialog("Installing Linux Modules", "Linux Modules Already Installed", "Ok");
-                    }
-                    else if (EditorUtility.DisplayDialog("Linux Modules Installed", "Please restart Unity", "Quit Unity", "Cancel"))
-                        EditorApplication.Exit(0);
                 };
             }
             else
@@ -150,7 +116,7 @@ namespace PurrNet.Editor
                 return;
             }
 
-            string cancelButton = buttonText != "Ok" ? "Cancel" : string.Empty;
+            string cancelButton = buttonText != "Ok" ? "Ok" : string.Empty;
 
             EditorUtility.ClearProgressBar();
 
