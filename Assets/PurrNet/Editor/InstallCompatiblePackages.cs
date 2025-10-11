@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -45,30 +43,6 @@ namespace PurrNet.Editor
             if (BuildPipeline.IsBuildTargetSupported(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64))
                 return true;
             return false;
-        }
-
-        static float TryFindProgress(string output)
-        {
-            try
-            {
-                int pIndex = output.IndexOf("%", System.StringComparison.Ordinal);
-                if (pIndex == -1)
-                    return 0;
-
-                int findPreceeingSpace = output.LastIndexOf(' ', pIndex);
-                if (findPreceeingSpace == -1)
-                    return 0;
-                var percentageString = output.Substring(findPreceeingSpace + 1, pIndex - findPreceeingSpace - 1);
-
-                if (!float.TryParse(percentageString, out float progress))
-                    return 0;
-
-                return progress / 100f;
-            }
-            catch
-            {
-                return 0;
-            }
         }
 
 
