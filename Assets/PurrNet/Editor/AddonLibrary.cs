@@ -252,11 +252,7 @@ namespace PurrNet.Editor
             if (addon.asManifest)
             {
                 if (!GitHelper.CheckGit())
-                {
-                    if(EditorUtility.DisplayDialog("Git", "You cannot install this addon, as git is not installed on your system.", "Install", "Cancel"))
-                        Application.OpenURL("https://git-scm.com/downloads");
                     return;
-                }
                 AddAddon_Manifest(addon);
             }
             else
