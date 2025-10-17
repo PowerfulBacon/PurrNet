@@ -234,6 +234,9 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static bool AreEqual<T>(T a, T b)
         {
+            if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+                return EqualityComparer<T>.Default.Equals(a, b);
+
             using var packerA = BitPackerPool.Get();
             using var packerB = BitPackerPool.Get();
 

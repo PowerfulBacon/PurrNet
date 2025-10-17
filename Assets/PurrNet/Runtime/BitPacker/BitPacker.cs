@@ -334,6 +334,13 @@ namespace PurrNet.Packing
             WriteBitsWithoutChecks(data, bits);
         }
 
+        public bool WriteBit(bool data)
+        {
+            EnsureBitsExist(1);
+            WriteBitsWithoutChecks(data ? 1u : 0, 1);
+            return data;
+        }
+
         public unsafe void WriteBitsWithoutChecks(ulong data, byte bits)
         {
             if (bits > 64)

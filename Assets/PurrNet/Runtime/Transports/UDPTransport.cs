@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using LiteNetLib;
+using PurrNet.Edgegap.Runtime;
 using PurrNet.Logging;
 using UnityEngine;
 
@@ -8,6 +9,8 @@ namespace PurrNet.Transports
     [DefaultExecutionOrder(-100)]
     public class UDPTransport : GenericTransport, ITransport, INetLogger
     {
+        [SerializeField] private AutomaticCloudSetups _automaticCloudSetups;
+
         [Header("Server Settings")]
         [Tooltip("The port which the server will start on, and clients connect.")]
         [SerializeField]
@@ -56,6 +59,8 @@ namespace PurrNet.Transports
 
         public IReadOnlyList<Connection> connections => _connections;
 
+        public IReadOnlyDictionary<Connection, PeerInfo> peers => _peers;
+
         private EventBasedNetListener _clientListener;
         private EventBasedNetListener _serverListener;
 
@@ -68,6 +73,8 @@ namespace PurrNet.Transports
 
         readonly List<Connection> _connections = new List<Connection>();
 
+        readonly Dictionary<Connection, PeerInfo> _peers = new Dictionary<Connection, PeerInfo>();
+
         public override bool isSupported => Application.platform != RuntimePlatform.WebGLPlayer;
 
         public override ITransport transport => this;
@@ -75,6 +82,22 @@ namespace PurrNet.Transports
         private void Awake()
         {
             NetDebug.Logger = this;
+            SetupCloud();
+        }
+
+        private void SetupCloud()
+        {
+            if (_automaticCloudSetups.adaptToEdgegap)
+            {
+                var arbitrium = EdgegapUtils.GetArbitrium();
+                if (arbitrium.TryGetPort("UDP", 0, out var port))
+                {
+                    _serverPort = (ushort)port;
+                    _address = "0.0.0.0";
+                    PurrLogger.Log($"Edgegap Auto-Setup: 0.0.0.0:{port}");
+                }
+                else PurrLogger.Log("Edgegap Auto-Setup: No UDP port");
+            }
         }
 
         private void OnEnable()
@@ -177,6 +200,7 @@ namespace PurrNet.Transports
             {
                 if (_connections[i] == conn)
                 {
+                    _peers.Remove(conn);
                     _connections.RemoveAt(i);
                     break;
                 }
@@ -189,6 +213,9 @@ namespace PurrNet.Transports
         private void OnServerConnected(NetPeer peer)
         {
             var conn = new Connection(peer.Id);
+
+            _peers[conn] = PeerInfo.Generate(peer);
+
             _connections.Add(conn);
             onConnected?.Invoke(conn, true);
         }
@@ -258,7 +285,6 @@ namespace PurrNet.Transports
             _client.DisconnectAll();
             _client.Stop();
 
-
             clientState = ConnectionState.Disconnected;
             TriggerConnectionStateEvent(false);
         }
@@ -299,11 +325,12 @@ namespace PurrNet.Transports
                 listenerState = ConnectionState.Disconnected;
                 TriggerConnectionStateEvent(true);
 
+                _peers.Clear();
                 _connections.Clear();
             }
         }
 
-        static DeliveryMethod ToDeliveryMethod(Channel channel)
+        public static DeliveryMethod ToDeliveryMethod(Channel channel)
         {
             return channel switch
             {
@@ -365,6 +392,7 @@ namespace PurrNet.Transports
             TriggerConnectionStateEvent(true);
             TriggerConnectionStateEvent(false);
 
+            _peers.Clear();
             _connections.Clear();
         }
 

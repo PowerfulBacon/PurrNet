@@ -15,6 +15,8 @@ namespace PurrNet.Modules
 
     public delegate bool ValidateSpawnAction(PlayerID player, SpawnPacket data);
 
+    public delegate void SpawnDelegate(GameObject instance, bool isSceneObject);
+
     public class HierarchyV2
     {
         private readonly NetworkManager _manager;
@@ -103,6 +105,8 @@ namespace PurrNet.Modules
 
                 if (!roots.Add(root))
                     continue;
+
+                onPreSpawn?.Invoke(root.gameObject, true);
 
                 var children = ListPool<NetworkIdentity>.Instantiate();
                 root.GetComponentsInChildren(true, children);
@@ -540,11 +544,14 @@ namespace PurrNet.Modules
 
             if (data.prototype.framework.Count > 0)
             {
-                foreach (var piece in data.prototype.framework)
+                for (var i = 0; i < data.prototype.framework.Count; i++)
                 {
+                    var piece = data.prototype.framework[i];
                     if (TryGetIdentity(piece.id, out var existing))
                     {
-                        PurrLogger.LogError($"Spawn failed for player `{player}`. Identity with id `{piece.id}` already exists: `{existing.gameObject.name}`", existing);
+                        PurrLogger.LogError(
+                            $"Spawn failed for player `{player}`. Identity with id `{piece.id}` already exists: `{existing.gameObject.name}`",
+                            existing);
                         return;
                     }
                 }
@@ -552,20 +559,26 @@ namespace PurrNet.Modules
 
             if (_asServer && onClientSpawnValidate != null)
             {
-                foreach (var @delegate in onClientSpawnValidate.GetInvocationList())
+                var list = onClientSpawnValidate.GetInvocationList();
+                for (var i = 0; i < list.Length; i++)
                 {
+                    var @delegate = list[i];
                     var validator = (ValidateSpawnAction)@delegate;
                     if (!validator(player, data))
                     {
                         var declaring = validator.Method.DeclaringType;
                         var methodName = validator.Method.Name;
                         if (data.prototype.framework.Count > 0 &&
-                            _manager.prefabProvider.TryGetPrefabData(data.prototype.framework[0].pid.prefabId, out var pdata) &&
+                            _manager.prefabProvider.TryGetPrefabData(data.prototype.framework[0].pid.prefabId,
+                                out var pdata) &&
                             pdata.prefab)
                         {
-                            PurrLogger.LogWarning($"Spawn validation of `{pdata.prefab.name}` failed for player `{player}` by `{declaring?.Name}.{methodName}`");
+                            PurrLogger.LogWarning(
+                                $"Spawn validation of `{pdata.prefab.name}` failed for player `{player}` by `{declaring?.Name}.{methodName}`");
                         }
-                        else PurrLogger.LogWarning($"Spawn validation failed for player `{player}` by `{declaring?.Name}.{methodName}`");
+                        else
+                            PurrLogger.LogWarning(
+                                $"Spawn validation failed for player `{player}` by `{declaring?.Name}.{methodName}`");
 
                         // send despawn packet to the player
                         RollbackSpawnOnClient(player, data);
@@ -575,7 +588,9 @@ namespace PurrNet.Modules
             }
 
             var createdNids =  DisposableList<NetworkIdentity>.Create(16);
-            CreatePrototype(data.prototype, createdNids.list);
+            var go = CreatePrototype(data.prototype, createdNids.list);
+
+            onPreSpawn?.Invoke(go, false);
 
             if (_asServer)
             {
@@ -640,6 +655,12 @@ namespace PurrNet.Modules
         {
             if (data.sceneId != _sceneId)
                 return;
+
+            if (!asServer && _manager.isServer)
+            {
+                // when in host mode, let the server handle the despawn on their module
+                return;
+            }
 
             if (!TryGetIdentity(data.parentId, out var identity))
             {
@@ -771,6 +792,10 @@ namespace PurrNet.Modules
             if (!identity.id.HasValue)
                 return;
 
+            // dont send despawn packet to the local player
+            if (player == _manager.localPlayer)
+                return;
+
             var packet = new DespawnPacket
             {
                 sceneId = _sceneId,
@@ -840,6 +865,12 @@ namespace PurrNet.Modules
             }
         }
 
+        /// <summary>
+        /// Called before a gameobject is spawned.
+        /// Both locally and for incoming remote spawns.
+        /// </summary>
+        public static event SpawnDelegate onPreSpawn;
+
         public void OnGameObjectCreated(GameObject obj, GameObject prefab)
         {
             if (!obj)
@@ -856,7 +887,7 @@ namespace PurrNet.Modules
 
             NetworkManager.SetupPrefabInfo(obj, data.prefabId, data.pooled);
 
-            Spawn(obj);
+            InternalSpawn(obj);
         }
 
         public void Spawn(GameObject gameObject, GameObject prefab)
@@ -870,7 +901,7 @@ namespace PurrNet.Modules
             NetworkManager.SetupPrefabInfo(gameObject, data.prefabId, data.pooled);
         }
 
-        internal void Spawn(GameObject gameObject)
+        internal void InternalSpawn(GameObject gameObject)
         {
             if (!isReadyToSpawn)
             {
@@ -913,6 +944,7 @@ namespace PurrNet.Modules
                 scope = _playersManager.localPlayerId.Value;
             }
 
+            onPreSpawn?.Invoke(gameObject, false);
 
             var baseNid = new NetworkID(_nextId++, scope);
             SetupIdsLocally(id, ref baseNid);
@@ -1322,10 +1354,9 @@ namespace PurrNet.Modules
                 if (TryGetIdentity(prototype.parentID.Value, out var parent))
                 {
                     result.transform.SetParent(parent.transform, false);
-                    SetLocalPosAndRot(resultTrs, prototype.position, prototype.rotation, prototype.scale);
-
                     if (result.TryGetComponent<NetworkIdentity>(out var nid))
                         ApplyParentChange(nid, parent, prototype.path, false);
+                    SetLocalPosAndRot(resultTrs, prototype.position, prototype.rotation, prototype.scale);
                 }
                 else
                 {

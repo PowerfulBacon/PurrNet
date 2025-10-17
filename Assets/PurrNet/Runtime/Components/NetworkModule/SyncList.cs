@@ -42,7 +42,7 @@ namespace PurrNet
         {
             return new SyncListChange<T>(SyncListOperation.Added, item, default(T), index);
         }
-        
+
         public static SyncListChange<T> Removed(T item, T oldValue, int index)
         {
             return new SyncListChange<T>(SyncListOperation.Removed, item, oldValue, index);
@@ -67,7 +67,7 @@ namespace PurrNet
         {
             return new SyncListChange<T>(SyncListOperation.Cleared, default(T), default(T), -1);
         }
-        
+
         public override string ToString()
         {
             string valueStr = $"Value: {value} | OldValue: {oldValue} | Operation: {operation} | Index: {index}";
@@ -114,6 +114,15 @@ namespace PurrNet
         private float _lastSendTime;
         private bool _wasLastDirty;
         private bool _isDirty;
+
+        public override void OnPoolReset()
+        {
+            onChanged = null;
+            _pendingChanges.Clear();
+            _lastSendTime = default;
+            _wasLastDirty = default;
+            _isDirty = default;
+        }
 
         public SyncList(bool ownerAuth = false)
         {
@@ -359,7 +368,14 @@ namespace PurrNet
 
         private void InvokeChange(SyncListChange<T> change)
         {
-            onChanged?.Invoke(change);
+            try
+            {
+                onChanged?.Invoke(change);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         /// <summary>

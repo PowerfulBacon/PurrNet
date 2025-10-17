@@ -3,7 +3,7 @@ using PurrNet.Packing;
 
 namespace PurrNet.Modules
 {
-    public readonly struct SpawnID : IEquatable<SpawnID>
+    public readonly struct SpawnID : IEquatable<SpawnID>, IPackedAuto
     {
         readonly PackedULong packetIdx;
         public readonly PlayerID player;

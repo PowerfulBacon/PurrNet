@@ -349,6 +349,10 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
+  prefab: {fileID: 5061703843092929407, guid: 6ed01b8a124e8c74788db5bf2caa512b, type: 3}
+  p_parent: {fileID: 6183224292089968140}
+  pos: {x: 1, y: 2, z: 3}
+  rot: {x: 10, y: 20, z: 30}
 --- !u!1 &6426148537294609696
 GameObject:
   m_ObjectHideFlags: 0
@@ -588,6 +592,8 @@ MonoBehaviour:
   _positionAccuracy: 0.01
   _angleAccuracy: 0.5
   _scaleAccuracy: 0.05
+  _minBufferSize: 2
+  _maxBufferSize: 3
 --- !u!1001 &2879680269106758047
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -700,6 +706,8 @@ MonoBehaviour:
   _positionAccuracy: 0.01
   _angleAccuracy: 0.5
   _scaleAccuracy: 0.05
+  _minBufferSize: 2
+  _maxBufferSize: 3
 --- !u!1001 &8593810812524289271
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -808,6 +816,8 @@ MonoBehaviour:
   _positionAccuracy: 0.01
   _angleAccuracy: 0.5
   _scaleAccuracy: 0.05
+  _minBufferSize: 2
+  _maxBufferSize: 3
 --- !u!1001 &8607107901277641316
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -920,3 +930,5 @@ MonoBehaviour:
   _positionAccuracy: 0.01
   _angleAccuracy: 0.5
   _scaleAccuracy: 0.05
+  _minBufferSize: 2
+  _maxBufferSize: 3

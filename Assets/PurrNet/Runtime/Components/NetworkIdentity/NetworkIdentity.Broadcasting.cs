@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 #if UNITASK_PURRNET_SUPPORT
 using Cysharp.Threading.Tasks;
 #endif
-using JetBrains.Annotations;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
@@ -437,8 +436,6 @@ namespace PurrNet
                 return false;
             }
 
-            Func<PlayerID, bool> predicate = ShouldSend;
-
             switch (signature.type)
             {
                 case RPCType.ServerRPC: throw new InvalidOperationException("ServerRPC should be handled by server.");
@@ -446,7 +443,23 @@ namespace PurrNet
                 case RPCType.ObserversRPC:
                 {
                     var rawData = BroadcastModule.GetImmediateData(data);
-                    SendToObservers(rawData, predicate, signature.channel);
+                    using var players = DisposableList<PlayerID>.Create(observers.Count);
+                    var cachedOwner = owner;
+
+                    for (var i = 0; i < observers.Count; ++i)
+                    {
+                        var observer = observers[i];
+
+                        bool ignoreSender = observer == info.sender && (signature.excludeSender || signature.runLocally);
+                        bool ignoreOwner = signature.excludeOwner && observer == cachedOwner;
+
+                        if (ignoreSender || ignoreOwner)
+                            continue;
+
+                        players.Add(observer);
+                    }
+
+                    Send(players, rawData, signature.channel);
                     AppendToBufferedRPCs(signature, data, module);
                     return !isClient;
                 }
@@ -458,14 +471,6 @@ namespace PurrNet
                     return false;
                 }
                 default: throw new ArgumentOutOfRangeException(nameof(signature.type));
-            }
-
-            bool ShouldSend(PlayerID player)
-            {
-                if (player == info.sender && (signature.excludeSender || signature.runLocally))
-                    return false;
-
-                return !signature.excludeOwner || IsNotOwnerPredicate(player);
             }
         }
 
@@ -480,46 +485,6 @@ namespace PurrNet
                     module.AppendToBufferedRPCs(childRpcPacket, signature);
                     break;
             }
-        }
-
-        static readonly List<PlayerID> _players = new List<PlayerID>();
-
-        public void SendToObservers(ByteData packet, [CanBeNull] Func<PlayerID, bool> predicate,
-            Channel method = Channel.ReliableOrdered)
-        {
-            if (predicate != null)
-            {
-                _players.Clear();
-                _players.AddRange(observers);
-
-                for (int i = 0; i < _players.Count; i++)
-                {
-                    if (!predicate(_players[i]))
-                        _players.RemoveAt(i--);
-                }
-
-                Send(_players, packet, method);
-            }
-            else Send(observers, packet, method);
-        }
-
-        public void SendToObservers<T>(T packet, [CanBeNull] Func<PlayerID, bool> predicate,
-            Channel method = Channel.ReliableOrdered)
-        {
-            if (predicate != null)
-            {
-                _players.Clear();
-                _players.AddRange(observers);
-
-                for (int i = 0; i < _players.Count; i++)
-                {
-                    if (!predicate(_players[i]))
-                        _players.RemoveAt(i--);
-                }
-
-                Send(_players, packet, method);
-            }
-            else Send(observers, packet, method);
         }
 
         public void Send<T>(PlayerID player, T packet, Channel method = Channel.ReliableOrdered)

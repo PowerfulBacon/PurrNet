@@ -255,6 +255,9 @@ namespace PurrNet
         [UsedByIL]
         public static bool isServerStatic => main && main.isServer;
 
+        [UsedByIL]
+        public static bool isClientStatic => main && main.isClient;
+
         /// <summary>
         /// Whether the network manager is a client.
         /// </summary>
@@ -396,10 +399,17 @@ namespace PurrNet
 
         static string GetSimpleNameOf(Type t) => t.Assembly.GetName().Name;
 
+        struct TypeRegistrer
+        {
+            public MethodInfo method;
+            public int priority;
+        }
+
         public static void CallAllRegisters()
         {
             var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
             var attrAssemblyName = GetSimpleNameOf(typeof(RegisterPackersAttribute));
+            using var methodsToCall = DisposableList<TypeRegistrer>.Create(128);
 
             for (var index = 0; index < allAssemblies.Length; index++)
             {
@@ -457,10 +467,17 @@ namespace PurrNet
                             for (var i = 0; i < attributes.Length; i++)
                             {
                                 var attribute = attributes[i];
-                                if (attribute.GetType() != typeof(RegisterPackersAttribute))
+
+                                if (attribute is not RegisterPackersAttribute registerPackersAttribute)
                                     continue;
 
-                                method.Invoke(null, null);
+                                methodsToCall.Add(new TypeRegistrer
+                                {
+                                    method = method,
+                                    priority = registerPackersAttribute.priority
+                                });
+
+                                // method.Invoke(null, null);
                                 break;
                             }
                         }
@@ -471,6 +488,11 @@ namespace PurrNet
                     }
                 }
             }
+
+            methodsToCall.list.Sort((a, b) => a.priority.CompareTo(b.priority));
+
+            for (var i = 0; i < methodsToCall.Count; i++)
+                methodsToCall[i].method.Invoke(null, null);
         }
 
         private static bool _hasGeneratedAlready;
@@ -919,9 +941,15 @@ namespace PurrNet
 
             if (asServer)
             {
+                if (_serverTickManager != null)
+                {
+                    _serverTickManager.onPreTick -= OnServerPreTick;
+                    _serverTickManager.onTick -= OnServerTick;
+                    _serverTickManager.onPostTick -= OnServerPostTick;
+                }
+
                 _serverTickManager = tickManager;
                 _isServerTicking = true;
-
                 _serverTickManager.onPreTick += OnServerPreTick;
                 _serverTickManager.onTick += OnServerTick;
                 _serverTickManager.onPostTick += OnServerPostTick;
@@ -1149,6 +1177,7 @@ namespace PurrNet
 
         private void OnTick()
         {
+            var delta = tickModule?.tickDelta ?? Time.fixedUnscaledDeltaTime;
             bool serverConnected = serverState == ConnectionState.Connected;
             bool clientConnected = clientState == ConnectionState.Connected;
 
@@ -1159,7 +1188,7 @@ namespace PurrNet
                 _clientModules.TriggerOnPreFixedUpdate();
 
             if (_transport)
-                _transport.transport.ReceiveMessages(tickModule.tickDelta);
+                _transport.transport.ReceiveMessages(delta);
 
             if (serverConnected)
                 _serverModules.TriggerOnFixedUpdate();
@@ -1174,7 +1203,7 @@ namespace PurrNet
                 _clientModules.TriggerOnPostFixedUpdate();
 
             if (_transport)
-                _transport.transport.SendMessages(tickModule.tickDelta);
+                _transport.transport.SendMessages(delta);
 
             if (_isCleaningClient && _clientModules.Cleanup())
             {
@@ -1540,7 +1569,7 @@ namespace PurrNet
                 TryGetSceneID(entry.scene, out var sceneID) &&
                 factory.TryGetHierarchy(sceneID, out var hierarchy))
             {
-                hierarchy.Spawn(entry);
+                hierarchy.InternalSpawn(entry);
             }
         }
 

@@ -100,8 +100,8 @@ namespace PurrNet.Transports
     [DefaultExecutionOrder(-100)]
     public class CompositeTransport : GenericTransport, ITransport
     {
-        [SerializeField] private bool _ensureAllServersStart;
-        [SerializeField] private GenericTransport[] _transports = { };
+        [SerializeField, HideInInspector] private bool _ensureAllServersStart;
+        [SerializeField, HideInInspector] private GenericTransport[] _transports = { };
 
         private GenericTransport _clientTransport;
 

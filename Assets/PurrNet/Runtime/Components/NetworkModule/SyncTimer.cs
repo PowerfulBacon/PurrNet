@@ -20,14 +20,15 @@ namespace PurrNet
         Paused
     }
 
+    [Serializable]
     public class SyncTimer : NetworkModule, ITick
     {
         private readonly bool _ownerAuth;
         private readonly float _reconcileInterval;
 
-        private TimerState _state;
-        private float _remaining;
-        private float _lastReconcile;
+        [SerializeField, HideInInspector] private TimerState _state;
+        [SerializeField, HideInInspector] private float _remaining;
+        [SerializeField, HideInInspector] private float _lastReconcile;
 
         public float remaining => _remaining;
         public bool isRunning => _state == TimerState.Running;
@@ -57,10 +58,13 @@ namespace PurrNet
             if (lastSecond != remainingInt)
                 onTimerSecondTick?.Invoke();
 
-            if (_ownerAuth && isOwner || !_ownerAuth && isServer)
+            if (IsController(_ownerAuth))
             {
                 if (_remaining <= 0)
+                {
                     HandleTimerEvent(TimerEvent.Stop);
+                    return;
+                }
 
                 if (_lastReconcile + _reconcileInterval < Time.unscaledTime)
                 {

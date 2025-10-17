@@ -2,17 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Security.Authentication;
 using JamesFrowen.SimpleWeb;
+using PurrNet.Edgegap.Runtime;
+using PurrNet.Logging;
 using UnityEngine;
 
 namespace PurrNet.Transports
 {
     public class WebTransport : GenericTransport, ITransport
     {
-        [Header("Server Settings")] [SerializeField]
-        private ushort _serverPort = 5001;
-        [SerializeField] private bool _forceIpv4;
+        [SerializeField] private AutomaticCloudSetups _automaticCloudSetups;
 
+        [Header("Server Settings")]
+        [SerializeField] private ushort _serverPort = 5001;
         [SerializeField] private int _maxConnections = 100;
+        [SerializeField] private bool _forceIpv4;
 
         [Header("Client Settings")] [SerializeField]
         private string _address = "127.0.0.1";
@@ -128,6 +131,31 @@ namespace PurrNet.Transports
             _client.onDisconnect += OnClientDisconnected;
             _client.onData += OnClientReceivedData;
             _client.onError += OnClientError;
+            SetupCloud();
+        }
+
+        private void SetupCloud()
+        {
+            if (_automaticCloudSetups.adaptToEdgegap)
+            {
+                var arbitrium = EdgegapUtils.GetArbitrium();
+                if (arbitrium.TryGetPort("WS", 0, out var port))
+                {
+                    _serverPort = (ushort)port;
+                    _address = "0.0.0.0";
+                    _enableSSL = false;
+                    PurrLogger.Log($"Edgegap Auto-Setup: 0.0.0.0:{port} ssl: false");
+                }
+                else if (arbitrium.TryGetPort("WSS", 0, out var sslport))
+                {
+                    _serverPort = (ushort)sslport;
+                    _address = "0.0.0.0";
+                    _enableSSL = true;
+
+                    PurrLogger.Log($"Edgegap Auto-Setup: 0.0.0.0:{sslport} ssl: true");
+                }
+                else PurrLogger.Log("Edgegap Auto-Setup: No WebSocket port");
+            }
         }
 
         public void RaiseDataReceived(Connection conn, ByteData data, bool asServer)

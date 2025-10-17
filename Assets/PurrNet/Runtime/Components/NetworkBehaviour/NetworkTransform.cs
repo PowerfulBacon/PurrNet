@@ -201,8 +201,13 @@ namespace PurrNet
             OnOwnerChanged(ownerId, ownerId, isServer);
         }
 
+        private bool _cachedIsController;
+
         protected override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
         {
+            _cachedConnectedOwner = hasConnectedOwner;
+            _cachedIsController = IsController(_ownerAuth);
+
             if (!enabled) {
                 return;
             }
@@ -234,6 +239,7 @@ namespace PurrNet
 
         protected override void OnSpawned(bool asServer)
         {
+            _cachedIsController = IsController(_ownerAuth);
             _wasOnSpawnedCalled = true;
 
             if (!networkManager.TryGetModule<NetworkTransformFactory>(asServer, out var factory))
@@ -310,20 +316,51 @@ namespace PurrNet
         /// </summary>
         public void ForceSync()
         {
-            if (!isController)
+            if (!_cachedIsController)
                 return;
 
             _currentData = GetCurrentTransformData();
             _latestData = _currentData;
-            ForceSyncServer(_currentData);
+            _lastSentDelta = _currentData;
+
+            if (isServer)
+            {
+                int obCount = observers.Count;
+                for (var i = 0; i < obCount; i++)
+                {
+                    var observer = observers[i];
+
+                    if (owner == observer)
+                        continue;
+
+                    SendLatestState(observer, _currentData, true);
+                }
+            }
+            else
+            {
+                ForceSyncServer(_currentData);
+            }
         }
 
+        [ServerRpc]
         private void ForceSyncServer(NetworkTransformData data)
         {
-            foreach (var observer in observers)
+            if (!_ownerAuth)
+                return;
+
+            _lastReadData = data;
+            _currentData = data;
+
+            TeleportToData(data);
+            ApplyLerpedPosition();
+
+            int obCount = observers.Count;
+            for (var i = 0; i < obCount; i++)
             {
-                if (IsController(observer, _ownerAuth, false))
-                    return; //No need to send state to controller
+                var observer = observers[i];
+
+                if (owner == observer)
+                    continue;
 
                 SendLatestState(observer, data, true);
             }
@@ -369,20 +406,20 @@ namespace PurrNet
 #if UNITY_PHYSICS_3D || UNITY_PHYSICS_2D
         private void FixedUpdate()
         {
-
             if (!isSpawned)
                 return;
-            bool isNotController = !IsController(_ownerAuth);
 
+            bool isNotController = !_cachedIsController;
+
+            if (isNotController)
+            {
 #if UNITY_PHYSICS_3D
-            if (_rb && isNotController)
-                _rb.Sleep();
+                if (_rb) _rb.Sleep();
 #endif
-
 #if UNITY_PHYSICS_2D
-            if (_rb2d && isNotController)
-                _rb2d.Sleep();
+                if (_rb2d) _rb2d.Sleep();
 #endif
+            }
         }
 #endif
 
@@ -415,7 +452,7 @@ namespace PurrNet
             if (!isSpawned)
                 return;
 
-            bool isLocalController = IsController(_ownerAuth);
+            bool isLocalController = _cachedIsController;
 
             if (!isLocalController)
                 ApplyLerpedPosition();
@@ -589,25 +626,29 @@ namespace PurrNet
         private NetworkTransformData _lastReadData;
         private NetworkTransformData _lastSentDelta;
 
+        public bool HasChanges()
+        {
+            return !_currentData.Equals(_lastSentDelta);
+        }
+
         public bool DeltaWrite(BitPacker packer)
         {
-            int flagPos = packer.AdvanceBits(1);
             bool hasChanged = false;
 
             if (syncPosition)
                 hasChanged = DeltaPacker<CompressedVector3>.Write(packer, _lastSentDelta.position, _currentData.position);
 
             if (syncRotation)
+            {
                 hasChanged = DeltaPacker<PackedQuaternion>.Write(packer, _lastSentDelta.rotation, _currentData.rotation) ||
-                             hasChanged;
+                          hasChanged;
+            }
 
             if (syncScale)
-                hasChanged = DeltaPacker<CompressedVector3>.Write(packer, _lastSentDelta.scale, _currentData.scale) || hasChanged;
-
-            packer.WriteAt(flagPos, hasChanged);
-
-            if (!hasChanged)
-                packer.SetBitPosition(flagPos + 1);
+            {
+                hasChanged = DeltaPacker<CompressedVector3>.Write(packer, _lastSentDelta.scale, _currentData.scale) ||
+                          hasChanged;
+            }
 
             return hasChanged;
         }
@@ -620,25 +661,18 @@ namespace PurrNet
 
         NetworkTransformData DeltaRead(BitPacker packet, NetworkTransformData oldValue)
         {
-            bool hasChanged = default;
+            var pos = oldValue.position;
+            var rot = oldValue.rotation;
+            var ntScale = oldValue.scale;
 
-            Packer<bool>.Read(packet, ref hasChanged);
+            if (syncPosition)
+                DeltaPacker<CompressedVector3>.Read(packet, pos, ref oldValue.position);
 
-            if (hasChanged)
-            {
-                var pos = oldValue.position;
-                var rot = oldValue.rotation;
-                var ntScale = oldValue.scale;
+            if (syncRotation)
+                DeltaPacker<PackedQuaternion>.Read(packet, rot, ref oldValue.rotation);
 
-                if (syncPosition)
-                    DeltaPacker<CompressedVector3>.Read(packet, pos, ref oldValue.position);
-
-                if (syncRotation)
-                    DeltaPacker<PackedQuaternion>.Read(packet, rot, ref oldValue.rotation);
-
-                if (syncScale)
-                    DeltaPacker<CompressedVector3>.Read(packet, ntScale, ref oldValue.scale);
-            }
+            if (syncScale)
+                DeltaPacker<CompressedVector3>.Read(packet, ntScale, ref oldValue.scale);
 
             return oldValue;
         }
@@ -646,21 +680,31 @@ namespace PurrNet
         public void GatherState()
         {
             _currentData = _latestData;
-            if (IsController(_ownerAuth))
+            if (_cachedIsController)
                 TeleportToData(_currentData);
         }
 
         public void DeltaSave()
         {
-            using var packer = BitPackerPool.Get(false);
-            DeltaWrite(packer);
-            packer.ResetPositionAndMode(true);
-            _lastSentDelta = DeltaRead(packer, _lastSentDelta);
+            _lastSentDelta = _currentData;
+        }
+
+        private bool _cachedConnectedOwner;
+
+        protected override void OnOwnerDisconnected(PlayerID ownerId)
+        {
+            _cachedConnectedOwner = false;
         }
 
         public bool IsControlling(PlayerID player, bool asServer)
         {
-            return IsController(player, _ownerAuth, asServer);
+            if (!_ownerAuth || !_cachedConnectedOwner)
+                return asServer;
+
+            if (player == owner)
+                return true;
+
+            return asServer;
         }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace PurrNet.Examples.TopDownShooter
 {
-    public class PlayerMovement : NetworkBehaviour
+    public class PlayerMovement : PlayerIdentity<PlayerMovement>
     {
         [SerializeField] private Reference<Transform> _visuals;
         [SerializeField] private float moveSpeed = 4f;
@@ -29,12 +29,14 @@ namespace PurrNet.Examples.TopDownShooter
 
         protected override void OnSpawned(bool asServer)
         {
+            base.OnSpawned();
             if (!asServer)
                 enabled = isOwner;
         }
 
         protected override void OnDespawned()
         {
+            base.OnDespawned();
             if (_visuals.value && isSpawned)
                 Destroy(_visuals.value.gameObject);
         }
@@ -61,8 +63,7 @@ namespace PurrNet.Examples.TopDownShooter
         {
             if (!_controller)
                 return;
-
-
+            
             Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
             Vector3 targetMove = new Vector3(input.x, 0, input.y).normalized;
 

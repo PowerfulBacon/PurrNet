@@ -86,6 +86,18 @@ namespace PurrNet
         private bool _isDirty;
         private bool _wasLastDirty;
 
+        public override void OnPoolReset()
+        {
+            onChanged = null;
+            _lastSendTime = default;
+            _isDirty = default;
+            _wasLastDirty = default;
+
+#if UNITY_EDITOR
+            onChanged += UpdateSerializedDict;
+#endif
+        }
+
         /// <summary>
         /// Creates a new Sync Dictionary
         /// </summary>
@@ -309,7 +321,14 @@ namespace PurrNet
 
         private void InvokeChange(SyncDictionaryChange<TKey, TValue> change)
         {
-            onChanged?.Invoke(change);
+            try
+            {
+                onChanged?.Invoke(change);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         private void QueueChange(SyncDictionaryChange<TKey, TValue> change)

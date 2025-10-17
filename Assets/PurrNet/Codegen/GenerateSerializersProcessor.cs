@@ -107,6 +107,10 @@ namespace PurrNet.Codegen
                 assembly.MainModule.TypeSystem.Object
             );
 
+            var editorType = assembly.MainModule.GetTypeDefinition<GeneratedByILAttribute>().Import(assembly.MainModule);
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters).Import(assembly.MainModule);
+            var editorAttribute = new CustomAttribute(editorConstructor);
+            serializerClass.CustomAttributes.Add(editorAttribute);
             var resolvedType = type.Resolve();
 
             if (resolvedType == null)
@@ -212,7 +216,7 @@ namespace PurrNet.Codegen
             if (ignoreDelta?.Contains(type) == false)
                 GenerateDeltaSerializersProcessor.HandleType(assembly, type, serializerClass);
 
-            RegisterSerializersProcessor.HandleType(type.Module, serializerClass, isEditor, null, null);
+            RegisterSerializersProcessor.HandleType(type.Module, serializerClass, null, null);
         }
 
         private static void HandleHashOnly(AssemblyDefinition assembly, TypeReference type,
@@ -223,9 +227,10 @@ namespace PurrNet.Codegen
 
             var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>()
                 .Import(assembly.MainModule);
-            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
                 .Import(assembly.MainModule);
             var editorAttribute = new CustomAttribute(editorConstructor);
+            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, -1));
             registerMethod.CustomAttributes.Add(editorAttribute);
 
             var il = registerMethod.Body.GetILProcessor();
@@ -249,9 +254,10 @@ namespace PurrNet.Codegen
                 new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
 
             var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
-            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
                 .Import(assembly.MainModule);
             var editorAttribute = new CustomAttribute(editorConstructor);
+            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, -1));
             registerMethod.CustomAttributes.Add(editorAttribute);
 
             registerMethod.Body = new MethodBody(registerMethod)
@@ -271,10 +277,10 @@ namespace PurrNet.Codegen
                 new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
 
             var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
-            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
                 .Import(assembly.MainModule);
             var editorAttribute = new CustomAttribute(editorConstructor);
-
+            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, -1));
             registerMethod.CustomAttributes.Add(editorAttribute);
             registerMethod.Body = new MethodBody(registerMethod)
             {
@@ -294,9 +300,10 @@ namespace PurrNet.Codegen
                 new MethodDefinition("Register", MethodAttributes.Static, assembly.MainModule.TypeSystem.Void);
 
             var editorType = assembly.MainModule.GetTypeDefinition<RegisterPackersAttribute>();
-            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
                 .Import(assembly.MainModule);
             var editorAttribute = new CustomAttribute(editorConstructor);
+            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, -1));
             registerMethod.CustomAttributes.Add(editorAttribute);
             registerMethod.Body = new MethodBody(registerMethod)
             {
@@ -452,6 +459,19 @@ namespace PurrNet.Codegen
             return baseType != null && HasInterface(baseType, interfaceType);
         }
 
+        public static TypeDefinition HasInterfaceExtra(TypeDefinition def, Type interfaceType)
+        {
+            bool selfHas = def.Interfaces.Any(i => i.InterfaceType.FullName == interfaceType.FullName);
+            if (selfHas)
+                return def;
+
+            var baseType = def.BaseType?.Resolve();
+            if (baseType != null)
+                return HasInterfaceExtra(baseType, interfaceType);
+
+            return null;
+        }
+
         public static bool HasInterface(TypeDefinition def, Type interfaceType)
         {
             bool selfHas = def.Interfaces.Any(i => i.InterfaceType.FullName == interfaceType.FullName);
@@ -597,6 +617,16 @@ namespace PurrNet.Codegen
             bool isClass = !type.IsValueType;
 
             var ret = il.Create(OpCodes.Ret);
+
+            var standaloneType = HasInterfaceExtra(type, typeof(IStandaloneSerializable));
+
+            if (standaloneType != null && standaloneType.FullName != type.FullName)
+            {
+                // call Packer<>.Write for the standalone type
+                CallForStandalone(isWriting, method, serializeDirect, il, mainmodule, packerType, standaloneType, type);
+                il.Append(ret);
+                return;
+            }
 
             if (isClass)
             {
@@ -791,6 +821,43 @@ namespace PurrNet.Codegen
             il.Emit(OpCodes.Call, readData);*/
 
             il.Append(ret);
+        }
+
+        private static void CallForStandalone(bool isWriting, MethodDefinition method, MethodReference serializeDirect,
+            ILProcessor il, ModuleDefinition mainmodule, TypeReference packerType, TypeDefinition standaloneType,
+            TypeDefinition type)
+        {
+            var genericM = CreateGenericMethod(packerType, standaloneType, serializeDirect, mainmodule);
+
+            var variable = new VariableDefinition(standaloneType);
+
+            if (isWriting)
+            {
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldarg_1);
+            }
+            else
+            {
+                // variable = this
+                method.Body.Variables.Add(variable);
+
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Ldind_Ref);
+                il.Emit(OpCodes.Stloc, variable);
+
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldloca, variable);
+            }
+
+            il.Emit(OpCodes.Call, genericM);
+
+            if (!isWriting)
+            {
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Ldloc, variable);
+                il.Emit(OpCodes.Castclass, type);
+                il.Emit(OpCodes.Stind_Ref);
+            }
         }
 
         private static bool ShouldIgnoreField(FieldDefinition field)

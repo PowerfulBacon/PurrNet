@@ -222,6 +222,9 @@ namespace PurrNet.Steam
 
         public void SendToClient(Connection target, ByteData data, Channel method = Channel.ReliableOrdered)
         {
+            if (_server == null)
+                return;
+
             if (listenerState is not ConnectionState.Connected)
                 return;
 
@@ -234,13 +237,16 @@ namespace PurrNet.Steam
 
         public void SendToServer(ByteData data, Channel method = Channel.ReliableOrdered)
         {
+            if (_client == null)
+                return;
+
             _client.Send(data, method);
             RaiseDataSent(default, data, false);
         }
 
         public void CloseConnection(Connection conn)
         {
-            _server.Kick(conn.connectionId);
+            _server?.Kick(conn.connectionId);
         }
 
         public void ReceiveMessages(float delta)

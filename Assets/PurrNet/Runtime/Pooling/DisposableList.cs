@@ -11,6 +11,11 @@ namespace PurrNet.Pooling
 
         public List<T> list { get; private set; }
 
+        public override string ToString()
+        {
+            return string.Concat("[", string.Join(", ", list), "]");
+        }
+
         [Obsolete("Use DisposableList<T>.Create instead")]
         public DisposableList(int capacity)
         {
@@ -190,14 +195,46 @@ namespace PurrNet.Pooling
             {
                 if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
                 NotifyUsage();
+                if (index >= list.Count || index < 0)
+                    throw new IndexOutOfRangeException($"Index {index} is out of range for list of size {list.Count}.");
                 return list[index];
             }
             set
             {
                 if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
                 NotifyUsage();
+
+                if (index >= list.Count || index < 0)
+                    throw new IndexOutOfRangeException($"Index {index} is out of range for list of size {list.Count}.");
                 list[index] = value;
             }
+        }
+
+        public void Reverse()
+        {
+            if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
+            NotifyUsage();
+            list.Reverse();
+        }
+
+        public void RemoveRange(int opIndex, int opLength)
+        {
+            if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
+            NotifyUsage();
+
+            if (opIndex + opLength > list.Count)
+                throw new IndexOutOfRangeException($"Index {opIndex} + {opLength} is out of range for list of size {list.Count}.");
+            if (opIndex < 0)
+                throw new IndexOutOfRangeException($"Index {opIndex} is out of range for list of size {list.Count}.");
+
+            list.RemoveRange(opIndex, opLength);
+        }
+
+        public void InsertRange(int index, IEnumerable<T> values)
+        {
+            if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
+            NotifyUsage();
+            list.InsertRange(index, values);
         }
     }
 }
