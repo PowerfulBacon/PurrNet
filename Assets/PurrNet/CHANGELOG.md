@@ -1,3 +1,10 @@
+## [1.16.1-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.16.0...v1.16.1-beta.1) (2025-10-22)
+
+
+### Bug Fixes
+
+* State machine host fix ([15bfbcd](https://github.com/PurrNet/PurrNet/commit/15bfbcd1a912ad2a9bceb50dbbb3d8468005595d))
+
 # [1.16.0](https://github.com/PurrNet/PurrNet/compare/v1.15.0...v1.16.0) (2025-10-17)
 
 
