@@ -3170,6 +3170,9 @@ namespace PurrNet.Codegen
             if (IsGeneric(typeReference, typeof(DisposableList<>)))
                 return true;
 
+            if (IsGeneric(typeReference, typeof(DisposableArray<>)))
+                return true;
+
             if (IsGeneric(typeReference, typeof(DisposableHashSet<>)))
                 return true;
 

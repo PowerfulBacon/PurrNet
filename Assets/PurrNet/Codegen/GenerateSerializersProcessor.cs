@@ -22,6 +22,7 @@ namespace PurrNet.Codegen
         Queue,
         Stack,
         DisposableList,
+        DisposableArray,
         DisposableHashSet,
         DisposableDictionary
     }
@@ -396,6 +397,13 @@ namespace PurrNet.Codegen
                     genericRegisterDListMethod.GenericArguments.Add(stackType.GenericArguments[0]);
 
                     il.Emit(OpCodes.Call, genericRegisterDListMethod);
+                    break;
+                case HandledGenericTypes.DisposableArray when importedType is GenericInstanceType stackType:
+                    var registerDisposableArrayMethod =
+                        packCollectionsType.GetMethod("RegisterDisposableArray", true).Import(module);
+                    var genericRegisterDArrayMethod = new GenericInstanceMethod(registerDisposableArrayMethod);
+                    genericRegisterDArrayMethod.GenericArguments.Add(stackType.GenericArguments[0]);
+                    il.Emit(OpCodes.Call, genericRegisterDArrayMethod);
                     break;
                 case HandledGenericTypes.DisposableHashSet when importedType is GenericInstanceType stackType:
                     var registerDisposableHashSetMethod =
@@ -1028,6 +1036,13 @@ namespace PurrNet.Codegen
                 type = HandledGenericTypes.DisposableList;
                 return true;
             }
+
+            if (IsGeneric(typeDef, typeof(DisposableArray<>)))
+            {
+                type = HandledGenericTypes.DisposableArray;
+                return true;
+            }
+
 
             if (IsGeneric(typeDef, typeof(DisposableHashSet<>)))
             {
