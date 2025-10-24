@@ -8,13 +8,13 @@ namespace PurrNet.Editor
         [MenuItem("Tools/PurrNet/Features/Disable Runtime Profiling", priority = 105)]
         public static void Uninstall_PURR_RUNTIME_PROFILING()
         {
-            SymbolsHelper.RemoveSymbol("PURR_BUTTONS");
+            SymbolsHelper.RemoveSymbol("PURR_RUNTIME_PROFILING");
         }
 #else
         [MenuItem("Tools/PurrNet/Features/Enable Runtime Profiling", priority = 105)]
         public static void Install_PURR_RUNTIME_PROFILING()
         {
-            SymbolsHelper.AddSymbol("PURR_BUTTONS");
+            SymbolsHelper.AddSymbol("PURR_RUNTIME_PROFILING");
         }
 #endif
 
