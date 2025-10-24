@@ -1,3 +1,10 @@
+## [1.16.1-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.1...v1.16.1-beta.2) (2025-10-23)
+
+
+### Bug Fixes
+
+* actually register disposableArray ([c0f7b0f](https://github.com/PurrNet/PurrNet/commit/c0f7b0f85213304459111acbaa607dd834dbf7e1))
+
 ## [1.16.1-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.16.0...v1.16.1-beta.1) (2025-10-22)
 
 
