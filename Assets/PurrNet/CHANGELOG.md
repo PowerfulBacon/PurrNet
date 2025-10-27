@@ -1,3 +1,10 @@
+## [1.16.1-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.3...v1.16.1-beta.4) (2025-10-26)
+
+
+### Bug Fixes
+
+* error when adding component at runtime ([a7d068c](https://github.com/PurrNet/PurrNet/commit/a7d068c81001e645d49921f9caced42c7eef7840))
+
 ## [1.16.1-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.2...v1.16.1-beta.3) (2025-10-24)
 
 
