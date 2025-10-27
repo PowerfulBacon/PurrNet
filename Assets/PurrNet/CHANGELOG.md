@@ -1,3 +1,10 @@
+## [1.16.1-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.4...v1.16.1-beta.5) (2025-10-27)
+
+
+### Bug Fixes
+
+* PURR_LEAKS_CHECK for dictionaries too ([3c1b8d6](https://github.com/PurrNet/PurrNet/commit/3c1b8d652685969fe82f5a2341a6073d75ac3414))
+
 ## [1.16.1-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.3...v1.16.1-beta.4) (2025-10-26)
 
 
