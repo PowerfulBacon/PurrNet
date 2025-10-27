@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace PurrNet.Pooling
 {
@@ -13,27 +14,29 @@ namespace PurrNet.Pooling
 
         public void Add(T item)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException("Cannot add to a DisposableArray");
         }
 
         public void Clear()
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException("Cannot clear a DisposableArray");
         }
 
         public bool Contains(T item)
         {
+            NotifyUsage();
             return Array.IndexOf(array, item) >= 0;
         }
 
         public void CopyTo(T[] array, int arrayIndex)
         {
+            NotifyUsage();
             Array.Copy(this.array, array, Count);
         }
 
         public bool Remove(T item)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException("Cannot remove from a DisposableArray");
         }
 
         public int Count { get; private set; }
@@ -44,17 +47,18 @@ namespace PurrNet.Pooling
 
         public int IndexOf(T item)
         {
+            NotifyUsage();
             return Array.IndexOf(array, item);
         }
 
         public void Insert(int index, T item)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException("Cannot insert into a DisposableArray");
         }
 
         public void RemoveAt(int index)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException("Cannot remove from a DisposableArray");
         }
 
         public T this[int index]
@@ -62,6 +66,7 @@ namespace PurrNet.Pooling
             get
             {
                 if (isDisposed) throw new ObjectDisposedException(nameof(DisposableArray<T>));
+                NotifyUsage();
                 if (index >= Count || index < 0)
                     throw new IndexOutOfRangeException($"Index {index} is out of range for list of size {Count}.");
                 return array[index];
@@ -69,6 +74,7 @@ namespace PurrNet.Pooling
             set
             {
                 if (isDisposed) throw new ObjectDisposedException(nameof(DisposableArray<T>));
+                NotifyUsage();
                 if (index >= Count || index < 0)
                     throw new IndexOutOfRangeException($"Index {index} is out of range for list of size {Count}.");
                 array[index] = value;
@@ -78,6 +84,9 @@ namespace PurrNet.Pooling
         public static DisposableArray<T> Create(int size)
         {
             var rented = ArrayPool<T>.Shared.Rent(size);
+#if UNITY_EDITOR && PURR_LEAKS_CHECK
+            AllocationTracker.Track(rented);
+#endif
             Array.Clear(rented, 0, size);
 
             return new DisposableArray<T>
@@ -91,6 +100,9 @@ namespace PurrNet.Pooling
         public static DisposableArray<T> Create(DisposableArray<T> copyFrom)
         {
             var array = ArrayPool<T>.Shared.Rent(copyFrom.Count);
+#if UNITY_EDITOR && PURR_LEAKS_CHECK
+            AllocationTracker.Track(array);
+#endif
             Array.Copy(copyFrom.array, array, copyFrom.Count);
             return new DisposableArray<T>
             {
@@ -103,6 +115,9 @@ namespace PurrNet.Pooling
         public static DisposableArray<T> Create(IList<T> copyFrom)
         {
             var array = ArrayPool<T>.Shared.Rent(copyFrom.Count);
+#if UNITY_EDITOR && PURR_LEAKS_CHECK
+            AllocationTracker.Track(array);
+#endif
             copyFrom.CopyTo(array, 0);
             return new DisposableArray<T>
             {
@@ -115,6 +130,9 @@ namespace PurrNet.Pooling
         public static DisposableArray<T> Create(T[] copyFrom)
         {
             var array = ArrayPool<T>.Shared.Rent(copyFrom.Length);
+#if UNITY_EDITOR && PURR_LEAKS_CHECK
+            AllocationTracker.Track(array);
+#endif
             Array.Copy(copyFrom, array, copyFrom.Length);
             return new DisposableArray<T>
             {
@@ -128,18 +146,23 @@ namespace PurrNet.Pooling
         {
             if (!_shouldDispose) return;
             ArrayPool<T>.Shared.Return(array);
+#if UNITY_EDITOR && PURR_LEAKS_CHECK
+            AllocationTracker.UnTrack(array);
+#endif
             _shouldDispose = false;
         }
 
         public IEnumerator<T> GetEnumerator()
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableArray<T>));
+            NotifyUsage();
             for (int i = 0; i < Count; i++)
                 yield return array[i];
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
+            NotifyUsage();
             return GetEnumerator();
         }
 
@@ -152,8 +175,21 @@ namespace PurrNet.Pooling
             var newArray = ArrayPool<T>.Shared.Rent(valueCount);
             Array.Copy(array, newArray, Count);
             ArrayPool<T>.Shared.Return(array);
+#if UNITY_EDITOR && PURR_LEAKS_CHECK
+            AllocationTracker.UnTrack(array);
+            AllocationTracker.Track(newArray);
+#endif
             array = newArray;
             Count = valueCount;
+            NotifyUsage();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void NotifyUsage()
+        {
+#if UNITY_EDITOR && PURR_LEAKS_CHECK
+            AllocationTracker.UpdateUsage(array);
+#endif
         }
     }
 }
