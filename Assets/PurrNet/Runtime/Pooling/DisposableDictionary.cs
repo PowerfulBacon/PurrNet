@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace PurrNet.Pooling
 {
@@ -14,6 +15,14 @@ namespace PurrNet.Pooling
         private DisposableList<TKey> _keys;
 
         public Dictionary<TKey, TValue> dictionary { get; private set; }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void NotifyUsage()
+        {
+#if UNITY_EDITOR && PURR_LEAKS_CHECK
+            AllocationTracker.UpdateUsage(dictionary);
+#endif
+        }
 
         public static DisposableDictionary<TKey, TValue> Create()
         {
@@ -52,7 +61,7 @@ namespace PurrNet.Pooling
         {
             if (!_isAllocated)
                 throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
-
+            NotifyUsage();
             int count = _keys.Count;
             for (var i = 0; i < count; ++i)
             {
@@ -65,7 +74,7 @@ namespace PurrNet.Pooling
         {
             if (!_isAllocated)
                 throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
-
+            NotifyUsage();
             return GetEnumerator();
         }
 
@@ -73,6 +82,7 @@ namespace PurrNet.Pooling
         {
             if (!_isAllocated)
                 throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+            NotifyUsage();
             dictionary.Add(item.Key, item.Value);
             _keys.Add(item.Key);
         }
@@ -81,6 +91,7 @@ namespace PurrNet.Pooling
         {
             if (!_isAllocated)
                 throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+            NotifyUsage();
             _keys.Clear();
             dictionary.Clear();
         }
@@ -89,6 +100,7 @@ namespace PurrNet.Pooling
         {
             if (!_isAllocated)
                 throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+            NotifyUsage();
             return dictionary.ContainsKey(item.Key) && EqualityComparer<TValue>.Default.Equals(dictionary[item.Key], item.Value);
         }
 
@@ -96,6 +108,7 @@ namespace PurrNet.Pooling
         {
             if (!_isAllocated)
                 throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+            NotifyUsage();
             if (array == null) throw new ArgumentNullException(nameof(array));
             if (arrayIndex < 0 || arrayIndex + dictionary.Count > array.Length)
                 throw new ArgumentOutOfRangeException(nameof(arrayIndex));
@@ -111,6 +124,7 @@ namespace PurrNet.Pooling
         {
             if (!_isAllocated)
                 throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+            NotifyUsage();
             if (dictionary.ContainsKey(item.Key) && EqualityComparer<TValue>.Default.Equals(dictionary[item.Key], item.Value))
             {
                 dictionary.Remove(item.Key);
@@ -126,6 +140,7 @@ namespace PurrNet.Pooling
             {
                 if (!_isAllocated)
                     throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+                NotifyUsage();
                 return dictionary.Count;
             }
         }
@@ -136,6 +151,7 @@ namespace PurrNet.Pooling
             {
                 if (!_isAllocated)
                     throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+                NotifyUsage();
                 return false;
             }
         }
@@ -144,6 +160,7 @@ namespace PurrNet.Pooling
         {
             if (!_isAllocated)
                 throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+            NotifyUsage();
             _keys.Add(key);
             dictionary.Add(key, value);
         }
@@ -152,6 +169,7 @@ namespace PurrNet.Pooling
         {
             if (!_isAllocated)
                 throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+            NotifyUsage();
             return dictionary.ContainsKey(key);
         }
 
@@ -159,6 +177,7 @@ namespace PurrNet.Pooling
         {
             if (!_isAllocated)
                 throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+            NotifyUsage();
 
             if (dictionary.Remove(key))
             {
@@ -176,6 +195,7 @@ namespace PurrNet.Pooling
                 value = default;
                 return false;
             }
+            NotifyUsage();
             return dictionary.TryGetValue(key, out value);
         }
 
@@ -185,13 +205,14 @@ namespace PurrNet.Pooling
             {
                 if (!_isAllocated)
                     throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+                NotifyUsage();
                 return dictionary[key];
             }
             set
             {
                 if (!_isAllocated)
                     throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
-
+                NotifyUsage();
                 if (!dictionary.ContainsKey(key))
                     _keys.Add(key);
                 dictionary[key] = value;
@@ -204,6 +225,7 @@ namespace PurrNet.Pooling
             {
                 if (!_isAllocated)
                     throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+                NotifyUsage();
                 return _keys;
             }
         }
@@ -214,6 +236,7 @@ namespace PurrNet.Pooling
             {
                 if (!_isAllocated)
                     throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+                NotifyUsage();
                 return _keys;
             }
         }
@@ -227,6 +250,7 @@ namespace PurrNet.Pooling
         {
             if (!_isAllocated)
                 throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
+            NotifyUsage();
             return dictionary.GetValueOrDefault(key);
         }
     }
