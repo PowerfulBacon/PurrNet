@@ -66,7 +66,6 @@ namespace PurrNet.Pooling
             get
             {
                 if (isDisposed) throw new ObjectDisposedException(nameof(DisposableArray<T>));
-                NotifyUsage();
                 if (index >= Count || index < 0)
                     throw new IndexOutOfRangeException($"Index {index} is out of range for list of size {Count}.");
                 return array[index];
@@ -74,7 +73,6 @@ namespace PurrNet.Pooling
             set
             {
                 if (isDisposed) throw new ObjectDisposedException(nameof(DisposableArray<T>));
-                NotifyUsage();
                 if (index >= Count || index < 0)
                     throw new IndexOutOfRangeException($"Index {index} is out of range for list of size {Count}.");
                 array[index] = value;
