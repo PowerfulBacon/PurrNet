@@ -3,10 +3,11 @@ using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using PurrNet.Packing;
 
 namespace PurrNet.Pooling
 {
-    public struct DisposableArray<T> : IDisposable, IReadOnlyList<T>, IList<T>
+    public struct DisposableArray<T> : IDisposable, IReadOnlyList<T>, IList<T>, IDuplicate<DisposableArray<T>>
     {
         private bool _shouldDispose;
 
@@ -188,6 +189,11 @@ namespace PurrNet.Pooling
 #if UNITY_EDITOR && PURR_LEAKS_CHECK
             AllocationTracker.UpdateUsage(array);
 #endif
+        }
+
+        public DisposableArray<T> Duplicate()
+        {
+            return Create(this);
         }
     }
 }

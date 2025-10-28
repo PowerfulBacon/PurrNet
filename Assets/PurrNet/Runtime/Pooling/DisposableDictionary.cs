@@ -2,10 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using PurrNet.Packing;
 
 namespace PurrNet.Pooling
 {
-    public struct DisposableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDisposable
+    public struct DisposableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDisposable, IDuplicate<DisposableDictionary<TKey, TValue>>
         where TKey : notnull
     {
         private bool _isAllocated;
@@ -252,6 +253,11 @@ namespace PurrNet.Pooling
                 throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
             NotifyUsage();
             return dictionary.GetValueOrDefault(key);
+        }
+
+        public DisposableDictionary<TKey, TValue> Duplicate()
+        {
+            return Create(this);
         }
     }
 }
