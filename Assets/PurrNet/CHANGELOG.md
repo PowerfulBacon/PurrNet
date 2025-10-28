@@ -1,3 +1,10 @@
+## [1.16.1-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.5...v1.16.1-beta.6) (2025-10-28)
+
+
+### Bug Fixes
+
+* allow to override how things are duplicated ([c99ba8f](https://github.com/PurrNet/PurrNet/commit/c99ba8f122f6b10bf1bf7f335d1b1df623ec7781))
+
 ## [1.16.1-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.4...v1.16.1-beta.5) (2025-10-27)
 
 
