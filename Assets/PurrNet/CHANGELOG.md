@@ -1,3 +1,10 @@
+## [1.16.1-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.6...v1.16.1-beta.7) (2025-11-02)
+
+
+### Bug Fixes
+
+* properly register interfaces and collections of interfaces ([dd0b28e](https://github.com/PurrNet/PurrNet/commit/dd0b28edb6f5c0ea06415eba4c9ee1ed577764a5))
+
 ## [1.16.1-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.5...v1.16.1-beta.6) (2025-10-28)
 
 
