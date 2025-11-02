@@ -32,10 +32,10 @@ namespace PurrNet.Codegen
         public static bool ValideType(TypeReference type)
         {
             // Check if the type itself is an interface
-            if (type.Resolve()?.IsInterface == true)
+            /*if (type.Resolve()?.IsInterface == true)
             {
                 return false;
-            }
+            }*/
 
             bool isDelegate = PostProcessor.InheritsFrom(type.Resolve(), typeof(Delegate).FullName);
 
@@ -51,7 +51,7 @@ namespace PurrNet.Codegen
                 // Recursively validate all generic arguments
                 foreach (var argument in genericInstance.GenericArguments)
                 {
-                    if (argument.ContainsGenericParameter || argument.Resolve()?.IsInterface == true ||
+                    if (argument.ContainsGenericParameter ||/* argument.Resolve()?.IsInterface == true ||*/
                         !ValideType(argument))
                     {
                         return false;
@@ -122,14 +122,10 @@ namespace PurrNet.Codegen
             if (hasDontPack)
                 return;
 
-            if (resolvedType.IsInterface)
-                return;
-
             var bitStreamType = assembly.MainModule.GetTypeDefinition(typeof(BitPacker)).Import(assembly.MainModule);
             var mainmodule = assembly.MainModule;
 
-
-            if (hashOnly)
+            if (resolvedType.IsInterface || hashOnly)
             {
                 assembly.MainModule.Types.Add(serializerClass);
                 HandleHashOnly(assembly, type, serializerClass);
