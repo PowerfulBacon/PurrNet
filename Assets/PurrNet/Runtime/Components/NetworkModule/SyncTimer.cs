@@ -29,6 +29,7 @@ namespace PurrNet
         [SerializeField, HideInInspector] private TimerState _state;
         [SerializeField, HideInInspector] private float _remaining;
         [SerializeField, HideInInspector] private float _lastReconcile;
+        [SerializeField, HideInInspector] private bool _manualUpdate;
 
         public float remaining => _remaining;
         public bool isRunning => _state == TimerState.Running;
@@ -42,17 +43,27 @@ namespace PurrNet
         public event Action onTimerPaused;
         public event Action onTimerResumed;
 
-        public SyncTimer(bool ownerAuth = false, float reconcileInterval = 3)
+        public SyncTimer(bool ownerAuth = false, float reconcileInterval = 3, bool manualUpdate = false)
         {
             _ownerAuth = ownerAuth;
             _reconcileInterval = reconcileInterval;
             _state = TimerState.Stopped;
+            
         }
 
         public void OnTick(float delta)
         {
-            if (_state != TimerState.Running) return;
+            if (!_manualUpdate) 
+                return;
 
+            Advance(delta);
+        }
+
+        public void Advance(float delta)
+        {
+            if (_state != TimerState.Running)
+                return;
+            
             int lastSecond = remainingInt;
             _remaining -= delta;
             if (lastSecond != remainingInt)
