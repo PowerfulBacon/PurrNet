@@ -59,9 +59,9 @@ namespace PurrNet
             Advance(delta);
         }
 
-        public void Advance(float delta)
+        public void Advance(float delta, bool useRunningCheck = true)
         {
-            if (_state != TimerState.Running)
+            if (useRunningCheck && _state != TimerState.Running)
                 return;
             
             int lastSecond = remainingInt;
