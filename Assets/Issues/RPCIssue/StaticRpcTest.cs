@@ -13,6 +13,7 @@ public class StaticRpcTest : PlayerIdentity<StaticRpcTest>
 
     private async void Update()
     {
+        return;
         if (Input.GetKeyDown(KeyCode.A))
         {
             var res = await TestCaller<StaticRpcTest>();
