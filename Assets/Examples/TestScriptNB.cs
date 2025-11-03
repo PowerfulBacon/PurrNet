@@ -1,6 +1,8 @@
+using System;
 using PurrNet;
 using PurrNet.Logging;
 using PurrNet.Packing;
+using UnityEngine;
 
 namespace System.Runtime.CompilerServices
 {
@@ -11,6 +13,17 @@ public record PickedUpEvent(string ItemName, int Quantity) : IPackedAuto;
 
 public class TestScriptNB : NetworkIdentity
 {
+    [SerializeField] GameObject prefab;
+    [SerializeField] Transform p_parent;
+    [SerializeField] private Vector3 pos;
+    [SerializeField] Vector3 rot;
+
+    protected override void OnSpawned()
+    {
+        if (isOwner)
+            UnityProxy.Instantiate(prefab, pos, Quaternion.Euler(rot), p_parent);
+    }
+
     [PurrButton]
     public void ServerRpcTesTButton()
     {

@@ -1,4 +1,4 @@
-using Cysharp.Threading.Tasks;
+using System.Threading.Tasks;
 using PurrNet;
 using PurrNet.Logging;
 using UnityEngine;
@@ -15,11 +15,12 @@ public class TrySimpleSpawner : NetworkBehaviour
             _ = HandleDefendPhase();
     }
 
-    public async UniTask HandleDefendPhase()
+    public Task HandleDefendPhase()
     {
         Debug.Log("HandleDefendPhase.");
 
         this?.EnterHang();
+        return Task.CompletedTask;
     }
 
     [ObserversRpc(PurrNet.Transports.Channel.ReliableOrdered)]

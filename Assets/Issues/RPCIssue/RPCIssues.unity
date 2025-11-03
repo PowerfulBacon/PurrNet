@@ -119,59 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &173168649
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 173168651}
-  - component: {fileID: 173168650}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &173168650
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 173168649}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b0cd72287a92b040a05fb3fb30e7fbf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: PurrNet.Issues.RpcIssue::SafeListUse
-  _isSetup: 0
-  _prefabId: -2147483648
-  _componentIndex: -2147483648
-  _shouldBePooled: 0
-  _parent: {fileID: 0}
-  _invertedPathToNearestParent: 
-  _directChildren: []
-  _networkRules: {fileID: 0}
-  _visitiblityRules: {fileID: 0}
---- !u!4 &173168651
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 173168649}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.69467, y: 0.44187, z: -6.18095}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &655911524
 GameObject:
   m_ObjectHideFlags: 0
@@ -184,7 +131,6 @@ GameObject:
   - component: {fileID: 655911527}
   - component: {fileID: 655911526}
   - component: {fileID: 655911525}
-  - component: {fileID: 655911529}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -304,34 +250,12 @@ Transform:
   m_GameObject: {fileID: 655911524}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.05353737, y: 5.283135, z: -4.2274423}
+  m_LocalPosition: {x: 0, y: 0, z: -4.2274423}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &655911529
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 655911524}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5db08e776b1de434baa9cd6dcb5376d6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: PurrNet.Issues.RpcIssue::StaticRpcTest
-  _isSetup: 0
-  _prefabId: -2147483648
-  _componentIndex: -2147483648
-  _shouldBePooled: 0
-  _parent: {fileID: 0}
-  _invertedPathToNearestParent: 
-  _directChildren: []
-  _networkRules: {fileID: 0}
-  _visitiblityRules: {fileID: 0}
-  _players: 
 --- !u!1 &999871911
 GameObject:
   m_ObjectHideFlags: 0
@@ -342,8 +266,10 @@ GameObject:
   m_Component:
   - component: {fileID: 999871914}
   - component: {fileID: 999871913}
-  - component: {fileID: 999871912}
   - component: {fileID: 999871915}
+  - component: {fileID: 999871916}
+  - component: {fileID: 999871917}
+  - component: {fileID: 999871918}
   m_Layer: 0
   m_Name: PurrNet
   m_TagString: Untagged
@@ -351,23 +277,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &999871912
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 999871911}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc64ff707d914a64e95f2ac0bf554c09, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _serverPort: 5000
-  _maxConnections: 100
-  _address: 127.0.0.1
-  _timeoutInSeconds: 5
-  _pollEventsInUpdate: 0
 --- !u!114 &999871913
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -381,11 +290,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _stopPlayingOnDisconnect: 0
-  _startServerFlags: 9
-  _startClientFlags: 7
+  _startServerFlags: 1
+  _startClientFlags: 3
   _cookieScope: 1
   _dontDestroyOnLoad: 0
-  _transport: {fileID: 999871912}
+  _transport: {fileID: 999871917}
   _networkPrefabs: {fileID: 11400000, guid: 44629c9ddffa3d347944a4335df094e0, type: 2}
   _networkAssets: {fileID: 0}
   _networkRules: {fileID: 11400000, guid: d8799083b96579a42b8b2d03e4ceae98, type: 2}
@@ -420,12 +329,73 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 332e746c3c3253246aacad4d5559f1fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.PurrTransport
-  _masterServer: https://purrbalancer.riten.dev:8080/
-  _roomName: 7954ea7c5f2a4d87810dcb9a49aef60c
-  _region: eu-central
-  _host: eu1.purrlay.riten.dev
+  _masterServer: https://purrtransport.purrservers.com/
+  _roomName: 9e09843bf969410eb8418542d5bde2a7fesf
+  _region: france
+  _host: purrtransport-france.purrservers.com
+  _timeoutInSeconds: 5
   _pollEventsInUpdate: 0
---- !u!1 &1327420631
+--- !u!114 &999871916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 999871911}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8236d3bdb4b232c4e86ae303902bd5db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.CompositeTransport
+  _ensureAllServersStart: 1
+  _transports:
+  - {fileID: 999871917}
+  - {fileID: 999871918}
+--- !u!114 &999871917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 999871911}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc64ff707d914a64e95f2ac0bf554c09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.UDPTransport
+  _automaticCloudSetups:
+    _adaptToEdgegap: 1
+  _serverPort: 6969
+  _maxConnections: 100
+  _address: 127.0.0.1
+  _timeoutInSeconds: 5
+  _pollEventsInUpdate: 0
+--- !u!114 &999871918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 999871911}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de4778b5edf2476448bcb3ac3d9c35d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.WebTransport
+  _automaticCloudSetups:
+    _adaptToEdgegap: 1
+  _serverPort: 5001
+  _maxConnections: 100
+  _forceIpv4: 0
+  _address: 127.0.0.1
+  _query: 
+  _path: 
+  _pollEventsInUpdate: 0
+  _enableSSL: 0
+  _certPath: 
+  _certPassword: 
+  _sslProtocols: 0
+--- !u!1 &1991991401
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -433,47 +403,59 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1327420632}
-  - component: {fileID: 1327420633}
+  - component: {fileID: 1991991403}
+  - component: {fileID: 1991991402}
   m_Layer: 0
-  m_Name: Timer
+  m_Name: GameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1327420632
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1327420631}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1327420633
+--- !u!114 &1991991402
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1327420631}
+  m_GameObject: {fileID: 1991991401}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a0ffe9a6be601c4480344c0fb4464b0, type: 3}
+  m_Script: {fileID: 11500000, guid: afdd58584995991448806f747b17efbc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: PurrNet.Issues.RpcIssue::TestTimer
+  m_EditorClassIdentifier: PurrNet.Internal.Examples::TestingDeltas
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _onSpawnException: 0
+  _onSpawnVariantException: 0
+  _onDespawnException: 0
+  _onDespawnVariantException: 0
+--- !u!4 &1991991403
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1991991401}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 9.0764, y: -4.97482, z: -4.78135}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 999871914}
   - {fileID: 655911528}
-  - {fileID: 173168651}
-  - {fileID: 1327420632}
+  - {fileID: 1991991403}
