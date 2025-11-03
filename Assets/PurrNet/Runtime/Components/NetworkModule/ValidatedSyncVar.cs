@@ -90,18 +90,21 @@ namespace PurrNet
 
         public override void OnEarlySpawn()
         {
-            if (!isOwner) _authoritative.onChangedWithOld += OnAuthoritativeChanged;
+            if (!isServer && !isOwner)
+                _authoritative.onChangedWithOld += OnAuthoritativeChanged;
         }
 
         public override void OnDespawned()
         {
-            if (!isOwner) _authoritative.onChangedWithOld -= OnAuthoritativeChanged;
+            if (!isServer && !isOwner)
+                _authoritative.onChangedWithOld -= OnAuthoritativeChanged;
         }
 
         public override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool isSpawnEvent, bool asServer)
         {
             _authoritative.onChangedWithOld -= OnAuthoritativeChanged;
-            if (!isOwner) _authoritative.onChangedWithOld += OnAuthoritativeChanged;
+            if (!isServer && !isOwner)
+                _authoritative.onChangedWithOld += OnAuthoritativeChanged;
         }
 
         private void OnAuthoritativeChanged(T oldAuth, T newAuth)
