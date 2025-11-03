@@ -1,3 +1,10 @@
+## [1.16.1-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.7...v1.16.1-beta.8) (2025-11-03)
+
+
+### Bug Fixes
+
+* Added summary for new sync timer advancing ([0b5be52](https://github.com/PurrNet/PurrNet/commit/0b5be5285c2458e1351da220a6c1088699514d2f))
+
 ## [1.16.1-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.6...v1.16.1-beta.7) (2025-11-02)
 
 
