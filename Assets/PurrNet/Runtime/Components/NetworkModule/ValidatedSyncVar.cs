@@ -1,6 +1,4 @@
 using System;
-using JetBrains.Annotations;
-using PurrNet.Logging;
 using PurrNet.Packing;
 using PurrNet.Transports;
 using UnityEngine;
@@ -28,19 +26,32 @@ namespace PurrNet
         private ulong _pendingId;
         private bool _hasPending;
 
+        public ValidatedSyncVar(T initialValue = default)
+        {
+            _authoritative = new SyncVar<T>(initialValue, 0f, false);
+            _display = initialValue;
+        }
+
         public T value
         {
             get => _display;
             set
             {
+                if (!parent.IsController(true))
+                    return;
+
                 if (isServer)
                 {
-                    ApplyAuthoritative(value);
+                    ServerValidateAndApply(value);
                     return;
                 }
 
+                if (!owner.HasValue)
+                    return;
+
                 var old = _display;
-                if ((old == null && value == null) || (old != null && old.Equals(value))) return;
+                if ((old == null && value == null) || (old != null && old.Equals(value)))
+                    return;
 
                 _display = value;
                 _pendingId = ++_nextPacketId;
@@ -49,20 +60,8 @@ namespace PurrNet
 
                 using var pack = BitPackerPool.Get();
                 Packer<T>.Write(pack, value);
-                if (!owner.HasValue)
-                {
-                    PurrLogger.LogError($"Validated syncvar is missing owner value. Within {parent.name}", parent);
-                    return;
-                }
-                
                 SubmitCandidate(owner.Value, _pendingId, pack);
             }
-        }
-
-        public ValidatedSyncVar(T initialValue = default)
-        {
-            _authoritative = new SyncVar<T>(initialValue, 0f, false);
-            _display = initialValue;
         }
 
         public override void OnPoolReset()
@@ -115,7 +114,31 @@ namespace PurrNet
             }
         }
 
-        [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
+        private bool RunServerValidators(T oldValue, T newValue)
+        {
+            var list = serverValidation?.GetInvocationList();
+            if (list == null) return true;
+            for (int i = 0; i < list.Length; i++)
+                if (!((ServerValidationHandler)list[i]).Invoke(oldValue, newValue))
+                    return false;
+            return true;
+        }
+
+        private void ServerValidateAndApply(T proposed)
+        {
+            var current = _authoritative.value;
+            if (!RunServerValidators(current, proposed))
+            {
+                var old = _display;
+                _display = current;
+                if (!Equals(old, _display)) TriggerEvents(old, _display);
+                onValidationFail?.Invoke(proposed, current);
+                return;
+            }
+            ApplyAuthoritative(proposed);
+        }
+
+        [ServerRpc(Channel.ReliableOrdered, requireOwnership: false)]
         private void SubmitCandidate(PlayerID sender, PackedULong packetId, BitPacker candidate)
         {
             using (candidate)
@@ -123,24 +146,28 @@ namespace PurrNet
                 if (!isServer) return;
                 if (packetId <= _lastAppliedServerId) return;
 
+                if (!owner.HasValue || sender != owner.Value)
+                {
+                    using var rejNoCtrl = BitPackerPool.Get();
+                    var current = _authoritative.value;
+                    Packer<T>.Write(rejNoCtrl, current);
+                    T failedNoCtrl = default;
+                    Packer<T>.Write(rejNoCtrl, failedNoCtrl);
+                    RejectOwner(sender, packetId, rejNoCtrl);
+                    return;
+                }
+
                 T proposed = default;
                 Packer<T>.Read(candidate, ref proposed);
-                var current = _authoritative.value;
+                var currentAuth = _authoritative.value;
 
-                var list = serverValidation?.GetInvocationList();
-                if (list != null)
+                if (!RunServerValidators(currentAuth, proposed))
                 {
-                    for (int i = 0; i < list.Length; i++)
-                    {
-                        if (!((ServerValidationHandler)list[i]).Invoke(current, proposed))
-                        {
-                            using var rej = BitPackerPool.Get();
-                            Packer<T>.Write(rej, current);
-                            Packer<T>.Write(rej, proposed);
-                            RejectOwner(sender, packetId, rej);
-                            return;
-                        }
-                    }
+                    using var rej = BitPackerPool.Get();
+                    Packer<T>.Write(rej, currentAuth);
+                    Packer<T>.Write(rej, proposed);
+                    RejectOwner(sender, packetId, rej);
+                    return;
                 }
 
                 _lastAppliedServerId = packetId;
