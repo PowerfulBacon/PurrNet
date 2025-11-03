@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Test : NetworkIdentity
 {
-    public ValidatedSyncVar<int> _testVar = new();
+    private ValidatedSyncVar<int> _testVar = new(100);
     
     private void OnEnable()
     {
