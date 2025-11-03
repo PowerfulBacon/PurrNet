@@ -59,6 +59,11 @@ namespace PurrNet
             Advance(delta);
         }
 
+        /// <summary>
+        /// Used to manually advance the sync timer if the manual update has been set to true when initializing the timer
+        /// </summary>
+        /// <param name="delta">The delta to advance the timer by</param>
+        /// <param name="useRunningCheck">Only for special use cases, where you'd want to skip the synchronized check to see whether the timer is running or not</param>
         public void Advance(float delta, bool useRunningCheck = true)
         {
             if (useRunningCheck && _state != TimerState.Running)
