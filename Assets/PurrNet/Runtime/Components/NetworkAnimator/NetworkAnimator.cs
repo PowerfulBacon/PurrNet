@@ -51,11 +51,15 @@ namespace PurrNet
 
         private void Awake()
         {
-            foreach (var param in _dontSyncParameters)
-                _dontSyncHashes.Add(Animator.StringToHash(param));
-
-            foreach (var parameter in _animator.parameters)
+            for (var i = 0; i < _dontSyncParameters.Count; i++)
             {
+                var param = _dontSyncParameters[i];
+                _dontSyncHashes.Add(Animator.StringToHash(param));
+            }
+
+            for (var i = 0; i < _animator.parameters.Length; i++)
+            {
+                var parameter = _animator.parameters[i];
                 if (_animator.IsParameterControlledByCurve(parameter.nameHash))
                     _dontSyncHashes.Add(parameter.nameHash);
             }

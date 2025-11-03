@@ -14,6 +14,7 @@ namespace PurrNet
         [Header("Settings")]
         [SerializeField] private bool _ownerAuth = true;
         [SerializeField, Range(1, 128), PurrLock] private int _sendRatePerSecond = 10;
+        [SerializeField, PurrLock] private Transform[] _extraBones;
         [Header("Accuracy")]
         [SerializeField, PurrLock] private float _positionAccuracy = 0.01f;
         [SerializeField, PurrLock] private float _angleAccuracy = 0.5f;
@@ -87,6 +88,20 @@ namespace PurrNet
                 {
                     if (!_bones.Contains(bones[bIdx]))
                         _bones.Add(bones[bIdx]);
+                }
+            }
+
+            if (_extraBones != null)
+            {
+                for (var bIdx = 0; bIdx < _extraBones.Length; bIdx++)
+                {
+                    var bone = _extraBones[bIdx];
+
+                    if (!bone)
+                        continue;
+
+                    if (!_bones.Contains(bone))
+                        _bones.Add(bone);
                 }
             }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -6,19 +7,40 @@ using PurrNet.Packing;
 using PurrNet.Pooling;
 using UnityEngine;
 
-public class StaticRpcTest : NetworkIdentity
+public class StaticRpcTest : PlayerIdentity<StaticRpcTest>
 {
     [SerializeField] List<ulong> _players;
 
+    private async void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            var res = await TestCaller<StaticRpcTest>();
+            Debug.Log(res);
+        }
+    }
+
+    private async Task<bool> TestCaller<T>()
+    {
+        return await Test<T>();
+    }
+
+    [ServerRpc(requireOwnership: false)]
+    private async Task<bool> Test<T>()
+    {
+        await Task.Delay(1000);
+        return true;
+    }
+
     [PurrButton("SendTargetRpc"), UsedImplicitly]
-    public void SendTargetRpc()
+    private void SendTargetRpc()
     {
         if (owner.HasValue)
             TargetRpc(owner.Value);
     }
 
     [PurrButton("Send to list"), UsedImplicitly]
-    public void SendServerRpcList()
+    private void SendServerRpcList()
     {
         using var players = DisposableList<PlayerID>.Create();
         foreach (var player in _players)
@@ -27,19 +49,19 @@ public class StaticRpcTest : NetworkIdentity
     }
 
     [PurrButton("Send to all observer"), UsedImplicitly]
-    public void SendServerRpcNoOwner()
+    private void SendServerRpcNoOwner()
     {
         SendObserverRpcM(observers, 123456789);
     }
 
     [TargetRpc(bufferLast: true)]
-    public void SendObserverRpcM<T>(IReadOnlyList<PlayerID> players, T data)
+    private void SendObserverRpcM<T>(IReadOnlyList<PlayerID> players, T data)
     {
         Debug.Log($"SendObserverRpcM: {data}");
     }
 
     [TargetRpc(requireServer: false)]
-    public Task TargetRpc(PlayerID player, RPCInfo info = default)
+    private Task TargetRpc(PlayerID player, RPCInfo info = default)
     {
         Debug.Log($"TargetRpc from {info.sender}");
         return Task.CompletedTask;
@@ -63,7 +85,7 @@ public class SomeBaseDataB : SomeBaseData
     }
 }
 
-public class SomeBaseData : IPackedAuto
+public class SomeBaseData : IPackedAuto, IStandaloneSerializable
 {
     public int someInt;
     public string someString;

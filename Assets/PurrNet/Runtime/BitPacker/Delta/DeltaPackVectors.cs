@@ -93,9 +93,9 @@ namespace PurrNet.Packing
 
             if (hasChanged)
             {
-                value.x = DeltaPacker<int>.ReadSimple(packer, oldvalue.x);
-                value.y = DeltaPacker<int>.ReadSimple(packer, oldvalue.y);
-                value.z = DeltaPacker<int>.ReadSimple(packer, oldvalue.z);
+                value.x = DeltaPacker<int>.Read(packer, oldvalue.x);
+                value.y = DeltaPacker<int>.Read(packer, oldvalue.y);
+                value.z = DeltaPacker<int>.Read(packer, oldvalue.z);
             }
             else value = oldvalue;
         }

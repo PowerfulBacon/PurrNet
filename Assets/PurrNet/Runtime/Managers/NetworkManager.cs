@@ -255,6 +255,9 @@ namespace PurrNet
         [UsedByIL]
         public static bool isServerStatic => main && main.isServer;
 
+        [UsedByIL]
+        public static bool isClientStatic => main && main.isClient;
+
         /// <summary>
         /// Whether the network manager is a client.
         /// </summary>
@@ -396,10 +399,17 @@ namespace PurrNet
 
         static string GetSimpleNameOf(Type t) => t.Assembly.GetName().Name;
 
+        struct TypeRegistrer
+        {
+            public MethodInfo method;
+            public int priority;
+        }
+
         public static void CallAllRegisters()
         {
             var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
             var attrAssemblyName = GetSimpleNameOf(typeof(RegisterPackersAttribute));
+            using var methodsToCall = DisposableList<TypeRegistrer>.Create(128);
 
             for (var index = 0; index < allAssemblies.Length; index++)
             {
@@ -457,10 +467,17 @@ namespace PurrNet
                             for (var i = 0; i < attributes.Length; i++)
                             {
                                 var attribute = attributes[i];
-                                if (attribute.GetType() != typeof(RegisterPackersAttribute))
+
+                                if (attribute is not RegisterPackersAttribute registerPackersAttribute)
                                     continue;
 
-                                method.Invoke(null, null);
+                                methodsToCall.Add(new TypeRegistrer
+                                {
+                                    method = method,
+                                    priority = registerPackersAttribute.priority
+                                });
+
+                                // method.Invoke(null, null);
                                 break;
                             }
                         }
@@ -471,6 +488,11 @@ namespace PurrNet
                     }
                 }
             }
+
+            methodsToCall.list.Sort((a, b) => a.priority.CompareTo(b.priority));
+
+            for (var i = 0; i < methodsToCall.Count; i++)
+                methodsToCall[i].method.Invoke(null, null);
         }
 
         private static bool _hasGeneratedAlready;
@@ -1198,7 +1220,7 @@ namespace PurrNet
                 _isCleaningServer = false;
             }
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
             Statistics.MarkEndOfSampling();
 #endif
         }

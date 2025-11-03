@@ -223,7 +223,10 @@ namespace PurrNet.Packing
             if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                 return value;
 
-            using BitPacker tmpPacker = BitPackerPool.Get();
+            if (value is IDuplicate<T> duplicate)
+                return duplicate.Duplicate();
+
+            using var tmpPacker = BitPackerPool.Get();
             Packer<T>.Write(tmpPacker, value);
             tmpPacker.ResetPositionAndMode(true);
             T copy = default(T);
@@ -234,8 +237,11 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static bool AreEqual<T>(T a, T b)
         {
-            using BitPacker packerA = BitPackerPool.Get();
-            using BitPacker packerB = BitPackerPool.Get();
+            if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+                return EqualityComparer<T>.Default.Equals(a, b);
+
+            using var packerA = BitPackerPool.Get();
+            using var packerB = BitPackerPool.Get();
 
             Packer<T>.Write(packerA, a);
             Packer<T>.Write(packerB, b);

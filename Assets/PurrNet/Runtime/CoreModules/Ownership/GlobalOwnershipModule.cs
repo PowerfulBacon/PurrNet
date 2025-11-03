@@ -14,10 +14,15 @@ namespace PurrNet.Modules
         public PlayerID player;
     }
 
-    internal struct OwnershipChangeBatch
+    internal struct OwnershipChangeBatch : IDisposable
     {
         public SceneID scene;
-        public List<OwnershipInfo> state;
+        public DisposableList<OwnershipInfo> state;
+
+        public void Dispose()
+        {
+            state.Dispose();
+        }
     }
 
     internal struct OwnershipCallback
@@ -28,23 +33,17 @@ namespace PurrNet.Modules
         public bool isSpawner;
     }
 
-    internal struct OwnershipChange : IPackedSimple
+    internal struct OwnershipChange : IDisposable
     {
         public SceneID sceneId;
-        public List<NetworkID> identities;
+        public DisposableList<NetworkID> identities;
         public bool isAdding;
         public PlayerID player;
         public bool isSpawner;
 
-        public void Serialize(BitPacker packer)
+        public void Dispose()
         {
-            Packer<SceneID>.Serialize(packer, ref sceneId);
-            Packer<List<NetworkID>>.Serialize(packer, ref identities);
-            Packer<bool>.Serialize(packer, ref isAdding);
-            Packer<bool>.Serialize(packer, ref isSpawner);
-
-            if (isAdding)
-                Packer<PlayerID>.Serialize(packer, ref player);
+            identities.Dispose();
         }
     }
 
@@ -364,8 +363,6 @@ namespace PurrNet.Modules
             _sceneOwnerships.Remove(scene);
         }
 
-        private static readonly List<NetworkID> _idsCache = new List<NetworkID>();
-
         public void GiveOwnership(NetworkIdentity nid, PlayerID player, bool? propagateToChildren = null,
             bool? overrideExistingOwners = null, bool silent = false, bool isSpawner = false)
         {
@@ -410,8 +407,7 @@ namespace PurrNet.Modules
             var affectedIds = ListPool<NetworkIdentity>.Instantiate();
             GetAllChildrenOrSelf(nid, affectedIds, propagateToChildren);
 
-            _idsCache.Clear();
-
+            using var _idsCache = DisposableList<NetworkID>.Create();
             var callbacks = ListPool<OwnershipCallback>.Instantiate();
 
             for (var i = 0; i < affectedIds.Count; i++)
@@ -459,7 +455,6 @@ namespace PurrNet.Modules
                 return;
             }
 
-            // TODO: compress _idsCache using RLE
             var data = new OwnershipChange
             {
                 sceneId = nid.sceneId,
@@ -520,7 +515,7 @@ namespace PurrNet.Modules
             var children = ListPool<NetworkIdentity>.Instantiate();
             GetAllChildrenOrSelf(id, children, true);
 
-            _idsCache.Clear();
+            using var _idsCache = DisposableList<NetworkID>.Create();
 
             for (var i = 0; i < children.Count; i++)
             {
@@ -601,7 +596,7 @@ namespace PurrNet.Modules
             var children = ListPool<NetworkIdentity>.Instantiate();
             GetAllChildrenOrSelf(id, children, propagateToChildren);
 
-            _idsCache.Clear();
+            using var _idsCache = DisposableList<NetworkID>.Create();
 
             for (var i = 0; i < children.Count; i++)
             {
@@ -671,7 +666,7 @@ namespace PurrNet.Modules
                 _playersManager.Send(player.player, new OwnershipChangeBatch
                 {
                     scene = player.scene,
-                    state = changes.list
+                    state = changes
                 });
 
                 changes.Dispose();
@@ -903,6 +898,13 @@ namespace PurrNet.Modules
 
             _owners[identity.id.Value] = player;
 
+            var oldOwner = identity.GetOwner(_asServer);
+
+            // Remove from old owner's owned list
+            if (oldOwner.HasValue && oldOwner.Value != player && _playerOwnedIds.TryGetValue(oldOwner.Value, out var owned))
+                owned.Remove(identity.id.Value);
+
+            // Add to new owner's owned list
             if (!_playerOwnedIds.TryGetValue(player, out var ownedIds))
             {
                 ownedIds = new HashSet<NetworkID> { identity.id.Value };

@@ -1,5 +1,3 @@
-// #define USE_LOCAL_MASTER
-
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -17,6 +15,7 @@ namespace PurrNet.Transports
     [Serializable]
     public struct RelayServer
     {
+        public string apiEndpoint;
         public string host;
         public int restPort;
         public int udpPort;
@@ -38,6 +37,7 @@ namespace PurrNet.Transports
         public bool ssl;
         public string secret;
         public int port;
+        public int udpPort;
     }
 
     [UsedImplicitly]
@@ -48,6 +48,7 @@ namespace PurrNet.Transports
         public string secret;
         public string host;
         public int port;
+        public int udpPort;
     }
 
     public static class PurrTransportUtils
@@ -98,10 +99,10 @@ namespace PurrNet.Transports
 
         private static async Task<ClientJoinInfo> ActualClientJoinInfo(string server, string roomName)
         {
+#if UNITY_WEB
             if (!server.EndsWith("/"))
                 server += "/";
 
-#if UNITY_WEB
             var url = $"{server}join";
             var request = UnityWebRequest.Get(url);
             request.useHttpContinue = false;
@@ -114,11 +115,6 @@ namespace PurrNet.Transports
 
             var text = response.webRequest.downloadHandler.text;
             var res = JsonUtility.FromJson<ClientJoinInfo>(text);
-#if USE_LOCAL_MASTER
-            res.ssl = false;
-#else
-            res.ssl = true;
-#endif
             return res;
 #else
             throw new NotSupportedException("You need the `com.unity.modules.unitywebrequest` package to use this.");
@@ -149,11 +145,6 @@ namespace PurrNet.Transports
 
             var text = response.webRequest.downloadHandler.text;
             var res = JsonUtility.FromJson<HostJoinInfo>(text);
-#if USE_LOCAL_MASTER
-            res.ssl = false;
-#else
-            res.ssl = true;
-#endif
             return res;
 #else
             throw new NotSupportedException("You need the `com.unity.modules.unitywebrequest` package to use this.");
@@ -214,13 +205,9 @@ namespace PurrNet.Transports
 
             var pings = new List<Task<float>>();
 
-            foreach (var server in servers.servers)
+            for (var i = 0; i < servers.servers.Length; i++)
             {
-#if USE_LOCAL_MASTER
-                var pingUrl = $"http://{server.host}:{server.restPort}/ping";
-#else
-                var pingUrl = $"https://{server.host}:{server.restPort}/ping";
-#endif
+                var pingUrl = $"{servers.servers[i].apiEndpoint}/ping";
                 pings.Add(PingInMS(pingUrl));
             }
 

@@ -65,22 +65,20 @@ namespace PurrNet
                     LocalDetach(detachedModule);
                 if (isModuleInitialized && _value is NetworkModule attachedModule)
                     Attach<T>(attachedModule);
-
-                onChanged?.Invoke(value);
-                onChangedWithOld?.Invoke(oldValue, value);
+                TriggerEvents(oldValue);
             }
+        }
+
+        public override void OnPoolReset()
+        {
+            onChanged = null;
+            onChangedWithOld = null;
         }
 
         public override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool isSpawnEvent, bool asServer)
         {
             if (isSpawnEvent)
                 return;
-
-            /*if (_ownerAuth && asServer)
-            {
-                _id = 0;
-                SendLatestStateToAll(_id, _value);
-            }*/
 
             if (_ownerAuth)
             {
@@ -222,8 +220,7 @@ namespace PurrNet
 
                 T oldValue = value;
                 Packer<T>.Read(newValue, ref _value);
-                onChanged?.Invoke(value);
-                onChangedWithOld?.Invoke(oldValue, value);
+                TriggerEvents(oldValue);
                 if (oldValue is NetworkModule detachedModule && !oldValue.Equals(_value))
                     LocalDetach(detachedModule);
             }
@@ -306,22 +303,44 @@ namespace PurrNet
             _id = packetId;
 
             Packer<T>.Read(newValue, ref _cache);
+            int readPos = newValue.positionInBits;
             newValue.SetBitPosition(0);
 
             bool bothNull = _value == null && _cache == null;
             bool bothEqual = _value != null && _value.Equals(_cache);
 
             if (bothNull || bothEqual)
+            {
+                newValue.SetBitPosition(readPos);
                 return;
+            }
 
             T oldValue = value;
             Packer<T>.Read(newValue, ref _value);
-            onChanged?.Invoke(value);
-            onChangedWithOld?.Invoke(oldValue, value);
-
             if (oldValue is NetworkModule detachedModule && !oldValue.Equals(_value))
                 LocalDetach(detachedModule);
+            TriggerEvents(oldValue);
+        }
 
+        private void TriggerEvents(T oldValue)
+        {
+            try
+            {
+                onChanged?.Invoke(value);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            try
+            {
+                onChangedWithOld?.Invoke(oldValue, value);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         public static implicit operator T(SyncVar<T> syncVar)
