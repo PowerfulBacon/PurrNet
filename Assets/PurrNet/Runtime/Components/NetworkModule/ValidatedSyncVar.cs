@@ -15,9 +15,14 @@ namespace PurrNet
 
         public event ServerValidationHandler serverValidation;
         public event ValidationFailedHandler onValidationFail;
-
-        public event Action<T> onChanged;
-        public event Action<T, T> onChangedWithOld;
+        
+        
+        public delegate void OnChangeDelegate(T newValue, bool serverValidated);
+        public event OnChangeDelegate onChanged;
+        
+        public delegate void OnChangeWithOldDelegate(T oldValue, T newValue, bool serverValidated);
+        public event OnChangeWithOldDelegate onChangedWithOld;
+        private bool _suppressNextAuthEcho;
 
         private T _display;
         private bool _hasAuthoritative;
@@ -56,7 +61,7 @@ namespace PurrNet
                 _display = value;
                 _pendingId = ++_nextPacketId;
                 _hasPending = true;
-                TriggerEvents(old, _display);
+                TriggerEvents(old, _display, false);
 
                 using var pack = BitPackerPool.Get();
                 Packer<T>.Write(pack, value);
@@ -75,6 +80,7 @@ namespace PurrNet
             _lastAppliedServerId = 0;
             _pendingId = 0;
             _hasPending = false;
+            _suppressNextAuthEcho = false;
         }
 
         public override void OnEarlySpawn()
@@ -93,13 +99,18 @@ namespace PurrNet
             var old = _display;
             _display = newAuth;
             _hasPending = false;
-            TriggerEvents(old, _display);
+            if (_suppressNextAuthEcho && Equals(newAuth, old))
+            {
+                _suppressNextAuthEcho = false;
+                return;
+            }
+            TriggerEvents(old, _display, true);
         }
 
-        private void TriggerEvents(T oldValue, T newValue)
+        private void TriggerEvents(T oldValue, T newValue, bool serverValidated)
         {
-            try { onChanged?.Invoke(newValue); } catch (Exception e) { Debug.LogException(e); }
-            try { onChangedWithOld?.Invoke(oldValue, newValue); } catch (Exception e) { Debug.LogException(e); }
+            try { onChanged?.Invoke(newValue, serverValidated); } catch (Exception e) { Debug.LogException(e); }
+            try { onChangedWithOld?.Invoke(oldValue, newValue, serverValidated); } catch (Exception e) { Debug.LogException(e); }
         }
 
         private void ApplyAuthoritative(T v)
@@ -110,7 +121,7 @@ namespace PurrNet
             {
                 _hasAuthoritative = true;
                 _display = v;
-                TriggerEvents(old, v);
+                TriggerEvents(old, v, true);
             }
         }
 
@@ -131,7 +142,7 @@ namespace PurrNet
             {
                 var old = _display;
                 _display = current;
-                if (!Equals(old, _display)) TriggerEvents(old, _display);
+                if (!Equals(old, _display)) TriggerEvents(old, _display, true);
                 onValidationFail?.Invoke(proposed, current);
                 return;
             }
@@ -192,7 +203,8 @@ namespace PurrNet
                 Packer<T>.Read(payload, ref v);
                 var old = _display;
                 _display = v;
-                TriggerEvents(old, v);
+                _suppressNextAuthEcho = true;
+                TriggerEvents(old, v, true);
             }
         }
 
@@ -212,7 +224,7 @@ namespace PurrNet
 
                 var old = _display;
                 _display = authoritativeNow;
-                TriggerEvents(old, _display);
+                TriggerEvents(old, _display, true);
                 onValidationFail?.Invoke(failed, authoritativeNow);
             }
         }
