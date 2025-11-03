@@ -1,12 +1,9 @@
-using System;
 using PurrNet;
-using PurrNet.Packing;
 using UnityEngine;
 
 public class Test : NetworkIdentity
 {
-    public ValidatedSyncVar<int> _testVar = new(100);
-
+    public ValidatedSyncVar<int> _testVar = new();
     
     private void OnEnable()
     {
@@ -24,11 +21,6 @@ public class Test : NetworkIdentity
         _testVar.onChangedWithOld -= OnChanged;
     }
 
-    private void OnChanged(int oldValue, int newValue, bool validated)
-    {
-        Debug.Log($"Value changed: {oldValue} -> {newValue} | Validated: {validated}");
-    }
-
     private bool ServerValidator(int oldValue, int newValue)
     {
         if (oldValue > newValue)
@@ -40,6 +32,11 @@ public class Test : NetworkIdentity
     private void OnValidationFail(int failedValue, int authoritativeValue)
     {
         Debug.Log($"Validation failed on {failedValue}. Returning to {authoritativeValue}");
+    }
+
+    private void OnChanged(int oldValue, int newValue, bool validated)
+    {
+        Debug.Log($"Value changed: {oldValue} -> {newValue} | Validated: {validated}");
     }
     
 
