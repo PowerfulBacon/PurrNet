@@ -8,7 +8,7 @@ namespace PurrNet
     [Serializable]
     public class ValidatedSyncVar<T> : NetworkModule
     {
-        [SerializeField] private SyncVar<T> _authoritative = new(default, 0f, false);
+        private SyncVar<T> _authoritative;
 
         public delegate bool ServerValidationHandler(T oldValue, T newValue);
         public delegate void ValidationFailedHandler(T failedValue, T authoritativeValue);
@@ -47,8 +47,12 @@ namespace PurrNet
                 if (!parent.IsController(true))
                     return;
 
+                var old = _display;
                 if (isServer)
                 {
+                    if ((old == null && value == null) || (old != null && old.Equals(value))) return;
+                    _display = value;
+                    TriggerEvents(old, _display, false);
                     ServerValidateAndApply(value);
                     return;
                 }
@@ -56,7 +60,6 @@ namespace PurrNet
                 if (!owner.HasValue)
                     return;
 
-                var old = _display;
                 if ((old == null && value == null) || (old != null && old.Equals(value)))
                     return;
 
