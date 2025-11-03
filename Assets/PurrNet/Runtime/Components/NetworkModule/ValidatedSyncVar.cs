@@ -26,9 +26,9 @@ namespace PurrNet
 
         private T _display;
         private bool _hasAuthoritative;
-        private ulong _nextPacketId;
-        private ulong _lastAppliedServerId;
-        private ulong _pendingId;
+        private uint _nextPacketId;
+        private uint _lastAppliedServerId;
+        private uint _pendingId;
         private bool _hasPending;
         
         public static implicit operator T(ValidatedSyncVar<T> syncVar) => syncVar._display;
@@ -90,25 +90,27 @@ namespace PurrNet
 
         public override void OnEarlySpawn()
         {
-            _authoritative.onChangedWithOld += OnAuthoritativeChanged;
+            if (!isOwner) _authoritative.onChangedWithOld += OnAuthoritativeChanged;
         }
 
         public override void OnDespawned()
         {
+            if (!isOwner) _authoritative.onChangedWithOld -= OnAuthoritativeChanged;
+        }
+
+        public override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool isSpawnEvent, bool asServer)
+        {
             _authoritative.onChangedWithOld -= OnAuthoritativeChanged;
+            if (!isOwner) _authoritative.onChangedWithOld += OnAuthoritativeChanged;
         }
 
         private void OnAuthoritativeChanged(T oldAuth, T newAuth)
         {
+            if (isOwner) return;
             _hasAuthoritative = true;
             var old = _display;
             _display = newAuth;
             _hasPending = false;
-            if (_suppressNextAuthEcho && Equals(newAuth, old))
-            {
-                _suppressNextAuthEcho = false;
-                return;
-            }
             TriggerEvents(old, _display, true);
         }
 
@@ -120,14 +122,11 @@ namespace PurrNet
 
         private void ApplyAuthoritative(T v)
         {
-            var old = _authoritative.value;
+            var oldDisplay = _display;
             _authoritative.value = v;
-            if (!_hasAuthoritative)
-            {
-                _hasAuthoritative = true;
-                _display = v;
-                TriggerEvents(old, v, true);
-            }
+            _hasAuthoritative = true;
+            _display = v;
+            TriggerEvents(oldDisplay, v, true);
         }
 
         private bool RunServerValidators(T oldValue, T newValue)
@@ -155,7 +154,7 @@ namespace PurrNet
         }
 
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: false)]
-        private void SubmitCandidate(PlayerID sender, PackedULong packetId, BitPacker candidate)
+        private void SubmitCandidate(PlayerID sender, PackedUInt packetId, BitPacker candidate)
         {
             using (candidate)
             {
@@ -196,30 +195,30 @@ namespace PurrNet
         }
 
         [TargetRpc(Channel.ReliableOrdered)]
-        private void AcceptOwner(PlayerID target, PackedULong packetId, BitPacker payload)
+        private void AcceptOwner(PlayerID target, PackedUInt packetId, BitPacker payload)
         {
             using (payload)
             {
                 if (isServer) return;
-                if (!_hasPending || packetId != _pendingId) return;
+                if (packetId < _pendingId) return;
                 _hasPending = false;
 
                 T v = default;
                 Packer<T>.Read(payload, ref v);
                 var old = _display;
                 _display = v;
-                _suppressNextAuthEcho = true;
+                _pendingId = packetId;
                 TriggerEvents(old, v, true);
             }
         }
 
         [TargetRpc(Channel.ReliableOrdered)]
-        private void RejectOwner(PlayerID target, PackedULong packetId, BitPacker payload)
+        private void RejectOwner(PlayerID target, PackedUInt packetId, BitPacker payload)
         {
             using (payload)
             {
                 if (isServer) return;
-                if (!_hasPending || packetId != _pendingId) return;
+                if (packetId < _pendingId) return;
                 _hasPending = false;
 
                 T authoritativeNow = default;
@@ -229,6 +228,7 @@ namespace PurrNet
 
                 var old = _display;
                 _display = authoritativeNow;
+                _pendingId = packetId;
                 TriggerEvents(old, _display, true);
                 onValidationFail?.Invoke(failed, authoritativeNow);
             }
