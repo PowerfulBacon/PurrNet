@@ -30,6 +30,8 @@ namespace PurrNet
         private ulong _lastAppliedServerId;
         private ulong _pendingId;
         private bool _hasPending;
+        
+        public static implicit operator T(ValidatedSyncVar<T> syncVar) => syncVar._display;
 
         public ValidatedSyncVar(T initialValue = default)
         {
