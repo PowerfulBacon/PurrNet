@@ -1,3 +1,10 @@
+# [1.17.0-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.8...v1.17.0-beta.1) (2025-11-03)
+
+
+### Features
+
+* Added Validated Syncvar ([49f9343](https://github.com/PurrNet/PurrNet/commit/49f9343b86e10e9f8d1b1db5c5f4c878aa19eb2f))
+
 ## [1.16.1-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.7...v1.16.1-beta.8) (2025-11-03)
 
 
