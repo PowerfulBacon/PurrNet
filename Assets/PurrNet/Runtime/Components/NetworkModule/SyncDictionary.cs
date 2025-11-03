@@ -8,7 +8,7 @@ using UnityEngine;
 namespace PurrNet
 {
     /// <summary>
-    /// The operation which has happened to the dictionary
+    /// The operation which has happened to the dictionary.
     /// </summary>
     public enum SyncDictionaryOperation
     {
