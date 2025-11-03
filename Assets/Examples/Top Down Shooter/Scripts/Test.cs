@@ -1,35 +1,35 @@
+using System;
 using PurrNet;
 using UnityEngine;
 
-[RegisterNetworkType(typeof(Texture))]
-[RegisterNetworkType(typeof(Sprite))]
 public class Test : NetworkIdentity
 {
-    [SerializeField] private GameObject spawnedObject;
-    [SerializeField] private GameObject networkPrefab;
-    [SerializeField] private GameObject singleplayerPrefab;
+    private SyncTimer _timer = new(manualUpdate:true);
 
-    [PurrButton]
-    private void RunSpawned()
+    private void OnEnable()
     {
-        Spawned(spawnedObject.transform);
+        _timer.onTimerSecondTick += OnTimerTick;
     }
 
-    [PurrButton]
-    private void RunNetwork()
+    private void OnDisable()
     {
-        Spawned(networkPrefab.transform);
+        _timer.onTimerSecondTick -= OnTimerTick;
     }
 
-    [PurrButton]
-    private void RunSingle()
+    private void OnTimerTick()
     {
-        Spawned(singleplayerPrefab.transform);
+        Debug.Log($"{_timer.remainingInt}");
     }
 
-    [ObserversRpc]
-    private void Spawned(Transform obj)
+    private void Update()
     {
-        Debug.Log($"Received from sender: {obj}");
+        if(Input.GetKeyDown(KeyCode.Alpha1))
+            _timer.StartTimer(10);
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+            _timer.PauseTimer(true);
+        if(Input.GetKeyDown(KeyCode.Alpha3))
+            _timer.ResumeTimer();
+        
+        _timer.Advance(Time.deltaTime);
     }
 }
