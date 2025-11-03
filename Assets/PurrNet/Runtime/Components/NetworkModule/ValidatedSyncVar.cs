@@ -1,5 +1,6 @@
 using System;
 using JetBrains.Annotations;
+using PurrNet.Logging;
 using PurrNet.Packing;
 using PurrNet.Transports;
 using UnityEngine;
@@ -11,15 +12,21 @@ namespace PurrNet
     {
         [SerializeField] private SyncVar<T> _authoritative = new(default, 0f, false);
 
+        public delegate bool ServerValidationHandler(T oldValue, T newValue);
+        public delegate void ValidationFailedHandler(T failedValue, T authoritativeValue);
+
+        public event ServerValidationHandler serverValidation;
+        public event ValidationFailedHandler onValidationFail;
+
+        public event Action<T> onChanged;
+        public event Action<T, T> onChangedWithOld;
+
         private T _display;
         private bool _hasAuthoritative;
         private ulong _nextPacketId;
         private ulong _lastAppliedServerId;
         private ulong _pendingId;
         private bool _hasPending;
-
-        public event Action<T> onChanged;
-        public event Action<T, T> onChangedWithOld;
 
         public T value
         {
@@ -44,19 +51,13 @@ namespace PurrNet
                 Packer<T>.Write(pack, value);
                 if (!owner.HasValue)
                 {
-                    Debug.LogError($"No owner found for validated syncvar in {parent.name}!", parent);
+                    PurrLogger.LogError($"Validated syncvar is missing owner value. Within {parent.name}", parent);
                     return;
                 }
                 
                 SubmitCandidate(owner.Value, _pendingId, pack);
             }
         }
-        
-        private ValidatorDelegate _validator;
-        private ValidationFailedDelegate _onFailed;
-        
-        public delegate bool ValidatorDelegate(T oldValue, T newValue);
-        public delegate void ValidationFailedDelegate(T failedValue, T authoritativeValue);
 
         public ValidatedSyncVar(T initialValue = default)
         {
@@ -68,6 +69,8 @@ namespace PurrNet
         {
             onChanged = null;
             onChangedWithOld = null;
+            serverValidation = null;
+            onValidationFail = null;
             _hasAuthoritative = false;
             _nextPacketId = 0;
             _lastAppliedServerId = 0;
@@ -77,13 +80,11 @@ namespace PurrNet
 
         public override void OnEarlySpawn()
         {
-            base.OnEarlySpawn();
             _authoritative.onChangedWithOld += OnAuthoritativeChanged;
         }
 
         public override void OnDespawned()
         {
-            base.OnDespawned();
             _authoritative.onChangedWithOld -= OnAuthoritativeChanged;
         }
 
@@ -126,13 +127,20 @@ namespace PurrNet
                 Packer<T>.Read(candidate, ref proposed);
                 var current = _authoritative.value;
 
-                if (_validator != null && !_validator(current, proposed))
+                var list = serverValidation?.GetInvocationList();
+                if (list != null)
                 {
-                    using var rej = BitPackerPool.Get();
-                    Packer<T>.Write(rej, current);
-                    Packer<T>.Write(rej, proposed);
-                    RejectOwner(sender, packetId, rej);
-                    return;
+                    for (int i = 0; i < list.Length; i++)
+                    {
+                        if (!((ServerValidationHandler)list[i]).Invoke(current, proposed))
+                        {
+                            using var rej = BitPackerPool.Get();
+                            Packer<T>.Write(rej, current);
+                            Packer<T>.Write(rej, proposed);
+                            RejectOwner(sender, packetId, rej);
+                            return;
+                        }
+                    }
                 }
 
                 _lastAppliedServerId = packetId;
@@ -178,9 +186,8 @@ namespace PurrNet
                 var old = _display;
                 _display = authoritativeNow;
                 TriggerEvents(old, _display);
-                _onFailed?.Invoke(failed, authoritativeNow);
+                onValidationFail?.Invoke(failed, authoritativeNow);
             }
         }
-
     }
 }
