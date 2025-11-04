@@ -1,35 +1,53 @@
 using PurrNet;
 using UnityEngine;
 
-[RegisterNetworkType(typeof(Texture))]
-[RegisterNetworkType(typeof(Sprite))]
 public class Test : NetworkIdentity
 {
-    [SerializeField] private GameObject spawnedObject;
-    [SerializeField] private GameObject networkPrefab;
-    [SerializeField] private GameObject singleplayerPrefab;
-
-    [PurrButton]
-    private void RunSpawned()
+    private ValidatedSyncVar<int> _testVar = new(100);
+    
+    private void OnEnable()
     {
-        Spawned(spawnedObject.transform);
+        _testVar.serverValidation += ServerValidator;
+        _testVar.onValidationFail += OnValidationFail;
+
+        _testVar.onChangedWithOld += OnChanged;
     }
 
-    [PurrButton]
-    private void RunNetwork()
+    private void OnDisable()
     {
-        Spawned(networkPrefab.transform);
+        _testVar.serverValidation -= ServerValidator;
+        _testVar.onValidationFail -= OnValidationFail;
+        
+        _testVar.onChangedWithOld -= OnChanged;
     }
 
-    [PurrButton]
-    private void RunSingle()
+    private bool ServerValidator(int oldValue, int newValue)
     {
-        Spawned(singleplayerPrefab.transform);
+        if (oldValue > newValue)
+            return false;
+        
+        return true;
     }
 
-    [ObserversRpc]
-    private void Spawned(Transform obj)
+    private void OnValidationFail(int failedValue, int authoritativeValue)
     {
-        Debug.Log($"Received from sender: {obj}");
+        Debug.Log($"Validation failed on {failedValue}. Returning to {authoritativeValue}");
+    }
+
+    private void OnChanged(int oldValue, int newValue, bool validated)
+    {
+        Debug.Log($"Value changed: {oldValue} -> {newValue} | Validated: {validated}");
+    }
+    
+
+    private void Update()
+    {
+        if (!isOwner)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            _testVar.value += 1;
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+            _testVar.value -= 1;
     }
 }

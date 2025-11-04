@@ -1,3 +1,24 @@
+# [1.17.0-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.1...v1.17.0-beta.2) (2025-11-03)
+
+
+### Bug Fixes
+
+* Improved validated syncvar handling ([4fe4434](https://github.com/PurrNet/PurrNet/commit/4fe443447d15264ff6f110fa4e12978b347ad020))
+
+# [1.17.0-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.8...v1.17.0-beta.1) (2025-11-03)
+
+
+### Features
+
+* Added Validated Syncvar ([49f9343](https://github.com/PurrNet/PurrNet/commit/49f9343b86e10e9f8d1b1db5c5f4c878aa19eb2f))
+
+## [1.16.1-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.7...v1.16.1-beta.8) (2025-11-03)
+
+
+### Bug Fixes
+
+* Added summary for new sync timer advancing ([0b5be52](https://github.com/PurrNet/PurrNet/commit/0b5be5285c2458e1351da220a6c1088699514d2f))
+
 ## [1.16.1-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.16.1-beta.6...v1.16.1-beta.7) (2025-11-02)
 
 
