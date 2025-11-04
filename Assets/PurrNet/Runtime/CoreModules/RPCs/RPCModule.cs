@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using K4os.Compression.LZ4;
 using PurrNet.Logging;
 using PurrNet.Packing;
-using PurrNet.Pooling;
 using PurrNet.Transports;
 using PurrNet.Utils;
 
@@ -691,7 +689,7 @@ namespace PurrNet.Modules
         }
 
 
-        unsafe void ReceiveStaticRPC(PlayerID player, StaticRPCPacket data, bool asServer)
+        void ReceiveStaticRPC(PlayerID player, StaticRPCPacket data, bool asServer)
         {
             if (!Hasher.TryGetType(data.typeHash, out var type))
             {
