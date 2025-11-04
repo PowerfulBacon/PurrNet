@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace PurrNet.Transports
@@ -6,7 +7,7 @@ namespace PurrNet.Transports
     [Serializable]
     public class AutomaticCloudSetups
     {
-        [SerializeField] private bool _adaptToEdgegap = true;
+        [SerializeField, UsedImplicitly] private bool _adaptToEdgegap = true;
 
 #if EDGEGAP_PURRNET_SUPPORT && UNITY_SERVER && !UNITY_EDITOR
         public bool adaptToEdgegap => _adaptToEdgegap;
