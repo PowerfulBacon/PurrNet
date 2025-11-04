@@ -1,3 +1,10 @@
+# [1.17.0-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.3...v1.17.0-beta.4) (2025-11-04)
+
+
+### Bug Fixes
+
+* try to match static rpc behaviour to normal rpcs ([267f5c5](https://github.com/PurrNet/PurrNet/commit/267f5c57e0d5d9efe6908a0d6ec1284c565d84d2))
+
 # [1.17.0-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.2...v1.17.0-beta.3) (2025-11-04)
 
 
