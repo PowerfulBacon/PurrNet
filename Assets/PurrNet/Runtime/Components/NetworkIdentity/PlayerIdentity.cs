@@ -1,18 +1,23 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace PurrNet
 {
     public abstract class PlayerIdentity<T> : NetworkIdentity where T : NetworkIdentity
     {
-        private static FirstElementMap<PlayerID, T> _allPlayers = new();
+        private static readonly FirstElementMap<PlayerID, T> _allPlayers = new();
         public static IReadOnlyDictionary<PlayerID, T> allPlayers => _allPlayers.first;
+
+        private PlayerID? _oldRegisteredOwner;
+
+        protected override void OnSpawned()
+        {
+            if (owner != _oldRegisteredOwner)
+                OnOwnerChanged(_oldRegisteredOwner, owner, isServer);
+        }
 
         protected override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
         {
-            base.OnOwnerChanged(oldOwner, newOwner, asServer);
-
-            if (asServer && isHost)
+            if (_oldRegisteredOwner == newOwner)
                 return;
 
             if (oldOwner.HasValue)
@@ -20,6 +25,8 @@ namespace PurrNet
 
             if (newOwner.HasValue)
                 _allPlayers.AddItem(newOwner.Value, this as T);
+
+            _oldRegisteredOwner = newOwner;
         }
 
         protected override void OnDespawned(bool asServer)
