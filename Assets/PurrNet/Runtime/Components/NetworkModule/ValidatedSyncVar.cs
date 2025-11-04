@@ -15,22 +15,19 @@ namespace PurrNet
 
         public event ServerValidationHandler serverValidation;
         public event ValidationFailedHandler onValidationFail;
-        
-        
+
+
         public delegate void OnChangeDelegate(T newValue, bool serverValidated);
         public event OnChangeDelegate onChanged;
-        
+
         public delegate void OnChangeWithOldDelegate(T oldValue, T newValue, bool serverValidated);
         public event OnChangeWithOldDelegate onChangedWithOld;
-        private bool _suppressNextAuthEcho;
 
         private T _display;
-        private bool _hasAuthoritative;
         private uint _nextPacketId;
         private uint _lastAppliedServerId;
         private uint _pendingId;
-        private bool _hasPending;
-        
+
         public static implicit operator T(ValidatedSyncVar<T> syncVar) => syncVar._display;
 
         public ValidatedSyncVar(T initialValue = default)
@@ -65,7 +62,6 @@ namespace PurrNet
 
                 _display = value;
                 _pendingId = ++_nextPacketId;
-                _hasPending = true;
                 TriggerEvents(old, _display, false);
 
                 using var pack = BitPackerPool.Get();
@@ -80,12 +76,9 @@ namespace PurrNet
             onChangedWithOld = null;
             serverValidation = null;
             onValidationFail = null;
-            _hasAuthoritative = false;
             _nextPacketId = 0;
             _lastAppliedServerId = 0;
             _pendingId = 0;
-            _hasPending = false;
-            _suppressNextAuthEcho = false;
         }
 
         public override void OnEarlySpawn()
@@ -110,10 +103,8 @@ namespace PurrNet
         private void OnAuthoritativeChanged(T oldAuth, T newAuth)
         {
             if (isOwner) return;
-            _hasAuthoritative = true;
             var old = _display;
             _display = newAuth;
-            _hasPending = false;
             TriggerEvents(old, _display, true);
         }
 
@@ -127,7 +118,6 @@ namespace PurrNet
         {
             var oldDisplay = _display;
             _authoritative.value = v;
-            _hasAuthoritative = true;
             _display = v;
             TriggerEvents(oldDisplay, v, true);
         }
@@ -204,7 +194,6 @@ namespace PurrNet
             {
                 if (isServer) return;
                 if (packetId < _pendingId) return;
-                _hasPending = false;
 
                 T v = default;
                 Packer<T>.Read(payload, ref v);
@@ -222,7 +211,6 @@ namespace PurrNet
             {
                 if (isServer) return;
                 if (packetId < _pendingId) return;
-                _hasPending = false;
 
                 T authoritativeNow = default;
                 T failed = default;
