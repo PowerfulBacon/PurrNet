@@ -1,13 +1,17 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace PurrNet
 {
     public abstract class PlayerIdentity<T> : NetworkIdentity where T : NetworkIdentity
     {
-        private static readonly FirstElementMap<PlayerID, T> _allPlayers = new();
+        private static FirstElementMap<PlayerID, T> _allPlayers = new();
         public static IReadOnlyDictionary<PlayerID, T> allPlayers => _allPlayers.first;
 
         private PlayerID? _oldRegisteredOwner;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Init() => _allPlayers = new FirstElementMap<PlayerID, T>();
 
         protected override void OnSpawned()
         {
