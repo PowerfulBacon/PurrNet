@@ -1,3 +1,10 @@
+# [1.17.0-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.2...v1.17.0-beta.3) (2025-11-04)
+
+
+### Bug Fixes
+
+* PlayerIdentity<T> catchup in OnSpawned when it happens at a later stage ([53305a4](https://github.com/PurrNet/PurrNet/commit/53305a468694272e151bb1bbc7e6901cc8bb3f02))
+
 # [1.17.0-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.1...v1.17.0-beta.2) (2025-11-03)
 
 
