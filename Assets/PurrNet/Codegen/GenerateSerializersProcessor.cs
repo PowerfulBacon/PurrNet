@@ -208,10 +208,10 @@ namespace PurrNet.Codegen
                 var read = readMethod.Body.GetILProcessor();
                 GenerateMethod(false, readMethod, readMethodP, readDirectP, type, read, mainmodule, valueArg);
                 serializerClass.Methods.Add(readMethod);
-
-                if (ignoreDelta?.Contains(type) == false)
-                    GenerateDeltaSerializersProcessor.HandleType(assembly, type, serializerClass);
             }
+
+            if (ignoreDelta?.Contains(type) == false)
+                GenerateDeltaSerializersProcessor.HandleType(assembly, type, serializerClass);
 
             RegisterSerializersProcessor.HandleType(type.Module, serializerClass, null, null);
         }
@@ -836,7 +836,7 @@ namespace PurrNet.Codegen
             il.Append(ret);
         }
 
-        private static void CreateGettersAndSetters(bool isWriting, TypeDefinition type)
+        public static void CreateGettersAndSetters(bool isWriting, TypeDefinition type)
         {
             for (var i = 0; i < type.Fields.Count; i++)
             {
