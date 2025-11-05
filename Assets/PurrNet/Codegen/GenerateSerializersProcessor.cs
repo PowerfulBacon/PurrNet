@@ -489,14 +489,13 @@ namespace PurrNet.Codegen
             return baseType != null && HasInterface(baseType, interfaceType);
         }
 
-        private static MethodReference CreateSetterMethod(TypeDefinition parent, FieldDefinition field)
+        private static void CreateSetterMethod(TypeDefinition parent, FieldDefinition field)
         {
             var name = MakeFullNameValidCSharp($"Purrnet_Set_{field.Name}");
 
             foreach (var m in parent.Methods)
             {
-                if (m.Name == name)
-                    return m;
+                if (m.Name == name) return;
             }
 
             var method = new MethodDefinition(name, MethodAttributes.Public, parent.Module.TypeSystem.Void);
@@ -534,17 +533,15 @@ namespace PurrNet.Codegen
             setter.Emit(OpCodes.Ret);
 
             parent.Methods.Add(method);
-            return method;
         }
 
-        private static MethodReference CreateGetterMethod(TypeDefinition parent, FieldDefinition field)
+        private static void CreateGetterMethod(TypeDefinition parent, FieldDefinition field)
         {
             var name = MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}");
 
             foreach (var m in parent.Methods)
             {
-                if (m.Name == name)
-                    return m;
+                if (m.Name == name) return;
             }
 
             var method = new MethodDefinition(MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}"),
@@ -578,7 +575,6 @@ namespace PurrNet.Codegen
             getter.Emit(OpCodes.Ret); // Return the field value
 
             parent.Methods.Add(method);
-            return method;
         }
 
         public static bool DoesTypeHaveAttribute(TypeDefinition type, Type attribute)
