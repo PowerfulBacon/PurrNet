@@ -830,9 +830,8 @@ namespace PurrNet
         private ScenePlayersModule _clientScenePlayersModule;
         private ScenePlayersModule _serverScenePlayersModule;
 
-        private DeltaModule _clientDeltaModule;
-        private DeltaModule _serverDeltaModule;
-
+        internal DeltaModule _clientDeltaModule;
+        internal DeltaModule _serverDeltaModule;
 
         /// <summary>
         /// This event is triggered before the tick.

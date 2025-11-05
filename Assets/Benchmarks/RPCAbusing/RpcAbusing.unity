@@ -395,7 +395,7 @@ MonoBehaviour:
   _certPath: 
   _certPassword: 
   _sslProtocols: 0
---- !u!1 &1526888625
+--- !u!1 &1528354728
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -403,42 +403,28 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1526888626}
-  - component: {fileID: 1526888627}
+  - component: {fileID: 1528354731}
+  - component: {fileID: 1528354730}
+  - component: {fileID: 1528354729}
   m_Layer: 0
-  m_Name: NonDeltaCompressed
+  m_Name: RandomIntBenchmark - Gen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1526888626
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1526888625}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.0764, y: -4.97482, z: -4.78135}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1526888627
+--- !u!114 &1528354729
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1526888625}
+  m_GameObject: {fileID: 1528354728}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 434455e7b45593a4f895e52157da3309, type: 3}
+  m_Script: {fileID: 11500000, guid: 7977b66f2a8d4c0d95d21516fa48870d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: PurrNet.Benchmarks::NonDeltaCompressed
+  m_EditorClassIdentifier: PurrNet.Benchmarks::DeltaCompressed
   _isSetup: 0
   _prefabId: -2147483648
   _componentIndex: -2147483648
@@ -449,9 +435,51 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   _duration: 1
-  _rpcCount: 1000
+  _type: 3
+  _rpcCount: 100
   _minRandomValue: 0
   _maxRandomValue: 1000
+--- !u!114 &1528354730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1528354728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7977b66f2a8d4c0d95d21516fa48870d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Benchmarks::DeltaCompressed
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _duration: 1
+  _type: 2
+  _rpcCount: 100
+  _minRandomValue: 0
+  _maxRandomValue: 1000
+--- !u!4 &1528354731
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1528354728}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 9.0764, y: -4.97482, z: -4.78135}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1683386730
 GameObject:
   m_ObjectHideFlags: 0
@@ -462,8 +490,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1683386732}
   - component: {fileID: 1683386731}
+  - component: {fileID: 1683386733}
   m_Layer: 0
-  m_Name: DeltaCompressed
+  m_Name: RandomIntBenchmark
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -491,7 +520,8 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   _duration: 1
-  _rpcCount: 1000
+  _type: 0
+  _rpcCount: 100
   _minRandomValue: 0
   _maxRandomValue: 1000
 --- !u!4 &1683386732
@@ -509,11 +539,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1683386733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1683386730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7977b66f2a8d4c0d95d21516fa48870d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Benchmarks::DeltaCompressed
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _duration: 1
+  _type: 1
+  _rpcCount: 100
+  _minRandomValue: 0
+  _maxRandomValue: 1000
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 999871914}
   - {fileID: 655911528}
-  - {fileID: 1526888626}
   - {fileID: 1683386732}
+  - {fileID: 1528354731}

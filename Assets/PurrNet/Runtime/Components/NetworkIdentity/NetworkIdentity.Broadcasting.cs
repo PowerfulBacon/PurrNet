@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -7,11 +8,9 @@ using Cysharp.Threading.Tasks;
 #endif
 using PurrNet.Logging;
 using PurrNet.Modules;
-using PurrNet.Packing;
 using PurrNet.Pooling;
 using PurrNet.Profiler;
 using PurrNet.Transports;
-using PurrNet.Utils;
 using UnityEngine.Scripting;
 using Channel = PurrNet.Transports.Channel;
 
@@ -61,29 +60,6 @@ namespace PurrNet
             new Dictionary<InstanceGenericKey, MethodInfo>();
 
         [UsedByIL]
-        public static void ReadGenericHeader(BitPacker stream, RPCInfo info, int genericCount, int paramCount,
-            out GenericRPCHeader rpcHeader)
-        {
-            uint hash = 0;
-
-            rpcHeader = new GenericRPCHeader
-            {
-                stream = stream,
-                types = new Type[genericCount],
-                values = new object[paramCount],
-                info = info
-            };
-
-            for (int i = 0; i < genericCount; i++)
-            {
-                Packer<uint>.Read(stream, ref hash);
-                var type = Hasher.ResolveType(hash);
-
-                rpcHeader.types[i] = type;
-            }
-        }
-
-        [UsedByIL]
         protected object CallGeneric(string methodName, GenericRPCHeader rpcHeader)
         {
             var key = new InstanceGenericKey(methodName, GetType(), rpcHeader.types);
@@ -105,7 +81,10 @@ namespace PurrNet
 
             try
             {
-                return gmethod.Invoke(this, rpcHeader.values);
+                var res = gmethod.Invoke(this, rpcHeader.values);
+                PreciseArrayPool<Type>.Return(rpcHeader.types);
+                PreciseArrayPool<object>.Return(rpcHeader.values);
+                return res;
             }
             catch (TargetInvocationException e)
             {
@@ -246,14 +225,59 @@ namespace PurrNet
             return module.GetNextId(target, timeout, out request);
         }
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
         private Type _myType;
 #endif
 
         [UsedByIL]
+        protected DisposableList<PlayerID> GetObservers(RPCSignature signature)
+        {
+            var players = DisposableList<PlayerID>.Create(observers.Count);
+
+            if (signature.targetPlayer != null)
+            {
+                players.Add(signature.targetPlayer.Value);
+                return players;
+            }
+
+            for (var i = 0; i < observers.Count; i++)
+            {
+                var player = observers[i];
+                bool isLocalPlayer = player == networkManager.localPlayer;
+
+                if (signature.runLocally && isLocalPlayer)
+                    continue;
+
+                if (signature.excludeSender && isLocalPlayer)
+                    continue;
+
+                if (signature.excludeOwner && !IsNotOwnerPredicate(player))
+                    continue;
+
+                players.Add(player);
+            }
+            return players;
+        }
+
+        [UsedByIL]
+        protected void ModifyManyToOne(ref RPCSignature signature, PlayerID target)
+        {
+            if (signature.type != RPCType.TargetRPC)
+            {
+                signature.targetPlayer = target;
+            }
+            else
+            {
+                signature.targetPlayer = target;
+                signature.targetPlayerEnumerable = null;
+                signature.targetPlayerList = null;
+            }
+        }
+
+        [UsedByIL]
         protected void SendRPC(RPCPacket packet, RPCSignature signature)
         {
-#if UNITY_EDITOR
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
             _myType ??= GetType();
 #endif
             if (!isSpawned)
@@ -311,26 +335,15 @@ namespace PurrNet
                 {
                     if (isServer)
                     {
-                        using var players = DisposableList<PlayerID>.Create();
-                        for (var i = 0; i < observers.Count; i++)
-                        {
-                            var player = observers[i];
-                            bool isLocalPlayer = player == networkManager.localPlayer;
+                        using var players = GetObservers(signature);
 
-                            if (signature.runLocally && isLocalPlayer)
-                                continue;
+                        if (players.Count == 0)
+                            break;
 
-                            if (signature.excludeSender && isLocalPlayer)
-                                continue;
-
-                            if (signature.excludeOwner && !IsNotOwnerPredicate(player))
-                                continue;
 #if UNITY_EDITOR || PURR_RUNTIME_PROFILING
-                            Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment,
-                                this);
+                        for (var i = players.Count - 1; i >= 0; --i)
+                            Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
 #endif
-                            players.Add(player);
-                        }
                         Send(players, packet, signature.channel);
                     }
                     else
@@ -343,21 +356,33 @@ namespace PurrNet
                     break;
                 }
                 case RPCType.TargetRPC:
-#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
-                    Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
-#endif
                     if (isServer)
                     {
-                        using var targets = signature.GetTargets();
-                        Send(targets, packet, signature.channel);
+                        using var players = signature.GetTargets();
+
+                        if (players.Count == 0)
+                            break;
+
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
+                        for (var i = players.Count - 1; i >= 0; --i)
+                            Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
+#endif
+                        Send(players, packet, signature.channel);
                     }
                     else
                     {
                         using var targets = signature.GetTargets();
+
+                        if (targets.Count == 0)
+                            break;
+
                         // TODO: we should batch this into one packet to the server instead of N
                         for (int i = 0; i < targets.Count; i++)
                         {
                             packet.targetPlayerId = targets[i];
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
+                            Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
+#endif
                             SendToServer(packet, signature.channel);
                         }
                     }

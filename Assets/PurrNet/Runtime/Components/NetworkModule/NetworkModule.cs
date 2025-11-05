@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Reflection;
 using JetBrains.Annotations;
 using PurrNet.Logging;
@@ -311,7 +312,25 @@ namespace PurrNet
                 return null;
             }
 
-            return gmethod.Invoke(this, rpcHeader.values);
+            try
+            {
+                var res = gmethod.Invoke(this, rpcHeader.values);
+                PreciseArrayPool<Type>.Return(rpcHeader.types);
+                PreciseArrayPool<object>.Return(rpcHeader.values);
+                return res;
+            }
+            catch (TargetInvocationException e)
+            {
+                var actualException = e.InnerException;
+
+                if (actualException != null)
+                {
+                    PurrLogger.LogException(actualException);
+                    throw BypassLoggingException.instance;
+                }
+
+                throw;
+            }
         }
 
         [UsedByIL]

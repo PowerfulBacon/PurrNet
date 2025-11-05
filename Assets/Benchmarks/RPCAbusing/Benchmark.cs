@@ -1,4 +1,5 @@
-﻿using PurrNet;
+﻿using System.Collections.Generic;
+using PurrNet;
 using PurrNet.Transports;
 using UnityEngine;
 
@@ -27,7 +28,7 @@ public abstract class Benchmark : NetworkIdentity, ITick
         _bytesReceived = 0;
     }
 
-    [ContextMenu("Start Benchmark"), PurrContextButton]
+    [ContextMenu("Start Benchmark"), PurrButton]
     public void StartBenchmark()
     {
         _running = true;
