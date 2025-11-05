@@ -75,6 +75,7 @@ namespace PurrNet.Modules
         private readonly AuthModule _authModule;
         private readonly BroadcastModule _broadcastModule;
         private readonly ITransport _transport;
+        private readonly NetworkManager _networkManager;
 
         private readonly Dictionary<string, PlayerID> _cookieToPlayerId = new Dictionary<string, PlayerID>();
         private readonly Dictionary<PlayerID, string> _playerIdToCookie = new Dictionary<PlayerID, string>();
@@ -172,6 +173,7 @@ namespace PurrNet.Modules
 
         public PlayersManager(NetworkManager nm, AuthModule auth, BroadcastModule broadcaster)
         {
+            _networkManager = nm;
             _transport = nm.transport.transport;
             _authModule = auth;
             _broadcastModule = broadcaster;
@@ -256,9 +258,7 @@ namespace PurrNet.Modules
         public PlayerID CreateBot()
         {
             if (!_asServer)
-            {
-                throw new InvalidOperationException(PurrLogger.FormatMessage("Cannot create a bot from a client."));
-            }
+                throw new InvalidOperationException("Cannot create a bot from a client.");
 
             var playerId = new PlayerID(++_playerIdCounter, true);
             if (RegisterPlayer(default, playerId, out var isReconnect))
@@ -266,7 +266,6 @@ namespace PurrNet.Modules
                 SendNewUserToAllClients(default, playerId);
                 TriggerOnJoinedEvent(playerId, isReconnect);
             }
-
             return playerId;
         }
 
