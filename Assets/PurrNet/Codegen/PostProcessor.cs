@@ -831,6 +831,9 @@ namespace PurrNet.Codegen
             var responderUniTaskWithoutResponse =
                 rpcReqRespType.GetMethod("CompleteRequestWithUniTaskEmptyResponse").Import(module);
 
+            var responderTask = rpcReqRespType.GetMethod("CompleteRequestWithResponseObject", true).Import(module);
+            var responderUniTask = rpcReqRespType.GetMethod("CompleteRequestWithUniTaskObject", true).Import(module);
+
             var responderTaskObject = rpcReqRespType.GetMethod("CompleteRequestWithResponseObject", false).Import(module);
             var responderUniTaskObject = rpcReqRespType.GetMethod("CompleteRequestWithUniTaskObject", false).Import(module);
 
@@ -1076,9 +1079,31 @@ namespace PurrNet.Codegen
                     code.Append(Instruction.Create(OpCodes.Ldloc, requestId));
                     PushNetworkManager(newMethod, isNetworkClass, code, mainManagerGetter, getNetworkManagerModule, getNetworkManager);
 
-                    code.Append(returnMode == ReturnMode.Task
-                        ? Instruction.Create(OpCodes.Call, responderTaskObject)
-                        : Instruction.Create(OpCodes.Call, responderUniTaskObject));
+                    var taskType = genericInstance.GenericArguments[0];
+                    bool isTaskTypeConcrete = IsConcreteType(taskType, out var concreteTaskType);
+
+                    if (returnMode == ReturnMode.Task)
+                    {
+                        if (isTaskTypeConcrete)
+                        {
+                            var genericResponse = new GenericInstanceMethod(responderTask);
+                            genericResponse.GenericArguments.Add(concreteTaskType);
+                            code.Append(Instruction.Create(OpCodes.Call, genericResponse.Import(module)));
+                        }
+                        else code.Append(Instruction.Create(OpCodes.Call, responderTaskObject));
+                    }
+                    else
+                    {
+                        code.Append(Instruction.Create(OpCodes.Call, responderUniTaskObject));
+
+                        if (isTaskTypeConcrete)
+                        {
+                            var genericResponse = new GenericInstanceMethod(responderUniTask);
+                            genericResponse.GenericArguments.Add(concreteTaskType);
+                            code.Append(Instruction.Create(OpCodes.Call, genericResponse.Import(module)));
+                        }
+                        else code.Append(Instruction.Create(OpCodes.Call, responderUniTaskObject));
+                    }
                 }
                 else if (originalMethod.ReturnType != module.TypeSystem.Void)
                 {

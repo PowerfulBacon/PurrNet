@@ -103,6 +103,15 @@ public class RandomIntBenchmark : Benchmark
         return Task.FromResult(value);
     }
 
+    [TargetRpc(deltaPacked: false), UsedByIL]
+    Task<int> ReturnableGenericExtra<T>(PlayerID target, int value, T extra)
+    {
+        ++_received;
+        Debug.Log(value);
+        Debug.Log(extra);
+        return Task.FromResult(value);
+    }
+
     [TargetRpc(deltaPacked: false)]
     Task<T> ReturnableGeneric<T>(PlayerID target, T value)
     {
