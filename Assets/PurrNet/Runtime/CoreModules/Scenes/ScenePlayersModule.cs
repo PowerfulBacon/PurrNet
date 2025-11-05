@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using PurrNet.Logging;
+using UnityEngine;
 
 namespace PurrNet.Modules
 {
@@ -171,6 +172,53 @@ namespace PurrNet.Modules
             onPrePlayerLoadedScene?.Invoke(player, data.scene, asServer);
             onPlayerLoadedScene?.Invoke(player, data.scene, asServer);
             onPostPlayerLoadedScene?.Invoke(player, data.scene, asServer);
+        }
+        
+        /// <summary>
+        /// Notify bot has loaded in a scene (matches RemoteClientLoadedScene behavior)
+        /// </summary>
+        internal void NotifyBotSceneLoaded(PlayerID bot, SceneID scene)
+        {
+            if (!_asServer)
+            {
+                PurrLogger.LogError("NotifyBotSceneLoaded can only be called on server");
+                return;
+            }
+
+            if (!_scenePlayers.TryGetValue(scene, out var playersInScene))
+                return;
+
+            if (playersInScene.Contains(bot))
+                return;
+
+            if (_sceneLoadedPlayers.TryGetValue(scene, out var loadedPlayers))
+            {
+                if (!loadedPlayers.Contains(bot))
+                    loadedPlayers.Add(bot);
+            }
+            else
+            {
+                PurrLogger.LogError($"SceneID '{scene}' not found in scene loaded players dictionary");
+                return;
+            }
+
+            onPrePlayerLoadedScene?.Invoke(bot, scene, _asServer);
+            onPlayerLoadedScene?.Invoke(bot, scene, _asServer);
+            onPostPlayerLoadedScene?.Invoke(bot, scene, _asServer);
+        }
+        
+        /// <summary>
+        /// Notify bot has unloaded from a scene (matches player disconnect behavior)
+        /// </summary>
+        internal void NotifyBotSceneUnloaded(PlayerID bot, SceneID scene)
+        {
+            if (!_asServer)
+            {
+                PurrLogger.LogError("NotifyBotSceneUnloaded can only be called on server");
+                return;
+            }
+
+            RemovePlayerFromLoadedScene(bot, scene);
         }
 
         /// <summary>
