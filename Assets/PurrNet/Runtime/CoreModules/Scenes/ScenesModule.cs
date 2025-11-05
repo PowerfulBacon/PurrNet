@@ -299,14 +299,6 @@ namespace PurrNet.Modules
 
             if (_playerFilteredActions.Count > 0)
                 _players.Send(player, new SceneActionsBatch { actions = _playerFilteredActions });
-            if (player.isBot)
-            {
-                foreach (var sceneState in _scenes)
-                {
-                    if(sceneState.Value.settings.isPublic)
-                        _scenePlayers.NotifyBotSceneLoaded(player, sceneState.Key);
-                }
-            }
         }
 
         private void OnPlayerLeftScene(PlayerID player, SceneID scene, bool asServer)
