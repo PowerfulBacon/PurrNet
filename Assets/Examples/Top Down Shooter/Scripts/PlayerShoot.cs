@@ -13,6 +13,25 @@ namespace PurrNet.Examples.TopDownShooter
             enabled = isOwner;
         }
 
+        protected override void OnSpawned()
+        {
+            Debug.Log($"New Player Spawned for player: {owner}");
+        }
+        
+        
+        protected override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
+        {
+            if (!asServer)
+                return;
+            
+            Debug.Log($"Ownership changed: {newOwner}");
+        }
+
+        protected override void OnOwnerDisconnected(PlayerID ownerId)
+        {
+            Debug.Log($"Owner disconnected: {ownerId}");
+        }
+
         private void Update()
         {
             if (!Input.GetMouseButtonDown(0))
