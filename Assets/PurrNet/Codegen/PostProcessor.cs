@@ -234,24 +234,35 @@ namespace PurrNet.Codegen
 
         public static void Error(ICollection<DiagnosticMessage> messages, string message, MethodDefinition method)
         {
-            if (method.DebugInformation.HasSequencePoints)
+            try
             {
-                var first = method.DebugInformation.SequencePoints[0];
-                string file = first.Document.Url;
-                if (!string.IsNullOrEmpty(file))
-                    file = '/' + file[file.IndexOf("Assets", StringComparison.Ordinal)..].Replace('\\', '/');
-                else file = string.Empty;
-
-                messages.Add(new DiagnosticMessage
+                if (method.DebugInformation.HasSequencePoints)
                 {
-                    DiagnosticType = DiagnosticType.Error,
-                    MessageData = message,
-                    Column = first.StartColumn,
-                    Line = first.StartLine,
-                    File = file
-                });
+                    var first = method.DebugInformation.SequencePoints[0];
+                    string file = first.Document.Url;
+                    if (!string.IsNullOrEmpty(file))
+                        file = '/' + file[file.IndexOf("Assets", StringComparison.Ordinal)..].Replace('\\', '/');
+                    else file = string.Empty;
+
+                    messages.Add(new DiagnosticMessage
+                    {
+                        DiagnosticType = DiagnosticType.Error,
+                        MessageData = message,
+                        Column = first.StartColumn,
+                        Line = first.StartLine,
+                        File = file
+                    });
+                }
+                else
+                {
+                    messages.Add(new DiagnosticMessage
+                    {
+                        DiagnosticType = DiagnosticType.Error,
+                        MessageData = $"[{method.DeclaringType.FullName}] {message}"
+                    });
+                }
             }
-            else
+            catch
             {
                 messages.Add(new DiagnosticMessage
                 {
@@ -1722,13 +1733,10 @@ namespace PurrNet.Codegen
                     // ref signature
                     code.Append(Instruction.Create(OpCodes.Ldloca, rpcSignature));
                     // players.GetAt(i)
-                    var getAtConcrete = disposableListType.GetMethod("GetAt");
-                    var getAtConcreteRef = module.ImportReference(getAtConcrete);
-                    getAtConcreteRef.DeclaringType = playersListType;
-
+                    var getAtConcrete = playersListType.GetMethodRef("GetAt");
                     code.Append(Instruction.Create(OpCodes.Ldloca, playersList));
                     code.Append(Instruction.Create(OpCodes.Ldloc, iterator));
-                    code.Append(Instruction.Create(OpCodes.Call, getAtConcreteRef.Import(module)));
+                    code.Append(Instruction.Create(OpCodes.Call, getAtConcrete.Import(module)));
                     code.Append(Instruction.Create(OpCodes.Dup));
                     code.Append(Instruction.Create(OpCodes.Stloc, currentDeltaPlayerTarget));
                     // ();
@@ -1994,13 +2002,11 @@ namespace PurrNet.Codegen
                 code.Append(Instruction.Create(OpCodes.Br, playersLoopStart));
                 code.Append(playersLoopEnd);
 
-                var disposeConcret = disposableListType.GetMethod("Dispose");
-                var disposeConcretRef = module.ImportReference(disposeConcret);
-                disposeConcretRef.DeclaringType = playersListType;
+                var disposeConcret = playersListType.GetMethodRef("Dispose");
 
                 // playersList.Dispose();
                 code.Append(Instruction.Create(OpCodes.Ldloca, playersList));
-                code.Append(Instruction.Create(OpCodes.Call, disposeConcretRef.Import(module)));
+                code.Append(Instruction.Create(OpCodes.Call, disposeConcret.Import(module)));
             }
 
             code.Append(Instruction.Create(OpCodes.Ldloc, rpcSignature));

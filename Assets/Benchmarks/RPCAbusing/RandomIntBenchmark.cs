@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using PurrNet;
+using PurrNet.Packing;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -23,6 +24,16 @@ public enum BenchmarkType
     StaticReturnableDelta,
     StaticGenericReturnable,
     StaticGenericReturnableDelta,
+}
+
+public struct IntContainer : IPackedSimple
+{
+    public int value;
+
+    public void Serialize(BitPacker packer)
+    {
+        Packer<int>.Serialize(packer, ref value);
+    }
 }
 
 public class RandomIntBenchmark : Benchmark
@@ -50,7 +61,10 @@ public class RandomIntBenchmark : Benchmark
     {
         for (int i = 0; i < _rpcCount; i++)
         {
-            var v = Random.Range(_minRandomValue, _maxRandomValue);
+            var v = new IntContainer
+            {
+                value = Random.Range(_minRandomValue, _maxRandomValue)
+            };
             ++_sent;
 
             switch (_type)
@@ -126,14 +140,14 @@ public class RandomIntBenchmark : Benchmark
     }
 
     [TargetRpc(deltaPacked: false)]
-    Task<int> Returnable(PlayerID target, int value)
+    Task<IntContainer> Returnable(PlayerID target, IntContainer value)
     {
         ++_received;
         return Task.FromResult(value);
     }
 
     [TargetRpc(deltaPacked: true)]
-    Task<int> ReturnableDelta(PlayerID target, int value)
+    Task<IntContainer> ReturnableDelta(PlayerID target, IntContainer value)
     {
         ++_received;
         return Task.FromResult(value);
@@ -154,13 +168,13 @@ public class RandomIntBenchmark : Benchmark
     }
 
     [ObserversRpc(deltaPacked: false)]
-    void Normal(int someRandomValue)
+    void Normal(IntContainer someRandomValue)
     {
         ++_received;
     }
 
     [ObserversRpc(deltaPacked: true)]
-    void NormalDelta(int someRandomValue)
+    void NormalDelta(IntContainer someRandomValue)
     {
         ++_received;
     }
@@ -180,14 +194,14 @@ public class RandomIntBenchmark : Benchmark
     // STATICS
 
     [TargetRpc(deltaPacked: false)]
-    static Task<int> StaticReturnable(PlayerID target, int value)
+    static Task<IntContainer> StaticReturnable(PlayerID target, IntContainer value)
     {
         ++_received;
         return Task.FromResult(value);
     }
 
     [TargetRpc(deltaPacked: true)]
-    static Task<int> StaticReturnableDelta(PlayerID target, int value)
+    static Task<IntContainer> StaticReturnableDelta(PlayerID target, IntContainer value)
     {
         ++_received;
         return Task.FromResult(value);
@@ -208,13 +222,13 @@ public class RandomIntBenchmark : Benchmark
     }
 
     [ObserversRpc(deltaPacked: false)]
-    static void StaticNormal(int someRandomValue)
+    static void StaticNormal(IntContainer someRandomValue)
     {
         ++_received;
     }
 
     [ObserversRpc(deltaPacked: true)]
-    static void StaticNormalDelta(int someRandomValue)
+    static void StaticNormalDelta(IntContainer someRandomValue)
     {
         ++_received;
     }
