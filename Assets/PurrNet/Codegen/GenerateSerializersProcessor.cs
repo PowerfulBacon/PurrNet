@@ -658,6 +658,8 @@ namespace PurrNet.Codegen
                 il.Emit(OpCodes.Brfalse, ret);
             }
 
+            CreateGettersAndSetters(isWriting, type);
+
             if (type.IsEnum)
             {
                 HandleEnums(isWriting, method, serialize, type, il, packerType, mainmodule);
@@ -742,7 +744,11 @@ namespace PurrNet.Codegen
                 {
                     if (isWriting)
                     {
-                        var getter = CreateGetterMethod(type, field);
+                        var getterName = MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}");
+                        var getter = new MethodReference(getterName, fieldType, typeRef)
+                        {
+                            HasThis = true
+                        };
 
                         if (typeRef is GenericInstanceType genericInstanceType)
                         {
@@ -776,7 +782,11 @@ namespace PurrNet.Codegen
                         var variable = new VariableDefinition(fieldType);
                         method.Body.Variables.Add(variable);
 
-                        var setter = CreateSetterMethod(type, field);
+                        var setterName = MakeFullNameValidCSharp($"Purrnet_Set_{field.Name}");
+                        var setter = new MethodReference(setterName, type.Module.TypeSystem.Void, typeRef)
+                        {
+                            HasThis = true
+                        };
 
                         if (typeRef is GenericInstanceType genericInstanceType)
                         {
@@ -825,6 +835,33 @@ namespace PurrNet.Codegen
             il.Emit(OpCodes.Call, readData);*/
 
             il.Append(ret);
+        }
+
+        private static void CreateGettersAndSetters(bool isWriting, TypeDefinition type)
+        {
+            for (var i = 0; i < type.Fields.Count; i++)
+            {
+                var field = type.Fields[i];
+                if (field.IsStatic)
+                    continue;
+
+                bool isDelegate = PostProcessor.InheritsFrom(field.FieldType.Resolve(), typeof(Delegate).FullName);
+
+                if (isDelegate)
+                    continue;
+
+                var ignore = ShouldIgnoreField(field);
+
+                if (ignore)
+                    continue;
+
+                if (!field.IsPublic)
+                {
+                    if (isWriting)
+                        CreateGetterMethod(type, field);
+                    else CreateSetterMethod(type, field);
+                }
+            }
         }
 
         private static void CallForStandalone(bool isWriting, MethodDefinition method, MethodReference serializeDirect,
