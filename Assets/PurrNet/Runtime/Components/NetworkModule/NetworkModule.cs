@@ -1,5 +1,4 @@
 using System;
-using System.Buffers;
 using System.Reflection;
 using JetBrains.Annotations;
 using PurrNet.Logging;
@@ -290,6 +289,12 @@ namespace PurrNet
             Statistics.ReceivedRPC(_myType, signature.type, signature.rpcName, data.rpcData.segment, parent);
 #endif
             return parent && parent.ValidateIncomingRPC(info, signature, data, asServer);
+        }
+
+        [UsedByIL]
+        public DisposableList<PlayerID> GetObservers(RPCSignature signature)
+        {
+            return parent.GetObservers(signature);
         }
 
         [UsedByIL]

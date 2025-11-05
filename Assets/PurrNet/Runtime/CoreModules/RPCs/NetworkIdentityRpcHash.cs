@@ -1,18 +1,43 @@
-﻿using PurrNet.Utils;
+﻿using PurrNet.Packing;
+using PurrNet.Utils;
 
 namespace PurrNet.Modules
 {
-    internal readonly struct NetworkIdentityRpcHash<T> : IStableHashable
+    internal readonly struct NetworkIdentityRpcHash<T, PACKET> : IStableHashable
     {
         private readonly NetworkID id;
         private readonly SceneID scene;
-        private readonly int rpcId;
+        private readonly PackedUInt typeId;
+        private readonly PackedUInt childId;
+        private readonly PackedUInt rpcId;
         private readonly ulong offset;
 
         public NetworkIdentityRpcHash(RPCPacket context, ulong offset)
         {
             id = context.networkId;
             scene = context.sceneId;
+            this.typeId = default;
+            this.childId = default;
+            this.rpcId = context.rpcId;
+            this.offset = offset;
+        }
+
+        public NetworkIdentityRpcHash(ChildRPCPacket context, ulong offset)
+        {
+            id = context.networkId;
+            scene = context.sceneId;
+            this.typeId = default;
+            this.childId = context.childId;
+            this.rpcId = context.rpcId;
+            this.offset = offset;
+        }
+
+        public NetworkIdentityRpcHash(StaticRPCPacket context, ulong offset)
+        {
+            id = default;
+            scene = default;
+            this.typeId = context.typeHash;
+            this.childId = default;
             this.rpcId = context.rpcId;
             this.offset = offset;
         }
@@ -22,12 +47,15 @@ namespace PurrNet.Modules
             ulong nid = id.id.value;
             ulong nscope = id.scope.id.value;
             ulong sceneScope = scene.id.value;
-            ulong rpc = (ulong)rpcId;
+            ulong rpc = rpcId.value;
 
             ulong hash = 1469598103934665603UL;
             const ulong prime = 1099511628211UL;
 
             hash ^= Hasher<T>.stableHash;
+            hash *= prime;
+
+            hash ^= Hasher<PACKET>.stableHash;
             hash *= prime;
 
             hash ^= nid;
@@ -40,6 +68,12 @@ namespace PurrNet.Modules
             hash *= prime;
 
             hash ^= rpc;
+            hash *= prime;
+
+            hash ^= typeId.value;
+            hash *= prime;
+
+            hash ^= childId.value;
             hash *= prime;
 
             hash ^= offset;

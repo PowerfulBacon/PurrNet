@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Reflection;
+using PurrNet.Packing;
 
 namespace PurrNet.Modules
 {
     internal readonly struct RPCKey : IEquatable<RPCKey>
     {
         private readonly IReflect type;
-        private readonly byte rpcId;
+        private readonly PackedUInt rpcId;
 
         public override int GetHashCode()
         {
             return type.GetHashCode() ^ rpcId.GetHashCode();
         }
 
-        public RPCKey(IReflect type, byte rpcId)
+        public RPCKey(IReflect type, PackedUInt rpcId)
         {
             this.type = type;
             this.rpcId = rpcId;
@@ -21,7 +22,7 @@ namespace PurrNet.Modules
 
         public bool Equals(RPCKey other)
         {
-            return Equals(type, other.type) && rpcId == other.rpcId;
+            return Equals(type, other.type) && rpcId.value == other.rpcId.value;
         }
 
         public override bool Equals(object obj)

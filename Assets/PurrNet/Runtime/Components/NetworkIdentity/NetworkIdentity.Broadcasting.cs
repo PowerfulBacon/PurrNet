@@ -230,7 +230,7 @@ namespace PurrNet
 #endif
 
         [UsedByIL]
-        protected DisposableList<PlayerID> GetObservers(RPCSignature signature)
+        public DisposableList<PlayerID> GetObservers(RPCSignature signature)
         {
             var players = DisposableList<PlayerID>.Create(observers.Count);
 
@@ -257,21 +257,6 @@ namespace PurrNet
                 players.Add(player);
             }
             return players;
-        }
-
-        [UsedByIL]
-        protected void ModifyManyToOne(ref RPCSignature signature, PlayerID target)
-        {
-            if (signature.type != RPCType.TargetRPC)
-            {
-                signature.targetPlayer = target;
-            }
-            else
-            {
-                signature.targetPlayer = target;
-                signature.targetPlayerEnumerable = null;
-                signature.targetPlayerList = null;
-            }
         }
 
         [UsedByIL]

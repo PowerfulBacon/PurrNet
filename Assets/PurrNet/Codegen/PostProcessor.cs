@@ -607,12 +607,23 @@ namespace PurrNet.Codegen
                 rpcPacker = new VariableDefinition(RPCPacketPackerType.Import(module));
                 newMethod.Body.Variables.Add(rpcPacker);
 
-                var createPackerForRPC = RPCPacketPackerType.GetMethod("CreateWithInfo").Import(module);
+                var createPackerForRPC = RPCPacketPackerType.GetMethod(GetCreateWithInfoName(rpcMethod, isNetworkClass))
+                    .Import(module);
                 //NetworkManager manager, RPCPacket context, RPCInfo info
                 PushNetworkManager(module, code, isNetworkClass, newMethod.IsStatic);
                 // PushNetworkManager(newMethod, isNetworkClass, code, mainManagerGetter, getNetworkManagerModule, getNetworkManager);
-                code.Append(Instruction.Create(OpCodes.Ldarg_2));
-                code.Append(Instruction.Create(OpCodes.Ldarg_3));
+
+                if (rpcMethod.Signature.isStatic)
+                {
+                    code.Append(Instruction.Create(OpCodes.Ldarg_1));
+                    code.Append(Instruction.Create(OpCodes.Ldarg_2));
+                }
+                else
+                {
+                    code.Append(Instruction.Create(OpCodes.Ldarg_2));
+                    code.Append(Instruction.Create(OpCodes.Ldarg_3));
+                }
+
                 code.Append(Instruction.Create(OpCodes.Call, createPackerForRPC));
                 code.Append(Instruction.Create(OpCodes.Stloc, rpcPacker));
             }
@@ -754,6 +765,40 @@ namespace PurrNet.Codegen
             }
         }
 
+        private static string GetCreateWithInfoName(RPCMethod rpcMethod, bool isNetworkClass)
+        {
+            string methodName;
+
+            if (isNetworkClass)
+            {
+                methodName = "CreateChildWithInfo";
+            }
+            else if (rpcMethod.Signature.isStatic)
+            {
+                methodName = "CreateStaticWithInfo";
+            }
+            else methodName = "CreateWithInfo";
+
+            return methodName;
+        }
+
+        private static string GetCreateName(RPCMethod rpcMethod, bool isNetworkClass)
+        {
+            string methodName;
+
+            if (isNetworkClass)
+            {
+                methodName = "CreateChild";
+            }
+            else if (rpcMethod.Signature.isStatic)
+            {
+                methodName = "CreateStatic";
+            }
+            else methodName = "Create";
+
+            return methodName;
+        }
+
         private static void PushNetworkManager(ModuleDefinition module, ILProcessor code, bool isNetworkClass, bool isStatic)
         {
             var managerType = module.GetTypeDefinition<NetworkManager>();
@@ -893,11 +938,22 @@ namespace PurrNet.Codegen
                 rpcPacker = new VariableDefinition(RPCPacketPackerType.Import(module));
                 newMethod.Body.Variables.Add(rpcPacker);
 
-                var createPackerForRPC = RPCPacketPackerType.GetMethod("CreateWithInfo").Import(module);
+                var createPackerForRPC = RPCPacketPackerType.GetMethod(GetCreateWithInfoName(rpcMethod, isNetworkClass))
+                    .Import(module);
                 //NetworkManager manager, RPCPacket context, RPCInfo info
                 PushNetworkManager(newMethod, isNetworkClass, code, mainManagerGetter, getNetworkManagerModule, getNetworkManager);
-                code.Append(Instruction.Create(OpCodes.Ldarg_2));
-                code.Append(Instruction.Create(OpCodes.Ldarg_3));
+
+                if (rpcMethod.Signature.isStatic)
+                {
+                    code.Append(Instruction.Create(OpCodes.Ldarg_1));
+                    code.Append(Instruction.Create(OpCodes.Ldarg_2));
+                }
+                else
+                {
+                    code.Append(Instruction.Create(OpCodes.Ldarg_2));
+                    code.Append(Instruction.Create(OpCodes.Ldarg_3));
+                }
+
                 code.Append(Instruction.Create(OpCodes.Call, createPackerForRPC));
                 code.Append(Instruction.Create(OpCodes.Stloc, rpcPacker));
             }
@@ -1627,9 +1683,11 @@ namespace PurrNet.Codegen
                     // playersList = rpcSignature.GetTargets() or GetObservers(signature);
                     if (methodRpc.Signature.type == RPCType.ObserversRPC)
                     {
-                        var getObservers = identityType.GetMethod("GetObservers").Import(module);
+                        var parentType = GetParentType(module, isNetworkClass, methodRpc.Signature.isStatic);
+                        var getObservers = parentType.GetMethod("GetObservers").Import(module);
                         // signature
-                        code.Append(Instruction.Create(OpCodes.Ldarg_0));
+                        if (!methodRpc.Signature.isStatic)
+                            code.Append(Instruction.Create(OpCodes.Ldarg_0));
                         code.Append(Instruction.Create(OpCodes.Ldloc, rpcSignature));
                         code.Append(Instruction.Create(OpCodes.Call, getObservers));
                     }
@@ -1659,9 +1717,8 @@ namespace PurrNet.Codegen
                     // loop content
 
                     // this.ModifyManyToOne(ref signature, players.GetAt(i));
-                    var modifyManyToOne = identityType.GetMethod("ModifyManyToOne").Import(module);
-                    //this
-                    code.Append(Instruction.Create(OpCodes.Ldarg_0));
+                    var rpcModule = module.GetTypeDefinition<RPCModule>();
+                    var modifyManyToOne = rpcModule.GetMethod("ModifyManyToOne").Import(module);
                     // ref signature
                     code.Append(Instruction.Create(OpCodes.Ldloca, rpcSignature));
                     // players.GetAt(i)
@@ -1805,7 +1862,8 @@ namespace PurrNet.Codegen
             // create delta packer
             if (useDeltaPacking)
             {
-                var createPackerForRPC = RPCPacketPackerType.GetMethod("Create").Import(module);
+                var createPackerForRPC = RPCPacketPackerType.GetMethod(GetCreateName(methodRpc, isNetworkClass))
+                    .Import(module);
                 //NetworkManager manager, RPCPacket context, RPCSignature signature, PlayerID target
                 PushNetworkManager(module, code, isNetworkClass, methodRpc.Signature.isStatic);
                 code.Append(Instruction.Create(OpCodes.Ldloc, rpcDataVariable));
@@ -2313,6 +2371,18 @@ namespace PurrNet.Codegen
             playdIdType.Import(module);
             var getNullableMethod = playdIdType.GetMethod("GetNullable").Import(module);
             code.Append(Instruction.Create(OpCodes.Call, getNullableMethod));
+        }
+
+        private static TypeReference GetParentType(ModuleDefinition module, bool isNetworkModule, bool isStatic)
+        {
+            if (!isStatic)
+            {
+                return isNetworkModule
+                    ? module.GetTypeDefinition<NetworkModule>().Import(module)
+                    : module.GetTypeDefinition<NetworkIdentity>().Import(module);
+            }
+
+            return module.GetTypeDefinition<RPCModule>().Import(module);
         }
 
         private static void PushLocalPlayerProp(ModuleDefinition module, ILProcessor code, bool isNetworkModule, bool isStatic)

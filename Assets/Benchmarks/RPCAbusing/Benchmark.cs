@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using PurrNet;
+﻿using PurrNet;
 using PurrNet.Transports;
 using UnityEngine;
 
