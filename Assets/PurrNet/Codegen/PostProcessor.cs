@@ -598,11 +598,8 @@ namespace PurrNet.Codegen
             VariableDefinition reqId = null;
             VariableDefinition rpcPacker = null;
 
-            bool hasMultipleTargets = rpcMethod.Signature.type == RPCType.ObserversRPC ||
-                                      rpcMethod.Signature.targetPlayerEnumerable != null ||
-                                      rpcMethod.Signature.targetPlayerList != null;
 
-            bool useDeltaPacking = rpcMethod.Signature.deltaPacked && rpcMethod.Signature.type != RPCType.ServerRPC && hasMultipleTargets;
+            bool useDeltaPacking = rpcMethod.Signature.deltaPacked && rpcMethod.Signature.type != RPCType.ServerRPC;
 
             // create delta packer
             if (useDeltaPacking)
@@ -834,8 +831,8 @@ namespace PurrNet.Codegen
             var responderUniTaskWithoutResponse =
                 rpcReqRespType.GetMethod("CompleteRequestWithUniTaskEmptyResponse").Import(module);
 
-            var responderTask = rpcReqRespType.GetMethod("CompleteRequestWithResponseObject", true).Import(module);
-            var responderUniTask = rpcReqRespType.GetMethod("CompleteRequestWithUniTaskObject", true).Import(module);
+            var responderTaskObject = rpcReqRespType.GetMethod("CompleteRequestWithResponseObject", false).Import(module);
+            var responderUniTaskObject = rpcReqRespType.GetMethod("CompleteRequestWithUniTaskObject", false).Import(module);
 
             var localPlayerProp = identityType.GetProperty("localPlayerForced");
             var localPlayerGetter = localPlayerProp.GetMethod.Import(module);
@@ -877,11 +874,7 @@ namespace PurrNet.Codegen
             int paramCount = originalMethod.Parameters.Count;
             int genericParamCount = originalMethod.GenericParameters.Count;
 
-            bool hasMultipleTargets = rpcMethod.Signature.type == RPCType.ObserversRPC ||
-                                      rpcMethod.Signature.targetPlayerEnumerable != null ||
-                                      rpcMethod.Signature.targetPlayerList != null;
-
-            bool useDeltaPacking = rpcMethod.Signature.deltaPacked && rpcMethod.Signature.type != RPCType.ServerRPC && hasMultipleTargets;
+            bool useDeltaPacking = rpcMethod.Signature.deltaPacked && rpcMethod.Signature.type != RPCType.ServerRPC;
 
             VariableDefinition requestId = null;
             VariableDefinition rpcPacker = null;
@@ -1083,18 +1076,9 @@ namespace PurrNet.Codegen
                     code.Append(Instruction.Create(OpCodes.Ldloc, requestId));
                     PushNetworkManager(newMethod, isNetworkClass, code, mainManagerGetter, getNetworkManagerModule, getNetworkManager);
 
-                    if (returnMode == ReturnMode.Task)
-                    {
-                        var genericResponse = new GenericInstanceMethod(responderTask);
-                        genericResponse.GenericArguments.Add(genericInstance.GenericArguments[0]);
-                        code.Append(Instruction.Create(OpCodes.Call, genericResponse));
-                    }
-                    else
-                    {
-                        var genericResponse = new GenericInstanceMethod(responderUniTask);
-                        genericResponse.GenericArguments.Add(genericInstance.GenericArguments[0]);
-                        code.Append(Instruction.Create(OpCodes.Call, genericResponse));
-                    }
+                    code.Append(returnMode == ReturnMode.Task
+                        ? Instruction.Create(OpCodes.Call, responderTaskObject)
+                        : Instruction.Create(OpCodes.Call, responderUniTaskObject));
                 }
                 else if (originalMethod.ReturnType != module.TypeSystem.Void)
                 {
@@ -1597,7 +1581,7 @@ namespace PurrNet.Codegen
                                       methodRpc.Signature.targetPlayerEnumerable != null ||
                                       methodRpc.Signature.targetPlayerList != null;
 
-            bool useDeltaPacking = methodRpc.Signature.deltaPacked && methodRpc.Signature.type != RPCType.ServerRPC && hasMultipleTargets;
+            bool useDeltaPacking = methodRpc.Signature.deltaPacked && methodRpc.Signature.type != RPCType.ServerRPC;
 
             if (useDeltaPacking)
             {
@@ -1611,60 +1595,63 @@ namespace PurrNet.Codegen
                 newMethod.Body.Variables.Add(iterator);
                 newMethod.Body.Variables.Add(rpcPacker);
 
-                playersLoopEnd = Instruction.Create(OpCodes.Nop);
-
-                // playersList = rpcSignature.GetTargets() or GetObservers(signature);
-                if (methodRpc.Signature.type == RPCType.ObserversRPC)
+                if (hasMultipleTargets)
                 {
-                    var getObservers = identityType.GetMethod("GetObservers").Import(module);
-                    // signature
-                    code.Append(Instruction.Create(OpCodes.Ldarg_0));
-                    code.Append(Instruction.Create(OpCodes.Ldloc, rpcSignature));
-                    code.Append(Instruction.Create(OpCodes.Call, getObservers));
-                }
-                else code.Append(Instruction.Create(OpCodes.Call, rpcSig_getTargets));
+                    playersLoopEnd = Instruction.Create(OpCodes.Nop);
 
-                code.Append(Instruction.Create(OpCodes.Stloc, playersList));
+                    // playersList = rpcSignature.GetTargets() or GetObservers(signature);
+                    if (methodRpc.Signature.type == RPCType.ObserversRPC)
+                    {
+                        var getObservers = identityType.GetMethod("GetObservers").Import(module);
+                        // signature
+                        code.Append(Instruction.Create(OpCodes.Ldarg_0));
+                        code.Append(Instruction.Create(OpCodes.Ldloc, rpcSignature));
+                        code.Append(Instruction.Create(OpCodes.Call, getObservers));
+                    }
+                    else code.Append(Instruction.Create(OpCodes.Call, rpcSig_getTargets));
 
-                // i = targets.Count;
-                code.Append(Instruction.Create(OpCodes.Ldloca, playersList));
-                var prop = disposableListType.GetProperty("Count");
-                var methodDef = prop.GetMethod;
-                var methodRef = new MethodReference(methodDef.Name, methodDef.ReturnType, playersListType)
+                    code.Append(Instruction.Create(OpCodes.Stloc, playersList));
+
+                    // i = targets.Count;
+                    code.Append(Instruction.Create(OpCodes.Ldloca, playersList));
+                    var prop = disposableListType.GetProperty("Count");
+                    var methodDef = prop.GetMethod;
+                    var methodRef = new MethodReference(methodDef.Name, methodDef.ReturnType, playersListType)
                     {
                         HasThis = true
                     };
 
-                code.Append(Instruction.Create(OpCodes.Call, methodRef.Import(module)));
-                code.Append(Instruction.Create(OpCodes.Ldc_I4_1));
-                code.Append(Instruction.Create(OpCodes.Sub));
-                code.Append(Instruction.Create(OpCodes.Stloc, iterator));
+                    code.Append(Instruction.Create(OpCodes.Call, methodRef.Import(module)));
+                    code.Append(Instruction.Create(OpCodes.Ldc_I4_1));
+                    code.Append(Instruction.Create(OpCodes.Sub));
+                    code.Append(Instruction.Create(OpCodes.Stloc, iterator));
 
-                // while (i >= 0)
-                playersLoopStart = Instruction.Create(OpCodes.Ldloc, iterator);
-                code.Append(playersLoopStart);
-                code.Append(Instruction.Create(OpCodes.Ldc_I4_0));
-                code.Append(Instruction.Create(OpCodes.Blt, playersLoopEnd));
-                // loop content
+                    // while (i >= 0)
+                    playersLoopStart = Instruction.Create(OpCodes.Ldloc, iterator);
+                    code.Append(playersLoopStart);
+                    code.Append(Instruction.Create(OpCodes.Ldc_I4_0));
+                    code.Append(Instruction.Create(OpCodes.Blt, playersLoopEnd));
+                    // loop content
 
-                // this.ModifyManyToOne(ref signature, players.GetAt(i));
-                var modifyManyToOne = identityType.GetMethod("ModifyManyToOne").Import(module);
-                //this
-                code.Append(Instruction.Create(OpCodes.Ldarg_0));
-                // ref signature
-                code.Append(Instruction.Create(OpCodes.Ldloca, rpcSignature));
-                // players.GetAt(i)
-                var getAtConcrete = disposableListType.GetMethod("GetAt");
-                var getAtConcreteRef = module.ImportReference(getAtConcrete);
-                getAtConcreteRef.DeclaringType = playersListType;
+                    // this.ModifyManyToOne(ref signature, players.GetAt(i));
+                    var modifyManyToOne = identityType.GetMethod("ModifyManyToOne").Import(module);
+                    //this
+                    code.Append(Instruction.Create(OpCodes.Ldarg_0));
+                    // ref signature
+                    code.Append(Instruction.Create(OpCodes.Ldloca, rpcSignature));
+                    // players.GetAt(i)
+                    var getAtConcrete = disposableListType.GetMethod("GetAt");
+                    var getAtConcreteRef = module.ImportReference(getAtConcrete);
+                    getAtConcreteRef.DeclaringType = playersListType;
 
-                code.Append(Instruction.Create(OpCodes.Ldloca, playersList));
-                code.Append(Instruction.Create(OpCodes.Ldloc, iterator));
-                code.Append(Instruction.Create(OpCodes.Call, getAtConcreteRef.Import(module)));
-                code.Append(Instruction.Create(OpCodes.Dup));
-                code.Append(Instruction.Create(OpCodes.Stloc, currentDeltaPlayerTarget));
-                // ();
-                code.Append(Instruction.Create(OpCodes.Call, modifyManyToOne));
+                    code.Append(Instruction.Create(OpCodes.Ldloca, playersList));
+                    code.Append(Instruction.Create(OpCodes.Ldloc, iterator));
+                    code.Append(Instruction.Create(OpCodes.Call, getAtConcreteRef.Import(module)));
+                    code.Append(Instruction.Create(OpCodes.Dup));
+                    code.Append(Instruction.Create(OpCodes.Stloc, currentDeltaPlayerTarget));
+                    // ();
+                    code.Append(Instruction.Create(OpCodes.Call, modifyManyToOne));
+                }
             }
 
             switch (methodRpc.Signature.type)
@@ -1912,7 +1899,7 @@ namespace PurrNet.Codegen
             code.Append(Instruction.Create(OpCodes.Ldloc, streamVariable));
             code.Append(Instruction.Create(OpCodes.Call, freeStreamMethod));
 
-            if (useDeltaPacking)
+            if (useDeltaPacking && hasMultipleTargets)
             {
                 // i -= 1;
                 code.Append(Instruction.Create(OpCodes.Ldloc, iterator));
