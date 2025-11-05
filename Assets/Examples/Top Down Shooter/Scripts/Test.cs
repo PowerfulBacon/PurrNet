@@ -8,6 +8,8 @@ public class Test : NetworkIdentity
     
     private Queue<PlayerID> _bots = new();
 
+    private bool _networkManagerLogs = false;
+
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
@@ -38,6 +40,9 @@ public class Test : NetworkIdentity
 
     private void OnPlayerJoinedScene(PlayerID player, SceneID scene, bool asServer)
     {
+        if (!_networkManagerLogs)
+            return;
+        
         if (player.id == 1)
             return;
 
@@ -46,6 +51,9 @@ public class Test : NetworkIdentity
 
     private void OnPlayerLoadedScene(PlayerID player, SceneID scene, bool asServer)
     {
+        if (!_networkManagerLogs)
+            return;
+
         if (player.id == 1)
             return;
 
@@ -54,6 +62,9 @@ public class Test : NetworkIdentity
 
     private void OnPlayerJoined(PlayerID player, bool isReconnect, bool asServer)
     {
+        if (!_networkManagerLogs)
+            return;
+
         if (player.id == 1)
             return;
 
@@ -62,6 +73,9 @@ public class Test : NetworkIdentity
 
     private void OnPlayerUnloadedScene(PlayerID player, SceneID scene, bool asServer)
     {
+        if (!_networkManagerLogs)
+            return;
+
         if (player.id == 1)
             return;
         
@@ -70,6 +84,9 @@ public class Test : NetworkIdentity
 
     private void OnPlayerLeftScene(PlayerID player, SceneID scene, bool asServer)
     {
+        if (!_networkManagerLogs)
+            return;
+
         if (player.id == 1)
             return;
 
@@ -78,6 +95,9 @@ public class Test : NetworkIdentity
 
     private void OnPlayerLeft(PlayerID player, bool asServer)
     {
+        if (!_networkManagerLogs)
+            return;
+
         if (player.id == 1)
             return;
 
