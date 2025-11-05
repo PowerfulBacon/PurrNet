@@ -784,6 +784,9 @@ namespace PurrNet.Codegen
                             HasThis = true
                         };
 
+                        setter.Parameters.Add(
+                            new ParameterDefinition("value", ParameterAttributes.None, fieldType));
+
                         if (typeRef is GenericInstanceType genericInstanceType)
                         {
                             var copy = new MethodReference(setter.Name, setter.ReturnType, genericInstanceType)
