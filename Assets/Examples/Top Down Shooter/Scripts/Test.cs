@@ -1,53 +1,45 @@
+using System;
 using PurrNet;
 using UnityEngine;
 
 public class Test : NetworkIdentity
 {
-    private ValidatedSyncVar<int> _testVar = new(100);
-    
-    private void OnEnable()
-    {
-        _testVar.serverValidation += ServerValidator;
-        _testVar.onValidationFail += OnValidationFail;
 
-        _testVar.onChangedWithOld += OnChanged;
-    }
-
-    private void OnDisable()
+    protected override void OnSpawned(bool asServer)
     {
-        _testVar.serverValidation -= ServerValidator;
-        _testVar.onValidationFail -= OnValidationFail;
+        if (!asServer)
+            return;
         
-        _testVar.onChangedWithOld -= OnChanged;
+        networkManager.onPlayerJoinedScene += OnPlayerJoinedScene;
+        networkManager.onPlayerLoadedScene += OnPlayerLoadedScene;
+        networkManager.onPlayerJoined += OnPlayerJoined;
     }
 
-    private bool ServerValidator(int oldValue, int newValue)
+    protected override void OnDespawned()
     {
-        if (oldValue > newValue)
-            return false;
-        
-        return true;
+        networkManager.onPlayerJoinedScene -= OnPlayerJoinedScene;
+        networkManager.onPlayerLoadedScene -= OnPlayerLoadedScene;
+        networkManager.onPlayerJoined -= OnPlayerJoined;
     }
 
-    private void OnValidationFail(int failedValue, int authoritativeValue)
+    private void OnPlayerJoinedScene(PlayerID player, SceneID scene, bool asServer)
     {
-        Debug.Log($"Validation failed on {failedValue}. Returning to {authoritativeValue}");
+        Debug.Log($"Joined scene: {player} | {scene} | {asServer}");
     }
 
-    private void OnChanged(int oldValue, int newValue, bool validated)
+    private void OnPlayerLoadedScene(PlayerID player, SceneID scene, bool asServer)
     {
-        Debug.Log($"Value changed: {oldValue} -> {newValue} | Validated: {validated}");
+        Debug.Log($"Loaded scene: {player} | {scene} | {asServer}");
     }
-    
+
+    private void OnPlayerJoined(PlayerID player, bool isReconnect, bool asServer)
+    {
+        Debug.Log($"Joined: {player} | {asServer}");
+    }
 
     private void Update()
     {
-        if (!isOwner)
-            return;
-
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-            _testVar.value += 1;
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-            _testVar.value -= 1;
+        if (Input.GetKeyDown(KeyCode.X)) 
+            networkManager.playerModule.CreateBot();
     }
 }
