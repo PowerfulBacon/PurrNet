@@ -98,7 +98,7 @@ namespace PurrNet
                 return;
 
             using var v = GetValue();
-            SendLatestState(player, _id, v);
+            SendLatestState(player, _id, _value);
         }
 
         public override void OnDespawned()
@@ -119,20 +119,16 @@ namespace PurrNet
 
         private void ForceSendUnreliable()
         {
-            using var v = GetValue();
-
             if (isServer)
-                SendToAll(_id++, v);
-            else SendToServer(_id++, v);
+                SendToAll(_id++, _value);
+            else SendToServer(_id++, _value);
         }
 
         private void ForceSendReliable()
         {
-            using var v = GetValue();
-
             if (isServer)
-                SendToAllReliably(_id++, v);
-            else SendToServerReliably(_id++, v);
+                SendToAllReliably(_id++, _value);
+            else SendToServerReliably(_id++, _value);
         }
 
         public void FlushImmediately()
@@ -183,93 +179,102 @@ namespace PurrNet
             _ownerAuth = ownerAuth;
         }
 
-        private static T _cache;
-
-        [TargetRpc, UsedImplicitly]
-        private void SendLatestState(PlayerID player, PackedULong packetId, BitPacker newValue)
+        [TargetRpc(deltaPacked: true), UsedImplicitly]
+        private void SendLatestState(PlayerID player, PackedULong packetId, T newValue)
         {
-            using (newValue)
+            if (isServer)
             {
-                if (isServer) return;
-
-                _id = packetId;
-
-                Packer<T>.Read(newValue, ref _cache);
-                newValue.SetBitPosition(0);
-
-                bool bothNull = _value == null && _cache == null;
-                bool bothEqual = _value != null && _value.Equals(_cache);
-
-                if (bothNull || bothEqual)
-                    return;
-
-                var oldValue = value;
-                Packer<T>.Read(newValue, ref _value);
-                TriggerEvents(oldValue);
+                DisposeOf(newValue);
+                return;
             }
+
+            _id = packetId;
+
+            var oldValue = _value;
+
+            if (Packer.Transform(ref _value, newValue))
+            {
+                DisposeOf(newValue);
+                return;
+            }
+
+            TriggerEvents(oldValue);
+            DisposeOf(newValue);
         }
 
-        [ServerRpc(Channel.Unreliable, requireOwnership: true)]
-        private void SendToServer(PackedULong packetId, BitPacker newValue)
+        private static void DisposeOf(T newValue)
         {
-            using (newValue)
-            {
-                if (!_ownerAuth) return;
-
-                OnReceivedValue(packetId, newValue);
-                SendToOthers(packetId, newValue);
-            }
+            if (newValue is IDisposable disposable)
+                disposable.Dispose();
         }
 
-        [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
-        private void SendToServerReliably(PackedULong packetId, BitPacker newValue)
+        [ServerRpc(Channel.Unreliable, requireOwnership: true, deltaPacked: true)]
+        private void SendToServer(PackedULong packetId, T newValue)
         {
-            using (newValue)
+            if (!_ownerAuth)
             {
-                if (!_ownerAuth) return;
-
-                OnReceivedValue(packetId, newValue);
-                SendToOthersReliably(packetId, newValue);
+                if (newValue is IDisposable disposable)
+                    disposable.Dispose();
+                return;
             }
+
+            OnReceivedValue(packetId, newValue);
+            SendToOthers(packetId, newValue);
+
+            if (newValue is IDisposable newValDisp)
+                newValDisp.Dispose();
         }
 
-        [ObserversRpc(Channel.Unreliable, excludeOwner: true)]
-        private void SendToOthers(PackedULong packetId, BitPacker newValue)
+        [ServerRpc(Channel.ReliableOrdered, requireOwnership: true, deltaPacked: true)]
+        private void SendToServerReliably(PackedULong packetId, T newValue)
         {
-            using (newValue)
+            if (!_ownerAuth)
             {
-                if (!isServer) OnReceivedValue(packetId, newValue);
+                if (newValue is IDisposable disposable)
+                    disposable.Dispose();
+                return;
             }
+
+            OnReceivedValue(packetId, newValue);
+            SendToOthersReliably(packetId, newValue);
+
+            if (newValue is IDisposable newValDisp)
+                newValDisp.Dispose();
         }
 
-        [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true)]
-        private void SendToOthersReliably(PackedULong packetId, BitPacker newValue)
+        [ObserversRpc(Channel.Unreliable, excludeOwner: true, deltaPacked: true)]
+        private void SendToOthers(PackedULong packetId, T newValue)
         {
-            using (newValue)
-            {
-                if (!isHost) OnReceivedValue(packetId, newValue);
-            }
+            if (!isServer) OnReceivedValue(packetId, newValue);
+            if (newValue is IDisposable disposable)
+                disposable.Dispose();
         }
 
-        [ObserversRpc(Channel.Unreliable)]
-        private void SendToAll(PackedULong packetId, BitPacker newValue)
+        [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true, deltaPacked: true)]
+        private void SendToOthersReliably(PackedULong packetId, T newValue)
         {
-            using (newValue)
-            {
-                if (!isHost) OnReceivedValue(packetId, newValue);
-            }
+            if (!isHost) OnReceivedValue(packetId, newValue);
+            if (newValue is IDisposable disposable)
+                disposable.Dispose();
         }
 
-        [ObserversRpc(Channel.ReliableOrdered)]
-        private void SendToAllReliably(PackedULong packetId, BitPacker newValue)
+        [ObserversRpc(Channel.Unreliable, deltaPacked: true)]
+        private void SendToAll(PackedULong packetId, T newValue)
         {
-            using (newValue)
-            {
-                if (!isHost) OnReceivedValue(packetId, newValue);
-            }
+            if (!isHost) OnReceivedValue(packetId, newValue);
+            if (newValue is IDisposable disposable)
+                disposable.Dispose();
         }
 
-        private void OnReceivedValue(PackedULong packetId, BitPacker newValue)
+        [ObserversRpc(Channel.ReliableOrdered, deltaPacked: true)]
+        private void SendToAllReliably(PackedULong packetId, T newValue)
+        {
+            if (!isHost) OnReceivedValue(packetId, newValue);
+            if (newValue is IDisposable disposable)
+                disposable.Dispose();
+        }
+
+        private void OnReceivedValue(PackedULong packetId, T newValue)
         {
             bool isControlling = parent.IsController(_ownerAuth);
 
@@ -284,22 +289,10 @@ namespace PurrNet
             }
 
             _id = packetId;
+            var oldValue = _value;
 
-            Packer<T>.Read(newValue, ref _cache);
-            int readPos = newValue.positionInBits;
-            newValue.SetBitPosition(0);
-
-            bool bothNull = _value == null && _cache == null;
-            bool bothEqual = _value != null && _value.Equals(_cache);
-
-            if (bothNull || bothEqual)
-            {
-                newValue.SetBitPosition(readPos);
+            if (Packer.Transform(ref _value, newValue))
                 return;
-            }
-
-            var oldValue = value;
-            Packer<T>.Read(newValue, ref _value);
 
             TriggerEvents(oldValue);
         }
