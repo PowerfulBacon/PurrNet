@@ -11,7 +11,8 @@ namespace PurrNet
         public PlayerID senderId;
         public PlayerID? targetId;
         public PackedUInt rpcId;
-        public ByteData data;
+
+        [DontDeltaCompress] public ByteData data;
 
         public ByteData rpcData
         {
