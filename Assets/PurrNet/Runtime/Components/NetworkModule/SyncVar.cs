@@ -179,7 +179,7 @@ namespace PurrNet
             _ownerAuth = ownerAuth;
         }
 
-        [TargetRpc(deltaPacked: true), UsedImplicitly]
+        [TargetRpc, UsedImplicitly]
         private void SendLatestState(PlayerID player, PackedULong packetId, T newValue)
         {
             if (isServer)
@@ -208,7 +208,7 @@ namespace PurrNet
                 disposable.Dispose();
         }
 
-        [ServerRpc(Channel.Unreliable, requireOwnership: true, deltaPacked: true)]
+        [ServerRpc(Channel.Unreliable, requireOwnership: true)]
         private void SendToServer(PackedULong packetId, T newValue)
         {
             if (!_ownerAuth)
@@ -225,7 +225,7 @@ namespace PurrNet
                 newValDisp.Dispose();
         }
 
-        [ServerRpc(Channel.ReliableOrdered, requireOwnership: true, deltaPacked: true)]
+        [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
         private void SendToServerReliably(PackedULong packetId, T newValue)
         {
             if (!_ownerAuth)
@@ -242,7 +242,7 @@ namespace PurrNet
                 newValDisp.Dispose();
         }
 
-        [ObserversRpc(Channel.Unreliable, excludeOwner: true, deltaPacked: true)]
+        [ObserversRpc(Channel.Unreliable, excludeOwner: true)]
         private void SendToOthers(PackedULong packetId, T newValue)
         {
             if (!isServer) OnReceivedValue(packetId, newValue);
@@ -250,7 +250,7 @@ namespace PurrNet
                 disposable.Dispose();
         }
 
-        [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true, deltaPacked: true)]
+        [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true)]
         private void SendToOthersReliably(PackedULong packetId, T newValue)
         {
             if (!isHost) OnReceivedValue(packetId, newValue);
@@ -258,7 +258,7 @@ namespace PurrNet
                 disposable.Dispose();
         }
 
-        [ObserversRpc(Channel.Unreliable, deltaPacked: true)]
+        [ObserversRpc(Channel.Unreliable)]
         private void SendToAll(PackedULong packetId, T newValue)
         {
             if (!isHost) OnReceivedValue(packetId, newValue);
@@ -266,7 +266,7 @@ namespace PurrNet
                 disposable.Dispose();
         }
 
-        [ObserversRpc(Channel.ReliableOrdered, deltaPacked: true)]
+        [ObserversRpc(Channel.ReliableOrdered)]
         private void SendToAllReliably(PackedULong packetId, T newValue)
         {
             if (!isHost) OnReceivedValue(packetId, newValue);
