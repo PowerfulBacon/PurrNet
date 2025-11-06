@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using PurrNet.Modules;
 using PurrNet.Packing;
 
 namespace PurrNet.Pooling
@@ -173,6 +174,14 @@ namespace PurrNet.Pooling
         private bool _isAllocated;
 
         public bool isDisposed => !_isAllocated;
+
+        [UsedByIL]
+        public T GetAt(int index)
+        {
+            if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
+            NotifyUsage();
+            return list[index];
+        }
 
         public int IndexOf(T item)
         {

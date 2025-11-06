@@ -292,6 +292,12 @@ namespace PurrNet
         }
 
         [UsedByIL]
+        public DisposableList<PlayerID> GetObservers(RPCSignature signature)
+        {
+            return parent.GetObservers(signature);
+        }
+
+        [UsedByIL]
         protected object CallGeneric(string methodName, GenericRPCHeader rpcHeader)
         {
             var key = new NetworkIdentity.InstanceGenericKey(methodName, GetType(), rpcHeader.types);
@@ -311,7 +317,25 @@ namespace PurrNet
                 return null;
             }
 
-            return gmethod.Invoke(this, rpcHeader.values);
+            try
+            {
+                var res = gmethod.Invoke(this, rpcHeader.values);
+                PreciseArrayPool<Type>.Return(rpcHeader.types);
+                PreciseArrayPool<object>.Return(rpcHeader.values);
+                return res;
+            }
+            catch (TargetInvocationException e)
+            {
+                var actualException = e.InnerException;
+
+                if (actualException != null)
+                {
+                    PurrLogger.LogException(actualException);
+                    throw BypassLoggingException.instance;
+                }
+
+                throw;
+            }
         }
 
         [UsedByIL]
