@@ -251,13 +251,16 @@ namespace PurrNet.Packing
                 return true;
             }
 
+            if (target is IEquatable<T> comparable && comparable.Equals(whatToCopy))
+                return false;
+
             using var packerA = BitPackerPool.Get();
             using var packerB = BitPackerPool.Get();
 
             Packer<T>.Write(packerA, target);
             Packer<T>.Write(packerB, whatToCopy);
 
-            if (AreEqual(packerA, packerB))
+            if (ArePackersEqual(packerA, packerB))
                 return false;
 
             packerB.ResetPositionAndMode(true);
@@ -265,7 +268,8 @@ namespace PurrNet.Packing
             return true;
         }
 
-        public static bool AreEqual(BitPacker packerA, BitPacker packerB)
+        [UsedByIL]
+        public static bool ArePackersEqual(BitPacker packerA, BitPacker packerB)
         {
             if (packerA.positionInBits != packerB.positionInBits)
                 return false;
@@ -313,6 +317,9 @@ namespace PurrNet.Packing
         {
             if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                 return EqualityComparer<T>.Default.Equals(a, b);
+
+            if (a is IEquatable<T> comparable)
+                return comparable.Equals(b);
 
             using var packerA = BitPackerPool.Get();
             using var packerB = BitPackerPool.Get();
