@@ -1,53 +1,119 @@
+using System.Collections.Generic;
 using PurrNet;
 using UnityEngine;
 
 public class Test : NetworkIdentity
 {
-    private ValidatedSyncVar<int> _testVar = new(100);
+    [SerializeField, PurrScene] private string _sceneOne, _sceneTwo; 
     
-    private void OnEnable()
-    {
-        _testVar.serverValidation += ServerValidator;
-        _testVar.onValidationFail += OnValidationFail;
+    private Queue<PlayerID> _bots = new();
 
-        _testVar.onChangedWithOld += OnChanged;
+    private bool _networkManagerLogs = false;
+
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
     }
 
-    private void OnDisable()
+    protected override void OnSpawned(bool asServer)
     {
-        _testVar.serverValidation -= ServerValidator;
-        _testVar.onValidationFail -= OnValidationFail;
+        if (!asServer)
+            return;
         
-        _testVar.onChangedWithOld -= OnChanged;
+        networkManager.onPlayerJoinedScene += OnPlayerJoinedScene;
+        networkManager.onPlayerLoadedScene += OnPlayerLoadedScene;
+        networkManager.onPlayerJoined += OnPlayerJoined;
+        networkManager.onPlayerLeft += OnPlayerLeft;
+        networkManager.onPlayerLeftScene += OnPlayerLeftScene;
+        networkManager.onPlayerUnloadedScene += OnPlayerUnloadedScene;
     }
 
-    private bool ServerValidator(int oldValue, int newValue)
+    protected override void OnDespawned()
     {
-        if (oldValue > newValue)
-            return false;
+        networkManager.onPlayerJoinedScene -= OnPlayerJoinedScene;
+        networkManager.onPlayerLoadedScene -= OnPlayerLoadedScene;
+        networkManager.onPlayerJoined -= OnPlayerJoined;
+        networkManager.onPlayerLeft -= OnPlayerLeft;
+        networkManager.onPlayerLeftScene -= OnPlayerLeftScene;
+        networkManager.onPlayerUnloadedScene -= OnPlayerUnloadedScene;
+    }
+
+    private void OnPlayerJoinedScene(PlayerID player, SceneID scene, bool asServer)
+    {
+        if (!_networkManagerLogs)
+            return;
         
-        return true;
+        if (player.id == 1)
+            return;
+
+        Debug.Log($"Joined scene: {player} | {scene} | {asServer}");
     }
 
-    private void OnValidationFail(int failedValue, int authoritativeValue)
+    private void OnPlayerLoadedScene(PlayerID player, SceneID scene, bool asServer)
     {
-        Debug.Log($"Validation failed on {failedValue}. Returning to {authoritativeValue}");
+        if (!_networkManagerLogs)
+            return;
+
+        if (player.id == 1)
+            return;
+
+        Debug.Log($"Loaded scene: {player} | {scene} | {asServer}");
     }
 
-    private void OnChanged(int oldValue, int newValue, bool validated)
+    private void OnPlayerJoined(PlayerID player, bool isReconnect, bool asServer)
     {
-        Debug.Log($"Value changed: {oldValue} -> {newValue} | Validated: {validated}");
+        if (!_networkManagerLogs)
+            return;
+
+        if (player.id == 1)
+            return;
+
+        Debug.Log($"Joined: {player} | {asServer}");
     }
-    
+
+    private void OnPlayerUnloadedScene(PlayerID player, SceneID scene, bool asServer)
+    {
+        if (!_networkManagerLogs)
+            return;
+
+        if (player.id == 1)
+            return;
+        
+        Debug.Log($"Unloaded scene: {player} | {scene} | {asServer}");
+    }
+
+    private void OnPlayerLeftScene(PlayerID player, SceneID scene, bool asServer)
+    {
+        if (!_networkManagerLogs)
+            return;
+
+        if (player.id == 1)
+            return;
+
+        Debug.Log($"Left scene: {player} | {scene} | {asServer}");
+    }
+
+    private void OnPlayerLeft(PlayerID player, bool asServer)
+    {
+        if (!_networkManagerLogs)
+            return;
+
+        if (player.id == 1)
+            return;
+
+        Debug.Log($"Left: {player} | {asServer}");
+    }
 
     private void Update()
     {
-        if (!isOwner)
-            return;
+        if (Input.GetKeyDown(KeyCode.X))
+            _bots.Enqueue(networkManager.playerModule.CreateBot());
+        if (Input.GetKeyDown(KeyCode.C)) 
+            networkManager.playerModule.KickPlayer(_bots.Dequeue());
 
         if (Input.GetKeyDown(KeyCode.Alpha1))
-            _testVar.value += 1;
+            networkManager.sceneModule.LoadSceneAsync(_sceneOne);
         if (Input.GetKeyDown(KeyCode.Alpha2))
-            _testVar.value -= 1;
+            networkManager.sceneModule.LoadSceneAsync(_sceneTwo);
     }
 }

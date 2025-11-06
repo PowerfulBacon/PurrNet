@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using PurrNet.Logging;
+using UnityEngine;
 
 namespace PurrNet.Modules
 {
@@ -172,6 +173,36 @@ namespace PurrNet.Modules
             onPlayerLoadedScene?.Invoke(player, data.scene, asServer);
             onPostPlayerLoadedScene?.Invoke(player, data.scene, asServer);
         }
+        
+        /// <summary>
+        /// Notify bot has loaded in a scene (matches RemoteClientLoadedScene behavior)
+        /// </summary>
+        private void NotifyBotSceneLoaded(PlayerID bot, SceneID scene)
+        {
+            if (!_asServer)
+            {
+                PurrLogger.LogError("NotifyBotSceneLoaded can only be called on server");
+                return;
+            }
+
+            if (!_scenePlayers.TryGetValue(scene, out var playersInScene))
+                return;
+
+            if (_sceneLoadedPlayers.TryGetValue(scene, out var loadedPlayers))
+            {
+                if (!loadedPlayers.Contains(bot))
+                    loadedPlayers.Add(bot);
+            }
+            else
+            {
+                PurrLogger.LogError($"SceneID '{scene}' not found in scene loaded players dictionary");
+                return;
+            }
+
+            onPrePlayerLoadedScene?.Invoke(bot, scene, _asServer);
+            onPlayerLoadedScene?.Invoke(bot, scene, _asServer);
+            onPostPlayerLoadedScene?.Invoke(bot, scene, _asServer);
+        }
 
         /// <summary>
         /// Get all players that are both part of the scene and have finished loading the scene
@@ -221,6 +252,9 @@ namespace PurrNet.Modules
                     playersInScene.Add(player);
 
                 onPlayerJoinedScene?.Invoke(player, scene, asServer);
+                
+                if(player.isBot)
+                    NotifyBotSceneLoaded(player, scene);
             }
         }
 
@@ -309,6 +343,8 @@ namespace PurrNet.Modules
             {
                 playersInScene.Add(player);
                 onPlayerJoinedScene?.Invoke(player, scene, _asServer);
+                if(player.isBot)
+                    NotifyBotSceneLoaded(player, scene);
             }
         }
 
