@@ -452,9 +452,8 @@ namespace PurrNet
 
                 case RPCType.ObserversRPC:
                 {
-                    var rawData = BroadcastModule.GetImmediateData(data);
-                    using var players = DisposableList<PlayerID>.Create(observers.Count);
                     var cachedOwner = owner;
+                    var broadcaster = networkManager.GetConnectionBroadcaster(false);
 
                     for (var i = 0; i < observers.Count; ++i)
                     {
@@ -466,17 +465,23 @@ namespace PurrNet
                         if (ignoreSender || ignoreOwner)
                             continue;
 
-                        players.Add(observer);
+                        if (networkManager.playerModule.TryGetConnection(data.targetPlayerId, out var connection))
+                        {
+                            var rawData = broadcaster.GetImmediateData(connection, data, signature.channel);
+                            SendToTarget(data.targetPlayerId, rawData, signature.channel);
+                        }
                     }
-
-                    Send(players, rawData, signature.channel);
                     AppendToBufferedRPCs(signature, data, module);
                     return !isClient;
                 }
                 case RPCType.TargetRPC:
                 {
-                    var rawData = BroadcastModule.GetImmediateData(data);
-                    SendToTarget(data.targetPlayerId, rawData, signature.channel);
+                    if (networkManager.playerModule.TryGetConnection(data.targetPlayerId, out var connection))
+                    {
+                        var rawData = networkManager.GetConnectionBroadcaster(false)
+                            .GetImmediateData(connection, data, signature.channel);
+                        SendToTarget(data.targetPlayerId, rawData, signature.channel);
+                    }
                     AppendToBufferedRPCs(signature, data, module);
                     return false;
                 }

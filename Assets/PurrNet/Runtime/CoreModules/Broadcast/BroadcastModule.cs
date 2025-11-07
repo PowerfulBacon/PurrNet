@@ -51,12 +51,49 @@ namespace PurrNet.Modules
                 throw new InvalidOperationException(PurrLogger.FormatMessage(message));
         }
 
-        public static ByteData GetImmediateData(object data)
+        public ByteData GetImmediateData(Connection conn, IRpc data, Channel channel)
         {
+            bool isReliable = channel == Channel.ReliableOrdered;
+
             using var stream = BitPackerPool.Get();
-            Packer<bool>.Write(stream, false);
-            Packer<PackedUInt>.Write(stream, Hasher.GetStableHashU32(data.GetType()));
-            Packer.Write(stream, data);
+            var typeId = Hasher.GetStableHashU32(data.GetType());
+
+            Packer<bool>.Write(stream, isReliable);
+
+            if (isReliable)
+            {
+                _reliableTypeCache.WriteReliable(stream, conn, typeId);
+            }
+            else
+            {
+                Packer<PackedUInt>.Write(stream, typeId);
+            }
+
+            switch (isReliable)
+            {
+                case true when data is RPCPacket packet:
+                    _reliableRpcCache.WriteReliable(stream, conn, packet);
+                    break;
+                case false when data is RPCPacket packet:
+                    _unreliableRpcCache.WriteReliable(stream, conn, packet);
+                    break;
+                case true when data is ChildRPCPacket child:
+                    _reliableChildRpcCache.WriteReliable(stream, conn, child);
+                    break;
+                case false when data is ChildRPCPacket child:
+                    _unreliableChildRpcCache.WriteReliable(stream, conn, child);
+                    break;
+                case true when data is StaticRPCPacket staticRpc:
+                    _reliableStaticRpcCache.WriteReliable(stream, conn, staticRpc);
+                    break;
+                case false when data is StaticRPCPacket staticRpc:
+                    _unreliableStaticRpcCache.WriteReliable(stream, conn, staticRpc);
+                    break;
+                default:
+                    Packer.Write(stream, data);
+                    break;
+            }
+
             return stream.ToByteData();
         }
 

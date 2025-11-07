@@ -325,8 +325,8 @@ namespace PurrNet.Modules
 
                 case RPCType.ObserversRPC:
                 {
-                    var rawData = BroadcastModule.GetImmediateData(data);
-                    using var players = DisposableList<PlayerID>.Create(networkManager.players.Count);
+                    var broadcaster = networkManager.GetConnectionBroadcaster(false);
+                    var playersManager = networkManager.GetModule<PlayersManager>(true);
 
                     for (var i = 0; i < networkManager.players.Count; ++i)
                     {
@@ -337,20 +337,27 @@ namespace PurrNet.Modules
                         if (ignoreSender)
                             continue;
 
-                        players.Add(observer);
+                        if (networkManager.playerModule.TryGetConnection(data.targetPlayerId, out var connection))
+                        {
+                            var rawData = broadcaster.GetImmediateData(connection, data, signature.channel);
+                            playersManager.Send(observer, rawData, signature.channel);
+                        }
                     }
 
-                    var playersManager = networkManager.GetModule<PlayersManager>(true);
-                    playersManager.Send(players, rawData, signature.channel);
                     if (data is StaticRPCPacket staticRpc)
                         module.AppendToBufferedRPCs(staticRpc, signature);
                     return !networkManager.isClient;
                 }
                 case RPCType.TargetRPC:
                 {
-                    var rawData = BroadcastModule.GetImmediateData(data);
-                    var playersManager = networkManager.GetModule<PlayersManager>(true);
-                    playersManager.Send(data.targetPlayerId, rawData, signature.channel);
+                    if (networkManager.playerModule.TryGetConnection(data.targetPlayerId, out var connection))
+                    {
+                        var rawData = networkManager.GetConnectionBroadcaster(false)
+                            .GetImmediateData(connection, data, signature.channel);
+                        var playersManager = networkManager.GetModule<PlayersManager>(true);
+                        playersManager.Send(data.targetPlayerId, rawData, signature.channel);
+                    }
+
                     if (data is StaticRPCPacket staticRpc)
                         module.AppendToBufferedRPCs(staticRpc, signature);
                     return false;

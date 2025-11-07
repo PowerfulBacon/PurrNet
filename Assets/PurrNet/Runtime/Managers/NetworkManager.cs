@@ -798,6 +798,13 @@ namespace PurrNet
         /// </summary>
         public PlayersBroadcaster broadcastModule => _serverPlayersBroadcast ?? _clientPlayersBroadcast;
 
+        public BroadcastModule connectionBroadcaster => _serverBroadcast ?? _clientBroadcast;
+
+        public BroadcastModule GetConnectionBroadcaster(bool asServer)
+        {
+            return asServer ? _serverBroadcast : _clientBroadcast;
+        }
+
         /// <summary>
         /// The scene players module of the network manager.
         /// Defaults to the server scene players module if the server is active.
@@ -823,6 +830,9 @@ namespace PurrNet
 
         private TickManager _clientTickManager;
         private TickManager _serverTickManager;
+
+        private BroadcastModule _clientBroadcast;
+        private BroadcastModule _serverBroadcast;
 
         private PlayersBroadcaster _clientPlayersBroadcast;
         private PlayersBroadcaster _serverPlayersBroadcast;
@@ -969,6 +979,11 @@ namespace PurrNet
             }
 
             var connBroadcaster = new BroadcastModule(this, asServer);
+
+            if (asServer)
+                _serverBroadcast = connBroadcaster;
+            else _clientBroadcast = connBroadcaster;
+
             var networkCookies = new CookiesModule(_cookieScope, asServer);
             var authModule = new AuthModule(this, connBroadcaster, networkCookies);
             var playersManager = new PlayersManager(this, authModule, connBroadcaster);
