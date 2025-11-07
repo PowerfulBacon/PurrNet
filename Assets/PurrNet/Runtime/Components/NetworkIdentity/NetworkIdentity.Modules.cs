@@ -43,7 +43,7 @@ namespace PurrNet
             _externalModulesView.Add(module);
         }
 
-        public bool TryGetModule(byte moduleId, out NetworkModule module)
+        public bool TryGetModule(int moduleId, out NetworkModule module)
         {
             if (moduleId >= _modules.Count)
             {

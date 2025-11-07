@@ -7,14 +7,14 @@ namespace PurrNet.Modules
     internal readonly struct RPCKey : IEquatable<RPCKey>
     {
         private readonly IReflect type;
-        private readonly PackedUInt rpcId;
+        private readonly Size rpcId;
 
         public override int GetHashCode()
         {
             return type.GetHashCode() ^ rpcId.GetHashCode();
         }
 
-        public RPCKey(IReflect type, PackedUInt rpcId)
+        public RPCKey(IReflect type, Size rpcId)
         {
             this.type = type;
             this.rpcId = rpcId;

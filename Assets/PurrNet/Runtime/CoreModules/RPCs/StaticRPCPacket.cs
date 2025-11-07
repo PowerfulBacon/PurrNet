@@ -6,7 +6,7 @@ namespace PurrNet
     public struct StaticRPCPacket : IPackedAuto, IRpc
     {
         public PackedUInt typeHash;
-        public PackedUInt rpcId;
+        public Size rpcId;
         public PlayerID senderId;
         public PlayerID? targetId;
         [DontDeltaCompress] public ByteData data;

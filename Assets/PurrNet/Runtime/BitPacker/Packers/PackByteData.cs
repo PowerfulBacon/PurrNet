@@ -16,8 +16,6 @@ namespace PurrNet.Packing
         [UsedByIL]
         public static void Read(this BitPacker packer, ref ByteData data)
         {
-            // TODO: use BitData instead of ByteData and map BitData directly to BitPacker underlaying buffer
-
             Size length = default;
             Packer<Size>.Read(packer, ref length);
 

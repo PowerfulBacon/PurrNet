@@ -10,7 +10,7 @@ namespace PurrNet
         public SceneID sceneId;
         public PlayerID senderId;
         public PlayerID? targetId;
-        public PackedUInt rpcId;
+        public Size rpcId;
 
         [DontDeltaCompress] public ByteData data;
 
@@ -34,8 +34,8 @@ namespace PurrNet
         public readonly PackedUInt typeHash;
         public readonly SceneID sceneId;
         public readonly NetworkID networkId;
-        private readonly PackedUInt rpcId;
-        private readonly PackedUInt childId;
+        private readonly Size rpcId;
+        private readonly Size childId;
 
         public RPC_ID(RPCPacket packet)
         {

@@ -339,7 +339,7 @@ namespace PurrNet
         }
 
         [UsedByIL]
-        protected ChildRPCPacket BuildRPC(byte rpcId, BitPacker data)
+        protected ChildRPCPacket BuildRPC(int rpcId, BitPacker data)
         {
             if (!parent)
                 throw new InvalidOperationException(
@@ -349,8 +349,8 @@ namespace PurrNet
             {
                 networkId = parent.id!.Value,
                 sceneId = parent.sceneId,
-                childId = index,
-                rpcId = rpcId,
+                childId = (int)index,
+                rpcId = (int)rpcId,
                 data = data.ToByteData(),
                 senderId = RPCModule.GetLocalPlayer(networkManager)
             };

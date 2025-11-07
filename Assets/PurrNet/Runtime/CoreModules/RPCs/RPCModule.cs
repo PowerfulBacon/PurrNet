@@ -633,7 +633,7 @@ namespace PurrNet.Modules
         }
 
         [UsedByIL]
-        public static RPCPacket BuildRawRPC(NetworkID? networkId, SceneID id, byte rpcId, BitPacker data)
+        public static RPCPacket BuildRawRPC(NetworkID? networkId, SceneID id, int rpcId, BitPacker data)
         {
             var rpc = new RPCPacket
             {
@@ -667,7 +667,7 @@ namespace PurrNet.Modules
 
         delegate void StaticRPCHandler(BitPacker stream, StaticRPCPacket packet, RPCInfo info, bool asServer);
 
-        static StaticRPCHandler GetStaticRPCHandler(Type type, PackedUInt rpcId)
+        static StaticRPCHandler GetStaticRPCHandler(Type type, Size rpcId)
         {
             var rpcKey = new RPCKey(type, rpcId);
 

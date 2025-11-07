@@ -9,8 +9,8 @@ namespace PurrNet
         public SceneID sceneId;
         public PlayerID senderId;
         public PlayerID? targetId;
-        public byte rpcId;
-        public byte childId;
+        public Size rpcId;
+        public Size childId;
         [DontDeltaCompress] public ByteData data;
 
         public ByteData rpcData

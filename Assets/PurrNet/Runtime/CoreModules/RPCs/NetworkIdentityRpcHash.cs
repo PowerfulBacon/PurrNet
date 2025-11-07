@@ -8,8 +8,8 @@ namespace PurrNet.Modules
         private readonly NetworkID id;
         private readonly SceneID scene;
         private readonly PackedUInt typeId;
-        private readonly PackedUInt childId;
-        private readonly PackedUInt rpcId;
+        private readonly Size childId;
+        private readonly Size rpcId;
         private readonly ulong offset;
 
         public NetworkIdentityRpcHash(RPCPacket context, ulong offset)
