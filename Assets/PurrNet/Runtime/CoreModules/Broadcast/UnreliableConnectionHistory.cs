@@ -15,11 +15,12 @@ namespace PurrNet.Modules
 
     public class UnreliableConnectionHistory<T>
     {
-        // Each entry keeps its data and the time it was written
+        // Entry with timestamp
         private readonly struct Entry
         {
             public readonly T value;
             public readonly float time;
+
             public Entry(T v)
             {
                 value = v;
@@ -32,98 +33,125 @@ namespace PurrNet.Modules
         private readonly Dictionary<Connection, uint> _lastSeqId = new();
         private readonly List<UnreliableAck> _pendingAcks = new();
 
+        // Tunables
         private const float ExpireAfter = 10f; // seconds
         private const int KeepMin = 4;
+        private const float CleanupInterval = 2f; // run cleanup every 2s max
+
+        private float _lastCleanupTime;
 
         private uint NextSeqId(Connection conn)
         {
             if (!_lastSeqId.TryGetValue(conn, out var seq))
                 seq = 0;
+
             seq++;
             _lastSeqId[conn] = seq;
             return seq;
         }
 
-        private static void CleanupOldEntries(Dictionary<uint, Entry> history)
+        private static void TryDispose(in Entry e)
+        {
+            if (e.value is IDisposable d)
+                d.Dispose();
+        }
+
+        private void MaybeCleanup(Dictionary<uint, Entry> history)
         {
             float now = Time.realtimeSinceStartup;
-            using var toRemove = DisposableList<uint>.Create(history.Count);
+            if (now - _lastCleanupTime < CleanupInterval)
+                return;
 
+            _lastCleanupTime = now;
+
+            using var toRemove = DisposableList<uint>.Create(history.Count);
             foreach (var kvp in history)
             {
-                if (history.Count - toRemove.Count > KeepMin &&
-                    now - kvp.Value.time > ExpireAfter)
+                if (history.Count - toRemove.Count <= KeepMin)
+                    break;
+
+                if (now - kvp.Value.time > ExpireAfter)
                     toRemove.Add(kvp.Key);
             }
 
-            foreach (var k in toRemove)
-                if (history.Remove(k, out var e) && e.value is IDisposable d)
-                    d.Dispose();
+            foreach (var key in toRemove)
+            {
+                if (history.Remove(key, out var e))
+                    TryDispose(e);
+            }
         }
 
+        // Write new version of data
         public void WriteReliable(BitPacker stream, Connection conn, T newValue)
         {
             if (!_history.TryGetValue(conn, out var connHist))
                 _history[conn] = connHist = new Dictionary<uint, Entry>();
 
-            var seqId = NextSeqId(conn);
-            var acked = _lastAcked.GetValueOrDefault(conn);
-            T old = default;
+            uint seqId = NextSeqId(conn);
+            uint acked = _lastAcked.GetValueOrDefault(conn);
+            T oldValue = default;
 
-            if (acked > 0 && connHist.TryGetValue(acked, out var ackedVal))
-                old = ackedVal.value;
+            if (acked > 0 && connHist.TryGetValue(acked, out var oldEntry))
+                oldValue = oldEntry.value;
 
             Packer<PackedUInt>.Write(stream, acked);
-            Packer<PackedUInt>.Write(stream, seqId);
-            DeltaPacker<T>.Write(stream, old, newValue);
+            Packer<Size>.Write(stream, seqId - acked);
+
+            // Always send value, even when equal
+            DeltaPacker<T>.Write(stream, oldValue, newValue);
 
             connHist[seqId] = new Entry(Packer.Copy(newValue));
-            CleanupOldEntries(connHist);
+            MaybeCleanup(connHist);
         }
 
+        // Read new version of data
         public T ReadReliable(BitPacker stream, Connection conn)
         {
             if (!_history.TryGetValue(conn, out var connHist))
                 _history[conn] = connHist = new Dictionary<uint, Entry>();
 
-            uint oldId = Packer<PackedUInt>.Read(stream);
-            uint seqId = Packer<PackedUInt>.Read(stream);
+            uint oldAck = Packer<PackedUInt>.Read(stream);
+            uint seqDelta = Packer<Size>.Read(stream);
+            uint seqId = oldAck + seqDelta;
 
-            T old = default;
-            if (connHist.TryGetValue(oldId, out var entry))
-                old = entry.value;
+            T oldValue = default;
+            if (connHist.TryGetValue(oldAck, out var oldEntry))
+                oldValue = oldEntry.value;
 
             T newValue = default;
-            DeltaPacker<T>.Read(stream, old, ref newValue);
+            DeltaPacker<T>.Read(stream, oldValue, ref newValue);
 
             connHist[seqId] = new Entry(Packer.Copy(newValue));
             RegisterAck(conn, seqId);
-            CleanupOldEntries(connHist);
+            MaybeCleanup(connHist);
             return newValue;
         }
 
+        // Receive ack packet
         public void ReceiveAcks(Connection conn, BitPacker stream)
         {
             if (!Packer<bool>.Read(stream))
                 return;
 
-            var ackSeqId = Packer<PackedUInt>.Read(stream).value;
+            uint ackSeqId = Packer<PackedUInt>.Read(stream).value;
             _lastAcked[conn] = ackSeqId;
         }
 
+        // Send ack packet
         public bool SendAcks(Connection conn, BitPacker stream)
         {
             for (int i = _pendingAcks.Count - 1; i >= 0; i--)
             {
-                var a = _pendingAcks[i];
-                if (a.conn == conn)
+                var pending = _pendingAcks[i];
+                if (pending.conn == conn)
                 {
                     Packer<bool>.Write(stream, true);
-                    Packer<PackedUInt>.Write(stream, a.ack);
+                    Packer<PackedUInt>.Write(stream, pending.ack);
                     _pendingAcks.RemoveAt(i);
                     return true;
                 }
             }
+
             Packer<bool>.Write(stream, false);
             return false;
         }
@@ -138,6 +166,7 @@ namespace PurrNet.Modules
                     return;
                 }
             }
+
             _pendingAcks.Add(new UnreliableAck { conn = conn, ack = seqId });
         }
 
@@ -146,9 +175,9 @@ namespace PurrNet.Modules
             if (_history.Remove(conn, out var dict))
             {
                 foreach (var e in dict.Values)
-                    if (e.value is IDisposable d)
-                        d.Dispose();
+                    TryDispose(e);
             }
+
             _lastSeqId.Remove(conn);
             _lastAcked.Remove(conn);
         }

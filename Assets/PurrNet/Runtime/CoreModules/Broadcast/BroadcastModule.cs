@@ -25,7 +25,6 @@ namespace PurrNet.Modules
         private readonly ReliableConnectionHistory<RPCPacket> _reliableRpcCache = new ();
 
 
-        private readonly UnreliableConnectionHistory<PackedUInt> _unreliableTypeCache = new ();
         private readonly UnreliableConnectionHistory<ChildRPCPacket> _unreliableChildRpcCache = new ();
         private readonly UnreliableConnectionHistory<StaticRPCPacket> _unreliableStaticRpcCache = new ();
         private readonly UnreliableConnectionHistory<RPCPacket> _unreliableRpcCache = new ();
@@ -313,8 +312,7 @@ namespace PurrNet.Modules
             for (int i = _transport.connections.Count - 1; i >= 0; i--)
             {
                 var conn = _transport.connections[i];
-                bool any = _unreliableTypeCache.SendAcks(conn, stream);
-                any = _unreliableRpcCache.SendAcks(conn, stream) || any;
+                bool any = _unreliableRpcCache.SendAcks(conn, stream);
                 any = _unreliableChildRpcCache.SendAcks(conn, stream) || any;
                 any = _unreliableStaticRpcCache.SendAcks(conn, stream) || any;
 
@@ -340,7 +338,6 @@ namespace PurrNet.Modules
         {
             using var stream = BitPackerPool.Get(data.data);
 
-            _unreliableTypeCache.ReceiveAcks(conn, stream);
             _unreliableRpcCache.ReceiveAcks(conn, stream);
             _unreliableChildRpcCache.ReceiveAcks(conn, stream);
             _unreliableStaticRpcCache.ReceiveAcks(conn, stream);
@@ -357,7 +354,6 @@ namespace PurrNet.Modules
             _reliableStaticRpcCache.Clear(conn);
             _reliableRpcCache.Clear(conn);
 
-            _unreliableTypeCache.Clear(conn);
             _unreliableChildRpcCache.Clear(conn);
             _unreliableStaticRpcCache.Clear(conn);
             _unreliableRpcCache.Clear(conn);
