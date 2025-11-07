@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using PurrNet;
-using PurrNet.Packing;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -26,14 +26,10 @@ public enum BenchmarkType
     StaticGenericReturnableDelta,
 }
 
-public struct IntContainer : IPackedSimple
+public struct IntContainer
 {
+    [UsedImplicitly]
     public int value;
-
-    public void Serialize(BitPacker packer)
-    {
-        Packer<int>.Serialize(packer, ref value);
-    }
 }
 
 public class RandomIntBenchmark : Benchmark

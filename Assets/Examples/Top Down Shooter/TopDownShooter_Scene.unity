@@ -1841,9 +1841,8 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  spawnedObject: {fileID: 0}
-  networkPrefab: {fileID: 0}
-  singleplayerPrefab: {fileID: 0}
+  _sceneOne: 
+  _sceneTwo: 
 --- !u!114 &634351201
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3331,7 +3330,7 @@ MonoBehaviour:
   _startServerFlags: 9
   _startClientFlags: 7
   _cookieScope: 1
-  _dontDestroyOnLoad: 0
+  _dontDestroyOnLoad: 1
   _transport: {fileID: 1216416902}
   _networkPrefabs: {fileID: 11400000, guid: 37af97d33ef8d9747b965053a79d21f4, type: 2}
   _networkAssets: {fileID: 11400000, guid: a519d78740d8b804e80cc0fd8da9b0cd, type: 2}
