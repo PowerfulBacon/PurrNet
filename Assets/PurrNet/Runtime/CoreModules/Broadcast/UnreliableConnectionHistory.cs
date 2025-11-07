@@ -40,6 +40,16 @@ namespace PurrNet.Modules
 
         private float _lastCleanupTime;
 
+        private uint GetSeqId(Connection conn)
+        {
+            if (!_lastSeqId.TryGetValue(conn, out var seq))
+            {
+                seq = 1;
+                _lastSeqId[conn] = seq;
+            }
+            return seq;
+        }
+
         private uint NextSeqId(Connection conn)
         {
             if (!_lastSeqId.TryGetValue(conn, out var seq))
@@ -87,18 +97,22 @@ namespace PurrNet.Modules
             if (!_history.TryGetValue(conn, out var connHist))
                 _history[conn] = connHist = new Dictionary<uint, Entry>();
 
-            uint seqId = NextSeqId(conn);
+            uint seqId = GetSeqId(conn);
             uint acked = _lastAcked.GetValueOrDefault(conn);
             T oldValue = default;
 
             if (acked > 0 && connHist.TryGetValue(acked, out var oldEntry))
+            {
                 oldValue = oldEntry.value;
+                if (!Packer.AreEqual(oldValue, newValue))
+                    seqId = NextSeqId(conn);
+            }
 
             Packer<PackedUInt>.Write(stream, acked);
-            Packer<Size>.Write(stream, seqId - acked);
+            DeltaPacker<PackedUInt>.Write(stream, acked, seqId);
 
-            // Always send value, even when equal
-            DeltaPacker<T>.Write(stream, oldValue, newValue);
+            if (acked != seqId)
+                DeltaPacker<T>.Write(stream, oldValue, newValue);
 
             connHist[seqId] = new Entry(Packer.Copy(newValue));
             MaybeCleanup(connHist);
@@ -111,15 +125,17 @@ namespace PurrNet.Modules
                 _history[conn] = connHist = new Dictionary<uint, Entry>();
 
             uint oldAck = Packer<PackedUInt>.Read(stream);
-            uint seqDelta = Packer<Size>.Read(stream);
-            uint seqId = oldAck + seqDelta;
+            uint seqId = DeltaPacker<PackedUInt>.Read(stream, oldAck);
 
             T oldValue = default;
             if (connHist.TryGetValue(oldAck, out var oldEntry))
                 oldValue = oldEntry.value;
 
             T newValue = default;
-            DeltaPacker<T>.Read(stream, oldValue, ref newValue);
+
+            if (oldAck != seqId)
+                DeltaPacker<T>.Read(stream, oldValue, ref newValue);
+            else newValue = Packer.Copy(oldValue);
 
             connHist[seqId] = new Entry(Packer.Copy(newValue));
             RegisterAck(conn, seqId);
