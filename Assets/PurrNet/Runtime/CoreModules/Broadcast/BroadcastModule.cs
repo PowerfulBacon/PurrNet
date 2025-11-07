@@ -56,6 +56,11 @@ namespace PurrNet.Modules
 
         internal event Action<Connection, uint, object> onRawDataReceived;
 
+        private readonly ReliableConnectionHistory<PackedUInt> _reliableTypeCache = new ();
+        private readonly ReliableConnectionHistory<ChildRPCPacket> _reliableChildRpcCache = new ();
+        private readonly ReliableConnectionHistory<StaticRPCPacket> _reliableStaticRpcCache = new ();
+        private readonly ReliableConnectionHistory<RPCPacket> _reliableRpcCache = new ();
+
         public BroadcastModule(INetworkManager manager, bool asServer)
         {
             _transport = manager.rawTransport;
@@ -76,19 +81,6 @@ namespace PurrNet.Modules
                 throw new InvalidOperationException(PurrLogger.FormatMessage(message));
         }
 
-        private readonly Dictionary<Connection, PackedUInt> _lastReadReliableId = new ();
-        private readonly Dictionary<Connection, PackedUInt> _lastWrittenReliableId = new ();
-
-        private PackedUInt GetLastWrittenReliableId(Connection conn)
-        {
-            return _lastWrittenReliableId.GetValueOrDefault(conn);
-        }
-
-        public PackedUInt GetLastReadReliableId(Connection conn)
-        {
-            return _lastReadReliableId.GetValueOrDefault(conn);
-        }
-
         public static ByteData GetImmediateData(object data)
         {
             using var stream = BitPackerPool.Get();
@@ -96,6 +88,22 @@ namespace PurrNet.Modules
             Packer<PackedUInt>.Write(stream, Hasher.GetStableHashU32(data.GetType()));
             Packer.Write(stream, data);
             return stream.ToByteData();
+        }
+
+        static void WriteReliable<T>(BitPacker stream, Connection conn, ReliableConnectionHistory<T> cache, T newValue)
+        {
+            var old = cache.GetLastWrittenReliableId(conn);
+            DeltaPacker<T>.Write(stream, old, newValue);
+            cache.UpdateLastWritten(conn, newValue);
+        }
+
+        static T ReadReliable<T>(BitPacker stream, Connection conn, ReliableConnectionHistory<T> cache)
+        {
+            var old = cache.GetLastReadReliableId(conn);
+            var newValue = default(T);
+            DeltaPacker<T>.Read(stream, old, ref newValue);
+            cache.UpdateLastRead(conn, newValue);
+            return newValue;
         }
 
         private ByteData GetData<T>(Connection conn, T data, Channel channel)
@@ -109,16 +117,29 @@ namespace PurrNet.Modules
 
             if (isReliable)
             {
-                var old = GetLastWrittenReliableId(conn);
-                DeltaPacker<PackedUInt>.Write(stream, old, typeId);
-                _lastWrittenReliableId[conn] = typeId;
+                WriteReliable(stream, conn, _reliableTypeCache, typeId);
             }
             else
             {
                 Packer<PackedUInt>.Write(stream, typeId);
             }
 
-            Packer<T>.Write(stream, data);
+            switch (isReliable)
+            {
+                case true when data is RPCPacket packet:
+                    WriteReliable(stream, conn, _reliableRpcCache, packet);
+                    break;
+                case true when data is ChildRPCPacket child:
+                    WriteReliable(stream, conn, _reliableChildRpcCache, child);
+                    break;
+                case true when data is StaticRPCPacket staticRpc:
+                    WriteReliable(stream, conn, _reliableStaticRpcCache, staticRpc);
+                    break;
+                default:
+                    Packer<T>.Write(stream, data);
+                    break;
+            }
+
             return stream.ToByteData();
         }
 
@@ -235,9 +256,7 @@ namespace PurrNet.Modules
 
             if (isReliable)
             {
-                var lastRead = GetLastReadReliableId(conn);
-                DeltaPacker<PackedUInt>.Read(stream, lastRead, ref typeId);
-                _lastReadReliableId[conn] = typeId;
+                typeId = ReadReliable(stream, conn, _reliableTypeCache);
             }
             else
             {
@@ -252,7 +271,23 @@ namespace PurrNet.Modules
             }
 
             object instance = null;
-            Packer.Read(stream, typeInfo, ref instance);
+
+            switch (isReliable)
+            {
+                case true when typeInfo == typeof(RPCPacket):
+                    instance = ReadReliable<RPCPacket>(stream, conn, _reliableRpcCache);
+                    break;
+                case true when typeInfo == typeof(ChildRPCPacket):
+                    instance = ReadReliable<ChildRPCPacket>(stream, conn, _reliableChildRpcCache);
+                    break;
+                case true when typeInfo == typeof(StaticRPCPacket):
+                    instance = ReadReliable<StaticRPCPacket>(stream, conn, _reliableStaticRpcCache);
+                    break;
+                default:
+                    Packer.Read(stream, typeInfo, ref instance);
+                    break;
+            }
+
             TriggerCallback(conn, typeId, instance);
 
 #if UNITY_EDITOR || PURR_RUNTIME_PROFILING
@@ -312,8 +347,10 @@ namespace PurrNet.Modules
 
         public void OnDisconnected(Connection conn, bool asServer)
         {
-            _lastReadReliableId.Remove(conn);
-            _lastWrittenReliableId.Remove(conn);
+            _reliableTypeCache.Clear(conn);
+            _reliableChildRpcCache.Clear(conn);
+            _reliableStaticRpcCache.Clear(conn);
+            _reliableRpcCache.Clear(conn);
         }
     }
 }

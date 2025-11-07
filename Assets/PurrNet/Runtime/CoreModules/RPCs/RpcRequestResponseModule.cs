@@ -30,7 +30,7 @@ namespace PurrNet.Modules
 
     public struct RpcResponse
     {
-        public uint id;
+        public PackedUInt id;
         public ByteData data;
     }
 
