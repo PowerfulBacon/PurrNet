@@ -35,20 +35,10 @@ namespace PurrNet.Modules
 
         // Tunables
         private const float ExpireAfter = 10f; // seconds
-        private const int KeepMin = 4;
+        private const int KeepMin = 32;
         private const float CleanupInterval = 2f; // run cleanup every 2s max
 
         private float _lastCleanupTime;
-
-        private uint GetSeqId(Connection conn)
-        {
-            if (!_lastSeqId.TryGetValue(conn, out var seq))
-            {
-                seq = 1;
-                _lastSeqId[conn] = seq;
-            }
-            return seq;
-        }
 
         private uint NextSeqId(Connection conn)
         {
@@ -97,22 +87,16 @@ namespace PurrNet.Modules
             if (!_history.TryGetValue(conn, out var connHist))
                 _history[conn] = connHist = new Dictionary<uint, Entry>();
 
-            uint seqId = GetSeqId(conn);
+            uint seqId = NextSeqId(conn);
             uint acked = _lastAcked.GetValueOrDefault(conn);
             T oldValue = default;
 
             if (acked > 0 && connHist.TryGetValue(acked, out var oldEntry))
-            {
                 oldValue = oldEntry.value;
-                if (!Packer.AreEqual(oldValue, newValue))
-                    seqId = NextSeqId(conn);
-            }
 
             Packer<PackedUInt>.Write(stream, acked);
             DeltaPacker<PackedUInt>.Write(stream, acked, seqId);
-
-            if (acked != seqId)
-                DeltaPacker<T>.Write(stream, oldValue, newValue);
+            DeltaPacker<T>.Write(stream, oldValue, newValue);
 
             connHist[seqId] = new Entry(Packer.Copy(newValue));
             MaybeCleanup(connHist);
@@ -133,9 +117,7 @@ namespace PurrNet.Modules
 
             T newValue = default;
 
-            if (oldAck != seqId)
-                DeltaPacker<T>.Read(stream, oldValue, ref newValue);
-            else newValue = Packer.Copy(oldValue);
+            DeltaPacker<T>.Read(stream, oldValue, ref newValue);
 
             connHist[seqId] = new Entry(Packer.Copy(newValue));
             RegisterAck(conn, seqId);
