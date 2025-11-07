@@ -1,3 +1,10 @@
+# [1.17.0-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.6...v1.17.0-beta.7) (2025-11-07)
+
+
+### Bug Fixes
+
+* forwarding data with delta packer ([135e8df](https://github.com/PurrNet/PurrNet/commit/135e8df2f9147fd2100d1edc71c87d13bb45c265))
+
 # [1.17.0-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.5...v1.17.0-beta.6) (2025-11-06)
 
 
