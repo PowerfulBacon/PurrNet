@@ -31,6 +31,10 @@ public abstract class Benchmark : NetworkIdentity, ITick
     public void StartBenchmark()
     {
         _running = true;
+        _time = 0;
+        _bytesSent = 0;
+        _bytesReceived = 0;
+        _done = false;
         OnBenchmarkStart();
     }
 

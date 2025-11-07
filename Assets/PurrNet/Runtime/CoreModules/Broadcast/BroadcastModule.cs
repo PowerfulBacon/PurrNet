@@ -8,44 +8,7 @@ using PurrNet.Utils;
 
 namespace PurrNet.Modules
 {
-    public delegate void BroadcastDelegate<in T>(Connection conn, T data, bool asServer);
-
-    public interface IBroadcastCallback
-    {
-        bool IsSame(object callback);
-
-        void TriggerCallback(Connection conn, object data, bool asServer);
-
-        void Subscribe(BroadcastModule module);
-    }
-
-    internal readonly struct BroadcastCallback<T> : IBroadcastCallback
-    {
-        readonly BroadcastDelegate<T> callback;
-
-        public BroadcastCallback(BroadcastDelegate<T> callback)
-        {
-            this.callback = callback;
-        }
-
-        public bool IsSame(object callbackToCmp)
-        {
-            return callbackToCmp is BroadcastDelegate<T> action && action == callback;
-        }
-
-        public void TriggerCallback(Connection conn, object data, bool asServer)
-        {
-            if (data is T value)
-                callback?.Invoke(conn, value, asServer);
-        }
-
-        public void Subscribe(BroadcastModule module)
-        {
-            module.Subscribe(callback);
-        }
-    }
-
-    public class BroadcastModule : INetworkModule, IDataListener, IConnectionListener
+    public class BroadcastModule : INetworkModule, IDataListener, IConnectionListener, IPostFixedUpdate
     {
         private readonly ITransport _transport;
 
@@ -61,6 +24,12 @@ namespace PurrNet.Modules
         private readonly ReliableConnectionHistory<StaticRPCPacket> _reliableStaticRpcCache = new ();
         private readonly ReliableConnectionHistory<RPCPacket> _reliableRpcCache = new ();
 
+
+        private readonly UnreliableConnectionHistory<PackedUInt> _unreliableTypeCache = new ();
+        private readonly UnreliableConnectionHistory<ChildRPCPacket> _unreliableChildRpcCache = new ();
+        private readonly UnreliableConnectionHistory<StaticRPCPacket> _unreliableStaticRpcCache = new ();
+        private readonly UnreliableConnectionHistory<RPCPacket> _unreliableRpcCache = new ();
+
         public BroadcastModule(INetworkManager manager, bool asServer)
         {
             _transport = manager.rawTransport;
@@ -69,10 +38,12 @@ namespace PurrNet.Modules
 
         public void Enable(bool asServer)
         {
+            Subscribe<BroascastAcks>(OnAcks);
         }
 
         public void Disable(bool asServer)
         {
+            Unsubscribe<BroascastAcks>(OnAcks);
         }
 
         void AssertIsServer(string message)
@@ -90,22 +61,6 @@ namespace PurrNet.Modules
             return stream.ToByteData();
         }
 
-        static void WriteReliable<T>(BitPacker stream, Connection conn, ReliableConnectionHistory<T> cache, T newValue)
-        {
-            var old = cache.GetLastWrittenReliableId(conn);
-            DeltaPacker<T>.Write(stream, old, newValue);
-            cache.UpdateLastWritten(conn, newValue);
-        }
-
-        static T ReadReliable<T>(BitPacker stream, Connection conn, ReliableConnectionHistory<T> cache)
-        {
-            var old = cache.GetLastReadReliableId(conn);
-            var newValue = default(T);
-            DeltaPacker<T>.Read(stream, old, ref newValue);
-            cache.UpdateLastRead(conn, newValue);
-            return newValue;
-        }
-
         private ByteData GetData<T>(Connection conn, T data, Channel channel)
         {
             bool isReliable = channel == Channel.ReliableOrdered;
@@ -117,7 +72,7 @@ namespace PurrNet.Modules
 
             if (isReliable)
             {
-                WriteReliable(stream, conn, _reliableTypeCache, typeId);
+                _reliableTypeCache.WriteReliable(stream, conn, typeId);
             }
             else
             {
@@ -127,13 +82,22 @@ namespace PurrNet.Modules
             switch (isReliable)
             {
                 case true when data is RPCPacket packet:
-                    WriteReliable(stream, conn, _reliableRpcCache, packet);
+                    _reliableRpcCache.WriteReliable(stream, conn, packet);
+                    break;
+                case false when data is RPCPacket packet:
+                    _unreliableRpcCache.WriteReliable(stream, conn, packet);
                     break;
                 case true when data is ChildRPCPacket child:
-                    WriteReliable(stream, conn, _reliableChildRpcCache, child);
+                    _reliableChildRpcCache.WriteReliable(stream, conn, child);
+                    break;
+                case false when data is ChildRPCPacket child:
+                    _unreliableChildRpcCache.WriteReliable(stream, conn, child);
                     break;
                 case true when data is StaticRPCPacket staticRpc:
-                    WriteReliable(stream, conn, _reliableStaticRpcCache, staticRpc);
+                    _reliableStaticRpcCache.WriteReliable(stream, conn, staticRpc);
+                    break;
+                case false when data is StaticRPCPacket staticRpc:
+                    _unreliableStaticRpcCache.WriteReliable(stream, conn, staticRpc);
                     break;
                 default:
                     Packer<T>.Write(stream, data);
@@ -250,18 +214,10 @@ namespace PurrNet.Modules
 
             using var stream = BitPackerPool.Get(data);
 
-            PackedUInt typeId = default;
-
-            bool isReliable = Packer<bool>.Read(stream);
-
-            if (isReliable)
-            {
-                typeId = ReadReliable(stream, conn, _reliableTypeCache);
-            }
-            else
-            {
-                Packer<PackedUInt>.Read(stream, ref typeId);
-            }
+            var isReliable = Packer<bool>.Read(stream);
+            var typeId = isReliable ?
+                _reliableTypeCache.ReadReliable(stream, conn) :
+                Packer<PackedUInt>.Read(stream);
 
             if (!Hasher.TryGetType(typeId, out var typeInfo))
             {
@@ -275,13 +231,22 @@ namespace PurrNet.Modules
             switch (isReliable)
             {
                 case true when typeInfo == typeof(RPCPacket):
-                    instance = ReadReliable<RPCPacket>(stream, conn, _reliableRpcCache);
+                    instance = _reliableRpcCache.ReadReliable(stream, conn);
+                    break;
+                case false when typeInfo == typeof(RPCPacket):
+                    instance = _unreliableRpcCache.ReadReliable(stream, conn);
                     break;
                 case true when typeInfo == typeof(ChildRPCPacket):
-                    instance = ReadReliable<ChildRPCPacket>(stream, conn, _reliableChildRpcCache);
+                    instance = _reliableChildRpcCache.ReadReliable(stream, conn);
+                    break;
+                case false when typeInfo == typeof(ChildRPCPacket):
+                    instance = _unreliableChildRpcCache.ReadReliable(stream, conn);
                     break;
                 case true when typeInfo == typeof(StaticRPCPacket):
-                    instance = ReadReliable<StaticRPCPacket>(stream, conn, _reliableStaticRpcCache);
+                    instance = _reliableStaticRpcCache.ReadReliable(stream, conn);
+                    break;
+                case false when typeInfo == typeof(StaticRPCPacket):
+                    instance = _unreliableStaticRpcCache.ReadReliable(stream, conn);
                     break;
                 default:
                     Packer.Read(stream, typeInfo, ref instance);
@@ -341,6 +306,46 @@ namespace PurrNet.Modules
             onRawDataReceived?.Invoke(conn, hash, instance);
         }
 
+        public void PostFixedUpdate()
+        {
+            using var stream = BitPackerPool.Get();
+
+            for (int i = _transport.connections.Count - 1; i >= 0; i--)
+            {
+                var conn = _transport.connections[i];
+                bool any = _unreliableTypeCache.SendAcks(conn, stream);
+                any = _unreliableRpcCache.SendAcks(conn, stream) || any;
+                any = _unreliableChildRpcCache.SendAcks(conn, stream) || any;
+                any = _unreliableStaticRpcCache.SendAcks(conn, stream) || any;
+
+                if (!any)
+                {
+                    stream.ResetPosition();
+                    continue;
+                }
+
+                var message = new BroascastAcks
+                {
+                    data = stream.ToByteData()
+                };
+
+                if (_asServer)
+                    Send(conn, message, Channel.Unreliable);
+                else SendToServer(message, Channel.Unreliable);
+                stream.ResetPosition();
+            }
+        }
+
+        private void OnAcks(Connection conn, BroascastAcks data, bool asServer)
+        {
+            using var stream = BitPackerPool.Get(data.data);
+
+            _unreliableTypeCache.ReceiveAcks(conn, stream);
+            _unreliableRpcCache.ReceiveAcks(conn, stream);
+            _unreliableChildRpcCache.ReceiveAcks(conn, stream);
+            _unreliableStaticRpcCache.ReceiveAcks(conn, stream);
+        }
+
         public void OnConnected(Connection conn, bool asServer)
         {
         }
@@ -351,6 +356,11 @@ namespace PurrNet.Modules
             _reliableChildRpcCache.Clear(conn);
             _reliableStaticRpcCache.Clear(conn);
             _reliableRpcCache.Clear(conn);
+
+            _unreliableTypeCache.Clear(conn);
+            _unreliableChildRpcCache.Clear(conn);
+            _unreliableStaticRpcCache.Clear(conn);
+            _unreliableRpcCache.Clear(conn);
         }
     }
 }

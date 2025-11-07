@@ -10,28 +10,44 @@ namespace PurrNet.Modules
         private readonly Dictionary<Connection, T> _lastRead = new ();
         private readonly Dictionary<Connection, T> _lastWritten = new ();
 
-        public T GetLastWrittenReliableId(Connection conn)
+        private T GetLastWrittenReliableId(Connection conn)
         {
             return _lastWritten.GetValueOrDefault(conn);
         }
 
-        public T GetLastReadReliableId(Connection conn)
+        private T GetLastReadReliableId(Connection conn)
         {
             return _lastRead.GetValueOrDefault(conn);
         }
 
-        public void UpdateLastRead(Connection conn, T data)
+        private void UpdateLastRead(Connection conn, T data)
         {
             if (_lastRead.TryGetValue(conn, out var old) && old is IDisposable disposable)
                 disposable.Dispose();
             _lastRead[conn] = Packer.Copy(data);
         }
 
-        public void UpdateLastWritten(Connection conn, T data)
+        private void UpdateLastWritten(Connection conn, T data)
         {
             if (_lastWritten.TryGetValue(conn, out var old) && old is IDisposable disposable)
                 disposable.Dispose();
             _lastWritten[conn] = Packer.Copy(data);
+        }
+
+        public void WriteReliable(BitPacker stream, Connection conn, T newValue)
+        {
+            var old = GetLastWrittenReliableId(conn);
+            DeltaPacker<T>.Write(stream, old, newValue);
+            UpdateLastWritten(conn, newValue);
+        }
+
+        public T ReadReliable(BitPacker stream, Connection conn)
+        {
+            var old = GetLastReadReliableId(conn);
+            var newValue = default(T);
+            DeltaPacker<T>.Read(stream, old, ref newValue);
+            UpdateLastRead(conn, newValue);
+            return newValue;
         }
 
         public void Clear(Connection conn)

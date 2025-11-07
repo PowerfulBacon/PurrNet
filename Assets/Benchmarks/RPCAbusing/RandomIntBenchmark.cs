@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using PurrNet;
+using PurrNet.Transports;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -163,13 +164,13 @@ public class RandomIntBenchmark : Benchmark
         return Task.FromResult(value);
     }
 
-    [ObserversRpc(deltaPacked: false)]
+    [ObserversRpc(deltaPacked: false, channel: Channel.Unreliable)]
     void Normal(IntContainer someRandomValue)
     {
         ++_received;
     }
 
-    [ObserversRpc(deltaPacked: true)]
+    [ObserversRpc(deltaPacked: true, channel: Channel.Unreliable)]
     void NormalDelta(IntContainer someRandomValue)
     {
         ++_received;
