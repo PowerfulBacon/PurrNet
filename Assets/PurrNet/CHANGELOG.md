@@ -1,3 +1,10 @@
+# [1.17.0-beta.9](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.8...v1.17.0-beta.9) (2025-11-10)
+
+
+### Bug Fixes
+
+* allow to manually clear all subscriptions from network manaher using `ResetInternalState` ([f24f0a8](https://github.com/PurrNet/PurrNet/commit/f24f0a897d64b19a7d7108f6634b87ed2d844e3e))
+
 # [1.17.0-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.7...v1.17.0-beta.8) (2025-11-10)
 
 
