@@ -1,5 +1,4 @@
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -453,7 +452,6 @@ namespace PurrNet
                 case RPCType.ObserversRPC:
                 {
                     var cachedOwner = owner;
-                    var broadcaster = networkManager.GetConnectionBroadcaster(false);
 
                     for (var i = 0; i < observers.Count; ++i)
                     {
@@ -465,23 +463,16 @@ namespace PurrNet
                         if (ignoreSender || ignoreOwner)
                             continue;
 
-                        if (networkManager.playerModule.TryGetConnection(data.targetPlayerId, out var connection))
-                        {
-                            var rawData = broadcaster.GetImmediateData(connection, data, signature.channel);
-                            SendToTarget(data.targetPlayerId, rawData, signature.channel);
-                        }
+                        var rawData = BroadcastModule.GetImmediateData(data);
+                        SendToTarget(data.targetPlayerId, rawData, signature.channel);
                     }
                     AppendToBufferedRPCs(signature, data, module);
                     return !isClient;
                 }
                 case RPCType.TargetRPC:
                 {
-                    if (networkManager.playerModule.TryGetConnection(data.targetPlayerId, out var connection))
-                    {
-                        var rawData = networkManager.GetConnectionBroadcaster(false)
-                            .GetImmediateData(connection, data, signature.channel);
-                        SendToTarget(data.targetPlayerId, rawData, signature.channel);
-                    }
+                    var rawData = BroadcastModule.GetImmediateData(data);
+                    SendToTarget(data.targetPlayerId, rawData, signature.channel);
                     AppendToBufferedRPCs(signature, data, module);
                     return false;
                 }
