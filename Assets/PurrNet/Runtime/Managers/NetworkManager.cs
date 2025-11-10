@@ -166,6 +166,38 @@ namespace PurrNet
         public ITransport rawTransport => _transport ? _transport.transport : null;
 
         /// <summary>
+        /// Unsubscribes all listeners and any other internal state.
+        /// This is meant to be called manually if you encounter any caching issues due to bad unsubscribing.
+        /// </summary>
+        public void ResetInternalState()
+        {
+            onServerConnectionState = null;
+            onClientConnectionState = null;
+            onAnyServerConnectionState = null;
+            onAnyClientConnectionState = null;
+
+            onPreTick = null;
+            onTick = null;
+            onPostTick = null;
+
+            onPlayerJoined = null;
+            onPlayerLeft = null;
+            onPlayerJoinedScene = null;
+            onPlayerLeftScene = null;
+            onPlayerLoadedScene = null;
+            onPlayerUnloadedScene = null;
+            onLocalPlayerReceivedID = null;
+
+            onNetworkStarted = null;
+            onNetworkShutdown = null;
+            onNetworkStartedSimple = null;
+            onNetworkShutdownSimple = null;
+
+            _serverPendingSubscriptions.Clear();
+            _clientPendingSubscriptions.Clear();
+        }
+
+        /// <summary>
         /// The transport of the network manager.
         /// This is the main transport used when starting the server or client.
         /// </summary>
@@ -200,6 +232,10 @@ namespace PurrNet
                     _transport.transport.onConnectionState += OnConnectionState;
                     _transport.transport.onDataReceived += OnDataReceived;
                     _subscribed = true;
+                }
+                else
+                {
+                    _subscribed = false;
                 }
             }
         }
