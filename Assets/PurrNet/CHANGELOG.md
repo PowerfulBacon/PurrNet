@@ -1,3 +1,11 @@
+# [1.17.0-beta.11](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.10...v1.17.0-beta.11) (2025-11-11)
+
+
+### Bug Fixes
+
+* static delta rpcs ([77ce2b4](https://github.com/PurrNet/PurrNet/commit/77ce2b4815eb474ef4bb308799c0d3cfafe4209f))
+* syncvar events should be triggered when Packer.Transform is successful ([abbc918](https://github.com/PurrNet/PurrNet/commit/abbc918f033be615831efdcc2aa61835707c71d7))
+
 # [1.17.0-beta.10](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.9...v1.17.0-beta.10) (2025-11-11)
 
 
