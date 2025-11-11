@@ -468,6 +468,7 @@ namespace PurrNet
                 case RPCType.ObserversRPC:
                 {
                     var cachedOwner = owner;
+                    using var players = DisposableList<PlayerID>.Create(observers.Count);
 
                     for (var i = 0; i < observers.Count; ++i)
                     {
@@ -479,9 +480,10 @@ namespace PurrNet
                         if (ignoreSender || ignoreOwner)
                             continue;
 
-                        var rawData = BroadcastModule.GetImmediateData(data);
-                        SendToTarget(data.targetPlayerId, rawData, signature.channel);
+                        players.Add(observer);
                     }
+
+                    Send(players, BroadcastModule.GetImmediateData(data), signature.channel);
                     AppendToBufferedRPCs(signature, data, module);
                     return !isClient;
                 }
