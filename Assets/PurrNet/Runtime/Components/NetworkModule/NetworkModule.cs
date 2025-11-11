@@ -277,7 +277,7 @@ namespace PurrNet
             }
         }
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
         private Type _myType;
 #endif
 
