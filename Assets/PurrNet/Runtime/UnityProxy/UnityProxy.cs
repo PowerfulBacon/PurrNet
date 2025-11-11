@@ -148,20 +148,8 @@ namespace PurrNet
                 return;
             }
 
-            var scene = go.scene;
             int sceneBuildIndex = go.scene.buildIndex;
-
-            var sceneInfo = SceneObjectsModule.GetRawSceneInfo(scene);
-            if (sceneInfo)
-            {
-                int idx = sceneInfo.rootGameObjects.IndexOf(go);
-                idx = idx == -1 ? go.transform.GetSiblingIndex() : idx;
-                UnityLatestUpdate.ExecuteAsap(() => { DontDestroyOnLoadDirectly(target); }, sceneBuildIndex, idx);
-            }
-            else
-            {
-                UnityLatestUpdate.ExecuteAsap(() => { DontDestroyOnLoadDirectly(target); }, sceneBuildIndex, go.transform.GetSiblingIndex());
-            }
+            UnityLatestUpdate.ExecuteAsap(() => { DontDestroyOnLoadDirectly(target); }, sceneBuildIndex, go.transform.GetSiblingIndex());
         }
 
 
