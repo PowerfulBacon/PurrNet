@@ -217,26 +217,18 @@ namespace PurrNet.Modules
                 {
                     if (nm.isServer)
                     {
-                        using var players = DisposableList<PlayerID>.Create();
-                        var allPlayers = nm.players;
+                        using var players = GetObservers(signature);
 
-                        for (var i = 0; i < allPlayers.Count; i++)
-                        {
-                            var player = allPlayers[i];
-                            bool isLocalPlayer = player == nm.localPlayer;
-
-                            if (signature.runLocally && isLocalPlayer)
-                                continue;
-
-                            if (signature.excludeSender && isLocalPlayer)
-                                continue;
+                        if (players.Count == 0)
+                            break;
 
 #if UNITY_EDITOR || PURR_RUNTIME_PROFILING
+                        for (var i = players.Count - 1; i >= 0; --i)
+                        {
                             if (Hasher.TryGetType(packet.typeHash, out var type))
                                 Statistics.SentRPC(type, signature.type, signature.rpcName, packet.data.segment, null);
-#endif
-                            players.Add(player);
                         }
+#endif
 
                         nm.GetModule<PlayersManager>(true).SendList(players, packet, signature.channel);
                     }
