@@ -1,3 +1,10 @@
+# [1.17.0-beta.12](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.11...v1.17.0-beta.12) (2025-11-11)
+
+
+### Bug Fixes
+
+* properly filter players when forwarding rpcs ([3b05719](https://github.com/PurrNet/PurrNet/commit/3b057195282236c496337875544d938946ce4731))
+
 # [1.17.0-beta.11](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.10...v1.17.0-beta.11) (2025-11-11)
 
 
