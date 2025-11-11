@@ -11,13 +11,23 @@ namespace PurrNet.Examples.TopDownShooter
         protected override void OnSpawned(bool asServer)
         {
             if (asServer)
-            {
                 _health.value = maxHealth;
-            }
-            else
-            {
-                UpdateHealthUI();
-            }
+        }
+
+        protected override void OnSpawned()
+        {
+            UpdateHealthUI();
+            _health.onChanged += OnHealthChanged;
+        }
+
+        protected override void OnDespawned()
+        {
+            _health.onChanged -= OnHealthChanged;
+        }
+
+        private void OnHealthChanged(int newVal)
+        {
+            UpdateHealthUI();
         }
 
         private void Update()
@@ -35,11 +45,6 @@ namespace PurrNet.Examples.TopDownShooter
             if (!_healthText.value)
                 return;
             _healthText.value.text = _health.value.ToString();
-        }
-
-        private void FixedUpdate()
-        {
-            UpdateHealthUI();
         }
 
         public void ChangeHealth(int change)
