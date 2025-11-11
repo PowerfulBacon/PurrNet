@@ -25,12 +25,50 @@ public enum BenchmarkType
     StaticReturnableDelta,
     StaticGenericReturnable,
     StaticGenericReturnableDelta,
+
+    ServerNormal,
+    ServerNormalDelta,
+    ServerGeneric,
+    ServerGenericDelta,
 }
 
 public struct IntContainer
 {
     [UsedImplicitly]
     public int value;
+}
+
+public class TestModule : NetworkModule
+{
+    public int received;
+
+    [ServerRpc(deltaPacked: false)]
+    public void NormalServer()
+    {
+        Debug.Log("NormalServer " + received);
+        ++received;
+    }
+
+    [ServerRpc(deltaPacked: true, channel: Channel.Unreliable)]
+    public void NormalDeltaServer(IntContainer someRandomValue)
+    {
+        Debug.Log("NormalDeltaServer " + someRandomValue.value);
+        ++received;
+    }
+
+    [ServerRpc(deltaPacked: false)]
+    public void GenericServer<T>(T someRandomValue)
+    {
+        Debug.Log("GenericServer " + someRandomValue);
+        ++received;
+    }
+
+    [ServerRpc(deltaPacked: true)]
+    public void GenericDeltaServer<T>(T someRandomValue)
+    {
+        Debug.Log("GenericDeltaServer " + someRandomValue);
+        ++received;
+    }
 }
 
 public class RandomIntBenchmark : Benchmark
@@ -43,6 +81,7 @@ public class RandomIntBenchmark : Benchmark
     static int _received;
     static int _sent;
 
+    private TestModule _testModule = new ();
 
     public override bool hasFinished
     {
@@ -123,6 +162,18 @@ public class RandomIntBenchmark : Benchmark
                 case BenchmarkType.GenericReturnableDelta:
                     for (var o = 0; o < observers.Count; o++)
                         _ = ReturnableGenericDelta(observers[o], v);
+                    break;
+                case BenchmarkType.ServerNormal:
+                    _testModule.NormalServer();
+                    break;
+                case BenchmarkType.ServerNormalDelta:
+                    _testModule.NormalDeltaServer(v);
+                    break;
+                case BenchmarkType.ServerGeneric:
+                    _testModule.GenericServer(v);
+                    break;
+                case BenchmarkType.ServerGenericDelta:
+                    _testModule.GenericDeltaServer(v);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
