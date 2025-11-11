@@ -126,6 +126,46 @@ namespace PurrNet
         }
 
         [UsedByIL]
+        public static void DontDestroyOnLoadDirectly(Object target) => Object.DontDestroyOnLoad(target);
+
+        [UsedByIL]
+        public static void DontDestroyOnLoad(Object target)
+        {
+            if (!target)
+                return;
+
+            var go = GetGameObject(target);
+
+            // if it's not a root object, don't do anything
+            if (go.transform.parent)
+                return;
+
+            bool isNetworked = go.GetComponentInChildren<NetworkIdentity>() != null;
+
+            if (!isNetworked)
+            {
+                DontDestroyOnLoadDirectly(target);
+                return;
+            }
+
+            var scene = go.scene;
+            int sceneBuildIndex = go.scene.buildIndex;
+
+            var sceneInfo = SceneObjectsModule.GetRawSceneInfo(scene);
+            if (sceneInfo)
+            {
+                int idx = sceneInfo.rootGameObjects.IndexOf(go);
+                idx = idx == -1 ? go.transform.GetSiblingIndex() : idx;
+                UnityLatestUpdate.ExecuteAsap(() => { DontDestroyOnLoadDirectly(target); }, sceneBuildIndex, idx);
+            }
+            else
+            {
+                UnityLatestUpdate.ExecuteAsap(() => { DontDestroyOnLoadDirectly(target); }, sceneBuildIndex, go.transform.GetSiblingIndex());
+            }
+        }
+
+
+        [UsedByIL]
         public static Object InstantiateDirectly(Object original) => Object.Instantiate(original);
 
         [UsedByIL]
