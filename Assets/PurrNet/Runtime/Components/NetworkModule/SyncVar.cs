@@ -192,7 +192,7 @@ namespace PurrNet
 
             var oldValue = _value;
 
-            if (Packer.Transform(ref _value, newValue))
+            if (!Packer.Transform(ref _value, newValue))
             {
                 DisposeOf(newValue);
                 return;
@@ -291,7 +291,7 @@ namespace PurrNet
             _id = packetId;
             var oldValue = _value;
 
-            if (Packer.Transform(ref _value, newValue))
+            if (!Packer.Transform(ref _value, newValue))
                 return;
 
             TriggerEvents(oldValue);
