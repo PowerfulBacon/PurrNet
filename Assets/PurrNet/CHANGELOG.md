@@ -1,3 +1,10 @@
+# [1.17.0-beta.10](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.9...v1.17.0-beta.10) (2025-11-11)
+
+
+### Bug Fixes
+
+* compiler error due to bad #if ([41cc6c6](https://github.com/PurrNet/PurrNet/commit/41cc6c62928d1f9dd037751e9f44b729b82399c8))
+
 # [1.17.0-beta.9](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.8...v1.17.0-beta.9) (2025-11-10)
 
 
