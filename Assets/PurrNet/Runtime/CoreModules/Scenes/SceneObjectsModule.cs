@@ -13,19 +13,6 @@ namespace PurrNet.Modules
 
         private static readonly List<NetworkIdentity> _sceneIdentities = new List<NetworkIdentity>();
 
-        public static PurrSceneInfo GetRawSceneInfo(Scene scene)
-        {
-            var rootGameObjects = scene.GetRootGameObjects();
-            for (var i = 0; i < rootGameObjects.Length; i++)
-            {
-                var rootObject = rootGameObjects[i];
-                if (rootObject.TryGetComponent<PurrSceneInfo>(out var si))
-                    return si;
-            }
-
-            return null;
-        }
-
         public static void GetSceneIdentities(Scene scene, List<NetworkIdentity> networkIdentities)
         {
             onPreSceneLoad?.Invoke(scene);

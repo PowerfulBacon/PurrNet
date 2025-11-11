@@ -30,7 +30,7 @@ namespace PurrNet
 
         private void Awake()
         {
-            TriggerAsap();
+            TriggerPendingAsaps();
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace PurrNet
             _executeASAP.Insert(insertIdx, item);
         }
 
-        static void TriggerAsap()
+        public static void TriggerPendingAsaps()
         {
             for (var i = 0; i < _executeASAP.Count; i++)
             {
@@ -140,22 +140,22 @@ namespace PurrNet
 
         private void OnEnable()
         {
-            TriggerAsap();
+            TriggerPendingAsaps();
         }
 
         private void OnDisable()
         {
-            TriggerAsap();
+            TriggerPendingAsaps();
         }
 
         private void OnDestroy()
         {
-            TriggerAsap();
+            TriggerPendingAsaps();
         }
 
         private void Update()
         {
-            TriggerAsap();
+            TriggerPendingAsaps();
             onUpdate?.Invoke();
 #if UNITY_EDITOR && PURR_LEAKS_CHECK
             _sweep += Time.deltaTime;
@@ -170,13 +170,13 @@ namespace PurrNet
 
         private void FixedUpdate()
         {
-            TriggerAsap();
+            TriggerPendingAsaps();
             onFixedUpdate?.Invoke();
         }
 
         private void LateUpdate()
         {
-            TriggerAsap();
+            TriggerPendingAsaps();
             onLatestUpdate?.Invoke();
         }
     }

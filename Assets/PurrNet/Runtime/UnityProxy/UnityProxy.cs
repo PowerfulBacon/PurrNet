@@ -131,6 +131,8 @@ namespace PurrNet
         [UsedByIL]
         public static void DontDestroyOnLoad(Object target)
         {
+            Object.DontDestroyOnLoad(target);
+
             if (!target)
                 return;
 
@@ -149,7 +151,11 @@ namespace PurrNet
             }
 
             int sceneBuildIndex = go.scene.buildIndex;
-            UnityLatestUpdate.ExecuteAsap(() => { DontDestroyOnLoadDirectly(target); }, sceneBuildIndex, go.transform.GetSiblingIndex());
+            UnityLatestUpdate.ExecuteAsap(() =>
+            {
+                if (go)
+                    go.transform.SetAsLastSibling();
+            }, sceneBuildIndex, go.transform.GetSiblingIndex());
         }
 
 

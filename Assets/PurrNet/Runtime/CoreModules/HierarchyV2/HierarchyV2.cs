@@ -70,6 +70,8 @@ namespace PurrNet.Modules
             _scenePool = NetworkPoolManager.GetScenePool(scene, sceneId);
             _prefabsPool = NetworkPoolManager.GetPool(manager);
 
+            UnityLatestUpdate.TriggerPendingAsaps();
+
             SetupSceneObjects(scene);
         }
 
