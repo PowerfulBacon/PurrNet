@@ -173,108 +173,16 @@ namespace PurrNet
         [UsedByIL]
         protected void SendRPC(ChildRPCPacket packet, RPCSignature signature)
         {
-            if (!parent)
-            {
-                if (signature.channel is Channel.ReliableOrdered or Channel.ReliableUnordered)
-                    PurrLogger.LogError($"Trying to send RPC from '{GetType().Name}' which is not initialized.");
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
+            _myType ??= GetType();
+#endif
+
+            if (!parent.ValidateSendingRPC(signature, out var module))
                 return;
-            }
-
-            if (!parent.isSpawned)
-            {
-                if (signature.channel is Channel.ReliableOrdered or Channel.ReliableUnordered)
-                    PurrLogger.LogError($"Trying to send RPC from '{parent.name}' which is not spawned.", parent);
-                return;
-            }
-
-            var nm = parent.networkManager;
-
-            if (!nm.TryGetModule<RPCModule>(nm.isServer, out var module))
-            {
-                PurrLogger.LogError("Failed to get RPC module.", parent);
-                return;
-            }
-
-            var rules = networkManager.networkRules;
-            bool shouldIgnoreOwnership = rules && rules.ShouldIgnoreRequireOwner();
-
-            if (!shouldIgnoreOwnership && signature.requireOwnership && !isOwner)
-            {
-                if (!signature.runLocally)
-                    PurrLogger.LogError(
-                        $"Trying to send RPC '{signature.rpcName}' from '{GetType().Name}' without ownership.", parent);
-                return;
-            }
-
-            bool shouldIgnore = rules && rules.ShouldIgnoreRequireServer();
-
-            if (!shouldIgnore && signature.requireServer && !networkManager.isServer)
-            {
-                if (!signature.runLocally)
-                    PurrLogger.LogError(
-                        $"Trying to send RPC '{signature.rpcName}' from '{GetType().Name}' without server.", parent);
-                return;
-            }
 
             module.AppendToBufferedRPCs(packet, signature);
 
-            switch (signature.type)
-            {
-                case RPCType.ServerRPC: parent.SendToServer(packet, signature.channel); break;
-                case RPCType.ObserversRPC:
-                {
-                    if (isServer)
-                    {
-                        var obs = parent.observers;
-                        var count = parent.observers.Count;
-                        using var players = DisposableList<PlayerID>.Create(count);
-                        for (var i = 0; i < count; i++)
-                        {
-                            var player = obs[i];
-                            if (ShouldSend(player))
-                                players.Add(player);
-                        }
-
-                        parent.Send(players, packet, signature.channel);
-                    }
-                    else parent.SendToServer(packet, signature.channel);
-                    break;
-                }
-                case RPCType.TargetRPC:
-                    if (isServer)
-                    {
-                        using var targets = signature.GetTargets();
-                        parent.Send(targets, packet, signature.channel);
-                    }
-                    else
-                    {
-                        using var targets = signature.GetTargets();
-
-                        // TODO: we should batch this into one packet to the server instead of N
-                        for (int i = 0; i < targets.Count; i++)
-                        {
-                            packet.targetPlayerId = targets[i];
-                            parent.SendToServer(packet, signature.channel);
-                        }
-                    }
-                    break;
-                default: throw new ArgumentOutOfRangeException();
-            }
-
-            return;
-
-            bool ShouldSend(PlayerID player)
-            {
-                bool isLocalPlayer = player == networkManager.localPlayer;
-
-                if (signature.runLocally && isLocalPlayer)
-                    return false;
-
-                if (signature.excludeSender && isLocalPlayer)
-                    return false;
-
-                return !signature.excludeOwner || parent.IsNotOwnerPredicate(player);
-            }
+            parent.SendRPC(_myType, packet, signature);
         }
 
 #if UNITY_EDITOR || PURR_RUNTIME_PROFILING
@@ -350,7 +258,7 @@ namespace PurrNet
                 networkId = parent.id!.Value,
                 sceneId = parent.sceneId,
                 childId = (int)index,
-                rpcId = (int)rpcId,
+                rpcId = rpcId,
                 data = data.ToByteData(),
                 senderId = RPCModule.GetLocalPlayer(networkManager)
             };
