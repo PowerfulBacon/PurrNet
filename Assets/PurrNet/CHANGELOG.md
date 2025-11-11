@@ -1,3 +1,10 @@
+# [1.17.0-beta.13](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.12...v1.17.0-beta.13) (2025-11-11)
+
+
+### Bug Fixes
+
+* trying to make DDOL deterministic ([d03647c](https://github.com/PurrNet/PurrNet/commit/d03647c71602ef588c165bf86854be9bf7f5efad))
+
 # [1.17.0-beta.12](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.11...v1.17.0-beta.12) (2025-11-11)
 
 
