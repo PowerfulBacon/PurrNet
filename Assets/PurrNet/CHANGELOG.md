@@ -1,3 +1,10 @@
+# [1.17.0-beta.15](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.14...v1.17.0-beta.15) (2025-11-12)
+
+
+### Bug Fixes
+
+* make sure `OnTick` exceptions don't have side effects to other subscribers ([8811429](https://github.com/PurrNet/PurrNet/commit/88114295949b5b64936c0becb7d5854f2714a744))
+
 # [1.17.0-beta.14](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.13...v1.17.0-beta.14) (2025-11-12)
 
 
