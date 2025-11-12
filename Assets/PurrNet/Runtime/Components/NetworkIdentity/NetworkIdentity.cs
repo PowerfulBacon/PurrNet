@@ -544,12 +544,27 @@ namespace PurrNet
         private void ClientTick()
         {
             InternalTick();
-            _ticker?.OnTick(_clientTickManager.tickDelta);
+
+            try
+            {
+                _ticker?.OnTick(_clientTickManager.tickDelta);
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
 
             for (var i = 0; i < _tickables.Count; i++)
             {
-                var ticker = _tickables[i];
-                ticker.OnTick(_clientTickManager.tickDelta);
+                try
+                {
+                    var ticker = _tickables[i];
+                    ticker.OnTick(_clientTickManager.tickDelta);
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(e);
+                }
             }
         }
 
@@ -558,11 +573,27 @@ namespace PurrNet
             if (_tickRegisteredClient <= 0)
             {
                 InternalTick();
-                _ticker?.OnTick(_serverTickManager.tickDelta);
+
+                try
+                {
+                    _ticker?.OnTick(_serverTickManager.tickDelta);
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(e);
+                }
+
                 for (var i = 0; i < _tickables.Count; i++)
                 {
-                    var ticker = _tickables[i];
-                    ticker.OnTick(_serverTickManager.tickDelta);
+                    try
+                    {
+                        var ticker = _tickables[i];
+                        ticker.OnTick(_serverTickManager.tickDelta);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Log(e);
+                    }
                 }
             }
         }
