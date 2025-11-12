@@ -1,3 +1,10 @@
+# [1.17.0-beta.14](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.13...v1.17.0-beta.14) (2025-11-12)
+
+
+### Bug Fixes
+
+* scene pooling not clearing properly ([1acdd22](https://github.com/PurrNet/PurrNet/commit/1acdd222acf5fc86b1ac3ef7b01d507f3b9137e7))
+
 # [1.17.0-beta.13](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.12...v1.17.0-beta.13) (2025-11-11)
 
 
