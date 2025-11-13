@@ -1,3 +1,10 @@
+# [1.17.0-beta.21](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.20...v1.17.0-beta.21) (2025-11-13)
+
+
+### Bug Fixes
+
+* order of add was screwed by my previous attempt to be smart ([315dd96](https://github.com/PurrNet/PurrNet/commit/315dd966ef007c8e08e355aeefb58f6e77415ba5))
+
 # [1.17.0-beta.20](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.19...v1.17.0-beta.20) (2025-11-13)
 
 
