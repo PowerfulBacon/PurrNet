@@ -234,6 +234,11 @@ namespace PurrNet.Packing
             return copy;
         }
 
+        public static T Copy<T, DUP>(DUP value) where DUP : struct, IDuplicate<T>
+        {
+            return value.Duplicate();
+        }
+
         /// <summary>
         /// Modifies `target` to become `whatToCopy` without re-creating it.
         /// </summary>
