@@ -20,8 +20,9 @@ namespace PurrNet.Pooling
 
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
-                var res = Create(Count);
-                for (var i = Count - 1; i >= 0; --i)
+                int c = Count;
+                var res = Create(c);
+                for (var i = 0; i < c; ++i)
                     res.Add(Packer.Copy(list[i]));
                 return res;
             }
@@ -69,8 +70,10 @@ namespace PurrNet.Pooling
             if (val.list.Capacity < copyFrom.Count)
                 val.list.Capacity = copyFrom.Count;
 
-            for (int i = copyFrom.Count - 1; i >= 0; i--)
+            int c = copyFrom.Count;
+            for (var i = 0; i < c; ++i)
                 val.list.Add(copyFrom[i]);
+
             val._isAllocated = true;
             val._shouldDispose = true;
             return val;
@@ -98,7 +101,8 @@ namespace PurrNet.Pooling
         public void AddRange(IList<T> collection)
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
-            for (var i = 0; i < collection.Count; i++)
+            int c = collection.Count;
+            for (var i = 0; i < c; i++)
                 list.Add(collection[i]);
             NotifyUsage();
         }
