@@ -196,7 +196,7 @@ namespace PurrNet.Pooling
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 var res = Create(Count);
-                for (var i = 0; i < Count; i++)
+                for (var i = Count - 1; i >= 0; --i)
                     res.Add(Packer.Copy(array[i]));
                 return res;
             }

@@ -18,7 +18,7 @@ namespace PurrNet.Pooling
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 var res = Create(Count);
-                for (var i = 0; i < Count; i++)
+                for (var i = Count - 1; i >= 0; --i)
                     res.Add(Packer.Copy(list[i]));
                 return res;
             }
@@ -53,6 +53,17 @@ namespace PurrNet.Pooling
                 newList.Capacity = capacity;
 
             val.list = newList;
+            val._isAllocated = true;
+            val._shouldDispose = true;
+            return val;
+        }
+
+        public static DisposableList<T> Create(IList<T> copyFrom)
+        {
+            var val = new DisposableList<T>();
+            val.list = ListPool<T>.Instantiate();
+            for (int i = copyFrom.Count - 1; i >= 0; i--)
+                val.list.Add(copyFrom[i]);
             val._isAllocated = true;
             val._shouldDispose = true;
             return val;
