@@ -62,6 +62,10 @@ namespace PurrNet.Pooling
         {
             var val = new DisposableList<T>();
             val.list = ListPool<T>.Instantiate();
+
+            if (val.list.Capacity < copyFrom.Count)
+                val.list.Capacity = copyFrom.Count;
+
             for (int i = copyFrom.Count - 1; i >= 0; i--)
                 val.list.Add(copyFrom[i]);
             val._isAllocated = true;
