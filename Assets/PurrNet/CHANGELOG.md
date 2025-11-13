@@ -1,3 +1,10 @@
+# [1.17.0-beta.18](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.17...v1.17.0-beta.18) (2025-11-13)
+
+
+### Bug Fixes
+
+* work around c# methods that generate GC ([59d660f](https://github.com/PurrNet/PurrNet/commit/59d660fcda78f1fe5543350ad28c6035accba61c))
+
 # [1.17.0-beta.17](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.16...v1.17.0-beta.17) (2025-11-13)
 
 
