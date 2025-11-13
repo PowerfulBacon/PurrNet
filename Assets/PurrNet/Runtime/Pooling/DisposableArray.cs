@@ -193,6 +193,9 @@ namespace PurrNet.Pooling
 
         public DisposableArray<T> Duplicate()
         {
+            if (isDisposed)
+                return default;
+
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 var res = Create(Count);

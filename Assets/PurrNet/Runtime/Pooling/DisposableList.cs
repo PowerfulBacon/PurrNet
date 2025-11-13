@@ -15,6 +15,9 @@ namespace PurrNet.Pooling
 
         public DisposableList<T> Duplicate()
         {
+            if (isDisposed)
+                return default;
+
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 var res = Create(Count);

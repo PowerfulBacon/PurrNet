@@ -257,6 +257,9 @@ namespace PurrNet.Pooling
 
         public DisposableDictionary<TKey, TValue> Duplicate()
         {
+            if (isDisposed)
+                return default;
+
             if (RuntimeHelpers.IsReferenceOrContainsReferences<TKey>() ||
                 RuntimeHelpers.IsReferenceOrContainsReferences<TValue>())
             {

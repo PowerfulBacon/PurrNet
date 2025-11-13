@@ -182,6 +182,9 @@ namespace PurrNet.Pooling
 
         public DisposableHashSet<T> Duplicate()
         {
+            if (isDisposed)
+                return default;
+
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 var res = Create();
