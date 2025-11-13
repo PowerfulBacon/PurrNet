@@ -241,6 +241,20 @@ namespace PurrNet
         {
             unityEvent.RemoveAllListeners();
         }
+        
+        public static SyncEvent<T> operator +(SyncEvent<T> e, UnityAction<T> listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.AddListener(listener);
+            return e;
+        }
+
+        public static SyncEvent<T> operator -(SyncEvent<T> e, UnityAction<T> listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.RemoveListener(listener);
+            return e;
+        }
     }
 
     [Serializable]
@@ -347,6 +361,20 @@ namespace PurrNet
         private void RemoveAllListenersRpc()
         {
             unityEvent.RemoveAllListeners();
+        }
+        
+        public static SyncEvent<T1, T2> operator +(SyncEvent<T1, T2> e, UnityAction<T1, T2> listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.AddListener(listener);
+            return e;
+        }
+
+        public static SyncEvent<T1, T2> operator -(SyncEvent<T1, T2> e, UnityAction<T1, T2> listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.RemoveListener(listener);
+            return e;
         }
     }
 }
