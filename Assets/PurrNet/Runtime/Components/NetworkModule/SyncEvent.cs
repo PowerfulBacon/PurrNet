@@ -136,6 +136,20 @@ namespace PurrNet
         {
             _unityEvent.RemoveAllListeners();
         }
+        
+        public static SyncEvent operator +(SyncEvent e, UnityAction listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.AddListener(listener);
+            return e;
+        }
+
+        public static SyncEvent operator -(SyncEvent e, UnityAction listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.RemoveListener(listener);
+            return e;
+        }
     }
 
     [Serializable]
