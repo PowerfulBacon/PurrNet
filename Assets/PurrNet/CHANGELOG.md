@@ -1,3 +1,10 @@
+# [1.17.0-beta.20](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.19...v1.17.0-beta.20) (2025-11-13)
+
+
+### Bug Fixes
+
+* building errors ([d0ce345](https://github.com/PurrNet/PurrNet/commit/d0ce34535f668d9bad6759385d3bf3c455d12c83))
+
 # [1.17.0-beta.19](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.18...v1.17.0-beta.19) (2025-11-13)
 
 
