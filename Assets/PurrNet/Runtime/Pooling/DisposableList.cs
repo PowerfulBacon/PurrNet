@@ -15,6 +15,14 @@ namespace PurrNet.Pooling
 
         public DisposableList<T> Duplicate()
         {
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                var res = Create(Count);
+                for (var i = 0; i < Count; i++)
+                    res.Add(Packer.Copy(list[i]));
+                return res;
+            }
+
             return Create(this);
         }
 

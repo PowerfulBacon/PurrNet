@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using PurrNet.Packing;
 
 namespace PurrNet.Pooling
@@ -181,6 +182,13 @@ namespace PurrNet.Pooling
 
         public DisposableHashSet<T> Duplicate()
         {
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                var res = Create();
+                foreach (var value in this)
+                    res.Add(Packer.Copy(value));
+                return res;
+            }
             return Create(this);
         }
     }

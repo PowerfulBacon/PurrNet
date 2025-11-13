@@ -193,6 +193,14 @@ namespace PurrNet.Pooling
 
         public DisposableArray<T> Duplicate()
         {
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                var res = Create(Count);
+                for (var i = 0; i < Count; i++)
+                    res.Add(Packer.Copy(array[i]));
+                return res;
+            }
+
             return Create(this);
         }
     }

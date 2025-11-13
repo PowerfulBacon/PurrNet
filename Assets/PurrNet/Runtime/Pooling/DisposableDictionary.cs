@@ -257,6 +257,14 @@ namespace PurrNet.Pooling
 
         public DisposableDictionary<TKey, TValue> Duplicate()
         {
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<TKey>() ||
+                RuntimeHelpers.IsReferenceOrContainsReferences<TValue>())
+            {
+                var res = Create();
+                foreach (var pair in this)
+                    res.Add(Packer.Copy(pair.Key), Packer.Copy(pair.Value));
+                return res;
+            }
             return Create(this);
         }
     }
