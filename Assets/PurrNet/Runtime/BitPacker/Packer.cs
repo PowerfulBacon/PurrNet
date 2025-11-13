@@ -216,6 +216,24 @@ namespace PurrNet.Packing
         }
     }
 
+    internal static class DuplicateCache<T>
+    {
+        public static readonly Func<T, T> Duplicate;
+
+        static DuplicateCache()
+        {
+            var type = typeof(T);
+            var iface = typeof(IDuplicate<T>);
+
+            if (iface.IsAssignableFrom(type))
+            {
+                var method = iface.GetMethod("Duplicate");
+                Duplicate = (Func<T, T>)Delegate.CreateDelegate(
+                    typeof(Func<T, T>), null, method!);
+            }
+        }
+    }
+
     public static class Packer
     {
         public static T Copy<T>(T value)
@@ -223,8 +241,8 @@ namespace PurrNet.Packing
             if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                 return value;
 
-            if (value is IDuplicate<T> duplicate)
-                return duplicate.Duplicate();
+            if (DuplicateCache<T>.Duplicate != null)
+                return DuplicateCache<T>.Duplicate(value);
 
             using var tmpPacker = BitPackerPool.Get();
             Packer<T>.Write(tmpPacker, value);
@@ -232,11 +250,6 @@ namespace PurrNet.Packing
             var copy = default(T);
             Packer<T>.Read(tmpPacker, ref copy);
             return copy;
-        }
-
-        public static T Copy<T, DUP>(DUP value) where DUP : struct, IDuplicate<T>
-        {
-            return value.Duplicate();
         }
 
         /// <summary>
