@@ -11,7 +11,7 @@ public class Test : NetworkIdentity
 
     private bool _networkManagerLogs = false;
 
-    private SyncEvent _syncEvent = new();
+    private SyncEvent<int> _syncEvent = new();
 
     private void Awake()
     {
@@ -28,15 +28,15 @@ public class Test : NetworkIdentity
         _syncEvent -= MyTestEvent;
     }
 
-    private void MyTestEvent()
+    private void MyTestEvent(int myInt)
     {
-        Debug.Log($"Event triggered!");
+        Debug.Log($"Event triggered! {myInt}");
     }
 
     private void Update()
     {
         if(Input.GetKeyDown(KeyCode.Q))
-            _syncEvent.Invoke();
+            _syncEvent.Invoke(53);
         
         if (Input.GetKeyDown(KeyCode.X))
             _bots.Enqueue(networkManager.playerModule.CreateBot());
