@@ -241,8 +241,8 @@ namespace PurrNet.Packing
             if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                 return value;
 
-            if (DuplicateCache<T>.Duplicate != null)
-                return DuplicateCache<T>.Duplicate(value);
+            if (value is IDuplicate<T> duplicate)
+                return duplicate.Duplicate();
 
             using var tmpPacker = BitPackerPool.Get();
             Packer<T>.Write(tmpPacker, value);
