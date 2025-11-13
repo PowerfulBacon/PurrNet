@@ -216,24 +216,6 @@ namespace PurrNet.Packing
         }
     }
 
-    internal static class DuplicateCache<T>
-    {
-        public static readonly Func<T, T> Duplicate;
-
-        static DuplicateCache()
-        {
-            var type = typeof(T);
-            var iface = typeof(IDuplicate<T>);
-
-            if (iface.IsAssignableFrom(type))
-            {
-                var method = iface.GetMethod("Duplicate");
-                Duplicate = (Func<T, T>)Delegate.CreateDelegate(
-                    typeof(Func<T, T>), null, method!);
-            }
-        }
-    }
-
     public static class Packer
     {
         public static T Copy<T>(T value)
