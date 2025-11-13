@@ -1,3 +1,10 @@
+# [1.17.0-beta.17](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.16...v1.17.0-beta.17) (2025-11-13)
+
+
+### Bug Fixes
+
+* IDuplicates of the disposable collections were wrong for managed types ([a11a9be](https://github.com/PurrNet/PurrNet/commit/a11a9be2ca2a249328a21b4cc0376fcd501a7d5e))
+
 # [1.17.0-beta.16](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.15...v1.17.0-beta.16) (2025-11-13)
 
 
