@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using PurrNet;
 using UnityEngine;
@@ -10,9 +11,42 @@ public class Test : NetworkIdentity
 
     private bool _networkManagerLogs = false;
 
+    private SyncEvent _syncEvent = new();
+
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+    }
+
+    private void OnEnable()
+    {
+        _syncEvent += MyTestEvent;
+    }
+
+    private void OnDisable()
+    {
+        _syncEvent -= MyTestEvent;
+    }
+
+    private void MyTestEvent()
+    {
+        Debug.Log($"Event triggered!");
+    }
+
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Q))
+            _syncEvent.Invoke();
+        
+        if (Input.GetKeyDown(KeyCode.X))
+            _bots.Enqueue(networkManager.playerModule.CreateBot());
+        if (Input.GetKeyDown(KeyCode.C)) 
+            networkManager.playerModule.KickPlayer(_bots.Dequeue());
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            networkManager.sceneModule.LoadSceneAsync(_sceneOne);
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+            networkManager.sceneModule.LoadSceneAsync(_sceneTwo);
     }
 
     protected override void OnSpawned(bool asServer)
@@ -102,18 +136,5 @@ public class Test : NetworkIdentity
             return;
 
         Debug.Log($"Left: {player} | {asServer}");
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.X))
-            _bots.Enqueue(networkManager.playerModule.CreateBot());
-        if (Input.GetKeyDown(KeyCode.C)) 
-            networkManager.playerModule.KickPlayer(_bots.Dequeue());
-
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-            networkManager.sceneModule.LoadSceneAsync(_sceneOne);
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-            networkManager.sceneModule.LoadSceneAsync(_sceneTwo);
     }
 }
