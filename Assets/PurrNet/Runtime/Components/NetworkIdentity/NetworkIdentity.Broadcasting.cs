@@ -347,7 +347,11 @@ namespace PurrNet
 
             module.AppendToBufferedRPCs(packet, signature);
 
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
             SendRPC(_myType, packet, signature);
+#else
+            SendRPC(null, packet, signature);
+#endif
         }
 
         public bool ValidateSendingRPC(RPCSignature signature, out RPCModule module)
