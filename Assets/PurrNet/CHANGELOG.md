@@ -1,3 +1,10 @@
+# [1.17.0-beta.16](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.15...v1.17.0-beta.16) (2025-11-13)
+
+
+### Bug Fixes
+
+* make ownership clearer for InterlatedWithDispose ([2615cc7](https://github.com/PurrNet/PurrNet/commit/2615cc7944bbed4d4c13ec25f2e77cc480ccc3bb))
+
 # [1.17.0-beta.15](https://github.com/PurrNet/PurrNet/compare/v1.17.0-beta.14...v1.17.0-beta.15) (2025-11-12)
 
 
