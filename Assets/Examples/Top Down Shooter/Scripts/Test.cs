@@ -1,35 +1,140 @@
+using System;
+using System.Collections.Generic;
 using PurrNet;
 using UnityEngine;
 
-[RegisterNetworkType(typeof(Texture))]
-[RegisterNetworkType(typeof(Sprite))]
 public class Test : NetworkIdentity
 {
-    [SerializeField] private GameObject spawnedObject;
-    [SerializeField] private GameObject networkPrefab;
-    [SerializeField] private GameObject singleplayerPrefab;
+    [SerializeField, PurrScene] private string _sceneOne, _sceneTwo; 
+    
+    private Queue<PlayerID> _bots = new();
 
-    [PurrButton]
-    private void RunSpawned()
+    private bool _networkManagerLogs = false;
+
+    private SyncEvent<int> _syncEvent = new();
+
+    private void Awake()
     {
-        Spawned(spawnedObject.transform);
+        DontDestroyOnLoad(gameObject);
     }
 
-    [PurrButton]
-    private void RunNetwork()
+    private void OnEnable()
     {
-        Spawned(networkPrefab.transform);
+        _syncEvent += MyTestEvent;
     }
 
-    [PurrButton]
-    private void RunSingle()
+    private void OnDisable()
     {
-        Spawned(singleplayerPrefab.transform);
+        _syncEvent -= MyTestEvent;
     }
 
-    [ObserversRpc]
-    private void Spawned(Transform obj)
+    private void MyTestEvent(int myInt)
     {
-        Debug.Log($"Received from sender: {obj}");
+        Debug.Log($"Event triggered! {myInt}");
+    }
+
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Q))
+            _syncEvent.Invoke(53);
+        
+        if (Input.GetKeyDown(KeyCode.X))
+            _bots.Enqueue(networkManager.playerModule.CreateBot());
+        if (Input.GetKeyDown(KeyCode.C)) 
+            networkManager.playerModule.KickPlayer(_bots.Dequeue());
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            networkManager.sceneModule.LoadSceneAsync(_sceneOne);
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+            networkManager.sceneModule.LoadSceneAsync(_sceneTwo);
+    }
+
+    protected override void OnSpawned(bool asServer)
+    {
+        if (!asServer)
+            return;
+        
+        networkManager.onPlayerJoinedScene += OnPlayerJoinedScene;
+        networkManager.onPlayerLoadedScene += OnPlayerLoadedScene;
+        networkManager.onPlayerJoined += OnPlayerJoined;
+        networkManager.onPlayerLeft += OnPlayerLeft;
+        networkManager.onPlayerLeftScene += OnPlayerLeftScene;
+        networkManager.onPlayerUnloadedScene += OnPlayerUnloadedScene;
+    }
+
+    protected override void OnDespawned()
+    {
+        networkManager.onPlayerJoinedScene -= OnPlayerJoinedScene;
+        networkManager.onPlayerLoadedScene -= OnPlayerLoadedScene;
+        networkManager.onPlayerJoined -= OnPlayerJoined;
+        networkManager.onPlayerLeft -= OnPlayerLeft;
+        networkManager.onPlayerLeftScene -= OnPlayerLeftScene;
+        networkManager.onPlayerUnloadedScene -= OnPlayerUnloadedScene;
+    }
+
+    private void OnPlayerJoinedScene(PlayerID player, SceneID scene, bool asServer)
+    {
+        if (!_networkManagerLogs)
+            return;
+        
+        if (player.id == 1)
+            return;
+
+        Debug.Log($"Joined scene: {player} | {scene} | {asServer}");
+    }
+
+    private void OnPlayerLoadedScene(PlayerID player, SceneID scene, bool asServer)
+    {
+        if (!_networkManagerLogs)
+            return;
+
+        if (player.id == 1)
+            return;
+
+        Debug.Log($"Loaded scene: {player} | {scene} | {asServer}");
+    }
+
+    private void OnPlayerJoined(PlayerID player, bool isReconnect, bool asServer)
+    {
+        if (!_networkManagerLogs)
+            return;
+
+        if (player.id == 1)
+            return;
+
+        Debug.Log($"Joined: {player} | {asServer}");
+    }
+
+    private void OnPlayerUnloadedScene(PlayerID player, SceneID scene, bool asServer)
+    {
+        if (!_networkManagerLogs)
+            return;
+
+        if (player.id == 1)
+            return;
+        
+        Debug.Log($"Unloaded scene: {player} | {scene} | {asServer}");
+    }
+
+    private void OnPlayerLeftScene(PlayerID player, SceneID scene, bool asServer)
+    {
+        if (!_networkManagerLogs)
+            return;
+
+        if (player.id == 1)
+            return;
+
+        Debug.Log($"Left scene: {player} | {scene} | {asServer}");
+    }
+
+    private void OnPlayerLeft(PlayerID player, bool asServer)
+    {
+        if (!_networkManagerLogs)
+            return;
+
+        if (player.id == 1)
+            return;
+
+        Debug.Log($"Left: {player} | {asServer}");
     }
 }

@@ -4,21 +4,15 @@ using PurrNet.Transports;
 
 namespace PurrNet
 {
-    public interface IRpc
-    {
-        public ByteData rpcData { get; set; }
-        PlayerID senderPlayerId { get; }
-        PlayerID targetPlayerId { get; set; }
-    }
-
     public struct RPCPacket : IPackedAuto, IRpc
     {
         public NetworkID networkId;
         public SceneID sceneId;
         public PlayerID senderId;
         public PlayerID? targetId;
-        public byte rpcId;
-        public ByteData data;
+        public Size rpcId;
+
+        [DontDeltaCompress] public ByteData data;
 
         public ByteData rpcData
         {
@@ -28,53 +22,6 @@ namespace PurrNet
 
         public PlayerID senderPlayerId => senderId;
 
-        public PlayerID targetPlayerId
-        {
-            get => targetId ?? default;
-            set => targetId = value;
-        }
-    }
-
-    public struct ChildRPCPacket : IPackedAuto, IRpc
-    {
-        public NetworkID networkId;
-        public SceneID sceneId;
-        public PlayerID senderId;
-        public PlayerID? targetId;
-        public byte rpcId;
-        public byte childId;
-        public ByteData data;
-
-        public ByteData rpcData
-        {
-            get { return data; }
-            set { data = value; }
-        }
-
-        public PlayerID senderPlayerId => senderId;
-
-        public PlayerID targetPlayerId
-        {
-            get => targetId ?? default;
-            set => targetId = value;
-        }
-    }
-
-    public struct StaticRPCPacket : IPackedAuto, IRpc
-    {
-        public uint typeHash;
-        public byte rpcId;
-        public PlayerID senderId;
-        public PlayerID? targetId;
-        public ByteData data;
-
-        public ByteData rpcData
-        {
-            get { return data; }
-            set { data = value; }
-        }
-
-        public PlayerID senderPlayerId => senderId;
         public PlayerID targetPlayerId
         {
             get => targetId ?? default;
@@ -84,11 +31,11 @@ namespace PurrNet
 
     internal readonly struct RPC_ID : IEquatable<RPC_ID>
     {
-        public readonly uint typeHash;
+        public readonly PackedUInt typeHash;
         public readonly SceneID sceneId;
         public readonly NetworkID networkId;
-        private readonly byte rpcId;
-        private readonly byte childId;
+        private readonly Size rpcId;
+        private readonly Size childId;
 
         public RPC_ID(RPCPacket packet)
         {

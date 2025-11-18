@@ -166,6 +166,38 @@ namespace PurrNet
         public ITransport rawTransport => _transport ? _transport.transport : null;
 
         /// <summary>
+        /// Unsubscribes all listeners and any other internal state.
+        /// This is meant to be called manually if you encounter any caching issues due to bad unsubscribing.
+        /// </summary>
+        public void ResetInternalState()
+        {
+            onServerConnectionState = null;
+            onClientConnectionState = null;
+            onAnyServerConnectionState = null;
+            onAnyClientConnectionState = null;
+
+            onPreTick = null;
+            onTick = null;
+            onPostTick = null;
+
+            onPlayerJoined = null;
+            onPlayerLeft = null;
+            onPlayerJoinedScene = null;
+            onPlayerLeftScene = null;
+            onPlayerLoadedScene = null;
+            onPlayerUnloadedScene = null;
+            onLocalPlayerReceivedID = null;
+
+            onNetworkStarted = null;
+            onNetworkShutdown = null;
+            onNetworkStartedSimple = null;
+            onNetworkShutdownSimple = null;
+
+            _serverPendingSubscriptions.Clear();
+            _clientPendingSubscriptions.Clear();
+        }
+
+        /// <summary>
         /// The transport of the network manager.
         /// This is the main transport used when starting the server or client.
         /// </summary>
@@ -200,6 +232,10 @@ namespace PurrNet
                     _transport.transport.onConnectionState += OnConnectionState;
                     _transport.transport.onDataReceived += OnDataReceived;
                     _subscribed = true;
+                }
+                else
+                {
+                    _subscribed = false;
                 }
             }
         }
@@ -798,6 +834,13 @@ namespace PurrNet
         /// </summary>
         public PlayersBroadcaster broadcastModule => _serverPlayersBroadcast ?? _clientPlayersBroadcast;
 
+        public BroadcastModule connectionBroadcaster => _serverBroadcast ?? _clientBroadcast;
+
+        public BroadcastModule GetConnectionBroadcaster(bool asServer)
+        {
+            return asServer ? _serverBroadcast : _clientBroadcast;
+        }
+
         /// <summary>
         /// The scene players module of the network manager.
         /// Defaults to the server scene players module if the server is active.
@@ -824,15 +867,17 @@ namespace PurrNet
         private TickManager _clientTickManager;
         private TickManager _serverTickManager;
 
+        private BroadcastModule _clientBroadcast;
+        private BroadcastModule _serverBroadcast;
+
         private PlayersBroadcaster _clientPlayersBroadcast;
         private PlayersBroadcaster _serverPlayersBroadcast;
 
         private ScenePlayersModule _clientScenePlayersModule;
         private ScenePlayersModule _serverScenePlayersModule;
 
-        private DeltaModule _clientDeltaModule;
-        private DeltaModule _serverDeltaModule;
-
+        internal DeltaModule _clientDeltaModule;
+        internal DeltaModule _serverDeltaModule;
 
         /// <summary>
         /// This event is triggered before the tick.
@@ -970,6 +1015,11 @@ namespace PurrNet
             }
 
             var connBroadcaster = new BroadcastModule(this, asServer);
+
+            if (asServer)
+                _serverBroadcast = connBroadcaster;
+            else _clientBroadcast = connBroadcaster;
+
             var networkCookies = new CookiesModule(_cookieScope, asServer);
             var authModule = new AuthModule(this, connBroadcaster, networkCookies);
             var playersManager = new PlayersManager(this, authModule, connBroadcaster);
@@ -1220,7 +1270,7 @@ namespace PurrNet
                 _isCleaningServer = false;
             }
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
             Statistics.MarkEndOfSampling();
 #endif
         }

@@ -223,6 +223,9 @@ namespace PurrNet.Packing
             if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                 return value;
 
+            if (value is IDuplicate<T> duplicate)
+                return duplicate.Duplicate();
+
             using var tmpPacker = BitPackerPool.Get();
             Packer<T>.Write(tmpPacker, value);
             tmpPacker.ResetPositionAndMode(true);
@@ -231,11 +234,92 @@ namespace PurrNet.Packing
             return copy;
         }
 
+        /// <summary>
+        /// Modifies `target` to become `whatToCopy` without re-creating it.
+        /// </summary>
+        /// <returns>
+        /// If a modification happened
+        /// </returns>
+        public static bool Transform<T>(ref T target, T whatToCopy)
+        {
+            if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                bool equal = EqualityComparer<T>.Default.Equals(target, whatToCopy);
+                if (equal)
+                    return false;
+                target = whatToCopy;
+                return true;
+            }
+
+            if (target is IEquatable<T> comparable && comparable.Equals(whatToCopy))
+                return false;
+
+            using var packerA = BitPackerPool.Get();
+            using var packerB = BitPackerPool.Get();
+
+            Packer<T>.Write(packerA, target);
+            Packer<T>.Write(packerB, whatToCopy);
+
+            if (ArePackersEqual(packerA, packerB))
+                return false;
+
+            packerB.ResetPositionAndMode(true);
+            Packer<T>.Read(packerB, ref target);
+            return true;
+        }
+
+        [UsedByIL]
+        public static bool ArePackersEqual(BitPacker packerA, BitPacker packerB)
+        {
+            if (packerA.positionInBits != packerB.positionInBits)
+                return false;
+
+            int bits = packerA.positionInBits;
+
+            packerA.ResetPositionAndMode(true);
+            packerB.ResetPositionAndMode(true);
+
+            while (bits >= 64)
+            {
+                ulong aBits = packerA.ReadBits(64);
+                ulong bBits = packerB.ReadBits(64);
+
+                if (aBits != bBits)
+                {
+                    packerA.SetBitPosition(bits);
+                    packerB.SetBitPosition(bits);
+                    return false;
+                }
+
+                bits -= 64;
+            }
+
+            if (bits > 0)
+            {
+                var remainingBits = (byte)bits;
+                ulong aBits = packerA.ReadBits(remainingBits);
+                ulong bBits = packerB.ReadBits(remainingBits);
+                if (aBits != bBits)
+                {
+                    packerA.SetBitPosition(bits);
+                    packerB.SetBitPosition(bits);
+                    return false;
+                }
+            }
+
+            packerA.SetBitPosition(bits);
+            packerB.SetBitPosition(bits);
+            return true;
+        }
+
         [UsedByIL]
         public static bool AreEqual<T>(T a, T b)
         {
             if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                 return EqualityComparer<T>.Default.Equals(a, b);
+
+            if (a is IEquatable<T> comparable)
+                return comparable.Equals(b);
 
             using var packerA = BitPackerPool.Get();
             using var packerB = BitPackerPool.Get();

@@ -111,6 +111,8 @@ namespace PurrNet.Codegen
                 il.Emit(OpCodes.Brfalse, endOfFunction);
             }
 
+            GenerateSerializersProcessor.CreateGettersAndSetters(false, type);
+
             if (type.IsEnum)
             {
                 var underlyingType = type.GetField("value__").FieldType;
@@ -340,6 +342,8 @@ namespace PurrNet.Codegen
                 // if null return
                 il.Emit(OpCodes.Brfalse, endOfFunction);
             }
+
+            GenerateSerializersProcessor.CreateGettersAndSetters(true, type);
 
             if (type.IsEnum)
             {

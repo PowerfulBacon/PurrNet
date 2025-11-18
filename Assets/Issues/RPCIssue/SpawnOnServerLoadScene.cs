@@ -17,6 +17,11 @@ public class SpawnOnServerLoadScene : PurrMonoBehaviour
 
     private void OnSceneLoaded(SceneID scene, bool asserver)
     {
+        if (manager.sceneModule.TryGetSceneState(scene, out var sceneState) && sceneState.scene != gameObject.scene)
+        {
+            return;
+        }
+
         if (asserver)
         {
             Debug.Log("Server loaded scene, instantiating prefab");

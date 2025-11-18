@@ -42,7 +42,7 @@ namespace PurrNet.Codegen
                         if (methodReference.DeclaringType.FullName != objectClassFullName)
                             continue;
 
-                        if (methodReference.Name != "Instantiate" && methodReference.Name != "Destroy")
+                        if (methodReference.Name != "Instantiate" && methodReference.Name != "Destroy" && methodReference.Name != "DontDestroyOnLoad")
                             continue;
 
                         var resolved = methodReference.Resolve();

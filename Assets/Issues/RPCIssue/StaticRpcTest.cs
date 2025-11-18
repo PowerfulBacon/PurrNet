@@ -13,10 +13,17 @@ public class StaticRpcTest : PlayerIdentity<StaticRpcTest>
 
     private async void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A))
+        try
         {
-            var res = await TestCaller<StaticRpcTest>();
-            Debug.Log(res);
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                var res = await TestCaller<StaticRpcTest>();
+                Debug.Log(res);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
         }
     }
 

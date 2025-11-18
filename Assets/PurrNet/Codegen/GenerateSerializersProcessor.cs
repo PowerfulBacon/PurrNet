@@ -22,6 +22,7 @@ namespace PurrNet.Codegen
         Queue,
         Stack,
         DisposableList,
+        DisposableArray,
         DisposableHashSet,
         DisposableDictionary
     }
@@ -31,10 +32,10 @@ namespace PurrNet.Codegen
         public static bool ValideType(TypeReference type)
         {
             // Check if the type itself is an interface
-            if (type.Resolve()?.IsInterface == true)
+            /*if (type.Resolve()?.IsInterface == true)
             {
                 return false;
-            }
+            }*/
 
             bool isDelegate = PostProcessor.InheritsFrom(type.Resolve(), typeof(Delegate).FullName);
 
@@ -50,7 +51,7 @@ namespace PurrNet.Codegen
                 // Recursively validate all generic arguments
                 foreach (var argument in genericInstance.GenericArguments)
                 {
-                    if (argument.ContainsGenericParameter || argument.Resolve()?.IsInterface == true ||
+                    if (argument.ContainsGenericParameter ||/* argument.Resolve()?.IsInterface == true ||*/
                         !ValideType(argument))
                     {
                         return false;
@@ -121,14 +122,10 @@ namespace PurrNet.Codegen
             if (hasDontPack)
                 return;
 
-            if (resolvedType.IsInterface)
-                return;
-
             var bitStreamType = assembly.MainModule.GetTypeDefinition(typeof(BitPacker)).Import(assembly.MainModule);
             var mainmodule = assembly.MainModule;
 
-
-            if (hashOnly)
+            if (resolvedType.IsInterface || hashOnly)
             {
                 assembly.MainModule.Types.Add(serializerClass);
                 HandleHashOnly(assembly, type, serializerClass);
@@ -397,6 +394,13 @@ namespace PurrNet.Codegen
 
                     il.Emit(OpCodes.Call, genericRegisterDListMethod);
                     break;
+                case HandledGenericTypes.DisposableArray when importedType is GenericInstanceType stackType:
+                    var registerDisposableArrayMethod =
+                        packCollectionsType.GetMethod("RegisterDisposableArray", true).Import(module);
+                    var genericRegisterDArrayMethod = new GenericInstanceMethod(registerDisposableArrayMethod);
+                    genericRegisterDArrayMethod.GenericArguments.Add(stackType.GenericArguments[0]);
+                    il.Emit(OpCodes.Call, genericRegisterDArrayMethod);
+                    break;
                 case HandledGenericTypes.DisposableHashSet when importedType is GenericInstanceType stackType:
                     var registerDisposableHashSetMethod =
                         packCollectionsType.GetMethod("RegisterDisposableHashSet", true).Import(module);
@@ -485,14 +489,13 @@ namespace PurrNet.Codegen
             return baseType != null && HasInterface(baseType, interfaceType);
         }
 
-        private static MethodReference CreateSetterMethod(TypeDefinition parent, FieldDefinition field)
+        private static void CreateSetterMethod(TypeDefinition parent, FieldDefinition field)
         {
             var name = MakeFullNameValidCSharp($"Purrnet_Set_{field.Name}");
 
             foreach (var m in parent.Methods)
             {
-                if (m.Name == name)
-                    return m;
+                if (m.Name == name) return;
             }
 
             var method = new MethodDefinition(name, MethodAttributes.Public, parent.Module.TypeSystem.Void);
@@ -530,17 +533,15 @@ namespace PurrNet.Codegen
             setter.Emit(OpCodes.Ret);
 
             parent.Methods.Add(method);
-            return method;
         }
 
-        private static MethodReference CreateGetterMethod(TypeDefinition parent, FieldDefinition field)
+        private static void CreateGetterMethod(TypeDefinition parent, FieldDefinition field)
         {
             var name = MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}");
 
             foreach (var m in parent.Methods)
             {
-                if (m.Name == name)
-                    return m;
+                if (m.Name == name) return;
             }
 
             var method = new MethodDefinition(MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}"),
@@ -574,7 +575,6 @@ namespace PurrNet.Codegen
             getter.Emit(OpCodes.Ret); // Return the field value
 
             parent.Methods.Add(method);
-            return method;
         }
 
         public static bool DoesTypeHaveAttribute(TypeDefinition type, Type attribute)
@@ -653,6 +653,8 @@ namespace PurrNet.Codegen
                 // if returned false, just return
                 il.Emit(OpCodes.Brfalse, ret);
             }
+
+            CreateGettersAndSetters(isWriting, type);
 
             if (type.IsEnum)
             {
@@ -738,7 +740,11 @@ namespace PurrNet.Codegen
                 {
                     if (isWriting)
                     {
-                        var getter = CreateGetterMethod(type, field);
+                        var getterName = MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}");
+                        var getter = new MethodReference(getterName, fieldType, typeRef)
+                        {
+                            HasThis = true
+                        };
 
                         if (typeRef is GenericInstanceType genericInstanceType)
                         {
@@ -772,7 +778,14 @@ namespace PurrNet.Codegen
                         var variable = new VariableDefinition(fieldType);
                         method.Body.Variables.Add(variable);
 
-                        var setter = CreateSetterMethod(type, field);
+                        var setterName = MakeFullNameValidCSharp($"Purrnet_Set_{field.Name}");
+                        var setter = new MethodReference(setterName, type.Module.TypeSystem.Void, typeRef)
+                        {
+                            HasThis = true
+                        };
+
+                        setter.Parameters.Add(
+                            new ParameterDefinition("value", ParameterAttributes.None, fieldType));
 
                         if (typeRef is GenericInstanceType genericInstanceType)
                         {
@@ -821,6 +834,33 @@ namespace PurrNet.Codegen
             il.Emit(OpCodes.Call, readData);*/
 
             il.Append(ret);
+        }
+
+        public static void CreateGettersAndSetters(bool isWriting, TypeDefinition type)
+        {
+            for (var i = 0; i < type.Fields.Count; i++)
+            {
+                var field = type.Fields[i];
+                if (field.IsStatic)
+                    continue;
+
+                bool isDelegate = PostProcessor.InheritsFrom(field.FieldType.Resolve(), typeof(Delegate).FullName);
+
+                if (isDelegate)
+                    continue;
+
+                var ignore = ShouldIgnoreField(field);
+
+                if (ignore)
+                    continue;
+
+                if (!field.IsPublic)
+                {
+                    if (isWriting)
+                        CreateGetterMethod(type, field);
+                    else CreateSetterMethod(type, field);
+                }
+            }
         }
 
         private static void CallForStandalone(bool isWriting, MethodDefinition method, MethodReference serializeDirect,
@@ -1028,6 +1068,13 @@ namespace PurrNet.Codegen
                 type = HandledGenericTypes.DisposableList;
                 return true;
             }
+
+            if (IsGeneric(typeDef, typeof(DisposableArray<>)))
+            {
+                type = HandledGenericTypes.DisposableArray;
+                return true;
+            }
+
 
             if (IsGeneric(typeDef, typeof(DisposableHashSet<>)))
             {

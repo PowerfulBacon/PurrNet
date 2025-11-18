@@ -70,6 +70,8 @@ namespace PurrNet.Modules
             _scenePool = NetworkPoolManager.GetScenePool(scene, sceneId);
             _prefabsPool = NetworkPoolManager.GetPool(manager);
 
+            UnityLatestUpdate.TriggerPendingAsaps();
+
             SetupSceneObjects(scene);
         }
 
@@ -189,6 +191,8 @@ namespace PurrNet.Modules
             _playersManager.Unsubscribe<DespawnPacket>(OnDespawnPacket);
             _playersManager.Unsubscribe<FinishSpawnPacket>(OnFinishSpawnPacket);
             _playersManager.Unsubscribe<ChangeParentPacket>(OnParentChangedPacket);
+
+            NetworkPoolManager.RemovePool(_sceneId);
         }
 
         private void OnSpawnPacketBatch(PlayerID player, SpawnPacketBatch data, bool asServer)

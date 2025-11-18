@@ -11,7 +11,7 @@ public class SceneLoadingExample : MonoBehaviour
     [SerializeField] private bool isPubic;
     [SerializeField] private LoadSceneMode loadSceneMode;
 
-    [ContextMenu("Tests/Add All")]
+    [ContextMenu("Tests/Add All"), PurrButton]
     public void AddAllPlayers()
     {
         var scenes = NetworkManager.main.GetModule<ScenesModule>(true);
@@ -29,8 +29,8 @@ public class SceneLoadingExample : MonoBehaviour
         }
         else PurrLogger.LogError($"Scene with build index {sceneIndex} '{scene.name}' not found");
     }
-    
-    [ContextMenu("Tests/Move All Players")]
+
+    [ContextMenu("Tests/Move All Players"), PurrButton]
     public void MoveAllPlayers()
     {
         var scenes = NetworkManager.main.GetModule<ScenesModule>(true);
@@ -47,12 +47,12 @@ public class SceneLoadingExample : MonoBehaviour
             }
         }
     }
-    
-    [ContextMenu("Tests/Execute")]
+
+    [ContextMenu("Tests/Execute"), PurrButton]
     public void Execute()
     {
         var scenes = NetworkManager.main.GetModule<ScenesModule>(true);
-        
+
         if (load)
         {
             scenes.LoadSceneAsync(sceneIndex, new PurrSceneSettings
