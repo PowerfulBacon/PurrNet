@@ -1,3 +1,10 @@
+## [1.17.1-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.17.1-beta.3...v1.17.1-beta.4) (2025-11-19)
+
+
+### Bug Fixes
+
+* parenting was broken from previous NT rework ([9536c5d](https://github.com/PurrNet/PurrNet/commit/9536c5d180b7e7f22ccce5c7b452128c091434c0))
+
 ## [1.17.1-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.17.1-beta.2...v1.17.1-beta.3) (2025-11-19)
 
 
