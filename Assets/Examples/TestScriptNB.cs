@@ -21,7 +21,10 @@ public class TestScriptNB : NetworkIdentity
     protected override void OnSpawned()
     {
         if (isOwner)
+        {
+            Debug.Log("Spawning");
             UnityProxy.Instantiate(prefab, pos, Quaternion.Euler(rot), p_parent);
+        }
     }
 
     [PurrButton]

@@ -1,20 +1,5 @@
 using PurrNet;
-using PurrNet.Packing;
-using PurrNet.Pooling;
 using UnityEngine;
-
-public interface ISomeInterface : IPackedAuto
-{
-    public void DoSomething();
-}
-
-public struct SomeImpl : ISomeInterface
-{
-    public void DoSomething()
-    {
-        Debug.Log("SomeImpl");
-    }
-}
 
 public class TestingDeltas : NetworkIdentity
 {
@@ -59,16 +44,6 @@ public class TestingDeltas : NetworkIdentity
         Debug.Log(result);
     }
 
-    [ObserversRpc(bufferLast: true)]
-    private void SendSomething(DisposableList<ISomeInterface> list, ISomeInterface data)
-    {
-        using (list)
-        {
-            for (var i = 0; i < list.Count; i++)
-                list[i].DoSomething();
-        }
-    }
-
     [PurrButton]
     public void TakeOwnershipButton()
     {
@@ -77,10 +52,6 @@ public class TestingDeltas : NetworkIdentity
 
     protected override void OnSpawned()
     {
-        using var data = DisposableList<ISomeInterface>.Create();
-        data.Add(new SomeImpl());
-        SendSomething(data, null);
-
         if (_onSpawnException)
             throw new System.NotImplementedException();
     }
