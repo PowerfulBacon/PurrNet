@@ -1,3 +1,10 @@
+## [1.17.1-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.17.1-beta.5...v1.17.1-beta.6) (2025-11-19)
+
+
+### Bug Fixes
+
+* remove obsolete code ([20c381a](https://github.com/PurrNet/PurrNet/commit/20c381a564b35c93507147a6b42f0ff325341ae1))
+
 ## [1.17.1-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.17.1-beta.4...v1.17.1-beta.5) (2025-11-19)
 
 
