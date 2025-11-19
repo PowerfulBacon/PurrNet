@@ -636,7 +636,8 @@ namespace PurrNet.Modules
                 }
             }
 
-            _pendingSpawns.Add(data.packetIdx, createdNids);
+            if (!_pendingSpawns.TryAdd(data.packetIdx, createdNids))
+                PurrLogger.LogError($"Failed to add spawn packet `{data.packetIdx}` to pending spawns from player `{player}`.");
 
             if (flushData)
                 FlushSpawnPackets();
