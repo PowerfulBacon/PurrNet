@@ -551,7 +551,7 @@ namespace PurrNet
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                Debug.LogException(e);
             }
 
             for (var i = 0; i < _tickables.Count; i++)
@@ -563,7 +563,7 @@ namespace PurrNet
                 }
                 catch (Exception e)
                 {
-                    Debug.Log(e);
+                    Debug.LogException(e);
                 }
             }
         }
@@ -580,7 +580,7 @@ namespace PurrNet
                 }
                 catch (Exception e)
                 {
-                    Debug.Log(e);
+                    Debug.LogException(e);
                 }
 
                 for (var i = 0; i < _tickables.Count; i++)
@@ -592,7 +592,7 @@ namespace PurrNet
                     }
                     catch (Exception e)
                     {
-                        Debug.Log(e);
+                        Debug.LogException(e);
                     }
                 }
             }

@@ -18,10 +18,40 @@ public struct SomeImpl : ISomeInterface
 
 public class TestingDeltas : NetworkIdentity
 {
+    [SerializeField] private SyncBigData _bigData;
     [SerializeField] private bool _onSpawnException;
     [SerializeField] private bool _onSpawnVariantException;
     [SerializeField] private bool _onDespawnException;
     [SerializeField] private bool _onDespawnVariantException;
+
+    [PurrButton]
+    public void SetRandomData()
+    {
+        byte[] data = new byte[1024 * 1024];
+        for (var i = 0; i < data.Length; i++)
+            data[i] = (byte)Random.Range(0, 256);
+        _bigData.SetData(data);
+    }
+
+    [PurrButton]
+    public void PrintStartAndEndOfData()
+    {
+        var data = _bigData.data;
+
+        string result = "";
+
+        for (var i = 0; i < data.Length; i++)
+        {
+            result += data[i].ToString("X2") + "|";
+            if (i > 5 && i < data.Length - 5)
+            {
+                result += "...";
+                i = data.Length - 5;
+            }
+        }
+
+        Debug.Log(result);
+    }
 
     [ObserversRpc(bufferLast: true)]
     private void SendSomething(DisposableList<ISomeInterface> list, ISomeInterface data)

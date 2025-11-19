@@ -754,7 +754,6 @@ namespace PurrNet.Modules
                     catch (Exception e)
                     {
                         PurrLogger.LogException(e);
-                        PurrLogger.LogError($"{identity.GetType().Name} - {networkClass.GetType().Name} - {packet.rpcId}");
                     }
                 }
             }
