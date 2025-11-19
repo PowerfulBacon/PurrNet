@@ -554,6 +554,9 @@ namespace PurrNet.Modules
 
         private void HandleSpawn(PlayerID player, SpawnPacket data, bool flushData)
         {
+            if (_asServer)
+                data.packetIdx.scope = player;
+
             if (data.sceneId != _sceneId)
                 return;
 
@@ -868,7 +871,7 @@ namespace PurrNet.Modules
 
         private void SendSpawnPacket(PlayerID player, GameObjectPrototype prototype, List<NetworkIdentity> spawned, bool batched)
         {
-            var spawnId = new SpawnID(_nextPacketIdx++, player);
+            var spawnId = new SpawnID(_nextPacketIdx++, player, _playersManager.localPlayerId);
             var packet = new SpawnPacket
             {
                 sceneId = _sceneId,
@@ -1266,7 +1269,7 @@ namespace PurrNet.Modules
                 };
 
                 if (_asServer)
-                    _playersManager.Send(toComplete.player, packet);
+                    _playersManager.Send(toComplete.target, packet);
                 else _playersManager.SendToServer(packet);
             }
 
