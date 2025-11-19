@@ -1,3 +1,10 @@
+## [1.17.1-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.17.0...v1.17.1-beta.1) (2025-11-19)
+
+
+### Bug Fixes
+
+* network rule to allow target rpcs to target server ([e8339c3](https://github.com/PurrNet/PurrNet/commit/e8339c3b8b301ff4a2520fbb00554afc9752fc85))
+
 # [1.17.0](https://github.com/PurrNet/PurrNet/compare/v1.16.0...v1.17.0) (2025-11-18)
 
 
