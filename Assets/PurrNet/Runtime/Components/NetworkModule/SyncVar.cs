@@ -85,19 +85,11 @@ namespace PurrNet
             }
         }
 
-        BitPacker GetValue()
-        {
-            var packer = BitPackerPool.Get();
-            Packer<T>.Write(packer, _value);
-            return packer;
-        }
-
         public override void OnObserverAdded(PlayerID player, bool isSpawner)
         {
             if (isSpawner && ownerAuth && owner == player)
                 return;
 
-            using var v = GetValue();
             SendLatestState(player, _id, _value);
         }
 
