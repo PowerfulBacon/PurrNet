@@ -43,9 +43,9 @@ namespace PurrNet
     [Serializable]
     public class SyncBigData : NetworkModule, ITick
     {
+        [SerializeField] private SyncStatus _syncStatus;
         [SerializeField, PurrLock] private bool _ownerAuth;
         [SerializeField, Min(1)] private int _maxKBPerSec;
-        [SerializeField, HideInInspector] private SyncStatus _syncStatus;
 
         private List<BigDataState> _pending = new ();
 
@@ -58,13 +58,22 @@ namespace PurrNet
 
         public event Action<SyncStatus> onSyncStatusChanged;
 
+        /// <summary>
+        /// Is the data ready to be used?
+        /// Aka, download finished and uncompressed data is available.
+        /// </summary>
         public bool isDataReady => _syncStatus.percent == 0 || _syncStatus.isDone;
 
-        public ReadOnlySpan<byte> compressedData => _compressedData;
-        public ReadOnlySpan<byte> data => _uncompressedData;
+        /// <summary>
+        /// Download progress, between 0 and 1.
+        /// </summary>
+        public float progress => _syncStatus.percent;
 
-        private byte[] _uncompressedData = Array.Empty<byte>();
-        private byte[] _compressedData = Array.Empty<byte>();
+        public ArraySegment<byte> compressedData => _compressedData ?? Array.Empty<byte>();
+        public ArraySegment<byte> data => _uncompressedData ?? Array.Empty<byte>();
+
+        private byte[] _uncompressedData;
+        private byte[] _compressedData;
         private const int PART_SIZE = 1000;
         private int _totalParts;
 
@@ -78,11 +87,6 @@ namespace PurrNet
         {
             _ownerAuth = ownerAuth;
             _maxKBPerSec = Mathf.Max(1, maxKBPerSec);
-        }
-
-        public override void OnSpawn()
-        {
-            ReQueueEveryone();
         }
 
         public void ClearData()
@@ -123,6 +127,7 @@ namespace PurrNet
                 _totalParts = 0;
             }
 
+            OnDataReady();
             ReQueueEveryone();
         }
 
@@ -504,9 +509,14 @@ namespace PurrNet
             };
 
             if (syncStatus.isDone)
+            {
                 _uncompressedData = LZ4Pickler.Unpickle(_compressedData);
+                OnDataReady();
+            }
             onSyncStatusChanged?.Invoke(syncStatus);
         }
+
+        protected virtual void OnDataReady() {}
 
         delegate void ModifyEntry(ref BigDataState entry);
 
