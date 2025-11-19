@@ -94,6 +94,7 @@ namespace PurrNet
                 return;
             }
 
+            _syncStatus = default;
             _receivingState = default;
 
             if (!data.IsEmpty)
@@ -255,7 +256,13 @@ namespace PurrNet
                     parts.Add(j);
             }
 
-            const int MAX_ENTRIES = 150;
+            const int MAX_TOTAL_ENTRIES = 300;
+            if (parts.Count > MAX_TOTAL_ENTRIES)
+                parts.RemoveRange(MAX_TOTAL_ENTRIES, parts.Count - MAX_TOTAL_ENTRIES);
+
+            const int MAX_ENTRIES = 100;
+
+            bool isServerAndOwnerAuth = isServer && _ownerAuth && owner.HasValue;
 
             if (parts.Count > MAX_ENTRIES)
             {
@@ -267,25 +274,43 @@ namespace PurrNet
                     int start = i * MAX_ENTRIES;
                     for (int j = 0; j < MAX_ENTRIES; j++)
                         chunk.Add(parts[start + j]);
-                    RequestMissingParts(chunk);
+
+                    if (isServerAndOwnerAuth)
+                         RequestMissingParts(owner.Value, chunk);
+                    else RequestMissingParts(chunk);
                 }
 
                 parts.RemoveRange(chunks * MAX_ENTRIES, parts.Count - chunks * MAX_ENTRIES);
             }
 
             if (parts.Count > 0)
-                RequestMissingParts(parts);
+            {
+                if (isServerAndOwnerAuth)
+                     RequestMissingParts(owner.Value, parts);
+                else RequestMissingParts(parts);
+            }
+        }
+
+        [TargetRpc(Channel.Unreliable)]
+        private void RequestMissingParts(PlayerID owner, DisposableList<Size> parts)
+        {
+            HandlePending(parts, PlayerID.Server);
         }
 
         [ServerRpc(Channel.Unreliable)]
         private void RequestMissingParts(DisposableList<Size> parts, RPCInfo info = default)
+        {
+            HandlePending(parts, info.sender);
+        }
+
+        private void HandlePending(DisposableList<Size> parts, PlayerID sender)
         {
             using (parts)
             {
                 for (int i = _pending.Count - 1; i >= 0; i--)
                 {
                     var v = _pending[i];
-                    if (v.player == info.sender)
+                    if (v.player == sender)
                     {
                         for (var p = 0; p < parts.Count; p++)
                         {
@@ -424,6 +449,9 @@ namespace PurrNet
 
         private void InsertConfirmedPart(ByteData data, int partId)
         {
+            if (_receivingState.confirmedParts.isDisposed)
+                return;
+
             int toInsert = _receivingState.confirmedParts.Count;
             for (int i = 0; i < toInsert; i++)
             {

@@ -63,6 +63,12 @@ public class TestingDeltas : NetworkIdentity
         }
     }
 
+    [PurrButton]
+    public void TakeOwnershipButton()
+    {
+        TakeOwnership();
+    }
+
     protected override void OnSpawned()
     {
         using var data = DisposableList<ISomeInterface>.Create();

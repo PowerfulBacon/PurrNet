@@ -391,7 +391,7 @@ namespace PurrNet
         private readonly List<ITick> _tickables = new List<ITick>();
 
         [ContextMenu("PurrNet/Take Ownership"), PurrContextButton]
-        private void TakeOwnership()
+        protected void TakeOwnership()
         {
             GiveOwnership(localPlayer);
         }
