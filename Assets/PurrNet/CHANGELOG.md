@@ -1,3 +1,10 @@
+## [1.17.1-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.17.1-beta.1...v1.17.1-beta.2) (2025-11-19)
+
+
+### Bug Fixes
+
+* SyncBigData.cs now supports owner auth and switching ([80a6932](https://github.com/PurrNet/PurrNet/commit/80a693297d4ea51d38f2633a6d4fc1b408d0c266))
+
 ## [1.17.1-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.17.0...v1.17.1-beta.1) (2025-11-19)
 
 
