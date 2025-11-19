@@ -312,6 +312,16 @@ namespace PurrNet.Modules
             }
 
             ApplyParentChange(identity, parent, data.path, true);
+
+            if (_asServer)
+            {
+                // forward parent change to other observers
+                var observers = DisposableList<PlayerID>.Create(identity.observers);
+                observers.Remove(player);
+                if (_playersManager.localPlayerId.HasValue)
+                    observers.Remove(_playersManager.localPlayerId.Value);
+                _playersManager.Send(observers, data);
+            }
         }
 
         static NetworkIdentity ClosestParent(Transform trs)
@@ -637,7 +647,10 @@ namespace PurrNet.Modules
             }
 
             if (!_pendingSpawns.TryAdd(data.packetIdx, createdNids))
-                PurrLogger.LogError($"Failed to add spawn packet `{data.packetIdx}` to pending spawns from player `{player}`.");
+            {
+                var first = createdNids[0];
+                PurrLogger.LogError($"Failed to add spawn packet `{data.packetIdx}` to pending spawns from player `{player}`", first);
+            }
 
             if (flushData)
                 FlushSpawnPackets();
