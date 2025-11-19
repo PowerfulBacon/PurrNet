@@ -25,6 +25,12 @@ public class TestingDeltas : NetworkIdentity
     [SerializeField] private bool _onDespawnVariantException;
 
     [PurrButton]
+    public void ClearData()
+    {
+        _bigData.ClearData();
+    }
+
+    [PurrButton]
     public void SetRandomData()
     {
         byte[] data = new byte[1024 * 1024];
@@ -36,7 +42,7 @@ public class TestingDeltas : NetworkIdentity
     [PurrButton]
     public void PrintStartAndEndOfData()
     {
-        var data = _bigData.data;
+        var data = _bigData.isDataReady ? _bigData.data : _bigData.compressedData;
 
         string result = "";
 

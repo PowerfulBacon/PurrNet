@@ -12,6 +12,7 @@ namespace PurrNet
 {
     internal struct BigDataState
     {
+        public PackedUInt id;
         public PlayerID player;
         public int sentPartsCount;
         public DisposableList<int> confirmedParts;
@@ -20,6 +21,7 @@ namespace PurrNet
 
     internal struct BigDataReceiveState
     {
+        public PackedUInt id;
         public int totalParts;
         public int totalLength;
         public float timeSinceLastReceivedPart;
@@ -55,9 +57,14 @@ namespace PurrNet
         private BigDataReceiveState _receivingState;
 
         public event Action<SyncStatus> onSyncStatusChanged;
-        public ReadOnlySpan<byte> data => _data;
 
-        private byte[] _data;
+        public bool isDataReady => _syncStatus.percent == 0 || _syncStatus.isDone;
+
+        public ReadOnlySpan<byte> compressedData => _compressedData;
+        public ReadOnlySpan<byte> data => _uncompressedData;
+
+        private byte[] _uncompressedData = Array.Empty<byte>();
+        private byte[] _compressedData = Array.Empty<byte>();
         private const int PART_SIZE = 1000;
         private int _totalParts;
 
@@ -78,6 +85,11 @@ namespace PurrNet
             ReQueueEveryone();
         }
 
+        public void ClearData()
+        {
+            SetData(default);
+        }
+
         public void SetData(ReadOnlySpan<byte> data)
         {
             if (!isSpawned)
@@ -94,26 +106,31 @@ namespace PurrNet
                 return;
             }
 
+            ++_nextId;
             _syncStatus = default;
             _receivingState = default;
 
             if (!data.IsEmpty)
             {
-                _data = LZ4Pickler.Pickle(data, LZ4Level.L12_MAX);
-                _totalParts = (int)Math.Ceiling(data.Length / (double)PART_SIZE);
+                _uncompressedData = data.ToArray();
+                _compressedData = LZ4Pickler.Pickle(_uncompressedData, LZ4Level.L12_MAX);
+                _totalParts = (int)Math.Ceiling(_compressedData.Length / (double)PART_SIZE);
             }
             else
             {
-                _data = default;
+                _uncompressedData = Array.Empty<byte>();
+                _compressedData = Array.Empty<byte>();
                 _totalParts = 0;
             }
 
             ReQueueEveryone();
         }
 
+        private uint _nextId;
+
         public override void OnObserverAdded(PlayerID player)
         {
-            if (_data == null || _data.Length == 0)
+            if (_compressedData == null)
                 return;
 
             if (player == localPlayer)
@@ -123,6 +140,7 @@ namespace PurrNet
             _pending.Add(new BigDataState
             {
                 player = player,
+                id = _nextId,
                 confirmedParts = DisposableList<int>.Create(),
                 requestedParts = DisposableList<int>.Create()
             });
@@ -135,11 +153,11 @@ namespace PurrNet
 
         private void ReQueueEveryone()
         {
-            if (_data == null || _data.Length == 0)
-                return;
-
             _pending ??= new List<BigDataState>();
             _pending.Clear();
+
+            if (_compressedData == null)
+                return;
 
             if (isServer)
             {
@@ -153,6 +171,7 @@ namespace PurrNet
                     _pending.Add(new BigDataState
                     {
                         player = observer,
+                        id = _nextId,
                         confirmedParts = DisposableList<int>.Create(),
                         requestedParts = DisposableList<int>.Create()
                     });
@@ -163,6 +182,7 @@ namespace PurrNet
                 _pending.Add(new BigDataState
                 {
                     player = PlayerID.Server,
+                    id = _nextId,
                     confirmedParts = DisposableList<int>.Create(),
                     requestedParts = DisposableList<int>.Create()
                 });
@@ -171,18 +191,18 @@ namespace PurrNet
 
         private ByteData GetDataPart(int part)
         {
-            if (_data == null) return default;
+            if (_compressedData == null) return default;
 
             if (part >= _totalParts)
                 return default;
 
             if (part == _totalParts - 1)
             {
-                return new ByteData(_data, part * PART_SIZE,
-                    _data.Length - part * PART_SIZE);
+                return new ByteData(_compressedData, part * PART_SIZE,
+                    _compressedData.Length - part * PART_SIZE);
             }
 
-            return new ByteData(_data, part * PART_SIZE, PART_SIZE);
+            return new ByteData(_compressedData, part * PART_SIZE, PART_SIZE);
         }
 
         private float _partsCounter;
@@ -350,8 +370,8 @@ namespace PurrNet
                     var part = GetDataPart(requestedPartId);
 
                     if (state.player == PlayerID.Server)
-                        SendPartToServer(part, requestedPartId);
-                    else SendPartToTarget(state.player, part, requestedPartId);
+                        SendPartToServer(state.id, part, requestedPartId);
+                    else SendPartToTarget(state.player, state.id, part, requestedPartId);
 
                     state.requestedParts.RemoveAt(j--);
                     --partsBudget;
@@ -371,7 +391,7 @@ namespace PurrNet
                     var part = GetDataPart(state.sentPartsCount);
                     if (state.player == PlayerID.Server)
                     {
-                        SendPartToServer(part, state.sentPartsCount);
+                        SendPartToServer(state.id, part, state.sentPartsCount);
                     }
                     else
                     {
@@ -381,7 +401,7 @@ namespace PurrNet
                             if (!hasPart)
                                 break;
                         }
-                        SendPartToTarget(state.player, part, state.sentPartsCount);
+                        SendPartToTarget(state.player, state.id, part, state.sentPartsCount);
                     }
                     ++state.sentPartsCount;
                     --partsBudget;
@@ -393,33 +413,34 @@ namespace PurrNet
         private void SendDownloadStart(ref BigDataState state)
         {
             if (isServer)
-                 SendFirstPart(state.player, GetDataPart(0), _totalParts, _data.Length);
-            else SendFirstPartToServer(GetDataPart(0), _totalParts, _data.Length);
+                 SendFirstPart(state.player, state.id, GetDataPart(0), _totalParts, _compressedData.Length);
+            else SendFirstPartToServer(state.id, GetDataPart(0), _totalParts, _compressedData.Length);
             state.sentPartsCount++;
         }
 
         [ServerRpc]
-        private void SendFirstPartToServer(ByteData data, int totalParts, int totalLength)
+        private void SendFirstPartToServer(PackedUInt tid, ByteData data, int totalParts, int totalLength)
         {
             if (!_ownerAuth || !owner.HasValue)
                 return;
 
-            HandleFirstPart(data, totalParts, totalLength);
+            HandleFirstPart(tid, data, totalParts, totalLength);
             ConfirmFirstPartWithOwner(owner.Value);
             ReQueueEveryone();
         }
 
         [TargetRpc]
-        private void SendFirstPart(PlayerID player, ByteData data, int totalParts, int totalLength)
+        private void SendFirstPart(PlayerID player, PackedUInt tid, ByteData data, int totalParts, int totalLength)
         {
-            HandleFirstPart(data, totalParts, totalLength);
+            HandleFirstPart(tid, data, totalParts, totalLength);
             ConfirmFirstPart();
         }
 
-        private void HandleFirstPart(ByteData data, int totalParts, int totalLength)
+        private void HandleFirstPart(PackedUInt tid, ByteData data, int totalParts, int totalLength)
         {
             _receivingState = new BigDataReceiveState
             {
+                id = tid,
                 totalParts = totalParts,
                 totalLength = totalLength,
                 confirmedParts = DisposableList<int>.Create()
@@ -427,23 +448,27 @@ namespace PurrNet
 
             _totalParts = totalParts;
 
-            if (_data == null)
-                _data = new byte[totalLength];
-            else if (_data.Length != totalLength)
-                Array.Resize(ref _data, totalLength);
+            if (_compressedData == null)
+                _compressedData = new byte[totalLength];
+            else if (_compressedData.Length != totalLength)
+                Array.Resize(ref _compressedData, totalLength);
 
             InsertConfirmedPart(data, 0);
         }
 
         [ServerRpc(channel: Channel.Unreliable)]
-        private void SendPartToServer(ByteData data, int partId)
+        private void SendPartToServer(PackedUInt id, ByteData data, int partId)
         {
+            if (_receivingState.id != id)
+                return;
             InsertConfirmedPart(data, partId);
         }
 
         [TargetRpc(channel: Channel.Unreliable)]
-        private void SendPartToTarget(PlayerID player, ByteData data, int partId)
+        private void SendPartToTarget(PlayerID player, PackedUInt id, ByteData data, int partId)
         {
+            if (_receivingState.id != id)
+                return;
             InsertConfirmedPart(data, partId);
         }
 
@@ -469,13 +494,17 @@ namespace PurrNet
             _receivingState.timeSinceLastReceivedPart = Time.unscaledTime;
 
             int partSize = Mathf.Min(PART_SIZE, _receivingState.totalLength - partId * PART_SIZE);
-            Array.Copy(data.data, data.offset, _data, partId * PART_SIZE, partSize);
+            if (partSize > 0)
+                Array.Copy(data.data, data.offset, _compressedData, partId * PART_SIZE, partSize);
 
             syncStatus = new SyncStatus
             {
                 percent = _receivingState.confirmedParts.Count / (float)_receivingState.totalParts,
                 isDone = _receivingState.confirmedParts.Count == _receivingState.totalParts
             };
+
+            if (syncStatus.isDone)
+                _uncompressedData = LZ4Pickler.Unpickle(_compressedData);
             onSyncStatusChanged?.Invoke(syncStatus);
         }
 
