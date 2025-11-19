@@ -340,11 +340,16 @@ namespace PurrNet.Modules
                 {
                     var rawData = BroadcastModule.GetImmediateData(data);
                     var playersManager = networkManager.GetModule<PlayersManager>(true);
-                    playersManager.Send(data.targetPlayerId, rawData, signature.channel);
+
+                    bool isTargetingServer = data.targetPlayerId == PlayerID.Server;
+                    bool shouldExecute = isTargetingServer && rules.CanTargetServerWithTargetRpc();
+
+                    if (!isTargetingServer)
+                        playersManager.Send(data.targetPlayerId, rawData, signature.channel);
 
                     if (data is StaticRPCPacket staticRpc)
                         module.AppendToBufferedRPCs(staticRpc, signature);
-                    return false;
+                    return shouldExecute;
                 }
                 default: throw new ArgumentOutOfRangeException(nameof(signature.type));
             }

@@ -41,6 +41,10 @@ namespace PurrNet
         [UsedImplicitly]
         [Tooltip("This allows client to call any OwnerRpc without the need to set requireOwner to false")]
         public bool ignoreRequireOwnerAttribute;
+
+        [UsedImplicitly]
+        [Tooltip("This allows client to use a TargetRpc as a ServerRpc")]
+        public bool targetRpcsCanTargetServer;
     }
 
     [Serializable]
@@ -150,7 +154,8 @@ namespace PurrNet
         private RpcRules _defaultRpcRules = new RpcRules
         {
             ignoreRequireServerAttribute = false,
-            ignoreRequireOwnerAttribute = false
+            ignoreRequireOwnerAttribute = false,
+            targetRpcsCanTargetServer = false
         };
 
         [PurrReadOnly, UsedImplicitly]
@@ -310,6 +315,11 @@ namespace PurrNet
         public bool ShouldAlwaysIncludeDontDestroyOnLoadScene()
         {
             return _defaultSceneRules.alwaysIncludeDontDestroyOnLoadScene;
+        }
+
+        public bool CanTargetServerWithTargetRpc()
+        {
+            return _defaultRpcRules.targetRpcsCanTargetServer;
         }
     }
 }

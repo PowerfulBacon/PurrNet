@@ -1519,7 +1519,7 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   _bigData:
-    _ownerAuth: 0
+    _ownerAuth: 1
     _maxKBPerSec: 100
     _syncStatus:
       percent: 0

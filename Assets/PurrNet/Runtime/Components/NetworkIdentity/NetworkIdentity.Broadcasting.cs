@@ -494,9 +494,9 @@ namespace PurrNet
                 case RPCType.TargetRPC:
                 {
                     var rawData = BroadcastModule.GetImmediateData(data);
-                    SendToTarget(data.targetPlayerId, rawData, signature.channel);
+                    bool shouldExecute = SendToTargetOrServer(rules, data.targetPlayerId, rawData, signature.channel);
                     AppendToBufferedRPCs(signature, data, module);
-                    return false;
+                    return shouldExecute;
                 }
                 default: throw new ArgumentOutOfRangeException(nameof(signature.type));
             }
@@ -527,30 +527,27 @@ namespace PurrNet
                 networkManager.GetModule<PlayersManager>(true).SendRaw(player, data, method);
         }
 
-        [Preserve]
-        public void SendToTarget(PlayerID player, ByteData data, Channel method = Channel.ReliableOrdered)
+        bool SendToTargetOrServer(NetworkRules rules, PlayerID player, ByteData data, Channel method = Channel.ReliableOrdered)
         {
+            if (player == PlayerID.Server)
+            {
+                if (rules.CanTargetServerWithTargetRpc())
+                    return true;
+
+                PurrLogger.LogError($"Trying to send TargetRPC to server `{name}`" +
+                                    $" but `NetworkRules` don't allow for this.", this);
+                return false;
+            }
+
             if (!IsObserver(player))
             {
                 PurrLogger.LogError($"Trying to send TargetRPC to player '{player}' which is not observing '{name}'.",
                     this);
-                return;
+                return false;
             }
 
             Send(player, data, method);
-        }
-
-        [Preserve]
-        public void SendToTarget<T>(PlayerID player, T packet, Channel method = Channel.ReliableOrdered)
-        {
-            if (!IsObserver(player))
-            {
-                PurrLogger.LogError($"Trying to send TargetRPC to player '{player}' which is not observing '{name}'.",
-                    this);
-                return;
-            }
-
-            Send(player, packet, method);
+            return false;
         }
 
         public void Send<T>(IReadOnlyList<PlayerID> players, T data, Channel method = Channel.ReliableOrdered)
