@@ -249,8 +249,9 @@ namespace PurrNet.Modules
                 Despawn(r.gameObject, true, true);
             }
 
-            foreach (var defaultPrototype in _defaultPrototypes)
+            for (var i = 0; i < _defaultPrototypes.Count; i++)
             {
+                var defaultPrototype = _defaultPrototypes[i];
                 CreatePrototype(defaultPrototype, null);
                 defaultPrototype.Dispose();
             }
@@ -383,8 +384,12 @@ namespace PurrNet.Modules
 
             if (refreshVisibility && _asServer && _scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
             {
-                foreach (var player in players)
+                for (var i = 0; i < players.Count; i++)
+                {
+                    var player = players[i];
                     _visibility.RefreshVisibilityForGameObject(player, idTrs, parent);
+                }
+
                 FlushSpawnPackets();
             }
         }
@@ -455,8 +460,12 @@ namespace PurrNet.Modules
             if (_asServer && _scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
             {
                 var trs = identity.transform;
-                foreach (var player in players)
+                for (var i = 0; i < players.Count; i++)
+                {
+                    var player = players[i];
                     _visibility.RefreshVisibilityForGameObject(player, trs, closestNid);
+                }
+
                 FlushSpawnPackets();
             }
         }
@@ -483,8 +492,11 @@ namespace PurrNet.Modules
                         case > 0 when list[0] && _asServer &&
                                       _scenePlayers.TryGetPlayersInScene(_sceneId, out var players):
                         {
-                            foreach (var playerInScene in players)
+                            for (var i = 0; i < players.Count; i++)
+                            {
+                                var playerInScene = players[i];
                                 _visibility.RefreshVisibilityForGameObject(playerInScene, list[0].transform);
+                            }
                             FlushSpawnPackets();
                             break;
                         }
@@ -628,8 +640,11 @@ namespace PurrNet.Modules
                 {
                     if (_scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
                     {
-                        foreach (var playerInScene in players)
+                        for (var i = 0; i < players.Count; i++)
+                        {
+                            var playerInScene = players[i];
                             _visibility.RefreshVisibilityForGameObject(playerInScene, createdNids[0].transform);
+                        }
                     }
 
                     var lastNid = createdNids[^1];
@@ -639,8 +654,9 @@ namespace PurrNet.Modules
             }
             else
             {
-                foreach (var nid in createdNids)
+                for (var i = 0; i < createdNids.Count; i++)
                 {
+                    var nid = createdNids[i];
                     nid.SetIdentity(_manager, this, _sceneId, _asServer, false);
                     RegisterIdentity(nid, false);
                 }
@@ -738,8 +754,12 @@ namespace PurrNet.Modules
         {
             if (_asServer && _scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
             {
-                foreach (var player in players)
+                for (var index = 0; index < players.Count; index++)
+                {
+                    var player = players[index];
                     _visibility.RefreshVisibilityForGameObject(player, root);
+                }
+
                 FlushSpawnPackets();
             }
         }
@@ -792,8 +812,9 @@ namespace PurrNet.Modules
                 var children = ListPool<NetworkIdentity>.Instantiate();
                 GetComponentsInChildren(identity.gameObject, children);
 
-                foreach (var child in children)
+                for (var i = 0; i < children.Count; i++)
                 {
+                    var child = children[i];
                     child.TriggerOnObserverRemoved(player);
                     onObserverRemoved?.Invoke(player, child);
                 }
@@ -974,8 +995,12 @@ namespace PurrNet.Modules
             }
             else if (_scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
             {
-                foreach (var player in players)
+                for (var i = 0; i < players.Count; i++)
+                {
+                    var player = players[i];
                     _visibility.RefreshVisibilityForGameObject(player, gameObject.transform);
+                }
+
                 FlushSpawnPackets();
             }
 
@@ -1054,8 +1079,9 @@ namespace PurrNet.Modules
             using var directChildren = DisposableList<TransformIdentityPair>.Create(16);
             HierarchyPool.GetDirectChildrenWithRoot(gameObject.transform, directChildren);
 
-            foreach (var idPair in directChildren)
+            for (var i = 0; i < directChildren.Count; i++)
             {
+                var idPair = directChildren[i];
                 var p = idPair.identity.parent;
                 if (p) p.RemoveDirectChild(idPair.identity);
             }
