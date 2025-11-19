@@ -94,6 +94,8 @@ namespace PurrNet
                 return;
             }
 
+            _receivingState = default;
+
             if (!data.IsEmpty)
             {
                 _data = LZ4Pickler.Pickle(data, LZ4Level.L12_MAX);
@@ -299,6 +301,9 @@ namespace PurrNet
 
         private void SendRequestedParts(int partsBudget, BigDataState state)
         {
+            bool proxying = isServer && _syncStatus is { isDone: false, percent: > 0 } &&
+                            !_receivingState.confirmedParts.isDisposed;
+
             if (partsBudget > 0)
             {
                 for (int j = 0; j < state.requestedParts.Count; j++)
@@ -306,8 +311,23 @@ namespace PurrNet
                     if (partsBudget <= 0)
                         break;
 
-                    var part = GetDataPart(state.requestedParts[j]);
-                    SendPartToTarget(state.player, part, state.requestedParts[j]);
+                    int requestedPartId = state.requestedParts[j];
+
+                    // if we are proxying incomplete stuff
+                    if (proxying)
+                    {
+                        // make sure we have the part that was requested
+                        bool hasPart = _receivingState.confirmedParts.Contains(requestedPartId);
+                        if (!hasPart)
+                            continue;
+                    }
+
+                    var part = GetDataPart(requestedPartId);
+
+                    if (state.player == PlayerID.Server)
+                        SendPartToServer(part, requestedPartId);
+                    else SendPartToTarget(state.player, part, requestedPartId);
+
                     state.requestedParts.RemoveAt(j--);
                     --partsBudget;
                 }
@@ -316,12 +336,28 @@ namespace PurrNet
 
         private void SendNewParts(ref int partsBudget, ref BigDataState state)
         {
+            bool proxying = isServer && _syncStatus is { isDone: false, percent: > 0 } &&
+                            !_receivingState.confirmedParts.isDisposed;
+
             for (int j = partsBudget; j >= 0; --j)
             {
                 if (state.sentPartsCount < _totalParts)
                 {
                     var part = GetDataPart(state.sentPartsCount);
-                    SendPartToTarget(state.player, part, state.sentPartsCount);
+                    if (state.player == PlayerID.Server)
+                    {
+                        SendPartToServer(part, state.sentPartsCount);
+                    }
+                    else
+                    {
+                        if (proxying)
+                        {
+                            bool hasPart = _receivingState.confirmedParts.Contains(state.sentPartsCount);
+                            if (!hasPart)
+                                break;
+                        }
+                        SendPartToTarget(state.player, part, state.sentPartsCount);
+                    }
                     ++state.sentPartsCount;
                     --partsBudget;
                 }
@@ -331,12 +367,31 @@ namespace PurrNet
 
         private void SendDownloadStart(ref BigDataState state)
         {
-            SendFirstPart(state.player, GetDataPart(0), _totalParts, _data.Length);
+            if (isServer)
+                 SendFirstPart(state.player, GetDataPart(0), _totalParts, _data.Length);
+            else SendFirstPartToServer(GetDataPart(0), _totalParts, _data.Length);
             state.sentPartsCount++;
+        }
+
+        [ServerRpc]
+        private void SendFirstPartToServer(ByteData data, int totalParts, int totalLength)
+        {
+            if (!_ownerAuth || !owner.HasValue)
+                return;
+
+            HandleFirstPart(data, totalParts, totalLength);
+            ConfirmFirstPartWithOwner(owner.Value);
+            ReQueueEveryone();
         }
 
         [TargetRpc]
         private void SendFirstPart(PlayerID player, ByteData data, int totalParts, int totalLength)
+        {
+            HandleFirstPart(data, totalParts, totalLength);
+            ConfirmFirstPart();
+        }
+
+        private void HandleFirstPart(ByteData data, int totalParts, int totalLength)
         {
             _receivingState = new BigDataReceiveState
             {
@@ -353,7 +408,12 @@ namespace PurrNet
                 Array.Resize(ref _data, totalLength);
 
             InsertConfirmedPart(data, 0);
-            ConfirmFirstPart();
+        }
+
+        [ServerRpc(channel: Channel.Unreliable)]
+        private void SendPartToServer(ByteData data, int partId)
+        {
+            InsertConfirmedPart(data, partId);
         }
 
         [TargetRpc(channel: Channel.Unreliable)]
@@ -415,6 +475,16 @@ namespace PurrNet
             if (!ModifyState(info.sender, ConfirmFirstEntry))
             {
                 PurrLogger.LogError($"Failed to confirm first part for player {info.sender} for " +
+                                    $"`<b>{GetType().Name} {name}</b>` on `{parent.name}`", parent);
+            }
+        }
+
+        [TargetRpc]
+        private void ConfirmFirstPartWithOwner(PlayerID target)
+        {
+            if (!ModifyState(PlayerID.Server, ConfirmFirstEntry))
+            {
+                PurrLogger.LogError($"Failed to confirm first part for Server for " +
                                     $"`<b>{GetType().Name} {name}</b>` on `{parent.name}`", parent);
             }
         }
