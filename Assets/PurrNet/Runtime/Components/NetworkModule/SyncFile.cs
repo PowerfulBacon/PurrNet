@@ -34,7 +34,6 @@ namespace PurrNet
 
         private void FilePathChanged()
         {
-            Debug.Log($"File path changed to `{_filePath}`");
             if (!File.Exists(_filePath))
             {
                 SetData(default);

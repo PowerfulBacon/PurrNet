@@ -89,6 +89,12 @@ namespace PurrNet
             _maxKBPerSec = Mathf.Max(1, maxKBPerSec);
         }
 
+        public override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
+        {
+            if (!IsController(_ownerAuth))
+                _pending?.Clear();
+        }
+
         public void ClearData()
         {
             SetData(default);
@@ -504,8 +510,8 @@ namespace PurrNet
 
             syncStatus = new SyncStatus
             {
-                percent = _receivingState.confirmedParts.Count / (float)_receivingState.totalParts,
-                isDone = _receivingState.confirmedParts.Count == _receivingState.totalParts
+                percent = _receivingState.confirmedParts.Count / (float)Mathf.Max(1, _receivingState.totalParts),
+                isDone = _receivingState.confirmedParts.Count >= _receivingState.totalParts
             };
 
             if (syncStatus.isDone)
