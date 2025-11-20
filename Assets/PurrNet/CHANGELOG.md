@@ -1,3 +1,10 @@
+## [1.17.1-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.17.1-beta.6...v1.17.1-beta.7) (2025-11-19)
+
+
+### Bug Fixes
+
+* big data bugs and sync texture! ([ca70b79](https://github.com/PurrNet/PurrNet/commit/ca70b79dc55cb42937dcdc2f041c3c9a1ec0e5c2))
+
 ## [1.17.1-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.17.1-beta.5...v1.17.1-beta.6) (2025-11-19)
 
 
