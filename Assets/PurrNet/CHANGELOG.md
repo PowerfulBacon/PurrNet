@@ -1,3 +1,10 @@
+## [1.17.1-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.17.1-beta.7...v1.17.1-beta.8) (2025-11-20)
+
+
+### Bug Fixes
+
+* double download/update bug for big data ([a785e7f](https://github.com/PurrNet/PurrNet/commit/a785e7f7c5652f0452b552964f0bb614b9a7051f))
+
 ## [1.17.1-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.17.1-beta.6...v1.17.1-beta.7) (2025-11-19)
 
 
