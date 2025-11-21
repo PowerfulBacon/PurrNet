@@ -37,7 +37,6 @@ namespace PurrNet.Modules
             public BitPacker data;
         }
 
-        private readonly RPCModule _rpcModule;
         private readonly PlayersManager _playersManager;
         private readonly List<PlayerRpcBatchedData> _batches = new ();
 
