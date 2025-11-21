@@ -27,6 +27,11 @@ namespace PurrNet.Modules
         readonly GlobalOwnershipModule _ownership;
         readonly NetworkManager _manager;
 
+        private readonly RPCBatch _reliableBatch;
+        private readonly RPCBatch _unreliableBatch;
+        private readonly RPCBatch _reliableUnorderedBatch;
+        private readonly RPCBatch _unreliableSequencedBatch;
+
         public RPCModule(NetworkManager manager, PlayersManager playersManager, HierarchyFactory hierarchyModule,
             GlobalOwnershipModule ownerships, ScenesModule scenes)
         {
@@ -35,6 +40,11 @@ namespace PurrNet.Modules
             _hierarchyModule = hierarchyModule;
             _scenes = scenes;
             _ownership = ownerships;
+
+            _reliableBatch = new RPCBatch(_playersManager);
+            _unreliableBatch = new RPCBatch(_playersManager);
+            _reliableUnorderedBatch = new RPCBatch(_playersManager);
+            _unreliableSequencedBatch = new RPCBatch(_playersManager);
         }
 
         public void Enable(bool asServer)
@@ -894,11 +904,6 @@ namespace PurrNet.Modules
             packer.Dispose();
             packer = newPacker;
         }
-
-        private readonly RPCBatch _reliableBatch = new();
-        private readonly RPCBatch _unreliableBatch = new();
-        private readonly RPCBatch _reliableUnorderedBatch = new();
-        private readonly RPCBatch _unreliableSequencedBatch = new();
 
         private RPCBatch GetBatcher(Channel channel)
         {
