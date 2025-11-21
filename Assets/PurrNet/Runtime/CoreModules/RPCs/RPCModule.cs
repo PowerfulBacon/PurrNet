@@ -894,5 +894,35 @@ namespace PurrNet.Modules
             packer.Dispose();
             packer = newPacker;
         }
+
+        private readonly RPCBatch _reliableBatch = new();
+        private readonly RPCBatch _unreliableBatch = new();
+        private readonly RPCBatch _reliableUnorderedBatch = new();
+        private readonly RPCBatch _unreliableSequencedBatch = new();
+
+        private RPCBatch GetBatcher(Channel channel)
+        {
+            return channel switch
+            {
+                Channel.ReliableOrdered => _reliableBatch,
+                Channel.Unreliable => _unreliableBatch,
+                Channel.ReliableUnordered => _reliableUnorderedBatch,
+                Channel.UnreliableSequenced => _unreliableSequencedBatch,
+                _ => throw new ArgumentOutOfRangeException(nameof(channel), channel, null)
+            };
+        }
+
+        public void BatchToServer<T>(T packet, Channel signatureChannel) where T : IRpc
+        {
+            var batcher = GetBatcher(signatureChannel);
+            batcher.Queue(PlayerID.Server, packet);
+        }
+
+        public void BatchToTargets<T>(DisposableList<PlayerID> players, T packet, Channel signatureChannel) where T : IRpc
+        {
+            var batcher = GetBatcher(signatureChannel);
+            for (int i = 0; i < players.Count; i++)
+                batcher.Queue(players[i], packet);
+        }
     }
 }

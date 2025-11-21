@@ -258,7 +258,7 @@ namespace PurrNet
             return players;
         }
 
-        public void SendRPC<T>(Type statisticsParent, T packet, RPCSignature signature) where T : IRpc
+        public void SendRPC<T>(Type statisticsParent, RPCModule rpcModule, T packet, RPCSignature signature) where T : IRpc
         {
             switch (signature.type)
             {
@@ -272,7 +272,7 @@ namespace PurrNet
 #if UNITY_EDITOR || PURR_RUNTIME_PROFILING
                     Statistics.SentRPC(statisticsParent, signature.type, signature.rpcName, packet.rpcData.segment, this);
 #endif
-                    SendToServer(packet, signature.channel);
+                    rpcModule.BatchToServer(packet, signature.channel);
                     break;
                 case RPCType.ObserversRPC:
                 {
@@ -287,14 +287,14 @@ namespace PurrNet
                         for (var i = players.Count - 1; i >= 0; --i)
                             Statistics.SentRPC(statisticsParent, signature.type, signature.rpcName, packet.rpcData.segment, this);
 #endif
-                        Send(players, packet, signature.channel);
+                        rpcModule.BatchToTargets(players, packet, signature.channel);
                     }
                     else
                     {
 #if UNITY_EDITOR || PURR_RUNTIME_PROFILING
                         Statistics.SentRPC(statisticsParent, signature.type, signature.rpcName, packet.rpcData.segment, this);
 #endif
-                        SendToServer(packet, signature.channel);
+                        rpcModule.BatchToServer(packet, signature.channel);
                     }
 
                     break;
@@ -311,7 +311,7 @@ namespace PurrNet
                         for (var i = players.Count - 1; i >= 0; --i)
                             Statistics.SentRPC(statisticsParent, signature.type, signature.rpcName, packet.rpcData.segment, this);
 #endif
-                        Send(players, packet, signature.channel);
+                        rpcModule.BatchToTargets(players, packet, signature.channel);
                     }
                     else
                     {
@@ -327,7 +327,7 @@ namespace PurrNet
 #if UNITY_EDITOR || PURR_RUNTIME_PROFILING
                             Statistics.SentRPC(statisticsParent, signature.type, signature.rpcName, packet.rpcData.segment, this);
 #endif
-                            SendToServer(packet, signature.channel);
+                            rpcModule.BatchToServer(packet, signature.channel);
                         }
                     }
 
@@ -348,9 +348,9 @@ namespace PurrNet
             module.AppendToBufferedRPCs(packet, signature);
 
 #if UNITY_EDITOR || PURR_RUNTIME_PROFILING
-            SendRPC(_myType, packet, signature);
+            SendRPC(_myType, module, packet, signature);
 #else
-            SendRPC(null, packet, signature);
+            SendRPC(null, module, packet, signature);
 #endif
         }
 

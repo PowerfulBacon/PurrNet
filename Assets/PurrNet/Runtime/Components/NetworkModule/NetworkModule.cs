@@ -183,9 +183,9 @@ namespace PurrNet
             module.AppendToBufferedRPCs(packet, signature);
 
 #if UNITY_EDITOR || PURR_RUNTIME_PROFILING
-            parent.SendRPC(_myType, packet, signature);
+            parent.SendRPC(_myType, module, packet, signature);
 #else
-            parent.SendRPC(null, packet, signature);
+            parent.SendRPC(null, module, packet, signature);
 #endif
         }
 
