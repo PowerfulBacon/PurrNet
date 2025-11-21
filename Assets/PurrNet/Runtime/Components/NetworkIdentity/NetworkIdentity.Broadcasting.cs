@@ -10,7 +10,6 @@ using PurrNet.Modules;
 using PurrNet.Pooling;
 using PurrNet.Profiler;
 using PurrNet.Transports;
-using UnityEngine.Scripting;
 using Channel = PurrNet.Transports.Channel;
 
 #if !UNITASK_PURRNET_SUPPORT

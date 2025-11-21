@@ -259,12 +259,15 @@ namespace PurrNet
 
             var rpc = new ChildRPCPacket
             {
-                networkId = parent.id!.Value,
-                sceneId = parent.sceneId,
-                childId = (int)index,
-                rpcId = rpcId,
+                header = new NetworkModuleRPCHeader
+                {
+                    networkId = parent.id!.Value,
+                    sceneId = parent.sceneId,
+                    childId = (int)index,
+                    rpcId = rpcId,
+                    senderId = RPCModule.GetLocalPlayer(networkManager)
+                },
                 data = data.ToByteData(),
-                senderId = RPCModule.GetLocalPlayer(networkManager)
             };
 
             return rpc;

@@ -40,6 +40,11 @@ namespace PurrNet.Modules
         void PostFixedUpdate();
     }
 
+    internal interface IBatch
+    {
+        void BatchNetworkMessages();
+    }
+
     internal interface IDrawGizmos
     {
         void DrawGizmos();
