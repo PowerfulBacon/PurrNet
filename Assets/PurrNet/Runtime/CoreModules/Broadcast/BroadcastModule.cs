@@ -47,7 +47,7 @@ namespace PurrNet.Modules
             return stream.ToByteData();
         }
 
-        private static ByteData GetData<T>(T data)
+        public static ByteData GetData<T>(T data)
         {
             using var stream = BitPackerPool.Get();
             var typeId = Hasher.GetStableHashU32<T>();
@@ -56,6 +56,14 @@ namespace PurrNet.Modules
             Packer<T>.Write(stream, data);
 
             return stream.ToByteData();
+        }
+
+        public static void GetData<T>(BitPacker stream, T data)
+        {
+            var typeId = Hasher.GetStableHashU32<T>();
+
+            Packer<PackedUInt>.Write(stream, typeId);
+            Packer<T>.Write(stream, data);
         }
 
         static bool ShouldTrackType(Type type)

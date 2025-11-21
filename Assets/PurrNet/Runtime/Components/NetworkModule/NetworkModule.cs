@@ -183,9 +183,9 @@ namespace PurrNet
             module.AppendToBufferedRPCs(packet, signature);
 
 #if UNITY_EDITOR || PURR_RUNTIME_PROFILING
-            parent.SendRPC(_myType, packet, signature);
+            parent.SendRPC(_myType, module, packet, signature);
 #else
-            parent.SendRPC(null, packet, signature);
+            parent.SendRPC(null, module, packet, signature);
 #endif
         }
 
@@ -259,12 +259,15 @@ namespace PurrNet
 
             var rpc = new ChildRPCPacket
             {
-                networkId = parent.id!.Value,
-                sceneId = parent.sceneId,
-                childId = (int)index,
-                rpcId = rpcId,
+                header = new NetworkModuleRPCHeader
+                {
+                    networkId = parent.id!.Value,
+                    sceneId = parent.sceneId,
+                    childId = (int)index,
+                    rpcId = rpcId,
+                    senderId = RPCModule.GetLocalPlayer(networkManager)
+                },
                 data = data.ToByteData(),
-                senderId = RPCModule.GetLocalPlayer(networkManager)
             };
 
             return rpc;

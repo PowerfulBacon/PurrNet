@@ -95,6 +95,13 @@ namespace PurrNet.Modules
 
         public NetworkID? lastNid { get; private set; }
 
+        public int GetMTU(PlayerID player, Channel channel, bool asServer)
+        {
+            if (_playerToConnection.TryGetValue(player, out var p))
+                return _networkManager.transport.transport.GetMTU(p, channel, asServer);
+            return 1024;
+        }
+
         /// <summary>
         /// First callback for whne a new player has joined
         /// </summary>

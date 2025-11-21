@@ -123,6 +123,18 @@ namespace PurrNet.Transports
 
         readonly TcpConfig _tcpConfig = new(noDelay: true, sendTimeout: 0, receiveTimeout: 0);
 
+        public bool SupportsChannel(Channel channel)
+        {
+            if (channel != Channel.ReliableOrdered)
+                return false;
+            return true;
+        }
+
+        public int GetMTU(Connection target, Channel channel, bool asServer)
+        {
+            return 8192 * 2;
+        }
+
         private void Awake()
         {
             CleanupServer();

@@ -85,6 +85,25 @@ namespace PurrNet.Transports
             SetupCloud();
         }
 
+        public bool SupportsChannel(Channel channel)
+        {
+            return true;
+        }
+
+        public int GetMTU(Connection target, Channel channel, bool asServer)
+        {
+            try
+            {
+                if (asServer)
+                    return _server.GetPeerById(target.connectionId).GetMaxSinglePacketSize(ToDeliveryMethod(channel));
+                return _client.FirstPeer.GetMaxSinglePacketSize(ToDeliveryMethod(channel));
+            }
+            catch
+            {
+                return 1024;
+            }
+        }
+
         private void SetupCloud()
         {
             if (_automaticCloudSetups == null)
