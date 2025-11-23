@@ -1,10 +1,11 @@
-﻿using PurrNet.Packing;
+﻿using System;
+using PurrNet.Packing;
 using PurrNet.Transports;
 using PurrNet.Utils;
 
 namespace PurrNet
 {
-    public struct NetworkModuleRPCHeader : IPackedAuto
+    public struct NetworkModuleRPCHeader : IPackedAuto, IEquatable<NetworkModuleRPCHeader>
     {
         public NetworkID networkId;
         public SceneID sceneId;
@@ -16,6 +17,26 @@ namespace PurrNet
         public override string ToString()
         {
             return $"NetworkModuleRPCHeader: {{ sceneId: {sceneId}, networkId: {networkId}, senderId: {senderId}, targetId: {targetId}, childId: {childId}, rpcId: {rpcId} }}";
+        }
+
+        public bool Equals(NetworkModuleRPCHeader other)
+        {
+            return networkId.Equals(other.networkId) &&
+                   sceneId.Equals(other.sceneId) &&
+                   senderId.Equals(other.senderId) &&
+                   Nullable.Equals(targetId, other.targetId) &&
+                   rpcId.Equals(other.rpcId) &&
+                   childId.Equals(other.childId);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is NetworkModuleRPCHeader other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(networkId, sceneId, senderId, targetId, rpcId, childId);
         }
     }
 
