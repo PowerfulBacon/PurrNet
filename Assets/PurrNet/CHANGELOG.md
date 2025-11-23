@@ -1,3 +1,10 @@
+# [1.18.0-beta.2](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.1...v1.18.0-beta.2) (2025-11-23)
+
+
+### Bug Fixes
+
+* pooled array not being cleared broke some functions ([70b8121](https://github.com/PurrNet/PurrNet/commit/70b81214b858a2ac3d4917c1fa3d7eadd9a548f2))
+
 # [1.18.0-beta.1](https://github.com/PurrNet/PurrNet/compare/v1.17.1-beta.8...v1.18.0-beta.1) (2025-11-21)
 
 
