@@ -1610,7 +1610,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  canEnter: 0
+  canEnter: 1
 --- !u!114 &634351198
 MonoBehaviour:
   m_ObjectHideFlags: 0
