@@ -14,6 +14,7 @@ namespace PurrNet
         private readonly List<IPreFixedUpdate> _preFixedUpdatesListeners;
         private readonly List<IPostFixedUpdate> _posteFixedUpdatesListeners;
         private readonly List<IBatch> _batchListeners;
+        private readonly List<IPostBatch> _postBatchListeners;
         private readonly List<IDrawGizmos> _drawGizmosListeners;
         private readonly List<IUpdate> _updateListeners;
         private readonly List<ICleanup> _cleanupListeners;
@@ -34,6 +35,7 @@ namespace PurrNet
             _cleanupListeners = new List<ICleanup>();
             _drawGizmosListeners = new List<IDrawGizmos>();
             _batchListeners = new List<IBatch>();
+            _postBatchListeners = new List<IPostBatch>();
             _manager = manager;
             _asServer = asServer;
         }
@@ -98,6 +100,9 @@ namespace PurrNet
 
                 if (_modules[i] is IBatch batch)
                     _batchListeners.Add(batch);
+
+                if (_modules[i] is IPostBatch postBatch)
+                    _postBatchListeners.Add(postBatch);
             }
         }
 
@@ -155,6 +160,12 @@ namespace PurrNet
                 _batchListeners[i].BatchNetworkMessages();
         }
 
+        public void TriggerOnPostBatch()
+        {
+            for (int i = 0; i < _postBatchListeners.Count; i++)
+                _postBatchListeners[i].PostBatchNetworkMessages();
+        }
+
         public void TriggerOnDrawGizmos()
         {
             for (int i = 0; i < _drawGizmosListeners.Count; i++)
@@ -191,6 +202,8 @@ namespace PurrNet
             _preFixedUpdatesListeners.Clear();
             _posteFixedUpdatesListeners.Clear();
             _drawGizmosListeners.Clear();
+            _batchListeners.Clear();
+            _postBatchListeners.Clear();
         }
 
         public void AddModule(INetworkModule module)

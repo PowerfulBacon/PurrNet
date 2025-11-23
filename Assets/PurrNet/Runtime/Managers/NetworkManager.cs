@@ -1258,6 +1258,12 @@ namespace PurrNet
             if (clientConnected)
                 _clientModules.TriggerOnBatch();
 
+            if (serverConnected)
+                _serverModules.TriggerOnPostBatch();
+
+            if (clientConnected)
+                _clientModules.TriggerOnPostBatch();
+
             if (_transport)
                 _transport.transport.SendMessages(delta);
 

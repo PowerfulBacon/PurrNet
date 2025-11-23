@@ -45,6 +45,11 @@ namespace PurrNet.Modules
         void BatchNetworkMessages();
     }
 
+    internal interface IPostBatch
+    {
+        void PostBatchNetworkMessages();
+    }
+
     internal interface IDrawGizmos
     {
         void DrawGizmos();
