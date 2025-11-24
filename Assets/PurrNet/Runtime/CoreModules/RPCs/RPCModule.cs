@@ -11,7 +11,7 @@ using PurrNet.Utils;
 
 namespace PurrNet.Modules
 {
-    public class RPCModule : INetworkModule, IBatch
+    public class RPCModule : INetworkModule, IBatch, IFlushBatchedRPCs
     {
         public delegate void RPCPreProcessDelegate(ref ByteData rpcData, RPCSignature signature, ref BitPacker packer);
 
@@ -1036,6 +1036,9 @@ namespace PurrNet.Modules
             _childRpcBatch.Flush();
         }
 
-        public void FlushAll() => BatchNetworkMessages();
+        public void FlushBatchedRPCs()
+        {
+            BatchNetworkMessages();
+        }
     }
 }

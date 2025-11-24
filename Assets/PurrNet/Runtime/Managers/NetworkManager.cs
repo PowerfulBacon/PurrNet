@@ -1124,12 +1124,10 @@ namespace PurrNet
             modules.AddModule(scenePlayers);
 
             var hierarchyV2 = new HierarchyFactory(this, scenesModule, scenePlayers, playersManager);
-            var ownershipModule = new GlobalOwnershipModule(hierarchyV2, playersManager, scenePlayers, scenesModule);
+            var ownershipModule = new GlobalOwnershipModule(this, hierarchyV2, playersManager, scenePlayers, scenesModule);
             var rpcModule = new RPCModule(this, playersManager, hierarchyV2, ownershipModule, scenesModule);
             var networkTransform = new NetworkTransformFactory(scenesModule, scenePlayers, playersBroadcast, this, hierarchyV2);
             var colliderRollback = new ColliderRollbackFactory(tickManager, scenesModule);
-
-            ownershipModule.SetRPCModule(rpcModule);
 
             if (asServer)
             {
@@ -1287,6 +1285,18 @@ namespace PurrNet
 #if UNITY_EDITOR || PURR_RUNTIME_PROFILING
             Statistics.MarkEndOfSampling();
 #endif
+        }
+
+        public void FlushBatchedRPCs()
+        {
+            bool serverConnected = serverState == ConnectionState.Connected;
+            bool clientConnected = clientState == ConnectionState.Connected;
+
+            if (serverConnected)
+                _serverModules.FlushBatchRPCs();
+
+            if (clientConnected)
+                _clientModules.FlushBatchRPCs();
         }
 
         private void OnDestroy()

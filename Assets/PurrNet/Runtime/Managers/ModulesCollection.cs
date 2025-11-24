@@ -18,6 +18,7 @@ namespace PurrNet
         private readonly List<IDrawGizmos> _drawGizmosListeners;
         private readonly List<IUpdate> _updateListeners;
         private readonly List<ICleanup> _cleanupListeners;
+        private readonly List<IFlushBatchedRPCs> _preBroadcastSentListeners;
 
         private readonly IRegisterModules _manager;
         private readonly bool _asServer;
@@ -36,6 +37,7 @@ namespace PurrNet
             _drawGizmosListeners = new List<IDrawGizmos>();
             _batchListeners = new List<IBatch>();
             _postBatchListeners = new List<IPostBatch>();
+            _preBroadcastSentListeners = new List<IFlushBatchedRPCs>();
             _manager = manager;
             _asServer = asServer;
         }
@@ -103,6 +105,9 @@ namespace PurrNet
 
                 if (_modules[i] is IPostBatch postBatch)
                     _postBatchListeners.Add(postBatch);
+
+                if (_modules[i] is IFlushBatchedRPCs preBroadcastSent)
+                    _preBroadcastSentListeners.Add(preBroadcastSent);
             }
         }
 
@@ -172,6 +177,12 @@ namespace PurrNet
                 _drawGizmosListeners[i].DrawGizmos();
         }
 
+        public void FlushBatchRPCs()
+        {
+            for (int i = 0; i < _preBroadcastSentListeners.Count; i++)
+                _preBroadcastSentListeners[i].FlushBatchedRPCs();
+        }
+
         public bool Cleanup()
         {
             bool allTrue = true;
@@ -204,6 +215,7 @@ namespace PurrNet
             _drawGizmosListeners.Clear();
             _batchListeners.Clear();
             _postBatchListeners.Clear();
+            _preBroadcastSentListeners.Clear();
         }
 
         public void AddModule(INetworkModule module)

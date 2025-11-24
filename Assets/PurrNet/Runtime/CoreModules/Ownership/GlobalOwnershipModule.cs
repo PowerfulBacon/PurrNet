@@ -51,25 +51,20 @@ namespace PurrNet.Modules
         readonly PlayersManager _playersManager;
         readonly ScenePlayersModule _scenePlayers;
         readonly HierarchyFactory _hierarchy;
-        RPCModule _rpcs;
+        readonly NetworkManager _manager;
 
         readonly ScenesModule _scenes;
         readonly Dictionary<SceneID, SceneOwnership> _sceneOwnerships = new Dictionary<SceneID, SceneOwnership>();
 
         private bool _asServer;
 
-        public GlobalOwnershipModule(HierarchyFactory hierarchy,
+        public GlobalOwnershipModule(NetworkManager manager, HierarchyFactory hierarchy,
             PlayersManager players, ScenePlayersModule scenePlayers, ScenesModule scenes)
         {
             _hierarchy = hierarchy;
             _scenes = scenes;
             _playersManager = players;
             _scenePlayers = scenePlayers;
-        }
-
-        public void SetRPCModule(RPCModule rpcs)
-        {
-            _rpcs = rpcs;
         }
 
         public void Enable(bool asServer)
@@ -329,13 +324,10 @@ namespace PurrNet.Modules
         {
             var stateCount = data.state.Count;
 
-            _rpcs.FlushAll();
-
             for (var j = 0; j < stateCount; j++)
                 HandleOwnershipBatch(data.scene, data.state[j], true);
 
-            _rpcs.FlushAll();
-
+            _manager.FlushBatchedRPCs();
             if (asServer && _scenePlayers.TryGetPlayersInScene(data.scene, out var players))
             {
                 using var copy = DisposableList<PlayerID>.Create(players.Count);
@@ -347,8 +339,6 @@ namespace PurrNet.Modules
 
         private void OnOwnershipChange(PlayerID player, OwnershipChange change, bool asServer)
         {
-            _rpcs.FlushAll();
-
             var idCount = change.identities.Count;
 
             for (var j = 0; j < idCount; j++)
@@ -360,7 +350,7 @@ namespace PurrNet.Modules
                 }
             }
 
-            _rpcs.FlushAll();
+            _manager.FlushBatchedRPCs();
 
             if (asServer && _scenePlayers.TryGetPlayersInScene(change.sceneId, out var players))
             {
@@ -379,8 +369,6 @@ namespace PurrNet.Modules
         public void GiveOwnership(NetworkIdentity nid, PlayerID player, bool? propagateToChildren = null,
             bool? overrideExistingOwners = null, bool silent = false, bool isSpawner = false)
         {
-            _rpcs.FlushAll();
-
             if (!nid.id.HasValue)
             {
                 if (!silent)
@@ -479,7 +467,7 @@ namespace PurrNet.Modules
                 isSpawner = isSpawner
             };
 
-            _rpcs.FlushAll();
+            _manager.FlushBatchedRPCs();
 
             if (_asServer)
             {
@@ -529,8 +517,6 @@ namespace PurrNet.Modules
                 return;
             }
 
-            _rpcs.FlushAll();
-
             var children = ListPool<NetworkIdentity>.Instantiate();
             GetAllChildrenOrSelf(id, children, true);
 
@@ -567,7 +553,7 @@ namespace PurrNet.Modules
                 player = default
             };
 
-            _rpcs.FlushAll();
+            _manager.FlushBatchedRPCs();
 
             if (_asServer)
             {
@@ -619,8 +605,6 @@ namespace PurrNet.Modules
 
             using var _idsCache = DisposableList<NetworkID>.Create();
 
-            _rpcs.FlushAll();
-
             for (var i = 0; i < children.Count; i++)
             {
                 var identity = children[i];
@@ -644,8 +628,6 @@ namespace PurrNet.Modules
                 }
             }
 
-            _rpcs.FlushAll();
-
             //TODO: compress _idsCache using RLE
             var data = new OwnershipChange
             {
@@ -654,6 +636,8 @@ namespace PurrNet.Modules
                 isAdding = false,
                 player = default
             };
+
+            _manager.FlushBatchedRPCs();
 
             if (_asServer)
             {
@@ -684,7 +668,7 @@ namespace PurrNet.Modules
             if (_pendingOwnershipChanges.Count == 0)
                 return;
 
-            _rpcs.FlushAll();
+            _manager.FlushBatchedRPCs();
 
             foreach (var (player, changes) in _pendingOwnershipChanges)
             {
