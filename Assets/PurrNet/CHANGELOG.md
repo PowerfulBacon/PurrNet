@@ -1,3 +1,10 @@
+# [1.18.0-beta.4](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.3...v1.18.0-beta.4) (2025-11-24)
+
+
+### Bug Fixes
+
+* rpc batching and ownership ([bd35c80](https://github.com/PurrNet/PurrNet/commit/bd35c80434a2c1de288fd1a75b504f77ae4e010d))
+
 # [1.18.0-beta.3](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.2...v1.18.0-beta.3) (2025-11-23)
 
 
