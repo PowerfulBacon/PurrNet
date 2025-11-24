@@ -1035,5 +1035,7 @@ namespace PurrNet.Modules
             _normalRpcBatch.Flush();
             _childRpcBatch.Flush();
         }
+
+        public void FlushAll() => BatchNetworkMessages();
     }
 }

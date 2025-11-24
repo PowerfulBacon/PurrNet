@@ -52,6 +52,7 @@ namespace PurrNet.Modules
         readonly PlayersManager _playersManager;
         readonly ScenePlayersModule _scenePlayers;
         readonly HierarchyFactory _hierarchy;
+        readonly RPCModule _rpcs;
 
         readonly ScenesModule _scenes;
         readonly Dictionary<SceneID, SceneOwnership> _sceneOwnerships = new Dictionary<SceneID, SceneOwnership>();
@@ -59,9 +60,10 @@ namespace PurrNet.Modules
         private bool _asServer;
 
         public GlobalOwnershipModule(HierarchyFactory hierarchy,
-            PlayersManager players, ScenePlayersModule scenePlayers, ScenesModule scenes)
+            PlayersManager players, ScenePlayersModule scenePlayers, ScenesModule scenes, RPCModule rpcs)
         {
             _hierarchy = hierarchy;
+            _rpcs = rpcs;
             _scenes = scenes;
             _playersManager = players;
             _scenePlayers = scenePlayers;
@@ -329,6 +331,8 @@ namespace PurrNet.Modules
 
             if (asServer && _scenePlayers.TryGetPlayersInScene(data.scene, out var players))
             {
+                _rpcs.FlushAll();
+
                 using var copy = DisposableList<PlayerID>.Create(players.Count);
                 copy.AddRange(players);
                 copy.Remove(player);
@@ -351,6 +355,7 @@ namespace PurrNet.Modules
 
             if (asServer && _scenePlayers.TryGetPlayersInScene(change.sceneId, out var players))
             {
+                _rpcs.FlushAll();
                 using var copy = DisposableList<PlayerID>.Create(players.Count);
                 copy.AddRange(players);
                 copy.Remove(player);
@@ -366,6 +371,7 @@ namespace PurrNet.Modules
         public void GiveOwnership(NetworkIdentity nid, PlayerID player, bool? propagateToChildren = null,
             bool? overrideExistingOwners = null, bool silent = false, bool isSpawner = false)
         {
+
             if (!nid.id.HasValue)
             {
                 if (!silent)
@@ -464,6 +470,8 @@ namespace PurrNet.Modules
                 isSpawner = isSpawner
             };
 
+            _rpcs.FlushAll();
+
             if (_asServer)
             {
                 if (_scenePlayers.TryGetPlayersInScene(nid.sceneId, out var players))
@@ -548,6 +556,8 @@ namespace PurrNet.Modules
                 player = default
             };
 
+            _rpcs.FlushAll();
+
             if (_asServer)
             {
                 if (_scenePlayers.TryGetPlayersInScene(id.sceneId, out var players))
@@ -621,6 +631,8 @@ namespace PurrNet.Modules
                 }
             }
 
+            _rpcs.FlushAll();
+
             //TODO: compress _idsCache using RLE
             var data = new OwnershipChange
             {
@@ -658,6 +670,8 @@ namespace PurrNet.Modules
         {
             if (_pendingOwnershipChanges.Count == 0)
                 return;
+
+            _rpcs.FlushAll();
 
             foreach (var (player, changes) in _pendingOwnershipChanges)
             {
