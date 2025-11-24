@@ -51,7 +51,7 @@ namespace PurrNet.Modules
         readonly PlayersManager _playersManager;
         readonly ScenePlayersModule _scenePlayers;
         readonly HierarchyFactory _hierarchy;
-        readonly RPCModule _rpcs;
+        RPCModule _rpcs;
 
         readonly ScenesModule _scenes;
         readonly Dictionary<SceneID, SceneOwnership> _sceneOwnerships = new Dictionary<SceneID, SceneOwnership>();
@@ -59,13 +59,17 @@ namespace PurrNet.Modules
         private bool _asServer;
 
         public GlobalOwnershipModule(HierarchyFactory hierarchy,
-            PlayersManager players, ScenePlayersModule scenePlayers, ScenesModule scenes, RPCModule rpcs)
+            PlayersManager players, ScenePlayersModule scenePlayers, ScenesModule scenes)
         {
             _hierarchy = hierarchy;
-            _rpcs = rpcs;
             _scenes = scenes;
             _playersManager = players;
             _scenePlayers = scenePlayers;
+        }
+
+        public void SetRPCModule(RPCModule rpcs)
+        {
+            _rpcs = rpcs;
         }
 
         public void Enable(bool asServer)

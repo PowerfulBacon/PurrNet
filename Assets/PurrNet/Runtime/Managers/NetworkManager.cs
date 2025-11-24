@@ -1129,6 +1129,8 @@ namespace PurrNet
             var networkTransform = new NetworkTransformFactory(scenesModule, scenePlayers, playersBroadcast, this, hierarchyV2);
             var colliderRollback = new ColliderRollbackFactory(tickManager, scenesModule);
 
+            ownershipModule.SetRPCModule(rpcModule);
+
             if (asServer)
             {
                 if (_onClientSpawnValidate != null)
