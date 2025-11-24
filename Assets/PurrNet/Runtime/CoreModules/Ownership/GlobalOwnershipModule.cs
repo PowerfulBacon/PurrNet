@@ -61,6 +61,7 @@ namespace PurrNet.Modules
         public GlobalOwnershipModule(NetworkManager manager, HierarchyFactory hierarchy,
             PlayersManager players, ScenePlayersModule scenePlayers, ScenesModule scenes)
         {
+            _manager = manager;
             _hierarchy = hierarchy;
             _scenes = scenes;
             _playersManager = players;
