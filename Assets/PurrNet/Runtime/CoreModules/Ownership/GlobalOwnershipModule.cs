@@ -329,13 +329,15 @@ namespace PurrNet.Modules
         {
             var stateCount = data.state.Count;
 
+            _rpcs.FlushAll();
+
             for (var j = 0; j < stateCount; j++)
                 HandleOwnershipBatch(data.scene, data.state[j], true);
 
+            _rpcs.FlushAll();
+
             if (asServer && _scenePlayers.TryGetPlayersInScene(data.scene, out var players))
             {
-                _rpcs.FlushAll();
-
                 using var copy = DisposableList<PlayerID>.Create(players.Count);
                 copy.AddRange(players);
                 copy.Remove(player);
@@ -345,6 +347,8 @@ namespace PurrNet.Modules
 
         private void OnOwnershipChange(PlayerID player, OwnershipChange change, bool asServer)
         {
+            _rpcs.FlushAll();
+
             var idCount = change.identities.Count;
 
             for (var j = 0; j < idCount; j++)
@@ -356,9 +360,10 @@ namespace PurrNet.Modules
                 }
             }
 
+            _rpcs.FlushAll();
+
             if (asServer && _scenePlayers.TryGetPlayersInScene(change.sceneId, out var players))
             {
-                _rpcs.FlushAll();
                 using var copy = DisposableList<PlayerID>.Create(players.Count);
                 copy.AddRange(players);
                 copy.Remove(player);
@@ -374,6 +379,7 @@ namespace PurrNet.Modules
         public void GiveOwnership(NetworkIdentity nid, PlayerID player, bool? propagateToChildren = null,
             bool? overrideExistingOwners = null, bool silent = false, bool isSpawner = false)
         {
+            _rpcs.FlushAll();
 
             if (!nid.id.HasValue)
             {
@@ -523,6 +529,8 @@ namespace PurrNet.Modules
                 return;
             }
 
+            _rpcs.FlushAll();
+
             var children = ListPool<NetworkIdentity>.Instantiate();
             GetAllChildrenOrSelf(id, children, true);
 
@@ -610,6 +618,8 @@ namespace PurrNet.Modules
             GetAllChildrenOrSelf(id, children, propagateToChildren);
 
             using var _idsCache = DisposableList<NetworkID>.Create();
+
+            _rpcs.FlushAll();
 
             for (var i = 0; i < children.Count; i++)
             {
