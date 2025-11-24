@@ -165,17 +165,5 @@ namespace PurrNet.Packing
             }
             else value = oldvalue;
         }
-
-        [UsedByIL]
-        public static void Write(this BitPacker packer, HalfQuaternion value)
-        {
-            value.Normalize();
-
-            Packer<Half>.Write(packer, value.x);
-            Packer<Half>.Write(packer, value.y);
-            Packer<Half>.Write(packer, value.z);
-
-            packer.Write(value.w < 0);
-        }
     }
 }
