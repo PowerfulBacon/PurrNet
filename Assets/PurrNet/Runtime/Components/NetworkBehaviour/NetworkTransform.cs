@@ -1,3 +1,9 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using PurrNet.Collections;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
@@ -7,7 +13,7 @@ using UnityEngine.Serialization;
 
 namespace PurrNet
 {
-    public sealed class NetworkTransform : NetworkIdentity
+    public sealed class NetworkTransform : NetworkIdentity, INetworkTransform
     {
         [Header("What to Sync")]
         [Tooltip("Whether to sync the position of the transform. And if so, in what space.")]

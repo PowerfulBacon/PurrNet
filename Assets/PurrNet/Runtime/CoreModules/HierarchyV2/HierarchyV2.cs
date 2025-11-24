@@ -37,20 +37,61 @@ namespace PurrNet.Modules
 
         private bool _areSceneObjectsReady;
 
+        /// <summary>
+        /// Invoked to validate the spawning of a client-side object before it is instantiated.
+        /// This event allows implementing custom rules to determine whether the object spawn
+        /// should proceed or be rejected.
+        /// </summary>
         public event ValidateSpawnAction onClientSpawnValidate;
 
+        /// <summary>
+        /// Fired when a NetworkIdentity is added to the hierarchy early in its lifecycle,
+        /// before the standard identity initialization or observer assignment processes occur.
+        /// This event is typically leveraged to perform custom logic or setup on new identities
+        /// before they are fully managed by the hierarchy.
+        /// </summary>
         public event IdentityAction onEarlyIdentityAdded;
 
+        /// <summary>
+        /// Triggered when a new identity is added to the network hierarchy.
+        /// This event is invoked after the identity has been initialized and is ready to participate
+        /// in the network lifecycle, such as spawning, synchronization, or visibility evaluation.
+        /// </summary>
         public event IdentityAction onIdentityAdded;
 
+        /// <summary>
+        /// Triggered when a network identity is removed from the hierarchy.
+        /// This event provides an opportunity to handle cleanup or additional logic
+        /// associated with the removal of a network identity from the system.
+        /// </summary>
         public event IdentityAction onIdentityRemoved;
 
+        /// <summary>
+        /// Triggered whenever a new observer is added to a networked identity.
+        /// This event allows for custom logic to be executed when an observer becomes associated
+        /// with a specific networked object within the hierarchy.
+        /// </summary>
         public event ObserverAction onObserverAdded;
 
+        /// <summary>
+        /// Triggered after an observer has been added to a networked entity during the late evaluation phase.
+        /// This event allows for additional logic to be executed after the observer is linked to the entity,
+        /// such as custom visibility or state synchronization actions.
+        /// </summary>
         public event ObserverAction onLateObserverAdded;
 
+        /// <summary>
+        /// Triggered when an observer is removed from the system or process.
+        /// This event can be used to handle any necessary cleanup or updates
+        /// associated with the removal of the observer.
+        /// </summary>
         public event ObserverAction onObserverRemoved;
 
+        /// <summary>
+        /// Triggered when a spawn packet is sent to a client. This event provides details about the player,
+        /// the scene, and the spawned object's identifier, enabling the implementation of custom behavior
+        /// upon the transmission of spawn data.
+        /// </summary>
         public event SpawnedAction onSentSpawnPacket;
 
         private bool _isPlayerReady;
@@ -262,6 +303,11 @@ namespace PurrNet.Modules
             return true;
         }
 
+        /// <summary>
+        /// Indicates whether the system is ready to spawn networked objects.
+        /// This flag is typically set when the necessary conditions for spawning
+        /// objects, such as proper initialization and synchronization, have been met.
+        /// </summary>
         public bool isReadyToSpawn { get; private set; }
 
         private void OnNetworkIDReceived(NetworkID nid)
@@ -714,6 +760,12 @@ namespace PurrNet.Modules
             Despawn(identity.gameObject, true, true);
         }
 
+        /// <summary>
+        /// Evaluates the visibility of all spawned network identities for all players in the current scene.
+        /// This operation gathers the list of players currently present in the scene and applies a visibility evaluation
+        /// for each player based on the active set of spawned network identities.
+        /// Intended to be called when visibility recalculations are required, such as after significant state changes.
+        /// </summary>
         public void EvaluateAllVisibilities()
         {
             if (_asServer && _scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
@@ -753,6 +805,12 @@ namespace PurrNet.Modules
             HashSetPool<NetworkIdentity>.Destroy(roots);
         }
 
+        /// <summary>
+        /// Evaluates the visibility of a hierarchy of objects rooted at the specified transform
+        /// for all players currently present in the associated scene. This operation is intended
+        /// to be used on the server to ensure that visibility states are up-to-date for all relevant players.
+        /// </summary>
+        /// <param name="root">The root transform of the hierarchy of objects to evaluate visibility for.</param>
         public void EvaluateVisibility(Transform root)
         {
             if (_asServer && _scenePlayers.TryGetPlayersInScene(_sceneId, out var players))
@@ -767,6 +825,14 @@ namespace PurrNet.Modules
             }
         }
 
+        /// <summary>
+        /// Evaluates the visibility of the specified root transform for a given player.
+        /// This method checks if the player is loaded into the current scene and refreshes the visibility
+        /// of the specified GameObject hierarchy. It is generally used to update client visibility
+        /// when changes occur in the scene or the player's network state.
+        /// </summary>
+        /// <param name="player">The unique identifier of the player for whom the visibility is being evaluated.</param>
+        /// <param name="root">The root transform of the GameObject hierarchy whose visibility is being evaluated.</param>
         public void EvaluateVisibility(PlayerID player, Transform root)
         {
             if (_asServer && _scenePlayers.IsPlayerLoadedInScene(player, _sceneId))
@@ -1374,6 +1440,14 @@ namespace PurrNet.Modules
 #endif
         }
 
+        /// <summary>
+        /// Creates a new GameObject instance based on the provided prototype and optionally associates it with a list of network identities.
+        /// This method handles initializing the GameObject's position, rotation, scale, and parenting. If activation conditions are met,
+        /// the created GameObject is activated before being returned.
+        /// </summary>
+        /// <param name="prototype">The prototype containing the configuration details for the GameObject to be created.</param>
+        /// <param name="createdNids">An optional list of NetworkIdentity objects that will be associated with the created GameObject. Can be null.</param>
+        /// <returns>The newly created GameObject configured according to the given prototype, or null if creation fails.</returns>
         public GameObject CreatePrototype(GameObjectPrototype prototype, List<NetworkIdentity> createdNids)
         {
             var pair = new PoolPair(_scenePool, _prefabsPool);
@@ -1550,6 +1624,20 @@ namespace PurrNet.Modules
             }
         }
 
+        /// <summary>
+        /// Attempts to retrieve the <see cref="NetworkIdentity"/> associated with the specified <see cref="NetworkID"/>.
+        /// This operation checks the local hierarchy for the identity and, if running in a server-client scenario,
+        /// delegates the lookup to another hierarchy when necessary.
+        /// </summary>
+        /// <param name="id">The unique identifier of the requested network identity.</param>
+        /// <param name="identity">
+        /// When the method returns, contains the <see cref="NetworkIdentity"/> associated with the specified <see cref="NetworkID"/>
+        /// if the lookup was successful; otherwise, <c>null</c>.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the <see cref="NetworkIdentity"/> was successfully retrieved;
+        /// otherwise, <c>false</c>.
+        /// </returns>
         public bool TryGetIdentity(NetworkID id, out NetworkIdentity identity)
         {
             if (_spawnedIdentitiesMap.TryGetValue(id, out identity))
