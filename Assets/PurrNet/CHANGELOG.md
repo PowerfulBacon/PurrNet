@@ -1,3 +1,10 @@
+# [1.18.0-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.5...v1.18.0-beta.6) (2025-11-24)
+
+
+### Bug Fixes
+
+* merging of additions was too aggressive ([77549fe](https://github.com/PurrNet/PurrNet/commit/77549fe8a30873b638a717110dd7d5a6a4ef81ac))
+
 # [1.18.0-beta.5](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.4...v1.18.0-beta.5) (2025-11-24)
 
 
