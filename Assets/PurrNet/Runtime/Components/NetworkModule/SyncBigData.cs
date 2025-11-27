@@ -95,6 +95,15 @@ namespace PurrNet
                 _pending?.Clear();
         }
 
+        public override void OnOwnerDisconnected(PlayerID ownerId)
+        {
+            // if owner disconnected and we have partial data, clear it since we can't download it anymore'
+            if (_ownerAuth && _syncStatus is { percent: > 0, isDone: false })
+            {
+                ClearData();
+            }
+        }
+
         public void ClearData()
         {
             SetData(default);
