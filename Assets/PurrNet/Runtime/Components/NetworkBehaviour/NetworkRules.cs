@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using PurrNet.Utils;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.TextCore.Text;
 
 namespace PurrNet
 {
@@ -139,6 +140,8 @@ namespace PurrNet
     [CreateAssetMenu(fileName = "NetworkRules", menuName = "PurrNet/Network Rules", order = -201)]
     public class NetworkRules : ScriptableObject
     {
+        public bool enableHostMigration;
+
         [SerializeField]
         private SpawnRules _defaultSpawnRules = new SpawnRules
         {
@@ -320,6 +323,11 @@ namespace PurrNet
         public bool CanTargetServerWithTargetRpc()
         {
             return _defaultRpcRules.targetRpcsCanTargetServer;
+        }
+
+        public bool IsHostMigrationEnabled()
+        {
+            return enableHostMigration;
         }
     }
 }
