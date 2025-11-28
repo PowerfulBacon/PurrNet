@@ -200,15 +200,19 @@ namespace PurrNet.Transports
         {
             clientState = ConnectionState.Disconnected;
             TriggerConnectionStateEvent(false);
-            onDisconnected?.Invoke(new Connection(peer.Id), DisconnectReason.Timeout, false);
-        }
+            var reason = disconnectinfo.Reason switch
+            {
+                LiteNetLib.DisconnectReason.Timeout => DisconnectReason.Timeout,
+                LiteNetLib.DisconnectReason.RemoteConnectionClose => DisconnectReason.ServerRequest,
+                _ => DisconnectReason.ClientRequest
+            };
 
-        private Connection? _clientToServerConn;
+            onDisconnected?.Invoke(new Connection(peer.Id), reason, false);
+        }
 
         private void OnClientConnected(NetPeer peer)
         {
             var conn = new Connection(peer.Id);
-            _clientToServerConn = conn;
             clientState = ConnectionState.Connected;
             TriggerConnectionStateEvent(false);
             onConnected?.Invoke(conn, false);
@@ -228,8 +232,14 @@ namespace PurrNet.Transports
                 }
             }
 
-            onDisconnected?.Invoke(conn, DisconnectReason.Timeout, true);
-            _clientToServerConn = null;
+            var reason = disconnectinfo.Reason switch
+            {
+                LiteNetLib.DisconnectReason.Timeout => DisconnectReason.Timeout,
+                LiteNetLib.DisconnectReason.RemoteConnectionClose => DisconnectReason.ClientRequest,
+                _ => DisconnectReason.ServerRequest
+            };
+
+            onDisconnected?.Invoke(conn, reason, true);
         }
 
         private void OnServerConnected(NetPeer peer)
@@ -297,12 +307,6 @@ namespace PurrNet.Transports
 
             clientState = ConnectionState.Disconnecting;
             TriggerConnectionStateEvent(false);
-
-            if (_clientToServerConn.HasValue)
-            {
-                onDisconnected?.Invoke(_clientToServerConn.Value, DisconnectReason.ClientRequest, false);
-                _clientToServerConn = null;
-            }
 
             _client.DisconnectAll();
             _client.Stop();
