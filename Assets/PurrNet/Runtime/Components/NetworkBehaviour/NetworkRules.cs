@@ -3,7 +3,6 @@ using JetBrains.Annotations;
 using PurrNet.Utils;
 using UnityEngine;
 using UnityEngine.Serialization;
-using UnityEngine.TextCore.Text;
 
 namespace PurrNet
 {
@@ -104,10 +103,7 @@ namespace PurrNet
             set => sceneCleanupModeOnDisconnect = value ? SceneCleanupMode.OnlineOnly : SceneCleanupMode.Off;
         }
 
-        public readonly void OnBeforeSerialize()
-        {
-            return;
-        }
+        public readonly void OnBeforeSerialize() { }
 
         public void OnAfterDeserialize()
         {
@@ -140,7 +136,7 @@ namespace PurrNet
     [CreateAssetMenu(fileName = "NetworkRules", menuName = "PurrNet/Network Rules", order = -201)]
     public class NetworkRules : ScriptableObject
     {
-        public bool enableHostMigration;
+        private bool _enableHostMigration;
 
         [SerializeField]
         private SpawnRules _defaultSpawnRules = new SpawnRules
@@ -327,7 +323,7 @@ namespace PurrNet
 
         public bool IsHostMigrationEnabled()
         {
-            return enableHostMigration;
+            return _enableHostMigration;
         }
     }
 }

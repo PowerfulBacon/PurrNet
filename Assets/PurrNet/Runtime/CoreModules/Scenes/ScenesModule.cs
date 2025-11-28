@@ -148,6 +148,16 @@ namespace PurrNet.Modules
                 return;
             }
 
+            if (!isPublic)
+            {
+                var rules = _networkManager.networkRules;
+                if (rules && rules.IsHostMigrationEnabled())
+                {
+                    PurrLogger.LogWarning("Host migration is enabled, so scenes cannot be set to private");
+                    isPublic = true;
+                }
+            }
+
             state.settings.isPublic = isPublic;
             _scenes[scene] = state;
 
@@ -646,6 +656,8 @@ namespace PurrNet.Modules
                 return null;
             }
 
+            HostMigrationCompatibility(ref settings);
+
             var idToAssign = GetNextID();
             var parameters = new LoadSceneParameters(settings.mode, settings.physicsMode);
 
@@ -694,6 +706,19 @@ namespace PurrNet.Modules
             }
 
             return op;
+        }
+
+        private void HostMigrationCompatibility(ref PurrSceneSettings settings)
+        {
+            if (!settings.isPublic)
+            {
+                var rules = _networkManager.networkRules;
+                if (rules && rules.IsHostMigrationEnabled())
+                {
+                    PurrLogger.LogWarning("Host migration is enabled, so scenes cannot be set to private");
+                    settings.isPublic = true;
+                }
+            }
         }
 
         /// <summary>
