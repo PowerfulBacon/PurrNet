@@ -6,6 +6,17 @@ using UnityEngine.Serialization;
 
 namespace PurrNet
 {
+
+    [Serializable]
+    public struct HostMigrationRules
+    {
+        [UsedImplicitly] public bool enabled;
+        [Tooltip("If enabled, new server will also start as client (server+client)")]
+        [UsedImplicitly] public bool migrateAsHost;
+        [UsedImplicitly] public bool identitiesAlwaysVisible;
+        [UsedImplicitly] public bool scenesAlwaysPublic;
+    }
+
     public enum SceneCleanupMode
     {
         /// <summary>
@@ -136,7 +147,14 @@ namespace PurrNet
     [CreateAssetMenu(fileName = "NetworkRules", menuName = "PurrNet/Network Rules", order = -201)]
     public class NetworkRules : ScriptableObject
     {
-        private bool _enableHostMigration;
+        [SerializeField]
+        private HostMigrationRules _hostMigrationRules = new HostMigrationRules
+        {
+            enabled = false,
+            migrateAsHost = true,
+            identitiesAlwaysVisible = true,
+            scenesAlwaysPublic = true
+        };
 
         [SerializeField]
         private SpawnRules _defaultSpawnRules = new SpawnRules
@@ -323,7 +341,17 @@ namespace PurrNet
 
         public bool IsHostMigrationEnabled()
         {
-            return _enableHostMigration;
+            return _hostMigrationRules.enabled;
+        }
+
+        public bool ShouldForceVisibilityToAlwaysVisible()
+        {
+            return _hostMigrationRules.identitiesAlwaysVisible;
+        }
+
+        public bool ShouldForceSceneToAlwaysPublic()
+        {
+            return _hostMigrationRules.scenesAlwaysPublic;
         }
     }
 }

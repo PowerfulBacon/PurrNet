@@ -1402,6 +1402,22 @@ namespace PurrNet
         }
 
         /// <summary>
+        /// Transitions the current NetworkManager instance into acting as a server.
+        /// This method is used to promote the local instance from a client state
+        /// into a server state, enabling server-specific functionalities.
+        /// Great for host migration.
+        /// </summary>
+        [ContextMenu("Promote To Server"), PurrContextButton]
+        public void PromoteToServer()
+        {
+            if (serverState != ConnectionState.Disconnected)
+            {
+                PurrLogger.LogError("Cannot promote to server, you already are a server.");
+                return;
+            }
+        }
+
+        /// <summary>
         /// Starts as both a server and a client.
         /// isServer and isClient will both be true after connection is established.
         /// </summary>
@@ -1535,6 +1551,7 @@ namespace PurrNet
 
         private void OnLostConnection(Connection conn, DisconnectReason reason, bool asServer)
         {
+            Debug.Log(reason);
             if (asServer)
                 _serverModules.OnLostConnection(conn, true);
             else

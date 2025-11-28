@@ -151,7 +151,7 @@ namespace PurrNet.Modules
             if (!isPublic)
             {
                 var rules = _networkManager.networkRules;
-                if (rules && rules.IsHostMigrationEnabled())
+                if (rules && rules.ShouldForceSceneToAlwaysPublic())
                 {
                     PurrLogger.LogWarning("Host migration is enabled, so scenes cannot be set to private");
                     isPublic = true;
@@ -713,7 +713,7 @@ namespace PurrNet.Modules
             if (!settings.isPublic)
             {
                 var rules = _networkManager.networkRules;
-                if (rules && rules.IsHostMigrationEnabled())
+                if (rules && rules.ShouldForceSceneToAlwaysPublic())
                 {
                     PurrLogger.LogWarning("Host migration is enabled, so scenes cannot be set to private");
                     settings.isPublic = true;

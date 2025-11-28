@@ -1,4 +1,4 @@
-using System;
+using JetBrains.Annotations;
 using PurrNet;
 using PurrNet.Logging;
 using PurrNet.Packing;
@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace System.Runtime.CompilerServices
 {
+    [UsedImplicitly]
     internal static class IsExternalInit { }
 }
 
@@ -22,7 +23,6 @@ public class TestScriptNB : NetworkIdentity
     {
         if (isOwner)
         {
-            Debug.Log("Spawning");
             UnityProxy.Instantiate(prefab, pos, Quaternion.Euler(rot), p_parent);
         }
     }

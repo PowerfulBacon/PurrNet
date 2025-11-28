@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28e93bf2b6064364aa5fd430134916ac, type: 3}
   m_Name: Unsafe-HostMigration
   m_EditorClassIdentifier: 
-  enableHostMigration: 1
+  _hostMigrationRules:
+    enabled: 1
+    migrateAsHost: 1
   _defaultSpawnRules:
     spawnAuth: 1
     despawnAuth: -1

@@ -841,15 +841,15 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Server: PURRNET_CONNECTION_DEBUG;EDGEGAP_PLUGIN_SERVERS
-    Standalone: STEAMWORKS_NET;EDGEGAP_PLUGIN_SERVERS
+    Server: PURRNET_CONNECTION_DEBUG;EDGEGAP_PLUGIN_SERVERS;PURR_CONTEXT_BUTTONS
+    Standalone: STEAMWORKS_NET;EDGEGAP_PLUGIN_SERVERS;PURR_CONTEXT_BUTTONS;PURR_BUTTONS
     WebGL: STEAMWORKS_NET;PURRNET_DEBUG_NETWORK_IDENTITY;PURR_CONTEXT_BUTTONS
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
     Android: 1
     Server: 1
-    Standalone: 1
+    Standalone: 0
   il2cppCompilerConfiguration:
     Standalone: 2
   il2cppCodeGeneration: {}
