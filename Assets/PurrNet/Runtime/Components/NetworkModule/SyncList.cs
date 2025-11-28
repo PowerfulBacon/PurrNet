@@ -198,7 +198,7 @@ namespace PurrNet
 
         private void HandleFullState(List<T> newList)
         {
-            if (isHost) return;
+            if (isHost || IsController(ownerAuth)) return;
 
             bool listChanged = false;
 
