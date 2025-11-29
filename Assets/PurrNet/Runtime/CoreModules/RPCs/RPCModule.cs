@@ -11,7 +11,7 @@ using PurrNet.Utils;
 
 namespace PurrNet.Modules
 {
-    public class RPCModule : INetworkModule, IBatch, IFlushBatchedRPCs
+    public class RPCModule : INetworkModule, IBatch, IFlushBatchedRPCs, IPromoteToServerModule
     {
         public delegate void RPCPreProcessDelegate(ref ByteData rpcData, RPCSignature signature, ref BitPacker packer);
 
@@ -45,6 +45,15 @@ namespace PurrNet.Modules
             _staticRpcBatch = new RPCBatch<StaticRPCHeader>(_playersManager, ReiceStaticBatchedRPC);
         }
 
+        public void PromoteToServerModule()
+        {
+            _normalRpcBatch.Clear();
+            _childRpcBatch.Clear();
+            _staticRpcBatch.Clear();
+        }
+
+        public void PostPromoteToServerModule() { }
+
         private void ReiceStaticBatchedRPC(PlayerID sender, StaticRPCHeader header, ByteData content, bool asServer)
         {
             ReceiveStaticRPC(sender, new StaticRPCPacket
@@ -71,7 +80,6 @@ namespace PurrNet.Modules
                 data = content
             }, asServer);
         }
-
 
         public void Enable(bool asServer)
         {

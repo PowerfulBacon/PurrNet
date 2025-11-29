@@ -4,7 +4,9 @@ using Newtonsoft.Json;
 using PurrNet.Authentication;
 using PurrNet.Logging;
 using PurrNet.Packing;
+using PurrNet.Pooling;
 using PurrNet.Transports;
+using UnityEngine;
 
 namespace PurrNet.Modules
 {
@@ -70,7 +72,7 @@ namespace PurrNet.Modules
 
     public delegate void OnPlayerEvent(PlayerID player);
 
-    public class PlayersManager : INetworkModule, IConnectionListener, IPlayerBroadcaster
+    public class PlayersManager : INetworkModule, IConnectionListener, IPlayerBroadcaster, IPromoteToServerModule
     {
         private readonly AuthModule _authModule;
         private readonly BroadcastModule _broadcastModule;
@@ -289,6 +291,23 @@ namespace PurrNet.Modules
             SendUserLeftToAllClients(playerId);
         }
 
+        public void PromoteToServerModule()
+        {
+            Disable(false);
+            _asServer = true;
+            Enable(true);
+
+            lastNid = null;
+            localPlayerId = null;
+        }
+
+        public void PostPromoteToServerModule()
+        {
+            using var keys = DisposableList<Connection>.Create(_connectionToPlayerId.Keys);
+            for (var i = 0; i < keys.Count; i++)
+                _networkManager.TriggerConnectionLeft(keys[i]);
+        }
+
         public void Enable(bool asServer)
         {
             _asServer = asServer;
@@ -303,6 +322,21 @@ namespace PurrNet.Modules
                 _broadcastModule.Subscribe<PlayerSnapshotEvent>(OnPlayerSnapshotEvent);
                 _broadcastModule.Subscribe<PlayerJoinedEvent>(OnPlayerJoinedEvent);
                 _broadcastModule.Subscribe<PlayerLeftEvent>(OnPlayerLeftEvent);
+            }
+        }
+
+        public void Disable(bool asServer)
+        {
+            if (asServer)
+            {
+                _authModule.onConnection -= OnClientAuthed;
+            }
+            else
+            {
+                _broadcastModule.Unsubscribe<ServerLoginResponse>(OnClientLoginResponse);
+                _broadcastModule.Unsubscribe<PlayerSnapshotEvent>(OnPlayerSnapshotEvent);
+                _broadcastModule.Unsubscribe<PlayerJoinedEvent>(OnPlayerJoinedEvent);
+                _broadcastModule.Unsubscribe<PlayerLeftEvent>(OnPlayerLeftEvent);
             }
         }
 
@@ -447,21 +481,6 @@ namespace PurrNet.Modules
 
             onPlayerLeft?.Invoke(playerId, _asServer);
             onPostPlayerLeft?.Invoke(playerId, _asServer);
-        }
-
-        public void Disable(bool asServer)
-        {
-            if (asServer)
-            {
-                _authModule.onConnection -= OnClientAuthed;
-            }
-            else
-            {
-                _broadcastModule.Unsubscribe<ServerLoginResponse>(OnClientLoginResponse);
-                _broadcastModule.Unsubscribe<PlayerSnapshotEvent>(OnPlayerSnapshotEvent);
-                _broadcastModule.Unsubscribe<PlayerJoinedEvent>(OnPlayerJoinedEvent);
-                _broadcastModule.Unsubscribe<PlayerLeftEvent>(OnPlayerLeftEvent);
-            }
         }
 
         public void OnConnected(Connection conn, bool asServer)

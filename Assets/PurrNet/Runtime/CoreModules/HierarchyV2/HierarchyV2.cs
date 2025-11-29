@@ -17,10 +17,11 @@ namespace PurrNet.Modules
 
     public delegate void SpawnDelegate(GameObject instance, bool isSceneObject);
 
-    public class HierarchyV2
+    public class HierarchyV2 : IPromoteToServerModule
     {
+        private bool _asServer;
+
         private readonly NetworkManager _manager;
-        private readonly bool _asServer;
         private readonly SceneID _sceneId;
         private readonly Scene _scene;
         private readonly ScenePlayersModule _scenePlayers;
@@ -114,6 +115,37 @@ namespace PurrNet.Modules
             UnityLatestUpdate.TriggerPendingAsaps();
 
             SetupSceneObjects(scene);
+        }
+
+        public void PromoteToServerModule()
+        {
+            _asServer = true;
+        }
+
+        public void PostPromoteToServerModule()
+        {
+            for (var i = 0; i < _spawnedIdentities.Count; i++)
+            {
+                var identity = _spawnedIdentities[i];
+                if (identity.IsSpawned(false))
+                {
+                    identity.TriggerDespawnEvent(false);
+                    identity.SetIsSpawned(false, false);
+                }
+            }
+
+            for (var i = 0; i < _spawnedIdentities.Count; i++)
+            {
+                var identity = _spawnedIdentities[i];
+                identity.SetIsSpawned(true, true);
+                identity.TriggerSpawnEvent(true);
+            }
+
+            for (var i = 0; i < _spawnedIdentities.Count; i++)
+            {
+                var identity = _spawnedIdentities[i];
+                identity.TriggerPromoteToServer();
+            }
         }
 
         readonly List<GameObjectPrototype> _defaultPrototypes = new List<GameObjectPrototype>();

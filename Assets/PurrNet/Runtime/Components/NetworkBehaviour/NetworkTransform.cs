@@ -1,10 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using PurrNet.Collections;
-using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Utils;
@@ -249,10 +242,7 @@ namespace PurrNet
             _wasOnSpawnedCalled = true;
 
             if (!networkManager.TryGetModule<NetworkTransformFactory>(asServer, out var factory))
-            {
-                PurrLogger.LogError("NetworkTransformFactory not found");
                 return;
-            }
 
             if (!factory.TryGetModule(sceneId, out var ntModule))
                 return;
@@ -273,7 +263,10 @@ namespace PurrNet
             _wasOnSpawnedCalled = false;
 
             if (!networkManager.TryGetModule<NetworkTransformFactory>(asServer, out var factory))
-                return;
+            {
+                if (!networkManager.TryGetModule<NetworkTransformFactory>(true, out factory))
+                    return;
+            }
 
             if (!factory.TryGetModule(sceneId, out var ntModule))
                 return;

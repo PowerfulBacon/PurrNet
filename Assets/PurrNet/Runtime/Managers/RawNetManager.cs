@@ -388,6 +388,10 @@ namespace PurrNet
             RenewSubscriptions(asServer);
         }
 
+        public bool isPromotingToServer => false;
+
+        public ITransport currentTransport => _transport ? _transport.transport : null;
+
         private void RenewSubscriptions(bool asServer)
         {
             if (!TryGetModule(out BroadcastModule broadcaster, asServer))

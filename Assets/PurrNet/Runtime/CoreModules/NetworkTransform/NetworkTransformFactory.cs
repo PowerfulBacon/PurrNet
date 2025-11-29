@@ -3,7 +3,7 @@ using PurrNet.Logging;
 
 namespace PurrNet.Modules
 {
-    public class NetworkTransformFactory : INetworkModule, IPostBatch
+    public class NetworkTransformFactory : INetworkModule, IPostBatch, IPromoteToServerModule
     {
         readonly ScenesModule _scenes;
         readonly ScenePlayersModule _scenePlayers;
@@ -22,6 +22,18 @@ namespace PurrNet.Modules
             _broadcaster = broadcaster;
             _manager = manager;
             _factory = factory;
+        }
+
+        public void PromoteToServerModule()
+        {
+            for (var i = 0; i < _rawModules.Count; i++)
+                _rawModules[i].PromoteToServerModule();
+        }
+
+        public void PostPromoteToServerModule()
+        {
+            for (var i = 0; i < _rawModules.Count; i++)
+                _rawModules[i].PostPromoteToServerModule();
         }
 
         public void Enable(bool asServer)

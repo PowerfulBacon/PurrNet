@@ -182,7 +182,8 @@ namespace PurrNet.Modules
             if (state != ConnectionState.Connected)
                 return;
 
-            Setup(asServer);
+            if (!_wasSetup)
+                Setup(asServer);
         }
 
         private bool _wasSetup;

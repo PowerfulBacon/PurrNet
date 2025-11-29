@@ -353,5 +353,10 @@ namespace PurrNet
         {
             return _hostMigrationRules.scenesAlwaysPublic;
         }
+
+        public bool ShouldMigrateAsHost()
+        {
+            return _hostMigrationRules.migrateAsHost;
+        }
     }
 }

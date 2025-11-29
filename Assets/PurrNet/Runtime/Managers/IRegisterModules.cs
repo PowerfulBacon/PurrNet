@@ -1,7 +1,13 @@
-﻿namespace PurrNet
+﻿using PurrNet.Transports;
+
+namespace PurrNet
 {
     public interface IRegisterModules
     {
         void RegisterModules(ModulesCollection modules, bool asServer);
+
+        bool isPromotingToServer { get; }
+
+        ITransport currentTransport { get; }
     }
 }

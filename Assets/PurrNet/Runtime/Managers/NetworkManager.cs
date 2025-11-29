@@ -197,6 +197,8 @@ namespace PurrNet
             _clientPendingSubscriptions.Clear();
         }
 
+        public ITransport currentTransport => _transport ? _transport.transport : null;
+
         /// <summary>
         /// The transport of the network manager.
         /// This is the main transport used when starting the server or client.
@@ -262,9 +264,10 @@ namespace PurrNet
             get
             {
                 var state = !_transport ? ConnectionState.Disconnected : _transport.transport.listenerState;
-                return state == ConnectionState.Disconnected && _isCleaningServer
+                var result = state == ConnectionState.Disconnected && _isCleaningServer
                     ? ConnectionState.Disconnecting
                     : state;
+                return result;
             }
         }
 
@@ -982,6 +985,12 @@ namespace PurrNet
 
         public void RegisterModules(ModulesCollection modules, bool asServer)
         {
+            if (asServer && _isPromotingToServer)
+            {
+                modules.MigrateFrom(_clientModules);
+                return;
+            }
+
             var tickManager = new TickManager(_tickRate, this);
 
             if (asServer)
@@ -1267,11 +1276,18 @@ namespace PurrNet
             if (_transport)
                 _transport.transport.SendMessages(delta);
 
-            if (_isCleaningClient && _clientModules.Cleanup())
+            if (_isCleaningClient)
             {
-                _clientModules.UnregisterModules();
-                CleanupClientModules();
-                _isCleaningClient = false;
+                if (_isPromotingToServer)
+                {
+                    _isCleaningClient = false;
+                }
+                else if (_clientModules.Cleanup())
+                {
+                    _clientModules.UnregisterModules();
+                    CleanupClientModules();
+                    _isCleaningClient = false;
+                }
             }
 
             if (_isCleaningServer && _serverModules.Cleanup())
@@ -1401,6 +1417,10 @@ namespace PurrNet
             _transport.StartServer(this);
         }
 
+        private bool _isPromotingToServer;
+
+        public bool isPromotingToServer => _isPromotingToServer;
+
         /// <summary>
         /// Transitions the current NetworkManager instance into acting as a server.
         /// This method is used to promote the local instance from a client state
@@ -1408,12 +1428,42 @@ namespace PurrNet
         /// Great for host migration.
         /// </summary>
         [ContextMenu("Promote To Server"), PurrContextButton]
-        public void PromoteToServer()
+        public async void PromoteToServer()
         {
-            if (serverState != ConnectionState.Disconnected)
+            try
             {
-                PurrLogger.LogError("Cannot promote to server, you already are a server.");
-                return;
+                if (_isPromotingToServer)
+                    return;
+
+                if (serverState != ConnectionState.Disconnected)
+                {
+                    PurrLogger.LogError("Cannot promote to server, you already are a server.");
+                    return;
+                }
+
+                _isPromotingToServer = true;
+
+                StopClient();
+
+                while (clientState != ConnectionState.Disconnected)
+                    await UnityLatestUpdate.Yield();
+
+                StartServer();
+                _serverModules.PostPromoteToServer();
+
+                if (_networkRules && _networkRules.ShouldMigrateAsHost())
+                    StartClient();
+            }
+            catch (Exception e)
+            {
+                PurrLogger.LogException(e);
+                _isPromotingToServer = false;
+                StopClient();
+                StopServer();
+            }
+            finally
+            {
+                _isPromotingToServer = false;
             }
         }
 
@@ -1448,6 +1498,11 @@ namespace PurrNet
             _clientModules.RegisterModules();
             _isSubscribedClient = true;
             TriggerSubscribeEvents(false);
+        }
+
+        internal void TriggerConnectionLeft(Connection connection)
+        {
+            _serverModules.OnLostConnection(connection, true);
         }
 
         bool _isSubscribedClient;
@@ -1551,7 +1606,6 @@ namespace PurrNet
 
         private void OnLostConnection(Connection conn, DisconnectReason reason, bool asServer)
         {
-            Debug.Log(reason);
             if (asServer)
                 _serverModules.OnLostConnection(conn, true);
             else

@@ -35,7 +35,7 @@ namespace PurrNet
         }
     }
 
-    public class PlayersBroadcaster : INetworkModule, IPlayerBroadcaster
+    public class PlayersBroadcaster : INetworkModule, IPlayerBroadcaster, IPromoteToServerModule
     {
         private readonly BroadcastModule _broadcastModule;
         private readonly PlayersManager _playersManager;
@@ -51,6 +51,16 @@ namespace PurrNet
         {
             _broadcastModule = broadcastModule;
             _playersManager = playersManager;
+        }
+
+        public void PromoteToServerModule()
+        {
+            _asServer = true;
+        }
+
+        public void PostPromoteToServerModule()
+        {
+
         }
 
         public void Enable(bool asServer)

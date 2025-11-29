@@ -334,5 +334,12 @@ namespace PurrNet
                 _ => "Client is trying to act on module that is not `<b>ownerAuth</b>`, only server can act on it."
             };
         }
+
+        /// <summary>
+        /// Promotes the NetworkIdentity instance to function as a server entity.
+        /// This is used for host-migration, when a client is promoted to host.
+        /// Use this to ensure client has everything it needs to function as server.
+        /// </summary>
+        public virtual void PromoteToServer() {}
     }
 }

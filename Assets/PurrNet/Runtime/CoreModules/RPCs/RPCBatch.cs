@@ -47,7 +47,7 @@ namespace PurrNet.Modules
         {
             _playersManager = playersManager;
             _onRPCReceived = callback;
-            playersManager.Subscribe<RPCBatchPacket>(OnBatchReceived);
+            _playersManager.Subscribe<RPCBatchPacket>(OnBatchReceived);
         }
 
         public void Dispose()
@@ -158,6 +158,11 @@ namespace PurrNet.Modules
             Packer<ByteData>.Write(batch.batchedData, content);
 
             _batches[batchIdx] = batch;
+        }
+
+        public void Clear()
+        {
+            _batches.Clear();
         }
     }
 }

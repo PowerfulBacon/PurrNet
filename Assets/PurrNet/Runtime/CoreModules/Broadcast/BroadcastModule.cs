@@ -8,14 +8,14 @@ using PurrNet.Utils;
 
 namespace PurrNet.Modules
 {
-    public class BroadcastModule : INetworkModule, IDataListener
+    public class BroadcastModule : INetworkModule, IDataListener, IPromoteToServerModule
     {
         private readonly ITransport _transport;
 
-        private readonly bool _asServer;
-
         private readonly Dictionary<uint, List<IBroadcastCallback>> _actions =
             new Dictionary<uint, List<IBroadcastCallback>>();
+
+        private bool _asServer;
 
         internal event Action<Connection, uint, object> onRawDataReceived;
 
@@ -231,5 +231,12 @@ namespace PurrNet.Modules
 
             onRawDataReceived?.Invoke(conn, hash, instance);
         }
+
+        public void PromoteToServerModule()
+        {
+            _asServer = true;
+        }
+
+        public void PostPromoteToServerModule() { }
     }
 }
