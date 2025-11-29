@@ -345,6 +345,56 @@ namespace PurrNet
             InvokeChange(change);
         }
 
+                /// <summary>
+        /// Sorts the list using the given comparison and syncs the changes.
+        /// </summary>
+        /// <param name="comparison">Comparison to use for sorting the list</param>
+        public void Sort(Comparison<T> comparison)
+        {
+            if (!ValidateAuthority())
+                return;
+
+            var old = new List<T>(_list);
+            var sorted = new List<T>(_list);
+            sorted.Sort(comparison);
+
+            for (int i = 0; i < sorted.Count; i++)
+                {
+                    if (i >= _list.Count || !EqualityComparer<T>.Default.Equals(_list[i], sorted[i]))
+                    {
+                        var oldValue = (i < _list.Count) ? _list[i] : default;
+
+                        if (i < _list.Count)
+                            _list[i] = sorted[i];
+                        else
+                            _list.Add(sorted[i]);
+
+                        var change = SyncListChange<T>.Set(sorted[i], oldValue, i);
+                        QueueChange(change);
+                        InvokeChange(change);
+                    }
+                }
+
+            // handle case where list was longer than sorted.
+            if (_list.Count != sorted.Count)
+            {
+                _list.Clear();
+                _list.AddRange(sorted);
+
+                var clear = SyncListChange<T>.Cleared();
+
+                QueueChange(clear);
+                InvokeChange(clear);
+
+                for (int i = 0; i < _list.Count; i++)
+                {
+                    var add = SyncListChange<T>.Added(_list[i], i);
+                    QueueChange(add);
+                    InvokeChange(add);
+                }
+            }
+        }
+
         public bool Contains(T item) => _list.Contains(item);
         public void CopyTo(T[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
         public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
