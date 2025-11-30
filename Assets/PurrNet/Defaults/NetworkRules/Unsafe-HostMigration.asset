@@ -15,13 +15,15 @@ MonoBehaviour:
   _hostMigrationRules:
     enabled: 1
     migrateAsHost: 1
+    identitiesAlwaysVisible: 1
+    scenesAlwaysPublic: 1
   _defaultSpawnRules:
     spawnAuth: 1
     despawnAuth: -1
     defaultOwner: 1
     propagateOwnershipByDefault: 1
-    despawnIfOwnerDisconnects: 1
-    cleanupSpawnedObjects: 1
+    despawnIfOwnerDisconnects: 0
+    cleanupSpawnedObjects: 0
   _defaultRpcRules:
     ignoreRequireServerAttribute: 1
     ignoreRequireOwnerAttribute: 1
@@ -36,7 +38,7 @@ MonoBehaviour:
   _defaultSceneRules:
     _cleanupScenesOnDisconnect: 0
     removePlayerFromSceneOnDisconnect: 0
-    sceneCleanupModeOnDisconnect: 1
+    sceneCleanupModeOnDisconnect: 0
     alwaysIncludeDontDestroyOnLoadScene: 0
   _defaultIdentityRules:
     receiveRpcsWhenDisabled: 1

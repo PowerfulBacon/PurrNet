@@ -120,6 +120,15 @@ namespace PurrNet.Modules
         public void PromoteToServerModule()
         {
             _asServer = true;
+            _nextId = default;
+
+            // catch up with the server's next id
+            for (var i = 0; i < _spawnedIdentities.Count; i++)
+            {
+                var identity = _spawnedIdentities[i];
+                if (identity.id.HasValue && identity.id.Value.id.value >= _nextId)
+                    _nextId = identity.id.Value.id.value + 1;
+            }
         }
 
         public void PostPromoteToServerModule()
