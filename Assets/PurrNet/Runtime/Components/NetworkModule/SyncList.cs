@@ -355,7 +355,7 @@ namespace PurrNet
             if (!ValidateAuthority())
                 return;
             
-            var sorted = DisposableList<T>.Create(_list);
+            using var sorted = DisposableList<T>.Create(_list);
             sorted.list.Sort(comparison);
 
             for (int i = 0; i < sorted.Count; i++)
