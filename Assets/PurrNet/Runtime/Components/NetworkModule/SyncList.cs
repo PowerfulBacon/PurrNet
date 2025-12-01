@@ -3,6 +3,7 @@ using PurrNet.Logging;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using PurrNet.Pooling;
 using PurrNet.Transports;
 using UnityEngine.Scripting;
 
@@ -345,7 +346,7 @@ namespace PurrNet
             InvokeChange(change);
         }
 
-                /// <summary>
+        /// <summary>
         /// Sorts the list using the given comparison and syncs the changes.
         /// </summary>
         /// <param name="comparison">Comparison to use for sorting the list</param>
@@ -353,44 +354,22 @@ namespace PurrNet
         {
             if (!ValidateAuthority())
                 return;
-
-            var old = new List<T>(_list);
-            var sorted = new List<T>(_list);
-            sorted.Sort(comparison);
+            
+            var sorted = DisposableList<T>.Create(_list);
+            sorted.list.Sort(comparison);
 
             for (int i = 0; i < sorted.Count; i++)
-                {
-                    if (i >= _list.Count || !EqualityComparer<T>.Default.Equals(_list[i], sorted[i]))
-                    {
-                        var oldValue = (i < _list.Count) ? _list[i] : default;
-
-                        if (i < _list.Count)
-                            _list[i] = sorted[i];
-                        else
-                            _list.Add(sorted[i]);
-
-                        var change = SyncListChange<T>.Set(sorted[i], oldValue, i);
-                        QueueChange(change);
-                        InvokeChange(change);
-                    }
-                }
-
-            // handle case where list was longer than sorted.
-            if (_list.Count != sorted.Count)
             {
-                _list.Clear();
-                _list.AddRange(sorted);
+                T newItem = sorted[i];
+                T oldItem = _list[i];
 
-                var clear = SyncListChange<T>.Cleared();
-
-                QueueChange(clear);
-                InvokeChange(clear);
-
-                for (int i = 0; i < _list.Count; i++)
+                if (!EqualityComparer<T>.Default.Equals(oldItem, newItem))
                 {
-                    var add = SyncListChange<T>.Added(_list[i], i);
-                    QueueChange(add);
-                    InvokeChange(add);
+                    _list[i] = newItem;
+                    
+                    var change = SyncListChange<T>.Set(newItem, oldItem, i);
+                    QueueChange(change);
+                    InvokeChange(change);
                 }
             }
         }
