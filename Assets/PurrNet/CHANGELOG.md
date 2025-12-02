@@ -1,3 +1,10 @@
+# [1.18.0-beta.9](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.8...v1.18.0-beta.9) (2025-12-02)
+
+
+### Bug Fixes
+
+* syncvar cleanup and optimisations ([6eae47b](https://github.com/PurrNet/PurrNet/commit/6eae47b1d5b5e25d5b667ec17af77e1a2f05f3d9))
+
 # [1.18.0-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.7...v1.18.0-beta.8) (2025-11-28)
 
 
