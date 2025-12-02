@@ -128,6 +128,7 @@ namespace PurrNet.Modules
                 var identity = _spawnedIdentities[i];
                 if (identity.id.HasValue && identity.id.Value.id.value >= _nextId)
                     _nextId = identity.id.Value.id.value + 1;
+
                 identity.ClearObservers();
             }
         }
@@ -145,7 +146,9 @@ namespace PurrNet.Modules
                 {
                     var owner = identity.owner;
                     if (owner.HasValue)
+                    {
                         identity.TriggerOnOwnerChanged(owner.Value, null, false, false);
+                    }
                     identity.TriggerDespawnEvent(false);
                     identity.SetIsSpawned(false, false);
                 }
@@ -160,7 +163,10 @@ namespace PurrNet.Modules
                 identity.TriggerEarlySpawnEvent(true);
 
                 if (prevOwner.HasValue)
+                {
                     identity.TriggerOnOwnerChanged(null, prevOwner.Value, true, false);
+                    identity.TriggerOnOwnerDisconnected(prevOwner.Value);
+                }
 
                 identity.TriggerSpawnEvent(true);
             }
