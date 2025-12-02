@@ -94,7 +94,6 @@ namespace PurrNet.Modules
             bool anyWritten = false;
 
             var controlled = ListPool<NetworkTransform>.Instantiate();
-            using var dummy = BitPackerPool.Get();
 
             GatherCandidates(player, ntCount, localPlayer, controlled);
 
