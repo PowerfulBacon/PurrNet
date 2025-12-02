@@ -301,12 +301,8 @@ namespace PurrNet.Modules
             NetworkPoolManager.RemovePool(_sceneId);
         }
 
-        private bool _clearBeforeNextSpawn;
-
         public void TransferToNewServer()
         {
-            // _clearBeforeNextSpawn = true;
-
             var hash = HashSetPool<NetworkIdentity>.Instantiate();
 
             for (var i = 0; i < _spawnedIdentities.Count; i++)
@@ -331,40 +327,10 @@ namespace PurrNet.Modules
             Init();
         }
 
-        private void PutEverythingBackInPool()
-        {
-            var hash = HashSetPool<NetworkIdentity>.Instantiate();
-
-            for (var i = 0; i < _spawnedIdentities.Count; i++)
-            {
-                var nid = _spawnedIdentities[i];
-                var root = nid.GetRootIdentity();
-
-                if (!root)
-                    continue;
-
-                hash.Add(root);
-            }
-
-            foreach (var r in hash)
-            {
-                if (!r) continue;
-                Despawn(r.gameObject, true, true);
-            }
-
-            HashSetPool<NetworkIdentity>.Destroy(hash);
-        }
-
         private void OnSpawnPacketBatch(PlayerID player, SpawnPacketBatch data, bool asServer)
         {
             if (data.sceneId != _sceneId)
                 return;
-
-            if (_clearBeforeNextSpawn)
-            {
-                PutEverythingBackInPool();
-                _clearBeforeNextSpawn = false;
-            }
 
             int count = data.spawnPackets.Count;
             for (var i = 0; i < count; ++i)
@@ -415,14 +381,16 @@ namespace PurrNet.Modules
                 Despawn(r.gameObject, true, true);
             }
 
-            for (var i = 0; i < _defaultPrototypes.Count; i++)
+            if (!_manager.isTranferingToNewServer)
             {
-                var defaultPrototype = _defaultPrototypes[i];
-                CreatePrototype(defaultPrototype, null);
-                defaultPrototype.Dispose();
+                for (var i = 0; i < _defaultPrototypes.Count; i++)
+                {
+                    var defaultPrototype = _defaultPrototypes[i];
+                    CreatePrototype(defaultPrototype, null);
+                    defaultPrototype.Dispose();
+                }
+                _defaultPrototypes.Clear();
             }
-
-            _defaultPrototypes.Clear();
 
             HashSetPool<NetworkIdentity>.Destroy(hash);
             return true;
