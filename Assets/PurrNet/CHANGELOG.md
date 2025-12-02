@@ -1,3 +1,17 @@
+# [1.18.0-beta.8](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.7...v1.18.0-beta.8) (2025-11-28)
+
+
+### Bug Fixes
+
+* SyncList owner auth fix ([19d044f](https://github.com/PurrNet/PurrNet/commit/19d044f76d1af20cf91da1dcb92cb5ee63e8920d))
+
+# [1.18.0-beta.7](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.6...v1.18.0-beta.7) (2025-11-27)
+
+
+### Bug Fixes
+
+* clear partial data if owner disconnected mid download ([0bb0cd9](https://github.com/PurrNet/PurrNet/commit/0bb0cd973e0badcaa4ccea88320b9bc44f477408))
+
 # [1.18.0-beta.6](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.5...v1.18.0-beta.6) (2025-11-24)
 
 
