@@ -121,6 +121,7 @@ namespace PurrNet.Modules
         {
             _asServer = true;
             _nextId = default;
+            _isDisposed = false;
 
             // catch up with the server's next id
             for (var i = 0; i < _spawnedIdentities.Count; i++)
@@ -298,11 +299,16 @@ namespace PurrNet.Modules
             _playersManager.Unsubscribe<FinishSpawnPacket>(OnFinishSpawnPacket);
             _playersManager.Unsubscribe<ChangeParentPacket>(OnParentChangedPacket);
 
-            NetworkPoolManager.RemovePool(_sceneId);
+            if (!_manager.isTranferingToNewServer)
+                NetworkPoolManager.RemovePool(_sceneId);
         }
 
         public void TransferToNewServer()
         {
+            isReadyToSpawn = false;
+            _nextId = default;
+            _isPlayerReady = false;
+
             var hash = HashSetPool<NetworkIdentity>.Instantiate();
 
             for (var i = 0; i < _spawnedIdentities.Count; i++)
@@ -325,6 +331,8 @@ namespace PurrNet.Modules
             HashSetPool<NetworkIdentity>.Destroy(hash);
 
             Init();
+
+            UnityLatestUpdate.TriggerPendingAsaps();
         }
 
         private void OnSpawnPacketBatch(PlayerID player, SpawnPacketBatch data, bool asServer)
