@@ -160,10 +160,7 @@ namespace PurrNet.Modules
                 identity.TriggerEarlySpawnEvent(true);
 
                 if (prevOwner.HasValue)
-                {
-                    Debug.Log("TriggerOnOwnerChanged " + prevOwner.Value + " " + identity, identity);
                     identity.TriggerOnOwnerChanged(null, prevOwner.Value, true, false);
-                }
 
                 identity.TriggerSpawnEvent(true);
             }

@@ -65,11 +65,11 @@ namespace PurrNet.Modules
     public struct PlayerSnapshotEvent : IPackedAuto
     {
         [JsonProperty]
-        public Dictionary<Connection, PlayerID> connectionToPlayerId { get; }
+        public DisposableList<PlayerJoinedEvent> events { get; }
 
-        public PlayerSnapshotEvent(Dictionary<Connection, PlayerID> connectionToPlayerId)
+        public PlayerSnapshotEvent(DisposableList<PlayerJoinedEvent> snapshot)
         {
-            this.connectionToPlayerId = connectionToPlayerId;
+            this.events = snapshot;
         }
     }
 
@@ -433,10 +433,13 @@ namespace PurrNet.Modules
 
         private void OnPlayerSnapshotEvent(Connection conn, PlayerSnapshotEvent data, bool asServer)
         {
-            foreach (var (key, pid) in data.connectionToPlayerId)
+            using (data.events)
             {
-                if (RegisterPlayer(key, pid, out var isReconnect))
-                    TriggerOnJoinedEvent(pid, isReconnect);
+                for (var i = 0; i < data.events.Count; i++)
+                {
+                    var evt = data.events[i];
+                    OnPlayerJoinedEvent(conn, evt, asServer);
+                }
             }
         }
 
@@ -450,6 +453,11 @@ namespace PurrNet.Modules
 
         private void SendNewUserToAllClients(Connection conn, PlayerID playerId)
         {
+            _broadcastModule.SendToAll(GetPlayerJoinEvent(playerId, conn));
+        }
+
+        private PlayerJoinedEvent GetPlayerJoinEvent(PlayerID playerId, Connection conn)
+        {
             string cookie = null;
             NetworkID? playerLastNid = null;
 
@@ -462,7 +470,7 @@ namespace PurrNet.Modules
                     playerLastNid = lastNidId;
             }
 
-            _broadcastModule.SendToAll(new PlayerJoinedEvent(playerId, conn, playerLastNid, cookie));
+            return new PlayerJoinedEvent(playerId, conn, playerLastNid, cookie);
         }
 
         private void SendUserLeftToAllClients(PlayerID playerId)
@@ -472,7 +480,10 @@ namespace PurrNet.Modules
 
         private void SendSnapshotToClient(Connection conn)
         {
-            _broadcastModule.Send(conn, new PlayerSnapshotEvent(_connectionToPlayerId));
+            using var batch = DisposableList<PlayerJoinedEvent>.Create(_players.Count);
+            foreach (var (playerId, playerConn) in _playerToConnection)
+                batch.Add(GetPlayerJoinEvent(playerId, playerConn));
+            _broadcastModule.Send(conn, new PlayerSnapshotEvent(batch));
         }
 
         private bool RegisterPlayer(Connection conn, PlayerID player, out bool isReconnect)
