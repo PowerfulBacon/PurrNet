@@ -23,7 +23,7 @@ MonoBehaviour:
     defaultOwner: 1
     propagateOwnershipByDefault: 1
     despawnIfOwnerDisconnects: 0
-    cleanupSpawnedObjects: 0
+    cleanupSpawnedObjects: 1
   _defaultRpcRules:
     ignoreRequireServerAttribute: 1
     ignoreRequireOwnerAttribute: 1

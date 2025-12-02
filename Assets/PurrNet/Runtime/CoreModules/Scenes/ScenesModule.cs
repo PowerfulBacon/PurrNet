@@ -47,7 +47,7 @@ namespace PurrNet.Modules
 
     public delegate void OnSceneVisibilityEvent(SceneID scene, bool isVisible, bool asServer);
 
-    public class ScenesModule : INetworkModule, IFixedUpdate, ICleanup, IConnectionStateListener
+    public class ScenesModule : INetworkModule, IFixedUpdate, ICleanup, IConnectionStateListener, ITransferToNewServer, IPromoteToServerModule
     {
         private readonly NetworkManager _networkManager;
         private readonly PlayersManager _players;
@@ -124,6 +124,11 @@ namespace PurrNet.Modules
             _idToScene.Add(scene, id);
             _rawScenes.Add(id);
 
+            PlayLoadEventsForScene(id);
+        }
+
+        private void PlayLoadEventsForScene(SceneID id)
+        {
             onPreSceneLoaded?.Invoke(id, _asServer);
             onSceneLoaded?.Invoke(id, _asServer);
             onPostSceneLoaded?.Invoke(id, _asServer);
@@ -207,6 +212,29 @@ namespace PurrNet.Modules
             return scene.name is "DontDestroyOnLoad";
         }
 
+
+        public void PromoteToServerModule()
+        {
+            _asServer = true;
+            _players.Unsubscribe<SceneActionsBatch>(OnSceneActionsBatch);
+            _players.Unsubscribe<FirstSceneActionsBatch>(OnSceneActionsBatch);
+            _players.onPrePlayerJoined += OnPlayerJoined;
+            _scenePlayers.onPlayerJoinedScene += OnPlayerJoinedScene;
+            _scenePlayers.onPlayerLeftScene += OnPlayerLeftScene;
+        }
+
+        private bool _isTransferingToNewServer;
+
+        public void PostPromoteToServerModule()
+        {
+
+        }
+
+        public void TransferToNewServer()
+        {
+            _isTransferingToNewServer = true;
+        }
+
         private void Setup(bool asServer)
         {
             _wasSetup = true;
@@ -251,6 +279,7 @@ namespace PurrNet.Modules
             if (!asServer)
             {
                 _players.Subscribe<SceneActionsBatch>(OnSceneActionsBatch);
+                _players.Subscribe<FirstSceneActionsBatch>(OnSceneActionsBatch);
             }
             else
             {
@@ -272,6 +301,7 @@ namespace PurrNet.Modules
             if (!asServer)
             {
                 _players.Unsubscribe<SceneActionsBatch>(OnSceneActionsBatch);
+                _players.Unsubscribe<FirstSceneActionsBatch>(OnSceneActionsBatch);
             }
             else
             {
@@ -308,8 +338,7 @@ namespace PurrNet.Modules
                     _playerFilteredActions.Add(action);
             }
 
-            if (_playerFilteredActions.Count > 0)
-                _players.Send(player, new SceneActionsBatch { actions = _playerFilteredActions });
+            _players.Send(player, new FirstSceneActionsBatch { actions = _playerFilteredActions });
         }
 
         private void OnPlayerLeftScene(PlayerID player, SceneID scene, bool asServer)
@@ -490,35 +519,59 @@ namespace PurrNet.Modules
             }
         }
 
+        private void OnSceneActionsBatch(PlayerID player, FirstSceneActionsBatch data, bool asServer)
+        {
+            if (!_isTransferingToNewServer)
+            {
+                HandleScenes(data.actions);
+                return;
+            }
+
+            _isTransferingToNewServer = false;
+
+            // TODO: reconcile with current scenes, data.actions is the correct target
+
+            for (var i = 0; i < _rawScenes.Count; i++)
+            {
+                var scene = _rawScenes[i];
+                PlayLoadEventsForScene(scene);
+            }
+        }
+
         private void OnSceneActionsBatch(PlayerID player, SceneActionsBatch data, bool asServer)
+        {
+            HandleScenes(data.actions);
+        }
+
+        private void HandleScenes(List<SceneAction> actions)
         {
             if (_networkManager.isServer || _asServer)
             {
                 var serverModule = _networkManager.GetModule<ScenesModule>(true);
-                for (var i = 0; i < data.actions.Count; i++)
+                for (var i = 0; i < actions.Count; i++)
                 {
-                    var action = data.actions[i];
+                    var action = actions[i];
 
                     switch (action.type)
                     {
                         case SceneActionType.Load:
-                            {
-                                if (_scenes.ContainsKey(action.loadSceneAction.sceneID))
-                                    continue;
+                        {
+                            if (_scenes.ContainsKey(action.loadSceneAction.sceneID))
+                                continue;
 
-                                if (serverModule.TryGetSceneState(action.loadSceneAction.sceneID, out var state))
-                                    AddScene(state.scene, state.settings, action.loadSceneAction.sceneID);
-                                break;
-                            }
+                            if (serverModule.TryGetSceneState(action.loadSceneAction.sceneID, out var state))
+                                AddScene(state.scene, state.settings, action.loadSceneAction.sceneID);
+                            break;
+                        }
                         case SceneActionType.Unload:
-                            {
-                                if (!_scenes.ContainsKey(action.unloadSceneAction.sceneID))
-                                    continue;
+                        {
+                            if (!_scenes.ContainsKey(action.unloadSceneAction.sceneID))
+                                continue;
 
-                                if (serverModule.TryGetSceneState(action.unloadSceneAction.sceneID, out var state))
-                                    RemoveScene(state.scene);
-                                break;
-                            }
+                            if (serverModule.TryGetSceneState(action.unloadSceneAction.sceneID, out var state))
+                                RemoveScene(state.scene);
+                            break;
+                        }
 
                         case SceneActionType.SetActive:
                         default:
@@ -529,8 +582,8 @@ namespace PurrNet.Modules
                 return;
             }
 
-            for (var i = 0; i < data.actions.Count; i++)
-                _actionsQueue.Enqueue(data.actions[i]);
+            for (var i = 0; i < actions.Count; i++)
+                _actionsQueue.Enqueue(actions[i]);
 
             HandleNextSceneAction();
         }

@@ -62,11 +62,7 @@ namespace PurrNet.Modules
         private void OnPreSceneLoaded(SceneID scene, bool asServer)
         {
             if (_modules.ContainsKey(scene))
-            {
-                PurrLogger.LogError(
-                    $"Hierarchy module for scene {scene} already exists; trying to create another one?");
                 return;
-            }
 
             var hierarchy = new NetworkTransformModule(_manager, _broadcaster, _scenePlayers, scene, _factory);
 

@@ -8,6 +8,8 @@ namespace PurrNet
 
         bool isPromotingToServer { get; }
 
+        bool isTranferingToNewServer { get; }
+
         ITransport currentTransport { get; }
     }
 }

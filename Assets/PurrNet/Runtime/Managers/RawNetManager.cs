@@ -390,6 +390,8 @@ namespace PurrNet
 
         public bool isPromotingToServer => false;
 
+        public bool isTranferingToNewServer => false;
+
         public ITransport currentTransport => _transport ? _transport.transport : null;
 
         private void RenewSubscriptions(bool asServer)

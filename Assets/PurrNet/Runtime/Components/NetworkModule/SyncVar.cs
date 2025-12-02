@@ -69,6 +69,9 @@ namespace PurrNet
         {
             onChanged = null;
             onChangedWithOld = null;
+            _id = default;
+            _wasLastDirty = false;
+            _lastSendTime = default;
         }
 
         public override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool isSpawnEvent, bool asServer)

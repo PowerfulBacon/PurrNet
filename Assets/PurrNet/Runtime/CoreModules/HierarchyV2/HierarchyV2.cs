@@ -17,7 +17,7 @@ namespace PurrNet.Modules
 
     public delegate void SpawnDelegate(GameObject instance, bool isSceneObject);
 
-    public class HierarchyV2 : IPromoteToServerModule
+    public class HierarchyV2 : IPromoteToServerModule, ITransferToNewServer
     {
         private bool _asServer;
 
@@ -128,6 +128,7 @@ namespace PurrNet.Modules
                 var identity = _spawnedIdentities[i];
                 if (identity.id.HasValue && identity.id.Value.id.value >= _nextId)
                     _nextId = identity.id.Value.id.value + 1;
+                identity.ClearObservers();
             }
         }
 
@@ -136,8 +137,15 @@ namespace PurrNet.Modules
             for (var i = 0; i < _spawnedIdentities.Count; i++)
             {
                 var identity = _spawnedIdentities[i];
+                var clientId = identity.GetNetworkID(false);
+                if (clientId.HasValue)
+                    identity.SetID(clientId.Value);
+
                 if (identity.IsSpawned(false))
                 {
+                    var owner = identity.owner;
+                    if (owner.HasValue)
+                        identity.TriggerOnOwnerChanged(owner.Value, null, false, false);
                     identity.TriggerDespawnEvent(false);
                     identity.SetIsSpawned(false, false);
                 }
@@ -146,7 +154,17 @@ namespace PurrNet.Modules
             for (var i = 0; i < _spawnedIdentities.Count; i++)
             {
                 var identity = _spawnedIdentities[i];
-                identity.SetIsSpawned(true, true);
+                var prevOwner = identity.internalOwnerServer;
+                identity.SetIdentity(_manager, this, _sceneId, _asServer, false);
+                identity.internalOwnerServer = prevOwner;
+                identity.TriggerEarlySpawnEvent(true);
+
+                if (prevOwner.HasValue)
+                {
+                    Debug.Log("TriggerOnOwnerChanged " + prevOwner.Value + " " + identity, identity);
+                    identity.TriggerOnOwnerChanged(null, prevOwner.Value, true, false);
+                }
+
                 identity.TriggerSpawnEvent(true);
             }
 
@@ -244,19 +262,22 @@ namespace PurrNet.Modules
             _scenePlayers.onPlayerUnloadedScene += OnPlayerUnloadedScene;
             _playersManager.onNetworkIDReceived += OnNetworkIDReceived;
 
-            if (_playersManager.lastNid.HasValue)
-                OnNetworkIDReceived(_playersManager.lastNid.Value);
-
-            if (_playersManager.localPlayerId.HasValue)
-                OnPlayerReceivedID(_playersManager.localPlayerId.Value);
-
-            else _playersManager.onLocalPlayerReceivedID += OnPlayerReceivedID;
+            Init();
 
             _playersManager.Subscribe<SpawnPacketBatch>(OnSpawnPacketBatch);
             _playersManager.Subscribe<SpawnPacket>(OnSpawnPacket);
             _playersManager.Subscribe<DespawnPacket>(OnDespawnPacket);
             _playersManager.Subscribe<FinishSpawnPacket>(OnFinishSpawnPacket);
             _playersManager.Subscribe<ChangeParentPacket>(OnParentChangedPacket);
+        }
+
+        private void Init()
+        {
+            if (_playersManager.lastNid.HasValue)
+                OnNetworkIDReceived(_playersManager.lastNid.Value);
+            if (_playersManager.localPlayerId.HasValue)
+                OnPlayerReceivedID(_playersManager.localPlayerId.Value);
+            else _playersManager.onLocalPlayerReceivedID += OnPlayerReceivedID;
         }
 
         public void Disable()
@@ -277,10 +298,70 @@ namespace PurrNet.Modules
             NetworkPoolManager.RemovePool(_sceneId);
         }
 
+        private bool _clearBeforeNextSpawn;
+
+        public void TransferToNewServer()
+        {
+            // _clearBeforeNextSpawn = true;
+
+            var hash = HashSetPool<NetworkIdentity>.Instantiate();
+
+            for (var i = 0; i < _spawnedIdentities.Count; i++)
+            {
+                var nid = _spawnedIdentities[i];
+                var root = nid.GetRootIdentity();
+
+                if (!root)
+                    continue;
+
+                hash.Add(root);
+            }
+
+            foreach (var r in hash)
+            {
+                if (!r) continue;
+                Despawn(r.gameObject, true, true);
+            }
+
+            HashSetPool<NetworkIdentity>.Destroy(hash);
+
+            Init();
+        }
+
+        private void PutEverythingBackInPool()
+        {
+            var hash = HashSetPool<NetworkIdentity>.Instantiate();
+
+            for (var i = 0; i < _spawnedIdentities.Count; i++)
+            {
+                var nid = _spawnedIdentities[i];
+                var root = nid.GetRootIdentity();
+
+                if (!root)
+                    continue;
+
+                hash.Add(root);
+            }
+
+            foreach (var r in hash)
+            {
+                if (!r) continue;
+                Despawn(r.gameObject, true, true);
+            }
+
+            HashSetPool<NetworkIdentity>.Destroy(hash);
+        }
+
         private void OnSpawnPacketBatch(PlayerID player, SpawnPacketBatch data, bool asServer)
         {
             if (data.sceneId != _sceneId)
                 return;
+
+            if (_clearBeforeNextSpawn)
+            {
+                PutEverythingBackInPool();
+                _clearBeforeNextSpawn = false;
+            }
 
             int count = data.spawnPackets.Count;
             for (var i = 0; i < count; ++i)

@@ -79,7 +79,7 @@ namespace PurrNet.Modules
 
     public delegate void OnPlayerEvent(PlayerID player);
 
-    public class PlayersManager : INetworkModule, IConnectionListener, IPlayerBroadcaster, IPromoteToServerModule
+    public class PlayersManager : INetworkModule, IConnectionListener, IPlayerBroadcaster, IPromoteToServerModule, ITransferToNewServer, IPostTransferToNewServer
     {
         private readonly AuthModule _authModule;
         private readonly BroadcastModule _broadcastModule;
@@ -308,11 +308,26 @@ namespace PurrNet.Modules
             localPlayerId = null;
         }
 
+        public void TransferToNewServer()
+        {
+            lastNid = null;
+            localPlayerId = null;
+            for (var i = _players.Count - 1; i >= 0; i--)
+                UnregisterPlayer(_players[i]);
+        }
+
+        public void PostTransferToNewServer()
+        {
+            /*for (var i = _players.Count - 1; i >= 0; i--)
+                UnregisterPlayer(_players[i]);*/
+        }
+
         public void PostPromoteToServerModule()
         {
             using var keys = DisposableList<Connection>.Create(_connectionToPlayerId.Keys);
             for (var i = 0; i < keys.Count; i++)
-                _networkManager.TriggerConnectionLeft(keys[i]);
+                _networkManager.TriggerConnectionLeft(keys[i], true);
+            _connectionToPlayerId.Clear();
         }
 
         public void Enable(bool asServer)
