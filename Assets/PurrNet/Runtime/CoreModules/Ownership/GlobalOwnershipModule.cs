@@ -188,6 +188,15 @@ namespace PurrNet.Modules
 
             if (_sceneOwnerships.TryGetValue(identity.sceneId, out var module))
                 module.RemoveOwnership(identity);
+
+            for (var i = 0; i < _pendingOwnership.Count; i++)
+            {
+                var pendingOp = _pendingOwnership[i];
+                if (pendingOp.change.identity == identity.id.Value)
+                {
+                    _pendingOwnership.RemoveAt(i--);
+                }
+            }
         }
 
         struct PlayerSceneID : IEquatable<PlayerSceneID>
@@ -828,13 +837,14 @@ namespace PurrNet.Modules
         private void HandleAsyncPendingChanges()
         {
             const float TIMEOUT = 5f;
+
             for (var i = 0; i < _pendingOwnership.Count; ++i)
             {
                 var change = _pendingOwnership[i];
 
                 if (Time.time - change.timeAdded > TIMEOUT)
                 {
-                    _pendingOwnership.RemoveAt(i);
+                    _pendingOwnership.RemoveAt(i--);
                     continue;
                 }
 
@@ -842,7 +852,7 @@ namespace PurrNet.Modules
                     continue;
 
                 HandleOwnershipBatch(change.scene, change.change, false);
-                _pendingOwnership.RemoveAt(i);
+                _pendingOwnership.RemoveAt(i--);
             }
         }
 
