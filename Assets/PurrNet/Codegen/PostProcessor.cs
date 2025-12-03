@@ -1161,7 +1161,7 @@ namespace PurrNet.Codegen
                     }
                     else
                     {
-                        code.Append(Instruction.Create(OpCodes.Call, responderUniTaskObject));
+                        //code.Append(Instruction.Create(OpCodes.Call, responderUniTaskObject));
 
                         if (isTaskTypeConcrete)
                         {
