@@ -289,7 +289,7 @@ namespace PurrNet
         /// <summary>
         /// Whether the network manager is a server.
         /// </summary>
-        public bool isServer => _transport && _transport.transport.listenerState == ConnectionState.Connected;
+        public bool isServer { get; private set; }
 
         [UsedByIL]
         public static bool isServerStatic => main && main.isServer;
@@ -300,7 +300,7 @@ namespace PurrNet
         /// <summary>
         /// Whether the network manager is a client.
         /// </summary>
-        public bool isClient => _transport && _transport.transport.clientState == ConnectionState.Connected;
+        public bool isClient { get; private set; }
 
         /// <summary>
         /// Whether the network manager is offline.
@@ -1682,12 +1682,14 @@ namespace PurrNet
         {
             if (asServer)
             {
+                isServer = state == ConnectionState.Connected;
                 _serverModules.OnConnectionState(state, true);
                 onServerConnectionState?.Invoke(state);
                 onAnyServerConnectionState?.Invoke(state);
             }
             else
             {
+                isClient = state == ConnectionState.Connected;
                 _clientModules.OnConnectionState(state, false);
                 onClientConnectionState?.Invoke(state);
                 onAnyClientConnectionState?.Invoke(state);

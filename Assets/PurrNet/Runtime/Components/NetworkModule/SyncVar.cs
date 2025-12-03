@@ -2,6 +2,7 @@ using UnityEngine;
 using PurrNet.Logging;
 using PurrNet.Modules;
 using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using PurrNet.Packing;
 using PurrNet.Transports;
@@ -10,7 +11,7 @@ using PurrNet.Utils;
 namespace PurrNet
 {
     [Serializable]
-    public class SyncVar<T> : NetworkModule, ITick
+    public class SyncVar<T> : NetworkModule
     {
         private TickManager _tickManager;
 
@@ -36,18 +37,18 @@ namespace PurrNet
         public delegate void ActionWithOld(T oldValue, T newValue);
         public event ActionWithOld onChangedWithOld;
 
-        public bool isControllingSyncVar => parent.IsController(_ownerAuth);
+        public bool isControllingSyncVar { get; private set; }
+
+        private bool _isSubscribedToTickManager;
+
+        static readonly IEqualityComparer<T> _cmp = EqualityComparer<T>.Default;
 
         public T value
         {
             get => _value;
             set
             {
-                bool bothNull = value == null && _value == null;
-                bool bothEqual = value != null && value.Equals(_value);
-
-                if (bothNull || bothEqual)
-                    return;
+                if (_cmp.Equals(value, _value)) return;
 
                 if (isSpawned && !parent.IsController(_ownerAuth))
                 {
@@ -59,8 +60,8 @@ namespace PurrNet
 
                 var oldValue = _value;
                 _value = value;
-                _isDirty = true;
 
+                SetDirty();
                 TriggerEvents(oldValue);
             }
         }
@@ -69,13 +70,23 @@ namespace PurrNet
         {
             onChanged = null;
             onChangedWithOld = null;
-            _id = default;
-            _wasLastDirty = false;
-            _lastSendTime = default;
+            isControllingSyncVar = false;
+        }
+
+        public override void OnOwnerDisconnected(PlayerID ownerId)
+        {
+            InvalidateIsController();
+        }
+
+        public override void OnOwnerReconnected(PlayerID ownerId)
+        {
+            InvalidateIsController();
         }
 
         public override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool isSpawnEvent, bool asServer)
         {
+            InvalidateIsController();
+
             if (isSpawnEvent)
                 return;
 
@@ -84,8 +95,26 @@ namespace PurrNet
                 _id = 0;
 
                 if (isOwner)
-                    _isDirty = true;
+                    SetDirty();
             }
+        }
+
+        private void SubscribeToTickManager()
+        {
+            if (_isSubscribedToTickManager)
+                return;
+
+            _isSubscribedToTickManager = true;
+            networkManager.tickModule.onTick += OnTick;
+        }
+
+        private void UnsubscribeFromTickManager()
+        {
+            if (!_isSubscribedToTickManager)
+                return;
+
+            _isSubscribedToTickManager = false;
+            networkManager.tickModule.onTick -= OnTick;
         }
 
         public override void OnObserverAdded(PlayerID player, bool isSpawner)
@@ -94,6 +123,16 @@ namespace PurrNet
                 return;
 
             SendLatestState(player, _id, _value);
+        }
+
+        public override void OnSpawn()
+        {
+            InvalidateIsController();
+        }
+
+        private void InvalidateIsController()
+        {
+            isControllingSyncVar = parent.IsController(_ownerAuth);
         }
 
         public override void OnDespawned()
@@ -107,7 +146,11 @@ namespace PurrNet
 
         public void SetDirty()
         {
+            if (_isDirty || !isControllingSyncVar)
+                return;
+
             _isDirty = true;
+            SubscribeToTickManager();
         }
 
         private float _lastSendTime;
@@ -132,35 +175,31 @@ namespace PurrNet
             _lastSendTime = Time.time;
             _wasLastDirty = false;
             _isDirty = false;
+            UnsubscribeFromTickManager();
         }
 
-        public void OnTick(float delta)
+        public void OnTick()
         {
-            bool isControlling = parent.IsController(_ownerAuth);
-
-            if (!isControlling)
-                return;
-
-            float timeSinceLastSend = Time.time - _lastSendTime;
-
-            if (timeSinceLastSend < _sendIntervalInSeconds)
+            if (!isControllingSyncVar)
                 return;
 
             if (_isDirty)
             {
-                ForceSendUnreliable();
+                float time = Time.time;
 
-                _lastSendTime = Time.time;
+                if (time - _lastSendTime < _sendIntervalInSeconds)
+                    return;
+
+                ForceSendUnreliable();
+                _lastSendTime = time;
                 _wasLastDirty = true;
                 _isDirty = false;
             }
-            else
+            else if (_wasLastDirty)
             {
-                if (_wasLastDirty)
-                {
-                    ForceSendReliable();
-                    _wasLastDirty = false;
-                }
+                ForceSendReliable();
+                UnsubscribeFromTickManager();
+                _wasLastDirty = false;
             }
         }
 
@@ -271,9 +310,7 @@ namespace PurrNet
 
         private void OnReceivedValue(PackedULong packetId, T newValue)
         {
-            bool isControlling = parent.IsController(_ownerAuth);
-
-            if (isControlling)
+            if (isControllingSyncVar)
             {
                 return;
             }
