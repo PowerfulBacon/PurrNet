@@ -14,7 +14,7 @@ using UnityEngine;
 namespace PurrNet.Steam
 {
     [DefaultExecutionOrder(-100)]
-    public class SteamTransport : GenericTransport, ITransport
+    public partial class SteamTransport : GenericTransport, ITransport
     {
         [Header("Server Settings")] [SerializeField]
         private ushort _serverPort = 5003;
