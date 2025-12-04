@@ -1,3 +1,10 @@
+# [1.18.0-beta.11](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.10...v1.18.0-beta.11) (2025-12-04)
+
+
+### Bug Fixes
+
+* Player Identity AOT safety ([520b268](https://github.com/PurrNet/PurrNet/commit/520b2682d214ff97e1a5b922f6fe40ad13ef3a9a))
+
 # [1.18.0-beta.10](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.9...v1.18.0-beta.10) (2025-12-03)
 
 
