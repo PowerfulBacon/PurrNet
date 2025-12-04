@@ -51,8 +51,6 @@ namespace PurrNet
         /// </summary>
         public bool syncParent => _syncParent;
 
-        private Transform _trsParent;
-
         public int ticksBehind
         {
             get
@@ -126,7 +124,6 @@ namespace PurrNet
         private void Awake()
         {
             _trs = transform;
-            _trsParent = _trs.parent;
 
 #if UNITY_PHYSICS_3D
             _rb = GetComponent<Rigidbody>();
@@ -165,6 +162,7 @@ namespace PurrNet
         {
             _trs = transform;
 
+            var _trsParent = _trs.parent;
             float sendDelta = networkManager.tickModule.tickDelta;
 
             if (syncPosition)
@@ -375,6 +373,7 @@ namespace PurrNet
         /// </summary>
         public void ClearInterpolation(Vector3? targetPos, Quaternion? targetRot, Vector3? targetScale)
         {
+            var _trsParent = _trs.parent;
             if (syncPosition && targetPos.HasValue)
                 _position.Teleport(new Vector3WithParent(_trsParent, _syncPosition == SyncMode.Local, targetPos.Value));
             if (syncRotation && targetRot.HasValue)
@@ -506,6 +505,7 @@ namespace PurrNet
 
             if (syncScale)
             {
+                var _trsParent = _trs.parent;
                 var worldScale = _scale.Advance(Time.unscaledDeltaTime).scale;
                 var ls = _trsParent ? _trsParent.GetLocalScale(worldScale) : worldScale;
                 _trs.localScale = ls;
@@ -557,8 +557,6 @@ namespace PurrNet
 
         void OnTransformParentChangedDelayed()
         {
-            _trsParent = _trs.parent;
-
             if (_isIgnoringParentChanges)
                 return;
 
@@ -572,7 +570,7 @@ namespace PurrNet
                 return;
 
             if (_syncParent)
-                HandleParentChanged(_trsParent);
+                HandleParentChanged(_trs.parent);
         }
 
         private void HandleParentChanged(Transform parent)
@@ -598,6 +596,8 @@ namespace PurrNet
 
         private void TeleportToData(NetworkTransformData data)
         {
+            var _trsParent = _trs.parent;
+
             if (syncPosition)
                 _position.Teleport(new Vector3WithParent(_trsParent, _syncPosition == SyncMode.Local, data.position));
 
@@ -610,6 +610,8 @@ namespace PurrNet
 
         private void ApplyData(NetworkTransformData data)
         {
+            var _trsParent = _trs.parent;
+
             if (syncPosition)
                 _position.Add(new Vector3WithParent(_trsParent, _syncPosition == SyncMode.Local, data.position));
 
