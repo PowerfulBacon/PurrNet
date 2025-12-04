@@ -1405,7 +1405,7 @@ namespace PurrNet.Modules
             actual.Clear();
         }
 
-        static void SetLocalPosAndRot(Transform t, Vector3 pos, Quaternion rot, Vector3 scale)
+        public static void SetLocalPosAndRot(Transform t, Vector3 pos, Quaternion rot, Vector3 scale)
         {
 #if UNITY_PHYSICS_3D
             var cc = t.GetComponent<CharacterController>();
