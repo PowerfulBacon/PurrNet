@@ -1,3 +1,10 @@
+# [1.18.0-beta.13](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.12...v1.18.0-beta.13) (2025-12-05)
+
+
+### Bug Fixes
+
+* observer events need to flush RPCs for the onspawned to be processed correctly ([67cf99f](https://github.com/PurrNet/PurrNet/commit/67cf99f2da195a3da29a9d33698b95d85f3361e1))
+
 # [1.18.0-beta.12](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.11...v1.18.0-beta.12) (2025-12-04)
 
 
