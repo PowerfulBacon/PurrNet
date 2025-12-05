@@ -1157,13 +1157,20 @@ namespace PurrNet.Modules
                 _visibility.ClearVisibilityForGameObject(gameObject.transform);
                 for (var i = 0; i < c; i++)
                     TriggerDespawnEvent(children[i]);
+                _manager.FlushBatchedRPCs();
                 FlushSpawnPackets();
             }
             else if (!bypassBroadcast)
             {
                 for (var i = 0; i < c; i++)
                     TriggerDespawnEvent(children[i]);
+                _manager.FlushBatchedRPCs();
                 SendDespawnPacket(default, children[0], false);
+            }
+            else
+            {
+                for (var i = 0; i < c; i++)
+                    TriggerDespawnEvent(children[i]);
             }
 
             for (var i = 0; i < c; i++)
