@@ -1287,13 +1287,17 @@ namespace PurrNet.Modules
 
         public void PreNetworkMessages()
         {
+            _manager.FlushBatchedRPCs();
             SendDelayedObserverEvents();
+            _manager.FlushBatchedRPCs();
             SendDelayedCompleteSpawns();
         }
 
         public void PostNetworkMessages()
         {
+            _manager.FlushBatchedRPCs();
             FlushSpawnPackets();
+            _manager.FlushBatchedRPCs();
             SpawnDelayedIdentities();
         }
 
