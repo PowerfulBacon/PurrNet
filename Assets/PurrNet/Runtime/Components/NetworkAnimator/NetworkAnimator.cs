@@ -500,6 +500,9 @@ namespace PurrNet
 
         public bool GetBool(int nameHash) => _animator.GetBool(nameHash);
 
+        [Obsolete("Use SetInteger instead")]
+        public void SetInt(int nameHash, int value) => SetInteger(nameHash, value);
+        
         public void SetInteger(string propName, int value) => SetInteger(Animator.StringToHash(propName), value);
 
         public int GetInteger(string propName) => _animator.GetInteger(propName);
