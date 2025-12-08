@@ -28,13 +28,17 @@ namespace PurrNet.Editor
         private static void OnSettingsChanged(PurrNetSettings obj)
         {
             ToolbarExtender.RequestToolbarRepaint();
+#if UNITY_PLAYMODE
             PlayModePatch.Repaint();
+#endif
         }
 
         private static void OnConnectionStateChanged(ConnectionState state)
         {
             ToolbarExtender.RequestToolbarRepaint();
+#if UNITY_PLAYMODE
             PlayModePatch.Repaint();
+#endif
         }
 
         static string TryFindVersion()
@@ -136,7 +140,9 @@ namespace PurrNet.Editor
 
             if (IsClientOrServerTransitioning(manager)) {
                 ToolbarExtender.RequestToolbarRepaint();
+#if UNITY_PLAYMODE
                 PlayModePatch.Repaint();
+#endif
             }
         }
 
