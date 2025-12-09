@@ -329,7 +329,7 @@ namespace PurrNet.Modules
                 {
                     bool shouldDespawn = identity.ShouldDespawnOnOwnerDisconnect();
 
-                    if (shouldDespawn && !identity.isSceneObject)
+                    if (shouldDespawn && !identity.isSceneObject && !identity.isManualSpawn)
                         toDestroy.Add(identity.gameObject);
                 }
             }
