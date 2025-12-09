@@ -16,7 +16,11 @@ namespace PurrNet.Editor
         [InitializeOnLoadMethod]
         static void Init()
         {
+#if !UNITY_6000_3_OR_NEWER
             ToolbarExtender.RightToolbarGUI.Add(OnToolbarGUI);
+#else
+            ToolbarExtender.toolbarGUI += OnToolbarGUI;
+#endif
 
             PurrNetSettings.onSettingsChanged += OnSettingsChanged;
             NetworkManager.onAnyServerConnectionState += OnConnectionStateChanged;
@@ -28,6 +32,7 @@ namespace PurrNet.Editor
         private static void OnSettingsChanged(PurrNetSettings obj)
         {
             ToolbarExtender.RequestToolbarRepaint();
+
 #if UNITY_PLAYMODE
             PlayModePatch.Repaint();
 #endif
