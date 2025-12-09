@@ -160,6 +160,7 @@ namespace PurrNet
         {
             _trs = transform;
 
+            var _trsParent = _trs.parent;
             float sendDelta = networkManager.tickModule.tickDelta;
             var p = _trs.parent;
 
@@ -503,6 +504,7 @@ namespace PurrNet
 
             if (syncScale)
             {
+                var _trsParent = _trs.parent;
                 var worldScale = _scale.Advance(Time.unscaledDeltaTime).scale;
                 var parentTrs = _trs.parent;
                 var ls = parentTrs ? parentTrs.GetLocalScale(worldScale) : worldScale;

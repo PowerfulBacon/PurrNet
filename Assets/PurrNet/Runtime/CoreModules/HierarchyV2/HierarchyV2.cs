@@ -1258,13 +1258,20 @@ namespace PurrNet.Modules
                 _visibility.ClearVisibilityForGameObject(gameObject.transform);
                 for (var i = 0; i < c; i++)
                     TriggerDespawnEvent(children[i]);
+                _manager.FlushBatchedRPCs();
                 FlushSpawnPackets();
             }
             else if (!bypassBroadcast)
             {
                 for (var i = 0; i < c; i++)
                     TriggerDespawnEvent(children[i]);
+                _manager.FlushBatchedRPCs();
                 SendDespawnPacket(default, children[0], false);
+            }
+            else
+            {
+                for (var i = 0; i < c; i++)
+                    TriggerDespawnEvent(children[i]);
             }
 
             for (var i = 0; i < c; i++)
@@ -1388,13 +1395,17 @@ namespace PurrNet.Modules
 
         public void PreNetworkMessages()
         {
+            _manager.FlushBatchedRPCs();
             SendDelayedObserverEvents();
+            _manager.FlushBatchedRPCs();
             SendDelayedCompleteSpawns();
         }
 
         public void PostNetworkMessages()
         {
+            _manager.FlushBatchedRPCs();
             FlushSpawnPackets();
+            _manager.FlushBatchedRPCs();
             SpawnDelayedIdentities();
         }
 
@@ -1506,7 +1517,7 @@ namespace PurrNet.Modules
             actual.Clear();
         }
 
-        static void SetLocalPosAndRot(Transform t, Vector3 pos, Quaternion rot, Vector3 scale)
+        public static void SetLocalPosAndRot(Transform t, Vector3 pos, Quaternion rot, Vector3 scale)
         {
 #if UNITY_PHYSICS_3D
             var cc = t.GetComponent<CharacterController>();

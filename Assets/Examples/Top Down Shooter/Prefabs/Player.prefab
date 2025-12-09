@@ -80,6 +80,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!102 &2339485392063238819
 TextMesh:
@@ -112,6 +113,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6956860889567420228}
+  - component: {fileID: 6688310198081937181}
   - component: {fileID: 6798584989352981788}
   - component: {fileID: 8989118555565616075}
   - component: {fileID: 6099025641715272783}
@@ -143,6 +145,31 @@ Transform:
   - {fileID: 7133067894972459132}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6688310198081937181
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2021845121686469242}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6532a5d975c940146994b2be84053df8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Internal.Examples::PlayerHeadLamp
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _lampIsOn:
+    _value: 1
+    _ownerAuth: 1
+    _sendIntervalInSeconds: 0
 --- !u!114 &6798584989352981788
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -589,6 +616,7 @@ MonoBehaviour:
   _visitiblityRules: {fileID: 0}
   _ownerAuth: 1
   _sendRatePerSecond: 10
+  _extraBones: []
   _positionAccuracy: 0.01
   _angleAccuracy: 0.5
   _scaleAccuracy: 0.05
@@ -703,6 +731,7 @@ MonoBehaviour:
   _visitiblityRules: {fileID: 0}
   _ownerAuth: 1
   _sendRatePerSecond: 10
+  _extraBones: []
   _positionAccuracy: 0.01
   _angleAccuracy: 0.5
   _scaleAccuracy: 0.05
@@ -813,6 +842,7 @@ MonoBehaviour:
   _visitiblityRules: {fileID: 0}
   _ownerAuth: 1
   _sendRatePerSecond: 10
+  _extraBones: []
   _positionAccuracy: 0.01
   _angleAccuracy: 0.5
   _scaleAccuracy: 0.05
@@ -927,6 +957,7 @@ MonoBehaviour:
   _visitiblityRules: {fileID: 0}
   _ownerAuth: 1
   _sendRatePerSecond: 10
+  _extraBones: []
   _positionAccuracy: 0.01
   _angleAccuracy: 0.5
   _scaleAccuracy: 0.05
