@@ -17,10 +17,11 @@ namespace PurrNet.Modules
 
     public delegate void SpawnDelegate(GameObject instance, bool isSceneObject);
 
-    public class HierarchyV2
+    public class HierarchyV2 : IPromoteToServerModule, ITransferToNewServer
     {
+        private bool _asServer;
+
         private readonly NetworkManager _manager;
-        private readonly bool _asServer;
         private readonly SceneID _sceneId;
         private readonly Scene _scene;
         private readonly ScenePlayersModule _scenePlayers;
@@ -116,6 +117,68 @@ namespace PurrNet.Modules
             SetupSceneObjects(scene);
         }
 
+        public void PromoteToServerModule()
+        {
+            _asServer = true;
+            _nextId = default;
+            _isDisposed = false;
+
+            // catch up with the server's next id
+            for (var i = 0; i < _spawnedIdentities.Count; i++)
+            {
+                var identity = _spawnedIdentities[i];
+                if (identity.id.HasValue && identity.id.Value.id.value >= _nextId)
+                    _nextId = identity.id.Value.id.value + 1;
+
+                identity.ClearObservers();
+            }
+        }
+
+        public void PostPromoteToServerModule()
+        {
+            for (var i = 0; i < _spawnedIdentities.Count; i++)
+            {
+                var identity = _spawnedIdentities[i];
+                var clientId = identity.GetNetworkID(false);
+                if (clientId.HasValue)
+                    identity.SetID(clientId.Value);
+
+                if (identity.IsSpawned(false))
+                {
+                    var owner = identity.owner;
+                    if (owner.HasValue)
+                    {
+                        identity.TriggerOnOwnerChanged(owner.Value, null, false, false);
+                    }
+                    identity.TriggerDespawnEvent(false);
+                    identity.SetIsSpawned(false, false);
+                }
+            }
+
+            for (var i = 0; i < _spawnedIdentities.Count; i++)
+            {
+                var identity = _spawnedIdentities[i];
+                var prevOwner = identity.internalOwnerServer;
+                identity.SetIdentity(_manager, this, _sceneId, _asServer, false);
+                identity.internalOwnerServer = prevOwner;
+                identity.TriggerEarlySpawnEvent(true);
+
+                if (prevOwner.HasValue)
+                {
+                    identity.TriggerOnOwnerChanged(null, prevOwner.Value, true, false);
+                    identity.TriggerOnOwnerDisconnected(prevOwner.Value);
+                }
+
+                identity.TriggerSpawnEvent(true);
+            }
+
+            for (var i = 0; i < _spawnedIdentities.Count; i++)
+            {
+                var identity = _spawnedIdentities[i];
+                identity.TriggerPromoteToServer();
+            }
+        }
+
         readonly List<GameObjectPrototype> _defaultPrototypes = new List<GameObjectPrototype>();
 
         private void SetupSceneObjects(Scene scene)
@@ -203,19 +266,22 @@ namespace PurrNet.Modules
             _scenePlayers.onPlayerUnloadedScene += OnPlayerUnloadedScene;
             _playersManager.onNetworkIDReceived += OnNetworkIDReceived;
 
-            if (_playersManager.lastNid.HasValue)
-                OnNetworkIDReceived(_playersManager.lastNid.Value);
-
-            if (_playersManager.localPlayerId.HasValue)
-                OnPlayerReceivedID(_playersManager.localPlayerId.Value);
-
-            else _playersManager.onLocalPlayerReceivedID += OnPlayerReceivedID;
+            Init();
 
             _playersManager.Subscribe<SpawnPacketBatch>(OnSpawnPacketBatch);
             _playersManager.Subscribe<SpawnPacket>(OnSpawnPacket);
             _playersManager.Subscribe<DespawnPacket>(OnDespawnPacket);
             _playersManager.Subscribe<FinishSpawnPacket>(OnFinishSpawnPacket);
             _playersManager.Subscribe<ChangeParentPacket>(OnParentChangedPacket);
+        }
+
+        private void Init()
+        {
+            if (_playersManager.lastNid.HasValue)
+                OnNetworkIDReceived(_playersManager.lastNid.Value);
+            if (_playersManager.localPlayerId.HasValue)
+                OnPlayerReceivedID(_playersManager.localPlayerId.Value);
+            else _playersManager.onLocalPlayerReceivedID += OnPlayerReceivedID;
         }
 
         public void Disable()
@@ -233,7 +299,40 @@ namespace PurrNet.Modules
             _playersManager.Unsubscribe<FinishSpawnPacket>(OnFinishSpawnPacket);
             _playersManager.Unsubscribe<ChangeParentPacket>(OnParentChangedPacket);
 
-            NetworkPoolManager.RemovePool(_sceneId);
+            if (!_manager.isTranferingToNewServer)
+                NetworkPoolManager.RemovePool(_sceneId);
+        }
+
+        public void TransferToNewServer()
+        {
+            isReadyToSpawn = false;
+            _nextId = default;
+            _isPlayerReady = false;
+
+            var hash = HashSetPool<NetworkIdentity>.Instantiate();
+
+            for (var i = 0; i < _spawnedIdentities.Count; i++)
+            {
+                var nid = _spawnedIdentities[i];
+                var root = nid.GetRootIdentity();
+
+                if (!root)
+                    continue;
+
+                hash.Add(root);
+            }
+
+            foreach (var r in hash)
+            {
+                if (!r) continue;
+                Despawn(r.gameObject, true, true);
+            }
+
+            HashSetPool<NetworkIdentity>.Destroy(hash);
+
+            Init();
+
+            UnityLatestUpdate.TriggerPendingAsaps();
         }
 
         private void OnSpawnPacketBatch(PlayerID player, SpawnPacketBatch data, bool asServer)
@@ -290,14 +389,16 @@ namespace PurrNet.Modules
                 Despawn(r.gameObject, true, true);
             }
 
-            for (var i = 0; i < _defaultPrototypes.Count; i++)
+            if (!_manager.isTranferingToNewServer)
             {
-                var defaultPrototype = _defaultPrototypes[i];
-                CreatePrototype(defaultPrototype, null);
-                defaultPrototype.Dispose();
+                for (var i = 0; i < _defaultPrototypes.Count; i++)
+                {
+                    var defaultPrototype = _defaultPrototypes[i];
+                    CreatePrototype(defaultPrototype, null);
+                    defaultPrototype.Dispose();
+                }
+                _defaultPrototypes.Clear();
             }
-
-            _defaultPrototypes.Clear();
 
             HashSetPool<NetworkIdentity>.Destroy(hash);
             return true;

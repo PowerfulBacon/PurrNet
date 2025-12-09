@@ -10,11 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 28e93bf2b6064364aa5fd430134916ac, type: 3}
-  m_Name: TopDownShooter_Rules
+  m_Name: Unsafe-HostMigration
   m_EditorClassIdentifier: 
   _hostMigrationRules:
     enabled: 1
     migrateAsHost: 1
+    identitiesAlwaysVisible: 1
+    scenesAlwaysPublic: 1
   _defaultSpawnRules:
     spawnAuth: 1
     despawnAuth: -1
@@ -25,7 +27,7 @@ MonoBehaviour:
   _defaultRpcRules:
     ignoreRequireServerAttribute: 1
     ignoreRequireOwnerAttribute: 1
-    targetRpcsCanTargetServer: 0
+    targetRpcsCanTargetServer: 1
   _defaultVisibilityRules:
     visibilityMode: 0
   _defaultOwnershipRules:
@@ -34,9 +36,9 @@ MonoBehaviour:
     removeAuth: -1
     overrideWhenPropagating: 1
   _defaultSceneRules:
-    _cleanupScenesOnDisconnect: 1
+    _cleanupScenesOnDisconnect: 0
     removePlayerFromSceneOnDisconnect: 0
-    sceneCleanupModeOnDisconnect: 1
+    sceneCleanupModeOnDisconnect: 0
     alwaysIncludeDontDestroyOnLoadScene: 0
   _defaultIdentityRules:
     receiveRpcsWhenDisabled: 1

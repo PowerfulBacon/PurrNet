@@ -14,7 +14,7 @@ using UnityEngine;
 
 namespace PurrNet.Transports
 {
-    public class PurrTransport : GenericTransport, ITransport
+    public partial class PurrTransport : GenericTransport, ITransport
     {
         enum SERVER_PACKET_TYPE : byte
         {

@@ -19,6 +19,9 @@ namespace PurrNet
         private readonly List<IUpdate> _updateListeners;
         private readonly List<ICleanup> _cleanupListeners;
         private readonly List<IFlushBatchedRPCs> _preBroadcastSentListeners;
+        private readonly List<IPromoteToServerModule> _IPromoteToServerModule;
+        private readonly List<ITransferToNewServer> _ITransferToNewServer;
+        private readonly List<IPostTransferToNewServer> _IPostTransferToNewServer;
 
         private readonly IRegisterModules _manager;
         private readonly bool _asServer;
@@ -38,6 +41,9 @@ namespace PurrNet
             _batchListeners = new List<IBatch>();
             _postBatchListeners = new List<IPostBatch>();
             _preBroadcastSentListeners = new List<IFlushBatchedRPCs>();
+            _IPromoteToServerModule = new List<IPromoteToServerModule>();
+            _ITransferToNewServer = new List<ITransferToNewServer>();
+            _IPostTransferToNewServer = new List<IPostTransferToNewServer>();
             _manager = manager;
             _asServer = asServer;
         }
@@ -65,9 +71,18 @@ namespace PurrNet
 
         public void RegisterModules()
         {
-            UnregisterModules();
+            bool isClientTransfering = !_asServer && _manager.isTranferingToNewServer;
+
+            if (!isClientTransfering)
+                UnregisterModules();
 
             _manager.RegisterModules(this, _asServer);
+
+            if (_manager.isPromotingToServer)
+                return;
+
+            if (_manager.isTranferingToNewServer)
+                return;
 
             for (int i = 0; i < _modules.Count; i++)
             {
@@ -108,6 +123,15 @@ namespace PurrNet
 
                 if (_modules[i] is IFlushBatchedRPCs preBroadcastSent)
                     _preBroadcastSentListeners.Add(preBroadcastSent);
+
+                if (_modules[i] is IPromoteToServerModule promoteToServerModule)
+                    _IPromoteToServerModule.Add(promoteToServerModule);
+
+                if (_modules[i] is ITransferToNewServer TransferToNewServer)
+                    _ITransferToNewServer.Add(TransferToNewServer);
+
+                if (_modules[i] is IPostTransferToNewServer PostTransferToNewServer)
+                    _IPostTransferToNewServer.Add(PostTransferToNewServer);
             }
         }
 
@@ -183,6 +207,30 @@ namespace PurrNet
                 _preBroadcastSentListeners[i].FlushBatchedRPCs();
         }
 
+        public void PromoteToServer()
+        {
+            for (int i = 0; i < _IPromoteToServerModule.Count; i++)
+                _IPromoteToServerModule[i].PromoteToServerModule();
+        }
+
+        public void PostPromoteToServer()
+        {
+            for (int i = 0; i < _IPromoteToServerModule.Count; i++)
+                _IPromoteToServerModule[i].PostPromoteToServerModule();
+        }
+
+        public void TransferToNewServer()
+        {
+            for (int i = 0; i < _ITransferToNewServer.Count; i++)
+                _ITransferToNewServer[i].TransferToNewServer();
+        }
+
+        public void PostTransferToNewServer()
+        {
+            for (int i = 0; i < _IPostTransferToNewServer.Count; i++)
+                _IPostTransferToNewServer[i].PostTransferToNewServer();
+        }
+
         public bool Cleanup()
         {
             bool allTrue = true;
@@ -203,6 +251,11 @@ namespace PurrNet
             for (int i = 0; i < _modules.Count; i++)
                 _modules[i].Disable(_asServer);
 
+            Clear();
+        }
+
+        private void Clear()
+        {
             _modules.Clear();
             _connectionListeners.Clear();
             _connectionStateListeners.Clear();
@@ -216,11 +269,37 @@ namespace PurrNet
             _batchListeners.Clear();
             _postBatchListeners.Clear();
             _preBroadcastSentListeners.Clear();
+            _IPromoteToServerModule.Clear();
+            _ITransferToNewServer.Clear();
+            _IPostTransferToNewServer.Clear();
         }
 
         public void AddModule(INetworkModule module)
         {
             _modules.Add(module);
+        }
+
+        public void MigrateFrom(ModulesCollection other)
+        {
+            _modules.AddRange(other._modules);
+            _connectionListeners.AddRange(other._connectionListeners);
+            _connectionStateListeners.AddRange(other._connectionStateListeners);
+            _dataListeners.AddRange(other._dataListeners);
+            _updateListeners.AddRange(other._updateListeners);
+            _fixedUpdatesListeners.AddRange(other._fixedUpdatesListeners);
+            _cleanupListeners.AddRange(other._cleanupListeners);
+            _preFixedUpdatesListeners.AddRange(other._preFixedUpdatesListeners);
+            _posteFixedUpdatesListeners.AddRange(other._posteFixedUpdatesListeners);
+            _drawGizmosListeners.AddRange(other._drawGizmosListeners);
+            _batchListeners.AddRange(other._batchListeners);
+            _postBatchListeners.AddRange(other._postBatchListeners);
+            _preBroadcastSentListeners.AddRange(other._preBroadcastSentListeners);
+            _IPromoteToServerModule.AddRange(other._IPromoteToServerModule);
+            _ITransferToNewServer.AddRange(other._ITransferToNewServer);
+            _IPostTransferToNewServer.AddRange(other._IPostTransferToNewServer);
+            other.Clear();
+
+            PromoteToServer();
         }
     }
 }

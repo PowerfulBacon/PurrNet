@@ -1138,6 +1138,37 @@ namespace PurrNet
 
         public bool isManualSpawn { get; internal set; }
 
+        /// <summary>
+        /// Promotes the NetworkIdentity instance to function as a server entity.
+        /// This is used for host-migration, when a client is promoted to host.
+        /// Use this to ensure client has everything it needs to function as server.
+        /// </summary>
+        protected virtual void PromoteToServer() { }
+
+        internal void TriggerPromoteToServer()
+        {
+            try
+            {
+                PromoteToServer();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            for (int i = 0; i < _externalModulesView.Count; i++)
+            {
+                try
+                {
+                    _externalModulesView[i].PromoteToServer();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
+        }
+
         internal void TriggerSpawnEvent(bool asServer)
         {
             InternalOnSpawn(asServer);

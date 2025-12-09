@@ -35,6 +35,22 @@ namespace PurrNet.Modules
         bool Cleanup();
     }
 
+    internal interface IPromoteToServerModule
+    {
+        void PromoteToServerModule();
+        void PostPromoteToServerModule();
+    }
+
+    internal interface ITransferToNewServer
+    {
+        void TransferToNewServer();
+    }
+
+    internal interface IPostTransferToNewServer
+    {
+        void PostTransferToNewServer();
+    }
+
     internal interface IPostFixedUpdate
     {
         void PostFixedUpdate();
