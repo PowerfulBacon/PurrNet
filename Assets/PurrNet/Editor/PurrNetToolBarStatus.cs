@@ -93,8 +93,10 @@ namespace PurrNet.Editor
         public static void OnToolbarGUI()
         {
             var settings = PurrNetSettings.GetOrCreateSettings();
+#if !UNITY_6000_3_OR_NEWER
             if (settings.toolbarMode == ToolbarMode.None)
                 return;
+#endif
             _version ??= TryFindVersion();
 
             GUILayout.FlexibleSpace();
