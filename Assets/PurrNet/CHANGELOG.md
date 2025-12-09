@@ -1,3 +1,10 @@
+# [1.18.0-beta.16](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.15...v1.18.0-beta.16) (2025-12-09)
+
+
+### Bug Fixes
+
+* Big cleanup of SyncEvent ([633a0ce](https://github.com/PurrNet/PurrNet/commit/633a0cebb936f4398d1d7b37f5802103dae9388b))
+
 # [1.18.0-beta.15](https://github.com/PurrNet/PurrNet/compare/v1.18.0-beta.14...v1.18.0-beta.15) (2025-12-07)
 
 
