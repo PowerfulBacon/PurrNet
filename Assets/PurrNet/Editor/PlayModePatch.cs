@@ -64,7 +64,7 @@ namespace PurrNet.Editor
             var hostView = _parentField?.GetValue(window);
             if (hostView == null)
                 return;
-            
+
             var currentDelegate = _onGUIField?.GetValue(hostView) as Delegate;
             var currentMethod = currentDelegate?.Method;
 
@@ -75,8 +75,8 @@ namespace PurrNet.Editor
 
             _onGUIField?.SetValue(hostView, wrappedDelegate);
             window.Repaint();
-            
-            EditorApplication.update -= TryPatchTopViewGUI;
+
+            // EditorApplication.update -= TryPatchTopViewGUI;
         }
 
         /// <summary>
