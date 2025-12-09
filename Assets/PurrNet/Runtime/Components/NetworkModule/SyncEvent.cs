@@ -266,7 +266,7 @@ namespace PurrNet
         public void AddListener(UnityAction<T1, T2, T3, T4> listener) => unityEvent.AddListener(listener);
         public void RemoveListener(UnityAction<T1, T2, T3, T4> listener) => unityEvent.RemoveListener(listener);
 
-        public void Invoke(T1 a, T2 b, T3 c) => InvokePacket(new SyncEventData().AddData<T1>(a).AddData<T2>(b).AddData<T3>(c));
+        public void Invoke(T1 a, T2 b, T3 c, T4 d) => InvokePacket(new SyncEventData().AddData<T1>(a).AddData<T2>(b).AddData<T3>(c).AddData<T4>(d));
         protected override void InvokeLocal()
         {
             T1 value1 = _lastData.ReadData<T1>();
@@ -304,7 +304,7 @@ namespace PurrNet
         public void AddListener(Action<T1, T2, T3, T4, T5> listener) => unityEvent += listener;
         public void RemoveListener(Action<T1, T2, T3, T4, T5> listener) => unityEvent -= listener;
 
-        public void Invoke(T1 a, T2 b, T3 c) => InvokePacket(new SyncEventData().AddData<T1>(a).AddData<T2>(b).AddData<T3>(c));
+        public void Invoke(T1 a, T2 b, T3 c, T4 d, T5 e) => InvokePacket(new SyncEventData().AddData<T1>(a).AddData<T2>(b).AddData<T3>(c).AddData<T4>(d).AddData<T5>(e));
         protected override void InvokeLocal()
         {
             T1 value1 = _lastData.ReadData<T1>();
