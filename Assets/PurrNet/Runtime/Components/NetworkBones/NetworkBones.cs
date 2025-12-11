@@ -315,7 +315,7 @@ namespace PurrNet
                         var count = b - lastIndex + 1;
                         forward(observer, lastIndex, count, packer);
                     }
-                    lastIndex = b;
+                    lastIndex = b + 1;
                     packer.ResetPosition();
                     writtenAny = false;
                 }
